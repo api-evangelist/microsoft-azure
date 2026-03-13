@@ -1,0 +1,628 @@
+openapi: 3.1.0
+info:
+  title: Azure Container Registry API
+  description: >-
+    Azure Container Registry (ACR) is a managed Docker registry service based on
+    the open-source Docker Registry 2.0. The REST API provides operations for
+    managing repositories, tags, manifests, and registry operations, enabling
+    automated container image builds, vulnerability scanning, and geo-replication
+    for enterprise container deployments. ACR supports OCI artifacts and Helm
+    charts in addition to Docker container images.
+  version: '2023-07-01'
+  contact:
+    name: Microsoft Azure Support
+    url: https://azure.microsoft.com/en-us/support/
+    email: azuresupport@microsoft.com
+  license:
+    name: Microsoft API License
+    url: https://learn.microsoft.com/en-us/legal/
+  x-logo:
+    url: https://azure.microsoft.com/svghandler/azure-logo.png
+servers:
+  - url: https://{registryName}.azurecr.io
+    description: Azure Container Registry data plane endpoint
+    variables:
+      registryName:
+        default: myregistry
+        description: The name of the Azure Container Registry.
+security:
+  - oauth2: []
+  - basicAuth: []
+tags:
+  - name: Repositories
+    description: Operations for managing repositories
+  - name: Tags
+    description: Operations for managing image tags
+  - name: Manifests
+    description: Operations for managing image manifests
+  - name: Blobs
+    description: Operations for managing content blobs
+  - name: Catalog
+    description: Operations for listing the registry catalog
+paths:
+  /acr/v1/_catalog:
+    get:
+      operationId: Catalog_List
+      summary: List repositories
+      description: List repositories in the registry.
+      tags:
+        - Catalog
+      parameters:
+        - name: last
+          in: query
+          description: Query parameter for the last item in the previous call.
+          schema:
+            type: string
+        - name: 'n'
+          in: query
+          description: Number of repositories to return.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully returned the list of repositories.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repositories'
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+  /acr/v1/{name}:
+    get:
+      operationId: Repository_GetAttributes
+      summary: Get repository attributes
+      description: Get repository attributes.
+      tags:
+        - Repositories
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+      responses:
+        '200':
+          description: Successfully returned repository attributes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryAttributes'
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+    delete:
+      operationId: Repository_Delete
+      summary: Delete a repository
+      description: Delete the repository identified by name.
+      tags:
+        - Repositories
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+      responses:
+        '202':
+          description: The repository was accepted for deletion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedRepository'
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+    patch:
+      operationId: Repository_UpdateAttributes
+      summary: Update repository attributes
+      description: Update the attribute identified by name where reference is the tag or digest.
+      tags:
+        - Repositories
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepositoryChangeableAttributes'
+      responses:
+        '200':
+          description: Successfully updated repository attributes.
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+  /acr/v1/{name}/_tags:
+    get:
+      operationId: Tag_List
+      summary: List tags
+      description: List tags of a repository.
+      tags:
+        - Tags
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+        - name: last
+          in: query
+          description: Query parameter for the last item in previous call.
+          schema:
+            type: string
+        - name: 'n'
+          in: query
+          description: Number of tags to return.
+          schema:
+            type: integer
+        - name: orderby
+          in: query
+          description: Orderby query parameter.
+          schema:
+            type: string
+            enum:
+              - timedesc
+              - timeasc
+        - name: digest
+          in: query
+          description: Filter by digest.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully returned the list of tags.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagList'
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+  /acr/v1/{name}/_tags/{reference}:
+    get:
+      operationId: Tag_GetAttributes
+      summary: Get tag attributes
+      description: Get tag attributes by tag.
+      tags:
+        - Tags
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+        - name: reference
+          in: path
+          required: true
+          description: Tag name.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully returned tag attributes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagAttributes'
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+    delete:
+      operationId: Tag_Delete
+      summary: Delete a tag
+      description: Delete tag by name.
+      tags:
+        - Tags
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+        - name: reference
+          in: path
+          required: true
+          description: Tag name.
+          schema:
+            type: string
+      responses:
+        '202':
+          description: The tag was accepted for deletion.
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+  /acr/v1/{name}/_manifests:
+    get:
+      operationId: Manifests_List
+      summary: List manifests
+      description: List manifests of a repository.
+      tags:
+        - Manifests
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+        - name: last
+          in: query
+          description: Query parameter for the last item in previous call.
+          schema:
+            type: string
+        - name: 'n'
+          in: query
+          description: Number of manifests to return.
+          schema:
+            type: integer
+        - name: orderby
+          in: query
+          description: Orderby query parameter.
+          schema:
+            type: string
+            enum:
+              - timedesc
+              - timeasc
+      responses:
+        '200':
+          description: Successfully returned the list of manifests.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestList'
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+  /v2/{name}/manifests/{reference}:
+    get:
+      operationId: Manifests_Get
+      summary: Get a manifest
+      description: Get the manifest identified by name and reference.
+      tags:
+        - Manifests
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+        - name: reference
+          in: path
+          required: true
+          description: A tag or a digest, pointing to a specific image.
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: Accept header string delimited by comma.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully returned the manifest.
+          content:
+            application/vnd.docker.distribution.manifest.v2+json:
+              schema:
+                $ref: '#/components/schemas/ManifestWrapper'
+            application/vnd.oci.image.manifest.v1+json:
+              schema:
+                $ref: '#/components/schemas/ManifestWrapper'
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+    put:
+      operationId: Manifests_Create
+      summary: Put a manifest
+      description: Put the manifest identified by name and reference.
+      tags:
+        - Manifests
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+        - name: reference
+          in: path
+          required: true
+          description: A tag or a digest, pointing to a specific image.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/vnd.docker.distribution.manifest.v2+json:
+            schema:
+              $ref: '#/components/schemas/Manifest'
+      responses:
+        '201':
+          description: The manifest was put successfully.
+          headers:
+            Docker-Content-Digest:
+              schema:
+                type: string
+              description: Identifies the docker upload UUID for the current request.
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+    delete:
+      operationId: Manifests_Delete
+      summary: Delete a manifest
+      description: Delete the manifest identified by name and reference.
+      tags:
+        - Manifests
+      parameters:
+        - $ref: '#/components/parameters/RepositoryNameParameter'
+        - name: reference
+          in: path
+          required: true
+          description: Digest of a manifest.
+          schema:
+            type: string
+      responses:
+        '202':
+          description: The manifest was accepted for deletion.
+        default:
+          description: ACR error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcrErrors'
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+          scopes: {}
+      description: Azure Active Directory OAuth2 Flow
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Basic authentication using registry credentials.
+  parameters:
+    RepositoryNameParameter:
+      name: name
+      in: path
+      required: true
+      description: Name of the image (including the namespace).
+      schema:
+        type: string
+  schemas:
+    Repositories:
+      type: object
+      description: List of repositories.
+      properties:
+        repositories:
+          type: array
+          items:
+            type: string
+          description: List of repository names.
+    RepositoryAttributes:
+      type: object
+      description: Repository attributes.
+      properties:
+        registry:
+          type: string
+          description: Registry name.
+        imageName:
+          type: string
+          description: Image name.
+        createdTime:
+          type: string
+          format: date-time
+          description: Image created time.
+        lastUpdateTime:
+          type: string
+          format: date-time
+          description: Image last update time.
+        manifestCount:
+          type: integer
+          description: Number of manifests.
+        tagCount:
+          type: integer
+          description: Number of tags.
+        changeableAttributes:
+          $ref: '#/components/schemas/RepositoryChangeableAttributes'
+    RepositoryChangeableAttributes:
+      type: object
+      description: Changeable attributes for a repository.
+      properties:
+        deleteEnabled:
+          type: boolean
+          description: Whether delete is enabled.
+        writeEnabled:
+          type: boolean
+          description: Whether write is enabled.
+        listEnabled:
+          type: boolean
+          description: Whether list is enabled.
+        readEnabled:
+          type: boolean
+          description: Whether read is enabled.
+        teleportEnabled:
+          type: boolean
+          description: Whether teleport is enabled.
+    DeletedRepository:
+      type: object
+      description: Deleted repository result.
+      properties:
+        manifestsDeleted:
+          type: array
+          items:
+            type: string
+          description: Digests of manifests deleted.
+        tagsDeleted:
+          type: array
+          items:
+            type: string
+          description: Tags deleted.
+    TagList:
+      type: object
+      description: Tag list result.
+      properties:
+        registry:
+          type: string
+          description: Registry name.
+        imageName:
+          type: string
+          description: Image name.
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagAttributesBase'
+          description: List of tag attributes.
+    TagAttributes:
+      type: object
+      description: Tag attributes result.
+      properties:
+        registry:
+          type: string
+        imageName:
+          type: string
+        tag:
+          $ref: '#/components/schemas/TagAttributesBase'
+    TagAttributesBase:
+      type: object
+      description: Tag attribute details.
+      properties:
+        name:
+          type: string
+          description: Tag name.
+        digest:
+          type: string
+          description: Tag digest.
+        createdTime:
+          type: string
+          format: date-time
+        lastUpdateTime:
+          type: string
+          format: date-time
+        signed:
+          type: boolean
+          description: Whether the tag is signed.
+        changeableAttributes:
+          $ref: '#/components/schemas/RepositoryChangeableAttributes'
+    ManifestList:
+      type: object
+      description: List of manifests.
+      properties:
+        registry:
+          type: string
+        imageName:
+          type: string
+        manifests:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestAttributesBase'
+    ManifestAttributesBase:
+      type: object
+      description: Manifest attribute details.
+      properties:
+        digest:
+          type: string
+          description: Manifest digest.
+        imageSize:
+          type: integer
+          format: int64
+          description: Image size.
+        createdTime:
+          type: string
+          format: date-time
+        lastUpdateTime:
+          type: string
+          format: date-time
+        architecture:
+          type: string
+          description: CPU architecture.
+        os:
+          type: string
+          description: Operating system.
+        mediaType:
+          type: string
+          description: Media type.
+        configMediaType:
+          type: string
+          description: Config media type.
+        tags:
+          type: array
+          items:
+            type: string
+          description: List of tags.
+        changeableAttributes:
+          $ref: '#/components/schemas/RepositoryChangeableAttributes'
+    Manifest:
+      type: object
+      description: Docker V2 manifest.
+      properties:
+        schemaVersion:
+          type: integer
+          description: Schema version.
+          enum:
+            - 2
+        mediaType:
+          type: string
+          description: Media type.
+        config:
+          $ref: '#/components/schemas/Descriptor'
+        layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Descriptor'
+          description: List of layer descriptors.
+    ManifestWrapper:
+      type: object
+      description: Manifest wrapper.
+      allOf:
+        - $ref: '#/components/schemas/Manifest'
+      properties:
+        annotations:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional information about the manifest.
+    Descriptor:
+      type: object
+      description: Docker V2 image layer descriptor.
+      properties:
+        mediaType:
+          type: string
+          description: Layer media type.
+        size:
+          type: integer
+          format: int64
+          description: Layer size.
+        digest:
+          type: string
+          description: Layer digest.
+        urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Specifies a list of URLs from which this object may be downloaded.
+        annotations:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional information about the descriptor.
+    AcrErrors:
+      type: object
+      description: ACR error response.
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcrErrorInfo'
+          description: Array of detailed error information.
+    AcrErrorInfo:
+      type: object
+      description: Error information.
+      properties:
+        code:
+          type: string
+          description: Error code.
+        message:
+          type: string
+          description: Error message.
+        detail:
+          type: object
+          description: Error details.

@@ -1,0 +1,1052 @@
+openapi: 3.1.0
+info:
+  title: Azure Key Vault API
+  description: >-
+    Azure Key Vault is a cloud service for securely storing and accessing secrets,
+    keys, and certificates. The Key Vault REST API provides programmatic access
+    to manage cryptographic keys, secrets (such as connection strings and passwords),
+    and certificates used by cloud applications and services. Key Vault helps
+    safeguard cryptographic keys and secrets used by applications, while enabling
+    users to maintain control of their keys and reduce latency of cloud applications.
+  version: '7.5'
+  contact:
+    name: Microsoft Azure Support
+    url: https://azure.microsoft.com/en-us/support/
+    email: azuresupport@microsoft.com
+  license:
+    name: Microsoft API License
+    url: https://learn.microsoft.com/en-us/legal/
+  x-logo:
+    url: https://azure.microsoft.com/svghandler/azure-logo.png
+servers:
+  - url: https://{vaultName}.vault.azure.net
+    description: Azure Key Vault endpoint
+    variables:
+      vaultName:
+        default: mykeyvault
+        description: The name of the Azure Key Vault.
+security:
+  - oauth2:
+      - https://vault.azure.net/.default
+tags:
+  - name: Keys
+    description: Operations for managing cryptographic keys
+  - name: Secrets
+    description: Operations for managing secrets
+  - name: Certificates
+    description: Operations for managing certificates
+paths:
+  /keys:
+    get:
+      operationId: Keys_List
+      summary: List keys
+      description: >-
+        List keys in the specified vault. Retrieves a list of the keys in the
+        Key Vault as JSON Web Key structures that contain the public part of a
+        stored key.
+      tags:
+        - Keys
+      parameters:
+        - $ref: '#/components/parameters/ApiVersionParameter'
+        - name: maxresults
+          in: query
+          description: Maximum number of results to return in a page (1-25).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 25
+      responses:
+        '200':
+          description: Successfully returned the list of keys.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyListResult'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /keys/{key-name}/create:
+    post:
+      operationId: Keys_Create
+      summary: Create a key
+      description: >-
+        Creates a new key, stores it, then returns key parameters and attributes
+        to the client. The create key operation can be used to create any key
+        type in Azure Key Vault.
+      tags:
+        - Keys
+      parameters:
+        - name: key-name
+          in: path
+          required: true
+          description: The name for the new key.
+          schema:
+            type: string
+            pattern: '^[0-9a-zA-Z-]+$'
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyCreateParameters'
+      responses:
+        '200':
+          description: Successfully created the key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyBundle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /keys/{key-name}/{key-version}:
+    get:
+      operationId: Keys_Get
+      summary: Get a key
+      description: >-
+        Gets the public part of a stored key. The get key operation applies to
+        all key types. If the requested key is symmetric, then no key material
+        is released in the response.
+      tags:
+        - Keys
+      parameters:
+        - name: key-name
+          in: path
+          required: true
+          description: The name of the key.
+          schema:
+            type: string
+        - name: key-version
+          in: path
+          required: true
+          description: >-
+            The version of the key. Use an empty string to get the latest version.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      responses:
+        '200':
+          description: Successfully returned the key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyBundle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+    patch:
+      operationId: Keys_Update
+      summary: Update key attributes
+      description: >-
+        The update key operation changes specified attributes of a stored key
+        and can be applied to any key type and key version stored in Azure Key Vault.
+      tags:
+        - Keys
+      parameters:
+        - name: key-name
+          in: path
+          required: true
+          description: The name of the key.
+          schema:
+            type: string
+        - name: key-version
+          in: path
+          required: true
+          description: The version of the key.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyUpdateParameters'
+      responses:
+        '200':
+          description: Successfully updated the key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyBundle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /keys/{key-name}:
+    delete:
+      operationId: Keys_Delete
+      summary: Delete a key
+      description: >-
+        Deletes a key of any type from storage in Azure Key Vault. The delete
+        key operation cannot be used to remove individual versions of a key.
+      tags:
+        - Keys
+      parameters:
+        - name: key-name
+          in: path
+          required: true
+          description: The name of the key to delete.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      responses:
+        '200':
+          description: Successfully deleted the key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedKeyBundle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /secrets:
+    get:
+      operationId: Secrets_List
+      summary: List secrets
+      description: >-
+        List secrets in the specified vault. The Get Secrets operation applies
+        to the entire vault. However, only the base secret identifier and its
+        attributes are provided in the response.
+      tags:
+        - Secrets
+      parameters:
+        - $ref: '#/components/parameters/ApiVersionParameter'
+        - name: maxresults
+          in: query
+          description: Maximum number of results to return in a page (1-25).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 25
+      responses:
+        '200':
+          description: Successfully returned the list of secrets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecretListResult'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /secrets/{secret-name}:
+    put:
+      operationId: Secrets_Set
+      summary: Set a secret
+      description: >-
+        Sets a secret in the specified vault. The set operation adds a secret to
+        the Azure Key Vault. If the named secret already exists, Azure Key Vault
+        creates a new version of that secret.
+      tags:
+        - Secrets
+      parameters:
+        - name: secret-name
+          in: path
+          required: true
+          description: The name of the secret.
+          schema:
+            type: string
+            pattern: '^[0-9a-zA-Z-]+$'
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecretSetParameters'
+      responses:
+        '200':
+          description: Successfully set the secret.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecretBundle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+    delete:
+      operationId: Secrets_Delete
+      summary: Delete a secret
+      description: Deletes a secret from a specified key vault.
+      tags:
+        - Secrets
+      parameters:
+        - name: secret-name
+          in: path
+          required: true
+          description: The name of the secret to delete.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      responses:
+        '200':
+          description: Successfully deleted the secret.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedSecretBundle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /secrets/{secret-name}/{secret-version}:
+    get:
+      operationId: Secrets_Get
+      summary: Get a secret
+      description: >-
+        Get a specified secret from a given key vault. The GET operation is
+        applicable to any secret stored in Azure Key Vault.
+      tags:
+        - Secrets
+      parameters:
+        - name: secret-name
+          in: path
+          required: true
+          description: The name of the secret.
+          schema:
+            type: string
+        - name: secret-version
+          in: path
+          required: true
+          description: The version of the secret. Use empty string for the latest version.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      responses:
+        '200':
+          description: Successfully returned the secret.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecretBundle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /certificates:
+    get:
+      operationId: Certificates_List
+      summary: List certificates
+      description: >-
+        List certificates in the specified vault. Retrieves information about
+        all certificates stored in the vault.
+      tags:
+        - Certificates
+      parameters:
+        - $ref: '#/components/parameters/ApiVersionParameter'
+        - name: maxresults
+          in: query
+          description: Maximum number of results to return in a page (1-25).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 25
+        - name: includePending
+          in: query
+          description: Whether to include certificates that are not fully provisioned.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successfully returned the list of certificates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateListResult'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+  /certificates/{certificate-name}/create:
+    post:
+      operationId: Certificates_Create
+      summary: Create a certificate
+      description: >-
+        Creates a new certificate. If this is the first version, the certificate
+        resource is created. This operation requires the certificates/create
+        permission.
+      tags:
+        - Certificates
+      parameters:
+        - name: certificate-name
+          in: path
+          required: true
+          description: The name of the certificate.
+          schema:
+            type: string
+            pattern: '^[0-9a-zA-Z-]+$'
+        - $ref: '#/components/parameters/ApiVersionParameter'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateCreateParameters'
+      responses:
+        '202':
+          description: Accepted. The certificate create operation is pending.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateOperation'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVaultError'
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+          scopes:
+            https://vault.azure.net/.default: Access Azure Key Vault
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client API version.
+      schema:
+        type: string
+        default: '7.5'
+  schemas:
+    KeyBundle:
+      type: object
+      description: A key bundle containing the key and its attributes.
+      properties:
+        key:
+          $ref: '#/components/schemas/JsonWebKey'
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application-specific metadata in the form of key-value pairs.
+        managed:
+          type: boolean
+          readOnly: true
+          description: Whether the key's lifetime is managed by Key Vault.
+        release_policy:
+          $ref: '#/components/schemas/KeyReleasePolicy'
+    JsonWebKey:
+      type: object
+      description: JSON Web Key (JWK) representation of a key.
+      properties:
+        kid:
+          type: string
+          description: Key identifier.
+        kty:
+          type: string
+          description: Key type (e.g., RSA, EC, oct, oct-HSM).
+          enum:
+            - EC
+            - EC-HSM
+            - RSA
+            - RSA-HSM
+            - oct
+            - oct-HSM
+        key_ops:
+          type: array
+          items:
+            type: string
+            enum:
+              - encrypt
+              - decrypt
+              - sign
+              - verify
+              - wrapKey
+              - unwrapKey
+              - import
+              - export
+          description: Allowed key operations.
+        n:
+          type: string
+          description: RSA modulus.
+        e:
+          type: string
+          description: RSA public exponent.
+        d:
+          type: string
+          description: RSA private exponent.
+        dp:
+          type: string
+          description: RSA private key parameter.
+        dq:
+          type: string
+          description: RSA private key parameter.
+        qi:
+          type: string
+          description: RSA private key parameter.
+        p:
+          type: string
+          description: RSA secret prime.
+        q:
+          type: string
+          description: RSA secret prime.
+        k:
+          type: string
+          description: Symmetric key.
+        crv:
+          type: string
+          description: Elliptic curve name.
+          enum:
+            - P-256
+            - P-384
+            - P-521
+            - P-256K
+        x:
+          type: string
+          description: X component of an EC public key.
+        'y':
+          type: string
+          description: Y component of an EC public key.
+    KeyAttributes:
+      type: object
+      description: The attributes of a key.
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the key is enabled.
+        nbf:
+          type: integer
+          description: Not before date in UTC (Unix time).
+        exp:
+          type: integer
+          description: Expiry date in UTC (Unix time).
+        created:
+          type: integer
+          readOnly: true
+          description: Creation time in UTC (Unix time).
+        updated:
+          type: integer
+          readOnly: true
+          description: Last updated time in UTC (Unix time).
+        recoveryLevel:
+          type: string
+          readOnly: true
+          description: The recovery level currently in effect.
+          enum:
+            - Purgeable
+            - Recoverable+Purgeable
+            - Recoverable
+            - Recoverable+ProtectedSubscription
+        recoverableDays:
+          type: integer
+          readOnly: true
+          description: The soft-delete data retention days.
+        exportable:
+          type: boolean
+          description: Whether the private key can be exported.
+        hsmPlatform:
+          type: string
+          readOnly: true
+          description: The underlying HSM platform.
+    KeyReleasePolicy:
+      type: object
+      description: The policy rules under which the key can be exported.
+      properties:
+        contentType:
+          type: string
+          default: application/json; charset=utf-8
+          description: Content type and version of key release policy.
+        immutable:
+          type: boolean
+          description: Defines whether the policy is immutable.
+        data:
+          type: string
+          description: Blob encoding the policy rules (base64url-encoded).
+    KeyCreateParameters:
+      type: object
+      description: The key create parameters.
+      properties:
+        kty:
+          type: string
+          description: The type of key to create.
+          enum:
+            - EC
+            - EC-HSM
+            - RSA
+            - RSA-HSM
+            - oct
+            - oct-HSM
+        key_size:
+          type: integer
+          description: The key size in bits. For example, 2048, 3072, or 4096 for RSA.
+        key_ops:
+          type: array
+          items:
+            type: string
+            enum:
+              - encrypt
+              - decrypt
+              - sign
+              - verify
+              - wrapKey
+              - unwrapKey
+              - import
+              - export
+          description: JSON web key operations.
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application-specific metadata.
+        crv:
+          type: string
+          description: Elliptic curve name (for EC key types).
+          enum:
+            - P-256
+            - P-384
+            - P-521
+            - P-256K
+        release_policy:
+          $ref: '#/components/schemas/KeyReleasePolicy'
+        exportable:
+          type: boolean
+          description: Whether the private key can be exported.
+      required:
+        - kty
+    KeyUpdateParameters:
+      type: object
+      description: The key update parameters.
+      properties:
+        key_ops:
+          type: array
+          items:
+            type: string
+          description: JSON web key operations.
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application-specific metadata.
+        release_policy:
+          $ref: '#/components/schemas/KeyReleasePolicy'
+    DeletedKeyBundle:
+      type: object
+      description: A deleted key bundle.
+      allOf:
+        - $ref: '#/components/schemas/KeyBundle'
+      properties:
+        recoveryId:
+          type: string
+          description: The URL of the recovery object.
+        scheduledPurgeDate:
+          type: integer
+          description: The time when the key is scheduled to be purged (Unix time).
+        deletedDate:
+          type: integer
+          description: The time when the key was deleted (Unix time).
+    KeyListResult:
+      type: object
+      description: The key list result.
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/KeyItem'
+          description: A list of keys.
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of keys.
+    KeyItem:
+      type: object
+      description: The key item containing key metadata.
+      properties:
+        kid:
+          type: string
+          description: Key identifier.
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        managed:
+          type: boolean
+          readOnly: true
+    SecretBundle:
+      type: object
+      description: A secret consisting of a value, id, and attributes.
+      properties:
+        value:
+          type: string
+          description: The secret value.
+        id:
+          type: string
+          description: The secret identifier.
+        contentType:
+          type: string
+          description: The content type of the secret.
+        attributes:
+          $ref: '#/components/schemas/SecretAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application-specific metadata.
+        kid:
+          type: string
+          readOnly: true
+          description: >-
+            If the secret is backing a KV certificate, then this field specifies
+            the corresponding key backing the certificate.
+        managed:
+          type: boolean
+          readOnly: true
+          description: Whether the secret's lifetime is managed by Key Vault.
+    SecretAttributes:
+      type: object
+      description: The secret management attributes.
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the secret is enabled.
+        nbf:
+          type: integer
+          description: Not before date in UTC (Unix time).
+        exp:
+          type: integer
+          description: Expiry date in UTC (Unix time).
+        created:
+          type: integer
+          readOnly: true
+          description: Creation time in UTC (Unix time).
+        updated:
+          type: integer
+          readOnly: true
+          description: Last updated time in UTC (Unix time).
+        recoveryLevel:
+          type: string
+          readOnly: true
+          description: The recovery level currently in effect.
+        recoverableDays:
+          type: integer
+          readOnly: true
+          description: The soft-delete data retention days.
+    SecretSetParameters:
+      type: object
+      description: The secret set parameters.
+      properties:
+        value:
+          type: string
+          description: The value of the secret.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application-specific metadata.
+        contentType:
+          type: string
+          description: Type of the secret value such as a password.
+        secretAttributes:
+          $ref: '#/components/schemas/SecretAttributes'
+      required:
+        - value
+    DeletedSecretBundle:
+      type: object
+      description: A deleted secret bundle.
+      allOf:
+        - $ref: '#/components/schemas/SecretBundle'
+      properties:
+        recoveryId:
+          type: string
+          description: The URL of the recovery object.
+        scheduledPurgeDate:
+          type: integer
+          description: The time when the secret is scheduled to be purged.
+        deletedDate:
+          type: integer
+          description: The time when the secret was deleted.
+    SecretListResult:
+      type: object
+      description: The secret list result.
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/SecretItem'
+          description: A list of secrets.
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of secrets.
+    SecretItem:
+      type: object
+      description: The secret item containing secret metadata.
+      properties:
+        id:
+          type: string
+          description: Secret identifier.
+        attributes:
+          $ref: '#/components/schemas/SecretAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        contentType:
+          type: string
+        managed:
+          type: boolean
+          readOnly: true
+    CertificateCreateParameters:
+      type: object
+      description: The certificate create parameters.
+      properties:
+        policy:
+          $ref: '#/components/schemas/CertificatePolicy'
+        attributes:
+          $ref: '#/components/schemas/CertificateAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+    CertificatePolicy:
+      type: object
+      description: Management policy for a certificate.
+      properties:
+        id:
+          type: string
+          readOnly: true
+        key_props:
+          type: object
+          description: Properties of the key pair.
+          properties:
+            exportable:
+              type: boolean
+            kty:
+              type: string
+              enum:
+                - RSA
+                - RSA-HSM
+                - EC
+                - EC-HSM
+            key_size:
+              type: integer
+            reuse_key:
+              type: boolean
+            crv:
+              type: string
+              enum:
+                - P-256
+                - P-384
+                - P-521
+                - P-256K
+        secret_props:
+          type: object
+          description: Properties of the secret backing a certificate.
+          properties:
+            contentType:
+              type: string
+        x509_props:
+          type: object
+          description: Properties of the X509 component.
+          properties:
+            subject:
+              type: string
+            sans:
+              type: object
+              properties:
+                emails:
+                  type: array
+                  items:
+                    type: string
+                dns_names:
+                  type: array
+                  items:
+                    type: string
+                upns:
+                  type: array
+                  items:
+                    type: string
+            ekus:
+              type: array
+              items:
+                type: string
+            key_usage:
+              type: array
+              items:
+                type: string
+            validity_months:
+              type: integer
+        issuer:
+          type: object
+          description: Parameters for the issuer of the X509 component.
+          properties:
+            name:
+              type: string
+              description: Name of the referenced issuer object or reserved names (Self, Unknown).
+            cty:
+              type: string
+              description: Certificate type as supported by the provider.
+        attributes:
+          $ref: '#/components/schemas/CertificateAttributes'
+        lifetime_actions:
+          type: array
+          items:
+            type: object
+            properties:
+              trigger:
+                type: object
+                properties:
+                  lifetime_percentage:
+                    type: integer
+                  days_before_expiry:
+                    type: integer
+              action:
+                type: object
+                properties:
+                  action_type:
+                    type: string
+                    enum:
+                      - EmailContacts
+                      - AutoRenew
+    CertificateAttributes:
+      type: object
+      description: The certificate management attributes.
+      properties:
+        enabled:
+          type: boolean
+        nbf:
+          type: integer
+        exp:
+          type: integer
+        created:
+          type: integer
+          readOnly: true
+        updated:
+          type: integer
+          readOnly: true
+        recoveryLevel:
+          type: string
+          readOnly: true
+        recoverableDays:
+          type: integer
+          readOnly: true
+    CertificateOperation:
+      type: object
+      description: A certificate operation is returned in case of asynchronous requests.
+      properties:
+        id:
+          type: string
+          readOnly: true
+        issuer:
+          type: object
+          properties:
+            name:
+              type: string
+        csr:
+          type: string
+          description: The certificate signing request (CSR) in base64.
+        cancellation_requested:
+          type: boolean
+        status:
+          type: string
+        status_details:
+          type: string
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+        target:
+          type: string
+        request_id:
+          type: string
+    CertificateListResult:
+      type: object
+      description: The certificate list result.
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              attributes:
+                $ref: '#/components/schemas/CertificateAttributes'
+              tags:
+                type: object
+                additionalProperties:
+                  type: string
+              x5t:
+                type: string
+                description: Thumbprint of the certificate.
+              subject:
+                type: string
+          description: A list of certificates.
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of certificates.
+    KeyVaultError:
+      type: object
+      description: The key vault error exception.
+      properties:
+        error:
+          type: object
+          readOnly: true
+          description: The key vault server error.
+          properties:
+            code:
+              type: string
+              readOnly: true
+              description: The error code.
+            message:
+              type: string
+              readOnly: true
+              description: The error message.
+            innererror:
+              type: object
+              readOnly: true
+              description: Inner error details.
+              properties:
+                code:
+                  type: string
+                  readOnly: true
+                innererror:
+                  type: object
+                  readOnly: true
