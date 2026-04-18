@@ -1,0 +1,237 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Azure Data and Security"
+  description: "Unified workflow for Azure data infrastructure and security combining Cosmos DB for NoSQL data, Blob Storage for object storage, Key Vault for secrets management, and Resource Manager for infrastructure governance. Used by cloud architects, data engineers, and security teams."
+  tags:
+    - Azure
+    - Cosmos DB
+    - Blob Storage
+    - Key Vault
+    - Resource Manager
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      AZURE_MANAGEMENT_TOKEN: AZURE_MANAGEMENT_TOKEN
+      AZURE_COSMOS_KEY: AZURE_COSMOS_KEY
+      AZURE_STORAGE_KEY: AZURE_STORAGE_KEY
+      AZURE_KEY_VAULT_TOKEN: AZURE_KEY_VAULT_TOKEN
+
+capability:
+  consumes:
+    - import: azure-cosmos
+      location: ./shared/cosmos-db.yaml
+    - import: azure-blob
+      location: ./shared/blob-storage.yaml
+    - import: azure-keyvault
+      location: ./shared/key-vault.yaml
+    - import: azure-arm
+      location: ./shared/resource-manager.yaml
+
+  exposes:
+    - type: rest
+      port: 8082
+      namespace: azure-data-security-api
+      description: "Unified REST API for Azure data and security operations."
+      resources:
+        - path: /v1/databases
+          name: databases
+          description: "Cosmos DB database management"
+          operations:
+            - method: GET
+              name: list-databases
+              description: "List Cosmos DB databases"
+              call: "azure-cosmos.list-databases"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/blobs
+          name: blobs
+          description: "Blob storage operations"
+          operations:
+            - method: GET
+              name: list-blobs
+              description: "List blobs in a container"
+              call: "azure-blob.list-blobs"
+              with:
+                containerName: "rest.containerName"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/secrets
+          name: secrets
+          description: "Key Vault secret management"
+          operations:
+            - method: GET
+              name: list-secrets
+              description: "List secrets"
+              call: "azure-keyvault.list-secrets"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/subscriptions
+          name: subscriptions
+          description: "Subscription management"
+          operations:
+            - method: GET
+              name: list-subscriptions
+              description: "List subscriptions"
+              call: "azure-arm.list-subscriptions"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9092
+      namespace: azure-data-security-mcp
+      transport: http
+      description: "MCP server for AI-assisted Azure data and security operations."
+      tools:
+        - name: cosmos-list-databases
+          description: "List Cosmos DB databases"
+          hints:
+            readOnly: true
+            openWorld: true
+          call: "azure-cosmos.list-databases"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: cosmos-list-containers
+          description: "List containers in a database"
+          hints:
+            readOnly: true
+          call: "azure-cosmos.list-containers"
+          with:
+            databaseId: "tools.databaseId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: cosmos-list-items
+          description: "List items in a container"
+          hints:
+            readOnly: true
+          call: "azure-cosmos.list-items"
+          with:
+            databaseId: "tools.databaseId"
+            containerId: "tools.containerId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: blob-list-blobs
+          description: "List blobs in a container"
+          hints:
+            readOnly: true
+          call: "azure-blob.list-blobs"
+          with:
+            containerName: "tools.containerName"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: blob-download
+          description: "Download a blob"
+          hints:
+            readOnly: true
+          call: "azure-blob.download-blob"
+          with:
+            containerName: "tools.containerName"
+            blobName: "tools.blobName"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: blob-get-properties
+          description: "Get blob properties"
+          hints:
+            readOnly: true
+          call: "azure-blob.get-blob-properties"
+          with:
+            containerName: "tools.containerName"
+            blobName: "tools.blobName"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: keyvault-list-keys
+          description: "List cryptographic keys"
+          hints:
+            readOnly: true
+          call: "azure-keyvault.list-keys"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: keyvault-list-secrets
+          description: "List secrets"
+          hints:
+            readOnly: true
+          call: "azure-keyvault.list-secrets"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: keyvault-get-secret
+          description: "Get a secret value"
+          hints:
+            readOnly: true
+          call: "azure-keyvault.get-secret"
+          with:
+            secretName: "tools.secretName"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: keyvault-list-certificates
+          description: "List certificates"
+          hints:
+            readOnly: true
+          call: "azure-keyvault.list-certificates"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: arm-list-subscriptions
+          description: "List Azure subscriptions"
+          hints:
+            readOnly: true
+            openWorld: true
+          call: "azure-arm.list-subscriptions"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: arm-list-resource-groups
+          description: "List resource groups"
+          hints:
+            readOnly: true
+          call: "azure-arm.list-resource-groups"
+          with:
+            subscriptionId: "tools.subscriptionId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: arm-list-resources
+          description: "List resources in a subscription"
+          hints:
+            readOnly: true
+          call: "azure-arm.list-resources"
+          with:
+            subscriptionId: "tools.subscriptionId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: arm-list-providers
+          description: "List resource providers"
+          hints:
+            readOnly: true
+          call: "azure-arm.list-providers"
+          with:
+            subscriptionId: "tools.subscriptionId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: arm-list-tags
+          description: "List subscription tags"
+          hints:
+            readOnly: true
+          call: "azure-arm.list-tags"
+          with:
+            subscriptionId: "tools.subscriptionId"
+          outputParameters:
+            - type: object
+              mapping: "$."

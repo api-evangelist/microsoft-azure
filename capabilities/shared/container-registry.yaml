@@ -1,0 +1,144 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Azure Container Registry"
+  description: "Azure Container Registry API for managing repositories, tags, and manifests."
+  tags:
+    - Azure
+    - Container Registry
+    - Docker
+    - Containers
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      AZURE_ACR_TOKEN: AZURE_ACR_TOKEN
+
+capability:
+  consumes:
+    - type: http
+      namespace: azure-acr
+      baseUri: https://{registryName}.azurecr.io
+      description: "Azure Container Registry API"
+      authentication:
+        type: bearer
+        token: "{{AZURE_ACR_TOKEN}}"
+      resources:
+        - name: catalog
+          path: /acr/v1/_catalog
+          description: "Registry catalog"
+          operations:
+            - name: list-repositories
+              method: GET
+              description: "List repositories in the registry"
+              inputParameters: []
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: repositories
+          path: /acr/v1/{repositoryName}
+          description: "Repository operations"
+          operations:
+            - name: get-repository
+              method: GET
+              description: "Get repository attributes"
+              inputParameters:
+                - name: repositoryName
+                  in: path
+                  type: string
+                  required: true
+                  description: "Repository name"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: delete-repository
+              method: DELETE
+              description: "Delete a repository"
+              inputParameters:
+                - name: repositoryName
+                  in: path
+                  type: string
+                  required: true
+                  description: "Repository name"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: tags
+          path: /acr/v1/{repositoryName}/_tags
+          description: "Tag operations"
+          operations:
+            - name: list-tags
+              method: GET
+              description: "List tags for a repository"
+              inputParameters:
+                - name: repositoryName
+                  in: path
+                  type: string
+                  required: true
+                  description: "Repository name"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: manifests
+          path: /acr/v1/{repositoryName}/_manifests
+          description: "Manifest operations"
+          operations:
+            - name: list-manifests
+              method: GET
+              description: "List manifests for a repository"
+              inputParameters:
+                - name: repositoryName
+                  in: path
+                  type: string
+                  required: true
+                  description: "Repository name"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+
+  exposes:
+    - type: mcp
+      port: 9106
+      namespace: azure-acr-mcp
+      transport: http
+      tools:
+        - name: list-repositories
+          description: "List container repositories"
+          hints:
+            readOnly: true
+          call: "azure-acr.list-repositories"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-tags
+          description: "List tags for a repository"
+          hints:
+            readOnly: true
+          call: "azure-acr.list-tags"
+          with:
+            repositoryName: "tools.repositoryName"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-manifests
+          description: "List manifests for a repository"
+          hints:
+            readOnly: true
+          call: "azure-acr.list-manifests"
+          with:
+            repositoryName: "tools.repositoryName"
+          outputParameters:
+            - type: object
+              mapping: "$."
