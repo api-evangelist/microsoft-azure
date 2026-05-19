@@ -1,0 +1,235 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Microsoft Azure Azure Blob Storage API — Blobs
+  description: 'Microsoft Azure Azure Blob Storage API — Blobs. 4 operations. Lead operation: Microsoft Azure Download a Blob.
+    Self-contained Naftiko capability covering one Microsoft Azure business surface.'
+  tags:
+  - Microsoft Azure
+  - Blobs
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    MICROSOFT_AZURE_API_KEY: MICROSOFT_AZURE_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: azure-blob-storage-blobs
+    baseUri: https://{accountName}.blob.core.windows.net
+    description: Microsoft Azure Azure Blob Storage API — Blobs business capability. Self-contained, no shared references.
+    resources:
+    - name: containerName-blob
+      path: /{containerName}/{blob}
+      operations:
+      - name: blobdownload
+        method: GET
+        description: Microsoft Azure Download a Blob
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: Range
+          in: header
+          type: string
+          description: Return only the bytes of the blob in the specified range.
+        - name: x-ms-range-get-content-md5
+          in: header
+          type: boolean
+          description: When set to true and the Range header is specified, returns the MD5 hash for the range.
+        - name: snapshot
+          in: query
+          type: string
+          description: The snapshot parameter is an opaque DateTime value that specifies the blob snapshot.
+      - name: blobupload
+        method: PUT
+        description: Microsoft Azure Upload a Blob
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: x-ms-blob-type
+          in: header
+          type: string
+          description: The type of the blob.
+          required: true
+        - name: Content-Type
+          in: header
+          type: string
+          description: The MIME content type of the blob.
+        - name: Content-Length
+          in: header
+          type: integer
+          description: The length of the request body in bytes.
+          required: true
+        - name: x-ms-blob-content-type
+          in: header
+          type: string
+          description: The content type to set for the blob.
+        - name: x-ms-blob-content-encoding
+          in: header
+          type: string
+          description: The content encoding to set for the blob.
+        - name: x-ms-access-tier
+          in: header
+          type: string
+          description: The tier to be set on the blob.
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: blobdelete
+        method: DELETE
+        description: Microsoft Azure Delete a Blob
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: snapshot
+          in: query
+          type: string
+          description: The snapshot to delete.
+        - name: x-ms-delete-snapshots
+          in: header
+          type: string
+          description: Required if the blob has associated snapshots.
+        - name: x-ms-lease-id
+          in: header
+          type: string
+          description: Required if the blob has an active lease.
+      - name: blobgetproperties
+        method: HEAD
+        description: Microsoft Azure Get blob properties
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.MICROSOFT_AZURE_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: azure-blob-storage-blobs-rest
+    port: 8080
+    description: REST adapter for Microsoft Azure Azure Blob Storage API — Blobs. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/{containername}/{blob}
+      name: containername-blob
+      description: REST surface for containerName-blob.
+      operations:
+      - method: GET
+        name: blobdownload
+        description: Microsoft Azure Download a Blob
+        call: azure-blob-storage-blobs.blobdownload
+        with:
+          Range: rest.Range
+          x-ms-range-get-content-md5: rest.x-ms-range-get-content-md5
+          snapshot: rest.snapshot
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: blobupload
+        description: Microsoft Azure Upload a Blob
+        call: azure-blob-storage-blobs.blobupload
+        with:
+          x-ms-blob-type: rest.x-ms-blob-type
+          Content-Type: rest.Content-Type
+          Content-Length: rest.Content-Length
+          x-ms-blob-content-type: rest.x-ms-blob-content-type
+          x-ms-blob-content-encoding: rest.x-ms-blob-content-encoding
+          x-ms-access-tier: rest.x-ms-access-tier
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: blobdelete
+        description: Microsoft Azure Delete a Blob
+        call: azure-blob-storage-blobs.blobdelete
+        with:
+          snapshot: rest.snapshot
+          x-ms-delete-snapshots: rest.x-ms-delete-snapshots
+          x-ms-lease-id: rest.x-ms-lease-id
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: HEAD
+        name: blobgetproperties
+        description: Microsoft Azure Get blob properties
+        call: azure-blob-storage-blobs.blobgetproperties
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: azure-blob-storage-blobs-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Microsoft Azure Azure Blob Storage API — Blobs. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: microsoft-azure-download-blob
+      description: Microsoft Azure Download a Blob
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: azure-blob-storage-blobs.blobdownload
+      with:
+        Range: tools.Range
+        x-ms-range-get-content-md5: tools.x-ms-range-get-content-md5
+        snapshot: tools.snapshot
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: microsoft-azure-upload-blob
+      description: Microsoft Azure Upload a Blob
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: azure-blob-storage-blobs.blobupload
+      with:
+        x-ms-blob-type: tools.x-ms-blob-type
+        Content-Type: tools.Content-Type
+        Content-Length: tools.Content-Length
+        x-ms-blob-content-type: tools.x-ms-blob-content-type
+        x-ms-blob-content-encoding: tools.x-ms-blob-content-encoding
+        x-ms-access-tier: tools.x-ms-access-tier
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: microsoft-azure-delete-blob
+      description: Microsoft Azure Delete a Blob
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: azure-blob-storage-blobs.blobdelete
+      with:
+        snapshot: tools.snapshot
+        x-ms-delete-snapshots: tools.x-ms-delete-snapshots
+        x-ms-lease-id: tools.x-ms-lease-id
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: microsoft-azure-get-blob-properties
+      description: Microsoft Azure Get blob properties
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: azure-blob-storage-blobs.blobgetproperties
+      outputParameters:
+      - type: object
+        mapping: $.
