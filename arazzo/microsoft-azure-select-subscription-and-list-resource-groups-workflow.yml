@@ -1,0 +1,106 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Select Subscription and List Resource Groups
+  summary: List tenant subscriptions, get the first one's detail, then list its resource groups.
+  description: >-
+    A tenant-level bootstrap flow for tooling that does not yet know which
+    subscription to operate against. The workflow lists every subscription the
+    authenticated tenant can see, reads the first subscription to confirm it is
+    Enabled, and then lists the resource groups inside it. It branches so that a
+    disabled subscription ends the flow rather than continuing. Every step spells
+    out its request inline so the flow can be read and executed without opening
+    the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: select-subscription-and-list-groups
+  summary: Discover a subscription and enumerate its resource groups.
+  description: >-
+    Lists subscriptions, reads the first, branches on its state, then lists the
+    resource groups in that subscription.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: listSubscriptions
+    description: List all subscriptions visible to the authenticated tenant.
+    operationId: Subscriptions_List
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      firstSubscriptionId: $response.body#/value/0/subscriptionId
+      subscriptions: $response.body#/value
+  - stepId: getSubscription
+    description: >-
+      Get the first subscription's detail and branch: continue only when its
+      state is Enabled, otherwise end the flow.
+    operationId: Subscriptions_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $steps.listSubscriptions.outputs.firstSubscriptionId
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      state: $response.body#/state
+      displayName: $response.body#/displayName
+    onSuccess:
+    - name: subscriptionEnabled
+      type: goto
+      stepId: listResourceGroups
+      criteria:
+      - context: $response.body
+        condition: $.state == "Enabled"
+        type: jsonpath
+    - name: subscriptionNotEnabled
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.state != "Enabled"
+        type: jsonpath
+  - stepId: listResourceGroups
+    description: List all resource groups inside the selected, enabled subscription.
+    operationId: ResourceGroups_List
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $steps.listSubscriptions.outputs.firstSubscriptionId
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroups: $response.body#/value
+  outputs:
+    subscriptionId: $steps.listSubscriptions.outputs.firstSubscriptionId
+    subscriptionState: $steps.getSubscription.outputs.state
+    resourceGroups: $steps.listResourceGroups.outputs.resourceGroups

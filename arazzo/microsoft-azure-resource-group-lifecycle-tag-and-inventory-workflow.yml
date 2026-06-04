@@ -1,0 +1,129 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Resource Group Lifecycle Tag and Inventory
+  summary: List resource groups, get the first, patch governance tags onto it, then inventory its resources.
+  description: >-
+    An end-to-end governance pass over the first resource group in a subscription.
+    The workflow lists the resource groups, gets the first one, patches a set of
+    governance tags onto it, and then lists the resources inside it so the caller
+    has both the updated group and its contents in a single run. It chains the
+    list, get, patch, and resource-list operations across the resource group and
+    resource scopes. Every step spells out its request inline so the flow can be
+    read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: resource-group-lifecycle-tag-and-inventory
+  summary: Discover, tag, and inventory the first resource group in a subscription.
+  description: >-
+    Lists resource groups, gets the first, patches governance tags, then lists
+    the resources within it.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - tags
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      tags:
+        type: object
+        description: The governance tag map to apply to the resource group.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: listResourceGroups
+    description: List the resource groups so the first one can be selected for the governance pass.
+    operationId: ResourceGroups_List
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      firstResourceGroupName: $response.body#/value/0/name
+  - stepId: getResourceGroup
+    description: Get the selected resource group to confirm it exists before tagging it.
+    operationId: ResourceGroups_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $steps.listResourceGroups.outputs.firstResourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroupId: $response.body#/id
+  - stepId: tagResourceGroup
+    description: Patch the governance tags onto the selected resource group.
+    operationId: ResourceGroups_Update
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $steps.listResourceGroups.outputs.firstResourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        tags: $inputs.tags
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      updatedTags: $response.body#/tags
+  - stepId: inventoryResources
+    description: List the resources in the now-tagged resource group to complete the pass.
+    operationId: Resources_ListByResourceGroup
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $steps.listResourceGroups.outputs.firstResourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resources: $response.body#/value
+  outputs:
+    resourceGroupId: $steps.getResourceGroup.outputs.resourceGroupId
+    updatedTags: $steps.tagResourceGroup.outputs.updatedTags
+    resources: $steps.inventoryResources.outputs.resources

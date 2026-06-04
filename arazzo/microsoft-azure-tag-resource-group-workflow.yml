@@ -1,0 +1,116 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Tag an Existing Resource Group
+  summary: Read a resource group, apply new tags with a patch, and confirm the tags were written.
+  description: >-
+    A governance flow for applying organizational tags to an existing resource
+    group. The workflow first gets the resource group to confirm it exists, then
+    patches it with the supplied tag map, and finally re-reads the group to
+    confirm the tags persisted. Because patch retains unspecified fields, the
+    location and other properties are left intact. Every step spells out its
+    request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: tag-resource-group
+  summary: Apply tags to an existing resource group and confirm the change.
+  description: >-
+    Gets the resource group, patches it with new tags, then reads it back to
+    verify the tags were stored.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - resourceGroupName
+    - tags
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      resourceGroupName:
+        type: string
+        description: The name of the resource group to tag.
+      tags:
+        type: object
+        description: The name/value tag map to apply to the resource group.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: getResourceGroup
+    description: Get the resource group to confirm it exists before patching it.
+    operationId: ResourceGroups_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroupId: $response.body#/id
+      existingTags: $response.body#/tags
+  - stepId: applyTags
+    description: Patch the resource group with the supplied tag map, leaving other fields intact.
+    operationId: ResourceGroups_Update
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        tags: $inputs.tags
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      updatedTags: $response.body#/tags
+  - stepId: confirmTags
+    description: Re-read the resource group to confirm the new tags persisted.
+    operationId: ResourceGroups_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      tags: $response.body#/tags
+  outputs:
+    resourceGroupId: $steps.getResourceGroup.outputs.resourceGroupId
+    finalTags: $steps.confirmTags.outputs.tags

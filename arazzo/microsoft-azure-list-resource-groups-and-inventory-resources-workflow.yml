@@ -1,0 +1,102 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure List Resource Groups and Inventory Resources
+  summary: List a subscription's resource groups, get the first one, and inventory its resources.
+  description: >-
+    A read-only discovery flow for taking stock of a subscription. The workflow
+    lists all resource groups, selects the first returned group, fetches its full
+    detail to confirm its location and provisioning state, and then lists every
+    resource contained in that group. It is the natural starting point for audits
+    and cost reviews. Every step spells out its request inline so the flow can be
+    read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: inventory-resource-group
+  summary: List resource groups, get one, and list its resources.
+  description: >-
+    Lists resource groups in the subscription, reads the first one, then lists
+    the resources that live inside it.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: listResourceGroups
+    description: List all resource groups in the subscription to discover what is provisioned.
+    operationId: ResourceGroups_List
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      firstResourceGroupName: $response.body#/value/0/name
+      resourceGroups: $response.body#/value
+  - stepId: getResourceGroup
+    description: Get the first resource group's detail to confirm its location and tags.
+    operationId: ResourceGroups_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $steps.listResourceGroups.outputs.firstResourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroupId: $response.body#/id
+      location: $response.body#/location
+  - stepId: listResourcesInGroup
+    description: List every resource contained in the selected resource group.
+    operationId: Resources_ListByResourceGroup
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $steps.listResourceGroups.outputs.firstResourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resources: $response.body#/value
+  outputs:
+    resourceGroupId: $steps.getResourceGroup.outputs.resourceGroupId
+    location: $steps.getResourceGroup.outputs.location
+    resources: $steps.listResourcesInGroup.outputs.resources

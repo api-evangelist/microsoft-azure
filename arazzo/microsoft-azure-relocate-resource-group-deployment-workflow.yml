@@ -1,0 +1,197 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Provision a Region-Specific Deployment
+  summary: Read a subscription, create a region-tagged resource group, deploy into it, and poll to completion.
+  description: >-
+    A region-aware provisioning flow that stitches the subscription, resource
+    group, and deployment scopes together. The workflow gets the subscription to
+    confirm it is Enabled, creates a resource group in the requested region with
+    a region tag, starts a template deployment, and polls until the deployment
+    reaches a terminal provisioning state, branching on success or failure. Every
+    step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: provision-region-deployment
+  summary: Confirm a subscription, create a region-tagged group, deploy, and poll to completion.
+  description: >-
+    Validates the subscription, creates a region-tagged resource group, submits
+    a deployment, and polls until terminal.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - resourceGroupName
+    - location
+    - deploymentName
+    - template
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      resourceGroupName:
+        type: string
+        description: The name of the resource group to create.
+      location:
+        type: string
+        description: The Azure region for the resource group and its region tag (e.g. eastus).
+      deploymentName:
+        type: string
+        description: The name of the deployment.
+      template:
+        type: object
+        description: The inline ARM template content to deploy.
+      parameters:
+        type: object
+        description: Name/value pairs that define the deployment parameters.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: getSubscription
+    description: >-
+      Get the subscription and branch: only provision when it reports Enabled,
+      otherwise end the flow.
+    operationId: Subscriptions_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      state: $response.body#/state
+    onSuccess:
+    - name: subscriptionEnabled
+      type: goto
+      stepId: createResourceGroup
+      criteria:
+      - context: $response.body
+        condition: $.state == "Enabled"
+        type: jsonpath
+    - name: subscriptionNotEnabled
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.state != "Enabled"
+        type: jsonpath
+  - stepId: createResourceGroup
+    description: Create the resource group in the requested region and tag it with that region.
+    operationId: ResourceGroups_CreateOrUpdate
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        location: $inputs.location
+        tags:
+          region: $inputs.location
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroupId: $response.body#/id
+  - stepId: startDeployment
+    description: Start an incremental template deployment into the region-tagged group.
+    operationId: Deployments_CreateOrUpdate
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: deploymentName
+      in: path
+      value: $inputs.deploymentName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        properties:
+          template: $inputs.template
+          parameters: $inputs.parameters
+          mode: Incremental
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      deploymentId: $response.body#/id
+  - stepId: pollDeployment
+    description: >-
+      Poll the deployment, ending on Succeeded, ending on Failed or Canceled, and
+      looping otherwise.
+    operationId: Deployments_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: deploymentName
+      in: path
+      value: $inputs.deploymentName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      provisioningState: $response.body#/properties/provisioningState
+    onSuccess:
+    - name: deploymentSucceeded
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Succeeded"
+        type: jsonpath
+    - name: deploymentFailed
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Failed" || $.properties.provisioningState == "Canceled"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollDeployment
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState != "Succeeded" && $.properties.provisioningState != "Failed" && $.properties.provisioningState != "Canceled"
+        type: jsonpath
+  outputs:
+    resourceGroupId: $steps.createResourceGroup.outputs.resourceGroupId
+    deploymentId: $steps.startDeployment.outputs.deploymentId
+    finalProvisioningState: $steps.pollDeployment.outputs.provisioningState

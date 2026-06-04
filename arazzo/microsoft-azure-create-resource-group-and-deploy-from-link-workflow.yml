@@ -1,0 +1,167 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Create Resource Group and Deploy From Template Link
+  summary: Create a resource group then deploy an ARM template referenced by URI, polling to completion.
+  description: >-
+    A variant of the standard provisioning flow that deploys from a linked
+    template and linked parameters file rather than inline content. The workflow
+    creates the resource group, submits a deployment whose templateLink and
+    parametersLink point at hosted JSON files, and then polls the deployment
+    until its provisioning state is terminal, branching on success or failure.
+    Every step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: deploy-from-template-link
+  summary: Provision a resource group and deploy a linked ARM template, polling to completion.
+  description: >-
+    Creates the resource group, submits a deployment that references a hosted
+    template and parameters file, then polls the deployment until terminal.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - resourceGroupName
+    - location
+    - deploymentName
+    - templateUri
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      resourceGroupName:
+        type: string
+        description: The name of the resource group to create and deploy into.
+      location:
+        type: string
+        description: The Azure region for the resource group (e.g. eastus).
+      deploymentName:
+        type: string
+        description: The name of the deployment.
+      templateUri:
+        type: string
+        description: The URI of the hosted ARM template JSON file.
+      parametersUri:
+        type: string
+        description: The URI of the hosted deployment parameters JSON file.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: createResourceGroup
+    description: Create or update the target resource group so the deployment has a scope.
+    operationId: ResourceGroups_CreateOrUpdate
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        location: $inputs.location
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroupId: $response.body#/id
+  - stepId: startLinkedDeployment
+    description: >-
+      Start an incremental deployment that references the template and parameters
+      by URI rather than embedding them in the request.
+    operationId: Deployments_CreateOrUpdate
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: deploymentName
+      in: path
+      value: $inputs.deploymentName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        properties:
+          templateLink:
+            uri: $inputs.templateUri
+          parametersLink:
+            uri: $inputs.parametersUri
+          mode: Incremental
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      deploymentId: $response.body#/id
+      provisioningState: $response.body#/properties/provisioningState
+  - stepId: pollDeployment
+    description: >-
+      Get the deployment and branch on its provisioning state: end on Succeeded,
+      end on Failed or Canceled, otherwise loop back and poll again.
+    operationId: Deployments_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: deploymentName
+      in: path
+      value: $inputs.deploymentName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      provisioningState: $response.body#/properties/provisioningState
+    onSuccess:
+    - name: linkedDeploymentSucceeded
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Succeeded"
+        type: jsonpath
+    - name: linkedDeploymentFailed
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Failed" || $.properties.provisioningState == "Canceled"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollDeployment
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState != "Succeeded" && $.properties.provisioningState != "Failed" && $.properties.provisioningState != "Canceled"
+        type: jsonpath
+  outputs:
+    resourceGroupId: $steps.createResourceGroup.outputs.resourceGroupId
+    deploymentId: $steps.startLinkedDeployment.outputs.deploymentId
+    finalProvisioningState: $steps.pollDeployment.outputs.provisioningState

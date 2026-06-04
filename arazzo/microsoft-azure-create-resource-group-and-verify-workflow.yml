@@ -1,0 +1,110 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Create Resource Group and Verify
+  summary: Create a resource group then read it back to confirm it provisioned successfully.
+  description: >-
+    A minimal create-then-confirm flow. The workflow creates or updates a
+    resource group in the target subscription and immediately gets it back,
+    branching so that a Succeeded provisioning state ends cleanly while any other
+    state is surfaced for the caller to retry. It is the smallest reusable unit
+    behind larger provisioning flows. Every step spells out its request inline so
+    the flow can be read and executed without opening the underlying OpenAPI
+    description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: create-resource-group-and-verify
+  summary: Create a resource group and read it back to confirm it exists.
+  description: >-
+    Creates or updates the resource group, then gets it and branches on the
+    reported provisioning state.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - resourceGroupName
+    - location
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      resourceGroupName:
+        type: string
+        description: The name of the resource group to create.
+      location:
+        type: string
+        description: The Azure region for the resource group (e.g. eastus).
+      tags:
+        type: object
+        description: Optional name/value tags to attach to the resource group.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: createResourceGroup
+    description: Create or update the resource group in the requested location with optional tags.
+    operationId: ResourceGroups_CreateOrUpdate
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        location: $inputs.location
+        tags: $inputs.tags
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroupId: $response.body#/id
+  - stepId: verifyResourceGroup
+    description: >-
+      Read the resource group back and branch on its provisioning state, ending
+      cleanly when it reports Succeeded.
+    operationId: ResourceGroups_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      provisioningState: $response.body#/properties/provisioningState
+      location: $response.body#/location
+    onSuccess:
+    - name: provisioned
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Succeeded"
+        type: jsonpath
+  outputs:
+    resourceGroupId: $steps.createResourceGroup.outputs.resourceGroupId
+    provisioningState: $steps.verifyResourceGroup.outputs.provisioningState
+    location: $steps.verifyResourceGroup.outputs.location

@@ -1,0 +1,112 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Deployment Status and Resulting Resources
+  summary: Get a deployment, confirm it succeeded, then list the resources in its resource group.
+  description: >-
+    A post-deployment verification flow. The workflow gets a named deployment at
+    resource group scope and branches on its provisioning state: when the
+    deployment has Succeeded it lists the resources in the resource group so the
+    caller can confirm what was created, and when it has not it ends without
+    listing. It is the read-side companion to the provisioning workflows. Every
+    step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: deployment-status-and-resources
+  summary: Check a deployment's status and, if it succeeded, list the resulting resources.
+  description: >-
+    Gets the deployment, branches on its provisioning state, and lists the
+    resource group's resources when the deployment succeeded.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - resourceGroupName
+    - deploymentName
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      resourceGroupName:
+        type: string
+        description: The name of the resource group containing the deployment.
+      deploymentName:
+        type: string
+        description: The name of the deployment to inspect.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: getDeployment
+    description: >-
+      Get the deployment and branch: list resources only when it reports
+      Succeeded, otherwise end the flow.
+    operationId: Deployments_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: deploymentName
+      in: path
+      value: $inputs.deploymentName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      provisioningState: $response.body#/properties/provisioningState
+      deploymentOutputs: $response.body#/properties/outputs
+    onSuccess:
+    - name: deploymentSucceeded
+      type: goto
+      stepId: listResourcesInGroup
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Succeeded"
+        type: jsonpath
+    - name: deploymentNotSucceeded
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState != "Succeeded"
+        type: jsonpath
+  - stepId: listResourcesInGroup
+    description: List the resources in the resource group to confirm what the deployment created.
+    operationId: Resources_ListByResourceGroup
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resources: $response.body#/value
+  outputs:
+    provisioningState: $steps.getDeployment.outputs.provisioningState
+    deploymentOutputs: $steps.getDeployment.outputs.deploymentOutputs
+    resources: $steps.listResourcesInGroup.outputs.resources

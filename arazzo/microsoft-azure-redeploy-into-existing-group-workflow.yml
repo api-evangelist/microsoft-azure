@@ -1,0 +1,168 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Redeploy Into an Existing Resource Group
+  summary: Confirm a resource group exists, start a deployment into it, and poll until terminal.
+  description: >-
+    A redeployment flow for updating infrastructure in a resource group that
+    already exists. The workflow gets the resource group to confirm it is present
+    and Succeeded, starts a new incremental template deployment, and then polls
+    the deployment until its provisioning state is terminal, branching on success
+    or failure. Every step spells out its request inline so the flow can be read
+    and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: redeploy-into-existing-group
+  summary: Deploy a template into an existing resource group, polling to completion.
+  description: >-
+    Confirms the resource group exists, submits an incremental deployment, then
+    polls until the deployment reaches a terminal provisioning state.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - resourceGroupName
+    - deploymentName
+    - template
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      resourceGroupName:
+        type: string
+        description: The name of the existing resource group to deploy into.
+      deploymentName:
+        type: string
+        description: The name of the deployment.
+      template:
+        type: object
+        description: The inline ARM template content to deploy.
+      parameters:
+        type: object
+        description: Name/value pairs that define the deployment parameters.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: confirmResourceGroup
+    description: >-
+      Get the resource group and branch: only deploy when it reports Succeeded,
+      otherwise end the flow.
+    operationId: ResourceGroups_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      provisioningState: $response.body#/properties/provisioningState
+    onSuccess:
+    - name: groupReady
+      type: goto
+      stepId: startDeployment
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Succeeded"
+        type: jsonpath
+    - name: groupNotReady
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState != "Succeeded"
+        type: jsonpath
+  - stepId: startDeployment
+    description: Start an incremental template deployment into the confirmed resource group.
+    operationId: Deployments_CreateOrUpdate
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: deploymentName
+      in: path
+      value: $inputs.deploymentName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    requestBody:
+      contentType: application/json
+      payload:
+        properties:
+          template: $inputs.template
+          parameters: $inputs.parameters
+          mode: Incremental
+    successCriteria:
+    - condition: $statusCode == 201
+    outputs:
+      deploymentId: $response.body#/id
+  - stepId: pollDeployment
+    description: >-
+      Get the deployment and branch on its provisioning state, looping until it
+      is Succeeded, Failed, or Canceled.
+    operationId: Deployments_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: deploymentName
+      in: path
+      value: $inputs.deploymentName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      provisioningState: $response.body#/properties/provisioningState
+    onSuccess:
+    - name: redeploySucceeded
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Succeeded"
+        type: jsonpath
+    - name: redeployFailed
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState == "Failed" || $.properties.provisioningState == "Canceled"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollDeployment
+      criteria:
+      - context: $response.body
+        condition: $.properties.provisioningState != "Succeeded" && $.properties.provisioningState != "Failed" && $.properties.provisioningState != "Canceled"
+        type: jsonpath
+  outputs:
+    deploymentId: $steps.startDeployment.outputs.deploymentId
+    finalProvisioningState: $steps.pollDeployment.outputs.provisioningState

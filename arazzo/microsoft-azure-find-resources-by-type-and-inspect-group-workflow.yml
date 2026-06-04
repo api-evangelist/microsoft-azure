@@ -1,0 +1,110 @@
+arazzo: 1.0.1
+info:
+  title: Microsoft Azure Find Resources by Type and Inspect Their Group
+  summary: Filter a subscription's resources by type, then get the resource group of the first match.
+  description: >-
+    A targeted discovery flow for finding where a particular kind of resource
+    lives. The workflow lists resources across the subscription using an OData
+    $filter on resource type, branches on whether any matched, and when a match
+    is found gets the resource group the first matching resource belongs to so
+    the caller can inspect that group's location and tags. Every step spells out
+    its request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: azureResourceManager
+  url: ../openapi/azure-resource-manager-openapi.yml
+  type: openapi
+workflows:
+- workflowId: find-resources-by-type
+  summary: Filter resources by type and inspect the group of the first match.
+  description: >-
+    Lists resources filtered by type, branches on whether any matched, and gets
+    the resource group of the first matching resource.
+  inputs:
+    type: object
+    required:
+    - accessToken
+    - subscriptionId
+    - resourceType
+    - resourceGroupName
+    properties:
+      accessToken:
+        type: string
+        description: An Azure Resource Manager OAuth2 bearer access token.
+      subscriptionId:
+        type: string
+        description: The ID of the target subscription.
+      resourceType:
+        type: string
+        description: The resource type to filter on (e.g. Microsoft.Storage/storageAccounts).
+      resourceGroupName:
+        type: string
+        description: The resource group to inspect when a matching resource is found.
+      apiVersion:
+        type: string
+        description: The Azure Resource Manager API version.
+        default: '2024-03-01'
+  steps:
+  - stepId: filterResources
+    description: >-
+      List subscription resources filtered by resource type and branch on whether
+      the result set is empty.
+    operationId: Resources_List
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    - name: $filter
+      in: query
+      value: "resourceType eq '$inputs.resourceType'"
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      matches: $response.body#/value
+    onSuccess:
+    - name: matchesFound
+      type: goto
+      stepId: inspectGroup
+      criteria:
+      - context: $response.body
+        condition: $.value.length > 0
+        type: jsonpath
+    - name: noMatches
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.value.length == 0
+        type: jsonpath
+  - stepId: inspectGroup
+    description: Get the resource group so the caller can inspect its location and tags.
+    operationId: ResourceGroups_Get
+    parameters:
+    - name: Authorization
+      in: header
+      value: Bearer $inputs.accessToken
+    - name: subscriptionId
+      in: path
+      value: $inputs.subscriptionId
+    - name: resourceGroupName
+      in: path
+      value: $inputs.resourceGroupName
+    - name: api-version
+      in: query
+      value: $inputs.apiVersion
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      resourceGroupId: $response.body#/id
+      location: $response.body#/location
+      tags: $response.body#/tags
+  outputs:
+    matches: $steps.filterResources.outputs.matches
+    resourceGroupId: $steps.inspectGroup.outputs.resourceGroupId
+    location: $steps.inspectGroup.outputs.location
