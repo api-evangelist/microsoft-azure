@@ -1,0 +1,50 @@
+generated: '2026-06-20'
+method: searched
+source: https://learn.microsoft.com/en-us/rest/api/azure/
+docs:
+  - https://learn.microsoft.com/en-us/rest/api/azure/
+  - https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design
+  - https://github.com/microsoft/api-guidelines
+notes: >-
+  Cross-cutting request/response semantics for Azure REST APIs (Azure Resource
+  Manager + data-plane). Derived from the Azure REST reference and the Microsoft
+  REST API Guidelines; verified against OpenAPI in this repo.
+authentication:
+  style: OAuth 2.0 Bearer tokens issued by Microsoft Entra ID (Azure AD)
+  header: "Authorization: Bearer <token>"
+  resource: management.azure.com (ARM) or per-service audience/scope
+  see: authentication/microsoft-azure-authentication.yml
+versioning:
+  style: mandatory api-version query parameter (date-based)
+  see: lifecycle/microsoft-azure-lifecycle.yml
+pagination:
+  style: continuation-link
+  response_field: nextLink
+  value_field: value
+  note: >-
+    Collection responses wrap items in a "value" array and return an absolute
+    "nextLink" URL when more pages exist; follow nextLink until absent. Some
+    data-plane APIs use $skipToken / continuation-token headers.
+async_operations:
+  style: long-running-operations (LRO)
+  headers: [Azure-AsyncOperation, Location, Retry-After]
+  pattern: >-
+    202 Accepted returns an operation-status URL in Azure-AsyncOperation (or
+    Location); poll it, honoring Retry-After, until status is Succeeded/Failed/Canceled.
+  docs: https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
+request_tracing:
+  request_id_header_client: x-ms-client-request-id
+  request_id_header_server: x-ms-request-id
+  correlation_header: x-ms-correlation-request-id
+  note: Server echoes x-ms-request-id / x-ms-correlation-request-id for support and tracing.
+rate_limit_signaling:
+  headers: [x-ms-ratelimit-remaining-subscription-reads, x-ms-ratelimit-remaining-subscription-writes, Retry-After]
+  status: 429
+  see: rate-limits/microsoft-azure-rate-limits.yml
+error_envelope:
+  format: azure-error (top-level "error" object with code/message/details/target)
+  content_type: application/json
+  see: errors/microsoft-azure-problem-types.yml
+conditional_requests:
+  headers: [ETag, If-Match, If-None-Match]
+  note: Optimistic concurrency via ETag / If-Match on many resource providers.
