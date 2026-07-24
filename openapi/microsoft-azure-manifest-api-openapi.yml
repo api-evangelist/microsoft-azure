@@ -1,0 +1,928 @@
+swagger: '2.0'
+info:
+  version: 2020-08-01-preview
+  title: Microsoft Azure AccessControlClient AccessConnector Manifest API
+  description: Everything about manifests
+schemes:
+- https
+tags:
+- name: Manifest
+  description: Everything about manifests
+paths:
+  /v2/{name}/manifests/{reference}:
+    get:
+      tags:
+      - Manifest
+      description: Pulls the image manifest file associated with the specified name and reference. Reference may be a tag or a digest
+      x-ms-examples:
+        Get manifest:
+          $ref: ./examples/GetManifest.json
+      operationId: microsoftAzureGetmanifest
+      parameters:
+      - $ref: '#/parameters/ImageName'
+      - $ref: '#/parameters/ImageReference'
+      - name: accept
+        in: header
+        description: Accept header string delimited by comma. For example, application/vnd.docker.distribution.manifest.v2+json
+        required: false
+        type: string
+      responses:
+        '200':
+          description: Returns the requested manifest file
+          schema:
+            $ref: '#/definitions/Manifest'
+        default:
+          description: ACR error response describing why the operation failed.
+          schema:
+            $ref: '#/definitions/AcrErrors'
+      summary: Microsoft Azure Get  Name Manifests Reference
+    put:
+      tags:
+      - Manifest
+      x-ms-long-running-operation: false
+      description: Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest.
+      x-ms-examples:
+        Put manifest:
+          $ref: ./examples/CreateManifest.json
+      consumes:
+      - application/vnd.docker.distribution.manifest.v2+json
+      operationId: microsoftAzureCreatemanifest
+      parameters:
+      - $ref: '#/parameters/ImageName'
+      - $ref: '#/parameters/ImageReference'
+      - $ref: '#/parameters/ManifestBody'
+      responses:
+        '201':
+          description: The manifest is updated
+          schema: {}
+          headers:
+            Docker-Content-Digest:
+              type: string
+              description: Identifies the docker upload uuid for the current request.
+            Location:
+              type: string
+              description: The canonical location url of the uploaded manifest.
+            Content-Length:
+              type: integer
+              description: The canonical location url of the uploaded manifest.
+        default:
+          description: ACR error response describing why the operation failed.
+          schema:
+            $ref: '#/definitions/AcrErrors'
+      summary: Microsoft Azure Put  Name Manifests Reference
+    delete:
+      tags:
+      - Manifest
+      description: Delete the manifest identified by `name` and `reference`. Note that a manifest can _only_ be deleted by `digest`.
+      x-ms-examples:
+        Delete manifest:
+          $ref: ./examples/DeleteManifest.json
+      operationId: microsoftAzureDeletemanifest
+      parameters:
+      - $ref: '#/parameters/ImageName'
+      - $ref: '#/parameters/ImageReference'
+      responses:
+        '202':
+          description: The manifest has been deleted
+        default:
+          description: ACR error response describing why the operation failed.
+          schema:
+            $ref: '#/definitions/AcrErrors'
+      summary: Microsoft Azure Delete  Name Manifests Reference
+  /subscriptions/{subscriptionId}/providers/Microsoft.ProviderHub/providerRegistrations/{providerNamespace}/generateManifest:
+    post:
+      tags:
+      - Manifest
+      description: Generates the manifest for the given provider.
+      operationId: microsoftAzureGeneratemanifest
+      produces:
+      - application/json
+      parameters:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/parameters/SubscriptionIdParameter
+      - $ref: '#/parameters/ProviderNamespaceParameter'
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/parameters/ApiVersionParameter
+      x-ms-examples:
+        GenerateManifest:
+          $ref: ./examples/GenerateManifest.json
+      responses:
+        '200':
+          description: Manifest generated.
+          schema:
+            $ref: '#/definitions/ResourceProviderManifest'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Microsoft Azure Post Subscriptions Subscriptionid Providers Microsoft Providerhub Providerregistrations Providernamespace Generatemanifest
+  /subscriptions/{subscriptionId}/providers/Microsoft.ProviderHub/providerRegistrations/{providerNamespace}/checkinManifest:
+    post:
+      tags:
+      - Manifest
+      description: Checkin the manifest.
+      operationId: microsoftAzureCheckinmanifest
+      produces:
+      - application/json
+      parameters:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/parameters/SubscriptionIdParameter
+      - $ref: '#/parameters/ProviderNamespaceParameter'
+      - name: checkinManifestParams
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CheckinManifestParams'
+        description: The required body parameters supplied to the checkin manifest operation.
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/parameters/ApiVersionParameter
+      x-ms-examples:
+        CheckinManifest:
+          $ref: ./examples/CheckinManifest.json
+      responses:
+        '200':
+          description: Successfully checked-in manifest.
+          schema:
+            $ref: '#/definitions/CheckinManifestInfo'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Microsoft Azure Post Subscriptions Subscriptionid Providers Microsoft Providerhub Providerregistrations Providernamespace Checkinmanifest
+definitions:
+  IdentityManagement:
+    type: object
+    properties:
+      type:
+        enum:
+        - NotSpecified
+        - SystemAssigned
+        - UserAssigned
+        - Actor
+        - DelegatedResourceIdentity
+        type: string
+        x-ms-enum:
+          name: IdentityManagementTypes
+          modelAsString: true
+  ResourceProviderManagement:
+    type: object
+    properties:
+      schemaOwners:
+        type: array
+        items:
+          type: string
+      manifestOwners:
+        type: array
+        items:
+          type: string
+      incidentRoutingService:
+        type: string
+      incidentRoutingTeam:
+        type: string
+      incidentContactEmail:
+        type: string
+      serviceTreeInfos:
+        type: array
+        items:
+          $ref: '#/definitions/ServiceTreeInfo'
+      resourceAccessPolicy:
+        enum:
+        - NotSpecified
+        - AcisReadAllowed
+        - AcisActionAllowed
+        type: string
+      resourceAccessRoles:
+        type: array
+        items: {}
+  LinkedOperationRule:
+    required:
+    - linkedAction
+    - linkedOperation
+    type: object
+    properties:
+      linkedOperation:
+        enum:
+        - None
+        - CrossResourceGroupResourceMove
+        - CrossSubscriptionResourceMove
+        type: string
+        x-ms-enum:
+          name: LinkedOperation
+          modelAsString: true
+      linkedAction:
+        enum:
+        - NotSpecified
+        - Blocked
+        - Validate
+        - Enabled
+        type: string
+        x-ms-enum:
+          name: LinkedAction
+          modelAsString: true
+  CheckinManifestParams:
+    type: object
+    properties:
+      environment:
+        type: string
+        description: The environment supplied to the checkin manifest operation.
+      baselineArmManifestLocation:
+        type: string
+        description: The baseline ARM manifest location supplied to the checkin manifest operation.
+    required:
+    - baselineArmManifestLocation
+    - environment
+  ExtendedLocationOptions:
+    type: object
+    properties:
+      type:
+        type: string
+      supportedPolicy:
+        type: string
+  ResourceType:
+    type: object
+    properties:
+      name:
+        type: string
+      routingType:
+        enum:
+        - Default
+        - ProxyOnly
+        - HostBased
+        - Extension
+        - Tenant
+        - Fanout
+        - LocationBased
+        - Failover
+        - CascadeExtension
+        type: string
+        x-ms-enum:
+          name: RoutingType
+          modelAsString: true
+      resourceValidation:
+        enum:
+        - NotSpecified
+        - ReservedWords
+        - ProfaneWords
+        type: string
+        x-ms-enum:
+          name: ResourceValidation
+          modelAsString: true
+      allowedUnauthorizedActions:
+        type: array
+        items:
+          type: string
+      authorizationActionMappings:
+        type: array
+        items:
+          $ref: '#/definitions/AuthorizationActionMapping'
+      linkedAccessChecks:
+        type: array
+        items:
+          $ref: '#/definitions/LinkedAccessCheck'
+      defaultApiVersion:
+        type: string
+      loggingRules:
+        type: array
+        items:
+          $ref: '#/definitions/LoggingRule'
+      throttlingRules:
+        type: array
+        items:
+          $ref: '#/definitions/ThrottlingRule'
+      endpoints:
+        type: array
+        items:
+          $ref: '#/definitions/ResourceProviderEndpoint'
+      marketplaceType:
+        enum:
+        - NotSpecified
+        - AddOn
+        - Bypass
+        - Store
+        type: string
+      identityManagement:
+        allOf:
+        - $ref: '#/definitions/IdentityManagement'
+      metadata: {}
+      requiredFeatures:
+        type: array
+        items:
+          type: string
+      featuresRule:
+        allOf:
+        - $ref: '#/definitions/FeaturesRule'
+      subscriptionStateRules:
+        type: array
+        items:
+          $ref: '#/definitions/SubscriptionStateRule'
+      serviceTreeInfos:
+        type: array
+        items:
+          $ref: '#/definitions/ServiceTreeInfo'
+      requestHeaderOptions:
+        allOf:
+        - $ref: '#/definitions/RequestHeaderOptions'
+      skuLink:
+        type: string
+      disallowedActionVerbs:
+        type: array
+        items:
+          type: string
+      templateDeploymentPolicy:
+        allOf:
+        - $ref: '#/definitions/TemplateDeploymentPolicy'
+      extendedLocations:
+        type: array
+        items:
+          $ref: '#/definitions/ExtendedLocationOptions'
+      linkedOperationRules:
+        type: array
+        items:
+          $ref: '#/definitions/LinkedOperationRule'
+      resourceDeletionPolicy:
+        enum:
+        - NotSpecified
+        - Cascade
+        - Force
+        type: string
+        x-ms-enum:
+          name: ManifestResourceDeletionPolicy
+          modelAsString: true
+  History:
+    description: A list of unstructured historical data for v1 compatibility
+    properties:
+      v1Compatibility:
+        type: string
+        description: The raw v1 compatibility information
+    example:
+      v1Compatibility: v1 compatibility info
+  AcrErrors:
+    description: Acr error response describing why the operation failed
+    properties:
+      errors:
+        type: array
+        description: Array of detailed error
+        items:
+          $ref: '#/definitions/AcrErrorInfo'
+  ResourceProviderEndpoint:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+      apiVersions:
+        type: array
+        items:
+          type: string
+      endpointUri:
+        type: string
+      locations:
+        type: array
+        items:
+          type: string
+      requiredFeatures:
+        type: array
+        items:
+          type: string
+      featuresRule:
+        allOf:
+        - $ref: '#/definitions/FeaturesRule'
+      timeout:
+        format: duration
+        type: string
+      endpointType:
+        enum:
+        - NotSpecified
+        - Canary
+        - Production
+        - TestInProduction
+        type: string
+        x-ms-enum:
+          name: EndpointType
+          modelAsString: true
+  ThrottlingMetric:
+    required:
+    - limit
+    - type
+    type: object
+    properties:
+      type:
+        enum:
+        - NotSpecified
+        - NumberOfRequests
+        - NumberOfResources
+        type: string
+        x-ms-enum:
+          name: ThrottlingMetricType
+          modelAsString: true
+      limit:
+        format: int64
+        type: integer
+      interval:
+        format: duration
+        type: string
+  V2Descriptor:
+    description: Docker V2 image layer descriptor including config and layers
+    properties:
+      mediaType:
+        type: string
+        description: Layer media type
+      size:
+        type: integer
+        description: Layer size
+      digest:
+        type: string
+        description: Layer digest
+    example:
+      mediaType: application/vnd.docker.image.rootfs.diff.tar.gzip
+      size: 2107098
+      digest: sha256:5d20c808ce198565ff70b3ed23a991dd49afac45dece63474b27ce6ed036adc6
+  TemplateDeploymentPolicy:
+    required:
+    - capabilities
+    - preflightOptions
+    type: object
+    properties:
+      capabilities:
+        enum:
+        - Default
+        - Preflight
+        type: string
+        x-ms-enum:
+          name: TemplateDeploymentCapabilities
+          modelAsString: true
+      preflightOptions:
+        enum:
+        - None
+        - ValidationRequests
+        - DeploymentRequests
+        - TestOnly
+        - RegisteredOnly
+        type: string
+        x-ms-enum:
+          name: TemplateDeploymentPreflightOptions
+          modelAsString: true
+  JWKHeader:
+    description: JSON web key parameter
+    properties:
+      crv:
+        type: string
+        description: crv value
+      kid:
+        type: string
+        description: kid value
+      kty:
+        type: string
+        description: kty value
+      x:
+        type: string
+        description: x value
+      y:
+        type: string
+        description: y value
+  InnerError:
+    description: Inner error containing list of errors.
+    type: object
+    properties:
+      code:
+        description: Specific error code than was provided by the containing error.
+        type: string
+        readOnly: true
+      innerError:
+        description: Object containing more specific information than the current object about the error.
+        type: object
+        readOnly: true
+    additionalProperties:
+      type: object
+  ThrottlingRule:
+    required:
+    - action
+    - metrics
+    type: object
+    properties:
+      action:
+        type: string
+      metrics:
+        type: array
+        items:
+          $ref: '#/definitions/ThrottlingMetric'
+      requiredFeatures:
+        type: array
+        items:
+          type: string
+  ResourceProviderAuthentication:
+    required:
+    - allowedAudiences
+    type: object
+    properties:
+      allowedAudiences:
+        type: array
+        items:
+          type: string
+  RequestHeaderOptions:
+    type: object
+    properties:
+      optInHeaders:
+        enum:
+        - NotSpecified
+        - SignedUserToken
+        - ClientGroupMembership
+        - SignedAuxiliaryTokens
+        - UnboundedClientGroupMembership
+        type: string
+        x-ms-enum:
+          name: OptInHeaderType
+          modelAsString: true
+  FeaturesRule:
+    required:
+    - requiredFeaturesPolicy
+    type: object
+    properties:
+      requiredFeaturesPolicy:
+        enum:
+        - Any
+        - All
+        type: string
+        x-ms-enum:
+          name: FeaturesPolicy
+          modelAsString: true
+  JWK:
+    description: A JSON web signature
+    properties:
+      jwk:
+        $ref: '#/definitions/JWKHeader'
+      alg:
+        type: string
+        description: The algorithm used to sign or encrypt the JWT
+  CheckinManifestInfo:
+    required:
+    - isCheckedIn
+    - statusMessage
+    type: object
+    properties:
+      isCheckedIn:
+        type: boolean
+      statusMessage:
+        type: string
+      pullRequest:
+        type: string
+      commitId:
+        type: string
+  ResourceProviderManifest:
+    type: object
+    properties:
+      providerAuthentication:
+        allOf:
+        - $ref: '#/definitions/ResourceProviderAuthentication'
+      providerAuthorizations:
+        type: array
+        items:
+          $ref: '#/definitions/ResourceProviderAuthorization'
+      namespace:
+        type: string
+      providerVersion:
+        type: string
+      providerType:
+        enum:
+        - NotSpecified
+        - Internal
+        - External
+        - Hidden
+        - RegistrationFree
+        - LegacyRegistrationRequired
+        - TenantOnly
+        - AuthorizationFree
+        type: string
+        x-ms-enum:
+          name: ResourceProviderType
+          modelAsString: true
+      requiredFeatures:
+        type: array
+        items:
+          type: string
+      featuresRule:
+        allOf:
+        - $ref: '#/definitions/FeaturesRule'
+      requestHeaderOptions:
+        allOf:
+        - $ref: '#/definitions/RequestHeaderOptions'
+      resourceTypes:
+        type: array
+        items:
+          $ref: '#/definitions/ResourceType'
+      management:
+        allOf:
+        - $ref: '#/definitions/ResourceProviderManagement'
+      capabilities:
+        type: array
+        items:
+          $ref: '#/definitions/ResourceProviderCapabilities'
+      metadata: {}
+      globalNotificationEndpoints:
+        type: array
+        items:
+          $ref: '#/definitions/ResourceProviderEndpoint'
+      reRegisterSubscriptionMetadata:
+        allOf:
+        - $ref: '#/definitions/ReRegisterSubscriptionMetadata'
+  ServiceTreeInfo:
+    type: object
+    properties:
+      serviceId:
+        type: string
+      componentId:
+        type: string
+      readiness:
+        enum:
+        - ClosingDown
+        - Deprecated
+        - GA
+        - InDevelopment
+        - InternalOnly
+        - PrivatePreview
+        - PublicPreview
+        - RemovedFromARM
+        - Retired
+        type: string
+        x-ms-enum:
+          name: Readiness
+          modelAsString: true
+  LoggingRule:
+    required:
+    - action
+    - detailLevel
+    - direction
+    type: object
+    properties:
+      action:
+        type: string
+      direction:
+        enum:
+        - None
+        - Request
+        - Response
+        type: string
+        x-ms-enum:
+          name: LoggingDirections
+          modelAsString: true
+      detailLevel:
+        enum:
+        - None
+        - Body
+        type: string
+        x-ms-enum:
+          name: LoggingDetails
+          modelAsString: true
+      hiddenPropertyPaths:
+        allOf:
+        - $ref: '#/definitions/LoggingHiddenPropertyPath'
+  Manifest:
+    description: Returns the requested manifest file
+    properties:
+      schemaVersion:
+        type: integer
+        description: Schema version
+      mediaType:
+        type: string
+        description: Media type usually application/vnd.docker.distribution.manifest.v2+json if this is in the accept header
+      config:
+        description: V2 image config descriptor
+        $ref: '#/definitions/V2Descriptor'
+      layers:
+        type: array
+        description: List of V2 image layer information
+        items:
+          $ref: '#/definitions/V2Descriptor'
+      architecture:
+        type: string
+        description: CPU architecture
+      name:
+        type: string
+        description: Image name
+      tag:
+        type: string
+        description: Image tag
+      fsLayers:
+        type: array
+        description: List of layer information
+        items:
+          $ref: '#/definitions/FsLayer'
+      history:
+        type: array
+        description: Image history
+        items:
+          $ref: '#/definitions/History'
+      signatures:
+        type: array
+        description: Image signature
+        items:
+          $ref: '#/definitions/ImageSignature'
+    example:
+      schemaVersion: 2
+      mediaType: application/vnd.docker.distribution.manifest.v2+json
+      config:
+        mediaType: application/vnd.docker.container.image.v1+json
+        size: 1512
+        digest: sha256:6d1ef012b5674ad8a127ecfa9b5e6f5178d171b90ee462846974177fd9bdd39f
+      layers:
+      - mediaType: application/vnd.docker.image.rootfs.diff.tar.gzip
+        size: 2107098
+        digest: sha256:5d20c808ce198565ff70b3ed23a991dd49afac45dece63474b27ce6ed036adc6
+  ReRegisterSubscriptionMetadata:
+    required:
+    - enabled
+    type: object
+    properties:
+      enabled:
+        type: boolean
+      concurrencyLimit:
+        format: int32
+        type: integer
+  AuthorizationActionMapping:
+    type: object
+    properties:
+      original:
+        type: string
+      desired:
+        type: string
+  Error:
+    description: Standard error object.
+    type: object
+    properties:
+      code:
+        description: Server-defined set of error codes.
+        type: string
+        readOnly: true
+      message:
+        description: Human-readable representation of the error.
+        type: string
+        readOnly: true
+      target:
+        description: Target of the error.
+        type: string
+        readOnly: true
+      details:
+        description: Array of details about specific errors that led to this reported error.
+        type: array
+        items:
+          $ref: '#/definitions/Error'
+        readOnly: true
+      innerError:
+        description: Object containing more specific information than  the current object about the error.
+        allOf:
+        - $ref: '#/definitions/InnerError'
+        readOnly: true
+  ErrorResponse:
+    description: Standard error response.
+    type: object
+    properties:
+      error:
+        description: Standard error object.
+        allOf:
+        - $ref: '#/definitions/Error'
+  ResourceProviderAuthorization:
+    type: object
+    properties:
+      applicationId:
+        type: string
+      roleDefinitionId:
+        type: string
+      managedByRoleDefinitionId:
+        type: string
+  SubscriptionStateRule:
+    type: object
+    properties:
+      state:
+        enum:
+        - NotDefined
+        - Enabled
+        - Warned
+        - PastDue
+        - Disabled
+        - Deleted
+        type: string
+        x-ms-enum:
+          name: SubscriptionState
+          modelAsString: true
+      allowedActions:
+        type: array
+        items:
+          type: string
+  FsLayer:
+    description: Image layer information
+    properties:
+      blobSum:
+        type: string
+        description: SHA of an image layer
+    example:
+      blobSum: sha256:1f7d468f830cb0ed4beb8edc9438f18096e8c682e56a35242f60e6c61b718b30
+  LoggingHiddenPropertyPath:
+    type: object
+    properties:
+      hiddenPathsOnRequest:
+        type: array
+        items:
+          type: string
+      hiddenPathsOnResponse:
+        type: array
+        items:
+          type: string
+  AcrErrorInfo:
+    description: Error information
+    properties:
+      code:
+        description: Error code
+        type: string
+      message:
+        type: string
+        description: Error message
+      detail:
+        type: object
+        description: Error details
+  ResourceProviderCapabilities:
+    required:
+    - effect
+    - quotaId
+    type: object
+    properties:
+      quotaId:
+        type: string
+      effect:
+        enum:
+        - NotSpecified
+        - Allow
+        - Disallow
+        type: string
+        x-ms-enum:
+          name: ResourceProviderCapabilitiesEffect
+          modelAsString: true
+      requiredFeatures:
+        type: array
+        items:
+          type: string
+  LinkedAccessCheck:
+    type: object
+    properties:
+      actionName:
+        type: string
+      linkedProperty:
+        type: string
+      linkedAction:
+        type: string
+      linkedActionVerb:
+        type: string
+      linkedType:
+        type: string
+  ImageSignature:
+    description: Signature of a signed manifest
+    properties:
+      header:
+        description: A JSON web signature
+        $ref: '#/definitions/JWK'
+      signature:
+        type: string
+        description: A signature for the image manifest, signed by a libtrust private key
+      protected:
+        type: string
+        description: The signed protected header
+    example:
+      header:
+        jwk:
+          crv: P-256
+          kid: WGXM:EYWQ:DA53:LQUP:BCWG:5RDG:S3ZM:ETH7:VMQS:WWKZ:EWDG:V74Q
+          kty: EC
+          x: OxZ9k5BVjPZ7jb3BmBD4X0d8MVPJqfF4NeSe8reoqnY
+          y: EaCqTe4-vYwhk7qU6Bs2-AeLGOVtCe_-IY2MdE0Vfyc
+        alg: ES256
+      signature: p73LfotMGD8nNXz2g9YX2XtSllb4GI5-b3vjqP5N0nkv8QXg-r5z_omGiVbOZE2BYG1X_4TIN23l1KSEqsXxOg
+      protected: eyJmb3JtYXRMZW5ndGgiOjI5ODYsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAxOC0wOS0yMFQyMzo0MTo1MloifQ
+parameters:
+  ImageName:
+    name: name
+    in: path
+    description: Name of the image (including the namespace)
+    required: true
+    type: string
+    x-ms-parameter-location: method
+  ImageReference:
+    name: reference
+    in: path
+    description: A tag or a digest, pointing to a specific image
+    required: true
+    type: string
+    x-ms-parameter-location: method
+  ManifestBody:
+    description: Manifest body, can take v1 or v2 values depending on accept header
+    name: payload
+    in: body
+    required: true
+    schema:
+      $ref: '#/definitions/Manifest'
+    x-ms-parameter-location: method
+  ProviderNamespaceParameter:
+    in: path
+    name: providerNamespace
+    description: The name of the resource provider hosted within ProviderHub.
+    required: true
+    type: string
+    x-ms-parameter-location: method
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/parameters/Endpoint'

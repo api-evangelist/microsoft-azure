@@ -1,0 +1,962 @@
+swagger: '2.0'
+info:
+  version: 2020-08-01-preview
+  title: Microsoft Azure AccessControlClient AccessConnector Analyze API
+schemes:
+- https
+tags:
+- name: Analyze
+paths:
+  /analyze:
+    post:
+      description: This operation extracts a rich set of visual features based on the image content. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.  Within your request, there is an optional parameter to allow you to choose which features to return.  By default, image categories are returned in the response.
+      operationId: microsoftAzureAnalyzeimage
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - $ref: '#/parameters/VisualFeatures'
+      - name: details
+        in: query
+        description: A string indicating which domain-specific details to return. Multiple values should be comma-separated. Valid visual feature types include:Celebrities - identifies celebrities if detected in the image.
+        type: array
+        required: false
+        collectionFormat: csv
+        items:
+          type: string
+          x-nullable: false
+          x-ms-enum:
+            name: Details
+            modelAsString: false
+          enum:
+          - Celebrities
+          - Landmarks
+      - $ref: '#/parameters/ServiceLanguage'
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageUrl
+      responses:
+        '200':
+          description: The response include the extracted features in JSON format.Here is the definitions for enumeration typesClipartTypeNon-clipart = 0,  ambiguous = 1, normal-clipart = 2, good-clipart = 3.LineDrawingTypeNon-LineDrawing = 0,LineDrawing = 1.
+          schema:
+            $ref: '#/definitions/ImageAnalysis'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/definitions/ComputerVisionError'
+      x-ms-examples:
+        Successful Analyze with Url request:
+          $ref: ./examples/SuccessfulAnalyzeWithUrl.json
+      summary: Microsoft Azure Post Analyze
+      tags:
+      - Analyze
+  /analyze/jobs/{jobId}:
+    get:
+      produces:
+      - application/json
+      - text/json
+      description: Get the status of an analysis job.  A job may consist of one or more tasks.  Once all tasks are completed, the job will transition to the completed state and results will be available for each task.
+      operationId: microsoftAzureAnalyzestatus
+      summary: Microsoft Azure Get Analysis Status And Results
+      parameters:
+      - $ref: '#/parameters/AnalyzeJobId'
+      - $ref: '#/parameters/ShowStats'
+      - default: 20
+        description: (Optional) Set the maximum number of results per task. When both $top and $skip are specified, $skip is applied first.
+        in: query
+        maximum: 50
+        minimum: 1
+        name: $top
+        type: integer
+      - default: 0
+        description: (Optional) Set the number of elements to offset in the response. When both $top and $skip are specified, $skip is applied first.
+        in: query
+        minimum: 0
+        name: $skip
+        type: integer
+      responses:
+        '200':
+          description: Analysis job status and metadata.
+          schema:
+            $ref: '#/definitions/AnalyzeJobState'
+        '404':
+          description: Job ID not found.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          x-ms-error-response: true
+        '500':
+          description: Internal error response
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          x-ms-error-response: true
+      x-ms-examples:
+        Successful Get Analysis job status request:
+          $ref: .//examples//SuccessfulAnalyzeStatusRequest.json
+      deprecated: false
+      tags:
+      - Analyze
+definitions:
+  DocumentLinkedEntities:
+    type: object
+    required:
+    - id
+    - entities
+    - warnings
+    properties:
+      id:
+        type: string
+        description: Unique, non-empty document identifier.
+      entities:
+        type: array
+        description: Recognized well known entities in the document.
+        items:
+          $ref: '#/definitions/LinkedEntity'
+      warnings:
+        type: array
+        description: Warnings encountered while processing document.
+        items:
+          $ref: '#/definitions/TextAnalyticsWarning'
+      statistics:
+        description: if showStats=true was specified in the request this field will contain information about the document payload.
+        $ref: '#/definitions/DocumentStatistics'
+  JobMetadata:
+    properties:
+      createdDateTime:
+        format: date-time
+        type: string
+      expirationDateTime:
+        format: date-time
+        type: string
+      jobId:
+        format: uuid
+        type: string
+      lastUpdateDateTime:
+        format: date-time
+        type: string
+      status:
+        enum:
+        - notStarted
+        - running
+        - succeeded
+        - failed
+        - cancelled
+        - cancelling
+        - partiallyCompleted
+        type: string
+        x-ms-enum:
+          modelAsString: false
+          name: State
+    required:
+    - jobId
+    - lastUpdateDateTime
+    - createdDateTime
+    - status
+    type: object
+  Category:
+    type: object
+    description: An object describing identified category.
+    properties:
+      name:
+        type: string
+        description: Name of the category.
+      score:
+        type: number
+        format: double
+        description: Scoring of the category.
+      detail:
+        $ref: '#/definitions/CategoryDetail'
+  PiiDocumentEntities:
+    type: object
+    required:
+    - id
+    - redactedText
+    - entities
+    - warnings
+    properties:
+      id:
+        type: string
+        description: Unique, non-empty document identifier.
+      redactedText:
+        type: string
+        description: Returns redacted text.
+      entities:
+        type: array
+        description: Recognized entities in the document.
+        items:
+          $ref: '#/definitions/Entity'
+      warnings:
+        type: array
+        description: Warnings encountered while processing document.
+        items:
+          $ref: '#/definitions/TextAnalyticsWarning'
+      statistics:
+        description: if showStats=true was specified in the request this field will contain information about the document payload.
+        $ref: '#/definitions/DocumentStatistics'
+  FaceDescription:
+    type: object
+    description: An object describing a face identified in the image.
+    properties:
+      age:
+        type: integer
+        description: Possible age of the face.
+      gender:
+        type: string
+        description: Possible gender of the face.
+        x-ms-enum:
+          name: Gender-
+          modelAsString: false
+        enum:
+        - Male
+        - Female
+      faceRectangle:
+        $ref: '#/definitions/FaceRectangle'
+  RequestStatistics:
+    type: object
+    required:
+    - documentsCount
+    - validDocumentsCount
+    - erroneousDocumentsCount
+    - transactionsCount
+    properties:
+      documentsCount:
+        type: integer
+        format: int32
+        description: Number of documents submitted in the request.
+      validDocumentsCount:
+        type: integer
+        format: int32
+        description: Number of valid documents. This excludes empty, over-size limit or non-supported languages documents.
+      erroneousDocumentsCount:
+        type: integer
+        format: int32
+        description: Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
+      transactionsCount:
+        type: integer
+        format: int64
+        description: Number of transactions for the request.
+    description: if showStats=true was specified in the request this field will contain information about the request payload.
+  DocumentError:
+    type: object
+    required:
+    - id
+    - error
+    properties:
+      id:
+        type: string
+        description: Document Id.
+      error:
+        type: object
+        description: Document Error.
+        $ref: '#/definitions/TextAnalyticsError'
+  DocumentKeyPhrases:
+    type: object
+    required:
+    - id
+    - keyPhrases
+    - warnings
+    properties:
+      id:
+        type: string
+        description: Unique, non-empty document identifier.
+      keyPhrases:
+        type: array
+        description: A list of representative words or phrases. The number of key phrases returned is proportional to the number of words in the input document.
+        items:
+          type: string
+      warnings:
+        type: array
+        description: Warnings encountered while processing document.
+        items:
+          $ref: '#/definitions/TextAnalyticsWarning'
+      statistics:
+        description: if showStats=true was specified in the request this field will contain information about the document payload.
+        $ref: '#/definitions/DocumentStatistics'
+  DocumentStatistics:
+    type: object
+    required:
+    - charactersCount
+    - transactionsCount
+    properties:
+      charactersCount:
+        type: integer
+        format: int32
+        description: Number of text elements recognized in the document.
+      transactionsCount:
+        type: integer
+        format: int32
+        description: Number of transactions for the document.
+    description: if showStats=true was specified in the request this field will contain information about the document payload.
+  Match:
+    type: object
+    required:
+    - confidenceScore
+    - text
+    - offset
+    - length
+    properties:
+      confidenceScore:
+        type: number
+        format: double
+        description: If a well known item is recognized, a decimal number denoting the confidence level between 0 and 1 will be returned.
+      text:
+        type: string
+        description: Entity text as appears in the request.
+      offset:
+        type: integer
+        format: int32
+        description: Start position for the entity match text.
+      length:
+        type: integer
+        format: int32
+        description: Length for the entity match text.
+  ImageType:
+    type: object
+    description: An object providing possible image types and matching confidence levels.
+    properties:
+      clipArtType:
+        type: number
+        description: Confidence level that the image is a clip art.
+      lineDrawingType:
+        type: number
+        description: Confidence level that the image is a line drawing.
+  EntityLinkingResult:
+    type: object
+    required:
+    - documents
+    - errors
+    - modelVersion
+    properties:
+      documents:
+        type: array
+        description: Response by document
+        items:
+          $ref: '#/definitions/DocumentLinkedEntities'
+      errors:
+        type: array
+        description: Errors by document id.
+        items:
+          $ref: '#/definitions/DocumentError'
+      statistics:
+        $ref: '#/definitions/RequestStatistics'
+      modelVersion:
+        type: string
+        description: This field indicates which model is used for scoring.
+  FaceRectangle:
+    type: object
+    description: An object describing face rectangle.
+    properties:
+      left:
+        type: integer
+        description: X-coordinate of the top left point of the face.
+      top:
+        type: integer
+        description: Y-coordinate of the top left point of the face.
+      width:
+        type: integer
+        description: Width measured from the top-left point of the face.
+      height:
+        type: integer
+        description: Height measured from the top-left point of the face.
+  ImageMetadata:
+    type: object
+    description: Image metadata
+    properties:
+      width:
+        type: integer
+        format: int32
+        description: Image width
+      height:
+        type: integer
+        format: int32
+        description: Image height
+      format:
+        type: string
+        description: Image format
+  KeyPhraseResult:
+    type: object
+    required:
+    - documents
+    - errors
+    - modelVersion
+    properties:
+      documents:
+        type: array
+        description: Response by document
+        items:
+          $ref: '#/definitions/DocumentKeyPhrases'
+      errors:
+        type: array
+        description: Errors by document id.
+        items:
+          $ref: '#/definitions/DocumentError'
+      statistics:
+        $ref: '#/definitions/RequestStatistics'
+      modelVersion:
+        type: string
+        description: This field indicates which model is used for scoring.
+  EntitiesResult:
+    type: object
+    required:
+    - documents
+    - errors
+    - modelVersion
+    properties:
+      documents:
+        type: array
+        description: Response by document
+        items:
+          $ref: '#/definitions/DocumentEntities'
+      errors:
+        type: array
+        description: Errors by document id.
+        items:
+          $ref: '#/definitions/DocumentError'
+      statistics:
+        $ref: '#/definitions/RequestStatistics'
+      modelVersion:
+        type: string
+        description: This field indicates which model is used for scoring.
+  TextAnalyticsWarning:
+    type: object
+    required:
+    - code
+    - message
+    properties:
+      code:
+        type: string
+        enum:
+        - LongWordsInDocument
+        - DocumentTruncated
+        x-ms-enum:
+          name: WarningCodeValue
+          modelAsString: true
+        description: Error code.
+      message:
+        type: string
+        description: Warning message.
+      targetRef:
+        type: string
+        description: A JSON pointer reference indicating the target object.
+  LinkedEntity:
+    type: object
+    required:
+    - name
+    - matches
+    - language
+    - url
+    - dataSource
+    properties:
+      name:
+        type: string
+        description: Entity Linking formal name.
+      matches:
+        type: array
+        description: List of instances this entity appears in the text.
+        items:
+          $ref: '#/definitions/Match'
+      language:
+        type: string
+        description: Language used in the data source.
+      id:
+        type: string
+        description: Unique identifier of the recognized entity from the data source.
+      url:
+        type: string
+        description: URL for the entity's page from the data source.
+      dataSource:
+        type: string
+        description: Data source used to extract entity linking, such as Wiki/Bing etc.
+      bingId:
+        type: string
+        description: Bing Entity Search API unique identifier of the recognized entity.
+  AnalyzeJobState:
+    allOf:
+    - $ref: '#/definitions/AnalyzeJobMetadata'
+    - $ref: '#/definitions/TasksState'
+    - properties:
+        errors:
+          items:
+            $ref: '#/definitions/TextAnalyticsError'
+          type: array
+        statistics:
+          $ref: '#/definitions/RequestStatistics'
+      type: object
+    - $ref: '#/definitions/Pagination'
+  ComputerVisionError:
+    type: object
+    required:
+    - code
+    - message
+    properties:
+      code:
+        type: string
+        description: The error code.
+        enum:
+        - InvalidImageUrl
+        - InvalidImageFormat
+        - InvalidImageSize
+        - NotSupportedVisualFeature
+        - NotSupportedImage
+        - InvalidDetails
+        - NotSupportedLanguage
+        - BadArgument
+        - FailedToProcess
+        - Timeout
+        - InternalServerError
+        - Unspecified
+        - StorageException
+        x-ms-enum:
+          name: ComputerVisionErrorCodes
+          modelAsString: false
+      message:
+        type: string
+        description: A message explaining the error reported by the service.
+      requestId:
+        type: string
+        description: A unique request identifier.
+  ImageTag:
+    type: object
+    description: An image caption, i.e. a brief description of what the image depicts.
+    properties:
+      name:
+        type: string
+        description: The tag value
+      confidence:
+        type: number
+        format: double
+        description: The level of confidence the service has in the caption
+  PiiResult:
+    type: object
+    required:
+    - documents
+    - errors
+    - modelVersion
+    properties:
+      documents:
+        type: array
+        description: Response by document
+        items:
+          $ref: '#/definitions/PiiDocumentEntities'
+      errors:
+        type: array
+        description: Errors by document id.
+        items:
+          $ref: '#/definitions/DocumentError'
+      statistics:
+        $ref: '#/definitions/RequestStatistics'
+      modelVersion:
+        type: string
+        description: This field indicates which model is used for scoring.
+  TasksState:
+    properties:
+      tasks:
+        properties:
+          details:
+            allOf:
+            - $ref: '#/definitions/TaskState'
+            type: object
+          completed:
+            type: integer
+          failed:
+            type: integer
+          inProgress:
+            type: integer
+          total:
+            type: integer
+          entityRecognitionTasks:
+            type: array
+            items:
+              type: object
+              allOf:
+              - $ref: '#/definitions/TaskState'
+              - type: object
+                properties:
+                  results:
+                    $ref: '#/definitions/EntitiesResult'
+          entityRecognitionPiiTasks:
+            type: array
+            items:
+              type: object
+              allOf:
+              - $ref: '#/definitions/TaskState'
+              - type: object
+                properties:
+                  results:
+                    $ref: '#/definitions/PiiResult'
+          keyPhraseExtractionTasks:
+            type: array
+            items:
+              type: object
+              allOf:
+              - $ref: '#/definitions/TaskState'
+              - type: object
+                properties:
+                  results:
+                    $ref: '#/definitions/KeyPhraseResult'
+          entityLinkingTasks:
+            type: array
+            items:
+              type: object
+              allOf:
+              - $ref: '#/definitions/TaskState'
+              - type: object
+                properties:
+                  results:
+                    $ref: '#/definitions/EntityLinkingResult'
+        required:
+        - total
+        - completed
+        - failed
+        - inProgress
+        type: object
+    required:
+    - tasks
+    type: object
+  ImageCaption:
+    type: object
+    description: An image caption, i.e. a brief description of what the image depicts.
+    properties:
+      text:
+        type: string
+        description: The text of the caption
+      confidence:
+        type: number
+        format: double
+        description: The level of confidence the service has in the caption
+  TaskState:
+    properties:
+      lastUpdateDateTime:
+        format: date-time
+        type: string
+      name:
+        type: string
+      status:
+        enum:
+        - notStarted
+        - running
+        - succeeded
+        - failed
+        - rejected
+        - cancelled
+        - cancelling
+        x-ms-enum:
+          modelAsString: false
+          name: State
+    required:
+    - status
+    - lastUpdateDateTime
+    type: object
+  Pagination:
+    properties:
+      '@nextLink':
+        type: string
+    type: object
+  ColorInfo:
+    type: object
+    description: An object providing additional metadata describing color attributes.
+    properties:
+      dominantColorForeground:
+        type: string
+        description: Possible dominant foreground color.
+      dominantColorBackground:
+        type: string
+        description: Possible dominant background color.
+      dominantColors:
+        type: array
+        description: An array of possible dominant colors.
+        items:
+          type: string
+      accentColor:
+        type: string
+        description: Possible accent color.
+      isBWImg:
+        type: boolean
+        description: A value indicating if the image is black and white.
+  DocumentEntities:
+    type: object
+    required:
+    - id
+    - entities
+    - warnings
+    properties:
+      id:
+        type: string
+        description: Unique, non-empty document identifier.
+      entities:
+        type: array
+        description: Recognized entities in the document.
+        items:
+          $ref: '#/definitions/Entity'
+      warnings:
+        type: array
+        description: Warnings encountered while processing document.
+        items:
+          $ref: '#/definitions/TextAnalyticsWarning'
+      statistics:
+        description: if showStats=true was specified in the request this field will contain information about the document payload.
+        $ref: '#/definitions/DocumentStatistics'
+  CategoryDetail:
+    type: object
+    description: An object describing additional category details.
+    properties:
+      celebrities:
+        type: array
+        description: An array of celebrities if any identified.
+        items:
+          $ref: '#/definitions/CelebritiesModel'
+  ErrorResponse:
+    type: object
+    required:
+    - error
+    properties:
+      error:
+        type: object
+        description: Document Error.
+        $ref: '#/definitions/TextAnalyticsError'
+  AnalyzeJobMetadata:
+    type: object
+    allOf:
+    - $ref: '#/definitions/JobMetadata'
+    - properties:
+        displayName:
+          type: string
+  AdultInfo:
+    type: object
+    description: An object describing whether the image contains adult-oriented content and/or is racy.
+    properties:
+      isAdultContent:
+        type: boolean
+        x-nullable: false
+        description: A value indicating if the image contains adult-oriented content.
+      isRacyContent:
+        type: boolean
+        x-nullable: false
+        description: A value indicating if the image is race.
+      adultScore:
+        type: number
+        format: double
+        x-nullable: false
+        description: Score from 0 to 1 that indicates how much of adult content is within the image.
+      racyScore:
+        type: number
+        format: double
+        x-nullable: false
+        description: Score from 0 to 1 that indicates how suggestive is the image.
+  ImageAnalysis:
+    type: object
+    description: Result of AnalyzeImage operation.
+    properties:
+      categories:
+        type: array
+        description: An array indicating identified categories.
+        items:
+          $ref: '#/definitions/Category'
+      adult:
+        $ref: '#/definitions/AdultInfo'
+      color:
+        $ref: '#/definitions/ColorInfo'
+      imageType:
+        $ref: '#/definitions/ImageType'
+      tags:
+        type: array
+        description: A list of tags with confidence level.
+        items:
+          $ref: '#/definitions/ImageTag'
+      description:
+        $ref: '#/definitions/ImageDescriptionDetails'
+      faces:
+        type: array
+        description: An array of possible faces within the image.
+        items:
+          $ref: '#/definitions/FaceDescription'
+      requestId:
+        type: string
+        description: Id of the request for tracking purposes.
+      metadata:
+        $ref: '#/definitions/ImageMetadata'
+  CelebritiesModel:
+    type: object
+    description: An object describing possible celebrity identification.
+    properties:
+      name:
+        type: string
+        description: Name of the celebrity.
+      confidence:
+        type: number
+        format: double
+        description: Level of confidence ranging from 0 to 1.
+      faceRectangle:
+        $ref: '#/definitions/FaceRectangle'
+  ImageDescriptionDetails:
+    type: object
+    description: A collection of content tags, along with a list of captions sorted by confidence level, and image metadata.
+    properties:
+      tags:
+        type: array
+        description: A collection of image tags.
+        items:
+          type: string
+      captions:
+        type: array
+        description: A list of captions, sorted by confidence level.
+        items:
+          $ref: '#/definitions/ImageCaption'
+      requestId:
+        type: string
+        description: Id of the REST API request.
+      metadata:
+        $ref: '#/definitions/ImageMetadata'
+  InnerError:
+    type: object
+    required:
+    - code
+    - message
+    properties:
+      code:
+        type: string
+        enum:
+        - InvalidParameterValue
+        - InvalidRequestBodyFormat
+        - EmptyRequest
+        - MissingInputRecords
+        - InvalidDocument
+        - ModelVersionIncorrect
+        - InvalidDocumentBatch
+        - UnsupportedLanguageCode
+        - InvalidCountryHint
+        x-ms-enum:
+          name: InnerErrorCodeValue
+          modelAsString: true
+        description: Error code.
+      message:
+        type: string
+        description: Error message.
+      details:
+        type: object
+        additionalProperties:
+          type: string
+        description: Error details.
+      target:
+        type: string
+        description: Error target.
+      innererror:
+        $ref: '#/definitions/InnerError'
+        description: Inner error contains more specific information.
+  Entity:
+    type: object
+    required:
+    - text
+    - category
+    - offset
+    - length
+    - confidenceScore
+    properties:
+      text:
+        type: string
+        description: Entity text as appears in the request.
+      category:
+        type: string
+        description: Entity type.
+      subcategory:
+        type: string
+        description: (Optional) Entity sub type.
+      offset:
+        type: integer
+        format: int32
+        description: Start position for the entity text. Use of different 'stringIndexType' values can affect the offset returned.
+      length:
+        type: integer
+        format: int32
+        description: Length for the entity text. Use of different 'stringIndexType' values can affect the length returned.
+      confidenceScore:
+        type: number
+        format: double
+        description: Confidence score between 0 and 1 of the extracted entity.
+  TextAnalyticsError:
+    type: object
+    required:
+    - code
+    - message
+    properties:
+      code:
+        type: string
+        enum:
+        - InvalidRequest
+        - InvalidArgument
+        - InternalServerError
+        - ServiceUnavailable
+        - NotFound
+        x-ms-enum:
+          name: ErrorCodeValue
+          modelAsString: false
+        description: Error code.
+      message:
+        type: string
+        description: Error message.
+      target:
+        type: string
+        description: Error target.
+      innererror:
+        $ref: '#/definitions/InnerError'
+        description: Inner error contains more specific information.
+      details:
+        type: array
+        description: Details about specific errors that led to this reported error.
+        items:
+          $ref: '#/definitions/TextAnalyticsError'
+parameters:
+  ShowStats:
+    name: showStats
+    in: query
+    description: (Optional) if set to true, response will contain request and document level statistics.
+    type: boolean
+    required: false
+    x-ms-parameter-location: method
+  ServiceLanguage:
+    name: language
+    in: query
+    description: The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
+    type: string
+    required: false
+    x-ms-parameter-location: method
+    x-nullable: false
+    default: en
+    enum:
+    - en
+    - es
+    - ja
+    - pt
+    - zh
+  VisualFeatures:
+    name: visualFeatures
+    in: query
+    description: A string indicating what visual feature types to return. Multiple values should be comma-separated. Valid visual feature types include:Categories - categorizes image content according to a taxonomy defined in documentation. Tags - tags the image with a detailed list of words related to the image content. Description - describes the image content with a complete English sentence. Faces - detects if faces are present. If present, generate coordinates, gender and age. ImageType - detects if image is clipart or a line drawing. Color - determines the accent color, dominant color, and whether an image is black&white.Adult - detects if the image is pornographic in nature (depicts nudity or a sex act).  Sexually suggestive content is also detected.
+    type: array
+    x-ms-parameter-location: method
+    required: false
+    collectionFormat: csv
+    items:
+      type: string
+      x-nullable: false
+      x-ms-enum:
+        name: VisualFeatureTypes
+        modelAsString: false
+      enum:
+      - ImageType
+      - Faces
+      - Adult
+      - Categories
+      - Color
+      - Tags
+      - Description
+  AnalyzeJobId:
+    description: Job ID for Analyze
+    in: path
+    name: jobId
+    required: true
+    type: string
+    x-ms-parameter-location: method
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/parameters/Endpoint'

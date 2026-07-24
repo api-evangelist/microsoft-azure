@@ -1,0 +1,130 @@
+swagger: '2.0'
+info:
+  version: 2020-08-01-preview
+  title: Microsoft Azure AccessControlClient AccessConnector Findsimilars API
+schemes:
+- https
+tags:
+- name: Findsimilars
+paths:
+  /findsimilars:
+    post:
+      description: Given query face's faceId, to search the similar-looking faces from a faceId array, a face list or a large face list. faceId array contains the faces created by [Face - Detect With Url](https://docs.microsoft.com/rest/api/faceapi/face/detectwithurl) or [Face - Detect With Stream](https://docs.microsoft.com/rest/api/faceapi/face/detectwithstream), which will expire at the time specified by faceIdTimeToLive after creation. A "faceListId" is created by [FaceList - Create](https://docs.microsoft.com/rest/api/faceapi/facelist/create) containing persistedFaceIds that will not expire. And a "largeFaceListId" is created by [LargeFaceList - Create](https://docs.microsoft.com/rest/api/faceapi/largefacelist/create) containing persistedFaceIds that will also not expire. Depending on the input the returned similar faces list contains faceIds or persistedFaceIds ranked by similarity.<br>Find similar has two working modes, "matchPerson" and "matchFace". "matchPerson" is the default mode that it tries to find faces of the same person as possible by using internal same-person thresholds. It is useful to find a known person's other photos. Note that an empty list will be returned if no faces pass the internal thresholds. "matchFace" mode ignores same-person thresholds and returns ranked similar faces anyway, even the similarity is low. It can be used in the cases like searching celebrity-looking faces.<br>The 'recognitionModel' associated with the query face's faceId should be the same as the 'recognitionModel' used by the target faceId array, face list or large face list.<br>
+      operationId: microsoftAzureFaceFindsimilar
+      parameters:
+      - name: body
+        in: body
+        description: Request body for Find Similar.
+        required: true
+        x-ms-client-flatten: true
+        schema:
+          $ref: '#/definitions/FindSimilarRequest'
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: A successful call returns an array of the most similar faces represented in faceId if the input parameter is faceIds or persistedFaceId if the input parameter is faceListId.
+          schema:
+            $ref: '#/definitions/SimilarFaces'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/definitions/APIError'
+      x-ms-examples:
+        Find similar results example:
+          $ref: ./examples/FindSimilar.json
+      summary: Microsoft Azure Post Findsimilars
+      tags:
+      - Findsimilars
+definitions:
+  SimilarFaces:
+    type: array
+    items:
+      $ref: '#/definitions/SimilarFace'
+  APIError:
+    type: object
+    description: Error information returned by the API
+    properties:
+      error:
+        $ref: '#/definitions/Error'
+  SimilarFace:
+    type: object
+    required:
+    - confidence
+    description: Response body for find similar face operation.
+    properties:
+      faceId:
+        type: string
+        format: uuid
+        description: FaceId of candidate face when find by faceIds. faceId is created by Face - Detect and will expire at the time specified by faceIdTimeToLive after the detection call
+      persistedFaceId:
+        type: string
+        format: uuid
+        description: PersistedFaceId of candidate face when find by faceListId. persistedFaceId in face list is persisted and will not expire. As showed in below response
+      confidence:
+        description: Similarity confidence of the candidate face. The higher confidence, the more similar. Range between [0,1].
+        $ref: '#/definitions/Confidence'
+  FindSimilarRequest:
+    type: object
+    required:
+    - faceId
+    description: Request body for find similar operation.
+    properties:
+      faceId:
+        type: string
+        format: uuid
+        description: FaceId of the query face. User needs to call Face - Detect first to get a valid faceId. Note that this faceId is not persisted and will expire at the time specified by faceIdTimeToLive after the detection call
+      faceListId:
+        type: string
+        description: An existing user-specified unique candidate face list, created in Face List - Create a Face List. Face list contains a set of persistedFaceIds which are persisted and will never expire. Parameter faceListId, largeFaceListId and faceIds should not be provided at the same time.
+        maxLength: 64
+        pattern: ^[a-z0-9-_]+$
+      largeFaceListId:
+        type: string
+        description: An existing user-specified unique candidate large face list, created in LargeFaceList - Create. Large face list contains a set of persistedFaceIds which are persisted and will never expire. Parameter faceListId, largeFaceListId and faceIds should not be provided at the same time.
+        maxLength: 64
+        pattern: ^[a-z0-9-_]+$
+      faceIds:
+        type: array
+        description: An array of candidate faceIds. All of them are created by Face - Detect and the faceIds will expire at the time specified by faceIdTimeToLive after the detection call. The number of faceIds is limited to 1000. Parameter faceListId, largeFaceListId and faceIds should not be provided at the same time.
+        maxItems: 1000
+        items:
+          type: string
+          format: uuid
+      maxNumOfCandidatesReturned:
+        type: integer
+        description: The number of top similar faces returned. The valid range is [1, 1000].
+        default: 20
+        minimum: 1
+        maximum: 1000
+      mode:
+        type: string
+        description: Similar face searching mode. It can be "matchPerson" or "matchFace".
+        default: matchPerson
+        x-nullable: false
+        x-ms-enum:
+          name: FindSimilarMatchMode
+          modelAsString: false
+        enum:
+        - matchPerson
+        - matchFace
+  Error:
+    type: object
+    description: Error body.
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+  Confidence:
+    description: A number ranging from 0 to 1 indicating a level of confidence associated with a property.
+    type: number
+    minimum: 0
+    maximum: 1
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/parameters/Endpoint'

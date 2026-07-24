@@ -1,0 +1,144 @@
+swagger: '2.0'
+info:
+  version: 2020-08-01-preview
+  title: Microsoft Azure AccessControlClient AccessConnector Identify API
+schemes:
+- https
+tags:
+- name: Identify
+paths:
+  /identify:
+    post:
+      description: '1-to-many identification to find the closest matches of the specific query person face from a person group, large person group, person directory dynamic person group or person directory personIds array.<br> For each face in the faceIds array, Face Identify will compute similarities between the query face and all the faces in the person group (given by personGroupId) or large person group (given by largePersonGroupId), and return candidate person(s) for that face ranked by similarity confidence. The person group/large person group should be trained to make it ready for identification. See more in [PersonGroup - Train](https://docs.microsoft.com/rest/api/faceapi/persongroup/train) and [LargePersonGroup - Train](https://docs.microsoft.com/rest/api/faceapi/largepersongroup/train).<br><br> <br>Remarks:<br>* The algorithm allows more than one face to be identified independently at the same request, but no more than 10 faces.<br>* Each person in the person group/large person group could have more than one face, but no more than 248 faces.<br>* Higher face image quality means better identification precision. Please consider high-quality faces: frontal, clear, and face size is 200x200 pixels (100 pixels between eyes) or bigger.<br>* Number of candidates returned is restricted by maxNumOfCandidatesReturned and confidenceThreshold. If no person is identified, the returned candidates will be an empty array.<br>* Try [Face - Find Similar](https://docs.microsoft.com/rest/api/faceapi/face/findsimilar) when you need to find similar faces from a face list/large face list instead of a person group/large person group.<br>* The ''recognitionModel'' associated with the query faces'' faceIds should be the same as the ''recognitionModel'' used by the target person group or large person group.<br>'
+      operationId: microsoftAzureFaceIdentify
+      parameters:
+      - name: body
+        description: Request body for identify operation.
+        in: body
+        required: true
+        x-ms-client-flatten: true
+        schema:
+          $ref: '#/definitions/IdentifyRequest'
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: A successful call returns the identified candidate person(s) for each query face.
+          schema:
+            $ref: '#/definitions/IdentifyResults'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/definitions/APIError'
+      x-ms-examples:
+        Identify example:
+          $ref: ./examples/Identify.json
+      summary: Microsoft Azure Post Identify
+      tags:
+      - Identify
+definitions:
+  IdentifyResults:
+    type: array
+    items:
+      $ref: '#/definitions/IdentifyResult'
+  IdentifyResult:
+    type: object
+    required:
+    - faceId
+    - candidates
+    description: Response body for identify face operation.
+    properties:
+      faceId:
+        type: string
+        format: uuid
+        description: FaceId of the query face
+      candidates:
+        type: array
+        description: Identified person candidates for that face (ranked by confidence). Array size should be no larger than input maxNumOfCandidatesReturned. If no person is identified, will return an empty array.
+        items:
+          $ref: '#/definitions/IdentifyCandidate'
+  APIError:
+    type: object
+    description: Error information returned by the API
+    properties:
+      error:
+        $ref: '#/definitions/Error'
+  IdentifyCandidate:
+    type: object
+    required:
+    - personId
+    - confidence
+    description: All possible faces that may qualify.
+    properties:
+      personId:
+        type: string
+        format: uuid
+        description: Id of candidate
+      confidence:
+        description: Confidence threshold of identification, used to judge whether one face belong to one person. The range of confidenceThreshold is [0, 1] (default specified by algorithm).
+        $ref: '#/definitions/Confidence'
+  IdentifyRequest:
+    type: object
+    required:
+    - faceIds
+    description: Request body for identify face operation.
+    properties:
+      faceIds:
+        type: array
+        description: Array of query faces faceIds, created by the Face - Detect. Each of the faces are identified independently. The valid number of faceIds is between [1, 10].
+        maxItems: 10
+        items:
+          type: string
+          format: uuid
+          x-nullable: false
+      personGroupId:
+        description: PersonGroupId of the target person group, created by PersonGroup - Create. Parameter personGroupId, largePersonGroupId, dynamicPersonGroupId, or personIds should not be provided at the same time.
+        type: string
+        maxLength: 64
+        pattern: ^[a-z0-9-_]+$
+      largePersonGroupId:
+        description: LargePersonGroupId of the target large person group, created by LargePersonGroup - Create. Parameter personGroupId, largePersonGroupId, dynamicPersonGroupId, or personIds should not be provided at the same time.
+        type: string
+        maxLength: 64
+        pattern: ^[a-z0-9-_]+$
+      dynamicPersonGroupId:
+        description: DynamicPersonGroupId of the target PersonDirectory dynamic person group to match against. Parameter personGroupId, largePersonGroupId, dynamicPersonGroupId, or personIds should not be provided at the same time.
+        type: string
+        maxLength: 64
+        pattern: ^[a-z0-9-_]+$
+      personIds:
+        description: Array of personIds created in PersonDirectory - PersonCreate. The valid number of personIds is between [1,30]. Providing a single '*' in the array identifies against all persons inside the PersonDirectory. Parameter personGroupId, largePersonGroupId, dynamicPersonGroupId, or personIds should not be provided at the same time.
+        type: array
+        maxItems: 30
+        items:
+          type: string
+          x-nullable: false
+      maxNumOfCandidatesReturned:
+        type: integer
+        description: The range of maxNumOfCandidatesReturned is between 1 and 100 (default is 1).
+        default: 1
+        minimum: 1
+        maximum: 100
+      confidenceThreshold:
+        description: Confidence threshold of identification, used to judge whether one face belong to one person. The range of confidenceThreshold is [0, 1] (default specified by algorithm).
+        $ref: '#/definitions/Confidence'
+  Error:
+    type: object
+    description: Error body.
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+  Confidence:
+    description: A number ranging from 0 to 1 indicating a level of confidence associated with a property.
+    type: number
+    minimum: 0
+    maximum: 1
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/parameters/Endpoint'

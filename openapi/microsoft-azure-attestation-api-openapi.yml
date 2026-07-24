@@ -1,0 +1,273 @@
+swagger: '2.0'
+info:
+  version: 2020-08-01-preview
+  title: Microsoft Azure AccessControlClient AccessConnector Attestation API
+schemes:
+- https
+tags:
+- name: Attestation
+paths:
+  /attest/OpenEnclave:
+    post:
+      tags:
+      - Attestation
+      summary: Microsoft Azure Attest To An Sgx Enclave
+      description: Processes an OpenEnclave report , producing an artifact. The type of artifact produced is dependent upon attestation policy.
+      operationId: microsoftAzureAttestationAttestopenenclave
+      parameters:
+      - $ref: '#/parameters/ApiVersionParameter'
+      - name: request
+        in: body
+        description: Request object containing the quote
+        required: true
+        schema:
+          $ref: '#/definitions/AttestOpenEnclaveRequest'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/AttestationResponse'
+        default:
+          description: Error response describing why the operation failed
+          schema:
+            $ref: '#/definitions/CloudError'
+      x-ms-examples:
+        Attest OpenEnclave:
+          $ref: ./examples/AttestOpenEnclave.json
+  /attest/SgxEnclave:
+    post:
+      tags:
+      - Attestation
+      summary: Microsoft Azure Attest To An Sgx Enclave
+      description: Processes an SGX enclave quote, producing an artifact. The type of artifact produced is dependent upon attestation policy.
+      operationId: microsoftAzureAttestationAttestsgxenclave
+      parameters:
+      - $ref: '#/parameters/ApiVersionParameter'
+      - name: request
+        in: body
+        description: Request object containing the quote
+        required: true
+        schema:
+          $ref: '#/definitions/AttestSgxEnclaveRequest'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/AttestationResponse'
+        default:
+          description: Error response describing why the operation failed
+          schema:
+            $ref: '#/definitions/CloudError'
+      x-ms-examples:
+        Attest SgxEnclave:
+          $ref: ./examples/AttestSgxEnclave.json
+  /attest/Tpm:
+    post:
+      tags:
+      - Attestation
+      summary: Microsoft Azure Attest A Virtualization Based Security Vbs Enclave
+      description: Processes attestation evidence from a VBS enclave, producing an attestation result. The attestation result produced is dependent upon the attestation policy.
+      operationId: microsoftAzureAttestationAttesttpm
+      consumes:
+      - application/json
+      parameters:
+      - $ref: '#/parameters/ApiVersionParameter'
+      - name: request
+        in: body
+        description: Request object
+        required: true
+        schema:
+          $ref: '#/definitions/TpmAttestationRequest'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/TpmAttestationResponse'
+        default:
+          description: Error response describing why the operation failed
+          schema:
+            $ref: '#/definitions/CloudError'
+      x-ms-examples:
+        Attest EdgeTpm:
+          $ref: ./examples/AttestVbsEnclave.json
+  /attest/SevSnpVm:
+    post:
+      tags:
+      - Attestation
+      summary: Microsoft Azure Attest To An Sev Snp Virtual Machine
+      description: Processes a SEV SNP Boot chain. The type of artifact produced is dependent upon attestation policy.
+      operationId: microsoftAzureAttestationAttestsevsnpvm
+      parameters:
+      - $ref: '#/parameters/ApiVersionParameter'
+      - name: request
+        in: body
+        description: Request object containing the quote
+        required: true
+        schema:
+          $ref: '#/definitions/AttestSevSnpVmRequest'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/AttestationResponse'
+        default:
+          description: Error response describing why the operation failed
+          schema:
+            $ref: '#/definitions/CloudError'
+      x-ms-examples:
+        Attest SevSnpVm:
+          $ref: ./examples/AttestSevSnpVm.json
+definitions:
+  InitTimeData:
+    type: object
+    description: Initialization time data are a conduit for any configuration information that is unknown when building the Trusted Execution Environment (TEE) and is defined at TEE launch time. This data can be used with confidential container or VM scenarios to capture configuration settings such as disk volume content, network configuration, etc.
+    properties:
+      data:
+        description: Initialization time data are passed into the Trusted Execution Environment (TEE) when it is created. For an Icelake SGX quote, the SHA256 hash of the InitTimeData must match the lower 32 bytes of the quote's "config id" attribute. For a SEV-SNP quote, the SHA256 hash of the InitTimeData must match the quote's "host data" attribute.
+        type: string
+        format: base64url
+      dataType:
+        description: The type of data contained within the "data" field
+        $ref: '#/definitions/DataType'
+  TpmAttestationResponse:
+    type: object
+    description: Attestation response for Trusted Platform Module (TPM) attestation.
+    properties:
+      data:
+        description: Protocol data containing attestation service response.
+        type: string
+        format: base64url
+  CloudError:
+    x-ms-external: true
+    properties:
+      error:
+        $ref: '#/definitions/CloudErrorBody'
+    description: An error response from Attestation.
+  AttestSevSnpVmRequest:
+    type: object
+    description: Attestation request for AMD SEV SNP Virtual Machine
+    properties:
+      report:
+        description: Hardware rooted report of the virtual machine being attested along with the signing certificate chain and optionally, additional endorsements
+        type: string
+      runtimeData:
+        description: Runtime data provided by the enclave at the time of report generation. The MAA will verify that the run time data is known to the attestation target.
+        $ref: '#/definitions/RuntimeData'
+      initTimeData:
+        description: Initialization data provided by the enclave at the time of report generation. The MAA will verify that the init time data is known to the attestation target.
+        $ref: '#/definitions/InitTimeData'
+      draftPolicyForAttestation:
+        description: Attest against the provided draft policy. Note that the resulting token cannot be validated.
+        type: string
+      nonce:
+        description: Nonce for incoming request - emitted in the generated attestation token
+        type: string
+  DataType:
+    description: Specifies the type of the data encoded contained within the "data" field of a "RuntimeData" or "InitTimeData" object
+    type: string
+    enum:
+    - Binary
+    - JSON
+    x-ms-enum:
+      name: DataType
+      modelAsString: true
+      values:
+      - value: Binary
+        description: The field's content should be treated as binary and not interpreted by MAA.
+      - value: JSON
+        description: The field's content should be treated as UTF-8 JSON text that may be further interpreted by MAA. Refer to RFC 8259 for a description of JSON serialization standards for interoperability.
+  TpmAttestationRequest:
+    type: object
+    description: Attestation request for Trusted Platform Module (TPM) attestation.
+    properties:
+      data:
+        description: Protocol data containing artifacts for attestation.
+        type: string
+        format: base64url
+  AttestationResponse:
+    type: object
+    description: The result of an attestation operation
+    properties:
+      token:
+        description: An RFC 7519 JSON Web Token, the body of which is an AttestationResult object.
+        $ref: '#/definitions/JsonWebToken'
+  CloudErrorBody:
+    x-ms-external: true
+    properties:
+      code:
+        type: string
+        description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+      message:
+        type: string
+        description: A message describing the error, intended to be suitable for displaying in a user interface.
+    description: An error response from Attestation.
+  AttestOpenEnclaveRequest:
+    type: object
+    description: Attestation request for Intel SGX enclaves
+    properties:
+      report:
+        description: OpenEnclave report from the enclave to be attested
+        type: string
+        format: base64url
+      runtimeData:
+        description: Runtime data provided by the enclave at the time of report generation. The MAA will verify that the first 32 bytes of the report_data field of the quote contains the SHA256 hash of the decoded "data" field of the runtime data.
+        $ref: '#/definitions/RuntimeData'
+      initTimeData:
+        description: Base64Url encoded "InitTime data". The MAA will verify that the init data was known to the enclave. Note that InitTimeData is invalid for CoffeeLake processors.
+        $ref: '#/definitions/InitTimeData'
+      draftPolicyForAttestation:
+        description: Attest against the provided draft policy. Note that the resulting token cannot be validated.
+        type: string
+      nonce:
+        description: Nonce for incoming request - emitted in the generated attestation token
+        type: string
+  AttestSgxEnclaveRequest:
+    type: object
+    description: Attestation request for Intel SGX enclaves
+    properties:
+      quote:
+        description: Quote of the enclave to be attested
+        type: string
+        format: base64url
+      runtimeData:
+        description: Runtime data provided by the enclave at the time of quote generation. The MAA will verify that the first 32 bytes of the report_data field of the quote contains the SHA256 hash of the decoded "data" field of the runtime data.
+        $ref: '#/definitions/RuntimeData'
+      initTimeData:
+        description: Initialization data provided when the enclave is created. MAA will verify that the init data was known to the enclave. Note that InitTimeData is invalid for CoffeeLake processors.
+        $ref: '#/definitions/InitTimeData'
+      draftPolicyForAttestation:
+        description: Attest against the provided draft policy. Note that the resulting token cannot be validated.
+        type: string
+      nonce:
+        description: Nonce for incoming request - emitted in the generated attestation token
+        type: string
+  JsonWebToken:
+    description: An RFC 7519 Json Web Token
+    type: string
+    pattern: '[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
+    externalDocs:
+      description: JSON Web Token RFC
+      url: https://tools.ietf.org/html/rfc7519
+  RuntimeData:
+    type: object
+    description: Runtime data are a conduit for any information defined by the Trusted Execution Environment (TEE) when actually running.
+    properties:
+      data:
+        description: Runtime data are generated by the Trusted Execution Environment (TEE). For an SGX quote (Coffeelake or Icelake), the SHA256 hash of the RuntimeData must match the lower 32 bytes of the quote's "report data" attribute. For a SEV-SNP quote, the SHA256 hash of the RuntimeData must match the quote's "report data" attribute.
+        type: string
+        format: base64url
+      dataType:
+        description: The type of data contained within the "data" field
+        $ref: '#/definitions/DataType'
+parameters:
+  ApiVersionParameter:
+    name: api-version
+    in: query
+    required: true
+    type: string
+    description: Client API version. Current version is 2022-09-01-preview
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/parameters/Endpoint'

@@ -1,0 +1,263 @@
+swagger: '2.0'
+info:
+  version: 2020-08-01-preview
+  title: Microsoft Azure AccessControlClient AccessConnector $Batch API
+schemes:
+- https
+tags:
+- name: $Batch
+paths:
+  /$batch:
+    post:
+      operationId: microsoftAzureQueryBatch
+      summary: Microsoft Azure Execute A Batch Of Analytics Queries
+      description: Executes a batch of Analytics queries for data. [Here](https://dev.loganalytics.io/documentation/Using-the-API) is an example for using POST with an Analytics query.
+      x-ms-examples:
+        metadataPost:
+          $ref: examples/batch-query-example.json
+      parameters:
+      - name: body
+        in: body
+        description: The batch request body
+        required: true
+        schema:
+          type: object
+          $ref: '#/definitions/batchRequest'
+      responses:
+        '200':
+          description: OK. The API call succeeded and the Analytics query result is in the response payload
+          schema:
+            $ref: '#/definitions/batchResponse'
+        default:
+          description: An error response object.
+          schema:
+            $ref: '#/definitions/errorResponse'
+      tags:
+      - $Batch
+definitions:
+  timespanParam:
+    description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+    type: string
+  workspacesParam:
+    description: Workspace names to include in cross-workspace queries.
+    type: array
+    items:
+      type: string
+  batchResponse:
+    type: object
+    description: Response to a batch query.
+    properties:
+      responses:
+        type: array
+        description: An array of responses corresponding to each individual request in a batch.
+        items:
+          $ref: '#/definitions/batchQueryResponse'
+  errorResponse:
+    title: Error details.
+    description: Contains details when the response code indicates an error.
+    type: object
+    properties:
+      error:
+        description: The error details.
+        $ref: '#/definitions/errorInfo'
+    required:
+    - error
+  errorInfo:
+    title: The code and message for an error.
+    type: object
+    properties:
+      code:
+        description: A machine readable error code.
+        type: string
+      message:
+        description: A human readable error message.
+        type: string
+      details:
+        description: error details.
+        type: array
+        items:
+          $ref: '#/definitions/errorDetail'
+      innererror:
+        description: Inner error details if they exist.
+        $ref: '#/definitions/errorInfo'
+      additionalProperties:
+        description: Additional properties that can be provided on the error info object
+        type: object
+    required:
+    - code
+    - message
+  table:
+    title: A query response table.
+    description: Contains the columns and rows for one table in a query response.
+    type: object
+    properties:
+      name:
+        description: The name of the table.
+        type: string
+      columns:
+        description: The list of columns in this table.
+        type: array
+        items:
+          $ref: '#/definitions/column'
+      rows:
+        description: The resulting rows from this query.
+        type: array
+        items:
+          type: array
+          items:
+            type: object
+    required:
+    - name
+    - columns
+    - rows
+  batchQueryRequest:
+    type: object
+    description: An single request in a batch.
+    properties:
+      id:
+        description: The error details.
+        type: string
+      headers:
+        type: object
+        additionalProperties:
+          type: string
+      body:
+        $ref: '#/definitions/queryBody'
+      path:
+        type: string
+        enum:
+        - /query
+      method:
+        type: string
+        enum:
+        - POST
+      workspace:
+        description: Workspace Id to be included in the query
+        type: string
+    required:
+    - workspace
+    - body
+    - id
+  batchQueryResults:
+    title: A query response for a single query in a batch.
+    description: Contains the tables, columns & rows resulting from a query.
+    type: object
+    properties:
+      tables:
+        description: The list of tables, columns and rows.
+        type: array
+        items:
+          $ref: '#/definitions/table'
+      statistics:
+        type: object
+        description: Statistics represented in JSON format.
+        properties: {}
+      render:
+        type: object
+        description: Visualization data in JSON format.
+        properties: {}
+      error:
+        $ref: '#/definitions/errorInfo'
+  logsColumnType:
+    type: string
+    description: The data type of this column.
+    enum:
+    - bool
+    - datetime
+    - dynamic
+    - int
+    - long
+    - real
+    - string
+    - guid
+    - decimal
+    - timespan
+    x-ms-enum:
+      name: logsColumnType
+      modelAsString: true
+  queryBody:
+    description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+    type: object
+    properties:
+      query:
+        description: The query to execute.
+        $ref: '#/definitions/queryParam'
+      timespan:
+        description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+        $ref: '#/definitions/timespanParam'
+      workspaces:
+        description: A list of workspaces that are included in the query.
+        $ref: '#/definitions/workspacesParam'
+    required:
+    - query
+  errorDetail:
+    title: Error details.
+    type: object
+    properties:
+      code:
+        description: The error's code.
+        type: string
+      message:
+        description: A human readable error message.
+        type: string
+      target:
+        description: Indicates which property in the request is responsible for the error.
+        type: string
+      value:
+        description: Indicates which value in 'target' is responsible for the error.
+        type: string
+      resources:
+        description: Indicates resources which were responsible for the error.
+        type: array
+        items:
+          type: string
+      additionalProperties:
+        description: Additional properties that can be provided on the error details object
+        type: object
+    required:
+    - code
+    - message
+  queryParam:
+    description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+    type: string
+  batchRequest:
+    type: object
+    description: An array of requests.
+    properties:
+      requests:
+        type: array
+        description: An single request in a batch.
+        items:
+          $ref: '#/definitions/batchQueryRequest'
+    required:
+    - requests
+  batchQueryResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      status:
+        type: integer
+      body:
+        type: object
+        $ref: '#/definitions/batchQueryResults'
+      headers:
+        type: object
+        additionalProperties:
+          type: string
+  column:
+    title: A table column.
+    description: A column in a table.
+    type: object
+    properties:
+      name:
+        description: The name of this column.
+        type: string
+      type:
+        description: The data type of this column.
+        $ref: '#/definitions/logsColumnType'
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/parameters/Endpoint'
