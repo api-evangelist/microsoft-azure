@@ -1,9 +1,7 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
   version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector AdminKeys API
-schemes:
-- https
+  title: Microsoft Azure AccessControlClient AccessConnector Admin Keys API
 tags:
 - name: AdminKeys
 paths:
@@ -19,20 +17,24 @@ paths:
       externalDocs:
         url: https://aka.ms/search-manage
       parameters:
-      - $ref: '#/parameters/ResourceGroupNameParameter'
-      - $ref: '#/parameters/SearchServiceNameParameter'
-      - $ref: '#/parameters/ClientRequestIdParameter'
-      - $ref: '#/parameters/ApiVersionParameter'
-      - $ref: '#/parameters/SubscriptionIdParameter'
+      - $ref: '#/components/parameters/ResourceGroupNameParameter'
+      - $ref: '#/components/parameters/SearchServiceNameParameter'
+      - $ref: '#/components/parameters/ClientRequestIdParameter'
+      - $ref: '#/components/parameters/ApiVersionParameter'
+      - $ref: '#/components/parameters/SubscriptionIdParameter'
       responses:
         '200':
           description: The admin keys were successfully retrieved and are in the response. You can use either the primary or secondary key as the value of the 'api-key' parameter in the Azure Cognitive Search Service REST API or SDK to perform any operations on your search service, including privileged operations. Privileged operations include managing resources like indexes and data sources as well as uploading, modifying, or deleting data in your indexes.
-          schema:
-            $ref: '#/definitions/AdminKeyResult'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminKeyResult'
         default:
           description: 'HTTP 404 (Not Found): The subscription, resource group, or search service could not be found. HTTP 409 (Conflict): The specified subscription is disabled.'
-          schema:
-            $ref: '#/definitions/CloudError'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudError'
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Search Searchservices Searchservicename Listadminkeys
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/regenerateAdminKey/{keyKind}
   : post:
@@ -46,15 +48,11 @@ paths:
       externalDocs:
         url: https://aka.ms/search-manage
       parameters:
-      - $ref: '#/parameters/ResourceGroupNameParameter'
-      - $ref: '#/parameters/SearchServiceNameParameter'
+      - $ref: '#/components/parameters/ResourceGroupNameParameter'
+      - $ref: '#/components/parameters/SearchServiceNameParameter'
       - name: keyKind
         in: path
         required: true
-        type: string
-        enum:
-        - primary
-        - secondary
         x-ms-enum:
           name: AdminKeyKind
           modelAsString: false
@@ -66,102 +64,117 @@ paths:
             name: Secondary
             description: The secondary API key for the search service.
         description: Specifies which key to regenerate. Valid values include 'primary' and 'secondary'.
-      - $ref: '#/parameters/ClientRequestIdParameter'
-      - $ref: '#/parameters/ApiVersionParameter'
-      - $ref: '#/parameters/SubscriptionIdParameter'
+        schema:
+          type: string
+          enum:
+          - primary
+          - secondary
+      - $ref: '#/components/parameters/ClientRequestIdParameter'
+      - $ref: '#/components/parameters/ApiVersionParameter'
+      - $ref: '#/components/parameters/SubscriptionIdParameter'
       responses:
         '200':
           description: The specified admin key was successfully regenerated. Both admin keys are included in the response, including the newly-regenerated key.
-          schema:
-            $ref: '#/definitions/AdminKeyResult'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminKeyResult'
         default:
           description: 'HTTP 404 (Not Found): The subscription, resource group, or search service could not be found. HTTP 409 (Conflict): The specified subscription is disabled.'
-          schema:
-            $ref: '#/definitions/CloudError'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudError'
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Search Searchservices Searchservicename Regenerateadminkey Keykind
-definitions:
-  CloudError:
-    type: object
-    properties:
-      error:
-        $ref: '#/definitions/CloudErrorBody'
-        description: Describes a particular API error with an error code and a message.
-      message:
+components:
+  schemas:
+    CloudError:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: Describes a particular API error with an error code and a message.
+        message:
+          type: string
+          description: A brief description of the error that hints at what went wrong (for details/debugging information refer to the 'error.message' property).
+      description: Contains information about an API error.
+      x-ms-external: true
+    AdminKeyResult:
+      properties:
+        primaryKey:
+          readOnly: true
+          type: string
+          description: The primary admin API key of the search service.
+        secondaryKey:
+          readOnly: true
+          type: string
+          description: The secondary admin API key of the search service.
+      description: Response containing the primary and secondary admin API keys for a given Azure Cognitive Search service.
+    CloudErrorBody:
+      type: object
+      description: Describes a particular API error with an error code and a message.
+      properties:
+        code:
+          type: string
+          description: An error code that describes the error condition more precisely than an HTTP status code. Can be used to programmatically handle specific error cases.
+        message:
+          type: string
+          description: A message that describes the error in detail and provides debugging information.
+        target:
+          type: string
+          description: The target of the particular error (for example, the name of the property in error).
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody'
+          description: Contains nested errors that are related to this error.
+      x-ms-external: true
+  parameters:
+    SearchServiceNameParameter:
+      name: searchServiceName
+      in: path
+      required: true
+      description: The name of the Azure Cognitive Search service associated with the specified resource group.
+      x-ms-parameter-location: method
+      schema:
         type: string
-        description: A brief description of the error that hints at what went wrong (for details/debugging information refer to the 'error.message' property).
-    description: Contains information about an API error.
-    x-ms-external: true
-  AdminKeyResult:
-    properties:
-      primaryKey:
-        readOnly: true
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: The API version to use for each request.
+      schema:
         type: string
-        description: The primary admin API key of the search service.
-      secondaryKey:
-        readOnly: true
+    ClientRequestIdParameter:
+      name: x-ms-client-request-id
+      x-ms-client-name: clientRequestId
+      in: header
+      required: false
+      description: A client-generated GUID value that identifies this request. If specified, this will be included in response information as a way to track the request.
+      x-ms-client-request-id: true
+      x-ms-parameter-grouping:
+        name: search-management-request-options
+      x-ms-parameter-location: method
+      schema:
         type: string
-        description: The secondary admin API key of the search service.
-    description: Response containing the primary and secondary admin API keys for a given Azure Cognitive Search service.
-  CloudErrorBody:
-    type: object
-    description: Describes a particular API error with an error code and a message.
-    properties:
-      code:
+        format: uuid
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: The unique identifier for a Microsoft Azure subscription. You can obtain this value from the Azure Resource Manager API or the portal.
+      schema:
         type: string
-        description: An error code that describes the error condition more precisely than an HTTP status code. Can be used to programmatically handle specific error cases.
-      message:
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: The name of the resource group within the current subscription. You can obtain this value from the Azure Resource Manager API or the portal.
+      x-ms-parameter-location: method
+      schema:
         type: string
-        description: A message that describes the error in detail and provides debugging information.
-      target:
-        type: string
-        description: The target of the particular error (for example, the name of the property in error).
-      details:
-        type: array
-        items:
-          $ref: '#/definitions/CloudErrorBody'
-        description: Contains nested errors that are related to this error.
-    x-ms-external: true
-parameters:
-  ClientRequestIdParameter:
-    name: x-ms-client-request-id
-    x-ms-client-name: clientRequestId
-    in: header
-    required: false
-    type: string
-    format: uuid
-    description: A client-generated GUID value that identifies this request. If specified, this will be included in response information as a way to track the request.
-    x-ms-client-request-id: true
-    x-ms-parameter-grouping:
-      name: search-management-request-options
-    x-ms-parameter-location: method
-  ResourceGroupNameParameter:
-    name: resourceGroupName
-    in: path
-    required: true
-    type: string
-    description: The name of the resource group within the current subscription. You can obtain this value from the Azure Resource Manager API or the portal.
-    x-ms-parameter-location: method
-  ApiVersionParameter:
-    name: api-version
-    in: query
-    required: true
-    type: string
-    description: The API version to use for each request.
-  SubscriptionIdParameter:
-    name: subscriptionId
-    in: path
-    required: true
-    type: string
-    description: The unique identifier for a Microsoft Azure subscription. You can obtain this value from the Azure Resource Manager API or the portal.
-  SearchServiceNameParameter:
-    name: searchServiceName
-    in: path
-    required: true
-    type: string
-    description: The name of the Azure Cognitive Search service associated with the specified resource group.
-    x-ms-parameter-location: method
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false
   parameters:
-  - $ref: '#/parameters/Endpoint'
+  - $ref: '#/components/parameters/Endpoint'

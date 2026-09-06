@@ -1,9 +1,7 @@
-swagger: '2.0'
+openapi: 3.2.0
 info:
   version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector :Analyze Conversations API
-schemes:
-- https
+  title: Microsoft Azure AccessControlClient AccessConnector :Analyze Conversations :Analyze Conversations API
 tags:
 - name: :Analyze Conversations
 paths:
@@ -13,29 +11,24 @@ paths:
       description: Analyzes the input conversation utterance.
       parameters:
       - $ref: common.json#/parameters/ApiVersionParameter
-      - description: A single conversational task to execute.
-        in: body
-        name: body
-        schema:
-          $ref: '#/definitions/AnalyzeConversationTask'
-        required: true
-      consumes:
-      - application/json
-      produces:
-      - application/json
       responses:
         '200':
           description: The conversation analysis response.
-          schema:
-            $ref: '#/definitions/AnalyzeConversationTaskResult'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeConversationTaskResult'
         default:
           description: Error response.
-          schema:
-            $ref: common.json#/definitions/ErrorResponse
           headers:
             x-ms-error-code:
               description: The error code for specific error that occurred.
-              type: string
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: common.json#/definitions/ErrorResponse
       x-ms-examples:
         Conversation project result:
           $ref: ./examples/conversations/SuccessfulAnalyzeConversations.json
@@ -46,33 +39,33 @@ paths:
       summary: Microsoft Azure Post :analyze Conversations
       tags:
       - :Analyze Conversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeConversationTask'
+        description: A single conversational task to execute.
+        required: true
   /analyze-conversations/jobs:
     post:
-      consumes:
-      - application/json
-      produces:
-      - application/json
       description: Submit a collection of conversations for analysis. Specify one or more unique tasks to be executed.
       operationId: microsoftAzureAnalyzeconversationSubmitjob
       summary: Microsoft Azure Submit Analysis Job For Conversations
       parameters:
       - $ref: common.json#/parameters/ApiVersionParameter
-      - description: The collection of conversations to analyze and one or more tasks to execute.
-        in: body
-        name: body
-        schema:
-          $ref: '#/definitions/AnalyzeConversationJobsInput'
-        required: true
       responses:
         '202':
           description: A successful call results with an Operation-Location header used to check the status of the analysis job.
           headers:
             Operation-Location:
-              type: string
+              schema:
+                type: string
         default:
           description: Error response.
-          schema:
-            $ref: common.json#/definitions/ErrorResponse
+          content:
+            application/json:
+              schema:
+                $ref: common.json#/definitions/ErrorResponse
       x-ms-examples:
         Successful Conversational PII Analysis Job Request:
           $ref: ./examples/conversations/SuccessfulConversationPIISubmit.json
@@ -91,10 +84,15 @@ paths:
       x-ms-long-running-operation: true
       tags:
       - :Analyze Conversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeConversationJobsInput'
+        description: The collection of conversations to analyze and one or more tasks to execute.
+        required: true
   /analyze-conversations/jobs/{jobId}:
     get:
-      produces:
-      - application/json
       description: Get the status of an analysis job. A job may consist of one or more tasks. Once all tasks are succeeded, the job will transition to the succeeded state and results will be available for each task.
       operationId: microsoftAzureAnalyzeconversationJobstatus
       summary: Microsoft Azure Get Analysis Status And Results
@@ -105,12 +103,16 @@ paths:
       responses:
         '200':
           description: Analysis job status and metadata.
-          schema:
-            $ref: '#/definitions/AnalyzeConversationJobState'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeConversationJobState'
         default:
           description: Error encountered.
-          schema:
-            $ref: common.json#/definitions/ErrorResponse
+          content:
+            application/json:
+              schema:
+                $ref: common.json#/definitions/ErrorResponse
       x-ms-examples:
         Successful Get Conversation PII Analysis Job Status Request:
           $ref: ./examples/conversations/SuccessfulConversationPIITaskStatusRequest.json
@@ -130,8 +132,6 @@ paths:
       - :Analyze Conversations
   /analyze-conversations/jobs/{jobId}:cancel:
     post:
-      produces:
-      - application/json
       description: Cancel a long-running Text Analysis conversations job.
       operationId: microsoftAzureAnalyzeconversationCanceljob
       summary: Microsoft Azure Cancel A Long Running Text Analysis Conversations Job
@@ -143,231 +143,240 @@ paths:
           description: Cancel Job request has been received.
           headers:
             Operation-Location:
-              type: string
+              schema:
+                type: string
         default:
           description: Unexpected error
-          schema:
-            $ref: common.json#/definitions/ErrorResponse
+          content:
+            application/json:
+              schema:
+                $ref: common.json#/definitions/ErrorResponse
       x-ms-examples:
         Successful Job Delete Request:
           $ref: ./examples/conversations/SuccessfulAnalyzeConversationsJobsCancelRequest.json
       x-ms-long-running-operation: true
       tags:
       - :Analyze Conversations
-definitions:
-  AnalyzeConversationJobsInput:
-    type: object
-    properties:
-      displayName:
-        description: Optional display name for the analysis job.
-        type: string
-      analysisInput:
-        $ref: '#/definitions/MultiLanguageConversationAnalysisInput'
-      tasks:
-        description: The set of tasks to execute on the input conversation.
-        type: array
-        items:
-          $ref: '#/definitions/AnalyzeConversationLROTask'
-    required:
-    - analysisInput
-    - tasks
-  AnalyzeConversationJobResult:
-    type: object
-    description: Container for results for all tasks in the conversation job.
-    discriminator: kind
-    properties:
-      kind:
-        $ref: '#/definitions/AnalyzeConversationResultsKind'
-    allOf:
-    - $ref: common.json#/definitions/TaskState
-    - $ref: common.json#/definitions/TaskIdentifier
-    required:
-    - kind
-  AnalyzeConversationTaskResultsKind:
-    type: string
-    description: Enumeration of supported conversational task results
-    enum:
-    - ConversationResult
-    x-ms-enum:
-      name: AnalyzeConversationTaskResultsKind
-      modelAsString: true
-  AnalyzeConversationJobStatistics:
-    description: Contains the statistics for the job submitted.
-    properties:
-      statistics:
-        $ref: '#/definitions/ConversationRequestStatistics'
-    type: object
-  AnalyzeConversationLROTaskKind:
-    type: string
-    description: Enumeration of supported analysis tasks on a collection of conversation.
-    enum:
-    - ConversationalPIITask
-    - ConversationalSummarizationTask
-    - CustomConversationalSummarizationTask
-    - ConversationalSentimentTask
-    x-ms-enum:
-      name: AnalyzeConversationLROTaskKind
-      modelAsString: true
-  AnalyzeConversationLROTask:
-    type: object
-    description: The base class for an long running conversation input task.
-    discriminator: kind
-    required:
-    - kind
-    properties:
-      kind:
-        $ref: '#/definitions/AnalyzeConversationLROTaskKind'
-    allOf:
-    - $ref: common.json#/definitions/TaskIdentifier
-  ConversationTasksState:
-    description: Contains the state for the tasks being executed as part of the analyze conversation job submitted.
-    properties:
-      tasks:
-        properties:
-          completed:
-            description: Count of tasks completed successfully.
-            type: integer
-            format: int32
-          failed:
-            description: Count of tasks that failed.
-            type: integer
-            format: int32
-          inProgress:
-            description: Count of tasks in progress currently.
-            type: integer
-            format: int32
-          total:
-            description: Total count of tasks submitted as part of the job.
-            type: integer
-            format: int32
+components:
+  schemas:
+    AnalyzeConversationJobState:
+      description: Contains the status of the analyze conversations job submitted along with related statistics.
+      allOf:
+      - $ref: common.json#/definitions/JobState
+      - $ref: '#/components/schemas/ConversationTasksState'
+      - $ref: '#/components/schemas/AnalyzeConversationJobStatistics'
+    Conversation:
+      type: object
+      description: A complete ordered set of utterances (spoken or written), by one or more speakers to be used for analysis.
+      discriminator:
+        propertyName: modality
+      required:
+      - id
+      - language
+      - modality
+      properties:
+        id:
+          description: Unique identifier for the conversation.
+          type: string
+        language:
+          description: The language of the conversation item in BCP-47 format.
+          type: string
+        modality:
+          $ref: '#/components/schemas/Modality'
+        domain:
+          $ref: '#/components/schemas/ConversationDomain'
+    AnalyzeConversationJobsInput:
+      type: object
+      properties:
+        displayName:
+          description: Optional display name for the analysis job.
+          type: string
+        analysisInput:
+          $ref: '#/components/schemas/MultiLanguageConversationAnalysisInput'
+        tasks:
+          description: The set of tasks to execute on the input conversation.
+          type: array
           items:
-            description: List of results from tasks (if available).
-            type: array
+            $ref: '#/components/schemas/AnalyzeConversationLROTask'
+      required:
+      - analysisInput
+      - tasks
+    AnalyzeConversationJobResult:
+      type: object
+      description: Container for results for all tasks in the conversation job.
+      discriminator:
+        propertyName: kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/AnalyzeConversationResultsKind'
+      allOf:
+      - $ref: common.json#/definitions/TaskState
+      - $ref: common.json#/definitions/TaskIdentifier
+      required:
+      - kind
+    AnalyzeConversationLROTask:
+      type: object
+      description: The base class for an long running conversation input task.
+      discriminator:
+        propertyName: kind
+      required:
+      - kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/AnalyzeConversationLROTaskKind'
+      allOf:
+      - $ref: common.json#/definitions/TaskIdentifier
+    ConversationRequestStatistics:
+      type: object
+      description: if showStats=true was specified in the request this field will contain information about the request payload.
+      required:
+      - conversationsCount
+      - validConversationsCount
+      - erroneousConversationsCount
+      properties:
+        conversationsCount:
+          type: integer
+          format: int32
+          description: Number of conversations submitted in the request.
+        validConversationsCount:
+          type: integer
+          format: int32
+          description: Number of conversations documents. This excludes empty, over-size limit or non-supported languages documents.
+        erroneousConversationsCount:
+          type: integer
+          format: int32
+          description: Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
+      allOf:
+      - $ref: common.json#/definitions/RequestStatistics
+    AnalyzeConversationTaskResultsKind:
+      type: string
+      description: Enumeration of supported conversational task results
+      enum:
+      - ConversationResult
+      x-ms-enum:
+        name: AnalyzeConversationTaskResultsKind
+        modelAsString: true
+    AnalyzeConversationLROTaskKind:
+      type: string
+      description: Enumeration of supported analysis tasks on a collection of conversation.
+      enum:
+      - ConversationalPIITask
+      - ConversationalSummarizationTask
+      - CustomConversationalSummarizationTask
+      - ConversationalSentimentTask
+      x-ms-enum:
+        name: AnalyzeConversationLROTaskKind
+        modelAsString: true
+    AnalyzeConversationResultsKind:
+      type: string
+      description: Enumeration of supported Conversation Analysis task results.
+      enum:
+      - ConversationalPIIResults
+      - ConversationalSummarizationResults
+      - CustomConversationalSummarizationResults
+      - ConversationalSentimentResults
+      x-ms-enum:
+        name: AnalyzeConversationResultsKind
+        modelAsString: true
+    AnalyzeConversationJobStatistics:
+      description: Contains the statistics for the job submitted.
+      properties:
+        statistics:
+          $ref: '#/components/schemas/ConversationRequestStatistics'
+      type: object
+    ConversationDomain:
+      type: string
+      description: Enumeration of supported conversational domains.
+      enum:
+      - finance
+      - healthcare
+      - generic
+      x-ms-enum:
+        name: ConversationDomain
+        modelAsString: true
+    AnalyzeConversationTaskResult:
+      type: object
+      description: The base class of a conversation task result.
+      discriminator:
+        propertyName: kind
+      required:
+      - kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/AnalyzeConversationTaskResultsKind'
+    AnalyzeConversationTask:
+      type: object
+      description: The base class of a conversation input task.
+      discriminator:
+        propertyName: kind
+      required:
+      - kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/AnalyzeConversationTaskKind'
+    AnalyzeConversationTaskKind:
+      type: string
+      description: Enumeration of supported Conversation tasks.
+      enum:
+      - Conversation
+      x-ms-enum:
+        name: AnalyzeConversationTaskKind
+        modelAsString: true
+    MultiLanguageConversationAnalysisInput:
+      type: object
+      required:
+      - conversations
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+    Modality:
+      type: string
+      description: Enumeration of supported conversational modalities.
+      enum:
+      - transcript
+      - text
+      x-ms-enum:
+        name: InputModality
+        modelAsString: true
+    ConversationTasksState:
+      description: Contains the state for the tasks being executed as part of the analyze conversation job submitted.
+      properties:
+        tasks:
+          properties:
+            completed:
+              description: Count of tasks completed successfully.
+              type: integer
+              format: int32
+            failed:
+              description: Count of tasks that failed.
+              type: integer
+              format: int32
+            inProgress:
+              description: Count of tasks in progress currently.
+              type: integer
+              format: int32
+            total:
+              description: Total count of tasks submitted as part of the job.
+              type: integer
+              format: int32
             items:
-              $ref: '#/definitions/AnalyzeConversationJobResult'
-        required:
-        - total
-        - completed
-        - failed
-        - inProgress
-        type: object
-    required:
-    - tasks
-    type: object
-  Conversation:
-    type: object
-    description: A complete ordered set of utterances (spoken or written), by one or more speakers to be used for analysis.
-    discriminator: modality
-    required:
-    - id
-    - language
-    - modality
-    properties:
-      id:
-        description: Unique identifier for the conversation.
-        type: string
-      language:
-        description: The language of the conversation item in BCP-47 format.
-        type: string
-      modality:
-        $ref: '#/definitions/Modality'
-      domain:
-        $ref: '#/definitions/ConversationDomain'
-  ConversationDomain:
-    type: string
-    description: Enumeration of supported conversational domains.
-    enum:
-    - finance
-    - healthcare
-    - generic
-    x-ms-enum:
-      name: ConversationDomain
-      modelAsString: true
-  MultiLanguageConversationAnalysisInput:
-    type: object
-    required:
-    - conversations
-    properties:
-      conversations:
-        type: array
-        items:
-          $ref: '#/definitions/Conversation'
-  AnalyzeConversationJobState:
-    description: Contains the status of the analyze conversations job submitted along with related statistics.
-    allOf:
-    - $ref: common.json#/definitions/JobState
-    - $ref: '#/definitions/ConversationTasksState'
-    - $ref: '#/definitions/AnalyzeConversationJobStatistics'
-  AnalyzeConversationResultsKind:
-    type: string
-    description: Enumeration of supported Conversation Analysis task results.
-    enum:
-    - ConversationalPIIResults
-    - ConversationalSummarizationResults
-    - CustomConversationalSummarizationResults
-    - ConversationalSentimentResults
-    x-ms-enum:
-      name: AnalyzeConversationResultsKind
-      modelAsString: true
-  AnalyzeConversationTask:
-    type: object
-    description: The base class of a conversation input task.
-    discriminator: kind
-    required:
-    - kind
-    properties:
-      kind:
-        $ref: '#/definitions/AnalyzeConversationTaskKind'
-  AnalyzeConversationTaskKind:
-    type: string
-    description: Enumeration of supported Conversation tasks.
-    enum:
-    - Conversation
-    x-ms-enum:
-      name: AnalyzeConversationTaskKind
-      modelAsString: true
-  Modality:
-    type: string
-    description: Enumeration of supported conversational modalities.
-    enum:
-    - transcript
-    - text
-    x-ms-enum:
-      name: InputModality
-      modelAsString: true
-  ConversationRequestStatistics:
-    type: object
-    description: if showStats=true was specified in the request this field will contain information about the request payload.
-    required:
-    - conversationsCount
-    - validConversationsCount
-    - erroneousConversationsCount
-    properties:
-      conversationsCount:
-        type: integer
-        format: int32
-        description: Number of conversations submitted in the request.
-      validConversationsCount:
-        type: integer
-        format: int32
-        description: Number of conversations documents. This excludes empty, over-size limit or non-supported languages documents.
-      erroneousConversationsCount:
-        type: integer
-        format: int32
-        description: Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
-    allOf:
-    - $ref: common.json#/definitions/RequestStatistics
-  AnalyzeConversationTaskResult:
-    type: object
-    description: The base class of a conversation task result.
-    discriminator: kind
-    required:
-    - kind
-    properties:
-      kind:
-        $ref: '#/definitions/AnalyzeConversationTaskResultsKind'
+              description: List of results from tasks (if available).
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyzeConversationJobResult'
+          required:
+          - total
+          - completed
+          - failed
+          - inProgress
+          type: object
+      required:
+      - tasks
+      type: object
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false
   parameters:
-  - $ref: '#/parameters/Endpoint'
+  - $ref: '#/components/parameters/Endpoint'
