@@ -1,0 +1,225 @@
+generated: '2026-09-06'
+method: derived
+source: >-
+  Entity graph derived from the URI hierarchy and $ref structure of the eight first-party contracts
+  under openapi/ (666 operations, 1,191 schema definitions), cross-checked against
+  https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview and
+  https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types
+provider: Microsoft Azure Cloud
+providerId: azure-cloud
+model:
+  shape: hierarchical-resource-tree
+  note: >-
+    Azure Resource Manager has no free-floating object graph. Every managed resource is a node on ONE
+    path-addressed tree, and the resource ID literally IS the path. Relationships are therefore
+    expressed two ways: containment, which is encoded in the URI, and cross-references, which are
+    encoded as a full resource ID string in a property. There are no short opaque ids and no id prefixes
+    of the Stripe kind.
+identifier:
+  format: >-
+    /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}
+  example: /subscriptions/{sub}/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1
+  properties:
+    - Case-insensitive on comparison but case-preserving on return.
+    - Globally unique; carries the full ancestry, so no separate parent pointer is needed.
+    - Child resources extend the same path (.../virtualMachines/vm1/extensions/ext1).
+  note: >-
+    Because the id encodes the whole hierarchy, an agent holding one resource ID can construct every
+    ancestor URI without another call — the single most useful structural property of this model.
+common_envelope:
+  name: Resource / TrackedResource
+  source: specification/common-types/resource-management/v3/types.json in Azure/azure-rest-api-specs
+  fields:
+    - name: id
+      description: Fully qualified resource ID. Read-only.
+    - name: name
+      description: Resource name (the last path segment). Read-only.
+    - name: type
+      description: 'Namespace/type, e.g. Microsoft.Compute/virtualMachines. Read-only.'
+    - name: location
+      description: Azure region. Required on tracked resources; immutable after create for most types.
+    - name: tags
+      description: Up to 50 string key/value pairs. The only free-form metadata surface.
+    - name: systemData
+      description: createdBy / createdAt / lastModifiedBy / lastModifiedAt. Read-only.
+    - name: properties
+      description: The type-specific payload. Everything that differs between resource types lives here.
+    - name: identity
+      description: Managed identity assignment (SystemAssigned / UserAssigned), where the type supports it.
+    - name: sku
+      description: Tier and capacity, where the type is sized.
+    - name: etag
+      description: Concurrency token, present on 49 network definitions and a handful elsewhere.
+  finding: >-
+    Every tracked resource across all eight contracts shares this envelope. A client can parse id, name,
+    type, location, tags and systemData for ANY Azure resource without knowing its type — a genuinely
+    unusual amount of cross-service uniformity, and the reason a single generic Resources_Get operation
+    can return any resource in the subscription.
+entities:
+  - name: Subscription
+    contract: openapi/azure-cloud-resource-manager-api-openapi.json
+    path: /subscriptions/{subscriptionId}
+    relationships:
+      - has_many: ResourceGroup
+        via: path containment
+      - has_many: ResourceProvider
+        via: registration
+  - name: ResourceGroup
+    contract: openapi/azure-cloud-resource-manager-api-openapi.json
+    operations:
+      - ResourceGroups_CreateOrUpdate
+      - ResourceGroups_Get
+      - ResourceGroups_List
+      - ResourceGroups_Delete
+      - ResourceGroups_ExportTemplate
+    relationships:
+      - belongs_to: Subscription
+        via: path containment
+      - has_many: Resource
+        via: path containment
+    note: >-
+      The deletion boundary. ResourceGroups_Delete removes every member resource and has no undo — see
+      conventions/azure-cloud-conventions.yml#reversibility.
+  - name: Resource
+    contract: openapi/azure-cloud-resource-manager-api-openapi.json
+    operations:
+      - Resources_CreateOrUpdate
+      - Resources_Get
+      - Resources_GetById
+      - Resources_List
+      - Resources_ListByResourceGroup
+      - Resources_Delete
+      - Resources_MoveResources
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - belongs_to: ResourceProvider
+        via: type field
+    note: The generic, type-agnostic view of any tracked resource. The typed contracts below are specializations.
+  - name: VirtualMachine
+    contract: openapi/azure-cloud-compute-api-openapi.json
+    operations:
+      - VirtualMachines_CreateOrUpdate
+      - VirtualMachines_Get
+      - VirtualMachines_List
+      - VirtualMachines_Delete
+      - VirtualMachines_Start
+      - VirtualMachines_PowerOff
+      - VirtualMachines_Deallocate
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - has_one: AvailabilitySet
+        via: properties.availabilitySet.id
+      - has_many: Disk
+        via: properties.storageProfile.dataDisks[].managedDisk.id
+      - has_one: Disk
+        via: properties.storageProfile.osDisk.managedDisk.id
+      - has_many: NetworkInterface
+        via: properties.networkProfile.networkInterfaces[].id
+      - has_one: VirtualMachineScaleSet
+        via: properties.virtualMachineScaleSet.id
+      - has_one: Image
+        via: properties.storageProfile.imageReference.id
+    note: >-
+      Every one of these is a cross-contract reference carried as a full resource ID string. The Disk
+      and NetworkInterface targets live in resource providers whose specs are NOT in this repo
+      (Microsoft.Compute/ComputeDisk and Microsoft.Network respectively for disks; the network contract
+      here covers virtual networks), so the graph deliberately points outside the harvested set rather
+      than pretending it closes.
+  - name: VirtualMachineScaleSet
+    contract: openapi/azure-cloud-compute-api-openapi.json
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - has_many: VirtualMachineScaleSetVM
+        via: path containment (.../virtualMachineScaleSets/{name}/virtualMachines/{instanceId})
+  - name: VirtualNetwork
+    contract: openapi/azure-cloud-virtual-network-api-openapi.json
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - has_many: Subnet
+        via: path containment (.../virtualNetworks/{vnet}/subnets/{subnet})
+      - has_many: VirtualNetworkPeering
+        via: path containment
+  - name: Vault
+    contract: openapi/azure-cloud-key-vault-api-openapi.json
+    operations:
+      - Vaults_CreateOrUpdate
+      - Vaults_Get
+      - Vaults_Delete
+      - Vaults_GetDeleted
+      - Vaults_PurgeDeleted
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - has_many: Secret
+        via: path containment (.../vaults/{vault}/secrets/{secret})
+      - has_many: Key
+        via: path containment (.../vaults/{vault}/keys/{key})
+    note: >-
+      Soft-delete gives Vault a second lifecycle state — a deleted vault is addressable through
+      Vaults_GetDeleted at a DIFFERENT path (.../locations/{loc}/deletedVaults/{name}) until purge.
+  - name: ServiceBusNamespace
+    contract: openapi/azure-cloud-service-bus-api-openapi.json
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - has_many: Queue
+        via: path containment
+      - has_many: Topic
+        via: path containment
+  - name: Topic
+    contract: openapi/azure-cloud-service-bus-api-openapi.json
+    relationships:
+      - belongs_to: ServiceBusNamespace
+        via: path containment
+      - has_many: Subscription
+        via: path containment (.../topics/{topic}/subscriptions/{sub})
+      - has_many: Rule
+        via: path containment (.../subscriptions/{sub}/rules/{rule})
+  - name: SqlServer
+    contract: openapi/azure-cloud-sql-databases-api-openapi.json
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - has_many: Database
+        via: path containment (.../servers/{server}/databases/{db})
+  - name: Database
+    contract: openapi/azure-cloud-sql-databases-api-openapi.json
+    relationships:
+      - belongs_to: SqlServer
+        via: path containment
+      - has_one: ElasticPool
+        via: properties.elasticPoolId
+  - name: IotHub
+    contract: openapi/azure-cloud-iot-hub-api-openapi.json
+    relationships:
+      - belongs_to: ResourceGroup
+        via: path containment
+      - has_many: EventHubConsumerGroup
+        via: path containment
+  - name: Deployment
+    contract: openapi/azure-cloud-azure-openai-api-openapi.json
+    path: /deployments/{deployment-id}
+    relationships:
+      - has_many: Completion
+        via: 'POST /deployments/{deployment-id}/completions'
+      - has_many: ChatCompletion
+        via: 'POST /deployments/{deployment-id}/chat/completions'
+      - has_many: Embedding
+        via: 'POST /deployments/{deployment-id}/embeddings'
+    note: >-
+      The one harvested contract that is NOT ARM-shaped. It is a data-plane API on
+      https://{endpoint}/openai with an api-key alternative to OAuth, and its objects are requests and
+      responses rather than tracked resources.
+list_result_pattern:
+  shape: '{ "value": [ ...items... ], "nextLink": "https://..." }'
+  count: >-
+    Seven of the eight contracts use it — 48 *ListResult definitions in Network, 23 in Compute, 14 in
+    Key Vault, 12 in Service Bus, 9 in IoT Hub, 6 in Resources, 1 in SQL. The exception is the Azure
+    OpenAI data-plane contract, which is not ARM-shaped and has none.
+  note: >-
+    A single generic list handler works across the whole Azure surface: read `value`, follow `nextLink`.
+    This uniformity is the strongest argument for treating Azure as one API rather than two hundred.

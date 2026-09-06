@@ -1,0 +1,128 @@
+generated: '2026-09-06'
+method: searched
+source: >-
+  https://learn.microsoft.com/en-us/azure/event-grid/system-topics (HTTP 200),
+  https://learn.microsoft.com/en-us/azure/event-grid/event-schema (HTTP 200),
+  https://learn.microsoft.com/en-us/azure/event-grid/cloud-event-schema (HTTP 200) and
+  https://learn.microsoft.com/en-us/azure/event-grid/webhook-event-delivery (HTTP 200) — all read
+  2026-09-06.
+provider: Microsoft Azure Cloud
+providerId: azure-cloud
+asyncapi_spec:
+  published: false
+  searched:
+    - https://github.com/Azure/azure-rest-api-specs (specification/eventgrid/)
+    - https://azure.microsoft.com/llms.txt
+    - Event Grid documentation
+  finding: >-
+    Azure publishes NO AsyncAPI document for any of its event surfaces. It publishes event payload
+    schemas — as JSON Schema fragments inside the Event Grid data-plane specs in
+    Azure/azure-rest-api-specs, and as prose tables per publisher on Learn — but nothing that describes
+    the channels, bindings and operations the way AsyncAPI does. Recorded as an honest absence, not
+    fabricated.
+webhooks:
+  mechanism: Azure Event Grid
+  docs: https://learn.microsoft.com/en-us/azure/event-grid/
+  transport: HTTPS POST to a subscriber-supplied endpoint
+  schemas:
+    - name: CloudEvents v1.0 (JSON)
+      standard: true
+      spec: https://github.com/cloudevents/spec/blob/v1.0/json-format.md
+      binding: https://github.com/cloudevents/spec/blob/v1.0/http-protocol-binding.md
+      docs: https://learn.microsoft.com/en-us/azure/event-grid/cloud-event-schema
+      note: >-
+        Native support. Microsoft is a listed collaborator on the CNCF CloudEvents specification. This
+        is the schema to prefer — it is the interoperable one.
+    - name: Event Grid event schema
+      standard: false
+      docs: https://learn.microsoft.com/en-us/azure/event-grid/event-schema
+      note: Azure's own proprietary envelope, predating the CloudEvents support.
+  endpoint_validation:
+    cloudevents:
+      method: HTTP OPTIONS
+      mechanism: >-
+        CloudEvents v1.0 abuse-protection handshake. Event Grid sends an OPTIONS request carrying
+        WebHook-Request-Origin; the subscriber must answer with WebHook-Allowed-Origin. When the
+        CloudEvents schema is selected this REPLACES the Event Grid validation event.
+      docs: https://learn.microsoft.com/en-us/azure/event-grid/webhook-event-delivery
+      caveat: >-
+        Microsoft is explicit that the handshake "doesn't aim to establish an authentication or
+        authorization context. It only serves to protect the sender from being told to push to a
+        destination that isn't expecting the traffic." A subscriber must still authorize the delivery
+        itself.
+    event_grid_schema:
+      method: SubscriptionValidationEvent
+      mechanism: >-
+        Event Grid POSTs a validation event with a validationCode the subscriber must echo back, or
+        alternatively a validationUrl that can be visited once manually.
+  delivery:
+    retry: Exponential backoff with a configurable retry policy and event time-to-live.
+    dead_lettering: Undeliverable events can be routed to a storage account.
+    ordering: Not guaranteed.
+    delivery_semantics: at-least-once
+    note: >-
+      At-least-once delivery with no ordering guarantee means a subscriber MUST be idempotent on its own
+      side. That obligation sits with the subscriber, and Azure documents it rather than solving it —
+      which is consistent with the absence of any idempotency mechanism on the request side (see
+      conventions/azure-cloud-conventions.yml#idempotency).
+  destinations:
+    - Webhook (HTTPS endpoint)
+    - Azure Functions
+    - Event Hubs
+    - Service Bus queue or topic
+    - Storage queue
+    - Relay hybrid connection
+    - Azure Automation runbook
+publishers:
+  note: >-
+    Azure services that emit events to an Event Grid system topic, listed verbatim from
+    https://learn.microsoft.com/en-us/azure/event-grid/system-topics on 2026-09-06. Each links to its own
+    event-schema page giving the event types and payload shape.
+  count: 26
+  sources:
+    - Azure API Center
+    - Azure API Management
+    - Azure App Configuration
+    - Azure App Service
+    - Azure Blob Storage
+    - Azure Cache for Redis
+    - Azure Communication Services
+    - Azure Container Registry
+    - Azure Data Box
+    - Azure Event Grid
+    - Azure Event Hubs
+    - Azure Health Data Services
+    - Azure IoT Hub
+    - Azure Key Vault
+    - Azure Kubernetes Service
+    - Azure Machine Learning
+    - Azure Maintenance Configuration
+    - Azure Maps
+    - Azure Media Services
+    - Azure Policy
+    - Azure Resource Notifications
+    - Azure resource groups
+    - Azure Service Bus
+    - Azure SignalR
+    - Azure Storage Actions
+    - Azure subscriptions
+management_contract:
+  note: >-
+    Event Grid topics, system topics and event subscriptions are themselves ARM resources, so the
+    subscription lifecycle is a REST surface. The Event Grid resource provider spec was not harvested in
+    this pass; the Service Bus contract in openapi/azure-cloud-service-bus-api-openapi.json is the
+    closest messaging contract in this repo.
+  reference: https://learn.microsoft.com/en-us/rest/api/eventgrid/
+other_event_surfaces:
+  - name: Azure Service Bus
+    kind: message-broker
+    protocol: AMQP 1.0
+    contract: openapi/azure-cloud-service-bus-api-openapi.json
+    note: Queues, topics and subscriptions as ARM resources; the data plane is AMQP, not HTTP webhooks.
+  - name: Azure Event Hubs
+    kind: streaming
+    protocol: AMQP 1.0 / Kafka protocol
+    note: Not harvested in this pass.
+  - name: Azure Web PubSub / SignalR
+    kind: websocket
+    note: Not harvested in this pass.
