@@ -1,7 +1,8 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Image Retrieval API
+  title: Microsoft Azure Computer Vision Client Image Retrieval API
+  description: The Computer Vision API provides state-of-the-art algorithms to process images and return information. For example, it can be used to extract text using Read OCR, caption an image using descriptive natural language, detect objects, people, and more.
+  version: 2023-04-01-preview
 tags:
 - name: ImageRetrieval
 paths:
@@ -88,36 +89,6 @@ paths:
         required: true
 components:
   schemas:
-    ErrorResponse:
-      description: Response returned when an error occurs.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponseDetails'
-    ImageUrl:
-      description: A JSON document with a URL pointing to the image that is to be analyzed.
-      required:
-      - url
-      type: object
-      properties:
-        url:
-          description: Publicly reachable URL of an image.
-          type: string
-    SingleVectorResultApiModel:
-      description: Results of image vectorization.
-      type: object
-      properties:
-        vector:
-          description: Vector of the image.
-          type: array
-          items:
-            format: float
-            type: number
-        modelVersion:
-          description: Model version.
-          type: string
     ErrorResponseDetails:
       description: Error info.
       required:
@@ -141,6 +112,25 @@ components:
             $ref: '#/components/schemas/ErrorResponseDetails'
         innererror:
           $ref: '#/components/schemas/ErrorResponseInnerError'
+    ImageUrl:
+      description: A JSON document with a URL pointing to the image that is to be analyzed.
+      required:
+      - url
+      type: object
+      properties:
+        url:
+          description: Publicly reachable URL of an image.
+          type: string
+    VectorizeTextRequestApiModel:
+      description: Model for VectorizeText request.
+      required:
+      - text
+      type: object
+      properties:
+        text:
+          description: Text for vectorization.
+          minLength: 1
+          type: string
     ErrorResponseInnerError:
       description: Detailed error.
       required:
@@ -156,15 +146,26 @@ components:
           type: string
         innererror:
           $ref: '#/components/schemas/ErrorResponseInnerError'
-    VectorizeTextRequestApiModel:
-      description: Model for VectorizeText request.
+    ErrorResponse:
+      description: Response returned when an error occurs.
       required:
-      - text
+      - error
       type: object
       properties:
-        text:
-          description: Text for vectorization.
-          minLength: 1
+        error:
+          $ref: '#/components/schemas/ErrorResponseDetails'
+    SingleVectorResultApiModel:
+      description: Results of image vectorization.
+      type: object
+      properties:
+        vector:
+          description: Vector of the image.
+          type: array
+          items:
+            format: float
+            type: number
+        modelVersion:
+          description: Model version.
           type: string
   parameters:
     ApiVersion:
@@ -175,8 +176,175 @@ components:
       x-ms-parameter-location: client
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+x-ms-paths:
+  /imageanalysis:segment?overload=stream:
+    post:
+      tags:
+      - Operations
+      summary: 'Analyze the input image. The request either contains an image stream with any content type [''image/*'', ''application/octet-stream''], or a JSON payload which includes a url property to be used to retrieve the image stream. An image stream of content type ''image/png'' is returned, where the pixel values depend on the analysis mode. The returned image has the same dimensions as the input image for modes: foregroundMatting. The returned image has the same aspect ratio and same dimensions as the input image up to a limit of 16 megapixels for modes: backgroundRemoval.'
+      operationId: ImageAnalysis_SegmentFromImageStream
+      consumes:
+      - application/octet-stream
+      - image/jpeg
+      - image/gif
+      - image/tiff
+      - image/bmp
+      - image/png
+      produces:
+      - image/png
+      - application/json
+      parameters:
+      - in: query
+        name: mode
+        description: The analysis mode requested.
+        type: string
+        enum:
+        - backgroundRemoval
+        - foregroundMatting
+        x-ms-enum:
+          name: SegmentationMode
+          modelAsString: true
+      - $ref: '#/components/parameters/ApiVersion'
+      - in: body
+        name: body
+        description: An image stream.
+        required: true
+        schema:
+          format: byte
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: string
+            format: binary
+        default:
+          description: Error
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            x-ms-error-code:
+              type: string
+      x-ms-examples:
+        Segment_BackgroundRemoval_FromImageStream:
+          $ref: ./examples/Segment_BackgroundRemoval_FromImageStream.json
+        Segment_ForegroundMatting_FromImageStream:
+          $ref: ./examples/Segment_ForegroundMatting_FromImageStream.json
+  /retrieval:vectorizeImage?overload=stream:
+    post:
+      tags:
+      - ImageRetrieval
+      summary: Return vector from an image.
+      operationId: ImageRetrieval_VectorizeImageFromImageStream
+      consumes:
+      - application/octet-stream
+      - image/jpeg
+      - image/gif
+      - image/tiff
+      - image/bmp
+      - image/png
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: model-version
+        description: Model version.
+        type: string
+      - $ref: '#/components/parameters/ApiVersion'
+      - in: body
+        name: body
+        description: An image stream.
+        required: true
+        schema:
+          format: byte
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/components/schemas/SingleVectorResultApiModel'
+        default:
+          description: Error
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            x-ms-error-code:
+              type: string
+      x-ms-examples:
+        ImageRetrieval_VectorizeImageFromImageStream:
+          $ref: ./examples/ImageRetrieval_VectorizeImageFromImageStream.json
+  /imageanalysis:analyze?overload=stream:
+    post:
+      tags:
+      - Operations
+      summary: Analyze the input image. The request either contains image stream with any content type ['image/*', 'application/octet-stream'], or a JSON payload which includes an url property to be used to retrieve the image stream.
+      operationId: ImageAnalysis_AnalyzeFromImageStream
+      consumes:
+      - application/octet-stream
+      - image/jpeg
+      - image/gif
+      - image/tiff
+      - image/bmp
+      - image/png
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: features
+        description: 'The visual features requested: tags, objects, caption, denseCaptions, read, smartCrops, people. This parameter needs to be specified if the parameter "model-name" is not specified.'
+        type: array
+        items:
+          enum:
+          - tags
+          - caption
+          - denseCaptions
+          - objects
+          - read
+          - smartCrops
+          - people
+          type: string
+          x-ms-enum:
+            name: VisualFeature
+            modelAsString: true
+        collectionFormat: csv
+      - in: query
+        name: model-name
+        description: The name of the custom trained model. This parameter needs to be specified if the parameter "features" is not specified.
+        type: string
+      - in: query
+        name: language
+        description: The desired language for output generation. If this parameter is not specified, the default value is "en". See https://aka.ms/cv-languages for a list of supported languages.
+        type: string
+        default: en
+      - in: query
+        name: smartcrops-aspect-ratios
+        description: A list of aspect ratios to use for smartCrops feature. Aspect ratios are calculated by dividing the target crop width by the height. Supported values are between 0.75 and 1.8 (inclusive). Multiple values should be comma-separated. If this parameter is not specified, the service will return one crop suggestion with an aspect ratio it sees fit between 0.5 and 2.0 (inclusive).
+        type: string
+      - in: query
+        name: gender-neutral-caption
+        description: Boolean flag for enabling gender-neutral captioning for caption and denseCaptions features. If this parameter is not specified, the default value is "false".
+        type: boolean
+        default: false
+      - $ref: '#/components/parameters/ApiVersion'
+      - in: body
+        name: body
+        description: An image stream.
+        required: true
+        schema:
+          format: byte
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/components/schemas/ImageAnalysisResult'
+        default:
+          description: Error
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            x-ms-error-code:
+              type: string
+      x-ms-examples:
+        AnalyzeImageFromImageStream_CustomModel:
+          $ref: ./examples/AnalyzeImageFromImageStream_CustomModel.json

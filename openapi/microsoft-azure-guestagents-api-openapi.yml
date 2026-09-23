@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Guest Agents API
+  title: Microsoft Azure Guest Agents API
+  version: '1.0'
+  description: 'Operations tagged GuestAgents across 2 of this provider''s published API definitions: azure-arc-vmware-management-service-api-openapi-original.yml, scvmm-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: GuestAgents
 paths:
@@ -140,6 +146,8 @@ paths:
               schema:
                 $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorResponse
       x-ms-long-running-operation: true
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachines/{virtualMachineName}/guestAgents
   : get:
       tags:
@@ -175,6 +183,8 @@ paths:
                 $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorResponse
       x-ms-pageable:
         nextLinkName: nextLink
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/virtualMachines/{virtualMachineName}/guestAgents/{guestAgentName}
   : put:
       tags:
@@ -306,6 +316,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-ms-long-running-operation: true
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ScVmm/virtualMachines/{virtualMachineName}/guestAgents
   : get:
       tags:
@@ -341,15 +353,10 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-ms-pageable:
         nextLinkName: nextLink
+    servers:
+    - url: https://management.azure.com
 components:
   schemas:
-    ErrorResponse:
-      description: Error response.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDefinition'
-          description: The error details.
     GuestAgentProperties:
       description: Describes the properties of a Virtual Machine Guest Agent.
       type: object
@@ -392,6 +399,37 @@ components:
           $ref: '#/components/schemas/ResourceProvisioningState'
           description: Gets the provisioning state.
           readOnly: true
+    ProvisioningAction:
+      description: Defines the different types of operations for guest agent.
+      enum:
+      - install
+      - uninstall
+      - repair
+      type: string
+      x-ms-enum:
+        modelAsString: true
+        name: ProvisioningAction
+    GuestAgent:
+      description: Defines the GuestAgent.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Resource properties.
+          $ref: '#/components/schemas/GuestAgentProperties'
+      x-ms-azure-resource: true
+    HttpProxyConfiguration:
+      description: HTTP Proxy configuration for the VM.
+      type: object
+      properties:
+        httpsProxy:
+          description: Gets or sets httpsProxy url.
+          type: string
     ResourceStatus:
       description: The resource status information.
       type: object
@@ -421,55 +459,6 @@ components:
           type: string
           format: date-time
           readOnly: true
-    GuestAgentList:
-      description: List of GuestAgent.
-      type: object
-      properties:
-        nextLink:
-          description: Url to follow for getting next page of GuestAgent.
-          type: string
-        value:
-          description: Array of GuestAgent
-          type: array
-          items:
-            $ref: '#/components/schemas/GuestAgent'
-      required:
-      - value
-    GuestAgent_2:
-      description: Defines the GuestAgent.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
-        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Resource properties.
-          $ref: '#/components/schemas/GuestAgentProperties_2'
-      x-ms-azure-resource: true
-    HttpProxyConfiguration:
-      description: HTTP Proxy configuration for the VM.
-      type: object
-      properties:
-        httpsProxy:
-          description: Gets or sets httpsProxy url.
-          type: string
-    GuestAgent:
-      description: Defines the GuestAgent.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Resource properties.
-          $ref: '#/components/schemas/GuestAgentProperties'
-      x-ms-azure-resource: true
     ResourceProvisioningState:
       type: string
       description: The current deployment state of resource.
@@ -485,35 +474,6 @@ components:
       x-ms-enum:
         name: ProvisioningState
         modelAsString: true
-    ProvisioningAction:
-      description: Defines the different types of operations for guest agent.
-      enum:
-      - install
-      - uninstall
-      - repair
-      type: string
-      x-ms-enum:
-        modelAsString: true
-        name: ProvisioningAction
-    ErrorDefinition:
-      description: Error definition.
-      type: object
-      properties:
-        code:
-          description: Service specific error code which serves as the substatus for the HTTP error code.
-          type: string
-          readOnly: true
-        message:
-          description: Description of the error.
-          type: string
-          readOnly: true
-        details:
-          description: Internal error details.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDefinition'
-          x-ms-identifiers: []
-          readOnly: true
     GuestCredential:
       description: Username / Password Credentials to connect to guest.
       type: object
@@ -528,6 +488,20 @@ components:
           - create
           - update
           x-ms-secret: true
+    GuestAgentList:
+      description: List of GuestAgent.
+      type: object
+      properties:
+        nextLink:
+          description: Url to follow for getting next page of GuestAgent.
+          type: string
+        value:
+          description: Array of GuestAgent
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestAgent'
+      required:
+      - value
     GuestAgentProperties_2:
       description: Defines the resource properties.
       type: object
@@ -558,40 +532,51 @@ components:
           description: Gets or sets the provisioning state.
           type: string
           readOnly: true
+    GuestAgent_2:
+      description: Defines the GuestAgent.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
+        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Resource properties.
+          $ref: '#/components/schemas/GuestAgentProperties_2'
+      x-ms-azure-resource: true
+    ErrorDefinition:
+      description: Error definition.
+      type: object
+      properties:
+        code:
+          description: Service specific error code which serves as the substatus for the HTTP error code.
+          type: string
+          readOnly: true
+        message:
+          description: Description of the error.
+          type: string
+          readOnly: true
+        details:
+          description: Internal error details.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDefinition'
+          x-ms-identifiers: []
+          readOnly: true
+    ErrorResponse:
+      description: Error response.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDefinition'
+          description: The error details.
   parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: The API version to be used with the HTTP request (e.g. YYYY-MM-DD).
-      schema:
-        type: string
     api-version:
       in: query
       name: api-version
       description: Client Api Version.
-      required: true
-      schema:
-        type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-      schema:
-        type: string
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      description: The name of the resource group.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionId:
-      in: path
-      name: subscriptionId
-      description: The Subscription ID.
       required: true
       schema:
         type: string
@@ -603,6 +588,47 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
+    subscriptionId:
+      in: path
+      name: subscriptionId
+      description: The Subscription ID.
+      required: true
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: The API version to be used with the HTTP request (e.g. YYYY-MM-DD).
+      schema:
+        type: string
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: The name of the resource group.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow.
+x-refined-from:
+- azure-arc-vmware-management-service-api-openapi-original.yml
+- scvmm-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

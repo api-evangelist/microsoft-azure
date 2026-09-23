@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Networks API
+  title: Microsoft Azure SeaBreezeManagementClient Networks API
+  description: APIs to deploy and manage resources to SeaBreeze.
+  version: 2018-07-01-preview
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Networks
 paths:
@@ -12,7 +18,10 @@ paths:
         Network_Create:
           $ref: ./examples/NetworkCreateOrUpdate.json
       summary: Microsoft Azure Creates Or Updates A Network Resource
-      description: Creates a network resource with the specified name and description. If a network with the same name already exists, then its description is updated to the one indicated in this request.<br><br>Use network resources to create private network and configure public connectivity for services within your application. <br>
+      description: 'Creates a network resource with the specified name and description. If a network with the same name already exists, then its description is updated to the one indicated in this request.
+
+
+        Use network resources to create private network and configure public connectivity for services within your application.'
       parameters:
       - $ref: '#/components/parameters/subscriptionIdRequiredPathParam'
       - $ref: '#/components/parameters/api-versionRequiredQueryParam'
@@ -46,7 +55,7 @@ paths:
         NetworkGet:
           $ref: ./examples/NetworkGet.json
       summary: Microsoft Azure Gets The Network Resource
-      description: Gets the information about the network resource with a given name. This information includes the network description and other runtime information.<br>
+      description: Gets the information about the network resource with a given name. This information includes the network description and other runtime information.
       parameters:
       - $ref: '#/components/parameters/subscriptionIdRequiredPathParam'
       - $ref: '#/components/parameters/api-versionRequiredQueryParam'
@@ -99,7 +108,7 @@ paths:
         NetworksList:
           $ref: ./examples/NetworksByResourceGroup.json
       summary: Microsoft Azure Gets All The Network Resources In A Given Resource Group
-      description: Gets the information about all network resources in a given resource group. The information includes the network description and other runtime properties.<br>
+      description: Gets the information about all network resources in a given resource group. The information includes the network description and other runtime properties.
       parameters:
       - $ref: '#/components/parameters/subscriptionIdRequiredPathParam'
       - $ref: '#/components/parameters/api-versionRequiredQueryParam'
@@ -151,17 +160,6 @@ paths:
         nextLinkName: nextLink
 components:
   schemas:
-    NetworkResourceDescription:
-      description: This type describes a network resource.
-      allOf:
-      - $ref: '#/components/schemas/TrackedResource'
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/NetworkResourceProperties'
-          description: Describes properties of a network resource.
-      required:
-      - properties
     NetworkResourceDescriptionList:
       description: A pageable list of network resources.
       type: object
@@ -174,6 +172,25 @@ components:
         nextLink:
           type: string
           description: URI to fetch the next page of the list.
+    Layer4IngressConfig:
+      description: Describes the layer4 configuration for public connectivity for this network.
+      type: object
+      properties:
+        name:
+          type: string
+          description: Layer4 ingress config name.
+        publicPort:
+          type: integer
+          description: Specifies the public port at which the service endpoint below needs to be exposed.
+        applicationName:
+          type: string
+          description: The application name which contains the service to be exposed.
+        serviceName:
+          type: string
+          description: The service whose endpoint needs to be exposed at the public port.
+        endpointName:
+          type: string
+          description: The service endpoint that needs to be exposed.
     NetworkProperties:
       description: Describes a network.
       type: object
@@ -189,39 +206,21 @@ components:
           description: Configuration for public connectivity for this network.
       required:
       - addressPrefix
-    ErrorDetailsModel:
-      description: Error model details information
+    ErrorModel:
       properties:
-        code:
-          type: string
-        message:
-          type: string
-          description: Error message.
+        error:
+          $ref: '#/components/schemas/ErrorErrorModel'
+          description: Error model information
+      description: The error details.
       required:
-      - code
-      - message
-    TrackedResource:
-      description: The resource model definition for Azure Resource Manager tracked top-level resource.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
+      - error
+    ProvisionedResourceProperties:
+      description: Describes common properties of a provisioned resource.
       properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          x-ms-mutability:
-          - read
-          - create
-          - update
-          description: Resource tags.
-        location:
+        provisioningState:
           type: string
-          x-ms-mutability:
-          - read
-          - create
-          description: The geo-location where the resource lives
-      required:
-      - location
+          description: State of the resource.
+          readOnly: true
     IngressConfig:
       description: Describes public connectivity configuration for the network.
       type: object
@@ -243,28 +242,28 @@ components:
           type: string
           readOnly: true
           description: The public IP address for reaching this network.
-    NetworkResourceProperties:
-      description: Describes properties of a network resource.
+    NetworkResourceDescription:
+      description: This type describes a network resource.
       allOf:
-      - $ref: '#/components/schemas/ProvisionedResourceProperties'
-      - $ref: '#/components/schemas/NetworkProperties'
-    ErrorErrorModel:
-      description: Error model information
+      - $ref: '#/components/schemas/TrackedResource'
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/NetworkResourceProperties'
+          description: Describes properties of a network resource.
+      required:
+      - properties
+    ErrorDetailsModel:
+      description: Error model details information
       properties:
         code:
           type: string
         message:
           type: string
           description: Error message.
-        innerError:
-          type: string
-        details:
-          type: array
-          description: List of error message details.
-          items:
-            $ref: '#/components/schemas/ErrorDetailsModel'
       required:
       - code
+      - message
     Resource:
       description: The resource model definition for Azure Resource Manager resource.
       properties:
@@ -293,40 +292,50 @@ components:
           - create
           description: The geo-location where the resource lives
       x-ms-azure-resource: true
-    ProvisionedResourceProperties:
-      description: Describes common properties of a provisioned resource.
+    TrackedResource:
+      description: The resource model definition for Azure Resource Manager tracked top-level resource.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
       properties:
-        provisioningState:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          x-ms-mutability:
+          - read
+          - create
+          - update
+          description: Resource tags.
+        location:
           type: string
-          description: State of the resource.
-          readOnly: true
-    Layer4IngressConfig:
-      description: Describes the layer4 configuration for public connectivity for this network.
-      type: object
-      properties:
-        name:
-          type: string
-          description: Layer4 ingress config name.
-        publicPort:
-          type: integer
-          description: Specifies the public port at which the service endpoint below needs to be exposed.
-        applicationName:
-          type: string
-          description: The application name which contains the service to be exposed.
-        serviceName:
-          type: string
-          description: The service whose endpoint needs to be exposed at the public port.
-        endpointName:
-          type: string
-          description: The service endpoint that needs to be exposed.
-    ErrorModel:
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorErrorModel'
-          description: Error model information
-      description: The error details.
+          x-ms-mutability:
+          - read
+          - create
+          description: The geo-location where the resource lives
       required:
-      - error
+      - location
+    ErrorErrorModel:
+      description: Error model information
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: Error message.
+        innerError:
+          type: string
+        details:
+          type: array
+          description: List of error message details.
+          items:
+            $ref: '#/components/schemas/ErrorDetailsModel'
+      required:
+      - code
+    NetworkResourceProperties:
+      description: Describes properties of a network resource.
+      allOf:
+      - $ref: '#/components/schemas/ProvisionedResourceProperties'
+      - $ref: '#/components/schemas/NetworkProperties'
   parameters:
     ResourceGroupNameRequiredPathParam:
       name: resourceGroupName
@@ -334,13 +343,6 @@ components:
       description: Azure resource group name
       required: true
       x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdRequiredPathParam:
-      name: subscriptionId
-      in: path
-      description: The customer subscription identifier
-      required: true
       schema:
         type: string
     NetworkResourceDescriptionRequiredBodyParam:
@@ -351,6 +353,13 @@ components:
       x-ms-parameter-location: method
       schema:
         $ref: '#/components/schemas/NetworkResourceDescription'
+    subscriptionIdRequiredPathParam:
+      name: subscriptionId
+      in: path
+      description: The customer subscription identifier
+      required: true
+      schema:
+        type: string
     api-versionRequiredQueryParam:
       name: api-version
       in: query
@@ -376,8 +385,12 @@ components:
       description: The identity of the network.
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

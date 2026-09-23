@@ -1,7 +1,8 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector App API
+  version: 2023-01-18-preview
+  title: Microsoft Azure ConfidentialLedgerClient App API
+  description: The ConfidentialLedgerClient writes and retrieves ledger entries against the Confidential Ledger service.
 tags:
 - name: App
 paths:
@@ -92,7 +93,7 @@ paths:
       x-ms-pageable:
         itemName: collections
         nextLinkName: nextLink
-      summary: Microsoft Azure Retrieves A List Of Collection Ids Present In The Confidential Ledger
+      summary: Microsoft Azure Retrieves A List Of Collection Ids Present In The Confidential…
       description: Collection ids are user-created collections of ledger entries
       parameters:
       - $ref: common.json#/parameters/ApiVersionParameter
@@ -185,7 +186,7 @@ paths:
       x-ms-examples:
         GetLedgerEntry:
           $ref: ./examples/ledger/GetLedgerEntry.json
-      summary: Microsoft Azure Gets The Ledger Entry At The Specified Transaction Id A Collection Id May Optionally Be Specified To Indicate The Collection From Which To Fetch The Value
+      summary: Microsoft Azure Gets The Ledger Entry At The Specified Transaction Id A…
       description: To return older ledger entries, the relevant sections of the ledger must be read from disk and validated. To prevent blocking within the enclave, the response will indicate whether the entry is ready and part of the response, or if the loading is still ongoing.
       parameters:
       - $ref: common.json#/parameters/ApiVersionParameter
@@ -212,7 +213,7 @@ paths:
       x-ms-examples:
         GetReceipt:
           $ref: ./examples/ledger/GetReceipt.json
-      summary: Microsoft Azure Gets A Receipt Certifying Ledger Contents At A Particular Transaction Id
+      summary: Microsoft Azure Gets A Receipt Certifying Ledger Contents At A Particular…
       parameters:
       - $ref: common.json#/parameters/ApiVersionParameter
       - $ref: '#/components/parameters/TransactionIdParameter'
@@ -358,97 +359,7 @@ paths:
       tags:
       - App
 components:
-  parameters:
-    UserDetailsParameter:
-      name: userDetails
-      description: Details about a Confidential Ledger user.
-      in: body
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/LedgerUser'
-    TransactionIdParameter:
-      name: transactionId
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: Identifies a write transaction.
-      schema:
-        type: string
-    TransactionIdToParameter:
-      name: toTransactionId
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      description: Specify the last transaction ID in a range.
-      schema:
-        type: string
-    TransactionIdFromParameter:
-      name: fromTransactionId
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      description: Specify the first transaction ID in a range.
-      schema:
-        type: string
-    UserIdParameter:
-      name: userId
-      in: path
-      required: true
-      description: The user id, either an AAD object ID or certificate fingerprint.
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    CollectionIdParameter:
-      name: collectionId
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      description: The collection id.
-      schema:
-        type: string
   schemas:
-    LedgerQueryResult:
-      description: The result of querying for a ledger entry from an older transaction id. The ledger entry is available in the response only if the returned state is Ready.
-      required:
-      - state
-      properties:
-        state:
-          $ref: '#/components/schemas/LedgerQueryState'
-        entry:
-          description: The ledger entry found as a result of the query. This is only available if the query is in Ready state.
-          $ref: '#/components/schemas/LedgerEntry'
-      type: object
-    UserId:
-      description: Identifier for the user. This must either be an AAD object id or a certificate fingerprint.
-      type: string
-    ReceiptLeafComponents:
-      properties:
-        claimsDigest:
-          type: string
-        commitEvidence:
-          type: string
-        writeSetDigest:
-          type: string
-      type: object
-    LedgerEntryClaim:
-      description: An application claim derived from ledger entry data.
-      required:
-      - protocol
-      properties:
-        collectionId:
-          description: Identifier of a collection.
-          type: string
-        contents:
-          description: Contents of a ledger entry.
-          type: string
-        secretKey:
-          type: string
-          description: Base64-encoded secret key.
-        protocol:
-          $ref: '#/components/schemas/ApplicationClaimProtocol'
-      type: object
     ApplicationClaimProtocol:
       type: string
       description: Represents the protocol to be used to compute the digest of a claim from the given claim data.
@@ -457,44 +368,34 @@ components:
       x-ms-enum:
         name: ApplicationClaimProtocol
         modelAsString: true
-    Collection:
-      description: Identifier for collections.
+    LedgerEntry:
+      description: An entry in the ledger.
       required:
-      - collectionId
+      - contents
       properties:
+        contents:
+          type: string
+          description: Contents of the ledger entry.
         collectionId:
           type: string
+          readOnly: true
+        transactionId:
+          $ref: '#/components/schemas/TransactionId'
+          readOnly: true
       type: object
-    LedgerWriteResult:
-      description: Returned as a result of a write to the Confidential Ledger, the transaction id in the response indicates when the write will become durable.
+    Constitution:
+      description: The governance script for the application.
       required:
-      - collectionId
+      - digest
+      - script
       properties:
-        collectionId:
+        digest:
+          description: SHA256 digest of the constitution script.
+          type: string
+        script:
+          description: Contents of the constitution.
           type: string
       type: object
-    ConsortiumMember:
-      description: Describes a member of the consortium.
-      required:
-      - certificate
-      - id
-      properties:
-        certificate:
-          type: string
-          description: PEM-encoded certificate associated with the member.
-        id:
-          description: Identifier assigned to the member.
-          $ref: '#/components/schemas/EntityId'
-      type: object
-    ApplicationClaims:
-      description: List of application claims.
-      type: array
-      items:
-        $ref: '#/components/schemas/ApplicationClaim'
-    ReceiptElementArray:
-      items:
-        $ref: '#/components/schemas/ReceiptElement'
-      type: array
     PagedLedgerEntries:
       description: Paginated ledger entries returned in response to a query.
       type: object
@@ -509,20 +410,6 @@ components:
           type: string
         entries:
           $ref: '#/components/schemas/LedgerEntries'
-    EnclaveQuotes:
-      description: Dictionary of enclave quotes, indexed by node id.
-      additionalProperties:
-        $ref: '#/components/schemas/EnclaveQuote'
-      type: object
-    TransactionState:
-      type: string
-      description: Represents the state of the transaction.
-      enum:
-      - Committed
-      - Pending
-      x-ms-enum:
-        name: TransactionState
-        modelAsString: true
     ReceiptContents:
       properties:
         cert:
@@ -546,126 +433,52 @@ components:
       - proof
       - nodeId
       type: object
-    Pem:
-      type: string
-    Consortium:
-      description: List of members in the consortium.
-      required:
-      - members
+    ReceiptLeafComponents:
       properties:
-        members:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConsortiumMember'
-        nextLink:
-          description: Path from which to retrieve the next page of results.
+        claimsDigest:
+          type: string
+        commitEvidence:
+          type: string
+        writeSetDigest:
           type: string
       type: object
-    Constitution:
-      description: The governance script for the application.
+    ReceiptElementArray:
+      items:
+        $ref: '#/components/schemas/ReceiptElement'
+      type: array
+    ApplicationClaim:
+      description: A claim of a ledger application.
       required:
-      - digest
-      - script
+      - kind
       properties:
         digest:
-          description: SHA256 digest of the constitution script.
-          type: string
-        script:
-          description: Contents of the constitution.
-          type: string
+          $ref: '#/components/schemas/ClaimDigest'
+        kind:
+          $ref: '#/components/schemas/ApplicationClaimKind'
+        ledgerEntry:
+          $ref: '#/components/schemas/LedgerEntryClaim'
       type: object
-    LedgerEntry:
-      description: An entry in the ledger.
+    LedgerEntryClaim:
+      description: An application claim derived from ledger entry data.
       required:
-      - contents
+      - protocol
       properties:
-        contents:
-          type: string
-          description: Contents of the ledger entry.
         collectionId:
+          description: Identifier of a collection.
           type: string
-          readOnly: true
-        transactionId:
-          $ref: '#/components/schemas/TransactionId'
-          readOnly: true
-      type: object
-    LedgerEntries:
-      description: Array of ledger entries.
-      type: array
-      items:
-        $ref: '#/components/schemas/LedgerEntry'
-    ConfidentialLedgerEnclaves:
-      description: Information about the enclaves running the Confidential Ledger.
-      required:
-      - currentNodeId
-      - enclaveQuotes
-      properties:
-        currentNodeId:
-          description: Id of the Confidential Ledger node responding to the request.
-          $ref: '#/components/schemas/EntityId'
-        enclaveQuotes:
-          $ref: '#/components/schemas/EnclaveQuotes'
+        contents:
+          description: Contents of a ledger entry.
+          type: string
+        secretKey:
+          type: string
+          description: Base64-encoded secret key.
+        protocol:
+          $ref: '#/components/schemas/ApplicationClaimProtocol'
       type: object
     PemArray:
       items:
         $ref: '#/components/schemas/Pem'
       type: array
-    ReceiptElement:
-      properties:
-        left:
-          type: string
-        right:
-          type: string
-      type: object
-    LedgerUser:
-      description: Details about a Confidential Ledger user.
-      required:
-      - assignedRole
-      properties:
-        assignedRole:
-          $ref: '#/components/schemas/LedgerUserRole'
-        userId:
-          $ref: '#/components/schemas/UserId'
-          readOnly: true
-      type: object
-    LedgerQueryState:
-      description: State of a ledger query.
-      type: string
-      enum:
-      - Loading
-      - Ready
-      x-ms-enum:
-        name: ConfidentialLedgerQueryState
-        modelAsString: true
-    EntityId:
-      description: Identifier for an entity.
-      type: string
-    TransactionId:
-      description: A unique identifier for the state of the ledger. If returned as part of a LedgerEntry, it indicates the state from which the entry was read.
-      type: string
-    PagedCollections:
-      description: Paginated collections returned in response to a query.
-      type: object
-      required:
-      - collections
-      properties:
-        collections:
-          items:
-            $ref: '#/components/schemas/Collection'
-          type: array
-        nextLink:
-          description: Path from which to retrieve the next page of results.
-          type: string
-    LedgerUserRole:
-      type: string
-      description: Represents an assignable role.
-      enum:
-      - Administrator
-      - Contributor
-      - Reader
-      x-ms-enum:
-        name: ConfidentialLedgerUserRoleName
-        modelAsString: true
     TransactionReceipt:
       description: A receipt certifying the transaction at the specified id.
       required:
@@ -681,6 +494,18 @@ components:
         transactionId:
           $ref: '#/components/schemas/TransactionId'
       type: object
+    ReceiptElement:
+      properties:
+        left:
+          type: string
+        right:
+          type: string
+      type: object
+    ApplicationClaims:
+      description: List of application claims.
+      type: array
+      items:
+        $ref: '#/components/schemas/ApplicationClaim'
     ApplicationClaimKind:
       type: string
       description: Represents the kind of an application claim.
@@ -690,18 +515,47 @@ components:
       x-ms-enum:
         name: ApplicationClaimKind
         modelAsString: true
-    ApplicationClaim:
-      description: A claim of a ledger application.
+    TransactionStatus:
+      description: Response returned to a query for the transaction status
       required:
-      - kind
+      - state
+      - transactionId
       properties:
-        digest:
-          $ref: '#/components/schemas/ClaimDigest'
-        kind:
-          $ref: '#/components/schemas/ApplicationClaimKind'
-        ledgerEntry:
-          $ref: '#/components/schemas/LedgerEntryClaim'
+        state:
+          $ref: '#/components/schemas/TransactionState'
+        transactionId:
+          $ref: '#/components/schemas/TransactionId'
       type: object
+    LedgerQueryResult:
+      description: The result of querying for a ledger entry from an older transaction id. The ledger entry is available in the response only if the returned state is Ready.
+      required:
+      - state
+      properties:
+        state:
+          $ref: '#/components/schemas/LedgerQueryState'
+        entry:
+          description: The ledger entry found as a result of the query. This is only available if the query is in Ready state.
+          $ref: '#/components/schemas/LedgerEntry'
+      type: object
+    LedgerQueryState:
+      description: State of a ledger query.
+      type: string
+      enum:
+      - Loading
+      - Ready
+      x-ms-enum:
+        name: ConfidentialLedgerQueryState
+        modelAsString: true
+    LedgerUserRole:
+      type: string
+      description: Represents an assignable role.
+      enum:
+      - Administrator
+      - Contributor
+      - Reader
+      x-ms-enum:
+        name: ConfidentialLedgerUserRoleName
+        modelAsString: true
     ClaimDigest:
       description: An application claim in digested form.
       required:
@@ -713,6 +567,42 @@ components:
         protocol:
           $ref: '#/components/schemas/ApplicationClaimProtocol'
       type: object
+    ConsortiumMember:
+      description: Describes a member of the consortium.
+      required:
+      - certificate
+      - id
+      properties:
+        certificate:
+          type: string
+          description: PEM-encoded certificate associated with the member.
+        id:
+          description: Identifier assigned to the member.
+          $ref: '#/components/schemas/EntityId'
+      type: object
+    EnclaveQuotes:
+      description: Dictionary of enclave quotes, indexed by node id.
+      additionalProperties:
+        $ref: '#/components/schemas/EnclaveQuote'
+      type: object
+    Pem:
+      type: string
+    Consortium:
+      description: List of members in the consortium.
+      required:
+      - members
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsortiumMember'
+        nextLink:
+          description: Path from which to retrieve the next page of results.
+          type: string
+      type: object
+    TransactionId:
+      description: A unique identifier for the state of the ledger. If returned as part of a LedgerEntry, it indicates the state from which the entry was read.
+      type: string
     EnclaveQuote:
       description: Contains the enclave quote.
       required:
@@ -733,19 +623,138 @@ components:
           description: Raw SGX quote, parsable by tools like Open Enclave's oeverify.
           type: string
       type: object
-    TransactionStatus:
-      description: Response returned to a query for the transaction status
-      required:
-      - state
-      - transactionId
-      properties:
-        state:
-          $ref: '#/components/schemas/TransactionState'
-        transactionId:
-          $ref: '#/components/schemas/TransactionId'
+    PagedCollections:
+      description: Paginated collections returned in response to a query.
       type: object
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
+      required:
+      - collections
+      properties:
+        collections:
+          items:
+            $ref: '#/components/schemas/Collection'
+          type: array
+        nextLink:
+          description: Path from which to retrieve the next page of results.
+          type: string
+    TransactionState:
+      type: string
+      description: Represents the state of the transaction.
+      enum:
+      - Committed
+      - Pending
+      x-ms-enum:
+        name: TransactionState
+        modelAsString: true
+    LedgerEntries:
+      description: Array of ledger entries.
+      type: array
+      items:
+        $ref: '#/components/schemas/LedgerEntry'
+    ConfidentialLedgerEnclaves:
+      description: Information about the enclaves running the Confidential Ledger.
+      required:
+      - currentNodeId
+      - enclaveQuotes
+      properties:
+        currentNodeId:
+          description: Id of the Confidential Ledger node responding to the request.
+          $ref: '#/components/schemas/EntityId'
+        enclaveQuotes:
+          $ref: '#/components/schemas/EnclaveQuotes'
+      type: object
+    Collection:
+      description: Identifier for collections.
+      required:
+      - collectionId
+      properties:
+        collectionId:
+          type: string
+      type: object
+    UserId:
+      description: Identifier for the user. This must either be an AAD object id or a certificate fingerprint.
+      type: string
+    LedgerUser:
+      description: Details about a Confidential Ledger user.
+      required:
+      - assignedRole
+      properties:
+        assignedRole:
+          $ref: '#/components/schemas/LedgerUserRole'
+        userId:
+          $ref: '#/components/schemas/UserId'
+          readOnly: true
+      type: object
+    LedgerWriteResult:
+      description: Returned as a result of a write to the Confidential Ledger, the transaction id in the response indicates when the write will become durable.
+      required:
+      - collectionId
+      properties:
+        collectionId:
+          type: string
+      type: object
+    EntityId:
+      description: Identifier for an entity.
+      type: string
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    TransactionIdToParameter:
+      name: toTransactionId
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      description: Specify the last transaction ID in a range.
+      schema:
+        type: string
+    UserDetailsParameter:
+      name: userDetails
+      description: Details about a Confidential Ledger user.
+      in: body
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/LedgerUser'
+    CollectionIdParameter:
+      name: collectionId
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      description: The collection id.
+      schema:
+        type: string
+    TransactionIdFromParameter:
+      name: fromTransactionId
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      description: Specify the first transaction ID in a range.
+      schema:
+        type: string
+    UserIdParameter:
+      name: userId
+      in: path
+      required: true
+      description: The user id, either an AAD object ID or certificate fingerprint.
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    TransactionIdParameter:
+      name: transactionId
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: Identifies a write transaction.
+      schema:
+        type: string
+x-ms-parameterized-host:
+  hostTemplate: '{ledgerEndpoint}'
+  useSchemePrefix: false
+  positionInOperation: first
+  parameters:
+  - name: ledgerEndpoint
+    description: The Confidential Ledger URL, for example https://contoso.confidentialledger.azure.com
+    required: true
+    type: string
+    in: path
+    format: url
+    x-ms-skip-url-encoding: true
+    x-ms-parameter-location: client

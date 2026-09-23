@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Repair Management API
+  title: Microsoft Azure Service Fabric Client Repair Management API
+  description: Service Fabric REST Client APIs allows management of Service Fabric clusters, applications and services.
+  version: '8.2'
+servers:
+- url: http://localhost:19080
+- url: https://localhost:19080
 tags:
 - name: RepairManagement
 paths:
@@ -9,7 +13,25 @@ paths:
     post:
       operationId: microsoftAzureCreaterepairtask
       summary: Microsoft Azure Creates A New Repair Task
-      description: For clusters that have the Repair Manager Service configured,<br>this API provides a way to create repair tasks that run automatically or manually.<br>For repair tasks that run automatically, an appropriate repair executor<br>must be running for each repair action to run automatically.<br>These are currently only available in specially-configured Azure Cloud Services.<br><br>To create a manual repair task, provide the set of impacted node names and the<br>expected impact. When the state of the created repair task changes to approved,<br>you can safely perform repair actions on those nodes.<br><br>This API supports the Service Fabric platform; it is not meant to be used directly from your code.
+      description: 'For clusters that have the Repair Manager Service configured,
+
+        this API provides a way to create repair tasks that run automatically or manually.
+
+        For repair tasks that run automatically, an appropriate repair executor
+
+        must be running for each repair action to run automatically.
+
+        These are currently only available in specially-configured Azure Cloud Services.
+
+
+        To create a manual repair task, provide the set of impacted node names and the
+
+        expected impact. When the state of the created repair task changes to approved,
+
+        you can safely perform repair actions on those nodes.
+
+
+        This API supports the Service Fabric platform; it is not meant to be used directly from your code.'
       parameters:
       - $ref: '#/components/parameters/ApiVersion_6-0_RequiredQueryParam'
       - $ref: '#/components/parameters/RepairTaskRequiredBodyParam'
@@ -182,8 +204,8 @@ paths:
                 $ref: '#/components/schemas/FabricError'
 components:
   schemas:
-    RepairTaskApproveDescription:
-      description: 'Describes a request for forced approval of a repair task.
+    RepairTaskCancelDescription:
+      description: 'Describes a request to cancel a repair task.
 
 
         This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
@@ -194,6 +216,50 @@ components:
         Version:
           type: string
           description: The current version number of the repair task. If non-zero, then the request will only succeed if this value matches the actual current version of the repair task. If zero, then no version check is performed.
+        RequestAbort:
+          type: boolean
+          description: _True_ if the repair should be stopped as soon as possible even if it has already started executing. _False_ if the repair should be cancelled only if execution has not yet started.
+      required:
+      - TaskId
+    FabricError:
+      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
+      properties:
+        Error:
+          $ref: '#/components/schemas/FabricErrorError'
+          description: Error object containing error code and error message.
+      required:
+      - Error
+    RepairTargetDescriptionBase:
+      discriminator:
+        propertyName: Kind
+      description: 'Describes the entities targeted by a repair action.
+
+
+        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
+      properties:
+        Kind:
+          $ref: '#/components/schemas/RepairTargetKind'
+          description: The kind of repair target described by the current object.
+      required:
+      - Kind
+    RepairTaskUpdateHealthPolicyDescription:
+      description: 'Describes a request to update the health policy of a repair task.
+
+
+        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
+      properties:
+        TaskId:
+          type: string
+          description: The ID of the repair task to be updated.
+        Version:
+          type: string
+          description: The current version number of the repair task. If non-zero, then the request will only succeed if this value matches the actual current value of the repair task. If zero, then no version check is performed.
+        PerformPreparingHealthCheck:
+          type: boolean
+          description: A boolean indicating if health check is to be performed in the Preparing stage of the repair task. If not specified the existing value should not be altered. Otherwise, specify the desired new value.
+        PerformRestoringHealthCheck:
+          type: boolean
+          description: A boolean indicating if health check is to be performed in the Restoring stage of the repair task. If not specified the existing value should not be altered. Otherwise, specify the desired new value.
       required:
       - TaskId
     FabricErrorCodes:
@@ -372,6 +438,31 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
+    RepairTargetKind:
+      description: Specifies the kind of the repair target. This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
+      type: string
+      enum:
+      - Invalid
+      - Node
+      x-ms-enum:
+        name: RepairTargetKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: The repair target is not valid or is of an unknown type.
+        - value: Node
+          description: The repair target is a set of Service Fabric nodes.
+    FabricErrorError:
+      description: Error object containing error code and error message.
+      properties:
+        Code:
+          $ref: '#/components/schemas/FabricErrorCodes'
+          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
+        Message:
+          type: string
+          description: Error message.
+      required:
+      - Code
     RepairImpactDescriptionBase:
       discriminator:
         propertyName: Kind
@@ -385,6 +476,31 @@ components:
           description: The kind of repair impact represented by the current object.
       required:
       - Kind
+    RepairTaskUpdateInfo:
+      description: 'Describes the result of an operation that created or updated a repair task.
+
+
+        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
+      properties:
+        Version:
+          type: string
+          description: The new version of the repair task.
+      required:
+      - Version
+    RepairTaskDeleteDescription:
+      description: 'Describes a request to delete a completed repair task.
+
+
+        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
+      properties:
+        TaskId:
+          type: string
+          description: The ID of the completed repair task to be deleted.
+        Version:
+          type: string
+          description: The current version number of the repair task. If non-zero, then the request will only succeed if this value matches the actual current version of the repair task. If zero, then no version check is performed.
+      required:
+      - TaskId
     RepairTask:
       description: 'Represents a repair task, which includes information about what kind of repair was requested, what its progress is, and what its final result was.
 
@@ -527,97 +643,6 @@ components:
       - TaskId
       - Action
       - State
-    FabricErrorError:
-      description: Error object containing error code and error message.
-      properties:
-        Code:
-          $ref: '#/components/schemas/FabricErrorCodes'
-          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
-        Message:
-          type: string
-          description: Error message.
-      required:
-      - Code
-    RepairTaskList:
-      type: array
-      description: A list of repair tasks.
-      items:
-        $ref: '#/components/schemas/RepairTask'
-    RepairTargetDescriptionBase:
-      discriminator:
-        propertyName: Kind
-      description: 'Describes the entities targeted by a repair action.
-
-
-        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
-      properties:
-        Kind:
-          $ref: '#/components/schemas/RepairTargetKind'
-          description: The kind of repair target described by the current object.
-      required:
-      - Kind
-    RepairTaskDeleteDescription:
-      description: 'Describes a request to delete a completed repair task.
-
-
-        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
-      properties:
-        TaskId:
-          type: string
-          description: The ID of the completed repair task to be deleted.
-        Version:
-          type: string
-          description: The current version number of the repair task. If non-zero, then the request will only succeed if this value matches the actual current version of the repair task. If zero, then no version check is performed.
-      required:
-      - TaskId
-    RepairTargetKind:
-      description: Specifies the kind of the repair target. This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
-      type: string
-      enum:
-      - Invalid
-      - Node
-      x-ms-enum:
-        name: RepairTargetKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: The repair target is not valid or is of an unknown type.
-        - value: Node
-          description: The repair target is a set of Service Fabric nodes.
-    RepairTaskHealthCheckState:
-      description: Specifies the workflow state of a repair task's health check. This type supports the Service Fabric platform; it is not meant to be used directly from your code.
-      type: string
-      enum:
-      - NotStarted
-      - InProgress
-      - Succeeded
-      - Skipped
-      - TimedOut
-      x-ms-enum:
-        name: RepairTaskHealthCheckState
-        modelAsString: true
-        values:
-        - value: NotStarted
-          description: Indicates that the health check has not started.
-        - value: InProgress
-          description: Indicates that the health check is in progress.
-        - value: Succeeded
-          description: Indicates that the health check succeeded.
-        - value: Skipped
-          description: Indicates that the health check was skipped.
-        - value: TimedOut
-          description: Indicates that the health check timed out.
-    RepairTaskUpdateInfo:
-      description: 'Describes the result of an operation that created or updated a repair task.
-
-
-        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
-      properties:
-        Version:
-          type: string
-          description: The new version of the repair task.
-      required:
-      - Version
     RepairTaskHistory:
       description: 'A record of the times when the repair task entered each state.
 
@@ -668,6 +693,11 @@ components:
           type: string
           format: date-time
           description: The time when the repair task completed the health check in the Restoring state.
+    RepairTaskList:
+      type: array
+      description: A list of repair tasks.
+      items:
+        $ref: '#/components/schemas/RepairTask'
     RepairImpactKind:
       description: Specifies the kind of the impact. This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
       type: string
@@ -682,8 +712,31 @@ components:
           description: The repair impact is not valid or is of an unknown type.
         - value: Node
           description: The repair impact affects a set of Service Fabric nodes.
-    RepairTaskCancelDescription:
-      description: 'Describes a request to cancel a repair task.
+    RepairTaskHealthCheckState:
+      description: Specifies the workflow state of a repair task's health check. This type supports the Service Fabric platform; it is not meant to be used directly from your code.
+      type: string
+      enum:
+      - NotStarted
+      - InProgress
+      - Succeeded
+      - Skipped
+      - TimedOut
+      x-ms-enum:
+        name: RepairTaskHealthCheckState
+        modelAsString: true
+        values:
+        - value: NotStarted
+          description: Indicates that the health check has not started.
+        - value: InProgress
+          description: Indicates that the health check is in progress.
+        - value: Succeeded
+          description: Indicates that the health check succeeded.
+        - value: Skipped
+          description: Indicates that the health check was skipped.
+        - value: TimedOut
+          description: Indicates that the health check timed out.
+    RepairTaskApproveDescription:
+      description: 'Describes a request for forced approval of a repair task.
 
 
         This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
@@ -694,40 +747,17 @@ components:
         Version:
           type: string
           description: The current version number of the repair task. If non-zero, then the request will only succeed if this value matches the actual current version of the repair task. If zero, then no version check is performed.
-        RequestAbort:
-          type: boolean
-          description: _True_ if the repair should be stopped as soon as possible even if it has already started executing. _False_ if the repair should be cancelled only if execution has not yet started.
-      required:
-      - TaskId
-    FabricError:
-      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
-      properties:
-        Error:
-          $ref: '#/components/schemas/FabricErrorError'
-          description: Error object containing error code and error message.
-      required:
-      - Error
-    RepairTaskUpdateHealthPolicyDescription:
-      description: 'Describes a request to update the health policy of a repair task.
-
-
-        This type supports the Service Fabric platform; it is not meant to be used directly from your code.'
-      properties:
-        TaskId:
-          type: string
-          description: The ID of the repair task to be updated.
-        Version:
-          type: string
-          description: The current version number of the repair task. If non-zero, then the request will only succeed if this value matches the actual current value of the repair task. If zero, then no version check is performed.
-        PerformPreparingHealthCheck:
-          type: boolean
-          description: A boolean indicating if health check is to be performed in the Preparing stage of the repair task. If not specified the existing value should not be altered. Otherwise, specify the desired new value.
-        PerformRestoringHealthCheck:
-          type: boolean
-          description: A boolean indicating if health check is to be performed in the Restoring stage of the repair task. If not specified the existing value should not be altered. Otherwise, specify the desired new value.
       required:
       - TaskId
   parameters:
+    RepairTaskRequiredBodyParam:
+      name: RepairTask
+      in: body
+      description: Describes the repair task to be created or updated.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/RepairTask'
     RepairTaskUpdateHealthPolicyDescriptionRequiredBodyParam:
       name: RepairTaskUpdateHealthPolicyDescription
       in: body
@@ -736,22 +766,6 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/RepairTaskUpdateHealthPolicyDescription'
-    RepairTaskApproveDescriptionRequiredBodyParam:
-      name: RepairTaskApproveDescription
-      in: body
-      description: Describes the repair task to be approved.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/RepairTaskApproveDescription'
-    RepairTaskCancelDescriptionRequiredBodyParam:
-      name: RepairTaskCancelDescription
-      in: body
-      description: Describes the repair task to be cancelled.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/RepairTaskCancelDescription'
     RepairTaskDeleteDescriptionRequiredBodyParam:
       name: RepairTaskDeleteDescription
       in: body
@@ -783,14 +797,22 @@ components:
       required: false
       schema:
         type: integer
-    RepairTaskRequiredBodyParam:
-      name: RepairTask
+    RepairTaskCancelDescriptionRequiredBodyParam:
+      name: RepairTaskCancelDescription
       in: body
-      description: Describes the repair task to be created or updated.
+      description: Describes the repair task to be cancelled.
       required: true
       x-ms-parameter-location: method
       schema:
-        $ref: '#/components/schemas/RepairTask'
+        $ref: '#/components/schemas/RepairTaskCancelDescription'
+    RepairTaskApproveDescriptionRequiredBodyParam:
+      name: RepairTaskApproveDescription
+      in: body
+      description: Describes the repair task to be approved.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/RepairTaskApproveDescription'
     RepairTaskExecutorFilterOptionalQueryParam:
       name: ExecutorFilter
       description: The name of the repair executor whose claimed tasks should be included in the list.
@@ -830,8 +852,3 @@ components:
         enum:
         - '6.0'
         default: '6.0'
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'

@@ -1,0 +1,237 @@
+openapi: 3.2.0
+info:
+  title: Microsoft Azure TrafficManagerManagementClient Heat Maps API
+  version: 2017-09-01-preview
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
+tags:
+- name: Heat Maps
+paths:
+  ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}/heatMaps/{heatMapType}
+  : get:
+      tags:
+      - Heat Maps
+      operationId: microsoftAzureHeatmapGet
+      description: Gets latest heatmap for Traffic Manager profile.
+      parameters:
+      - $ref: '#/components/parameters/SubscriptionIdParameter'
+      - name: resourceGroupName
+        in: path
+        required: true
+        description: The name of the resource group containing the Traffic Manager endpoint.
+        schema:
+          type: string
+      - name: profileName
+        in: path
+        required: true
+        description: The name of the Traffic Manager profile.
+        schema:
+          type: string
+      - name: heatMapType
+        in: path
+        required: true
+        description: The type of HeatMap for the Traffic Manager profile.
+        schema:
+          type: string
+          enum:
+          - default
+      - name: topLeft
+        in: query
+        required: false
+        allowEmptyValue: true
+        description: The top left latitude,longitude pair of the rectangular viewport to query for.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: number
+            format: double
+          maxItems: 2
+          minItems: 2
+      - name: botRight
+        in: query
+        required: false
+        allowEmptyValue: true
+        description: The bottom right latitude,longitude pair of the rectangular viewport to query for.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: number
+            format: double
+          maxItems: 2
+          minItems: 2
+      - $ref: '#/components/parameters/ApiVersionParameter'
+      responses:
+        '200':
+          description: The Traffic Manager heatmap.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeatMapModel'
+        default:
+          description: Default response. It will be deserialized as per the Error definition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudError'
+      x-ms-examples:
+        HeatMap-GET:
+          $ref: ./examples/HeatMap-GET.json
+        HeatMap-GET-With-TopLeft-BotRight:
+          $ref: ./examples/HeatMap-GET-With-TopLeft-BotRight.json
+        HeatMap-GET-With-Null-Values:
+          $ref: ./examples/HeatMap-GET-With-Null-Values.json
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
+components:
+  schemas:
+    CloudError:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: The content of the error.
+      description: An error returned by the Azure Resource Manager
+      x-ms-external: true
+    ProxyResource:
+      description: The resource model definition for a ARM proxy resource. It will have everything other than required location and tags
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    HeatMapProperties:
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: The beginning of the time window for this HeatMap, inclusive.
+        endTime:
+          type: string
+          format: date-time
+          description: The ending of the time window for this HeatMap, exclusive.
+        endpoints:
+          type: array
+          description: The endpoints used in this HeatMap calculation.
+          items:
+            $ref: '#/components/schemas/HeatMapEndpoint'
+        trafficFlows:
+          type: array
+          description: The traffic flows produced in this HeatMap calculation.
+          items:
+            $ref: '#/components/schemas/TrafficFlow'
+      description: Class representing a Traffic Manager HeatMap properties.
+    TrafficFlow:
+      properties:
+        sourceIp:
+          type: string
+          description: The IP address that this query experience originated from.
+        latitude:
+          type: number
+          format: double
+          description: The approximate latitude that these queries originated from.
+        longitude:
+          type: number
+          format: double
+          description: The approximate longitude that these queries originated from.
+        queryExperiences:
+          type: array
+          description: The query experiences produced in this HeatMap calculation.
+          items:
+            $ref: '#/components/schemas/QueryExperience'
+      description: Class representing a Traffic Manager HeatMap traffic flow properties.
+    CloudErrorBody:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        target:
+          type: string
+          description: Error target
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody'
+          description: Error details
+      description: The content of an error returned by the Azure Resource Manager
+      x-ms-external: true
+    HeatMapEndpoint:
+      properties:
+        resourceId:
+          type: string
+          description: The ARM Resource ID of this Traffic Manager endpoint.
+        endpointId:
+          type: integer
+          description: A number uniquely identifying this endpoint in query experiences.
+      description: Class which is a sparse representation of a Traffic Manager endpoint.
+    Resource:
+      description: The core properties of ARM resources
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Fully qualified resource Id for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficManagerProfiles/{resourceName}
+        name:
+          readOnly: true
+          type: string
+          description: The name of the resource
+        type:
+          readOnly: true
+          type: string
+          description: The type of the resource. Ex- Microsoft.Network/trafficManagerProfiles.
+      x-ms-azure-resource: true
+    QueryExperience:
+      properties:
+        endpointId:
+          type: integer
+          description: The id of the endpoint from the 'endpoints' array which these queries were routed to.
+        queryCount:
+          type: integer
+          description: The number of queries originating from this location.
+        latency:
+          type: number
+          format: double
+          description: The latency experienced by queries originating from this location.
+      required:
+      - endpointId
+      - queryCount
+      description: Class representing a Traffic Manager HeatMap query experience properties.
+    HeatMapModel:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/HeatMapProperties'
+          description: The properties of the Traffic Manager HeatMap.
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+      description: Class representing a Traffic Manager HeatMap.
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

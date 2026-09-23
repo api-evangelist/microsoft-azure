@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Metric API
+  title: Microsoft Azure Metrics Advisor Metric API
+  description: Microsoft Azure Metrics Advisor REST API (OpenAPI v2)
+  version: '1.0'
+security:
+- apim_key: []
+  ma_api_key: []
 tags:
 - name: Metric
 paths:
@@ -246,82 +250,33 @@ paths:
         required: true
 components:
   schemas:
-    MetricSeriesList:
+    EnrichmentStatus:
       type: object
       properties:
+        timestamp:
+          format: date-time
+          description: data slice timestamp.
+          type: string
+          readOnly: true
+        status:
+          description: latest enrichment status for this data slice.
+          type: string
+          readOnly: true
+        message:
+          description: the trimmed message describes details of the enrichment status.
+          type: string
+          readOnly: true
+    AnomalyDetectionConfigurationList:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnomalyDetectionConfiguration'
+          readOnly: true
         '@nextLink':
           type: string
           readOnly: true
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/MetricSeriesItem'
-          readOnly: true
-    WholeMetricConfiguration:
-      type: object
-      properties:
-        conditionOperator:
-          description: 'condition operator
-
-
-            should be specified when combining multiple detection conditions'
-          enum:
-          - AND
-          - OR
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectionConfigurationLogicType
-            modelAsString: true
-        smartDetectionCondition:
-          $ref: '#/components/schemas/SmartDetectionCondition'
-        hardThresholdCondition:
-          $ref: '#/components/schemas/HardThresholdCondition'
-        changeThresholdCondition:
-          $ref: '#/components/schemas/ChangeThresholdCondition'
-    MetricDimensionQueryOptions:
-      required:
-      - dimensionName
-      type: object
-      properties:
-        dimensionName:
-          description: dimension name
-          type: string
-        dimensionValueFilter:
-          description: dimension value to be filtered
-          type: string
-      example:
-        dimensionName: city
-    MetricDataList:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/MetricDataItem'
-          readOnly: true
-    SmartDetectionCondition:
-      required:
-      - anomalyDetectorDirection
-      - sensitivity
-      - suppressCondition
-      type: object
-      properties:
-        sensitivity:
-          format: double
-          description: 'sensitivity, value range : (0, 100]'
-          type: number
-        anomalyDetectorDirection:
-          description: detection direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectorDirection
-            modelAsString: true
-        suppressCondition:
-          $ref: '#/components/schemas/SuppressCondition'
     HardThresholdCondition:
       required:
       - anomalyDetectorDirection
@@ -354,62 +309,125 @@ components:
             modelAsString: true
         suppressCondition:
           $ref: '#/components/schemas/SuppressCondition'
-    ErrorCode:
+    MetricDimensionList:
       type: object
       properties:
-        message:
-          type: string
-        code:
-          type: string
-    AnomalyDetectionConfigurationList:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/AnomalyDetectionConfiguration'
-          readOnly: true
         '@nextLink':
           type: string
           readOnly: true
-    DimensionGroupIdentity:
+        value:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+          readOnly: true
+    ChangeThresholdCondition:
       required:
-      - dimension
+      - anomalyDetectorDirection
+      - changePercentage
+      - shiftPoint
+      - suppressCondition
+      - withinRange
       type: object
       properties:
+        changePercentage:
+          format: double
+          description: 'change percentage, value range : [0, +∞)'
+          type: number
+        shiftPoint:
+          format: int32
+          description: 'shift point, value range : [1, +∞)'
+          type: integer
+        withinRange:
+          description: 'if the withinRange = true, detected data is abnormal when the value falls in the range, in this case anomalyDetectorDirection must be Both
+
+            if the withinRange = false, detected data is abnormal when the value falls out of the range'
+          type: boolean
+        anomalyDetectorDirection:
+          description: detection direction
+          enum:
+          - Both
+          - Down
+          - Up
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectorDirection
+            modelAsString: true
+        suppressCondition:
+          $ref: '#/components/schemas/SuppressCondition'
+    SmartDetectionCondition:
+      required:
+      - anomalyDetectorDirection
+      - sensitivity
+      - suppressCondition
+      type: object
+      properties:
+        sensitivity:
+          format: double
+          description: 'sensitivity, value range : (0, 100]'
+          type: number
+        anomalyDetectorDirection:
+          description: detection direction
+          enum:
+          - Both
+          - Down
+          - Up
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectorDirection
+            modelAsString: true
+        suppressCondition:
+          $ref: '#/components/schemas/SuppressCondition'
+    MetricSeriesItem:
+      type: object
+      properties:
+        metricId:
+          format: uuid
+          description: metric unique id
+          type: string
+          readOnly: true
         dimension:
-          description: dimension specified for series group
+          description: dimension name and value pair
           type: object
           additionalProperties:
             type: string
-    MetricDataQueryOptions:
+          readOnly: true
+    SeriesConfiguration:
       required:
-      - endTime
       - series
-      - startTime
       type: object
       properties:
-        startTime:
-          format: date-time
-          description: start time of query a time series data, and format should be yyyy-MM-ddThh:mm:ssZ. The maximum number of data points (series number * time range) is 10000.
-          type: string
-        endTime:
-          format: date-time
-          description: start time of query a time series data, and format should be yyyy-MM-ddThh:mm:ssZ. The maximum number of data points (series number * time range) is 10000.
-          type: string
         series:
-          description: query specific series. The maximum number of series is 100.
+          $ref: '#/components/schemas/SeriesIdentity'
+        conditionOperator:
+          description: 'condition operator
+
+
+            should be specified when combining multiple detection conditions'
+          enum:
+          - AND
+          - OR
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectionConfigurationLogicType
+            modelAsString: true
+        smartDetectionCondition:
+          $ref: '#/components/schemas/SmartDetectionCondition'
+        hardThresholdCondition:
+          $ref: '#/components/schemas/HardThresholdCondition'
+        changeThresholdCondition:
+          $ref: '#/components/schemas/ChangeThresholdCondition'
+    EnrichmentStatusList:
+      type: object
+      properties:
+        '@nextLink':
+          type: string
+          readOnly: true
+        value:
           type: array
           items:
-            type: object
-            additionalProperties:
-              type: string
-      example:
-        startTime: '2020-01-01T00:00:00Z'
-        endTime: '2020-02-01T00:00:00Z'
-        series:
-        - category: __SUM__
-          city: Beijing
+            $ref: '#/components/schemas/EnrichmentStatus'
+          readOnly: true
     AnomalyDetectionConfiguration:
       required:
       - metricId
@@ -527,23 +545,6 @@ components:
             suppressCondition:
               minNumber: 1
               minRatio: 100
-    EnrichmentStatusQueryOption:
-      required:
-      - endTime
-      - startTime
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: the start point of time range to query anomaly detection status.
-          type: string
-        endTime:
-          format: date-time
-          description: the end point of time range to query anomaly detection status.
-          type: string
-      example:
-        startTime: '2020-01-01T00:00:00Z'
-        endTime: '2020-02-01T00:00:00Z'
     SuppressCondition:
       required:
       - minNumber
@@ -558,6 +559,44 @@ components:
           format: double
           description: 'min point ratio, value range : (0, 100]'
           type: number
+    ErrorCode:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+    WholeMetricConfiguration:
+      type: object
+      properties:
+        conditionOperator:
+          description: 'condition operator
+
+
+            should be specified when combining multiple detection conditions'
+          enum:
+          - AND
+          - OR
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectionConfigurationLogicType
+            modelAsString: true
+        smartDetectionCondition:
+          $ref: '#/components/schemas/SmartDetectionCondition'
+        hardThresholdCondition:
+          $ref: '#/components/schemas/HardThresholdCondition'
+        changeThresholdCondition:
+          $ref: '#/components/schemas/ChangeThresholdCondition'
+    DimensionGroupIdentity:
+      required:
+      - dimension
+      type: object
+      properties:
+        dimension:
+          description: dimension specified for series group
+          type: object
+          additionalProperties:
+            type: string
     MetricSeriesQueryOptions:
       required:
       - activeSince
@@ -579,59 +618,112 @@ components:
         dimensionFilter:
           city:
           - Beijing
-    MetricDimensionList:
+    MetricSeriesList:
       type: object
       properties:
         '@nextLink':
           type: string
           readOnly: true
         value:
-          uniqueItems: true
           type: array
           items:
+            $ref: '#/components/schemas/MetricSeriesItem'
+          readOnly: true
+    MetricDimensionQueryOptions:
+      required:
+      - dimensionName
+      type: object
+      properties:
+        dimensionName:
+          description: dimension name
+          type: string
+        dimensionValueFilter:
+          description: dimension value to be filtered
+          type: string
+      example:
+        dimensionName: city
+    SeriesIdentity:
+      required:
+      - dimension
+      type: object
+      properties:
+        dimension:
+          description: dimension specified for series
+          type: object
+          additionalProperties:
+            type: string
+    EnrichmentStatusQueryOption:
+      required:
+      - endTime
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: the start point of time range to query anomaly detection status.
+          type: string
+        endTime:
+          format: date-time
+          description: the end point of time range to query anomaly detection status.
+          type: string
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+    MetricDataList:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricDataItem'
+          readOnly: true
+    MetricDataQueryOptions:
+      required:
+      - endTime
+      - series
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: start time of query a time series data, and format should be yyyy-MM-ddThh:mm:ssZ. The maximum number of data points (series number * time range) is 10000.
+          type: string
+        endTime:
+          format: date-time
+          description: start time of query a time series data, and format should be yyyy-MM-ddThh:mm:ssZ. The maximum number of data points (series number * time range) is 10000.
+          type: string
+        series:
+          description: query specific series. The maximum number of series is 100.
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+        series:
+        - category: __SUM__
+          city: Beijing
+    MetricDataItem:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/MetricSeriesItem'
+        timestampList:
+          description: timestamps of the data related to this time series
+          type: array
+          items:
+            format: date-time
             type: string
           readOnly: true
-    EnrichmentStatus:
-      type: object
-      properties:
-        timestamp:
-          format: date-time
-          description: data slice timestamp.
-          type: string
+        valueList:
+          description: values of the data related to this time series
+          type: array
+          items:
+            format: double
+            type: number
           readOnly: true
-        status:
-          description: latest enrichment status for this data slice.
-          type: string
-          readOnly: true
-        message:
-          description: the trimmed message describes details of the enrichment status.
-          type: string
-          readOnly: true
-    SeriesConfiguration:
-      required:
-      - series
-      type: object
-      properties:
-        series:
-          $ref: '#/components/schemas/SeriesIdentity'
-        conditionOperator:
-          description: 'condition operator
-
-
-            should be specified when combining multiple detection conditions'
-          enum:
-          - AND
-          - OR
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectionConfigurationLogicType
-            modelAsString: true
-        smartDetectionCondition:
-          $ref: '#/components/schemas/SmartDetectionCondition'
-        hardThresholdCondition:
-          $ref: '#/components/schemas/HardThresholdCondition'
-        changeThresholdCondition:
-          $ref: '#/components/schemas/ChangeThresholdCondition'
     DimensionGroupConfiguration:
       required:
       - group
@@ -657,96 +749,17 @@ components:
           $ref: '#/components/schemas/HardThresholdCondition'
         changeThresholdCondition:
           $ref: '#/components/schemas/ChangeThresholdCondition'
-    MetricDataItem:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/MetricSeriesItem'
-        timestampList:
-          description: timestamps of the data related to this time series
-          type: array
-          items:
-            format: date-time
-            type: string
-          readOnly: true
-        valueList:
-          description: values of the data related to this time series
-          type: array
-          items:
-            format: double
-            type: number
-          readOnly: true
-    ChangeThresholdCondition:
-      required:
-      - anomalyDetectorDirection
-      - changePercentage
-      - shiftPoint
-      - suppressCondition
-      - withinRange
-      type: object
-      properties:
-        changePercentage:
-          format: double
-          description: 'change percentage, value range : [0, +∞)'
-          type: number
-        shiftPoint:
-          format: int32
-          description: 'shift point, value range : [1, +∞)'
-          type: integer
-        withinRange:
-          description: 'if the withinRange = true, detected data is abnormal when the value falls in the range, in this case anomalyDetectorDirection must be Both
-
-            if the withinRange = false, detected data is abnormal when the value falls out of the range'
-          type: boolean
-        anomalyDetectorDirection:
-          description: detection direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectorDirection
-            modelAsString: true
-        suppressCondition:
-          $ref: '#/components/schemas/SuppressCondition'
-    MetricSeriesItem:
-      type: object
-      properties:
-        metricId:
-          format: uuid
-          description: metric unique id
-          type: string
-          readOnly: true
-        dimension:
-          description: dimension name and value pair
-          type: object
-          additionalProperties:
-            type: string
-          readOnly: true
-    SeriesIdentity:
-      required:
-      - dimension
-      type: object
-      properties:
-        dimension:
-          description: dimension specified for series
-          type: object
-          additionalProperties:
-            type: string
-    EnrichmentStatusList:
-      type: object
-      properties:
-        '@nextLink':
-          type: string
-          readOnly: true
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnrichmentStatus'
-          readOnly: true
+  securitySchemes:
+    ma_api_key:
+      type: apiKey
+      name: x-api-key
+      in: header
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: '{endpoint}/metricsadvisor/v1.0'
   useSchemePrefix: false
   parameters:
   - $ref: '#/components/parameters/Endpoint'

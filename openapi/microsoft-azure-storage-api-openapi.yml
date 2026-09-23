@@ -1,7 +1,8 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Storage API
+  title: Microsoft Azure Storage API
+  version: '1.0'
+  description: 'Operations tagged Storage across 2 of this provider''s published API definitions: aoa-front-end-apis-openapi-original.yml, keyvaultclient-openapi-original.yml. Each path carries the servers of the definition it was published in.'
 tags:
 - name: Storage
 paths:
@@ -529,72 +530,83 @@ paths:
         description: The parameters to update a SAS definition.
         required: true
 components:
+  parameters:
+    AccountIdParameter:
+      in: path
+      name: accountId
+      description: Identifier for the Azure Object Anchors account.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    ApiVersionParameter:
+      in: query
+      name: api-version
+      description: The API version.
+      required: true
+      schema:
+        type: string
+    ClientRequestCorrelationVectorParameter:
+      in: header
+      name: x-mrc-cv
+      description: The client request correlation vector, which should be set to a new value for each request.
+      x-ms-parameter-location: method
+      schema:
+        type: string
   schemas:
-    DeletedSasDefinitionBundle:
-      allOf:
-      - $ref: '#/components/schemas/SasDefinitionBundle'
+    UploadLocation:
+      description: Represents an upload location for model ingestion.
+      required:
+      - inputAssetUri
+      type: object
       properties:
-        recoveryId:
+        inputAssetUri:
+          format: uri
+          description: The blob upload URI where a model should be uploaded to the service for ingestion.
           type: string
-          description: The url of the recovery object, used to identify and recover the deleted SAS definition.
-        scheduledPurgeDate:
-          type: integer
-          format: unixtime
-          readOnly: true
-          description: The time when the SAS definition is scheduled to be purged, in UTC
-        deletedDate:
-          type: integer
-          format: unixtime
-          readOnly: true
-          description: The time when the SAS definition was deleted, in UTC
-      description: A deleted SAS definition bundle consisting of its previous id, attributes and its tags, as well as information on when it will be purged.
-    StorageListResult:
+    InnerError:
+      description: Inner error.
+      type: object
       properties:
-        value:
+        code:
+          description: A more specific error code than was provided by the containing error.
+          type: string
+        innererror:
+          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/InnerError'
+    ErrorResponse:
+      description: Represents an error response.
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          description: The Error object.
+          $ref: '#/components/schemas/ErrorDetail'
+    ErrorDetail:
+      description: Represents an error.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error.
+          type: string
+        details:
           type: array
           items:
-            $ref: '#/components/schemas/StorageAccountItem'
-          readOnly: true
-          description: A response message containing a list of storage accounts in the key vault along with a link to the next page of storage accounts.
-        nextLink:
-          type: string
-          readOnly: true
-          description: The URL to get the next set of storage accounts.
-      description: The storage accounts list result.
-    SasDefinitionListResult:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SasDefinitionItem'
-          readOnly: true
-          description: A response message containing a list of SAS definitions along with a link to the next page of SAS definitions.
-        nextLink:
-          type: string
-          readOnly: true
-          description: The URL to get the next set of SAS definitions.
-      description: The storage account SAS definition list result.
-    StorageAccountItem:
-      properties:
-        id:
-          type: string
-          description: Storage identifier.
-          readOnly: true
-        resourceId:
-          type: string
-          description: Storage account resource Id.
-          readOnly: true
-        attributes:
-          $ref: '#/components/schemas/StorageAccountAttributes'
-          description: The storage account management attributes.
-          readOnly: true
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Application specific metadata in the form of key-value pairs.
-          readOnly: true
-      description: The storage account item containing storage account metadata.
+            $ref: '#/components/schemas/ErrorDetail'
+        innererror:
+          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/InnerError'
     StorageAccountCreateParameters:
       properties:
         resourceId:
@@ -623,47 +635,6 @@ components:
       - resourceId
       - activeKeyName
       - autoRegenerateKey
-    InnerError:
-      description: Inner error.
-      type: object
-      properties:
-        code:
-          description: A more specific error code than was provided by the containing error.
-          type: string
-        innererror:
-          description: An object containing more specific information than the current object about the error.
-          $ref: '#/components/schemas/InnerError'
-    UploadLocation:
-      description: Represents an upload location for model ingestion.
-      required:
-      - inputAssetUri
-      type: object
-      properties:
-        inputAssetUri:
-          format: uri
-          description: The blob upload URI where a model should be uploaded to the service for ingestion.
-          type: string
-    StorageAccountUpdateParameters:
-      properties:
-        activeKeyName:
-          type: string
-          description: The current active storage account key name.
-        autoRegenerateKey:
-          type: boolean
-          description: whether keyvault should manage the storage account for the user.
-        regenerationPeriod:
-          type: string
-          description: The key regeneration time duration specified in ISO-8601 format.
-        attributes:
-          x-ms-client-name: StorageAccountAttributes
-          $ref: '#/components/schemas/StorageAccountAttributes'
-          description: The attributes of the storage account.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Application specific metadata in the form of key-value pairs.
-      description: The storage account update parameters.
     StorageAccountRegenerteKeyParameters:
       properties:
         keyName:
@@ -672,38 +643,146 @@ components:
       description: The storage account key regenerate parameters.
       required:
       - keyName
-    DeletedStorageBundle:
+    SasDefinitionUpdateParameters:
+      properties:
+        templateUri:
+          type: string
+          description: The SAS definition token template signed with an arbitrary key.  Tokens created according to the SAS definition will have the same properties as the template.
+        sasType:
+          type: string
+          description: The type of SAS token the SAS definition will create.
+          enum:
+          - account
+          - service
+          x-ms-enum:
+            name: SasTokenType
+            modelAsString: true
+        validityPeriod:
+          type: string
+          description: The validity period of SAS tokens created according to the SAS definition.
+        attributes:
+          x-ms-client-name: SasDefinitionAttributes
+          $ref: '#/components/schemas/SasDefinitionAttributes'
+          description: The attributes of the SAS definition.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application specific metadata in the form of key-value pairs.
+      description: The SAS definition update parameters.
+    SasDefinitionCreateParameters:
+      properties:
+        templateUri:
+          type: string
+          description: The SAS definition token template signed with an arbitrary key.  Tokens created according to the SAS definition will have the same properties as the template.
+        sasType:
+          type: string
+          description: The type of SAS token the SAS definition will create.
+          enum:
+          - account
+          - service
+          x-ms-enum:
+            name: SasTokenType
+            modelAsString: true
+        validityPeriod:
+          type: string
+          description: The validity period of SAS tokens created according to the SAS definition.
+        attributes:
+          x-ms-client-name: SasDefinitionAttributes
+          $ref: '#/components/schemas/SasDefinitionAttributes'
+          description: The attributes of the SAS definition.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application specific metadata in the form of key-value pairs.
+      description: The SAS definition create parameters.
+      required:
+      - templateUri
+      - sasType
+      - validityPeriod
+    StorageBundle:
+      properties:
+        id:
+          type: string
+          description: The storage account id.
+          readOnly: true
+        resourceId:
+          type: string
+          description: The storage account resource id.
+          readOnly: true
+        activeKeyName:
+          type: string
+          description: The current active storage account key name.
+          readOnly: true
+        autoRegenerateKey:
+          type: boolean
+          description: whether keyvault should manage the storage account for the user.
+          readOnly: true
+        regenerationPeriod:
+          type: string
+          description: The key regeneration time duration specified in ISO-8601 format.
+          readOnly: true
+        attributes:
+          $ref: '#/components/schemas/StorageAccountAttributes'
+          description: The storage account attributes.
+          readOnly: true
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application specific metadata in the form of key-value pairs
+          readOnly: true
+      description: A Storage account bundle consists of key vault storage account details plus its attributes.
+    DeletedSasDefinitionBundle:
       allOf:
-      - $ref: '#/components/schemas/StorageBundle'
+      - $ref: '#/components/schemas/SasDefinitionBundle'
       properties:
         recoveryId:
           type: string
-          description: The url of the recovery object, used to identify and recover the deleted storage account.
+          description: The url of the recovery object, used to identify and recover the deleted SAS definition.
         scheduledPurgeDate:
           type: integer
           format: unixtime
           readOnly: true
-          description: The time when the storage account is scheduled to be purged, in UTC
+          description: The time when the SAS definition is scheduled to be purged, in UTC
         deletedDate:
           type: integer
           format: unixtime
           readOnly: true
-          description: The time when the storage account was deleted, in UTC
-      description: A deleted storage account bundle consisting of its previous id, attributes and its tags, as well as information on when it will be purged.
-    SasDefinitionItem:
+          description: The time when the SAS definition was deleted, in UTC
+      description: A deleted SAS definition bundle consisting of its previous id, attributes and its tags, as well as information on when it will be purged.
+    StorageRestoreParameters:
+      properties:
+        value:
+          type: string
+          x-ms-client-name: storageBundleBackup
+          format: base64url
+          description: The backup blob associated with a storage account.
+      description: The secret restore parameters.
+      required:
+      - value
+    BackupStorageResult:
+      properties:
+        value:
+          type: string
+          format: base64url
+          readOnly: true
+          description: The backup blob containing the backed up storage account.
+      description: The backup storage result, containing the backup blob.
+    StorageAccountItem:
       properties:
         id:
           type: string
-          description: The storage SAS identifier.
+          description: Storage identifier.
           readOnly: true
-        sid:
-          x-ms-client-name: SecretId
+        resourceId:
           type: string
-          description: The storage account SAS definition secret id.
+          description: Storage account resource Id.
           readOnly: true
         attributes:
-          $ref: '#/components/schemas/SasDefinitionAttributes'
-          description: The SAS definition management attributes.
+          $ref: '#/components/schemas/StorageAccountAttributes'
+          description: The storage account management attributes.
           readOnly: true
         tags:
           type: object
@@ -711,7 +790,7 @@ components:
             type: string
           description: Application specific metadata in the form of key-value pairs.
           readOnly: true
-      description: The SAS definition item containing storage SAS definition metadata.
+      description: The storage account item containing storage account metadata.
     SasDefinitionBundle:
       properties:
         id:
@@ -752,6 +831,107 @@ components:
           description: Application specific metadata in the form of key-value pairs
           readOnly: true
       description: A SAS definition bundle consists of key vault SAS definition details plus its attributes.
+    SasDefinitionListResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SasDefinitionItem'
+          readOnly: true
+          description: A response message containing a list of SAS definitions along with a link to the next page of SAS definitions.
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of SAS definitions.
+      description: The storage account SAS definition list result.
+    StorageListResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/StorageAccountItem'
+          readOnly: true
+          description: A response message containing a list of storage accounts in the key vault along with a link to the next page of storage accounts.
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of storage accounts.
+      description: The storage accounts list result.
+    SasDefinitionAttributes:
+      properties:
+        enabled:
+          type: boolean
+          description: the enabled state of the object.
+        created:
+          type: integer
+          format: unixtime
+          readOnly: true
+          description: Creation time in UTC.
+        updated:
+          type: integer
+          format: unixtime
+          readOnly: true
+          description: Last updated time in UTC.
+        recoverableDays:
+          type: integer
+          format: int32
+          readOnly: true
+          description: softDelete data retention days. Value should be >=7 and <=90 when softDelete enabled, otherwise 0.
+        recoveryLevel:
+          type: string
+          description: Reflects the deletion recovery level currently in effect for SAS definitions in the current vault. If it contains 'Purgeable' the SAS definition can be permanently deleted by a privileged user; otherwise, only the system can purge the SAS definition, at the end of the retention interval.
+          enum:
+          - Purgeable
+          - Recoverable+Purgeable
+          - Recoverable
+          - Recoverable+ProtectedSubscription
+          - CustomizedRecoverable+Purgeable
+          - CustomizedRecoverable
+          - CustomizedRecoverable+ProtectedSubscription
+          x-ms-enum:
+            name: DeletionRecoveryLevel
+            modelAsString: true
+          readOnly: true
+      description: The SAS definition management attributes.
+    StorageAccountUpdateParameters:
+      properties:
+        activeKeyName:
+          type: string
+          description: The current active storage account key name.
+        autoRegenerateKey:
+          type: boolean
+          description: whether keyvault should manage the storage account for the user.
+        regenerationPeriod:
+          type: string
+          description: The key regeneration time duration specified in ISO-8601 format.
+        attributes:
+          x-ms-client-name: StorageAccountAttributes
+          $ref: '#/components/schemas/StorageAccountAttributes'
+          description: The attributes of the storage account.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application specific metadata in the form of key-value pairs.
+      description: The storage account update parameters.
+    DeletedStorageBundle:
+      allOf:
+      - $ref: '#/components/schemas/StorageBundle'
+      properties:
+        recoveryId:
+          type: string
+          description: The url of the recovery object, used to identify and recover the deleted storage account.
+        scheduledPurgeDate:
+          type: integer
+          format: unixtime
+          readOnly: true
+          description: The time when the storage account is scheduled to be purged, in UTC
+        deletedDate:
+          type: integer
+          format: unixtime
+          readOnly: true
+          description: The time when the storage account was deleted, in UTC
+      description: A deleted storage account bundle consisting of its previous id, attributes and its tags, as well as information on when it will be purged.
     StorageAccountAttributes:
       properties:
         enabled:
@@ -803,207 +983,31 @@ components:
               description: Denotes a vault and subscription state in which deletion is recoverable, immediate and permanent deletion (i.e. purge) is not permitted, and in which the subscription itself cannot be permanently canceled when 7<= SoftDeleteRetentionInDays < 90. This level guarantees the recoverability of the deleted entity during the retention interval, and also reflects the fact that the subscription itself cannot be cancelled.
           readOnly: true
       description: The storage account management attributes.
-    SasDefinitionUpdateParameters:
-      properties:
-        templateUri:
-          type: string
-          description: The SAS definition token template signed with an arbitrary key.  Tokens created according to the SAS definition will have the same properties as the template.
-        sasType:
-          type: string
-          description: The type of SAS token the SAS definition will create.
-          enum:
-          - account
-          - service
-          x-ms-enum:
-            name: SasTokenType
-            modelAsString: true
-        validityPeriod:
-          type: string
-          description: The validity period of SAS tokens created according to the SAS definition.
-        attributes:
-          x-ms-client-name: SasDefinitionAttributes
-          $ref: '#/components/schemas/SasDefinitionAttributes'
-          description: The attributes of the SAS definition.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Application specific metadata in the form of key-value pairs.
-      description: The SAS definition update parameters.
-    ErrorResponse:
-      description: Represents an error response.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          description: The Error object.
-          $ref: '#/components/schemas/ErrorDetail'
-    StorageBundle:
+    SasDefinitionItem:
       properties:
         id:
           type: string
-          description: The storage account id.
+          description: The storage SAS identifier.
           readOnly: true
-        resourceId:
+        sid:
+          x-ms-client-name: SecretId
           type: string
-          description: The storage account resource id.
-          readOnly: true
-        activeKeyName:
-          type: string
-          description: The current active storage account key name.
-          readOnly: true
-        autoRegenerateKey:
-          type: boolean
-          description: whether keyvault should manage the storage account for the user.
-          readOnly: true
-        regenerationPeriod:
-          type: string
-          description: The key regeneration time duration specified in ISO-8601 format.
+          description: The storage account SAS definition secret id.
           readOnly: true
         attributes:
-          $ref: '#/components/schemas/StorageAccountAttributes'
-          description: The storage account attributes.
-          readOnly: true
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Application specific metadata in the form of key-value pairs
-          readOnly: true
-      description: A Storage account bundle consists of key vault storage account details plus its attributes.
-    BackupStorageResult:
-      properties:
-        value:
-          type: string
-          format: base64url
-          readOnly: true
-          description: The backup blob containing the backed up storage account.
-      description: The backup storage result, containing the backup blob.
-    StorageRestoreParameters:
-      properties:
-        value:
-          type: string
-          x-ms-client-name: storageBundleBackup
-          format: base64url
-          description: The backup blob associated with a storage account.
-      description: The secret restore parameters.
-      required:
-      - value
-    ErrorDetail:
-      description: Represents an error.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error.
-          type: string
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-        innererror:
-          description: An object containing more specific information than the current object about the error.
-          $ref: '#/components/schemas/InnerError'
-    SasDefinitionCreateParameters:
-      properties:
-        templateUri:
-          type: string
-          description: The SAS definition token template signed with an arbitrary key.  Tokens created according to the SAS definition will have the same properties as the template.
-        sasType:
-          type: string
-          description: The type of SAS token the SAS definition will create.
-          enum:
-          - account
-          - service
-          x-ms-enum:
-            name: SasTokenType
-            modelAsString: true
-        validityPeriod:
-          type: string
-          description: The validity period of SAS tokens created according to the SAS definition.
-        attributes:
-          x-ms-client-name: SasDefinitionAttributes
           $ref: '#/components/schemas/SasDefinitionAttributes'
-          description: The attributes of the SAS definition.
+          description: The SAS definition management attributes.
+          readOnly: true
         tags:
           type: object
           additionalProperties:
             type: string
           description: Application specific metadata in the form of key-value pairs.
-      description: The SAS definition create parameters.
-      required:
-      - templateUri
-      - sasType
-      - validityPeriod
-    SasDefinitionAttributes:
-      properties:
-        enabled:
-          type: boolean
-          description: the enabled state of the object.
-        created:
-          type: integer
-          format: unixtime
           readOnly: true
-          description: Creation time in UTC.
-        updated:
-          type: integer
-          format: unixtime
-          readOnly: true
-          description: Last updated time in UTC.
-        recoverableDays:
-          type: integer
-          format: int32
-          readOnly: true
-          description: softDelete data retention days. Value should be >=7 and <=90 when softDelete enabled, otherwise 0.
-        recoveryLevel:
-          type: string
-          description: Reflects the deletion recovery level currently in effect for SAS definitions in the current vault. If it contains 'Purgeable' the SAS definition can be permanently deleted by a privileged user; otherwise, only the system can purge the SAS definition, at the end of the retention interval.
-          enum:
-          - Purgeable
-          - Recoverable+Purgeable
-          - Recoverable
-          - Recoverable+ProtectedSubscription
-          - CustomizedRecoverable+Purgeable
-          - CustomizedRecoverable
-          - CustomizedRecoverable+ProtectedSubscription
-          x-ms-enum:
-            name: DeletionRecoveryLevel
-            modelAsString: true
-          readOnly: true
-      description: The SAS definition management attributes.
-  parameters:
-    ApiVersionParameter:
-      in: query
-      name: api-version
-      description: The API version.
-      required: true
-      schema:
-        type: string
-    AccountIdParameter:
-      in: path
-      name: accountId
-      description: Identifier for the Azure Object Anchors account.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    ClientRequestCorrelationVectorParameter:
-      in: header
-      name: x-mrc-cv
-      description: The client request correlation vector, which should be set to a new value for each request.
-      x-ms-parameter-location: method
-      schema:
-        type: string
+      description: The SAS definition item containing storage SAS definition metadata.
+x-refined-from:
+- aoa-front-end-apis-openapi-original.yml
+- keyvaultclient-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

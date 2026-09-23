@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Policy API
+  title: Microsoft Azure Policy API
+  version: '1.0'
+  description: 'Operations tagged Policy across 2 of this provider''s published API definitions: attestationclient-openapi-original.yml, azure-site-recovery-management-service-api-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://management.azure.com
 tags:
 - name: Policy
 paths:
@@ -67,7 +70,7 @@ paths:
     post:
       tags:
       - Policy
-      summary: Microsoft Azure Resets The Attestation Policy For The Specified Tenant And Reverts To The Default Policy
+      summary: Microsoft Azure Resets The Attestation Policy For The Specified Tenant And…
       operationId: microsoftAzurePolicyReset
       parameters:
       - $ref: '#/components/parameters/ApiVersionParameter'
@@ -125,6 +128,9 @@ paths:
       x-ms-examples:
         Policy_Get:
           $ref: ./examples/Policy_Get.json
+      security:
+      - azure_auth:
+        - user_impersonation
     put:
       tags:
       - Policy
@@ -168,6 +174,9 @@ paths:
             schema:
               $ref: '#/components/schemas/PolicyModel'
         description: Policy model.
+      security:
+      - azure_auth:
+        - user_impersonation
     delete:
       tags:
       - Policy
@@ -205,6 +214,11 @@ paths:
       x-ms-examples:
         Policy_Delete:
           $ref: ./examples/Policy_Delete.json
+      security:
+      - azure_auth:
+        - user_impersonation
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataReplication/replicationVaults/{vaultName}/replicationPolicies
   : get:
       tags:
@@ -235,6 +249,11 @@ paths:
       x-ms-examples:
         Policy_List:
           $ref: ./examples/Policy_List.json
+      security:
+      - azure_auth:
+        - user_impersonation
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataReplication/replicationVaults/{vaultName}/replicationPolicies/{policyName}/operations/{operationId}
   : get:
       tags:
@@ -265,15 +284,80 @@ paths:
       x-ms-examples:
         PolicyOperationStatus_Get:
           $ref: ./examples/PolicyOperationStatus_Get.json
+      security:
+      - azure_auth:
+        - user_impersonation
+    servers:
+    - url: https://management.azure.com
 components:
+  parameters:
+    AttestationType:
+      description: Specifies the trusted execution environment to be used to validate the evidence
+      name: attestationType
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      x-ms-enum:
+        name: AttestationType
+        modelAsString: true
+        values:
+        - value: SgxEnclave
+          description: Intel Software Guard eXtensions
+        - value: OpenEnclave
+          description: OpenEnclave extensions to SGX
+        - value: SevSnpVm
+          description: AMD SEV SNP Virtual Machine
+        - value: Tpm
+          description: Edge TPM Virtualization Based Security
+      schema:
+        type: string
+        enum:
+        - SgxEnclave
+        - OpenEnclave
+        - SevSnpVm
+        - Tpm
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client API version. Current version is 2022-09-01-preview
+      schema:
+        type: string
+    PolicyNameParameter:
+      in: path
+      name: policyName
+      description: The policy name.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9]*$
+    VaultNameParameter:
+      in: path
+      name: vaultName
+      description: The vault name.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9]*$
   schemas:
-    JsonWebToken:
-      description: An RFC 7519 Json Web Token
-      type: string
-      pattern: '[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
-      externalDocs:
-        description: JSON Web Token RFC
-        url: https://tools.ietf.org/html/rfc7519
+    CloudError:
+      x-ms-external: true
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+      description: An error response from Attestation.
+    CloudErrorBody:
+      x-ms-external: true
+      properties:
+        code:
+          type: string
+          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          type: string
+          description: A message describing the error, intended to be suitable for displaying in a user interface.
+      description: An error response from Attestation.
     PolicyResponse:
       type: object
       description: The response to an attestation policy operation
@@ -281,81 +365,13 @@ components:
         token:
           description: An RFC7519 JSON Web Token structure whose body is an PolicyResult object.
           $ref: '#/components/schemas/JsonWebToken'
-    PolicyModelProperties:
-      description: Policy model properties.
-      required:
-      - customProperties
-      type: object
-      properties:
-        provisioningState:
-          description: Gets or sets the provisioning state of the policy.
-          enum:
-          - Canceled
-          - Creating
-          - Deleting
-          - Deleted
-          - Failed
-          - Succeeded
-          - Updating
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: ProvisioningState
-            modelAsString: true
-        customProperties:
-          $ref: '#/components/schemas/PolicyModelCustomProperties'
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-      description: An error response from Attestation.
-    PolicyModelCustomProperties:
-      description: Policy model custom properties.
-      required:
-      - instanceType
-      type: object
-      properties:
-        instanceType:
-          description: Gets or sets the instance type.
-          minLength: 1
-          type: string
-      discriminator:
-        propertyName: instanceType
-    OperationStatus:
-      description: Defines the operation status.
-      type: object
-      properties:
-        id:
-          description: Gets or sets the Id.
-          type: string
-        name:
-          description: Gets or sets the operation name.
-          type: string
-        status:
-          description: 'Gets or sets the status of the operation. ARM expects the terminal status to be one of
-
-            Succeeded/ Failed/ Canceled. All other values imply that the operation is still running.'
-          type: string
-        startTime:
-          description: Gets or sets the start time.
-          type: string
-        endTime:
-          description: Gets or sets the end time.
-          type: string
-    PolicyModelCollection:
-      description: Policy model collection.
-      type: object
-      properties:
-        value:
-          description: Gets or sets the list of policies.
-          type: array
-          items:
-            $ref: '#/components/schemas/PolicyModel'
-          x-ms-identifiers: []
-        nextLink:
-          description: Gets or sets the value of next link.
-          type: string
+    JsonWebToken:
+      description: An RFC 7519 Json Web Token
+      type: string
+      pattern: '[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
+      externalDocs:
+        description: JSON Web Token RFC
+        url: https://tools.ietf.org/html/rfc7519
     PolicyModel:
       description: Policy model.
       required:
@@ -381,6 +397,75 @@ components:
           - $ref: '#/components/schemas/SystemDataModel'
           readOnly: true
       x-ms-azure-resource: true
+    OperationStatus:
+      description: Defines the operation status.
+      type: object
+      properties:
+        id:
+          description: Gets or sets the Id.
+          type: string
+        name:
+          description: Gets or sets the operation name.
+          type: string
+        status:
+          description: 'Gets or sets the status of the operation. ARM expects the terminal status to be one of
+
+            Succeeded/ Failed/ Canceled. All other values imply that the operation is still running.'
+          type: string
+        startTime:
+          description: Gets or sets the start time.
+          type: string
+        endTime:
+          description: Gets or sets the end time.
+          type: string
+    PolicyModelCustomProperties:
+      description: Policy model custom properties.
+      required:
+      - instanceType
+      type: object
+      properties:
+        instanceType:
+          description: Gets or sets the instance type.
+          minLength: 1
+          type: string
+      discriminator:
+        propertyName: instanceType
+    PolicyModelProperties:
+      description: Policy model properties.
+      required:
+      - customProperties
+      type: object
+      properties:
+        provisioningState:
+          description: Gets or sets the provisioning state of the policy.
+          enum:
+          - Canceled
+          - Creating
+          - Deleting
+          - Deleted
+          - Failed
+          - Succeeded
+          - Updating
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: ProvisioningState
+            modelAsString: true
+        customProperties:
+          $ref: '#/components/schemas/PolicyModelCustomProperties'
+    PolicyModelCollection:
+      description: Policy model collection.
+      type: object
+      properties:
+        value:
+          description: Gets or sets the list of policies.
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyModel'
+          x-ms-identifiers: []
+        nextLink:
+          description: Gets or sets the value of next link.
+          type: string
     SystemDataModel:
       description: System data required to be defined for Azure resources.
       type: object
@@ -409,67 +494,18 @@ components:
           format: date-time
           description: Gets or sets the timestamp of resource last modification (UTC).
           type: string
-    CloudErrorBody:
-      x-ms-external: true
-      properties:
-        code:
-          type: string
-          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          type: string
-          description: A message describing the error, intended to be suitable for displaying in a user interface.
-      description: An error response from Attestation.
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client API version. Current version is 2022-09-01-preview
-      schema:
-        type: string
-    PolicyNameParameter:
-      in: path
-      name: policyName
-      description: The policy name.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9]*$
-    AttestationType:
-      description: Specifies the trusted execution environment to be used to validate the evidence
-      name: attestationType
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      x-ms-enum:
-        name: AttestationType
-        modelAsString: true
-        values:
-        - value: SgxEnclave
-          description: Intel Software Guard eXtensions
-        - value: OpenEnclave
-          description: OpenEnclave extensions to SGX
-        - value: SevSnpVm
-          description: AMD SEV SNP Virtual Machine
-        - value: Tpm
-          description: Edge TPM Virtualization Based Security
-      schema:
-        type: string
-        enum:
-        - SgxEnclave
-        - OpenEnclave
-        - SevSnpVm
-        - Tpm
-    VaultNameParameter:
-      in: path
-      name: vaultName
-      description: The vault name.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9]*$
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow
+x-refined-from:
+- attestationclient-openapi-original.yml
+- azure-site-recovery-management-service-api-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

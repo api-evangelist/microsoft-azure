@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Savings Plan Order API
+  version: '2022-11-01'
+  title: Microsoft Azure Billing benefits RP Savings Plan Order API
+  description: Azure Benefits RP let users create and manage benefits like savings plan.
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Savings Plan Order
 paths:
@@ -33,7 +39,7 @@ paths:
             application/json:
               schema:
                 $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorResponse
-      summary: Microsoft Azure Get Providers Microsoft Billingbenefits Savingsplanorders Savingsplanorderid
+      summary: Microsoft Azure Get Providers Microsoft Billingbenefits Savingsplanorders…
   /providers/Microsoft.BillingBenefits/savingsPlanOrders/{savingsPlanOrderId}/elevate:
     post:
       description: Elevate as owner on savings plan order based on billing permissions.
@@ -59,7 +65,7 @@ paths:
             application/json:
               schema:
                 $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorResponse
-      summary: Microsoft Azure Post Providers Microsoft Billingbenefits Savingsplanorders Savingsplanorderid Elevate
+      summary: Microsoft Azure Post Providers Microsoft Billingbenefits Savingsplanorders…
   /providers/Microsoft.BillingBenefits/savingsPlanOrders:
     get:
       description: List all Savings plan orders.
@@ -89,14 +95,134 @@ paths:
       summary: Microsoft Azure Get Providers Microsoft Billingbenefits Savingsplanorders
 components:
   schemas:
+    ExtendedStatusInfo:
+      type: object
+      readOnly: true
+      properties:
+        statusCode:
+          type: string
+          description: Status code providing additional information.
+        message:
+          type: string
+          description: The message giving detailed information about the status code.
+    BillingScopeId:
+      type: string
+      description: Subscription that will be charged for purchasing the benefit
+    SavingsPlanOrderModel:
+      type: object
+      description: Savings plan order
+      required:
+      - sku
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
+      properties:
+        sku:
+          description: Savings plan SKU
+          $ref: '#/components/schemas/Sku'
+        properties:
+          description: Savings plan order properties
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/SavingsPlanOrderModelProperties'
+    BillingPlanInformation:
+      type: object
+      description: Information describing the type of billing plan for this savings plan.
+      properties:
+        pricingCurrencyTotal:
+          $ref: '#/components/schemas/Price'
+          description: Amount of money to be paid for the Order. Tax is not included.
+        startDate:
+          type: string
+          format: date
+          description: Date when the billing plan has started.
+        nextPaymentDueDate:
+          type: string
+          format: date
+          description: For recurring billing plans, indicates the date when next payment will be processed. Null when total is paid off.
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentDetail'
+          x-ms-identifiers: []
+    BenefitStartTime:
+      type: string
+      format: date-time
+      description: This is the DateTime when the savings plan benefit started.
+    BillingProfileId:
+      type: string
+      readOnly: true
+      description: Fully-qualified identifier of the billing profile where the savings plan is applied. Present only for Field-led or Customer-led customers.
+    SavingsPlanId:
+      type: string
+      description: Identifier of the savings plan
+      readOnly: true
+    ProvisioningState:
+      type: string
+      description: Provisioning state
+      readOnly: true
+      enum:
+      - Creating
+      - PendingBilling
+      - ConfirmedBilling
+      - Created
+      - Succeeded
+      - Cancelled
+      - Expired
+      - Failed
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    RoleAssignmentEntity:
+      type: object
+      description: Role assignment entity
+      properties:
+        id:
+          description: Role assignment entity id
+          type: string
+        name:
+          description: Role assignment entity name
+          type: string
+        properties:
+          description: Role assignment entity properties
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/RoleAssignmentEntityProperties'
     ExpiryDateTime:
       type: string
       description: Expiry date time
       readOnly: true
       format: date-time
-    BillingScopeId:
+    PaymentStatus:
       type: string
-      description: Subscription that will be charged for purchasing the benefit
+      description: Describes whether the payment is completed, failed, cancelled or scheduled in the future.
+      enum:
+      - Succeeded
+      - Failed
+      - Scheduled
+      - Cancelled
+      x-ms-enum:
+        name: PaymentStatus
+        modelAsString: true
+    Price:
+      type: object
+      properties:
+        currencyCode:
+          type: string
+          description: The ISO 4217 3-letter currency code for the currency used by this purchase record.
+        amount:
+          type: number
+          format: double
+    RoleAssignmentEntityProperties:
+      type: object
+      description: Role assignment entity properties
+      properties:
+        principalId:
+          description: Principal Id
+          type: string
+        roleDefinitionId:
+          description: Role definition id
+          type: string
+        scope:
+          description: Scope of the role assignment entity
+          type: string
     BillingAccountId:
       type: string
       readOnly: true
@@ -105,19 +231,6 @@ components:
       type: string
       readOnly: true
       description: Fully-qualified identifier of the customer where the savings plan is applied. Present only for Partner-led customers.
-    SavingsPlanOrderModelList:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SavingsPlanOrderModel'
-        nextLink:
-          type: string
-          description: Url to get the next page.
-    DisplayName:
-      type: string
-      description: Display name
     PaymentDetail:
       type: object
       description: Information about payment related to a savings plan order.
@@ -143,27 +256,29 @@ components:
         billingAccount:
           type: string
           description: Billing account
-    BillingPlan:
+    Term:
       type: string
-      description: Represents the billing plan in ISO 8601 format. Required only for monthly billing plans.
+      description: Represent benefit term in ISO 8601 format.
       enum:
-      - P1M
+      - P1Y
+      - P3Y
+      - P5Y
       x-ms-enum:
-        name: BillingPlan
+        name: Term
         modelAsString: true
-    RoleAssignmentEntityProperties:
+    DisplayName:
+      type: string
+      description: Display name
+    SavingsPlanOrderModelList:
       type: object
-      description: Role assignment entity properties
       properties:
-        principalId:
-          description: Principal Id
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavingsPlanOrderModel'
+        nextLink:
           type: string
-        roleDefinitionId:
-          description: Role definition id
-          type: string
-        scope:
-          description: Scope of the role assignment entity
-          type: string
+          description: Url to get the next page.
     SavingsPlanOrderModelProperties:
       type: object
       description: Savings plan order properties
@@ -196,55 +311,13 @@ components:
             $ref: '#/components/schemas/SavingsPlanId'
         extendedStatusInfo:
           $ref: '#/components/schemas/ExtendedStatusInfo'
-    ExtendedStatusInfo:
-      type: object
-      readOnly: true
-      properties:
-        statusCode:
-          type: string
-          description: Status code providing additional information.
-        message:
-          type: string
-          description: The message giving detailed information about the status code.
-    SavingsPlanId:
+    BillingPlan:
       type: string
-      description: Identifier of the savings plan
-      readOnly: true
-    BillingPlanInformation:
-      type: object
-      description: Information describing the type of billing plan for this savings plan.
-      properties:
-        pricingCurrencyTotal:
-          $ref: '#/components/schemas/Price'
-          description: Amount of money to be paid for the Order. Tax is not included.
-        startDate:
-          type: string
-          format: date
-          description: Date when the billing plan has started.
-        nextPaymentDueDate:
-          type: string
-          format: date
-          description: For recurring billing plans, indicates the date when next payment will be processed. Null when total is paid off.
-        transactions:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentDetail'
-          x-ms-identifiers: []
-    ProvisioningState:
-      type: string
-      description: Provisioning state
-      readOnly: true
+      description: Represents the billing plan in ISO 8601 format. Required only for monthly billing plans.
       enum:
-      - Creating
-      - PendingBilling
-      - ConfirmedBilling
-      - Created
-      - Succeeded
-      - Cancelled
-      - Expired
-      - Failed
+      - P1M
       x-ms-enum:
-        name: ProvisioningState
+        name: BillingPlan
         modelAsString: true
     Sku:
       type: object
@@ -253,88 +326,21 @@ components:
         name:
           type: string
           description: Name of the SKU to be applied
-    PaymentStatus:
-      type: string
-      description: Describes whether the payment is completed, failed, cancelled or scheduled in the future.
-      enum:
-      - Succeeded
-      - Failed
-      - Scheduled
-      - Cancelled
-      x-ms-enum:
-        name: PaymentStatus
-        modelAsString: true
-    Price:
-      type: object
-      properties:
-        currencyCode:
-          type: string
-          description: The ISO 4217 3-letter currency code for the currency used by this purchase record.
-        amount:
-          type: number
-          format: double
-    BillingProfileId:
-      type: string
-      readOnly: true
-      description: Fully-qualified identifier of the billing profile where the savings plan is applied. Present only for Field-led or Customer-led customers.
-    BenefitStartTime:
-      type: string
-      format: date-time
-      description: This is the DateTime when the savings plan benefit started.
-    Term:
-      type: string
-      description: Represent benefit term in ISO 8601 format.
-      enum:
-      - P1Y
-      - P3Y
-      - P5Y
-      x-ms-enum:
-        name: Term
-        modelAsString: true
-    SavingsPlanOrderModel:
-      type: object
-      description: Savings plan order
-      required:
-      - sku
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
-      properties:
-        sku:
-          description: Savings plan SKU
-          $ref: '#/components/schemas/Sku'
-        properties:
-          description: Savings plan order properties
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/SavingsPlanOrderModelProperties'
-    RoleAssignmentEntity:
-      type: object
-      description: Role assignment entity
-      properties:
-        id:
-          description: Role assignment entity id
-          type: string
-        name:
-          description: Role assignment entity name
-          type: string
-        properties:
-          description: Role assignment entity properties
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/RoleAssignmentEntityProperties'
   parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      x-ms-parameter-location: client
-      required: true
-      description: The api-version to be used by the service
-      schema:
-        type: string
     ExpandParameter:
       name: $expand
       description: May be used to expand the detail information of some properties.
       in: query
       x-ms-parameter-location: client
       required: false
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      x-ms-parameter-location: client
+      required: true
+      description: The api-version to be used by the service
       schema:
         type: string
     SavingsPlanOrderIdParameter:
@@ -345,8 +351,12 @@ components:
       description: Order ID of the savings plan
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

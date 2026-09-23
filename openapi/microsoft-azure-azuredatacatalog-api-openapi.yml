@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Azure Data Catalog API
+  title: Microsoft Azure Resource Provider Azure Data Catalog API
+  description: The Azure Data Catalog Resource Provider Services API.
+  version: '2016-03-30'
+servers:
+- url: https://management.azure.com
 tags:
 - name: AzureDataCatalog
 paths:
@@ -153,15 +156,66 @@ paths:
         required: true
 components:
   schemas:
-    ADCCatalog:
-      description: Azure Data Catalog.
+    ADCCatalogProperties:
+      description: Properties of the data catalog.
       properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ADCCatalogProperties'
-          description: Azure Data Catalog properties.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
+        sku:
+          type: string
+          description: Azure data catalog SKU.
+          enum:
+          - Free
+          - Standard
+          x-ms-enum:
+            name: SkuType
+            modelAsString: true
+        units:
+          type: integer
+          description: Azure data catalog units.
+        admins:
+          type: array
+          items:
+            $ref: '#/components/schemas/Principals'
+          description: Azure data catalog admin list.
+          x-ms-identifiers:
+          - objectId
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/Principals'
+          description: Azure data catalog user list.
+          x-ms-identifiers:
+          - objectId
+        successfullyProvisioned:
+          type: boolean
+          description: Azure data catalog provision status.
+        enableAutomaticUnitAdjustment:
+          type: boolean
+          description: Automatic unit adjustment enabled or not.
+    OperationDisplayInfo:
+      description: The operation supported by Azure Data Catalog Service.
+      type: object
+      properties:
+        description:
+          description: The description of the operation.
+          type: string
+        operation:
+          description: The action that users can perform, based on their permission level.
+          type: string
+        provider:
+          description: 'Service provider: Azure Data Catalog Service.'
+          type: string
+        resource:
+          description: Resource on which the operation is performed.
+          type: string
+    Principals:
+      description: User principals.
+      properties:
+        upn:
+          type: string
+          description: UPN of the user.
+        objectId:
+          type: string
+          description: Object Id for the user
     OperationEntityListResult:
       description: The list of Azure data catalog service operation response.
       type: object
@@ -173,6 +227,15 @@ components:
             $ref: '#/components/schemas/OperationEntity'
           x-ms-identifiers:
           - name
+    ADCCatalog:
+      description: Azure Data Catalog.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ADCCatalogProperties'
+          description: Azure Data Catalog properties.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
     OperationEntity:
       description: The operation supported by Azure Data Catalog Service.
       type: object
@@ -183,15 +246,6 @@ components:
         display:
           $ref: '#/components/schemas/OperationDisplayInfo'
           description: The operation supported by Azure Data Catalog Service.
-    Principals:
-      description: User principals.
-      properties:
-        upn:
-          type: string
-          description: UPN of the user.
-        objectId:
-          type: string
-          description: Object Id for the user
     ADCCatalogsListResult:
       properties:
         value:
@@ -230,58 +284,18 @@ components:
           type: string
           description: Resource etag
       x-ms-azure-resource: true
-    OperationDisplayInfo:
-      description: The operation supported by Azure Data Catalog Service.
-      type: object
-      properties:
-        description:
-          description: The description of the operation.
-          type: string
-        operation:
-          description: The action that users can perform, based on their permission level.
-          type: string
-        provider:
-          description: 'Service provider: Azure Data Catalog Service.'
-          type: string
-        resource:
-          description: Resource on which the operation is performed.
-          type: string
-    ADCCatalogProperties:
-      description: Properties of the data catalog.
-      properties:
-        sku:
-          type: string
-          description: Azure data catalog SKU.
-          enum:
-          - Free
-          - Standard
-          x-ms-enum:
-            name: SkuType
-            modelAsString: true
-        units:
-          type: integer
-          description: Azure data catalog units.
-        admins:
-          type: array
-          items:
-            $ref: '#/components/schemas/Principals'
-          description: Azure data catalog admin list.
-          x-ms-identifiers:
-          - objectId
-        users:
-          type: array
-          items:
-            $ref: '#/components/schemas/Principals'
-          description: Azure data catalog user list.
-          x-ms-identifiers:
-          - objectId
-        successfullyProvisioned:
-          type: boolean
-          description: Azure data catalog provision status.
-        enableAutomaticUnitAdjustment:
-          type: boolean
-          description: Automatic unit adjustment enabled or not.
   parameters:
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: The name of the resource group within the user's subscription. The name is case insensitive.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 90
+        minLength: 1
+        pattern: ^[-\w\._\(\)]+$
     ApiVersionParameter:
       name: api-version
       in: query
@@ -296,17 +310,6 @@ components:
       description: Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
       schema:
         type: string
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      description: The name of the resource group within the user's subscription. The name is case insensitive.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 90
-        minLength: 1
-        pattern: ^[-\w\._\(\)]+$
     CatalogNameParameter:
       name: catalogName
       in: path
@@ -315,8 +318,12 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

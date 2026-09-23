@@ -1,8 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Iscsi Targets API
+  version: 2021-04-01-preview
+  title: Microsoft Azure StoragePoolManagement Iscsi Targets API
   description: APIs for iSCSI target operations.
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: IscsiTargets
   description: APIs for iSCSI target operations.
@@ -36,7 +41,7 @@ paths:
       x-ms-examples:
         List Disk Pools by Resource Group:
           $ref: ./examples/IscsiTargets_ListByDiskPool.json
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Storagepool Diskpools Diskpoolname Iscsitargets
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StoragePool/diskPools/{diskPoolName}/iscsiTargets/{iscsiTargetName}
   : put:
       tags:
@@ -75,7 +80,7 @@ paths:
       x-ms-examples:
         Create or Update iSCSI Target:
           $ref: ./examples/IscsiTargets_Put.json
-      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Storagepool Diskpools Diskpoolname Iscsitargets Iscsitargetname
+      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups…
     patch:
       tags:
       - IscsiTargets
@@ -109,7 +114,7 @@ paths:
       x-ms-examples:
         Update iSCSI Target:
           $ref: ./examples/IscsiTargets_Patch.json
-      summary: Microsoft Azure Patch Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Storagepool Diskpools Diskpoolname Iscsitargets Iscsitargetname
+      summary: Microsoft Azure Patch Subscriptions Subscriptionid Resourcegroups…
     delete:
       tags:
       - IscsiTargets
@@ -140,7 +145,7 @@ paths:
       x-ms-examples:
         Delete iSCSI Target:
           $ref: ./examples/IscsiTargets_Delete.json
-      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Storagepool Diskpools Diskpoolname Iscsitargets Iscsitargetname
+      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
     get:
       tags:
       - IscsiTargets
@@ -168,38 +173,9 @@ paths:
       x-ms-examples:
         Get iSCSI Target:
           $ref: ./examples/IscsiTargets_Get.json
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Storagepool Diskpools Diskpoolname Iscsitargets Iscsitargetname
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    IscsiLun:
-      type: object
-      required:
-      - name
-      - managedDiskAzureResourceId
-      description: LUN to expose the Azure Managed Disk.
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          minimum: 1
-          maximum: 90
-          description: 'User defined name for iSCSI LUN; example: "lun0"'
-        managedDiskAzureResourceId:
-          type: string
-          description: Azure Resource ID of the Managed Disk.
-        lun:
-          type: integer
-          format: int32
-          readOnly: true
-          description: Specifies the Logical Unit Number of the iSCSI LUN.
-    Error:
-      type: object
-      description: The resource management error response.
-      properties:
-        error:
-          type: object
-          description: RP error response.
-          $ref: '#/components/schemas/ErrorResponse'
     IscsiTargetList:
       type: object
       required:
@@ -216,15 +192,56 @@ components:
           description: URI to fetch the next section of the paginated response.
           type: string
           readOnly: true
-    AclMode:
+    OperationalStatus:
       type: string
       enum:
-      - Dynamic
-      - Static
+      - Invalid
+      - Unknown
+      - Healthy
+      - Unhealthy
+      - Updating
+      - Running
+      - Stopped
+      - Stopped (deallocated)
       x-ms-enum:
-        name: IscsiTargetAclMode
+        name: OperationalStatus
         modelAsString: true
-      description: ACL mode for iSCSI Target.
+      description: Operational status of the resource.
+    IscsiTarget:
+      type: object
+      description: Response for iSCSI Target requests.
+      required:
+      - properties
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Properties for iSCSI Target operations.
+          $ref: '#/components/schemas/IscsiTargetProperties'
+        systemData:
+          description: Resource metadata required by ARM RPC
+          $ref: '#/components/schemas/SystemMetadata'
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+    ProxyResource:
+      description: The resource model definition for a ARM proxy resource. It will have everything other than required location and tags
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    ProvisioningState:
+      type: string
+      enum:
+      - Invalid
+      - Succeeded
+      - Failed
+      - Canceled
+      - Pending
+      - Creating
+      - Updating
+      - Deleting
+      x-ms-enum:
+        name: ProvisioningStates
+        modelAsString: true
+      description: Provisioning state of the iSCSI Target.
+      readOnly: true
     IscsiTargetCreateProperties:
       type: object
       description: Properties for iSCSI Target create or update request.
@@ -248,6 +265,15 @@ components:
           description: List of LUNs to be exposed through iSCSI Target.
           items:
             $ref: '#/components/schemas/IscsiLun'
+    AclMode:
+      type: string
+      enum:
+      - Dynamic
+      - Static
+      x-ms-enum:
+        name: IscsiTargetAclMode
+        modelAsString: true
+      description: ACL mode for iSCSI Target.
     SystemMetadata:
       description: Metadata pertaining to creation and last modification of the resource.
       type: object
@@ -289,83 +315,17 @@ components:
           type: string
           format: date-time
           description: The type of identity that last modified the resource.
-    Resource:
-      description: ARM resource model definition.
+    ErrorAdditionalInfo:
       properties:
-        id:
-          readOnly: true
-          type: string
-          description: Fully qualified resource Id for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}
-        name:
-          readOnly: true
-          type: string
-          description: The name of the resource
         type:
           readOnly: true
           type: string
-          description: The type of the resource. Ex- Microsoft.Compute/virtualMachines or Microsoft.Storage/storageAccounts.
-      x-ms-azure-resource: true
-    OperationalStatus:
-      type: string
-      enum:
-      - Invalid
-      - Unknown
-      - Healthy
-      - Unhealthy
-      - Updating
-      - Running
-      - Stopped
-      - Stopped (deallocated)
-      x-ms-enum:
-        name: OperationalStatus
-        modelAsString: true
-      description: Operational status of the resource.
-    IscsiTargetCreate:
-      type: object
-      description: Payload for iSCSI Target create or update requests.
-      required:
-      - properties
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Properties for iSCSI Target create request.
-          $ref: '#/components/schemas/IscsiTargetCreateProperties'
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-    ProxyResource:
-      description: The resource model definition for a ARM proxy resource. It will have everything other than required location and tags
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-    IscsiTargetUpdateProperties:
-      type: object
-      description: Properties for iSCSI Target update request.
-      properties:
-        staticAcls:
-          type: array
-          description: Access Control List (ACL) for an iSCSI Target; defines LUN masking policy
-          items:
-            $ref: '#/components/schemas/Acl'
-        luns:
-          type: array
-          description: List of LUNs to be exposed through iSCSI Target.
-          items:
-            $ref: '#/components/schemas/IscsiLun'
-    ProvisioningState:
-      type: string
-      enum:
-      - Invalid
-      - Succeeded
-      - Failed
-      - Canceled
-      - Pending
-      - Creating
-      - Updating
-      - Deleting
-      x-ms-enum:
-        name: ProvisioningStates
-        modelAsString: true
-      description: Provisioning state of the iSCSI Target.
-      readOnly: true
+          description: The additional info type.
+        info:
+          readOnly: true
+          type: object
+          description: The additional info.
+      description: The resource management error additional info.
     IscsiTargetProperties:
       type: object
       description: Response properties for iSCSI Target operations.
@@ -409,18 +369,6 @@ components:
           type: integer
           format: int32
           description: The port used by iSCSI Target portal group.
-    IscsiTargetUpdate:
-      type: object
-      description: Payload for iSCSI Target update requests.
-      required:
-      - properties
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Properties for iSCSI Target update request.
-          $ref: '#/components/schemas/IscsiTargetUpdateProperties'
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
     ErrorResponse:
       properties:
         code:
@@ -448,32 +396,46 @@ components:
             $ref: '#/components/schemas/ErrorAdditionalInfo'
           description: The error additional info.
       description: The resource management error response.
-    IscsiTarget:
+    IscsiTargetUpdate:
       type: object
-      description: Response for iSCSI Target requests.
+      description: Payload for iSCSI Target update requests.
       required:
       - properties
       properties:
         properties:
           x-ms-client-flatten: true
-          description: Properties for iSCSI Target operations.
-          $ref: '#/components/schemas/IscsiTargetProperties'
-        systemData:
-          description: Resource metadata required by ARM RPC
-          $ref: '#/components/schemas/SystemMetadata'
+          description: Properties for iSCSI Target update request.
+          $ref: '#/components/schemas/IscsiTargetUpdateProperties'
       allOf:
       - $ref: '#/components/schemas/ProxyResource'
-    ErrorAdditionalInfo:
+    IscsiTargetCreate:
+      type: object
+      description: Payload for iSCSI Target create or update requests.
+      required:
+      - properties
       properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Properties for iSCSI Target create request.
+          $ref: '#/components/schemas/IscsiTargetCreateProperties'
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+    Resource:
+      description: ARM resource model definition.
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Fully qualified resource Id for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}
+        name:
+          readOnly: true
+          type: string
+          description: The name of the resource
         type:
           readOnly: true
           type: string
-          description: The additional info type.
-        info:
-          readOnly: true
-          type: object
-          description: The additional info.
-      description: The resource management error additional info.
+          description: The type of the resource. Ex- Microsoft.Compute/virtualMachines or Microsoft.Storage/storageAccounts.
+      x-ms-azure-resource: true
     Acl:
       type: object
       description: Access Control List (ACL) for an iSCSI Target; defines LUN masking policy
@@ -489,15 +451,58 @@ components:
           description: List of LUN names mapped to the ACL.
           items:
             type: string
+    IscsiLun:
+      type: object
+      required:
+      - name
+      - managedDiskAzureResourceId
+      description: LUN to expose the Azure Managed Disk.
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minimum: 1
+          maximum: 90
+          description: 'User defined name for iSCSI LUN; example: "lun0"'
+        managedDiskAzureResourceId:
+          type: string
+          description: Azure Resource ID of the Managed Disk.
+        lun:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Specifies the Logical Unit Number of the iSCSI LUN.
+    Error:
+      type: object
+      description: The resource management error response.
+      properties:
+        error:
+          type: object
+          description: RP error response.
+          $ref: '#/components/schemas/ErrorResponse'
+    IscsiTargetUpdateProperties:
+      type: object
+      description: Properties for iSCSI Target update request.
+      properties:
+        staticAcls:
+          type: array
+          description: Access Control List (ACL) for an iSCSI Target; defines LUN masking policy
+          items:
+            $ref: '#/components/schemas/Acl'
+        luns:
+          type: array
+          description: List of LUNs to be exposed through iSCSI Target.
+          items:
+            $ref: '#/components/schemas/IscsiLun'
   parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
+    IscsiTargetName:
+      name: iscsiTargetName
       required: true
-      description: The API version to use for this operation.
+      in: path
+      description: The name of the iSCSI Target.
+      x-ms-parameter-location: method
       schema:
         type: string
-        minLength: 1
     ResourceGroupNameParameter:
       name: resourceGroupName
       in: path
@@ -509,30 +514,14 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._]*[0-9A-Za-z]$
-    IscsiTargetUpdate:
-      name: iscsiTargetUpdatePayload
+    ApiVersionParameter:
+      name: api-version
+      in: query
       required: true
-      in: body
-      description: Request payload for iSCSI Target update operation.
-      schema:
-        $ref: '#/components/schemas/IscsiTargetUpdate'
-      x-ms-parameter-location: method
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: The ID of the target subscription.
+      description: The API version to use for this operation.
       schema:
         type: string
         minLength: 1
-    IscsiTargetCreate:
-      name: iscsiTargetCreatePayload
-      required: true
-      in: body
-      description: Request payload for iSCSI Target create operation.
-      schema:
-        $ref: '#/components/schemas/IscsiTargetCreate'
-      x-ms-parameter-location: method
     DiskPoolName:
       name: diskPoolName
       in: path
@@ -541,16 +530,36 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    IscsiTargetName:
-      name: iscsiTargetName
-      required: true
+    SubscriptionIdParameter:
+      name: subscriptionId
       in: path
-      description: The name of the iSCSI Target.
-      x-ms-parameter-location: method
+      required: true
+      description: The ID of the target subscription.
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+        minLength: 1
+    IscsiTargetUpdate:
+      name: iscsiTargetUpdatePayload
+      required: true
+      in: body
+      description: Request payload for iSCSI Target update operation.
+      schema:
+        $ref: '#/components/schemas/IscsiTargetUpdate'
+      x-ms-parameter-location: method
+    IscsiTargetCreate:
+      name: iscsiTargetCreatePayload
+      required: true
+      in: body
+      description: Request payload for iSCSI Target create operation.
+      schema:
+        $ref: '#/components/schemas/IscsiTargetCreate'
+      x-ms-parameter-location: method
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

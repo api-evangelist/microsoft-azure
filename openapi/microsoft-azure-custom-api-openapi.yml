@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Custom API
+  version: 2.1-preview.3
+  title: Microsoft Azure Form Recognizer Client Custom API
+  description: Extracts information from forms and images into structured data.
+security:
+- apim_key: []
 tags:
 - name: Custom
 paths:
@@ -293,114 +296,279 @@ paths:
       - Custom
 components:
   schemas:
-    TextLine:
-      description: An object representing an extracted text line.
+    TextWord:
+      description: An object representing a word.
       type: object
       required:
-      - text
       - boundingBox
-      - words
+      - text
       properties:
         text:
-          description: The text content of the line.
+          description: The text content of the word.
           type: string
         boundingBox:
-          description: Bounding box of an extracted line.
+          description: Bounding box of an extracted word.
           $ref: '#/components/schemas/BoundingBox'
-        words:
-          description: List of words in the text line.
+        confidence:
+          description: Confidence value.
+          $ref: '#/components/schemas/Confidence'
+    CopyResult:
+      description: Custom model copy result.
+      type: object
+      required:
+      - modelId
+      properties:
+        modelId:
+          description: Identifier of the target model.
+          type: string
+          format: uuid
+        errors:
+          description: Errors returned during the copy operation.
           type: array
           items:
-            $ref: '#/components/schemas/TextWord'
-        appearance:
-          description: Text appearance properties.
-          $ref: '#/components/schemas/Appearance'
-    CopyRequest:
-      description: Request parameter to copy an existing custom model from the source resource to a target resource referenced by the resource ID.
-      required:
-      - targetResourceId
-      - targetResourceRegion
-      - copyAuthorization
-      type: object
-      properties:
-        targetResourceId:
-          description: Azure Resource Id of the target Form Recognizer resource where the model is copied to.
-          maxLength: 1024
-          type: string
-          pattern: ^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.CognitiveServices/accounts/[^/]*$
-          x-ms-azure-resource: true
-        targetResourceRegion:
-          description: Location of the target Azure resource. A valid Azure region name supported by Cognitive Services.
-          type: string
-          pattern: ^[a-z0-9]+$
-          minLength: 1
-          maxLength: 24
-        copyAuthorization:
-          description: Entity that encodes claims to authorize the copy request.
-          $ref: '#/components/schemas/CopyAuthorizationResult'
-    FormFieldsReport:
-      description: Report for a custom model training field.
+            $ref: '#/components/schemas/ErrorInformation'
+    KeyValuePair:
+      description: Information about the extracted key-value pair.
       type: object
       required:
-      - fieldName
-      - accuracy
+      - key
+      - value
+      - confidence
       properties:
-        fieldName:
-          description: Training field name.
+        label:
+          description: A user defined label for the key/value pair entry.
           type: string
-        accuracy:
-          description: Estimated extraction accuracy for this field.
-          type: number
+        key:
+          description: Information about the extracted key in a key-value pair.
+          $ref: '#/components/schemas/KeyValueElement'
+        value:
+          description: Information about the extracted value in a key-value pair.
+          $ref: '#/components/schemas/KeyValueElement'
+        confidence:
+          description: Confidence value.
+          $ref: '#/components/schemas/Confidence'
+    OperationStatus:
+      type: string
+      description: Status of the queued operation.
+      enum:
+      - notStarted
+      - running
+      - succeeded
+      - failed
+      x-ms-enum:
+        name: OperationStatus
+        modelAsString: false
+    AnalyzeResult:
+      description: Analyze operation result.
+      type: object
+      required:
+      - version
+      - readResults
+      properties:
+        version:
+          description: Version of schema used for this result.
+          type: string
+        readResults:
+          description: Text extracted from the input.
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadResult'
+        pageResults:
+          description: Page-level information extracted from the input.
+          type: array
+          items:
+            $ref: '#/components/schemas/PageResult'
+        documentResults:
+          description: Document-level information extracted from the input.
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentResult'
+        errors:
+          description: List of errors reported during the analyze operation.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorInformation'
+    CopyAuthorizationResult:
+      description: Request parameter that contains authorization claims for copy operation.
+      required:
+      - modelId
+      - accessToken
+      - expirationDateTimeTicks
+      type: object
+      properties:
+        modelId:
+          description: Model identifier.
+          type: string
+        accessToken:
+          description: Token claim used to authorize the request.
+          type: string
+        expirationDateTimeTicks:
+          description: The time when the access token expires. The date is represented as the number of seconds from 1970-01-01T0:0:0Z UTC until the expiration time.
+          type: integer
+          format: int64
+    SelectionMark:
+      description: Information about the extracted selection mark.
+      type: object
+      required:
+      - boundingBox
+      - confidence
+      - state
+      properties:
+        boundingBox:
+          description: Bounding box of the selection mark.
+          $ref: '#/components/schemas/BoundingBox'
+        confidence:
+          description: Confidence value.
+          $ref: '#/components/schemas/Confidence'
+        state:
+          description: State of the selection mark.
+          type: string
+          enum:
+          - selected
+          - unselected
     ElementReference:
       description: Reference to a line, word or selection mark.
       type: string
-    BoundingBox:
-      description: Quadrangle bounding box, with coordinates specified relative to the top-left of the original image. The eight numbers represent the four points, clockwise from the top-left corner relative to the text orientation. For image, the (x, y) coordinates are measured in pixels. For PDF, the (x, y) coordinates are measured in inches.
-      type: array
-      minItems: 8
-      maxItems: 8
-      items:
-        type: number
-    Attributes:
-      description: Optional model attributes.
-      type: object
-      properties:
-        isComposed:
-          description: 'Is this model composed? (default: false).'
-          type: boolean
-          default: false
-    ErrorInformation:
+    DocumentResult:
+      description: A set of extracted fields corresponding to the input document.
       type: object
       required:
-      - code
-      - message
+      - docType
+      - pageRange
+      - fields
       properties:
-        code:
+        docType:
+          description: Document type.
           type: string
-        message:
+        modelId:
+          description: Model identifier.
           type: string
-    AnalyzeOperationResult:
-      description: Status and result of the queued analyze operation.
+          format: uuid
+        pageRange:
+          description: First and last page number where the document is found.
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            type: integer
+            minimum: 1
+        docTypeConfidence:
+          description: Predicted document type confidence.
+          $ref: '#/components/schemas/Confidence'
+        fields:
+          description: Dictionary of named field values.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/FieldValue'
+    DataTable:
+      description: Information about the extracted table contained in a page.
       type: object
       required:
+      - rows
+      - columns
+      - cells
+      - boundingBox
+      properties:
+        rows:
+          description: Number of rows.
+          type: integer
+          minimum: 1
+        columns:
+          description: Number of columns.
+          type: integer
+          minimum: 1
+        cells:
+          description: List of cells contained in the table.
+          type: array
+          items:
+            $ref: '#/components/schemas/DataTableCell'
+        boundingBox:
+          description: Bounding box of the table.
+          $ref: '#/components/schemas/BoundingBox'
+    TrainingDocumentInfo:
+      description: Report for a custom model training document.
+      type: object
+      required:
+      - documentName
+      - pages
+      - errors
+      - status
+      properties:
+        documentName:
+          description: Training document name.
+          type: string
+        pages:
+          format: int32
+          description: Total number of pages trained.
+          type: integer
+        errors:
+          description: List of errors.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorInformation'
+        status:
+          description: Status of the training operation.
+          enum:
+          - succeeded
+          - partiallySucceeded
+          - failed
+          type: string
+          x-ms-enum:
+            name: TrainStatus
+            modelAsString: false
+    Model:
+      description: Response to the get custom model operation.
+      type: object
+      required:
+      - modelInfo
+      properties:
+        modelInfo:
+          $ref: '#/components/schemas/ModelInfo'
+        keys:
+          $ref: '#/components/schemas/KeysResult'
+        trainResult:
+          description: Training result for custom model.
+          $ref: '#/components/schemas/TrainResult'
+        composedTrainResults:
+          type: array
+          description: Training result for composed model.
+          items:
+            $ref: '#/components/schemas/TrainResult'
+    ModelInfo:
+      description: Basic custom model information.
+      type: object
+      required:
+      - modelId
       - status
       - createdDateTime
       - lastUpdatedDateTime
       properties:
+        modelId:
+          description: Model identifier.
+          type: string
+          format: uuid
         status:
-          description: Operation status.
-          $ref: '#/components/schemas/OperationStatus'
+          description: Status of the model.
+          enum:
+          - creating
+          - ready
+          - invalid
+          type: string
+          x-ms-enum:
+            name: ModelStatus
+            modelAsString: false
         createdDateTime:
           format: date-time
-          description: Date and time (UTC) when the analyze operation was submitted.
+          description: Date and time (UTC) when the model was created.
           type: string
         lastUpdatedDateTime:
           format: date-time
           description: Date and time (UTC) when the status was last updated.
           type: string
-        analyzeResult:
-          description: Results of the analyze operation.
-          $ref: '#/components/schemas/AnalyzeResult'
+        modelName:
+          $ref: '#/components/schemas/ModelName'
+        attributes:
+          $ref: '#/components/schemas/Attributes'
     DataTableCell:
       description: Information about the extracted cell in a table.
       type: object
@@ -451,34 +619,146 @@ components:
           description: Is the current cell a footer cell?
           type: boolean
           default: false
-    TrainResult:
-      description: Custom model training result.
+    TrainRequest:
+      description: Request parameter to train a new custom model.
+      required:
+      - source
+      type: object
+      properties:
+        source:
+          description: Source path containing the training documents.
+          maxLength: 2048
+          minLength: 0
+          type: string
+        sourceFilter:
+          $ref: '#/components/schemas/TrainSourceFilter'
+          description: Filter to apply to the documents in the source path for training.
+        useLabelFile:
+          description: Use label file for training a model.
+          type: boolean
+          default: false
+        modelName:
+          $ref: '#/components/schemas/ModelName'
+    FieldValueType:
+      type: string
+      description: Semantic data type of the field value.
+      enum:
+      - string
+      - date
+      - time
+      - phoneNumber
+      - number
+      - integer
+      - array
+      - object
+      - selectionMark
+      - gender
+      - country
+      x-ms-enum:
+        name: FieldValueType
+        modelAsString: false
+    CopyRequest:
+      description: Request parameter to copy an existing custom model from the source resource to a target resource referenced by the resource ID.
+      required:
+      - targetResourceId
+      - targetResourceRegion
+      - copyAuthorization
+      type: object
+      properties:
+        targetResourceId:
+          description: Azure Resource Id of the target Form Recognizer resource where the model is copied to.
+          maxLength: 1024
+          type: string
+          pattern: ^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.CognitiveServices/accounts/[^/]*$
+          x-ms-azure-resource: true
+        targetResourceRegion:
+          description: Location of the target Azure resource. A valid Azure region name supported by Cognitive Services.
+          type: string
+          pattern: ^[a-z0-9]+$
+          minLength: 1
+          maxLength: 24
+        copyAuthorization:
+          description: Entity that encodes claims to authorize the copy request.
+          $ref: '#/components/schemas/CopyAuthorizationResult'
+    Confidence:
+      description: Confidence value.
+      type: number
+      minimum: 0
+      maximum: 1
+    ErrorResponse:
       type: object
       required:
-      - trainingDocuments
+      - error
       properties:
-        trainingDocuments:
-          description: List of the documents used to train the model and any errors reported in each document.
+        error:
+          $ref: '#/components/schemas/ErrorInformation'
+    PageResult:
+      description: Extracted information from a single page.
+      type: object
+      required:
+      - page
+      properties:
+        page:
+          description: Page number.
+          type: integer
+          format: int32
+          minimum: 1
+        clusterId:
+          description: Cluster identifier.
+          type: integer
+          format: int32
+          minimum: 0
+        keyValuePairs:
+          description: List of key-value pairs extracted from the page.
           type: array
           items:
-            $ref: '#/components/schemas/TrainingDocumentInfo'
-        fields:
-          description: List of fields used to train the model and the train operation error reported by each.
+            $ref: '#/components/schemas/KeyValuePair'
+        tables:
+          description: List of data tables extracted from the page.
           type: array
           items:
-            $ref: '#/components/schemas/FormFieldsReport'
-        averageModelAccuracy:
-          description: Average accuracy.
-          type: number
-        modelId:
-          description: Model identifier.
+            $ref: '#/components/schemas/DataTable'
+    ErrorInformation:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
           type: string
-          format: uuid
-        errors:
-          description: Errors returned during the training operation.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorInformation'
+        message:
+          type: string
+    KeyValueType:
+      type: string
+      description: Semantic data type of the key value element.
+      enum:
+      - string
+      - selectionMark
+      x-ms-enum:
+        name: KeyValueType
+        modelAsString: true
+    AnalyzeOperationResult:
+      description: Status and result of the queued analyze operation.
+      type: object
+      required:
+      - status
+      - createdDateTime
+      - lastUpdatedDateTime
+      properties:
+        status:
+          description: Operation status.
+          $ref: '#/components/schemas/OperationStatus'
+        createdDateTime:
+          format: date-time
+          description: Date and time (UTC) when the analyze operation was submitted.
+          type: string
+        lastUpdatedDateTime:
+          format: date-time
+          description: Date and time (UTC) when the status was last updated.
+          type: string
+        analyzeResult:
+          description: Results of the analyze operation.
+          $ref: '#/components/schemas/AnalyzeResult'
     ReadResult:
       description: Text extracted from a page in the input document.
       type: object
@@ -525,24 +805,185 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SelectionMark'
-    CopyAuthorizationResult:
-      description: Request parameter that contains authorization claims for copy operation.
+    KeyValueElement:
+      description: Information about the extracted key or value in a key-value pair.
+      type: object
       required:
-      - modelId
-      - accessToken
-      - expirationDateTimeTicks
+      - text
+      properties:
+        type:
+          $ref: '#/components/schemas/KeyValueType'
+        text:
+          description: The text content of the key or value.
+          type: string
+        boundingBox:
+          description: Bounding box of the key or value.
+          $ref: '#/components/schemas/BoundingBox'
+        elements:
+          description: When includeTextDetails is set to true, a list of references to the text elements constituting this key or value.
+          type: array
+          items:
+            $ref: '#/components/schemas/ElementReference'
+    TrainSourceFilter:
+      description: Filter to apply to the documents in the source path for training.
       type: object
       properties:
+        prefix:
+          description: A case-sensitive prefix string to filter documents in the source path for training. For example, when using a Azure storage blob Uri, use the prefix to restrict sub folders for training.
+          maxLength: 1024
+          minLength: 0
+          type: string
+        includeSubFolders:
+          description: A flag to indicate if sub folders within the set of prefix folders will also need to be included when searching for content to be preprocessed.
+          type: boolean
+          default: false
+    KeysResult:
+      description: Keys extracted by the custom model.
+      type: object
+      required:
+      - clusters
+      properties:
+        clusters:
+          description: Object mapping clusterIds to a list of keys.
+          type: object
+          additionalProperties:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+    Appearance:
+      description: An object representing the appearance of the text line.
+      type: object
+      required:
+      - style
+      properties:
+        style:
+          description: An object representing the style of the text line.
+          type: object
+          $ref: '#/components/schemas/Style'
+    ModelName:
+      description: 'Optional user defined model name (max length: 1024).'
+      type: string
+    Style:
+      description: An object representing the style of the text line.
+      type: object
+      required:
+      - name
+      - confidence
+      properties:
+        name:
+          description: The text line style name, including handwriting and other.
+          type: string
+          x-ms-enum:
+            name: TextStyle
+            modelAsString: true
+          enum:
+          - other
+          - handwriting
+        confidence:
+          description: The confidence of text line style.
+          type: number
+          format: float
+    FormFieldsReport:
+      description: Report for a custom model training field.
+      type: object
+      required:
+      - fieldName
+      - accuracy
+      properties:
+        fieldName:
+          description: Training field name.
+          type: string
+        accuracy:
+          description: Estimated extraction accuracy for this field.
+          type: number
+    TrainResult:
+      description: Custom model training result.
+      type: object
+      required:
+      - trainingDocuments
+      properties:
+        trainingDocuments:
+          description: List of the documents used to train the model and any errors reported in each document.
+          type: array
+          items:
+            $ref: '#/components/schemas/TrainingDocumentInfo'
+        fields:
+          description: List of fields used to train the model and the train operation error reported by each.
+          type: array
+          items:
+            $ref: '#/components/schemas/FormFieldsReport'
+        averageModelAccuracy:
+          description: Average accuracy.
+          type: number
         modelId:
           description: Model identifier.
           type: string
-        accessToken:
-          description: Token claim used to authorize the request.
+          format: uuid
+        errors:
+          description: Errors returned during the training operation.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorInformation'
+    Attributes:
+      description: Optional model attributes.
+      type: object
+      properties:
+        isComposed:
+          description: 'Is this model composed? (default: false).'
+          type: boolean
+          default: false
+    TextLine:
+      description: An object representing an extracted text line.
+      type: object
+      required:
+      - text
+      - boundingBox
+      - words
+      properties:
+        text:
+          description: The text content of the line.
           type: string
-        expirationDateTimeTicks:
-          description: The time when the access token expires. The date is represented as the number of seconds from 1970-01-01T0:0:0Z UTC until the expiration time.
-          type: integer
-          format: int64
+        boundingBox:
+          description: Bounding box of an extracted line.
+          $ref: '#/components/schemas/BoundingBox'
+        words:
+          description: List of words in the text line.
+          type: array
+          items:
+            $ref: '#/components/schemas/TextWord'
+        appearance:
+          description: Text appearance properties.
+          $ref: '#/components/schemas/Appearance'
+    BoundingBox:
+      description: Quadrangle bounding box, with coordinates specified relative to the top-left of the original image. The eight numbers represent the four points, clockwise from the top-left corner relative to the text orientation. For image, the (x, y) coordinates are measured in pixels. For PDF, the (x, y) coordinates are measured in inches.
+      type: array
+      minItems: 8
+      maxItems: 8
+      items:
+        type: number
+    CopyOperationResult:
+      description: Status and result of the queued copy operation.
+      type: object
+      required:
+      - status
+      - createdDateTime
+      - lastUpdatedDateTime
+      properties:
+        status:
+          description: Operation status.
+          $ref: '#/components/schemas/OperationStatus'
+        createdDateTime:
+          format: date-time
+          description: Date and time (UTC) when the copy operation was submitted.
+          type: string
+        lastUpdatedDateTime:
+          format: date-time
+          description: Date and time (UTC) when the status was last updated.
+          type: string
+        copyResult:
+          description: Results of the copy operation.
+          $ref: '#/components/schemas/CopyResult'
     FieldValue:
       description: Recognized field value.
       type: object
@@ -616,95 +1057,6 @@ components:
           description: The 1-based page number in the input document.
           type: integer
           minimum: 1
-    SelectionMark:
-      description: Information about the extracted selection mark.
-      type: object
-      required:
-      - boundingBox
-      - confidence
-      - state
-      properties:
-        boundingBox:
-          description: Bounding box of the selection mark.
-          $ref: '#/components/schemas/BoundingBox'
-        confidence:
-          description: Confidence value.
-          $ref: '#/components/schemas/Confidence'
-        state:
-          description: State of the selection mark.
-          type: string
-          enum:
-          - selected
-          - unselected
-    FieldValueType:
-      type: string
-      description: Semantic data type of the field value.
-      enum:
-      - string
-      - date
-      - time
-      - phoneNumber
-      - number
-      - integer
-      - array
-      - object
-      - selectionMark
-      - gender
-      - country
-      x-ms-enum:
-        name: FieldValueType
-        modelAsString: false
-    KeysResult:
-      description: Keys extracted by the custom model.
-      type: object
-      required:
-      - clusters
-      properties:
-        clusters:
-          description: Object mapping clusterIds to a list of keys.
-          type: object
-          additionalProperties:
-            type: array
-            uniqueItems: true
-            items:
-              type: string
-    CopyOperationResult:
-      description: Status and result of the queued copy operation.
-      type: object
-      required:
-      - status
-      - createdDateTime
-      - lastUpdatedDateTime
-      properties:
-        status:
-          description: Operation status.
-          $ref: '#/components/schemas/OperationStatus'
-        createdDateTime:
-          format: date-time
-          description: Date and time (UTC) when the copy operation was submitted.
-          type: string
-        lastUpdatedDateTime:
-          format: date-time
-          description: Date and time (UTC) when the status was last updated.
-          type: string
-        copyResult:
-          description: Results of the copy operation.
-          $ref: '#/components/schemas/CopyResult'
-    CopyResult:
-      description: Custom model copy result.
-      type: object
-      required:
-      - modelId
-      properties:
-        modelId:
-          description: Identifier of the target model.
-          type: string
-          format: uuid
-        errors:
-          description: Errors returned during the copy operation.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorInformation'
     SourcePath:
       description: Uri or local path to source data.
       type: object
@@ -714,355 +1066,6 @@ components:
           maxLength: 2048
           minLength: 0
           type: string
-    TrainSourceFilter:
-      description: Filter to apply to the documents in the source path for training.
-      type: object
-      properties:
-        prefix:
-          description: A case-sensitive prefix string to filter documents in the source path for training. For example, when using a Azure storage blob Uri, use the prefix to restrict sub folders for training.
-          maxLength: 1024
-          minLength: 0
-          type: string
-        includeSubFolders:
-          description: A flag to indicate if sub folders within the set of prefix folders will also need to be included when searching for content to be preprocessed.
-          type: boolean
-          default: false
-    ModelName:
-      description: 'Optional user defined model name (max length: 1024).'
-      type: string
-    TrainRequest:
-      description: Request parameter to train a new custom model.
-      required:
-      - source
-      type: object
-      properties:
-        source:
-          description: Source path containing the training documents.
-          maxLength: 2048
-          minLength: 0
-          type: string
-        sourceFilter:
-          $ref: '#/components/schemas/TrainSourceFilter'
-          description: Filter to apply to the documents in the source path for training.
-        useLabelFile:
-          description: Use label file for training a model.
-          type: boolean
-          default: false
-        modelName:
-          $ref: '#/components/schemas/ModelName'
-    OperationStatus:
-      type: string
-      description: Status of the queued operation.
-      enum:
-      - notStarted
-      - running
-      - succeeded
-      - failed
-      x-ms-enum:
-        name: OperationStatus
-        modelAsString: false
-    TextWord:
-      description: An object representing a word.
-      type: object
-      required:
-      - boundingBox
-      - text
-      properties:
-        text:
-          description: The text content of the word.
-          type: string
-        boundingBox:
-          description: Bounding box of an extracted word.
-          $ref: '#/components/schemas/BoundingBox'
-        confidence:
-          description: Confidence value.
-          $ref: '#/components/schemas/Confidence'
-    AnalyzeResult:
-      description: Analyze operation result.
-      type: object
-      required:
-      - version
-      - readResults
-      properties:
-        version:
-          description: Version of schema used for this result.
-          type: string
-        readResults:
-          description: Text extracted from the input.
-          type: array
-          items:
-            $ref: '#/components/schemas/ReadResult'
-        pageResults:
-          description: Page-level information extracted from the input.
-          type: array
-          items:
-            $ref: '#/components/schemas/PageResult'
-        documentResults:
-          description: Document-level information extracted from the input.
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentResult'
-        errors:
-          description: List of errors reported during the analyze operation.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorInformation'
-    KeyValueElement:
-      description: Information about the extracted key or value in a key-value pair.
-      type: object
-      required:
-      - text
-      properties:
-        type:
-          $ref: '#/components/schemas/KeyValueType'
-        text:
-          description: The text content of the key or value.
-          type: string
-        boundingBox:
-          description: Bounding box of the key or value.
-          $ref: '#/components/schemas/BoundingBox'
-        elements:
-          description: When includeTextDetails is set to true, a list of references to the text elements constituting this key or value.
-          type: array
-          items:
-            $ref: '#/components/schemas/ElementReference'
-    Appearance:
-      description: An object representing the appearance of the text line.
-      type: object
-      required:
-      - style
-      properties:
-        style:
-          description: An object representing the style of the text line.
-          type: object
-          $ref: '#/components/schemas/Style'
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorInformation'
-    Model:
-      description: Response to the get custom model operation.
-      type: object
-      required:
-      - modelInfo
-      properties:
-        modelInfo:
-          $ref: '#/components/schemas/ModelInfo'
-        keys:
-          $ref: '#/components/schemas/KeysResult'
-        trainResult:
-          description: Training result for custom model.
-          $ref: '#/components/schemas/TrainResult'
-        composedTrainResults:
-          type: array
-          description: Training result for composed model.
-          items:
-            $ref: '#/components/schemas/TrainResult'
-    ModelInfo:
-      description: Basic custom model information.
-      type: object
-      required:
-      - modelId
-      - status
-      - createdDateTime
-      - lastUpdatedDateTime
-      properties:
-        modelId:
-          description: Model identifier.
-          type: string
-          format: uuid
-        status:
-          description: Status of the model.
-          enum:
-          - creating
-          - ready
-          - invalid
-          type: string
-          x-ms-enum:
-            name: ModelStatus
-            modelAsString: false
-        createdDateTime:
-          format: date-time
-          description: Date and time (UTC) when the model was created.
-          type: string
-        lastUpdatedDateTime:
-          format: date-time
-          description: Date and time (UTC) when the status was last updated.
-          type: string
-        modelName:
-          $ref: '#/components/schemas/ModelName'
-        attributes:
-          $ref: '#/components/schemas/Attributes'
-    DataTable:
-      description: Information about the extracted table contained in a page.
-      type: object
-      required:
-      - rows
-      - columns
-      - cells
-      - boundingBox
-      properties:
-        rows:
-          description: Number of rows.
-          type: integer
-          minimum: 1
-        columns:
-          description: Number of columns.
-          type: integer
-          minimum: 1
-        cells:
-          description: List of cells contained in the table.
-          type: array
-          items:
-            $ref: '#/components/schemas/DataTableCell'
-        boundingBox:
-          description: Bounding box of the table.
-          $ref: '#/components/schemas/BoundingBox'
-    KeyValuePair:
-      description: Information about the extracted key-value pair.
-      type: object
-      required:
-      - key
-      - value
-      - confidence
-      properties:
-        label:
-          description: A user defined label for the key/value pair entry.
-          type: string
-        key:
-          description: Information about the extracted key in a key-value pair.
-          $ref: '#/components/schemas/KeyValueElement'
-        value:
-          description: Information about the extracted value in a key-value pair.
-          $ref: '#/components/schemas/KeyValueElement'
-        confidence:
-          description: Confidence value.
-          $ref: '#/components/schemas/Confidence'
-    Style:
-      description: An object representing the style of the text line.
-      type: object
-      required:
-      - name
-      - confidence
-      properties:
-        name:
-          description: The text line style name, including handwriting and other.
-          type: string
-          x-ms-enum:
-            name: TextStyle
-            modelAsString: true
-          enum:
-          - other
-          - handwriting
-        confidence:
-          description: The confidence of text line style.
-          type: number
-          format: float
-    KeyValueType:
-      type: string
-      description: Semantic data type of the key value element.
-      enum:
-      - string
-      - selectionMark
-      x-ms-enum:
-        name: KeyValueType
-        modelAsString: true
-    DocumentResult:
-      description: A set of extracted fields corresponding to the input document.
-      type: object
-      required:
-      - docType
-      - pageRange
-      - fields
-      properties:
-        docType:
-          description: Document type.
-          type: string
-        modelId:
-          description: Model identifier.
-          type: string
-          format: uuid
-        pageRange:
-          description: First and last page number where the document is found.
-          type: array
-          minItems: 2
-          maxItems: 2
-          items:
-            type: integer
-            minimum: 1
-        docTypeConfidence:
-          description: Predicted document type confidence.
-          $ref: '#/components/schemas/Confidence'
-        fields:
-          description: Dictionary of named field values.
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/FieldValue'
-    Confidence:
-      description: Confidence value.
-      type: number
-      minimum: 0
-      maximum: 1
-    TrainingDocumentInfo:
-      description: Report for a custom model training document.
-      type: object
-      required:
-      - documentName
-      - pages
-      - errors
-      - status
-      properties:
-        documentName:
-          description: Training document name.
-          type: string
-        pages:
-          format: int32
-          description: Total number of pages trained.
-          type: integer
-        errors:
-          description: List of errors.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorInformation'
-        status:
-          description: Status of the training operation.
-          enum:
-          - succeeded
-          - partiallySucceeded
-          - failed
-          type: string
-          x-ms-enum:
-            name: TrainStatus
-            modelAsString: false
-    PageResult:
-      description: Extracted information from a single page.
-      type: object
-      required:
-      - page
-      properties:
-        page:
-          description: Page number.
-          type: integer
-          format: int32
-          minimum: 1
-        clusterId:
-          description: Cluster identifier.
-          type: integer
-          format: int32
-          minimum: 0
-        keyValuePairs:
-          description: List of key-value pairs extracted from the page.
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyValuePair'
-        tables:
-          description: List of data tables extracted from the page.
-          type: array
-          items:
-            $ref: '#/components/schemas/DataTable'
   parameters:
     Pages:
       name: pages
@@ -1082,8 +1085,73 @@ components:
       in: body
       schema:
         $ref: '#/components/schemas/SourcePath'
+  securitySchemes:
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: '{endpoint}/formrecognizer/v2.1-preview.3'
   useSchemePrefix: false
   parameters:
   - $ref: '#/components/parameters/Endpoint'
+x-ms-paths:
+  /custom/models?op=full:
+    get:
+      summary: List Custom Models
+      description: Get information about all custom models
+      operationId: ListCustomModels
+      consumes: []
+      produces:
+      - application/json
+      parameters:
+      - name: op
+        in: query
+        description: Specify whether to return summary or full list of models.
+        required: true
+        type: string
+        enum:
+        - full
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/components/schemas/Models'
+        default:
+          description: Response entity accompanying non-successful responses containing additional details about the error.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-pageable:
+        nextLinkName: nextLink
+        itemName: modelList
+      x-ms-examples:
+        List custom models:
+          $ref: ./examples/GetModels.json
+  /custom/models?op=summary:
+    get:
+      summary: Get Custom Models
+      description: Get information about all custom models
+      operationId: GetCustomModels
+      consumes: []
+      produces:
+      - application/json
+      parameters:
+      - name: op
+        in: query
+        description: Specify whether to return summary or full list of models.
+        required: true
+        type: string
+        enum:
+        - summary
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/components/schemas/Models'
+        default:
+          description: Response entity accompanying non-successful responses containing additional details about the error.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-examples:
+        Get models summary:
+          $ref: ./examples/GetModelsSummary.json

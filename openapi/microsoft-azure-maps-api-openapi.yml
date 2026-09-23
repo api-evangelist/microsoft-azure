@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Maps API
+  title: Microsoft Azure Service Map Maps API
+  description: Service Map API Reference
+  version: 2015-11-01-preview
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Maps
 paths:
@@ -36,7 +42,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Operationalinsights Workspaces Workspacename Features Servicemap Generatemap
+      summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
       requestBody:
         content:
           application/json:
@@ -46,94 +52,124 @@ paths:
         required: true
 components:
   schemas:
-    Ipv6NetworkInterface:
-      description: Describes an IPv6 network interface.
-      properties:
-        ipAddress:
-          type: string
-          description: IPv6 address.
-      required:
-      - ipAddress
-    VirtualMachineConfiguration:
-      description: Describes the virtualization-related configuration of a machine.
-      properties:
-        virtualMachineType:
-          $ref: '#/components/schemas/VirtualMachineType'
-          description: Specifies the virtualization technology used by the machine (hyperv, vmware, etc.)
-        nativeMachineId:
-          type: string
-          description: The unique identifier of the virtual machine as reported by the underlying virtualization system.
-        virtualMachineName:
-          type: string
-          description: The Name of the virtual machine.
-        nativeHostMachineId:
-          type: string
-          description: The unique identifier of the host of this virtual machine as reported by the underlying virtualization system.
-    CoreResource:
-      description: Marker resource for the core Service Map resources
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      discriminator:
-        propertyName: kind
-      properties:
-        etag:
-          type: string
-          description: Resource ETAG.
-        kind:
-          type: string
-          description: Additional resource type qualifier.
-          enum:
-          - machine
-          - process
-          - port
-          - clientGroup
-          - machineGroup
-      required:
-      - kind
-    HostingConfiguration:
-      description: Describes the hosting configuration of a machine.
-      discriminator:
-        propertyName: kind
-      properties:
-        provider:
-          type: string
-          description: The hosting provider of the VM.
-          enum:
-          - azure
-        kind:
-          type: string
-          description: Additional hosting configuration type qualifier.
-          enum:
-          - provider:azure
-      required:
-      - kind
-    Timezone:
-      description: Describes a timezone.
-      properties:
-        fullName:
-          type: string
-          description: Timezone full name.
-    Error:
+    MapEdges:
+      description: The edges (relationships) of a map.
       type: object
-      description: Error details.
       properties:
-        code:
-          type: string
-          description: Error code identifying the specific error.
-        message:
-          type: string
-          description: Error message in the caller's locale.
-      required:
-      - code
-    Acceptor:
-      description: A process accepting on a port.
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Connection'
+          description: Network connections.
+        acceptors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Acceptor'
+          description: Processes accepting on a port.
+    ClientGroup:
+      description: Represents a collection of clients of a resource. A client group can represent the clients of a port, process, or a machine.
       allOf:
-      - $ref: '#/components/schemas/Relationship'
-      x-ms-discriminator-value: rel:acceptor
+      - $ref: '#/components/schemas/CoreResource'
+      x-ms-discriminator-value: clientGroup
       properties:
         properties:
           x-ms-client-flatten: true
-          $ref: '#/components/schemas/AcceptorProperties'
+          type: object
+          description: Resource properties.
+          properties:
+            clientsOf:
+              $ref: '#/components/schemas/ResourceReference'
+              description: Reference to the resource whose clients are represented by this group.
+          required:
+          - clientsOf
+    AcceptorProperties:
+      description: Properties for an acceptor relationship.
+      properties:
+        source:
+          $ref: '#/components/schemas/PortReference'
+          description: Port being accepted.
+        destination:
+          $ref: '#/components/schemas/ProcessReference'
+          description: Accepting process.
+        startTime:
+          type: string
+          format: date-time
+          description: Relationship start time.
+        endTime:
+          type: string
+          format: date-time
+          description: Relationship end time.
+      required:
+      - source
+      - destination
+    MapResponse:
+      description: Specified the contents of a map response.
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: Map interval start time.
+        endTime:
+          type: string
+          format: date-time
+          description: Map interval end time.
+        map:
+          $ref: '#/components/schemas/Map'
+          description: The generated map.
+      required:
+      - startTime
+      - endTime
+      - map
+    ProcessHostedService:
+      description: A service hosted by a process.
+      properties:
+        name:
+          type: string
+          description: The name of the service.
+        displayName:
+          type: string
+          description: The service's display name.
+    Map:
+      description: A map of resources and relationships between them.
+      type: object
+      properties:
+        nodes:
+          $ref: '#/components/schemas/MapNodes'
+        edges:
+          $ref: '#/components/schemas/MapEdges'
+      required:
+      - nodes
+      - edges
+    MachineResourcesConfiguration:
+      description: Describes the resources of a machine.
+      properties:
+        physicalMemory:
+          type: integer
+          format: int32
+          description: Physical memory in megabytes (MB).
+        cpus:
+          type: integer
+          format: int32
+          description: Number of CPUs.
+        cpuSpeed:
+          type: integer
+          format: int32
+          description: CPU speed in megahertz (Mhz).
+        cpuSpeedAccuracy:
+          $ref: '#/components/schemas/Accuracy'
+          description: Describes the accuracy of the cpuSpeed field.
+    ConnectionProperties:
+      description: Properties for a connection resource.
+      allOf:
+      - $ref: '#/components/schemas/RelationshipProperties'
+      properties:
+        serverPort:
+          $ref: '#/components/schemas/PortReference'
+          description: Reference to the server port via which this connection has been established.
+        failureState:
+          $ref: '#/components/schemas/ConnectionFailureState'
+          description: Specifies whether there are only successful, failed or a mixture of both connections represented by this resource.
     AgentConfiguration:
       description: Describes the configuration of the Dependency Agent installed on a machine.
       properties:
@@ -158,266 +194,23 @@ components:
           description: Machine clock granularity in milliseconds.
       required:
       - agentId
-    RelationshipProperties:
-      description: Relationship properties.
-      properties:
-        source:
-          $ref: '#/components/schemas/ResourceReference'
-          description: Source resource of the relationship.
-        destination:
-          $ref: '#/components/schemas/ResourceReference'
-          description: Destination resource of the relationship.
-        startTime:
-          type: string
-          format: date-time
-          description: Relationship start time.
-        endTime:
-          type: string
-          format: date-time
-          description: Relationship end time.
-      required:
-      - source
-      - destination
-    HypervisorConfiguration:
-      description: Describes the hypervisor configuration of a machine.
-      properties:
-        hypervisorType:
-          $ref: '#/components/schemas/HypervisorType'
-          description: Specifies the virtualization technology used by the hypervisor (hyperv, vmware, etc.)
-        nativeHostMachineId:
-          type: string
-          description: The unique identifier of the hypervisor machine as reported by the underlying virtualization system.
-    ConnectionFailureState:
-      description: "Connection failure state:\n * ```ok``` indicates no failures\n * ```failed``` indicates only failures\n * ```mixed``` indicates both failures and successes"
-      type: string
-      enum:
-      - ok
-      - failed
-      - mixed
-      x-ms-enum:
-        name: ConnectionFailureState
-        modelAsString: false
-    ClientGroup:
-      description: Represents a collection of clients of a resource. A client group can represent the clients of a port, process, or a machine.
-      allOf:
-      - $ref: '#/components/schemas/CoreResource'
-      x-ms-discriminator-value: clientGroup
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          type: object
-          description: Resource properties.
-          properties:
-            clientsOf:
-              $ref: '#/components/schemas/ResourceReference'
-              description: Reference to the resource whose clients are represented by this group.
-          required:
-          - clientsOf
-    MonitoringState:
-      description: Used to specify if a resources is monitored or discovered.
-      type: string
-      enum:
-      - monitored
-      - discovered
-      x-ms-enum:
-        name: MonitoringState
-        modelAsString: false
-    VirtualMachineType:
-      description: Specifies the virtualization type of a machine.
-      type: string
-      enum:
-      - unknown
-      - hyperv
-      - ldom
-      - lpar
-      - vmware
-      - virtualPc
-      - xen
-      x-ms-enum:
-        name: VirtualMachineType
-        modelAsString: false
-    MapResponse:
-      description: Specified the contents of a map response.
-      type: object
-      properties:
-        startTime:
-          type: string
-          format: date-time
-          description: Map interval start time.
-        endTime:
-          type: string
-          format: date-time
-          description: Map interval end time.
-        map:
-          $ref: '#/components/schemas/Map'
-          description: The generated map.
-      required:
-      - startTime
-      - endTime
-      - map
-    ProcessDetails:
-      description: Describes process metadata.
-      properties:
-        persistentKey:
-          type: string
-          description: A unique identifier for a process, generally resilient to process restart, computed by Service Map.
-        poolId:
-          type: integer
-          format: int32
-          description: Represents the identity of the process pool assigned to the process by Dependency Agent.
-        firstPid:
-          type: integer
-          format: int32
-          description: The Operating System Process Identifier (PID) of the first process in this process pool.
-        description:
-          type: string
-          description: Process description.
-        companyName:
-          type: string
-          description: Name of company that created the process executable.
-        internalName:
-          type: string
-          description: Internal process name.
-        productName:
-          type: string
-          description: Product name.
-        productVersion:
-          type: string
-          description: Product version.
-        fileVersion:
-          type: string
-          description: File version.
-        commandLine:
-          type: string
-          description: Process command line.
-        executablePath:
-          type: string
-          description: Process executable path.
-        workingDirectory:
-          type: string
-          description: Process workingDirectory.
-        services:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProcessHostedService'
-          x-ms-identifiers: []
-          description: Collection of services hosted by this Process (Windows only).
-        zoneName:
-          type: string
-          description: Process zone name (Linux only).
-    MapEdges:
-      description: The edges (relationships) of a map.
-      type: object
-      properties:
-        connections:
-          type: array
-          items:
-            $ref: '#/components/schemas/Connection'
-          description: Network connections.
-        acceptors:
-          type: array
-          items:
-            $ref: '#/components/schemas/Acceptor'
-          description: Processes accepting on a port.
-    PortReference:
-      description: Reference to a port.
-      allOf:
-      - $ref: '#/components/schemas/ResourceReference'
-      x-ms-discriminator-value: ref:port
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          type: object
-          description: Resource properties.
-          properties:
-            machine:
-              $ref: '#/components/schemas/MachineReference'
-              description: Machine hosting the port.
-              readOnly: true
-            ipAddress:
-              type: string
-              description: IP address of the port.
-              readOnly: true
-            portNumber:
-              type: integer
-              format: int32
-              description: Port number.
-    OperatingSystemFamily:
-      description: Specifies the operating system family, e.g., Linux, Windows, etc.
-      type: string
-      enum:
-      - unknown
-      - windows
-      - linux
-      - solaris
-      - aix
-      x-ms-enum:
-        name: OperatingSystemFamily
-        modelAsString: false
-    OperatingSystemConfiguration:
-      description: Describes the configuration of the operating system of a machine.
-      properties:
-        family:
-          $ref: '#/components/schemas/OperatingSystemFamily'
-          description: Windows, Linux, etc.
-        fullName:
-          type: string
-          description: Operating system full name.
-        bitness:
-          $ref: '#/components/schemas/Bitness'
-          description: Operating system bitness (32-bit or 64-bit).
-      required:
-      - family
-      - fullName
-      - bitness
-    ProcessUser:
-      description: Describes the user under which a process is running.
-      properties:
-        userName:
-          type: string
-          description: User name under which the process is running.
-        userDomain:
-          type: string
-          description: Domain name for the user.
-    MapRequest:
-      description: Specifies the contents of request to generate a map.
-      type: object
+    ProcessHostingConfiguration:
+      description: Describes the hosting configuration of a process.
       discriminator:
         propertyName: kind
       properties:
-        startTime:
+        provider:
           type: string
-          format: date-time
-          description: Map interval start time.
-        endTime:
-          type: string
-          format: date-time
-          description: Map interval end time.
+          description: The hosting provider of the VM.
+          enum:
+          - azure
         kind:
           type: string
-          description: The type of map to create.
+          description: Additional hosting configuration type qualifier.
           enum:
-          - map:single-machine-dependency
-          - map:machine-group-dependency
-          - map:machine-list-dependency
+          - provider:azure
       required:
       - kind
-    Resource:
-      description: Resource model definition.
-      properties:
-        id:
-          type: string
-          description: Resource identifier.
-          readOnly: true
-        type:
-          type: string
-          description: Resource type.
-          readOnly: true
-        name:
-          type: string
-          description: Resource name.
-          readOnly: true
-      x-ms-azure-resource: true
     Process:
       description: A process resource represents a process running on a machine. The process may be actively *monitored*, i.e., a Dependency Agent is running on its machine, or *discovered*, i.e., its existence was inferred by observing the data stream from monitored machines. A process resource represents a pool of actual operating system resources that share command lines and metadata. As the process pool evolves over time, prior versions of the process resource are preserved and available for access. A process is live during an interval of time, if that process is executing during (parts) of that interval
       allOf:
@@ -479,6 +272,149 @@ components:
             hosting:
               $ref: '#/components/schemas/ProcessHostingConfiguration'
               description: Information about the hosting environment
+    Port:
+      description: A port resource represents a server port on a machine. The port may be actively *monitored*, i.e., a Dependency Agent is running on its machine, or *discovered*, i.e., its existence was inferred by observing the data stream from monitored machines. A port is live during an interval of time, if that port had associated activity during (parts) of that interval.
+      allOf:
+      - $ref: '#/components/schemas/CoreResource'
+      x-ms-discriminator-value: port
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          type: object
+          description: Resource properties.
+          properties:
+            monitoringState:
+              $ref: '#/components/schemas/MonitoringState'
+              description: Specifies whether the port is actively monitored or discovered.
+            machine:
+              $ref: '#/components/schemas/ResourceReference'
+              description: Machine hosting this port.
+            displayName:
+              type: string
+              description: Name to use for display purposes.
+            ipAddress:
+              type: string
+              description: IP address associated with the port. At present only IPv4 addresses are supported.
+            portNumber:
+              type: integer
+              format: int32
+              description: Port number.
+    OperatingSystemConfiguration:
+      description: Describes the configuration of the operating system of a machine.
+      properties:
+        family:
+          $ref: '#/components/schemas/OperatingSystemFamily'
+          description: Windows, Linux, etc.
+        fullName:
+          type: string
+          description: Operating system full name.
+        bitness:
+          $ref: '#/components/schemas/Bitness'
+          description: Operating system bitness (32-bit or 64-bit).
+      required:
+      - family
+      - fullName
+      - bitness
+    ResourceReference:
+      description: Represents a reference to another resource.
+      discriminator:
+        propertyName: kind
+      properties:
+        id:
+          type: string
+          description: Resource URI.
+        type:
+          type: string
+          description: Resource type qualifier.
+          readOnly: true
+        name:
+          type: string
+          description: Resource name.
+          readOnly: true
+        kind:
+          type: string
+          description: Specifies the sub-class of the reference.
+          enum:
+          - ref:machine
+          - ref:machinewithhints
+          - ref:process
+          - ref:port
+          - ref:onmachine
+          - ref:clientgroup
+      required:
+      - id
+      - kind
+    Bitness:
+      description: Specifies the bitness of a machine or process.
+      type: string
+      enum:
+      - 32bit
+      - 64bit
+      x-ms-enum:
+        name: Bitness
+        modelAsString: false
+    HypervisorType:
+      description: Specifies the hypervisor type of a machine.
+      type: string
+      enum:
+      - unknown
+      - hyperv
+      x-ms-enum:
+        name: HypervisorType
+        modelAsString: false
+    MapRequest:
+      description: Specifies the contents of request to generate a map.
+      type: object
+      discriminator:
+        propertyName: kind
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: Map interval start time.
+        endTime:
+          type: string
+          format: date-time
+          description: Map interval end time.
+        kind:
+          type: string
+          description: The type of map to create.
+          enum:
+          - map:single-machine-dependency
+          - map:machine-group-dependency
+          - map:machine-list-dependency
+      required:
+      - kind
+    ProcessUser:
+      description: Describes the user under which a process is running.
+      properties:
+        userName:
+          type: string
+          description: User name under which the process is running.
+        userDomain:
+          type: string
+          description: Domain name for the user.
+    CoreResource:
+      description: Marker resource for the core Service Map resources
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      discriminator:
+        propertyName: kind
+      properties:
+        etag:
+          type: string
+          description: Resource ETAG.
+        kind:
+          type: string
+          description: Additional resource type qualifier.
+          enum:
+          - machine
+          - process
+          - port
+          - clientGroup
+          - machineGroup
+      required:
+      - kind
     NetworkConfiguration:
       description: Describes the network configuration of a machine.
       properties:
@@ -515,50 +451,24 @@ components:
             type: string
             description: DNS name.
           description: DNS names associated with the machine.
-    ProcessHostingConfiguration:
-      description: Describes the hosting configuration of a process.
-      discriminator:
-        propertyName: kind
+    Timezone:
+      description: Describes a timezone.
       properties:
-        provider:
+        fullName:
           type: string
-          description: The hosting provider of the VM.
-          enum:
-          - azure
-        kind:
-          type: string
-          description: Additional hosting configuration type qualifier.
-          enum:
-          - provider:azure
-      required:
-      - kind
-    Port:
-      description: A port resource represents a server port on a machine. The port may be actively *monitored*, i.e., a Dependency Agent is running on its machine, or *discovered*, i.e., its existence was inferred by observing the data stream from monitored machines. A port is live during an interval of time, if that port had associated activity during (parts) of that interval.
-      allOf:
-      - $ref: '#/components/schemas/CoreResource'
-      x-ms-discriminator-value: port
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          type: object
-          description: Resource properties.
-          properties:
-            monitoringState:
-              $ref: '#/components/schemas/MonitoringState'
-              description: Specifies whether the port is actively monitored or discovered.
-            machine:
-              $ref: '#/components/schemas/ResourceReference'
-              description: Machine hosting this port.
-            displayName:
-              type: string
-              description: Name to use for display purposes.
-            ipAddress:
-              type: string
-              description: IP address associated with the port. At present only IPv4 addresses are supported.
-            portNumber:
-              type: integer
-              format: int32
-              description: Port number.
+          description: Timezone full name.
+    OperatingSystemFamily:
+      description: Specifies the operating system family, e.g., Linux, Windows, etc.
+      type: string
+      enum:
+      - unknown
+      - windows
+      - linux
+      - solaris
+      - aix
+      x-ms-enum:
+        name: OperatingSystemFamily
+        modelAsString: false
     VirtualizationState:
       description: Specifies if the machine is physical, virtual, hypervisor, or unknown.
       type: string
@@ -570,75 +480,29 @@ components:
       x-ms-enum:
         name: VirtualizationState
         modelAsString: false
-    AcceptorProperties:
-      description: Properties for an acceptor relationship.
-      properties:
-        source:
-          $ref: '#/components/schemas/PortReference'
-          description: Port being accepted.
-        destination:
-          $ref: '#/components/schemas/ProcessReference'
-          description: Accepting process.
-        startTime:
-          type: string
-          format: date-time
-          description: Relationship start time.
-        endTime:
-          type: string
-          format: date-time
-          description: Relationship end time.
-      required:
-      - source
-      - destination
-    Ipv4NetworkInterface:
-      description: Describes an IPv4 network interface.
-      properties:
-        ipAddress:
-          type: string
-          description: IPv4 address.
-        subnetMask:
-          type: string
-          default: 255.255.255.255
-          description: IPv4 subnet mask.
-      required:
-      - ipAddress
-    Bitness:
-      description: Specifies the bitness of a machine or process.
-      type: string
-      enum:
-      - 32bit
-      - 64bit
-      x-ms-enum:
-        name: Bitness
-        modelAsString: false
-    ConnectionProperties:
-      description: Properties for a connection resource.
+    ProcessReference:
+      description: Reference to a process.
       allOf:
-      - $ref: '#/components/schemas/RelationshipProperties'
+      - $ref: '#/components/schemas/ResourceReference'
+      x-ms-discriminator-value: ref:process
       properties:
-        serverPort:
-          $ref: '#/components/schemas/PortReference'
-          description: Reference to the server port via which this connection has been established.
-        failureState:
-          $ref: '#/components/schemas/ConnectionFailureState'
-          description: Specifies whether there are only successful, failed or a mixture of both connections represented by this resource.
-    Accuracy:
-      description: Specifies the accuracy of a computation.
+        properties:
+          x-ms-client-flatten: true
+          type: object
+          description: Resource properties.
+          properties:
+            machine:
+              $ref: '#/components/schemas/MachineReference'
+              description: Machine hosting the process.
+              readOnly: true
+    MonitoringState:
+      description: Used to specify if a resources is monitored or discovered.
       type: string
       enum:
-      - actual
-      - estimated
+      - monitored
+      - discovered
       x-ms-enum:
-        name: Accuracy
-        modelAsString: false
-    HypervisorType:
-      description: Specifies the hypervisor type of a machine.
-      type: string
-      enum:
-      - unknown
-      - hyperv
-      x-ms-enum:
-        name: HypervisorType
+        name: MonitoringState
         modelAsString: false
     Machine:
       description: A machine resource represents a discovered computer system. It can be *monitored*, i.e., a Dependency Agent is running on it, or *discovered*, i.e., its existence was inferred by observing the data stream from monitored machines. As machines change, prior versions of the machine resource are preserved and available for access. A machine is live during an interval of time, if either its Dependency Agent has reported data during (parts) of that interval, or a Dependency agent running on other machines has reported activity associated with the machine.
@@ -698,31 +562,6 @@ components:
             hosting:
               $ref: '#/components/schemas/HostingConfiguration'
               description: Hosting-related configuration. Present if hosting information is discovered for the VM.
-    Map:
-      description: A map of resources and relationships between them.
-      type: object
-      properties:
-        nodes:
-          $ref: '#/components/schemas/MapNodes'
-        edges:
-          $ref: '#/components/schemas/MapEdges'
-      required:
-      - nodes
-      - edges
-    MachineReference:
-      description: Reference to a machine.
-      allOf:
-      - $ref: '#/components/schemas/ResourceReference'
-      x-ms-discriminator-value: ref:machine
-    Connection:
-      description: A network connection.
-      allOf:
-      - $ref: '#/components/schemas/Relationship'
-      x-ms-discriminator-value: rel:connection
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ConnectionProperties'
     ErrorResponse:
       type: object
       description: An error response from the API.
@@ -732,24 +571,153 @@ components:
           description: Error information.
       required:
       - error
-    MachineResourcesConfiguration:
-      description: Describes the resources of a machine.
+    HypervisorConfiguration:
+      description: Describes the hypervisor configuration of a machine.
       properties:
-        physicalMemory:
-          type: integer
-          format: int32
-          description: Physical memory in megabytes (MB).
-        cpus:
-          type: integer
-          format: int32
-          description: Number of CPUs.
-        cpuSpeed:
-          type: integer
-          format: int32
-          description: CPU speed in megahertz (Mhz).
-        cpuSpeedAccuracy:
-          $ref: '#/components/schemas/Accuracy'
-          description: Describes the accuracy of the cpuSpeed field.
+        hypervisorType:
+          $ref: '#/components/schemas/HypervisorType'
+          description: Specifies the virtualization technology used by the hypervisor (hyperv, vmware, etc.)
+        nativeHostMachineId:
+          type: string
+          description: The unique identifier of the hypervisor machine as reported by the underlying virtualization system.
+    Accuracy:
+      description: Specifies the accuracy of a computation.
+      type: string
+      enum:
+      - actual
+      - estimated
+      x-ms-enum:
+        name: Accuracy
+        modelAsString: false
+    RelationshipProperties:
+      description: Relationship properties.
+      properties:
+        source:
+          $ref: '#/components/schemas/ResourceReference'
+          description: Source resource of the relationship.
+        destination:
+          $ref: '#/components/schemas/ResourceReference'
+          description: Destination resource of the relationship.
+        startTime:
+          type: string
+          format: date-time
+          description: Relationship start time.
+        endTime:
+          type: string
+          format: date-time
+          description: Relationship end time.
+      required:
+      - source
+      - destination
+    MachineReference:
+      description: Reference to a machine.
+      allOf:
+      - $ref: '#/components/schemas/ResourceReference'
+      x-ms-discriminator-value: ref:machine
+    VirtualMachineType:
+      description: Specifies the virtualization type of a machine.
+      type: string
+      enum:
+      - unknown
+      - hyperv
+      - ldom
+      - lpar
+      - vmware
+      - virtualPc
+      - xen
+      x-ms-enum:
+        name: VirtualMachineType
+        modelAsString: false
+    Resource:
+      description: Resource model definition.
+      properties:
+        id:
+          type: string
+          description: Resource identifier.
+          readOnly: true
+        type:
+          type: string
+          description: Resource type.
+          readOnly: true
+        name:
+          type: string
+          description: Resource name.
+          readOnly: true
+      x-ms-azure-resource: true
+    Ipv6NetworkInterface:
+      description: Describes an IPv6 network interface.
+      properties:
+        ipAddress:
+          type: string
+          description: IPv6 address.
+      required:
+      - ipAddress
+    Connection:
+      description: A network connection.
+      allOf:
+      - $ref: '#/components/schemas/Relationship'
+      x-ms-discriminator-value: rel:connection
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ConnectionProperties'
+    HostingConfiguration:
+      description: Describes the hosting configuration of a machine.
+      discriminator:
+        propertyName: kind
+      properties:
+        provider:
+          type: string
+          description: The hosting provider of the VM.
+          enum:
+          - azure
+        kind:
+          type: string
+          description: Additional hosting configuration type qualifier.
+          enum:
+          - provider:azure
+      required:
+      - kind
+    ConnectionFailureState:
+      description: "Connection failure state:\n * ```ok``` indicates no failures\n * ```failed``` indicates only failures\n * ```mixed``` indicates both failures and successes"
+      type: string
+      enum:
+      - ok
+      - failed
+      - mixed
+      x-ms-enum:
+        name: ConnectionFailureState
+        modelAsString: false
+    Relationship:
+      description: A typed relationship between two entities.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      discriminator:
+        propertyName: kind
+      properties:
+        kind:
+          type: string
+          description: Additional resource type qualifier.
+          enum:
+          - rel:connection
+          - rel:acceptor
+      required:
+      - kind
+    VirtualMachineConfiguration:
+      description: Describes the virtualization-related configuration of a machine.
+      properties:
+        virtualMachineType:
+          $ref: '#/components/schemas/VirtualMachineType'
+          description: Specifies the virtualization technology used by the machine (hyperv, vmware, etc.)
+        nativeMachineId:
+          type: string
+          description: The unique identifier of the virtual machine as reported by the underlying virtualization system.
+        virtualMachineName:
+          type: string
+          description: The Name of the virtual machine.
+        nativeHostMachineId:
+          type: string
+          description: The unique identifier of the host of this virtual machine as reported by the underlying virtualization system.
     MapNodes:
       description: The nodes (entities) of a map.
       type: object
@@ -784,11 +752,94 @@ components:
       x-ms-enum:
         name: MachineRebootStatus
         modelAsString: false
-    ProcessReference:
-      description: Reference to a process.
+    Error:
+      type: object
+      description: Error details.
+      properties:
+        code:
+          type: string
+          description: Error code identifying the specific error.
+        message:
+          type: string
+          description: Error message in the caller's locale.
+      required:
+      - code
+    ProcessDetails:
+      description: Describes process metadata.
+      properties:
+        persistentKey:
+          type: string
+          description: A unique identifier for a process, generally resilient to process restart, computed by Service Map.
+        poolId:
+          type: integer
+          format: int32
+          description: Represents the identity of the process pool assigned to the process by Dependency Agent.
+        firstPid:
+          type: integer
+          format: int32
+          description: The Operating System Process Identifier (PID) of the first process in this process pool.
+        description:
+          type: string
+          description: Process description.
+        companyName:
+          type: string
+          description: Name of company that created the process executable.
+        internalName:
+          type: string
+          description: Internal process name.
+        productName:
+          type: string
+          description: Product name.
+        productVersion:
+          type: string
+          description: Product version.
+        fileVersion:
+          type: string
+          description: File version.
+        commandLine:
+          type: string
+          description: Process command line.
+        executablePath:
+          type: string
+          description: Process executable path.
+        workingDirectory:
+          type: string
+          description: Process workingDirectory.
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessHostedService'
+          x-ms-identifiers: []
+          description: Collection of services hosted by this Process (Windows only).
+        zoneName:
+          type: string
+          description: Process zone name (Linux only).
+    Acceptor:
+      description: A process accepting on a port.
+      allOf:
+      - $ref: '#/components/schemas/Relationship'
+      x-ms-discriminator-value: rel:acceptor
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/AcceptorProperties'
+    Ipv4NetworkInterface:
+      description: Describes an IPv4 network interface.
+      properties:
+        ipAddress:
+          type: string
+          description: IPv4 address.
+        subnetMask:
+          type: string
+          default: 255.255.255.255
+          description: IPv4 subnet mask.
+      required:
+      - ipAddress
+    PortReference:
+      description: Reference to a port.
       allOf:
       - $ref: '#/components/schemas/ResourceReference'
-      x-ms-discriminator-value: ref:process
+      x-ms-discriminator-value: ref:port
       properties:
         properties:
           x-ms-client-flatten: true
@@ -797,80 +848,17 @@ components:
           properties:
             machine:
               $ref: '#/components/schemas/MachineReference'
-              description: Machine hosting the process.
+              description: Machine hosting the port.
               readOnly: true
-    ProcessHostedService:
-      description: A service hosted by a process.
-      properties:
-        name:
-          type: string
-          description: The name of the service.
-        displayName:
-          type: string
-          description: The service's display name.
-    Relationship:
-      description: A typed relationship between two entities.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      discriminator:
-        propertyName: kind
-      properties:
-        kind:
-          type: string
-          description: Additional resource type qualifier.
-          enum:
-          - rel:connection
-          - rel:acceptor
-      required:
-      - kind
-    ResourceReference:
-      description: Represents a reference to another resource.
-      discriminator:
-        propertyName: kind
-      properties:
-        id:
-          type: string
-          description: Resource URI.
-        type:
-          type: string
-          description: Resource type qualifier.
-          readOnly: true
-        name:
-          type: string
-          description: Resource name.
-          readOnly: true
-        kind:
-          type: string
-          description: Specifies the sub-class of the reference.
-          enum:
-          - ref:machine
-          - ref:machinewithhints
-          - ref:process
-          - ref:port
-          - ref:onmachine
-          - ref:clientgroup
-      required:
-      - id
-      - kind
+            ipAddress:
+              type: string
+              description: IP address of the port.
+              readOnly: true
+            portNumber:
+              type: integer
+              format: int32
+              description: Port number.
   parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: API version.
-      schema:
-        type: string
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      x-ms-parameter-location: method
-      required: true
-      description: Resource group name within the specified subscriptionId.
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-        pattern: '[a-zA-Z0-9_-]+'
     WorkspaceNameParameter:
       name: workspaceName
       in: path
@@ -882,6 +870,24 @@ components:
         maxLength: 63
         minLength: 3
         pattern: '[a-zA-Z0-9_][a-zA-Z0-9_-]+[a-zA-Z0-9_]'
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      x-ms-parameter-location: method
+      required: true
+      description: Resource group name within the specified subscriptionId.
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+        pattern: '[a-zA-Z0-9_-]+'
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: API version.
+      schema:
+        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -889,8 +895,12 @@ components:
       description: Azure subscription identifier.
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

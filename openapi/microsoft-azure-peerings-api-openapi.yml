@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Peerings API
+  version: 2019-09-01-preview
+  title: Microsoft Azure PeeringManagementClient Peerings API
+  description: APIs to manage Peering resources through the Azure Resource Manager.
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Peerings
 paths:
@@ -42,7 +48,7 @@ paths:
       x-ms-examples:
         Get a peering:
           $ref: ./examples/GetPeering.json
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Peering Peerings Peeringname
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
     put:
       tags:
       - Peerings
@@ -87,7 +93,7 @@ paths:
           $ref: ./examples/CreateDirectPeering.json
         Create an exchange peering:
           $ref: ./examples/CreateExchangePeering.json
-      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Peering Peerings Peeringname
+      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups…
       requestBody:
         content:
           application/json:
@@ -129,7 +135,7 @@ paths:
       x-ms-examples:
         Delete a peering:
           $ref: ./examples/DeletePeering.json
-      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Peering Peerings Peeringname
+      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
     patch:
       tags:
       - Peerings
@@ -166,7 +172,7 @@ paths:
       x-ms-examples:
         Update peering tags:
           $ref: ./examples/UpdatePeeringTags.json
-      summary: Microsoft Azure Patch Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Peering Peerings Peeringname
+      summary: Microsoft Azure Patch Subscriptions Subscriptionid Resourcegroups…
       requestBody:
         content:
           application/json:
@@ -207,7 +213,7 @@ paths:
           $ref: ./examples/ListPeeringsByResourceGroup.json
       x-ms-pageable:
         nextLinkName: nextLink
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Peering Peerings
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
   /subscriptions/{subscriptionId}/providers/Microsoft.Peering/peerings:
     get:
       tags:
@@ -235,55 +241,159 @@ paths:
           $ref: ./examples/ListPeeringsBySubscription.json
       x-ms-pageable:
         nextLinkName: nextLink
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft Peering Peerings
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft Peering…
 components:
   schemas:
-    ErrorResponse:
-      description: The error response that indicates why an operation has failed.
+    PeeringListResult:
+      description: The paginated list of peerings.
       type: object
       properties:
-        code:
-          description: The error code.
+        value:
+          description: The list of peerings.
+          type: array
+          items:
+            $ref: '#/components/schemas/Peering'
+        nextLink:
+          description: The link to fetch the next page of peerings.
+          type: string
+    Peering:
+      description: Peering is a logical representation of a set of connections to the Microsoft Cloud Edge at a location.
+      required:
+      - sku
+      - kind
+      - location
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        sku:
+          $ref: '#/components/schemas/PeeringSku'
+          description: The SKU that defines the tier and kind of the peering.
+        kind:
+          description: The kind of the peering.
+          enum:
+          - Direct
+          - Exchange
+          type: string
+          x-ms-enum:
+            name: kind
+            modelAsString: true
+        properties:
+          $ref: '#/components/schemas/PeeringProperties'
+          description: The properties that define a peering.
+          x-ms-client-flatten: true
+        location:
+          description: The location of the resource.
+          type: string
+          x-ms-mutability:
+          - read
+          - create
+        tags:
+          description: The resource tags.
+          type: object
+          additionalProperties:
+            type: string
+    DirectConnection:
+      description: The properties that define a direct connection.
+      type: object
+      properties:
+        bandwidthInMbps:
+          format: int32
+          description: The bandwidth of the connection.
+          type: integer
+        provisionedBandwidthInMbps:
+          format: int32
+          description: The bandwidth that is actually provisioned.
+          type: integer
+          readOnly: true
+        sessionAddressProvider:
+          description: The field indicating if Microsoft provides session ip addresses.
+          enum:
+          - Microsoft
+          - Peer
+          type: string
+          x-ms-enum:
+            name: sessionAddressProvider
+            modelAsString: true
+        useForPeeringService:
+          description: The flag that indicates whether or not the connection is used for peering service.
+          type: boolean
+        peeringDBFacilityId:
+          format: int32
+          description: The PeeringDB.com ID of the facility at which the connection has to be set up.
+          type: integer
+        connectionState:
+          description: The state of the connection.
+          enum:
+          - None
+          - PendingApproval
+          - Approved
+          - ProvisioningStarted
+          - ProvisioningFailed
+          - ProvisioningCompleted
+          - Validating
+          - Active
           type: string
           readOnly: true
-        message:
-          description: The error message.
+          x-ms-enum:
+            name: connectionState
+            modelAsString: true
+        bgpSession:
+          $ref: '#/components/schemas/BgpSession'
+          description: The BGP session associated with the connection.
+        connectionIdentifier:
+          description: The unique identifier (GUID) for the connection.
+          type: string
+        errorMessage:
+          description: The error message related to the connection state, if any.
           type: string
           readOnly: true
-    PeeringPropertiesDirect:
-      description: The properties that define a direct peering.
+    PeeringPropertiesExchange:
+      description: The properties that define an exchange peering.
       type: object
       properties:
         connections:
-          description: The set of connections that constitute a direct peering.
+          description: The set of connections that constitute an exchange peering.
           type: array
           items:
-            $ref: '#/components/schemas/DirectConnection'
-        useForPeeringService:
-          description: The flag that indicates whether or not the peering is used for peering service.
-          type: boolean
-          readOnly: true
+            $ref: '#/components/schemas/ExchangeConnection'
         peerAsn:
           $ref: '#/components/schemas/SubResource'
           description: The reference of the peer ASN.
-        directPeeringType:
-          description: The type of direct peering.
-          enum:
-          - Edge
-          - Transit
-          - Cdn
-          - Internal
-          type: string
-          x-ms-enum:
-            name: directPeeringType
-            modelAsString: true
-    SubResource:
-      description: The sub resource.
+    ResourceTags:
+      description: The resource tags.
       type: object
       properties:
-        id:
-          description: The identifier of the referenced resource.
+        tags:
+          description: Gets or sets the tags, a dictionary of descriptors arm object
+          type: object
+          additionalProperties:
+            type: string
+    PeeringProperties:
+      description: The properties that define connectivity to the Microsoft Cloud Edge.
+      type: object
+      properties:
+        direct:
+          $ref: '#/components/schemas/PeeringPropertiesDirect'
+          description: The properties that define a direct peering.
+        exchange:
+          $ref: '#/components/schemas/PeeringPropertiesExchange'
+          description: The properties that define an exchange peering.
+        peeringLocation:
+          description: The location of the peering.
           type: string
+        provisioningState:
+          description: The provisioning state of the resource.
+          enum:
+          - Succeeded
+          - Updating
+          - Deleting
+          - Failed
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: provisioningState
+            modelAsString: true
     BgpSession:
       description: The properties that define a BGP session.
       type: object
@@ -357,70 +467,33 @@ components:
         md5AuthenticationKey:
           description: The MD5 authentication key of the session.
           type: string
-    DirectConnection:
-      description: The properties that define a direct connection.
+    PeeringPropertiesDirect:
+      description: The properties that define a direct peering.
       type: object
       properties:
-        bandwidthInMbps:
-          format: int32
-          description: The bandwidth of the connection.
-          type: integer
-        provisionedBandwidthInMbps:
-          format: int32
-          description: The bandwidth that is actually provisioned.
-          type: integer
-          readOnly: true
-        sessionAddressProvider:
-          description: The field indicating if Microsoft provides session ip addresses.
-          enum:
-          - Microsoft
-          - Peer
-          type: string
-          x-ms-enum:
-            name: sessionAddressProvider
-            modelAsString: true
+        connections:
+          description: The set of connections that constitute a direct peering.
+          type: array
+          items:
+            $ref: '#/components/schemas/DirectConnection'
         useForPeeringService:
-          description: The flag that indicates whether or not the connection is used for peering service.
+          description: The flag that indicates whether or not the peering is used for peering service.
           type: boolean
-        peeringDBFacilityId:
-          format: int32
-          description: The PeeringDB.com ID of the facility at which the connection has to be set up.
-          type: integer
-        connectionState:
-          description: The state of the connection.
+          readOnly: true
+        peerAsn:
+          $ref: '#/components/schemas/SubResource'
+          description: The reference of the peer ASN.
+        directPeeringType:
+          description: The type of direct peering.
           enum:
-          - None
-          - PendingApproval
-          - Approved
-          - ProvisioningStarted
-          - ProvisioningFailed
-          - ProvisioningCompleted
-          - Validating
-          - Active
+          - Edge
+          - Transit
+          - Cdn
+          - Internal
           type: string
-          readOnly: true
           x-ms-enum:
-            name: connectionState
+            name: directPeeringType
             modelAsString: true
-        bgpSession:
-          $ref: '#/components/schemas/BgpSession'
-          description: The BGP session associated with the connection.
-        connectionIdentifier:
-          description: The unique identifier (GUID) for the connection.
-          type: string
-        errorMessage:
-          description: The error message related to the connection state, if any.
-          type: string
-          readOnly: true
-    ResourceTags:
-      description: The resource tags.
-      type: object
-      properties:
-        tags:
-          description: Gets or sets the tags, a dictionary of descriptors arm object
-          type: object
-          additionalProperties:
-            type: string
     ExchangeConnection:
       description: The properties that define an exchange connection.
       type: object
@@ -472,80 +545,25 @@ components:
           type: string
           readOnly: true
       x-ms-azure-resource: true
-    Peering:
-      description: Peering is a logical representation of a set of connections to the Microsoft Cloud Edge at a location.
-      required:
-      - sku
-      - kind
-      - location
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        sku:
-          $ref: '#/components/schemas/PeeringSku'
-          description: The SKU that defines the tier and kind of the peering.
-        kind:
-          description: The kind of the peering.
-          enum:
-          - Direct
-          - Exchange
-          type: string
-          x-ms-enum:
-            name: kind
-            modelAsString: true
-        properties:
-          $ref: '#/components/schemas/PeeringProperties'
-          description: The properties that define a peering.
-          x-ms-client-flatten: true
-        location:
-          description: The location of the resource.
-          type: string
-          x-ms-mutability:
-          - read
-          - create
-        tags:
-          description: The resource tags.
-          type: object
-          additionalProperties:
-            type: string
-    PeeringListResult:
-      description: The paginated list of peerings.
+    ErrorResponse:
+      description: The error response that indicates why an operation has failed.
       type: object
       properties:
-        value:
-          description: The list of peerings.
-          type: array
-          items:
-            $ref: '#/components/schemas/Peering'
-        nextLink:
-          description: The link to fetch the next page of peerings.
-          type: string
-    PeeringProperties:
-      description: The properties that define connectivity to the Microsoft Cloud Edge.
-      type: object
-      properties:
-        direct:
-          $ref: '#/components/schemas/PeeringPropertiesDirect'
-          description: The properties that define a direct peering.
-        exchange:
-          $ref: '#/components/schemas/PeeringPropertiesExchange'
-          description: The properties that define an exchange peering.
-        peeringLocation:
-          description: The location of the peering.
-          type: string
-        provisioningState:
-          description: The provisioning state of the resource.
-          enum:
-          - Succeeded
-          - Updating
-          - Deleting
-          - Failed
+        code:
+          description: The error code.
           type: string
           readOnly: true
-          x-ms-enum:
-            name: provisioningState
-            modelAsString: true
+        message:
+          description: The error message.
+          type: string
+          readOnly: true
+    SubResource:
+      description: The sub resource.
+      type: object
+      properties:
+        id:
+          description: The identifier of the referenced resource.
+          type: string
     PeeringSku:
       description: The SKU that defines the tier and kind of the peering.
       type: object
@@ -591,18 +609,6 @@ components:
           x-ms-enum:
             name: size
             modelAsString: true
-    PeeringPropertiesExchange:
-      description: The properties that define an exchange peering.
-      type: object
-      properties:
-        connections:
-          description: The set of connections that constitute an exchange peering.
-          type: array
-          items:
-            $ref: '#/components/schemas/ExchangeConnection'
-        peerAsn:
-          $ref: '#/components/schemas/SubResource'
-          description: The reference of the peer ASN.
   parameters:
     ApiVersionParameter:
       name: api-version
@@ -618,8 +624,12 @@ components:
       required: true
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow.

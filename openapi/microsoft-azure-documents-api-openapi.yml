@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Documents API
+  title: Microsoft Azure SearchIndexClient Documents API
+  description: Client that can be used to query an Azure Search index and upload, merge, or delete documents.
+  version: 2017-11-11-Preview
+  x-ms-code-generation-settings:
+    useDateTimeOffset: true
+    syncMethods: None
 tags:
 - name: Documents
 paths:
@@ -586,31 +590,6 @@ paths:
         required: true
 components:
   schemas:
-    AutocompleteMode:
-      type: string
-      enum:
-      - oneTerm
-      - twoTerms
-      - oneTermWithContext
-      x-ms-enum:
-        name: AutocompleteMode
-        modelAsString: false
-      description: Specifies the mode for Autocomplete. The default is 'oneTerm'. Use 'twoTerms' to get shingles and 'oneTermWithContext' to use the current context in producing autocomplete terms.
-    IndexAction:
-      properties:
-        '@search.action':
-          type: string
-          enum:
-          - upload
-          - merge
-          - mergeOrUpload
-          - delete
-          x-ms-enum:
-            name: IndexActionType
-          x-ms-client-name: ActionType
-          description: The operation to perform on a document in an indexing batch.
-      additionalProperties: true
-      description: Represents an index action that operates on a document.
     SuggestResult:
       properties:
         '@search.text':
@@ -620,15 +599,104 @@ components:
           x-ms-client-name: Text
       additionalProperties: true
       description: A result containing a document found by a suggestion query, plus associated metadata.
-    SearchMode:
-      type: string
-      enum:
-      - any
-      - all
-      x-ms-enum:
-        name: SearchMode
-        modelAsString: false
-      description: Specifies whether any or all of the search terms must be matched in order to count the document as a match.
+    AutocompleteItem:
+      properties:
+        text:
+          type: string
+          readOnly: true
+          description: The completed term.
+        queryPlusText:
+          type: string
+          readOnly: true
+          description: The query along with the completed term.
+      description: The result of Autocomplete requests.
+    FacetResult:
+      properties:
+        count:
+          type: integer
+          format: int64
+          readOnly: true
+          description: The approximate count of documents falling within the bucket described by this facet.
+      additionalProperties: true
+      description: A single bucket of a facet query result. Reports the number of documents with a field value falling within a particular range or having a particular value or interval.
+    DocumentSearchResult:
+      properties:
+        '@odata.count':
+          type: integer
+          format: int64
+          readOnly: true
+          x-ms-client-name: Count
+          description: The total count of results found by the search operation, or null if the count was not requested. If present, the count may be greater than the number of results in this response. This can happen if you use the $top or $skip parameters, or if Azure Search can't return all the requested documents in a single Search response.
+        '@search.coverage':
+          type: number
+          format: double
+          readOnly: true
+          x-ms-client-name: Coverage
+          description: A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not specified in the request.
+        '@search.facets':
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/FacetResult'
+          readOnly: true
+          x-ms-client-name: Facets
+          description: The facet query results for the search operation, organized as a collection of buckets for each faceted field; null if the query did not include any facet expressions.
+        '@search.nextPageParameters':
+          $ref: '#/components/schemas/SearchRequest'
+          readOnly: true
+          x-ms-client-name: NextPageParameters
+          description: Continuation JSON payload returned when Azure Search can't return all the requested results in a single Search response. You can use this JSON along with @odata.nextLink to formulate another POST Search request to get the next part of the search response.
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+          readOnly: true
+          x-ms-client-name: Results
+          description: The sequence of results returned by the query.
+        '@odata.nextLink':
+          type: string
+          readOnly: true
+          x-ms-client-name: NextLink
+          description: Continuation URL returned when Azure Search can't return all the requested results in a single Search response. You can use this URL to formulate another GET or POST Search request to get the next part of the search response. Make sure to use the same verb (GET or POST) as the request that produced this response.
+      description: Response containing search results from an Azure Search index.
+    DocumentIndexResult:
+      properties:
+        value:
+          x-ms-client-name: Results
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/IndexingResult'
+          description: The list of status information for each document in the indexing request.
+      description: Response containing the status of operations for all documents in the indexing request.
+    IndexBatch:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/IndexAction'
+          description: The actions in the batch.
+          x-ms-client-name: Actions
+      required:
+      - value
+      description: Contains a batch of document write actions to send to the Azure Search index.
+    DocumentSuggestResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SuggestResult'
+          readOnly: true
+          x-ms-client-name: Results
+          description: The sequence of results returned by the query.
+        '@search.coverage':
+          type: number
+          readOnly: true
+          format: double
+          x-ms-client-name: Coverage
+          description: A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not set in the request.
+      description: Response containing suggestion query results from an Azure Search index.
     SearchRequest:
       properties:
         count:
@@ -698,47 +766,16 @@ components:
           format: int32
           description: The number of search results to retrieve. This can be used in conjunction with $skip to implement client-side paging of search results. If results are truncated due to server-side paging, the response will include a continuation token that can be used to issue another Search request for the next page of results.
       description: Parameters for filtering, sorting, faceting, paging, and other search query behaviors.
-    IndexingResult:
-      properties:
-        key:
-          type: string
-          readOnly: true
-          description: The key of a document that was in the indexing request.
-        errorMessage:
-          type: string
-          readOnly: true
-          description: The error message explaining why the indexing operation failed for the document identified by the key; null if indexing succeeded.
-        status:
-          x-ms-client-name: Succeeded
-          type: boolean
-          readOnly: true
-          description: A value indicating whether the indexing operation succeeded for the document identified by the key.
-        statusCode:
-          type: integer
-          format: int32
-          readOnly: true
-          description: 'The status code of the indexing operation. Possible values include: 200 for a successful update or delete, 201 for successful document creation, 400 for a malformed input document, 404 for document not found, 409 for a version conflict, 422 when the index is temporarily unavailable, or 503 for when the service is too busy.'
-      description: Status of an indexing operation for a single document.
-    FacetResult:
-      properties:
-        count:
-          type: integer
-          format: int64
-          readOnly: true
-          description: The approximate count of documents falling within the bucket described by this facet.
-      additionalProperties: true
-      description: A single bucket of a facet query result. Reports the number of documents with a field value falling within a particular range or having a particular value or interval.
-    IndexBatch:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/IndexAction'
-          description: The actions in the batch.
-          x-ms-client-name: Actions
-      required:
-      - value
-      description: Contains a batch of document write actions to send to the Azure Search index.
+    AutocompleteMode:
+      type: string
+      enum:
+      - oneTerm
+      - twoTerms
+      - oneTermWithContext
+      x-ms-enum:
+        name: AutocompleteMode
+        modelAsString: false
+      description: Specifies the mode for Autocomplete. The default is 'oneTerm'. Use 'twoTerms' to get shingles and 'oneTermWithContext' to use the current context in producing autocomplete terms.
     SearchResult:
       properties:
         '@search.score':
@@ -758,6 +795,40 @@ components:
           description: Text fragments from the document that indicate the matching search terms, organized by each applicable field; null if hit highlighting was not enabled for the query.
       additionalProperties: true
       description: Contains a document found by a search query, plus associated metadata.
+    IndexAction:
+      properties:
+        '@search.action':
+          type: string
+          enum:
+          - upload
+          - merge
+          - mergeOrUpload
+          - delete
+          x-ms-enum:
+            name: IndexActionType
+          x-ms-client-name: ActionType
+          description: The operation to perform on a document in an indexing batch.
+      additionalProperties: true
+      description: Represents an index action that operates on a document.
+    QueryType:
+      type: string
+      enum:
+      - simple
+      - full
+      x-ms-enum:
+        name: QueryType
+        modelAsString: false
+      description: Specifies the syntax of the search query. The default is 'simple'. Use 'full' if your query uses the Lucene query syntax.
+    AutocompleteResult:
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/AutocompleteItem'
+          description: The list of returned Autocompleted items.
+          x-ms-client-name: Results
+      description: The result of Autocomplete query.
     SuggestRequest:
       properties:
         filter:
@@ -801,68 +872,36 @@ components:
           format: int32
           description: The number of suggestions to retrieve. This must be a value between 1 and 100. The default is 5.
       description: Parameters for filtering, sorting, fuzzy matching, and other suggestions query behaviors.
-    DocumentSearchResult:
+    SearchMode:
+      type: string
+      enum:
+      - any
+      - all
+      x-ms-enum:
+        name: SearchMode
+        modelAsString: false
+      description: Specifies whether any or all of the search terms must be matched in order to count the document as a match.
+    IndexingResult:
       properties:
-        '@odata.count':
+        key:
+          type: string
+          readOnly: true
+          description: The key of a document that was in the indexing request.
+        errorMessage:
+          type: string
+          readOnly: true
+          description: The error message explaining why the indexing operation failed for the document identified by the key; null if indexing succeeded.
+        status:
+          x-ms-client-name: Succeeded
+          type: boolean
+          readOnly: true
+          description: A value indicating whether the indexing operation succeeded for the document identified by the key.
+        statusCode:
           type: integer
-          format: int64
+          format: int32
           readOnly: true
-          x-ms-client-name: Count
-          description: The total count of results found by the search operation, or null if the count was not requested. If present, the count may be greater than the number of results in this response. This can happen if you use the $top or $skip parameters, or if Azure Search can't return all the requested documents in a single Search response.
-        '@search.coverage':
-          type: number
-          format: double
-          readOnly: true
-          x-ms-client-name: Coverage
-          description: A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not specified in the request.
-        '@search.facets':
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/FacetResult'
-          readOnly: true
-          x-ms-client-name: Facets
-          description: The facet query results for the search operation, organized as a collection of buckets for each faceted field; null if the query did not include any facet expressions.
-        '@search.nextPageParameters':
-          $ref: '#/components/schemas/SearchRequest'
-          readOnly: true
-          x-ms-client-name: NextPageParameters
-          description: Continuation JSON payload returned when Azure Search can't return all the requested results in a single Search response. You can use this JSON along with @odata.nextLink to formulate another POST Search request to get the next part of the search response.
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SearchResult'
-          readOnly: true
-          x-ms-client-name: Results
-          description: The sequence of results returned by the query.
-        '@odata.nextLink':
-          type: string
-          readOnly: true
-          x-ms-client-name: NextLink
-          description: Continuation URL returned when Azure Search can't return all the requested results in a single Search response. You can use this URL to formulate another GET or POST Search request to get the next part of the search response. Make sure to use the same verb (GET or POST) as the request that produced this response.
-      description: Response containing search results from an Azure Search index.
-    AutocompleteResult:
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/AutocompleteItem'
-          description: The list of returned Autocompleted items.
-          x-ms-client-name: Results
-      description: The result of Autocomplete query.
-    AutocompleteItem:
-      properties:
-        text:
-          type: string
-          readOnly: true
-          description: The completed term.
-        queryPlusText:
-          type: string
-          readOnly: true
-          description: The query along with the completed term.
-      description: The result of Autocomplete requests.
+          description: 'The status code of the indexing operation. Possible values include: 200 for a successful update or delete, 201 for successful document creation, 400 for a malformed input document, 404 for document not found, 409 for a version conflict, 422 when the index is temporarily unavailable, or 503 for when the service is too busy.'
+      description: Status of an indexing operation for a single document.
     AutocompleteRequest:
       properties:
         search:
@@ -902,41 +941,6 @@ components:
           format: int32
           description: The number of auto-completed terms to retrieve. This must be a value between 1 and 100. The default is 5.
       description: Parameters for fuzzy matching, and other autocomplete query behaviors.
-    QueryType:
-      type: string
-      enum:
-      - simple
-      - full
-      x-ms-enum:
-        name: QueryType
-        modelAsString: false
-      description: Specifies the syntax of the search query. The default is 'simple'. Use 'full' if your query uses the Lucene query syntax.
-    DocumentIndexResult:
-      properties:
-        value:
-          x-ms-client-name: Results
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/IndexingResult'
-          description: The list of status information for each document in the indexing request.
-      description: Response containing the status of operations for all documents in the indexing request.
-    DocumentSuggestResult:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SuggestResult'
-          readOnly: true
-          x-ms-client-name: Results
-          description: The sequence of results returned by the query.
-        '@search.coverage':
-          type: number
-          readOnly: true
-          format: double
-          x-ms-client-name: Coverage
-          description: A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not set in the request.
-      description: Response containing suggestion query results from an Azure Search index.
   parameters:
     ApiVersionParameter:
       name: api-version
@@ -958,7 +962,9 @@ components:
         type: string
         format: uuid
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: https://{searchServiceName}.{searchDnsSuffix}/indexes('{indexName}')
   useSchemePrefix: false
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  - $ref: '#/components/parameters/SearchServiceNameParameter'
+  - $ref: '#/components/parameters/SearchDnsSuffixParameter'
+  - $ref: '#/components/parameters/IndexNameParameter'

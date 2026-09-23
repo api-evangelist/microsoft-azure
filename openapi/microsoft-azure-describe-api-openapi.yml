@@ -1,13 +1,18 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Describe API
+  version: '1.0'
+  title: Microsoft Azure Computer Vision Describe API
+  description: The Computer Vision API provides state-of-the-art algorithms to process images and return information.
+servers:
+- url: /vision/v1.0
+security:
+- apim_key: []
 tags:
 - name: Describe
 paths:
   /describe:
     post:
-      description: This operation generates a description of an image in human readable language with complete sentences.  The description is based on a collection of content tags, which are also returned by the operation. More than one description can be generated for each image.  Descriptions are ordered by their confidence score. All descriptions are in English. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
+      description: This operation generates a description of an image in human readable language with complete sentences. The description is based on a collection of content tags, which are also returned by the operation. More than one description can be generated for each image. Descriptions are ordered by their confidence score. All descriptions are in English. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.A successful response will be returned in JSON. If the request failed, the response will contain an error code and a message to help understand what went wrong.
       operationId: microsoftAzureDescribeimage
       parameters:
       - name: maxCandidates
@@ -58,38 +63,6 @@ components:
         description:
           x-ms-client-flatten: true
           $ref: '#/components/schemas/ImageDescriptionDetails'
-    ComputerVisionError:
-      type: object
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: string
-          description: The error code.
-          enum:
-          - InvalidImageUrl
-          - InvalidImageFormat
-          - InvalidImageSize
-          - NotSupportedVisualFeature
-          - NotSupportedImage
-          - InvalidDetails
-          - NotSupportedLanguage
-          - BadArgument
-          - FailedToProcess
-          - Timeout
-          - InternalServerError
-          - Unspecified
-          - StorageException
-          x-ms-enum:
-            name: ComputerVisionErrorCodes
-            modelAsString: false
-        message:
-          type: string
-          description: A message explaining the error reported by the service.
-        requestId:
-          type: string
-          description: A unique request identifier.
     ImageDescriptionDetails:
       type: object
       description: A collection of content tags, along with a list of captions sorted by confidence level, and image metadata.
@@ -124,6 +97,38 @@ components:
         format:
           type: string
           description: Image format
+    ComputerVisionError:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: The error code.
+          enum:
+          - InvalidImageUrl
+          - InvalidImageFormat
+          - InvalidImageSize
+          - NotSupportedVisualFeature
+          - NotSupportedImage
+          - InvalidDetails
+          - NotSupportedLanguage
+          - BadArgument
+          - FailedToProcess
+          - Timeout
+          - InternalServerError
+          - Unspecified
+          - StorageException
+          x-ms-enum:
+            name: ComputerVisionErrorCodes
+            modelAsString: false
+        message:
+          type: string
+          description: A message explaining the error reported by the service.
+        requestId:
+          type: string
+          description: A unique request identifier.
   parameters:
     ServiceLanguage:
       name: language
@@ -140,8 +145,223 @@ components:
         - pt
         - zh
         default: en
+  securitySchemes:
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
+  hostTemplate: '{AzureRegion}.api.cognitive.microsoft.com'
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  - $ref: ../../../Common/ExtendedRegions.json#/parameters/AzureRegion
+x-ms-paths:
+  /analyze?overload=stream:
+    post:
+      description: This operation extracts a rich set of visual features based on the image content.
+      operationId: AnalyzeImageInStream
+      consumes:
+      - application/octet-stream
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - $ref: '#/components/parameters/VisualFeatures'
+      - name: details
+        in: query
+        description: A string indicating which domain-specific details to return. Multiple values should be comma-separated. Valid visual feature types include:Celebrities - identifies celebrities if detected in the image.
+        type: string
+        required: false
+        enum:
+        - Celebrities
+        - Landmarks
+      - $ref: '#/components/parameters/ServiceLanguage'
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageStream
+      responses:
+        '200':
+          description: The response include the extracted features in JSON format. Here is the definitions for enumeration types clipart = 0, ambiguous = 1, normal-clipart = 2, good-clipart = 3. Non-LineDrawing = 0,LineDrawing = 1.
+          schema:
+            $ref: '#/components/schemas/ImageAnalysis'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/components/schemas/ComputerVisionError'
+      x-ms-examples:
+        Successful Analyze with Url request:
+          $ref: ./examples/SuccessfulAnalyzeWithStream.json
+  /generateThumbnail?overload=stream:
+    post:
+      description: This operation generates a thumbnail image with the user-specified width and height. By default, the service analyzes the image, identifies the region of interest (ROI), and generates smart cropping coordinates based on the ROI. Smart cropping helps when you specify an aspect ratio that differs from that of the input image. A successful response contains the thumbnail image binary. If the request failed, the response contains an error code and a message to help determine what went wrong.
+      operationId: GenerateThumbnailInStream
+      consumes:
+      - application/octet-stream
+      - multipart/form-data
+      produces:
+      - application/octet-stream
+      parameters:
+      - name: width
+        type: integer
+        in: query
+        required: true
+        minimum: 1
+        maximum: 1023
+        description: Width of the thumbnail. It must be between 1 and 1024. Recommended minimum of 50.
+      - name: height
+        type: integer
+        in: query
+        required: true
+        minimum: 1
+        maximum: 1023
+        description: Height of the thumbnail. It must be between 1 and 1024. Recommended minimum of 50.
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageStream
+      - name: smartCropping
+        type: boolean
+        in: query
+        required: false
+        default: false
+        description: Boolean flag for enabling smart cropping.
+      responses:
+        '200':
+          description: The generated thumbnail in binary format.
+          schema:
+            type: string
+            format: binary
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/components/schemas/ComputerVisionError'
+      x-ms-examples:
+        Successful Generate Thumbnail request:
+          $ref: ./examples/SuccessfulGenerateThumbnailWithStream.json
+  /ocr?overload=stream:
+    post:
+      description: Optical Character Recognition (OCR) detects printed text in an image and extracts the recognized characters into a machine-usable character stream.   Upon success, the OCR results will be returned. Upon failure, the error code together with an error message will be returned. The error code can be one of InvalidImageUrl, InvalidImageFormat, InvalidImageSize, NotSupportedImage,  NotSupportedLanguage, or InternalServerError.
+      operationId: RecognizePrintedTextInStream
+      consumes:
+      - application/octet-stream
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - $ref: '#/components/parameters/OcrLanguage'
+      - $ref: '#/components/parameters/DetectOrientation'
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageStream
+      responses:
+        '200':
+          description: The OCR results in the hierarchy of region/line/word. The results include text, bounding box for regions, lines and words. The angle, in degrees, of the detected text with respect to the closest horizontal or vertical direction. After rotating the input image clockwise by this angle, the recognized text lines become horizontal or vertical. In combination with the orientation property it can be used to overlay recognition results correctly on the original image, by rotating either the original image or recognition results by a suitable angle around the center of the original image. If the angle cannot be confidently detected, this property is not present. If the image contains text at different angles, only part of the text will be recognized correctly.
+          schema:
+            $ref: '#/components/schemas/OcrResult'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/components/schemas/ComputerVisionError'
+      x-ms-examples:
+        Successful Ocr request:
+          $ref: ./examples/SuccessfulOcrWithStream.json
+  /describe?overload=stream:
+    post:
+      description: This operation generates a description of an image in human readable language with complete sentences.  The description is based on a collection of content tags, which are also returned by the operation. More than one description can be generated for each image.  Descriptions are ordered by their confidence score. All descriptions are in English. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
+      operationId: DescribeImageInStream
+      consumes:
+      - application/octet-stream
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - name: maxCandidates
+        in: query
+        description: Maximum number of candidate descriptions to be returned.  The default is 1.
+        type: string
+        required: false
+        default: '1'
+      - $ref: '#/components/parameters/ServiceLanguage'
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageStream
+      responses:
+        '200':
+          description: Image description object.
+          schema:
+            $ref: '#/components/schemas/ImageDescription'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/components/schemas/ComputerVisionError'
+      x-ms-examples:
+        Successful Describe request:
+          $ref: ./examples/SuccessfulDescribeWithStream.json
+  /tag?overload=stream:
+    post:
+      description: This operation generates a list of words, or tags, that are relevant to the content of the supplied image. The Computer Vision API can return tags based on objects, living beings, scenery or actions found in images. Unlike categories, tags are not organized according to a hierarchical classification system, but correspond to image content. Tags may contain hints to avoid ambiguity or provide context, for example the tag 'cello' may be accompanied by the hint 'musical instrument'. All tags are in English.
+      operationId: TagImageInStream
+      consumes:
+      - application/octet-stream
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - $ref: '#/components/parameters/ServiceLanguage'
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageStream
+      responses:
+        '200':
+          description: Image tags object.
+          schema:
+            $ref: '#/components/schemas/TagResult'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/components/schemas/ComputerVisionError'
+      x-ms-examples:
+        Successful Tag request:
+          $ref: ./examples/SuccessfulTagWithStream.json
+  /models/{model}/analyze?overload=stream:
+    post:
+      description: 'This operation recognizes content within an image by applying a domain-specific model.  The list of domain-specific models that are supported by the Computer Vision API can be retrieved using the /models GET request.  Currently, the API only provides a single domain-specific model: celebrities. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL. A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.'
+      operationId: AnalyzeImageByDomainInStream
+      consumes:
+      - application/octet-stream
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - name: model
+        in: path
+        description: The domain-specific content to recognize.
+        required: true
+        type: string
+      - $ref: '#/components/parameters/ServiceLanguage'
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageStream
+      responses:
+        '200':
+          description: Analysis result based on the domain model
+          schema:
+            $ref: '#/components/schemas/DomainModelResults'
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/components/schemas/ComputerVisionError'
+      x-ms-examples:
+        Successful Domain Model analysis request:
+          $ref: ./examples/SuccessfulDomainModelWithStream.json
+  /recognizeText?overload=stream:
+    post:
+      description: Recognize Text operation. When you use the Recognize Text interface, the response contains a field called 'Operation-Location'. The 'Operation-Location' field contains the URL that you must use for your Get Handwritten Text Operation Result operation.
+      operationId: RecognizeTextInStream
+      parameters:
+      - $ref: '#/components/parameters/HandwritingBoolean'
+      - $ref: ../../../Common/Parameters.json#/parameters/ImageStream
+      consumes:
+      - application/octet-stream
+      produces:
+      - application/json
+      responses:
+        '202':
+          description: The service has accepted the request and will start processing later.
+          headers:
+            Operation-Location:
+              description: 'URL to query for status of the operation. The operation ID will expire in 48 hours. '
+              type: string
+        default:
+          description: Error response.
+          schema:
+            $ref: '#/components/schemas/ComputerVisionError'
+      x-ms-examples:
+        Successful Domain Model analysis request:
+          $ref: ./examples/SuccessfulRecognizeTextWithStream.json

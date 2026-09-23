@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Anomaly Alerting API
+  title: Microsoft Azure Metrics Advisor Anomaly Alerting API
+  description: Microsoft Azure Metrics Advisor REST API (OpenAPI v2)
+  version: '1.0'
+security:
+- apim_key: []
+  ma_api_key: []
 tags:
 - name: AnomalyAlerting
 paths:
@@ -286,28 +290,114 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    AlertResult:
+    AlertSnoozeCondition:
+      required:
+      - autoSnooze
+      - onlyForSuccessive
+      - snoozeScope
       type: object
       properties:
-        alertId:
-          description: alert id
+        autoSnooze:
+          format: int32
+          description: 'snooze point count, value range : [0, +∞)'
+          type: integer
+        snoozeScope:
+          description: snooze scope
+          enum:
+          - Metric
+          - Series
+          type: string
+          x-ms-enum:
+            name: SnoozeScope
+            modelAsString: true
+        onlyForSuccessive:
+          description: only snooze for successive anomalies
+          type: boolean
+    IncidentProperty:
+      required:
+      - maxSeverity
+      type: object
+      properties:
+        maxSeverity:
+          description: max severity of latest anomalies in the incident
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+        incidentStatus:
+          description: 'incident status
+
+
+            only return for alerting incident result'
+          enum:
+          - Active
+          - Resolved
           type: string
           readOnly: true
-        timestamp:
-          format: date-time
-          description: anomaly time
+          x-ms-enum:
+            name: IncidentStatus
+            modelAsString: true
+        valueOfRootNode:
+          format: double
+          description: value of the root node
+          type: number
+          readOnly: true
+        expectedValueOfRootNode:
+          format: double
+          description: expected value of the root node given by smart detector
+          type: number
+          readOnly: true
+    IncidentResultList:
+      required:
+      - value
+      type: object
+      properties:
+        '@nextLink':
           type: string
           readOnly: true
-        createdTime:
-          format: date-time
-          description: created time
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentResult'
+    MetricAlertingConfiguration:
+      required:
+      - anomalyDetectionConfigurationId
+      - anomalyScopeType
+      type: object
+      properties:
+        anomalyDetectionConfigurationId:
+          format: uuid
+          description: Anomaly detection configuration unique id
           type: string
-          readOnly: true
-        modifiedTime:
-          format: date-time
-          description: modified time
+        anomalyScopeType:
+          description: Anomaly scope
+          enum:
+          - All
+          - Dimension
+          - TopN
           type: string
-          readOnly: true
+          example: All
+          x-ms-enum:
+            name: AnomalyScope
+            modelAsString: true
+        negationOperation:
+          description: Negation operation
+          default: false
+          type: boolean
+        dimensionAnomalyScope:
+          $ref: '#/components/schemas/DimensionGroupIdentity'
+        topNAnomalyScope:
+          $ref: '#/components/schemas/TopNGroupScope'
+        severityFilter:
+          $ref: '#/components/schemas/SeverityCondition'
+        snoozeFilter:
+          $ref: '#/components/schemas/AlertSnoozeCondition'
+        valueFilter:
+          $ref: '#/components/schemas/ValueCondition'
     AnomalyAlertingConfigurationPatch:
       type: object
       properties:
@@ -381,6 +471,66 @@ components:
             lower: 0
             upper: 1000
             direction: Both
+    AlertResultList:
+      required:
+      - value
+      type: object
+      properties:
+        '@nextLink':
+          type: string
+          readOnly: true
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertResult'
+    IncidentResult:
+      required:
+      - incidentId
+      - lastTime
+      - property
+      - rootNode
+      - startTime
+      type: object
+      properties:
+        dataFeedId:
+          format: uuid
+          description: 'data feed unique id
+
+
+            only return for alerting anomaly result'
+          type: string
+          readOnly: true
+        metricId:
+          format: uuid
+          description: 'metric unique id
+
+
+            only return for alerting incident result'
+          type: string
+          readOnly: true
+        anomalyDetectionConfigurationId:
+          format: uuid
+          description: 'anomaly detection configuration unique id
+
+
+            only return for alerting incident result'
+          type: string
+          readOnly: true
+        incidentId:
+          description: incident id
+          type: string
+        startTime:
+          format: date-time
+          description: incident start time
+          type: string
+        lastTime:
+          format: date-time
+          description: incident last time
+          type: string
+        rootNode:
+          $ref: '#/components/schemas/SeriesIdentity'
+        property:
+          $ref: '#/components/schemas/IncidentProperty'
     AnomalyProperty:
       required:
       - anomalySeverity
@@ -511,6 +661,61 @@ components:
           type: string
         code:
           type: string
+    SeverityCondition:
+      required:
+      - maxAlertSeverity
+      - minAlertSeverity
+      type: object
+      properties:
+        minAlertSeverity:
+          description: min alert severity
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+        maxAlertSeverity:
+          description: max alert severity
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+    AlertingResultQuery:
+      required:
+      - endTime
+      - startTime
+      - timeMode
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: start time
+          type: string
+        endTime:
+          format: date-time
+          description: end time
+          type: string
+        timeMode:
+          description: time mode
+          enum:
+          - AnomalyTime
+          - CreatedTime
+          - ModifiedTime
+          type: string
+          x-ms-enum:
+            name: TimeMode
+            modelAsString: true
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+        timeMode: AnomalyTime
     ValueCondition:
       required:
       - direction
@@ -570,35 +775,72 @@ components:
           type: object
           additionalProperties:
             type: string
-    AlertingResultQuery:
+    TopNGroupScope:
       required:
-      - endTime
-      - startTime
-      - timeMode
+      - minTopCount
+      - period
+      - top
       type: object
       properties:
-        startTime:
+        top:
+          format: int32
+          description: 'top N, value range : [1, +∞)'
+          type: integer
+        period:
+          format: int32
+          description: 'point count used to look back, value range : [1, +∞)'
+          type: integer
+        minTopCount:
+          format: int32
+          description: 'min count should be in top N, value range : [1, +∞)
+
+
+            should be less than or equal to period'
+          type: integer
+    SeriesIdentity:
+      required:
+      - dimension
+      type: object
+      properties:
+        dimension:
+          description: dimension specified for series
+          type: object
+          additionalProperties:
+            type: string
+    AlertResult:
+      type: object
+      properties:
+        alertId:
+          description: alert id
+          type: string
+          readOnly: true
+        timestamp:
           format: date-time
-          description: start time
+          description: anomaly time
           type: string
-        endTime:
+          readOnly: true
+        createdTime:
           format: date-time
-          description: end time
+          description: created time
           type: string
-        timeMode:
-          description: time mode
-          enum:
-          - AnomalyTime
-          - CreatedTime
-          - ModifiedTime
+          readOnly: true
+        modifiedTime:
+          format: date-time
+          description: modified time
           type: string
-          x-ms-enum:
-            name: TimeMode
-            modelAsString: true
-      example:
-        startTime: '2020-01-01T00:00:00Z'
-        endTime: '2020-02-01T00:00:00Z'
-        timeMode: AnomalyTime
+          readOnly: true
+    AnomalyResultList:
+      required:
+      - value
+      type: object
+      properties:
+        '@nextLink':
+          type: string
+          readOnly: true
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnomalyResult'
     AnomalyResult:
       required:
       - dimension
@@ -657,246 +899,17 @@ components:
             type: string
         property:
           $ref: '#/components/schemas/AnomalyProperty'
-    AlertSnoozeCondition:
-      required:
-      - autoSnooze
-      - onlyForSuccessive
-      - snoozeScope
-      type: object
-      properties:
-        autoSnooze:
-          format: int32
-          description: 'snooze point count, value range : [0, +∞)'
-          type: integer
-        snoozeScope:
-          description: snooze scope
-          enum:
-          - Metric
-          - Series
-          type: string
-          x-ms-enum:
-            name: SnoozeScope
-            modelAsString: true
-        onlyForSuccessive:
-          description: only snooze for successive anomalies
-          type: boolean
-    SeverityCondition:
-      required:
-      - maxAlertSeverity
-      - minAlertSeverity
-      type: object
-      properties:
-        minAlertSeverity:
-          description: min alert severity
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-        maxAlertSeverity:
-          description: max alert severity
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-    IncidentProperty:
-      required:
-      - maxSeverity
-      type: object
-      properties:
-        maxSeverity:
-          description: max severity of latest anomalies in the incident
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-        incidentStatus:
-          description: 'incident status
-
-
-            only return for alerting incident result'
-          enum:
-          - Active
-          - Resolved
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: IncidentStatus
-            modelAsString: true
-        valueOfRootNode:
-          format: double
-          description: value of the root node
-          type: number
-          readOnly: true
-        expectedValueOfRootNode:
-          format: double
-          description: expected value of the root node given by smart detector
-          type: number
-          readOnly: true
-    IncidentResultList:
-      required:
-      - value
-      type: object
-      properties:
-        '@nextLink':
-          type: string
-          readOnly: true
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/IncidentResult'
-    IncidentResult:
-      required:
-      - incidentId
-      - lastTime
-      - property
-      - rootNode
-      - startTime
-      type: object
-      properties:
-        dataFeedId:
-          format: uuid
-          description: 'data feed unique id
-
-
-            only return for alerting anomaly result'
-          type: string
-          readOnly: true
-        metricId:
-          format: uuid
-          description: 'metric unique id
-
-
-            only return for alerting incident result'
-          type: string
-          readOnly: true
-        anomalyDetectionConfigurationId:
-          format: uuid
-          description: 'anomaly detection configuration unique id
-
-
-            only return for alerting incident result'
-          type: string
-          readOnly: true
-        incidentId:
-          description: incident id
-          type: string
-        startTime:
-          format: date-time
-          description: incident start time
-          type: string
-        lastTime:
-          format: date-time
-          description: incident last time
-          type: string
-        rootNode:
-          $ref: '#/components/schemas/SeriesIdentity'
-        property:
-          $ref: '#/components/schemas/IncidentProperty'
-    SeriesIdentity:
-      required:
-      - dimension
-      type: object
-      properties:
-        dimension:
-          description: dimension specified for series
-          type: object
-          additionalProperties:
-            type: string
-    MetricAlertingConfiguration:
-      required:
-      - anomalyDetectionConfigurationId
-      - anomalyScopeType
-      type: object
-      properties:
-        anomalyDetectionConfigurationId:
-          format: uuid
-          description: Anomaly detection configuration unique id
-          type: string
-        anomalyScopeType:
-          description: Anomaly scope
-          enum:
-          - All
-          - Dimension
-          - TopN
-          type: string
-          example: All
-          x-ms-enum:
-            name: AnomalyScope
-            modelAsString: true
-        negationOperation:
-          description: Negation operation
-          default: false
-          type: boolean
-        dimensionAnomalyScope:
-          $ref: '#/components/schemas/DimensionGroupIdentity'
-        topNAnomalyScope:
-          $ref: '#/components/schemas/TopNGroupScope'
-        severityFilter:
-          $ref: '#/components/schemas/SeverityCondition'
-        snoozeFilter:
-          $ref: '#/components/schemas/AlertSnoozeCondition'
-        valueFilter:
-          $ref: '#/components/schemas/ValueCondition'
-    AnomalyResultList:
-      required:
-      - value
-      type: object
-      properties:
-        '@nextLink':
-          type: string
-          readOnly: true
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/AnomalyResult'
-    AlertResultList:
-      required:
-      - value
-      type: object
-      properties:
-        '@nextLink':
-          type: string
-          readOnly: true
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/AlertResult'
-    TopNGroupScope:
-      required:
-      - minTopCount
-      - period
-      - top
-      type: object
-      properties:
-        top:
-          format: int32
-          description: 'top N, value range : [1, +∞)'
-          type: integer
-        period:
-          format: int32
-          description: 'point count used to look back, value range : [1, +∞)'
-          type: integer
-        minTopCount:
-          format: int32
-          description: 'min count should be in top N, value range : [1, +∞)
-
-
-            should be less than or equal to period'
-          type: integer
+  securitySchemes:
+    ma_api_key:
+      type: apiKey
+      name: x-api-key
+      in: header
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: '{endpoint}/metricsadvisor/v1.0'
   useSchemePrefix: false
   parameters:
   - $ref: '#/components/parameters/Endpoint'

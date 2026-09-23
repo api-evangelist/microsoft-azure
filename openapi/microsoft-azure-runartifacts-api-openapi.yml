@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Run Artifacts API
+  version: '2019-09-30'
+  title: Microsoft Azure Run History Run Artifacts API
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: RunArtifacts
 paths:
@@ -333,28 +336,63 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StoredProcedureParameter'
-    ErrorResponse:
-      description: The error response.
+    ArtifactPathList:
+      description: Contains list of Artifact Paths.
+      required:
+      - paths
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/RootError'
-          description: The top level error that occurred.
-        correlation:
-          description: Dictionary containing correlation details for the error.
+        paths:
+          description: List of Artifact Paths.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtifactPath'
+    PaginatedArtifactList:
+      description: A paginated list of Artifacts.
+      type: object
+      properties:
+        value:
+          description: An array of objects of type Artifact.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/Artifact'
+        continuationToken:
+          description: The token used in retrieving the next page.  If null, there are no additional pages.
+          type: string
+        nextLink:
+          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
+          type: string
+    InnerErrorResponse:
+      description: A nested structure of errors.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
+    BatchArtifactContentInformationResult:
+      description: Results of the Batch Artifact Content Information request.
+      type: object
+      properties:
+        artifacts:
+          description: Artifact details of the Artifact Ids requested.
           type: object
           additionalProperties:
-            type: string
-        environment:
-          description: The hosting environment.
-          type: string
-        location:
-          description: The Azure region.
-          type: string
-        time:
-          format: date-time
-          description: The time in UTC.
-          type: string
+            $ref: '#/components/schemas/Artifact'
+        artifactContentInformation:
+          description: Artifact Content Information details of the Artifact Ids requested.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ArtifactContentInformation'
+        errors:
+          description: Errors occurred while fetching the requested Artifact Ids.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ErrorResponse'
     Artifact:
       description: Details of an Artifact.
       required:
@@ -402,38 +440,6 @@ components:
         path:
           description: The path to the Artifact in a container.
           type: string
-    ErrorDetails:
-      description: The error details.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
-    BatchArtifactContentInformationResult:
-      description: Results of the Batch Artifact Content Information request.
-      type: object
-      properties:
-        artifacts:
-          description: Artifact details of the Artifact Ids requested.
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Artifact'
-        artifactContentInformation:
-          description: Artifact Content Information details of the Artifact Ids requested.
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/ArtifactContentInformation'
-        errors:
-          description: Errors occurred while fetching the requested Artifact Ids.
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/ErrorResponse'
     StoredProcedureParameter:
       type: object
       properties:
@@ -453,6 +459,24 @@ components:
           x-ms-enum:
             name: StoredProcedureParameterType
             modelAsString: false
+    DataPath:
+      type: object
+      properties:
+        dataStoreName:
+          type: string
+        relativePath:
+          type: string
+        sqlDataPath:
+          $ref: '#/components/schemas/SqlDataPath'
+    ArtifactPath:
+      description: Details of an Artifact Path.
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          description: The path to the Artifact in a container.
+          type: string
     RootError:
       description: The root error.
       type: object
@@ -475,18 +499,6 @@ components:
         innerError:
           $ref: '#/components/schemas/InnerErrorResponse'
           description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    ArtifactPathList:
-      description: Contains list of Artifact Paths.
-      required:
-      - paths
-      type: object
-      properties:
-        paths:
-          description: List of Artifact Paths.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ArtifactPath'
     PaginatedArtifactContentInformationList:
       description: A paginated list of ArtifactContentInformations.
       type: object
@@ -503,67 +515,42 @@ components:
         nextLink:
           description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
-    DataPath:
+    ErrorResponse:
+      description: The error response.
       type: object
       properties:
-        dataStoreName:
+        error:
+          $ref: '#/components/schemas/RootError'
+          description: The top level error that occurred.
+        correlation:
+          description: Dictionary containing correlation details for the error.
+          type: object
+          additionalProperties:
+            type: string
+        environment:
+          description: The hosting environment.
           type: string
-        relativePath:
+        location:
+          description: The Azure region.
           type: string
-        sqlDataPath:
-          $ref: '#/components/schemas/SqlDataPath'
-    InnerErrorResponse:
-      description: A nested structure of errors.
+        time:
+          format: date-time
+          description: The time in UTC.
+          type: string
+    ErrorDetails:
+      description: The error details.
       type: object
       properties:
         code:
           description: The error code.
           type: string
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    PaginatedArtifactList:
-      description: A paginated list of Artifacts.
-      type: object
-      properties:
-        value:
-          description: An array of objects of type Artifact.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/Artifact'
-        continuationToken:
-          description: The token used in retrieving the next page.  If null, there are no additional pages.
+        message:
+          description: The error message.
           type: string
-        nextLink:
-          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
-          type: string
-    ArtifactPath:
-      description: Details of an Artifact Path.
-      required:
-      - path
-      type: object
-      properties:
-        path:
-          description: The path to the Artifact in a container.
+        target:
+          description: The target of the error (e.g., the name of the property in error).
           type: string
   parameters:
-    workspaceNameParameter:
-      name: workspaceName
-      in: path
-      description: The name of the workspace.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The Name of the resource group in which the workspace is located.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -573,8 +560,27 @@ components:
       schema:
         type: string
         format: uuid
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The Name of the resource group in which the workspace is located.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    workspaceNameParameter:
+      name: workspaceName
+      in: path
+      description: The name of the workspace.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize

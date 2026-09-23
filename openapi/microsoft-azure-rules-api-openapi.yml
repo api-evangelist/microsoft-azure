@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Rules API
+  title: Microsoft Azure Rules API
+  version: '1.0'
+  description: 'Operations tagged Rules across 2 of this provider''s published API definitions: microsoftdatadog-openapi-original.yml, microsoftelastic-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://management.azure.com
 tags:
 - name: Rules
 paths:
@@ -35,6 +38,8 @@ paths:
         TagRules_List:
           $ref: ./examples/TagRules_List.json
       description: Needs a more full description created.
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Datadog/monitors/{monitorName}/tagRules/{ruleSetName}
   : put:
       tags:
@@ -107,6 +112,8 @@ paths:
         TagRules_Get:
           $ref: ./examples/TagRules_Get.json
       description: Needs a more full description created.
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Elastic/monitors/{monitorName}/tagRules
   : get:
       tags:
@@ -137,6 +144,8 @@ paths:
         TagRules_List:
           $ref: ./examples/TagRules_List.json
       description: Needs a more full description created.
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Elastic/monitors/{monitorName}/tagRules/{ruleSetName}
   : put:
       tags:
@@ -229,26 +238,64 @@ paths:
         TagRules_Delete:
           $ref: ./examples/TagRules_Delete.json
       description: Needs a more full description created.
+    servers:
+    - url: https://management.azure.com
 components:
   schemas:
-    MonitoringTagRulesProperties_2:
-      description: Definition of the properties for a TagRules resource.
-      type: object
-      properties:
-        provisioningState:
-          description: Provisioning state of the monitoring tag rules.
-          $ref: '#/components/schemas/ProvisioningState_2'
-        logRules:
-          description: Rules for sending logs.
-          $ref: '#/components/schemas/LogRules_2'
-    ResourceProviderDefaultErrorResponse_2:
-      description: RP default error response.
+    TagAction:
+      description: Valid actions for a filtering tag. Exclusion takes priority over inclusion.
+      enum:
+      - Include
+      - Exclude
+      type: string
+      x-ms-enum:
+        modelAsString: true
+        name: TagAction
+    ResourceProviderDefaultErrorResponse:
       type: object
       properties:
         error:
-          description: Response body of Error
-          readOnly: true
-          $ref: '#/components/schemas/ErrorResponseBody_2'
+          $ref: '#/components/schemas/ErrorResponseBody'
+    ProvisioningState:
+      enum:
+      - Accepted
+      - Creating
+      - Updating
+      - Deleting
+      - Succeeded
+      - Failed
+      - Canceled
+      - Deleted
+      - NotSpecified
+      type: string
+      x-ms-enum:
+        modelAsString: true
+        name: ProvisioningState
+      readOnly: true
+    MonitoringTagRulesListResponse:
+      description: Response of a list operation.
+      type: object
+      properties:
+        value:
+          description: Results of a list operation.
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitoringTagRules'
+        nextLink:
+          description: Link to the next set of results, if any.
+          type: string
+    FilteringTag:
+      description: The definition of a filtering tag. Filtering tags are used for capturing resources and include/exclude them from being monitored.
+      type: object
+      properties:
+        name:
+          description: The name (also known as the key) of the tag.
+          type: string
+        value:
+          description: The value of the tag.
+          type: string
+        action:
+          $ref: '#/components/schemas/TagAction'
     MonitoringTagRulesProperties:
       description: Definition of the properties for a TagRules resource.
       type: object
@@ -259,19 +306,6 @@ components:
           $ref: '#/components/schemas/LogRules'
         metricRules:
           $ref: '#/components/schemas/MetricRules'
-    ErrorResponseBody:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        target:
-          type: string
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorResponseBody'
     LogRules:
       description: Set of rules for sending logs for the Monitor resource.
       type: object
@@ -290,100 +324,55 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FilteringTag'
-    ResourceProviderDefaultErrorResponse:
+    MetricRules:
+      description: Set of rules for sending metrics for the Monitor resource.
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponseBody'
-    ErrorResponseBody_2:
-      description: Error response body.
-      title: ErrorResponseBody
+        filteringTags:
+          description: List of filtering tags to be used for capturing metrics. If empty, all resources will be captured. If only Exclude action is specified, the rules will apply to the list of all available resources. If Include actions are specified, the rules will only include resources with the associated tags.
+          type: array
+          items:
+            $ref: '#/components/schemas/FilteringTag'
+    ErrorResponseBody:
       type: object
       properties:
         code:
-          description: Error code.
           type: string
         message:
-          description: Error message.
           type: string
         target:
-          description: Error target.
           type: string
         details:
-          description: Error details.
           type: array
-          x-ms-identifiers: []
           items:
-            $ref: '#/components/schemas/ErrorResponseBody_2'
-    FilteringTag:
-      description: The definition of a filtering tag. Filtering tags are used for capturing resources and include/exclude them from being monitored.
+            $ref: '#/components/schemas/ErrorResponseBody'
+    MonitoringTagRules:
+      description: Capture logs and metrics of Azure resources based on ARM tags.
       type: object
+      x-ms-azure-resource: true
       properties:
         name:
-          description: The name (also known as the key) of the tag.
+          description: Name of the rule set.
           type: string
-        value:
-          description: The value of the tag.
+          readOnly: true
+        id:
+          description: The id of the rule set.
           type: string
-        action:
-          $ref: '#/components/schemas/TagAction'
-    LogRules_2:
-      description: Set of rules for sending logs for the Monitor resource.
+          readOnly: true
+        type:
+          description: The type of the rule set.
+          type: string
+          readOnly: true
+        properties:
+          $ref: '#/components/schemas/MonitoringTagRulesProperties'
+    ResourceProviderDefaultErrorResponse_2:
+      description: RP default error response.
       type: object
       properties:
-        sendAadLogs:
-          description: Flag specifying if AAD logs should be sent for the Monitor resource.
-          type: boolean
-        sendSubscriptionLogs:
-          description: Flag specifying if subscription logs should be sent for the Monitor resource.
-          type: boolean
-        sendActivityLogs:
-          description: Flag specifying if activity logs from Azure resources should be sent for the Monitor resource.
-          type: boolean
-        filteringTags:
-          description: List of filtering tags to be used for capturing logs. This only takes effect if SendActivityLogs flag is enabled. If empty, all resources will be captured. If only Exclude action is specified, the rules will apply to the list of all available resources. If Include actions are specified, the rules will only include resources with the associated tags.
-          type: array
-          x-ms-identifiers: []
-          items:
-            $ref: '#/components/schemas/FilteringTag_2'
-    FilteringTag_2:
-      description: The definition of a filtering tag. Filtering tags are used for capturing resources and include/exclude them from being monitored.
-      type: object
-      properties:
-        name:
-          description: The name (also known as the key) of the tag.
-          type: string
-        value:
-          description: The value of the tag.
-          type: string
-        action:
-          description: Valid actions for a filtering tag.
-          $ref: '#/components/schemas/TagAction'
-    ProvisioningState:
-      enum:
-      - Accepted
-      - Creating
-      - Updating
-      - Deleting
-      - Succeeded
-      - Failed
-      - Canceled
-      - Deleted
-      - NotSpecified
-      type: string
-      x-ms-enum:
-        modelAsString: true
-        name: ProvisioningState
-      readOnly: true
-    TagAction:
-      description: Valid actions for a filtering tag. Exclusion takes priority over inclusion.
-      enum:
-      - Include
-      - Exclude
-      type: string
-      x-ms-enum:
-        modelAsString: true
-        name: TagAction
+        error:
+          description: Response body of Error
+          readOnly: true
+          $ref: '#/components/schemas/ErrorResponseBody_2'
     ProvisioningState_2:
       enum:
       - Accepted
@@ -414,34 +403,68 @@ components:
         nextLink:
           description: Link to the next set of results, if any.
           type: string
-    MetricRules:
-      description: Set of rules for sending metrics for the Monitor resource.
+    FilteringTag_2:
+      description: The definition of a filtering tag. Filtering tags are used for capturing resources and include/exclude them from being monitored.
       type: object
-      properties:
-        filteringTags:
-          description: List of filtering tags to be used for capturing metrics. If empty, all resources will be captured. If only Exclude action is specified, the rules will apply to the list of all available resources. If Include actions are specified, the rules will only include resources with the associated tags.
-          type: array
-          items:
-            $ref: '#/components/schemas/FilteringTag'
-    MonitoringTagRules:
-      description: Capture logs and metrics of Azure resources based on ARM tags.
-      type: object
-      x-ms-azure-resource: true
       properties:
         name:
-          description: Name of the rule set.
+          description: The name (also known as the key) of the tag.
           type: string
-          readOnly: true
-        id:
-          description: The id of the rule set.
+        value:
+          description: The value of the tag.
           type: string
-          readOnly: true
-        type:
-          description: The type of the rule set.
+        action:
+          description: Valid actions for a filtering tag.
+          $ref: '#/components/schemas/TagAction'
+    MonitoringTagRulesProperties_2:
+      description: Definition of the properties for a TagRules resource.
+      type: object
+      properties:
+        provisioningState:
+          description: Provisioning state of the monitoring tag rules.
+          $ref: '#/components/schemas/ProvisioningState_2'
+        logRules:
+          description: Rules for sending logs.
+          $ref: '#/components/schemas/LogRules_2'
+    LogRules_2:
+      description: Set of rules for sending logs for the Monitor resource.
+      type: object
+      properties:
+        sendAadLogs:
+          description: Flag specifying if AAD logs should be sent for the Monitor resource.
+          type: boolean
+        sendSubscriptionLogs:
+          description: Flag specifying if subscription logs should be sent for the Monitor resource.
+          type: boolean
+        sendActivityLogs:
+          description: Flag specifying if activity logs from Azure resources should be sent for the Monitor resource.
+          type: boolean
+        filteringTags:
+          description: List of filtering tags to be used for capturing logs. This only takes effect if SendActivityLogs flag is enabled. If empty, all resources will be captured. If only Exclude action is specified, the rules will apply to the list of all available resources. If Include actions are specified, the rules will only include resources with the associated tags.
+          type: array
+          x-ms-identifiers: []
+          items:
+            $ref: '#/components/schemas/FilteringTag_2'
+    ErrorResponseBody_2:
+      description: Error response body.
+      title: ErrorResponseBody
+      type: object
+      properties:
+        code:
+          description: Error code.
           type: string
-          readOnly: true
-        properties:
-          $ref: '#/components/schemas/MonitoringTagRulesProperties'
+        message:
+          description: Error message.
+          type: string
+        target:
+          description: Error target.
+          type: string
+        details:
+          description: Error details.
+          type: array
+          x-ms-identifiers: []
+          items:
+            $ref: '#/components/schemas/ErrorResponseBody_2'
     MonitoringTagRules_2:
       description: Capture logs and metrics of Azure resources based on ARM tags.
       type: object
@@ -467,31 +490,11 @@ components:
           readOnly: true
           description: The system metadata relating to this resource
           $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/systemData
-    MonitoringTagRulesListResponse:
-      description: Response of a list operation.
-      type: object
-      properties:
-        value:
-          description: Results of a list operation.
-          type: array
-          items:
-            $ref: '#/components/schemas/MonitoringTagRules'
-        nextLink:
-          description: Link to the next set of results, if any.
-          type: string
   parameters:
     ResourceGroupNameParameter:
       name: resourceGroupName
       in: path
       description: The name of the resource group to which the Datadog resource belongs.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    RuleSetNameParameter:
-      in: path
-      name: ruleSetName
-      description: Tag Rule Set resource name
       required: true
       x-ms-parameter-location: method
       schema:
@@ -511,6 +514,26 @@ components:
       required: true
       schema:
         type: string
+    RuleSetNameParameter:
+      in: path
+      name: ruleSetName
+      description: Tag Rule Set resource name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow
+x-refined-from:
+- microsoftdatadog-openapi-original.yml
+- microsoftelastic-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

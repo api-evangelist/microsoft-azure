@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Query API
+  title: Microsoft Azure Query API
+  version: '1.0'
+  description: 'Operations tagged Query across 2 of this provider''s published API definitions: azure-digital-twins-api-openapi-original.yml, azure-iot-central-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://digitaltwins-hostname
+- url: /api
 tags:
 - name: Query
 paths:
@@ -13,7 +17,23 @@ paths:
       tags:
       - Query
       operationId: microsoftAzureQueryQuerytwins
-      description: Executes a query that allows traversing relationships and filtering by property values.<br>Status codes:<br>* 200 OK<br>* 400 Bad Request<br>  * BadRequest - The continuation token is invalid.<br>  * SqlQueryError - The query contains some errors.<br>  * TimeoutError - The query execution timed out after 60 seconds. Try simplifying the query or adding conditions to reduce the result size.<br> * 429 Too Many Requests<br>  * QuotaReachedError - The maximum query rate limit has been reached.
+      description: 'Executes a query that allows traversing relationships and filtering by property values.
+
+        Status codes:
+
+        * 200 OK
+
+        * 400 Bad Request
+
+        * BadRequest - The continuation token is invalid.
+
+        * SqlQueryError - The query contains some errors.
+
+        * TimeoutError - The query execution timed out after 60 seconds. Try simplifying the query or adding conditions to reduce the result size.
+
+        * 429 Too Many Requests
+
+        * QuotaReachedError - The maximum query rate limit has been reached.'
       x-ms-examples:
         Query for digital twins:
           $ref: ./examples/QueryFirstPage.json
@@ -50,16 +70,60 @@ paths:
               $ref: '#/components/schemas/QuerySpecification'
         description: The query specification to execute.
         required: true
+      security:
+      - oauth2: []
+    servers:
+    - url: https://digitaltwins-hostname
 components:
+  parameters:
+    api-version:
+      name: api-version
+      in: query
+      description: The requested API version.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    tracestate:
+      name: tracestate
+      in: header
+      description: Provides vendor-specific trace identification information and is a companion to traceparent.
+      required: false
+      x-ms-parameter-location: method
+      x-ms-parameter-grouping:
+        postfix: Options
+      schema:
+        type: string
+    max-items-per-page:
+      name: max-items-per-page
+      in: header
+      description: The maximum number of items to retrieve per request. The server may choose to return less than the requested number.
+      required: false
+      x-ms-client-name: MaxItemsPerPage
+      x-ms-parameter-location: method
+      x-ms-parameter-grouping:
+        postfix: Options
+      schema:
+        type: integer
+    traceparent:
+      name: traceparent
+      in: header
+      description: Identifies the request in a distributed tracing system.
+      required: false
+      x-ms-parameter-location: method
+      x-ms-parameter-grouping:
+        postfix: Options
+      schema:
+        type: string
+    Version:
+      in: query
+      name: api-version
+      description: The version of the API being called.
+      x-ms-parameter-location: client
+      required: true
+      schema:
+        type: string
   schemas:
-    ErrorResponse:
-      description: Error response.
-      required:
-      - error
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-          description: The error details.
     QueryResult:
       description: The results of a query operation and an optional continuation token.
       type: object
@@ -113,46 +177,80 @@ components:
         innererror:
           description: An object containing more specific information than the current object about the error.
           $ref: '#/components/schemas/InnerError'
-  parameters:
-    tracestate:
-      name: tracestate
-      in: header
-      description: Provides vendor-specific trace identification information and is a companion to traceparent.
-      required: false
-      x-ms-parameter-location: method
-      x-ms-parameter-grouping:
-        postfix: Options
-      schema:
-        type: string
-    api-version:
-      name: api-version
-      in: query
-      description: The requested API version.
-      required: true
-      schema:
-        type: string
-        minLength: 1
-    traceparent:
-      name: traceparent
-      in: header
-      description: Identifies the request in a distributed tracing system.
-      required: false
-      x-ms-parameter-location: method
-      x-ms-parameter-grouping:
-        postfix: Options
-      schema:
-        type: string
-    max-items-per-page:
-      name: max-items-per-page
-      in: header
-      description: The maximum number of items to retrieve per request. The server may choose to return less than the requested number.
-      required: false
-      x-ms-client-name: MaxItemsPerPage
-      x-ms-parameter-location: method
-      x-ms-parameter-grouping:
-        postfix: Options
-      schema:
-        type: integer
+    ErrorResponse:
+      description: Error response.
+      required:
+      - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+          description: The error details.
+    QueryResponse:
+      description: The query response payload definition.
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+      required:
+      - results
+    Error_2:
+      description: The response error definition.
+      type: object
+      properties:
+        error:
+          description: Error details for current request.
+          $ref: '#/components/schemas/ErrorDetails'
+      required:
+      - error
+    QueryRequest:
+      description: The query request payload definition.
+      type: object
+      properties:
+        query:
+          description: Query to be executed.
+          type: string
+      required:
+      - query
+    ErrorDetails:
+      description: The detail information of the error.
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code.
+        message:
+          type: string
+          description: Error message details.
+        requestId:
+          type: string
+          description: Correlation Id for current request.
+        time:
+          type: string
+          format: date-time-rfc1123
+          description: The time that error request failed.
+      required:
+      - code
+      - message
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          scopes: {}
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize?resource=0b07f429-9f4b-4714-9392-cc5e8e80c8b0
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow
+x-refined-from:
+- azure-digital-twins-api-openapi-original.yml
+- azure-iot-central-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

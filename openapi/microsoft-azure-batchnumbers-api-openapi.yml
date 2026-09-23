@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Batch Numbers API
+  title: Microsoft Azure Batch Numbers API
+  x-refined-note:
+  - x-typespec-generated differs across the merged source definitions and was not carried
+  version: '1.0'
+  description: 'Operations tagged BatchNumbers across 2 of this provider''s published API definitions: microsoftvoiceservicesacgprovisioningplatformapi-openapi-original.yml, microsoftvoiceservicesprovisioning-openapi-original.yml. Each path carries the servers of the definition it was published in.'
 tags:
 - name: BatchNumbers
 paths:
@@ -51,6 +54,9 @@ paths:
               $ref: '#/components/schemas/BatchNumbers'
         description: Batch of numbers to create or replace.
         required: true
+      security:
+      - OAuth2:
+        - https://func-voiceservice-rp-prod-eastuseuap.azurewebsites.net/.default
   /accounts/{accountName}:createOrUpdateNumbers:
     post:
       operationId: microsoftAzureAccountsCreateorupdatenumbers
@@ -124,6 +130,9 @@ paths:
             schema:
               $ref: '#/components/schemas/BatchNumbers_2'
         required: true
+      security:
+      - OAuth2Auth:
+        - https://func-voiceservice-rp-prod-eastuseuap.azurewebsites.net/.default
   /accounts/{accountName}:deleteNumbers:
     post:
       operationId: microsoftAzureAccountsDeletenumbers
@@ -193,81 +202,63 @@ paths:
             schema:
               $ref: '#/components/schemas/BatchNumbersDelete'
         required: true
+      security:
+      - OAuth2Auth:
+        - https://func-voiceservice-rp-prod-eastuseuap.azurewebsites.net/.default
 components:
-  parameters:
-    Azure.Core.ClientRequestIdHeader:
-      name: x-ms-client-request-id
-      in: header
-      description: An opaque, globally-unique, client-generated string identifier for the request.
-      required: false
-      x-ms-parameter-location: method
-      x-ms-client-name: clientRequestId
-      schema:
-        type: string
-        format: uuid
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client API version
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    Azure.Core.RepeatabilityRequestHeaders.repeatabilityFirstSent:
-      name: Repeatability-First-Sent
-      in: header
-      description: Specifies the date and time at which the request was first created.
-      required: false
-      x-ms-parameter-location: method
-      x-ms-client-name: repeatabilityFirstSent
-      schema:
-        type: string
-        format: date-time
-    Azure.Core.Foundations.ApiVersionParameter:
-      name: api-version
-      in: query
-      description: The API version to use for this operation.
-      required: true
-      x-ms-parameter-location: method
-      x-ms-client-name: apiVersion
-      schema:
-        type: string
-        minLength: 1
-    Azure.Core.RepeatabilityRequestHeaders.repeatabilityRequestId:
-      name: Repeatability-Request-ID
-      in: header
-      description: An opaque, globally-unique, client-generated string identifier for the request.
-      required: false
-      x-ms-parameter-location: method
-      x-ms-client-name: repeatabilityRequestId
-      schema:
-        type: string
   schemas:
-    Azure.Core.Foundations.Error:
-      type: object
-      description: The error object.
+    NumberConfiguration:
+      additionalProperties: false
       properties:
-        code:
+        customSipHeader:
+          pattern: ^([A-Za-z0-9_-])+$
+          minLength: 1
+          maxLength: 100
           type: string
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
+          description: Contents of the custom SIP header to use with this number. Can only contain letters, numbers, underscores and dashes. Can be up to 100 characters in length. The name of the custom header is set as part of deploying Azure Communications Gateway.
+      type: object
+      description: Configuration for this number.
+    BatchNumbersItem:
+      additionalProperties: false
+      description: Details for a single number.
+      properties:
         details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          x-ms-identifiers: []
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/NumberDetails'
+        phoneNumber:
+          pattern: ^\+[1-9]\d+$
+          minLength: 3
+          maxLength: 16
+          type: string
+          description: The E.164 phone number whose record should be created/replaced.
       required:
-      - code
-      - message
+      - details
+      - phoneNumber
+      type: object
+    BatchNumbers:
+      additionalProperties: false
+      description: Batch of numbers with configuration.
+      properties:
+        numbers:
+          items:
+            $ref: '#/components/schemas/BatchNumbersItem'
+          maxItems: 100
+          type: array
+          description: Records to use for create/replace.
+      required:
+      - numbers
+      type: object
+    BatchNumbersResponse:
+      additionalProperties: false
+      properties:
+        numbers:
+          items:
+            $ref: '#/components/schemas/NumberResponse'
+          type: array
+          description: Details of the created/replaced numbers.
+      required:
+      - numbers
+      type: object
+      description: List of created or replaced numbers.
     NumberDetails:
       additionalProperties: false
       properties:
@@ -279,80 +270,6 @@ components:
       - services
       type: object
       description: Details of the number.
-    ZoomPhoneCloudPeeringNumberDetails:
-      type: object
-      description: Details for the Zoom Phone Cloud Peering service on this Number.
-      properties:
-        enabled:
-          type: boolean
-          description: Boolean indicating if the service is enabled on this Number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-      required:
-      - enabled
-    TeamsOperatorConnectNumberDetails:
-      type: object
-      description: Details for the Teams Operator Connect service on this Number.
-      properties:
-        enabled:
-          type: boolean
-          description: Boolean indicating if the service is enabled on this Number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        assignmentStatus:
-          $ref: '#/components/schemas/TelephoneNumberAssignmentStatus'
-          description: The assignment status of this Number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        configuration:
-          $ref: '#/components/schemas/TeamsOperatorConnectNumberConfig'
-          description: The configuration for Teams Operator Connect on this number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-      required:
-      - enabled
-    NumberConfiguration_2:
-      type: object
-      description: Configuration for this number.
-      properties:
-        customSipHeader:
-          type: string
-          description: Contents of the custom SIP header to use with this number. Can only contain letters, numbers, underscores and dashes. Can be up to 100 characters in length. The name of the custom header is set as part of the provisioning platform configuration on Azure Communications Gateway.
-          minLength: 1
-          maxLength: 100
-          pattern: ^([A-Za-z0-9_-])+$
-          x-ms-mutability:
-          - read
-          - update
-          - create
-    ServiceProvisioningStatus:
-      type: string
-      description: The provisioning states of an object on any relevant backend service.
-      enum:
-      - pending
-      - synced
-      - failed
-      x-ms-enum:
-        name: ServiceProvisioningStatus
-        modelAsString: true
-        values:
-        - name: pending
-          value: pending
-          description: The object is pending provisioning.
-        - name: synced
-          value: synced
-          description: The object has been synced with the relevant backend service.
-        - name: failed
-          value: failed
-          description: The object provisioning operation failed with the relevant backend service.
     InnerError:
       title: More specific information on an error object.
       type: object
@@ -363,6 +280,57 @@ components:
         innererror:
           description: Inner error details if they exist.
           $ref: '#/components/schemas/InnerError'
+    ErrorResponse:
+      title: Error details.
+      description: Contains details when the response code indicates an error.
+      type: object
+      properties:
+        error:
+          description: The error details.
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - error
+    NumberServices:
+      additionalProperties: false
+      properties:
+        teamsDrEnabled:
+          type: boolean
+          description: Enables/disables Microsoft Teams Direct Routing for the number.
+        teamsOcEnabled:
+          type: boolean
+          description: Enables/disables Operator Connect for the number.
+        zoomEnabled:
+          type: boolean
+          description: Enables/disables Zoom for the number.
+      required:
+      - teamsDrEnabled
+      - teamsOcEnabled
+      - zoomEnabled
+      type: object
+      description: Communications services enabled for this number.
+    ErrorDetail:
+      title: The code and message for an error.
+      type: object
+      properties:
+        code:
+          description: A machine readable error code.
+          type: string
+        message:
+          description: A human readable representation of the error.
+          type: string
+        details:
+          description: An array of details about specific errors that led to this error.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        innererror:
+          description: An object containing more specific information about the error.
+          $ref: '#/components/schemas/InnerError'
+        additionalProperties:
+          description: Additional properties that can be provided about the error.
+      required:
+      - code
+      - message
     NumberResponse:
       additionalProperties: false
       properties:
@@ -385,43 +353,9 @@ components:
       - phoneNumber
       type: object
       description: Details of the number as returned on a GET request.
-    NumberServices:
-      additionalProperties: false
-      properties:
-        teamsDrEnabled:
-          type: boolean
-          description: Enables/disables Microsoft Teams Direct Routing for the number.
-        teamsOcEnabled:
-          type: boolean
-          description: Enables/disables Operator Connect for the number.
-        zoomEnabled:
-          type: boolean
-          description: Enables/disables Zoom for the number.
-      required:
-      - teamsDrEnabled
-      - teamsOcEnabled
-      - zoomEnabled
+    ZoomPhoneCloudPeeringNumberDetails:
       type: object
-      description: Communications services enabled for this number.
-    TelephoneNumberAssignmentStatus:
-      type: string
-      description: Indicates whether a number is assigned to a user.
-      enum:
-      - assigned
-      - unassigned
-      x-ms-enum:
-        name: TelephoneNumberAssignmentStatus
-        modelAsString: true
-        values:
-        - name: assigned
-          value: assigned
-          description: The telephone number is assigned to a user.
-        - name: unassigned
-          value: unassigned
-          description: The telephone number is not assigned to a user.
-    TeamsPhoneMobileNumberDetails:
-      type: object
-      description: Details for the Teams Phone Mobile service on this Number.
+      description: Details for the Zoom Phone Cloud Peering service on this Number.
       properties:
         enabled:
           type: boolean
@@ -430,149 +364,8 @@ components:
           - read
           - update
           - create
-        assignmentStatus:
-          $ref: '#/components/schemas/TelephoneNumberAssignmentStatus'
-          description: The assignment status of this Number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        configuration:
-          $ref: '#/components/schemas/TeamsPhoneMobileNumberConfig'
-          description: The configuration for Teams Phone Mobile on this number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
       required:
       - enabled
-    BatchNumbers_2:
-      type: object
-      description: List of telephone numbers to be uploaded to an account via a PUT request.
-      properties:
-        numbers:
-          type: array
-          description: The list of numbers to upload. At most 100 can be uploaded in one request.
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/NumberResource'
-          x-ms-identifiers: []
-          x-ms-mutability:
-          - read
-          - update
-          - create
-      required:
-      - numbers
-    Azure.Core.Foundations.InnerError:
-      type: object
-      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: Inner error.
-    TeamsOperatorConnectNumberConfig:
-      type: object
-      description: Telephone number configuration for Teams Operator Connect telephone numbers.
-      properties:
-        usage:
-          type: string
-          description: The usage for this telephone number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        choosableCapabilities:
-          type: array
-          description: The choosable capabilities for this telephone number.
-          items:
-            type: string
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        acquiredCapabilities:
-          type: array
-          description: The acquired capabilities for this telephone number.
-          items:
-            type: string
-          readOnly: true
-        availableCapabilities:
-          type: array
-          description: The available capabilities for this telephone number.
-          items:
-            type: string
-          readOnly: true
-        additionalUsages:
-          type: array
-          description: The additional usages for this telephone number.
-          items:
-            type: string
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        civicAddressId:
-          type: string
-          description: The ID of the civic address to be used as the emergency address for this telephone number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        locationId:
-          type: string
-          description: The ID of the location to be used as the emergency address for this telephone number.
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        allowTenantAddressUpdate:
-          type: boolean
-          description: If the enterprise is allowed to update the address for this telephone number.
-          default: false
-          x-ms-mutability:
-          - read
-          - update
-          - create
-        displayedCountryCode:
-          type: string
-          description: The country code to be displayed with this telephone number
-          x-ms-mutability:
-          - read
-          - update
-          - create
-      required:
-      - usage
-      - choosableCapabilities
-    BatchNumbersItem:
-      additionalProperties: false
-      description: Details for a single number.
-      properties:
-        details:
-          $ref: '#/components/schemas/NumberDetails'
-        phoneNumber:
-          pattern: ^\+[1-9]\d+$
-          minLength: 3
-          maxLength: 16
-          type: string
-          description: The E.164 phone number whose record should be created/replaced.
-      required:
-      - details
-      - phoneNumber
-      type: object
-    NumberConfiguration:
-      additionalProperties: false
-      properties:
-        customSipHeader:
-          pattern: ^([A-Za-z0-9_-])+$
-          minLength: 1
-          maxLength: 100
-          type: string
-          description: Contents of the custom SIP header to use with this number. Can only contain letters, numbers, underscores and dashes. Can be up to 100 characters in length. The name of the custom header is set as part of deploying Azure Communications Gateway.
-      type: object
-      description: Configuration for this number.
     TeamsPhoneMobileNumberConfig:
       type: object
       description: Telephone number configuration for Teams Phone Mobile telephone numbers.
@@ -646,6 +439,55 @@ components:
       required:
       - usage
       - choosableCapabilities
+    TeamsDirectRoutingNumberDetails:
+      type: object
+      description: Details for the Teams Direct Routing service on this Number.
+      properties:
+        enabled:
+          type: boolean
+          description: Boolean indicating if the service is enabled on this Number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+      required:
+      - enabled
+    ServiceProvisioningStatus:
+      type: string
+      description: The provisioning states of an object on any relevant backend service.
+      enum:
+      - pending
+      - synced
+      - failed
+      x-ms-enum:
+        name: ServiceProvisioningStatus
+        modelAsString: true
+        values:
+        - name: pending
+          value: pending
+          description: The object is pending provisioning.
+        - name: synced
+          value: synced
+          description: The object has been synced with the relevant backend service.
+        - name: failed
+          value: failed
+          description: The object provisioning operation failed with the relevant backend service.
+    NumberIdentifier:
+      type: object
+      description: An identifier, used to identify a Number resource.
+      properties:
+        telephoneNumber:
+          type: string
+          description: Telephone number in E.164 format.
+          minLength: 3
+          maxLength: 16
+          pattern: ^\+[1-9]\d+$
+          x-ms-mutability:
+          - read
+          - update
+          - create
+      required:
+      - telephoneNumber
     NumberServiceDetails:
       type: object
       description: Configuration of backend services for a telephone number.
@@ -685,78 +527,54 @@ components:
           - read
           - update
           - create
-    BatchNumbersDelete:
+    TeamsOperatorConnectNumberDetails:
       type: object
-      description: A list of telephone numbers to delete.
-      properties:
-        numbers:
-          type: array
-          description: The list of number to delete. At most 100 can be deleted in one request.
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/NumberIdentifier'
-          x-ms-identifiers: []
-          x-ms-mutability:
-          - read
-          - update
-          - create
-      required:
-      - numbers
-    Azure.Core.Foundations.ErrorResponse:
-      type: object
-      description: A response containing error details.
-      properties:
-        error:
-          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          description: The error object.
-      required:
-      - error
-    TeamsDirectRoutingNumberDetails:
-      type: object
-      description: Details for the Teams Direct Routing service on this Number.
+      description: Details for the Teams Operator Connect service on this Number.
       properties:
         enabled:
           type: boolean
           description: Boolean indicating if the service is enabled on this Number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        assignmentStatus:
+          $ref: '#/components/schemas/TelephoneNumberAssignmentStatus'
+          description: The assignment status of this Number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        configuration:
+          $ref: '#/components/schemas/TeamsOperatorConnectNumberConfig'
+          description: The configuration for Teams Operator Connect on this number.
           x-ms-mutability:
           - read
           - update
           - create
       required:
       - enabled
-    NumberIdentifier:
+    TeamsPhoneMobileNumberDetails:
       type: object
-      description: An identifier, used to identify a Number resource.
-      properties:
-        telephoneNumber:
-          type: string
-          description: Telephone number in E.164 format.
-          minLength: 3
-          maxLength: 16
-          pattern: ^\+[1-9]\d+$
-          x-ms-mutability:
-          - read
-          - update
-          - create
-      required:
-      - telephoneNumber
-    ErrorResponse:
-      title: Error details.
-      description: Contains details when the response code indicates an error.
-      type: object
-      properties:
-        error:
-          description: The error details.
-          $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - error
-    AzureOperatorCallProtectionNumberDetails:
-      type: object
-      description: Details for the Azure Operator Call Protection service on this Number.
+      description: Details for the Teams Phone Mobile service on this Number.
       properties:
         enabled:
           type: boolean
           description: Boolean indicating if the service is enabled on this Number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        assignmentStatus:
+          $ref: '#/components/schemas/TelephoneNumberAssignmentStatus'
+          description: The assignment status of this Number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        configuration:
+          $ref: '#/components/schemas/TeamsPhoneMobileNumberConfig'
+          description: The configuration for Teams Phone Mobile on this number.
           x-ms-mutability:
           - read
           - update
@@ -816,54 +634,267 @@ components:
       - telephoneNumber
       - accountName
       - serviceDetails
-    BatchNumbers:
-      additionalProperties: false
-      description: Batch of numbers with configuration.
-      properties:
-        numbers:
-          items:
-            $ref: '#/components/schemas/BatchNumbersItem'
-          maxItems: 100
-          type: array
-          description: Records to use for create/replace.
-      required:
-      - numbers
+    Azure.Core.Foundations.Error:
       type: object
-    ErrorDetail:
-      title: The code and message for an error.
-      type: object
+      description: The error object.
       properties:
         code:
-          description: A machine readable error code.
           type: string
+          description: One of a server-defined set of error codes.
         message:
-          description: A human readable representation of the error.
           type: string
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          description: The target of the error.
         details:
-          description: An array of details about specific errors that led to this error.
           type: array
+          description: An array of details about specific errors that led to this reported error.
           items:
-            $ref: '#/components/schemas/ErrorDetail'
+            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          x-ms-identifiers: []
         innererror:
-          description: An object containing more specific information about the error.
-          $ref: '#/components/schemas/InnerError'
-        additionalProperties:
-          description: Additional properties that can be provided about the error.
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: An object containing more specific information than the current object about the error.
       required:
       - code
       - message
-    BatchNumbersResponse:
-      additionalProperties: false
+    AzureOperatorCallProtectionNumberDetails:
+      type: object
+      description: Details for the Azure Operator Call Protection service on this Number.
+      properties:
+        enabled:
+          type: boolean
+          description: Boolean indicating if the service is enabled on this Number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+      required:
+      - enabled
+    BatchNumbers_2:
+      type: object
+      description: List of telephone numbers to be uploaded to an account via a PUT request.
       properties:
         numbers:
-          items:
-            $ref: '#/components/schemas/NumberResponse'
           type: array
-          description: Details of the created/replaced numbers.
+          description: The list of numbers to upload. At most 100 can be uploaded in one request.
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/NumberResource'
+          x-ms-identifiers: []
+          x-ms-mutability:
+          - read
+          - update
+          - create
       required:
       - numbers
+    Azure.Core.Foundations.InnerError:
       type: object
-      description: List of created or replaced numbers.
+      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        innererror:
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: Inner error.
+    Azure.Core.Foundations.ErrorResponse:
+      type: object
+      description: A response containing error details.
+      properties:
+        error:
+          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          description: The error object.
+      required:
+      - error
+    NumberConfiguration_2:
+      type: object
+      description: Configuration for this number.
+      properties:
+        customSipHeader:
+          type: string
+          description: Contents of the custom SIP header to use with this number. Can only contain letters, numbers, underscores and dashes. Can be up to 100 characters in length. The name of the custom header is set as part of the provisioning platform configuration on Azure Communications Gateway.
+          minLength: 1
+          maxLength: 100
+          pattern: ^([A-Za-z0-9_-])+$
+          x-ms-mutability:
+          - read
+          - update
+          - create
+    TeamsOperatorConnectNumberConfig:
+      type: object
+      description: Telephone number configuration for Teams Operator Connect telephone numbers.
+      properties:
+        usage:
+          type: string
+          description: The usage for this telephone number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        choosableCapabilities:
+          type: array
+          description: The choosable capabilities for this telephone number.
+          items:
+            type: string
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        acquiredCapabilities:
+          type: array
+          description: The acquired capabilities for this telephone number.
+          items:
+            type: string
+          readOnly: true
+        availableCapabilities:
+          type: array
+          description: The available capabilities for this telephone number.
+          items:
+            type: string
+          readOnly: true
+        additionalUsages:
+          type: array
+          description: The additional usages for this telephone number.
+          items:
+            type: string
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        civicAddressId:
+          type: string
+          description: The ID of the civic address to be used as the emergency address for this telephone number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        locationId:
+          type: string
+          description: The ID of the location to be used as the emergency address for this telephone number.
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        allowTenantAddressUpdate:
+          type: boolean
+          description: If the enterprise is allowed to update the address for this telephone number.
+          default: false
+          x-ms-mutability:
+          - read
+          - update
+          - create
+        displayedCountryCode:
+          type: string
+          description: The country code to be displayed with this telephone number
+          x-ms-mutability:
+          - read
+          - update
+          - create
+      required:
+      - usage
+      - choosableCapabilities
+    TelephoneNumberAssignmentStatus:
+      type: string
+      description: Indicates whether a number is assigned to a user.
+      enum:
+      - assigned
+      - unassigned
+      x-ms-enum:
+        name: TelephoneNumberAssignmentStatus
+        modelAsString: true
+        values:
+        - name: assigned
+          value: assigned
+          description: The telephone number is assigned to a user.
+        - name: unassigned
+          value: unassigned
+          description: The telephone number is not assigned to a user.
+    BatchNumbersDelete:
+      type: object
+      description: A list of telephone numbers to delete.
+      properties:
+        numbers:
+          type: array
+          description: The list of number to delete. At most 100 can be deleted in one request.
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/NumberIdentifier'
+          x-ms-identifiers: []
+          x-ms-mutability:
+          - read
+          - update
+          - create
+      required:
+      - numbers
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client API version
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    Azure.Core.ClientRequestIdHeader:
+      name: x-ms-client-request-id
+      in: header
+      description: An opaque, globally-unique, client-generated string identifier for the request.
+      required: false
+      x-ms-parameter-location: method
+      x-ms-client-name: clientRequestId
+      schema:
+        type: string
+        format: uuid
+    Azure.Core.RepeatabilityRequestHeaders.repeatabilityFirstSent:
+      name: Repeatability-First-Sent
+      in: header
+      description: Specifies the date and time at which the request was first created.
+      required: false
+      x-ms-parameter-location: method
+      x-ms-client-name: repeatabilityFirstSent
+      schema:
+        type: string
+        format: date-time
+    Azure.Core.RepeatabilityRequestHeaders.repeatabilityRequestId:
+      name: Repeatability-Request-ID
+      in: header
+      description: An opaque, globally-unique, client-generated string identifier for the request.
+      required: false
+      x-ms-parameter-location: method
+      x-ms-client-name: repeatabilityRequestId
+      schema:
+        type: string
+    Azure.Core.Foundations.ApiVersionParameter:
+      name: api-version
+      in: query
+      description: The API version to use for this operation.
+      required: true
+      x-ms-parameter-location: method
+      x-ms-client-name: apiVersion
+      schema:
+        type: string
+        minLength: 1
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            https://func-voiceservice-rp-prod-eastuseuap.azurewebsites.net/.default: Grants the associated roles assigned to the client application
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/v2.0/token
+      description: Azure Active Directory OAuth2 Flow.
+    OAuth2Auth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            https://func-voiceservice-rp-prod-eastuseuap.azurewebsites.net/.default: ''
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/v2.0/token
+x-refined-from:
+- microsoftvoiceservicesacgprovisioningplatformapi-openapi-original.yml
+- microsoftvoiceservicesprovisioning-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

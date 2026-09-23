@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Domain API
+  title: Microsoft Azure Domain API
+  version: '1.0'
+  description: 'Operations tagged Domain across 2 of this provider''s published API definitions: dataplaneaccountclient-openapi-original.yml, graphrbacmanagementclient-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://purview.azure.com/account/
+- url: https://graph.windows.net
 tags:
 - name: Domain
 paths:
@@ -35,6 +39,8 @@ paths:
         Domains_GetDomain:
           $ref: ./examples/Domains_GetDomain.json
       summary: Microsoft Azure Get Domains Domainname
+    servers:
+    - url: https://purview.azure.com/account/
   /domains:
     get:
       tags:
@@ -66,6 +72,8 @@ paths:
         Domains_ListDomains:
           $ref: ./examples/Domains_ListDomains.json
       summary: Microsoft Azure Get Domains
+    servers:
+    - url: https://purview.azure.com/account/
   /{tenantID}/domains:
     get:
       tags:
@@ -88,10 +96,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainListResult'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/DomainListResult'
       x-ms-pageable:
         nextLinkName: null
       x-ms-odata: '#/definitions/User'
       summary: Microsoft Azure Get Tenantid Domains
+      security:
+      - azure_auth:
+        - user_impersonation
+    servers:
+    - url: https://graph.windows.net
   /{tenantID}/domains/{domainName}:
     get:
       tags:
@@ -114,33 +130,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Domain_2'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/Domain_2'
       summary: Microsoft Azure Get Tenantid Domains Domainname
+      security:
+      - azure_auth:
+        - user_impersonation
+    servers:
+    - url: https://graph.windows.net
 components:
-  parameters:
-    tenantIDInPath:
-      name: tenantID
-      in: path
-      required: true
-      description: The tenant ID.
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client API version.
-      schema:
-        type: string
-    api-version:
-      in: query
-      name: api-version
-      description: The api version to use.
-      required: true
-      x-ms-client-name: ApiVersion
-      schema:
-        type: string
   schemas:
+    UserAssignedIdentity:
+      description: Uses client ID and Principal ID
+      type: object
+      properties:
+        clientId:
+          description: Gets or Sets Client ID
+          type: string
+          readOnly: true
+        principalId:
+          description: Gets or Sets Principal ID
+          type: string
+          readOnly: true
+    DomainList:
+      description: Paged list of domains.
+      required:
+      - value
+      type: object
+      properties:
+        count:
+          format: int64
+          description: Total item count.
+          type: integer
+        nextLink:
+          description: The Url of next result page.
+          type: string
+        value:
+          description: Collection of items of type results.
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain'
     ErrorModel:
       description: Default error model
       type: object
@@ -163,47 +193,33 @@ components:
           description: Gets or sets the target.
           type: string
           readOnly: true
-    ErrorResponseModel:
-      description: Default error response model
+    Identity:
+      description: The Managed Identity of the resource
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/ErrorModel'
-    UserAssignedIdentity:
-      description: Uses client ID and Principal ID
-      type: object
-      properties:
-        clientId:
-          description: Gets or Sets Client ID
-          type: string
-          readOnly: true
         principalId:
-          description: Gets or Sets Principal ID
+          description: Service principal object Id
           type: string
           readOnly: true
-    Domain_2:
-      type: object
-      properties:
-        authenticationType:
+        tenantId:
+          description: Tenant Id
           type: string
-          description: the type of the authentication into the domain.
           readOnly: true
-        isDefault:
-          type: boolean
-          description: if this is the default domain in the tenant.
-          readOnly: true
-        isVerified:
-          type: boolean
-          description: if this domain's ownership is verified.
-          readOnly: true
-        name:
+        type:
+          description: Identity Type
+          enum:
+          - None
+          - SystemAssigned
+          - UserAssigned
           type: string
-          description: the domain name.
-      required:
-      - name
-      additionalProperties:
-        type: object
-      description: Active Directory Domain information.
+          x-ms-enum:
+            name: ManagedIdentityType
+            modelAsString: true
+        userAssignedIdentities:
+          description: User Assigned Identities
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/UserAssignedIdentity'
     Domain:
       description: Domain resource.
       type: object
@@ -258,33 +274,12 @@ components:
             modelAsString: true
         systemData:
           $ref: '#/components/schemas/SystemData'
-    DomainList:
-      description: Paged list of domains.
-      required:
-      - value
+    ErrorResponseModel:
+      description: Default error response model
       type: object
       properties:
-        count:
-          format: int64
-          description: Total item count.
-          type: integer
-        nextLink:
-          description: The Url of next result page.
-          type: string
-        value:
-          description: Collection of items of type results.
-          type: array
-          items:
-            $ref: '#/components/schemas/Domain'
-    DomainListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Domain_2'
-          description: the list of domains.
-      description: Server response for Get tenant domains API call.
+        error:
+          $ref: '#/components/schemas/ErrorModel'
     SystemData:
       description: Metadata pertaining to creation and last modification of the resource.
       type: object
@@ -331,33 +326,6 @@ components:
           x-ms-enum:
             name: IdentityType
             modelAsString: true
-    Identity:
-      description: The Managed Identity of the resource
-      type: object
-      properties:
-        principalId:
-          description: Service principal object Id
-          type: string
-          readOnly: true
-        tenantId:
-          description: Tenant Id
-          type: string
-          readOnly: true
-        type:
-          description: Identity Type
-          enum:
-          - None
-          - SystemAssigned
-          - UserAssigned
-          type: string
-          x-ms-enum:
-            name: ManagedIdentityType
-            modelAsString: true
-        userAssignedIdentities:
-          description: User Assigned Identities
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/UserAssignedIdentity'
     DomainMergeInfo:
       description: The public Domain Merge Info model.
       type: object
@@ -389,6 +357,74 @@ components:
           x-ms-enum:
             name: MergeStatus
             modelAsString: true
+    Domain_2:
+      type: object
+      properties:
+        authenticationType:
+          type: string
+          description: the type of the authentication into the domain.
+          readOnly: true
+        isDefault:
+          type: boolean
+          description: if this is the default domain in the tenant.
+          readOnly: true
+        isVerified:
+          type: boolean
+          description: if this domain's ownership is verified.
+          readOnly: true
+        name:
+          type: string
+          description: the domain name.
+      required:
+      - name
+      additionalProperties:
+        type: object
+      description: Active Directory Domain information.
+    DomainListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain_2'
+          description: the list of domains.
+      description: Server response for Get tenant domains API call.
+  parameters:
+    api-version:
+      in: query
+      name: api-version
+      description: The api version to use.
+      required: true
+      x-ms-client-name: ApiVersion
+      schema:
+        type: string
+    tenantIDInPath:
+      name: tenantID
+      in: path
+      required: true
+      description: The tenant ID.
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client API version.
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow.
+x-refined-from:
+- dataplaneaccountclient-openapi-original.yml
+- graphrbacmanagementclient-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

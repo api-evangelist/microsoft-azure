@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Keys API
+  title: Microsoft Azure Keys API
+  x-refined-note:
+  - x-logo differs across the merged source definitions and was not carried
+  version: '1.0'
+  description: 'Operations tagged Keys across 3 of this provider''s published API definitions: azure-app-configuration-openapi-original.yml, azure-key-vault-openapi.yml, azure-machine-learning-model-management-service-openapi-original.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://{vaultName}.vault.azure.net
   description: Azure Key Vault endpoint
@@ -218,6 +221,16 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+      security:
+      - oauth2:
+        - https://vault.azure.net/.default
+    servers:
+    - url: https://{vaultName}.vault.azure.net
+      description: Azure Key Vault endpoint
+      variables:
+        vaultName:
+          default: mykeyvault
+          description: The name of the Azure Key Vault.
   /keys/{key-name}/{key-version}:
     get:
       operationId: Keys_Get
@@ -306,6 +319,9 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+      security:
+      - oauth2:
+        - https://vault.azure.net/.default
     patch:
       operationId: Keys_Update
       summary: Microsoft Azure Update Key Attributes
@@ -421,6 +437,16 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+      security:
+      - oauth2:
+        - https://vault.azure.net/.default
+    servers:
+    - url: https://{vaultName}.vault.azure.net
+      description: Azure Key Vault endpoint
+      variables:
+        vaultName:
+          default: mykeyvault
+          description: The name of the Azure Key Vault.
   /keys/{key-name}:
     delete:
       operationId: Keys_Delete
@@ -472,6 +498,16 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+      security:
+      - oauth2:
+        - https://vault.azure.net/.default
+    servers:
+    - url: https://{vaultName}.vault.azure.net
+      description: Azure Key Vault endpoint
+      variables:
+        vaultName:
+          default: mykeyvault
+          description: The name of the Azure Key Vault.
   ? /modelmanagement/v1.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.MachineLearningServices/workspaces/{workspace}/services/{id}/listkeys
   : post:
       tags:
@@ -502,6 +538,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ModelErrorResponse'
+      security:
+      - azure_auth:
+        - user_impersonation
   ? /modelmanagement/v1.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.MachineLearningServices/workspaces/{workspace}/services/{id}/regenerateKeys
   : post:
       tags:
@@ -541,8 +580,23 @@ paths:
               $ref: '#/components/schemas/RegenerateServiceKeysRequest'
         description: The payload that is used to regenerate keys.
         required: true
+      security:
+      - azure_auth:
+        - user_impersonation
 components:
   schemas:
+    KeyListResult:
+      description: The result of a list request.
+      type: object
+      properties:
+        items:
+          description: The collection value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Key'
+        '@nextLink':
+          description: The URI that can be used to request the next set of paged results.
+          type: string
     Error:
       description: Azure App Configuration error object.
       type: object
@@ -563,23 +617,31 @@ components:
           description: The HTTP status code that the error maps to.
           type: integer
       readOnly: true
-    RegenerateServiceKeysRequest:
+    Key:
       type: object
       properties:
-        keyType:
-          format: int32
-          description: Specification for which type of key to generate.
-          enum:
-          - Primary
-          - Secondary
-          type: integer
-          example: Primary
-          x-ms-enum:
-            name: KeyType
-            modelAsString: false
-        keyValue:
-          description: The value the key is set to.
+        name:
           type: string
+          readOnly: true
+          description: The name of the key.
+    DeletedKeyBundle:
+      type: object
+      description: A deleted key bundle.
+      allOf:
+      - $ref: '#/components/schemas/KeyBundle'
+      properties:
+        recoveryId:
+          type: string
+          description: The URL of the recovery object.
+          example: '500123'
+        scheduledPurgeDate:
+          type: integer
+          description: The time when the key is scheduled to be purged (Unix time).
+          example: 10
+        deletedDate:
+          type: integer
+          description: The time when the key was deleted (Unix time).
+          example: 10
     KeyUpdateParameters:
       type: object
       description: The key update parameters.
@@ -600,205 +662,51 @@ components:
           example: example_value
         release_policy:
           $ref: '#/components/schemas/KeyReleasePolicy'
-    KeyBundle:
+    KeyListResult_2:
       type: object
-      description: A key bundle containing the key and its attributes.
+      description: The key list result.
       properties:
-        key:
-          $ref: '#/components/schemas/JsonWebKey'
-        attributes:
-          $ref: '#/components/schemas/KeyAttributes'
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Application-specific metadata in the form of key-value pairs.
-          example: example_value
-        managed:
-          type: boolean
-          readOnly: true
-          description: Whether the key's lifetime is managed by Key Vault.
-          example: true
-        release_policy:
-          $ref: '#/components/schemas/KeyReleasePolicy'
-    KeyListResult:
-      description: The result of a list request.
-      type: object
-      properties:
-        items:
-          description: The collection value.
+        value:
           type: array
+          readOnly: true
           items:
-            $ref: '#/components/schemas/Key'
-        '@nextLink':
-          description: The URI that can be used to request the next set of paged results.
-          type: string
-    KeyReleasePolicy:
-      type: object
-      description: The policy rules under which the key can be exported.
-      properties:
-        contentType:
-          type: string
-          default: application/json; charset=utf-8
-          description: Content type and version of key release policy.
-          example: example_value
-        immutable:
-          type: boolean
-          description: Defines whether the policy is immutable.
-          example: true
-        data:
-          type: string
-          description: Blob encoding the policy rules (base64url-encoded).
-          example: example_value
-    KeyAttributes:
-      type: object
-      description: The attributes of a key.
-      properties:
-        enabled:
-          type: boolean
-          description: Whether the key is enabled.
-          example: true
-        nbf:
-          type: integer
-          description: Not before date in UTC (Unix time).
-          example: 10
-        exp:
-          type: integer
-          description: Expiry date in UTC (Unix time).
-          example: 10
-        created:
-          type: integer
-          readOnly: true
-          description: Creation time in UTC (Unix time).
-          example: 10
-        updated:
-          type: integer
-          readOnly: true
-          description: Last updated time in UTC (Unix time).
-          example: 10
-        recoveryLevel:
-          type: string
-          readOnly: true
-          description: The recovery level currently in effect.
-          enum:
-          - Purgeable
-          - Recoverable+Purgeable
-          - Recoverable
-          - Recoverable+ProtectedSubscription
-          example: Purgeable
-        recoverableDays:
-          type: integer
-          readOnly: true
-          description: The soft-delete data retention days.
-          example: 10
-        exportable:
-          type: boolean
-          description: Whether the private key can be exported.
-          example: true
-        hsmPlatform:
-          type: string
-          readOnly: true
-          description: The underlying HSM platform.
-          example: example_value
-    ErrorDetails:
-      description: The error details.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
-    AuthKeys:
-      type: object
-      properties:
-        primaryKey:
-          description: The primary key.
-          type: string
-        secondaryKey:
-          description: The secondary key.
-          type: string
-    KeyCreateParameters:
-      type: object
-      description: The key create parameters.
-      properties:
-        kty:
-          type: string
-          description: The type of key to create.
-          enum:
-          - EC
-          - EC-HSM
-          - RSA
-          - RSA-HSM
-          - oct
-          - oct-HSM
-          example: EC
-        key_size:
-          type: integer
-          description: The key size in bits. For example, 2048, 3072, or 4096 for RSA.
-          example: 10
-        key_ops:
-          type: array
-          items:
-            type: string
-            enum:
-            - encrypt
-            - decrypt
-            - sign
-            - verify
-            - wrapKey
-            - unwrapKey
-            - import
-            - export
-          description: JSON web key operations.
+            $ref: '#/components/schemas/KeyItem'
+          description: A list of keys.
           example: []
-        attributes:
-          $ref: '#/components/schemas/KeyAttributes'
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Application-specific metadata.
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of keys.
           example: example_value
-        crv:
-          type: string
-          description: Elliptic curve name (for EC key types).
-          enum:
-          - P-256
-          - P-384
-          - P-521
-          - P-256K
-          example: P-256
-        release_policy:
-          $ref: '#/components/schemas/KeyReleasePolicy'
-        exportable:
-          type: boolean
-          description: Whether the private key can be exported.
-          example: true
-      required:
-      - kty
-    DeletedKeyBundle:
+    KeyVaultError:
       type: object
-      description: A deleted key bundle.
-      allOf:
-      - $ref: '#/components/schemas/KeyBundle'
+      description: The key vault error exception.
       properties:
-        recoveryId:
-          type: string
-          description: The URL of the recovery object.
-          example: '500123'
-        scheduledPurgeDate:
-          type: integer
-          description: The time when the key is scheduled to be purged (Unix time).
-          example: 10
-        deletedDate:
-          type: integer
-          description: The time when the key was deleted (Unix time).
-          example: 10
+        error:
+          type: object
+          readOnly: true
+          description: The key vault server error.
+          properties:
+            code:
+              type: string
+              readOnly: true
+              description: The error code.
+            message:
+              type: string
+              readOnly: true
+              description: The error message.
+            innererror:
+              type: object
+              readOnly: true
+              description: Inner error details.
+              properties:
+                code:
+                  type: string
+                  readOnly: true
+                innererror:
+                  type: object
+                  readOnly: true
+          example: example_value
     JsonWebKey:
       type: object
       description: JSON Web Key (JWK) representation of a key.
@@ -886,42 +794,172 @@ components:
           type: string
           description: Y component of an EC public key.
           example: example_value
-    KeyVaultError:
+    KeyBundle:
       type: object
-      description: The key vault error exception.
+      description: A key bundle containing the key and its attributes.
       properties:
-        error:
+        key:
+          $ref: '#/components/schemas/JsonWebKey'
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
           type: object
-          readOnly: true
-          description: The key vault server error.
-          properties:
-            code:
-              type: string
-              readOnly: true
-              description: The error code.
-            message:
-              type: string
-              readOnly: true
-              description: The error message.
-            innererror:
-              type: object
-              readOnly: true
-              description: Inner error details.
-              properties:
-                code:
-                  type: string
-                  readOnly: true
-                innererror:
-                  type: object
-                  readOnly: true
+          additionalProperties:
+            type: string
+          description: Application-specific metadata in the form of key-value pairs.
           example: example_value
-    Key:
+        managed:
+          type: boolean
+          readOnly: true
+          description: Whether the key's lifetime is managed by Key Vault.
+          example: true
+        release_policy:
+          $ref: '#/components/schemas/KeyReleasePolicy'
+    KeyReleasePolicy:
       type: object
+      description: The policy rules under which the key can be exported.
       properties:
-        name:
+        contentType:
+          type: string
+          default: application/json; charset=utf-8
+          description: Content type and version of key release policy.
+          example: example_value
+        immutable:
+          type: boolean
+          description: Defines whether the policy is immutable.
+          example: true
+        data:
+          type: string
+          description: Blob encoding the policy rules (base64url-encoded).
+          example: example_value
+    KeyCreateParameters:
+      type: object
+      description: The key create parameters.
+      properties:
+        kty:
+          type: string
+          description: The type of key to create.
+          enum:
+          - EC
+          - EC-HSM
+          - RSA
+          - RSA-HSM
+          - oct
+          - oct-HSM
+          example: EC
+        key_size:
+          type: integer
+          description: The key size in bits. For example, 2048, 3072, or 4096 for RSA.
+          example: 10
+        key_ops:
+          type: array
+          items:
+            type: string
+            enum:
+            - encrypt
+            - decrypt
+            - sign
+            - verify
+            - wrapKey
+            - unwrapKey
+            - import
+            - export
+          description: JSON web key operations.
+          example: []
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application-specific metadata.
+          example: example_value
+        crv:
+          type: string
+          description: Elliptic curve name (for EC key types).
+          enum:
+          - P-256
+          - P-384
+          - P-521
+          - P-256K
+          example: P-256
+        release_policy:
+          $ref: '#/components/schemas/KeyReleasePolicy'
+        exportable:
+          type: boolean
+          description: Whether the private key can be exported.
+          example: true
+      required:
+      - kty
+    KeyItem:
+      type: object
+      description: The key item containing key metadata.
+      properties:
+        kid:
+          type: string
+          description: Key identifier.
+          example: '500123'
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          example: example_value
+        managed:
+          type: boolean
+          readOnly: true
+          example: true
+    KeyAttributes:
+      type: object
+      description: The attributes of a key.
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the key is enabled.
+          example: true
+        nbf:
+          type: integer
+          description: Not before date in UTC (Unix time).
+          example: 10
+        exp:
+          type: integer
+          description: Expiry date in UTC (Unix time).
+          example: 10
+        created:
+          type: integer
+          readOnly: true
+          description: Creation time in UTC (Unix time).
+          example: 10
+        updated:
+          type: integer
+          readOnly: true
+          description: Last updated time in UTC (Unix time).
+          example: 10
+        recoveryLevel:
           type: string
           readOnly: true
-          description: The name of the key.
+          description: The recovery level currently in effect.
+          enum:
+          - Purgeable
+          - Recoverable+Purgeable
+          - Recoverable
+          - Recoverable+ProtectedSubscription
+          example: Purgeable
+        recoverableDays:
+          type: integer
+          readOnly: true
+          description: The soft-delete data retention days.
+          example: 10
+        exportable:
+          type: boolean
+          description: Whether the private key can be exported.
+          example: true
+        hsmPlatform:
+          type: string
+          readOnly: true
+          description: The underlying HSM platform.
+          example: example_value
     ModelErrorResponse:
       description: The Model Management Service Error object.
       type: object
@@ -942,40 +980,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ErrorDetails'
+    RegenerateServiceKeysRequest:
+      type: object
+      properties:
+        keyType:
+          format: int32
+          description: Specification for which type of key to generate.
+          enum:
+          - Primary
+          - Secondary
+          type: integer
+          example: Primary
+          x-ms-enum:
+            name: KeyType
+            modelAsString: false
+        keyValue:
+          description: The value the key is set to.
+          type: string
+    AuthKeys:
+      type: object
+      properties:
+        primaryKey:
+          description: The primary key.
+          type: string
+        secondaryKey:
+          description: The secondary key.
+          type: string
+    ErrorDetails:
+      description: The error details.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
   parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client API version.
-      schema:
-        type: string
-        default: '7.5'
-    workspaceParameter:
-      name: workspace
-      in: path
-      description: The name of the workspace.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    resourceGroupParameter:
-      name: resourceGroup
-      in: path
-      description: The Name of the resource group in which the workspace is located.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The Azure Subscription ID.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
     ApiVersion:
       name: api-version
       in: query
@@ -989,6 +1033,58 @@ components:
       description: Used to guarantee real-time consistency between requests.
       schema:
         type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client API version.
+      schema:
+        type: string
+        default: '7.5'
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The Azure Subscription ID.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    resourceGroupParameter:
+      name: resourceGroup
+      in: path
+      description: The Name of the resource group in which the workspace is located.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    workspaceParameter:
+      name: workspace
+      in: path
+      description: The name of the workspace.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+          scopes:
+            https://vault.azure.net/.default: Access Azure Key Vault
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+x-refined-from:
+- azure-app-configuration-openapi-original.yml
+- azure-key-vault-openapi.yml
+- azure-machine-learning-model-management-service-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

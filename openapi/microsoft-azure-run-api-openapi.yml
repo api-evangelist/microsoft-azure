@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Run API
+  version: '2019-09-30'
+  title: Microsoft Azure History Run API
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Run
 paths:
@@ -327,28 +330,173 @@ paths:
         description: Query parameters for data sorting and filtering.
 components:
   schemas:
-    ErrorResponse:
-      description: The error response.
+    CreateRun:
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/RootError'
-          description: The top level error that occurred.
-        correlation:
-          description: Dictionary containing correlation details for the error.
+        runId:
+          description: The identifier for the run. Run IDs must be less than 256 characters and contain only alphanumeric characters with dashes and underscores.
+          type: string
+        parentRunId:
+          description: The parent of the run if the run is hierarchical; otherwise, Null.
+          type: string
+        status:
+          description: The status of the run. The Status string value maps to the RunStatus Enum.
+          type: string
+        startTimeUtc:
+          format: date-time
+          description: The start time of the run in UTC.
+          type: string
+        endTimeUtc:
+          format: date-time
+          description: The end time of the run in UTC.
+          type: string
+        heartbeatEnabled:
+          type: boolean
+        options:
+          $ref: '#/components/schemas/RunOptions'
+        name:
+          type: string
+        dataContainerId:
+          type: string
+        description:
+          type: string
+        hidden:
+          type: boolean
+        runType:
+          type: string
+        properties:
           type: object
           additionalProperties:
             type: string
-        environment:
-          description: The hosting environment.
+        scriptName:
           type: string
+        target:
+          type: string
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+        runDefinition:
+          type: object
+        createdFrom:
+          $ref: '#/components/schemas/CreatedFrom'
+        cancelUri:
+          type: string
+        diagnosticsUri:
+          type: string
+    RunDetailsWarning:
+      type: object
+      properties:
+        source:
+          type: string
+        message:
+          type: string
+    BatchAddOrModifyRunRequest:
+      type: object
+      properties:
+        runs:
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateRun'
+    CreatedFrom:
+      type: object
+      properties:
+        type:
+          enum:
+          - Notebook
+          type: string
+          x-ms-enum:
+            name: CreatedFromType
+            modelAsString: false
+        locationType:
+          enum:
+          - ArtifactId
+          type: string
+          x-ms-enum:
+            name: CreatedFromLocationType
+            modelAsString: false
         location:
-          description: The Azure region.
           type: string
-        time:
-          format: date-time
-          description: The time in UTC.
+    InnerErrorResponse:
+      description: A nested structure of errors.
+      type: object
+      properties:
+        code:
+          description: The error code.
           type: string
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
+    QueryParams:
+      description: The set of supported filters.
+      type: object
+      properties:
+        filter:
+          description: 'Allows for filtering the collection of resources.
+
+            The expression specified is evaluated for each resource in the collection, and only items where the expression evaluates to true are included in the response.
+
+            See https://docs.microsoft.com/en-us/azure/search/query-odata-filter-orderby-syntax for details on the expression syntax.'
+          type: string
+        continuationToken:
+          description: The continuation token to use for getting the next set of resources.
+          type: string
+        orderBy:
+          description: 'The comma separated list of resource properties to use for sorting the requested resources.
+
+            Optionally, can be followed by either ''asc'' or ''desc'''
+          type: string
+          example: Color, Size desc
+        top:
+          format: int32
+          description: 'The maximum number of items in the resource collection to be included in the result.
+
+            If not specified, all items are returned.'
+          type: integer
+    CreatedBy:
+      type: object
+      properties:
+        userObjectId:
+          description: 'A user or service principal''s object ID.
+
+            This is PII and should never be logged.'
+          type: string
+        userTenantId:
+          description: A user or service principal's tenant ID.
+          type: string
+        userName:
+          description: 'A user''s full name or a service principal''s app ID.
+
+            This is PII and should never be logged.'
+          type: string
+    RunOptions:
+      type: object
+      properties:
+        generateDataContainerIdIfNotSpecified:
+          type: boolean
+    RootError:
+      description: The root error.
+      type: object
+      properties:
+        code:
+          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
+          type: string
+        message:
+          description: A human-readable representation of the error.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
+        details:
+          description: The related errors that occurred during the request.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     BatchAddOrModifyRunResult:
       type: object
       properties:
@@ -413,157 +561,6 @@ components:
         revision:
           format: int32
           type: integer
-    ErrorDetails:
-      description: The error details.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
-    CreateRun:
-      type: object
-      properties:
-        runId:
-          description: The identifier for the run. Run IDs must be less than 256 characters and contain only alphanumeric characters with dashes and underscores.
-          type: string
-        parentRunId:
-          description: The parent of the run if the run is hierarchical; otherwise, Null.
-          type: string
-        status:
-          description: The status of the run. The Status string value maps to the RunStatus Enum.
-          type: string
-        startTimeUtc:
-          format: date-time
-          description: The start time of the run in UTC.
-          type: string
-        endTimeUtc:
-          format: date-time
-          description: The end time of the run in UTC.
-          type: string
-        heartbeatEnabled:
-          type: boolean
-        options:
-          $ref: '#/components/schemas/RunOptions'
-        name:
-          type: string
-        dataContainerId:
-          type: string
-        description:
-          type: string
-        hidden:
-          type: boolean
-        runType:
-          type: string
-        properties:
-          type: object
-          additionalProperties:
-            type: string
-        scriptName:
-          type: string
-        target:
-          type: string
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-        runDefinition:
-          type: object
-        createdFrom:
-          $ref: '#/components/schemas/CreatedFrom'
-        cancelUri:
-          type: string
-        diagnosticsUri:
-          type: string
-    QueryParams:
-      description: The set of supported filters.
-      type: object
-      properties:
-        filter:
-          description: 'Allows for filtering the collection of resources.
-
-            The expression specified is evaluated for each resource in the collection, and only items where the expression evaluates to true are included in the response.
-
-            See https://docs.microsoft.com/en-us/azure/search/query-odata-filter-orderby-syntax for details on the expression syntax.'
-          type: string
-        continuationToken:
-          description: The continuation token to use for getting the next set of resources.
-          type: string
-        orderBy:
-          description: 'The comma separated list of resource properties to use for sorting the requested resources.
-
-            Optionally, can be followed by either ''asc'' or ''desc'''
-          type: string
-          example: Color, Size desc
-        top:
-          format: int32
-          description: 'The maximum number of items in the resource collection to be included in the result.
-
-            If not specified, all items are returned.'
-          type: integer
-    RunOptions:
-      type: object
-      properties:
-        generateDataContainerIdIfNotSpecified:
-          type: boolean
-    BatchAddOrModifyRunRequest:
-      type: object
-      properties:
-        runs:
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/CreateRun'
-    RunDetailsWarning:
-      type: object
-      properties:
-        source:
-          type: string
-        message:
-          type: string
-    RootError:
-      description: The root error.
-      type: object
-      properties:
-        code:
-          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
-          type: string
-        message:
-          description: A human-readable representation of the error.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
-        details:
-          description: The related errors that occurred during the request.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetails'
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    CreatedBy:
-      type: object
-      properties:
-        userObjectId:
-          description: 'A user or service principal''s object ID.
-
-            This is PII and should never be logged.'
-          type: string
-        userTenantId:
-          description: A user or service principal's tenant ID.
-          type: string
-        userName:
-          description: 'A user''s full name or a service principal''s app ID.
-
-            This is PII and should never be logged.'
-          type: string
     Run:
       description: The definition of a Run.
       type: object
@@ -656,35 +653,6 @@ components:
           type: string
         diagnosticsUri:
           type: string
-    InnerErrorResponse:
-      description: A nested structure of errors.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    CreatedFrom:
-      type: object
-      properties:
-        type:
-          enum:
-          - Notebook
-          type: string
-          x-ms-enum:
-            name: CreatedFromType
-            modelAsString: false
-        locationType:
-          enum:
-          - ArtifactId
-          type: string
-          x-ms-enum:
-            name: CreatedFromLocationType
-            modelAsString: false
-        location:
-          type: string
     PaginatedRunList:
       description: A paginated list of Runs.
       type: object
@@ -701,23 +669,42 @@ components:
         nextLink:
           description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
+    ErrorResponse:
+      description: The error response.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/RootError'
+          description: The top level error that occurred.
+        correlation:
+          description: Dictionary containing correlation details for the error.
+          type: object
+          additionalProperties:
+            type: string
+        environment:
+          description: The hosting environment.
+          type: string
+        location:
+          description: The Azure region.
+          type: string
+        time:
+          format: date-time
+          description: The time in UTC.
+          type: string
+    ErrorDetails:
+      description: The error details.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
   parameters:
-    workspaceNameParameter:
-      name: workspaceName
-      in: path
-      description: The name of the workspace.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The Name of the resource group in which the workspace is located.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -727,8 +714,27 @@ components:
       schema:
         type: string
         format: uuid
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The Name of the resource group in which the workspace is located.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    workspaceNameParameter:
+      name: workspaceName
+      in: path
+      description: The name of the workspace.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize

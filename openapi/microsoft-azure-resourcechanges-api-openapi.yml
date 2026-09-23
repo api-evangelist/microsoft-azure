@@ -1,7 +1,12 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Resource Changes API
+  title: Microsoft Azure AzureChangeAnalysisManagementClient…
+  version: 2021-04-01-preview
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: ResourceChanges
 paths:
@@ -9,7 +14,7 @@ paths:
     post:
       tags:
       - ResourceChanges
-      summary: Microsoft Azure List The Changes Of A Resource Within The Specified Time Range Customer Data Will Be Masked If The User Doesn T Have Access
+      summary: Microsoft Azure List The Changes Of A Resource Within The Specified Time Range…
       operationId: microsoftAzureResourcechangesList
       parameters:
       - $ref: ../../../../../common-types/resource-management/v2/types.json#/parameters/ApiVersionParameter
@@ -39,6 +44,60 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
+    ChangeProperties:
+      description: The properties of a change.
+      type: object
+      properties:
+        resourceId:
+          description: The resource id that the change is attached to.
+          type: string
+        timeStamp:
+          format: date-time
+          description: The time when the change is detected.
+          type: string
+        initiatedByList:
+          description: 'The list of identities who might initiated the change.
+
+            The identity could be user name (email address) or the object ID of the Service Principal.'
+          type: array
+          items:
+            type: string
+        changeType:
+          $ref: '#/components/schemas/ChangeType'
+        propertyChanges:
+          description: The list of detailed changes at json property level.
+          type: array
+          items:
+            $ref: '#/components/schemas/PropertyChange'
+    ChangeList:
+      description: The list of detected changes.
+      type: object
+      properties:
+        value:
+          description: The list of changes.
+          type: array
+          items:
+            $ref: '#/components/schemas/Change'
+        nextLink:
+          description: The URI that can be used to request the next page of changes.
+          type: string
+    Change:
+      description: The detected change.
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          $ref: '#/components/schemas/ChangeProperties'
+    Level:
+      enum:
+      - Noisy
+      - Normal
+      - Important
+      type: string
+      x-ms-enum:
+        name: Level
+        modelAsString: true
     PropertyChange:
       description: Data of a property change.
       type: object
@@ -74,60 +133,6 @@ components:
         isDataMasked:
           description: The boolean indicating whether the oldValue and newValue are masked. The values are masked if it contains sensitive information that the user doesn't have access to.
           type: boolean
-    ChangeProperties:
-      description: The properties of a change.
-      type: object
-      properties:
-        resourceId:
-          description: The resource id that the change is attached to.
-          type: string
-        timeStamp:
-          format: date-time
-          description: The time when the change is detected.
-          type: string
-        initiatedByList:
-          description: 'The list of identities who might initiated the change.
-
-            The identity could be user name (email address) or the object ID of the Service Principal.'
-          type: array
-          items:
-            type: string
-        changeType:
-          $ref: '#/components/schemas/ChangeType'
-        propertyChanges:
-          description: The list of detailed changes at json property level.
-          type: array
-          items:
-            $ref: '#/components/schemas/PropertyChange'
-    Change:
-      description: The detected change.
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          $ref: '#/components/schemas/ChangeProperties'
-    Level:
-      enum:
-      - Noisy
-      - Normal
-      - Important
-      type: string
-      x-ms-enum:
-        name: Level
-        modelAsString: true
-    ChangeList:
-      description: The list of detected changes.
-      type: object
-      properties:
-        value:
-          description: The list of changes.
-          type: array
-          items:
-            $ref: '#/components/schemas/Change'
-        nextLink:
-          description: The URI that can be used to request the next page of changes.
-          type: string
     ChangeType:
       description: The type of the change.
       enum:
@@ -139,23 +144,14 @@ components:
         name: ChangeType
         modelAsString: true
   parameters:
-    ResourceIdParameter:
-      in: path
-      name: resourceId
-      description: The identifier of the resource.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    EndTimeParameter:
+    ScanLatestParameter:
       in: query
-      name: $endTime
-      description: Specifies the end time of the changes request.
-      required: true
+      name: $scanLatest
+      description: Specifies whether to scan latest
+      required: false
       x-ms-parameter-location: method
       schema:
-        type: string
-        format: date-time
+        type: boolean
     SkipTokenParameter:
       in: query
       name: $skipToken
@@ -172,16 +168,29 @@ components:
       schema:
         type: string
         format: date-time
-    ScanLatestParameter:
+    EndTimeParameter:
       in: query
-      name: $scanLatest
-      description: Specifies whether to scan latest
-      required: false
+      name: $endTime
+      description: Specifies the end time of the changes request.
+      required: true
       x-ms-parameter-location: method
       schema:
-        type: boolean
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+        type: string
+        format: date-time
+    ResourceIdParameter:
+      in: path
+      name: resourceId
+      description: The identifier of the resource.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

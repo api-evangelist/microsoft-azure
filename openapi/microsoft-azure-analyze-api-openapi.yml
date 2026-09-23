@@ -1,13 +1,18 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Analyze API
+  title: Microsoft Azure Analyze API
+  version: '1.0'
+  description: 'Operations tagged Analyze across 2 of this provider''s published API definitions: computer-vision-api-openapi-original.yml, text-analytics-client-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: /vision/v1.0
+security:
+- apim_key: []
 tags:
 - name: Analyze
 paths:
   /analyze:
     post:
-      description: This operation extracts a rich set of visual features based on the image content. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.  Within your request, there is an optional parameter to allow you to choose which features to return.  By default, image categories are returned in the response.
+      description: This operation extracts a rich set of visual features based on the image content. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL. Within your request, there is an optional parameter to allow you to choose which features to return. By default, image categories are returned in the response.
       operationId: microsoftAzureAnalyzeimage
       parameters:
       - $ref: '#/components/parameters/VisualFeatures'
@@ -48,9 +53,11 @@ paths:
       summary: Microsoft Azure Post Analyze
       tags:
       - Analyze
+    servers:
+    - url: /vision/v1.0
   /analyze/jobs/{jobId}:
     get:
-      description: Get the status of an analysis job.  A job may consist of one or more tasks.  Once all tasks are completed, the job will transition to the completed state and results will be available for each task.
+      description: Get the status of an analysis job. A job may consist of one or more tasks. Once all tasks are completed, the job will transition to the completed state and results will be available for each task.
       operationId: microsoftAzureAnalyzestatus
       summary: Microsoft Azure Get Analysis Status And Results
       parameters:
@@ -109,38 +116,89 @@ paths:
       - Analyze
 components:
   schemas:
-    TextAnalyticsError:
+    ImageCaption:
       type: object
-      required:
-      - code
-      - message
+      description: An image caption, i.e. a brief description of what the image depicts.
       properties:
-        code:
+        text:
           type: string
-          enum:
-          - InvalidRequest
-          - InvalidArgument
-          - InternalServerError
-          - ServiceUnavailable
-          - NotFound
-          x-ms-enum:
-            name: ErrorCodeValue
-            modelAsString: false
-          description: Error code.
-        message:
-          type: string
-          description: Error message.
-        target:
-          type: string
-          description: Error target.
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: Inner error contains more specific information.
-        details:
+          description: The text of the caption
+        confidence:
+          type: number
+          format: double
+          description: The level of confidence the service has in the caption
+    CategoryDetail:
+      type: object
+      description: An object describing additional category details.
+      properties:
+        celebrities:
           type: array
-          description: Details about specific errors that led to this reported error.
+          description: An array of celebrities if any identified.
           items:
-            $ref: '#/components/schemas/TextAnalyticsError'
+            $ref: '#/components/schemas/CelebritiesModel'
+    AdultInfo:
+      type: object
+      description: An object describing whether the image contains adult-oriented content and/or is racy.
+      properties:
+        isAdultContent:
+          type: boolean
+          description: A value indicating if the image contains adult-oriented content.
+        isRacyContent:
+          type: boolean
+          description: A value indicating if the image is race.
+        adultScore:
+          type: number
+          format: double
+          description: Score from 0 to 1 that indicates how much of adult content is within the image.
+        racyScore:
+          type: number
+          format: double
+          description: Score from 0 to 1 that indicates how suggestive is the image.
+    CelebritiesModel:
+      type: object
+      description: An object describing possible celebrity identification.
+      properties:
+        name:
+          type: string
+          description: Name of the celebrity.
+        confidence:
+          type: number
+          format: double
+          description: Level of confidence ranging from 0 to 1.
+        faceRectangle:
+          $ref: '#/components/schemas/FaceRectangle'
+    ColorInfo:
+      type: object
+      description: An object providing additional metadata describing color attributes.
+      properties:
+        dominantColorForeground:
+          type: string
+          description: Possible dominant foreground color.
+        dominantColorBackground:
+          type: string
+          description: Possible dominant background color.
+        dominantColors:
+          type: array
+          description: An array of possible dominant colors.
+          items:
+            type: string
+        accentColor:
+          type: string
+          description: Possible accent color.
+        isBWImg:
+          type: boolean
+          description: A value indicating if the image is black and white.
+    ImageTag:
+      type: object
+      description: An image caption, i.e. a brief description of what the image depicts.
+      properties:
+        name:
+          type: string
+          description: The tag value
+        confidence:
+          type: number
+          format: double
+          description: The level of confidence the service has in the caption
     Category:
       type: object
       description: An object describing identified category.
@@ -154,106 +212,51 @@ components:
           description: Scoring of the category.
         detail:
           $ref: '#/components/schemas/CategoryDetail'
-    Match:
+    ImageType:
       type: object
-      required:
-      - confidenceScore
-      - text
-      - offset
-      - length
+      description: An object providing possible image types and matching confidence levels.
       properties:
-        confidenceScore:
+        clipArtType:
           type: number
-          format: double
-          description: If a well known item is recognized, a decimal number denoting the confidence level between 0 and 1 will be returned.
-        text:
-          type: string
-          description: Entity text as appears in the request.
-        offset:
+          description: Confidence level that the image is a clip art.
+        lineDrawingType:
+          type: number
+          description: Confidence level that the image is a line drawing.
+    FaceRectangle:
+      type: object
+      description: An object describing face rectangle.
+      properties:
+        left:
           type: integer
-          format: int32
-          description: Start position for the entity match text.
-        length:
+          description: X-coordinate of the top left point of the face.
+        top:
           type: integer
-          format: int32
-          description: Length for the entity match text.
-    DocumentEntities:
+          description: Y-coordinate of the top left point of the face.
+        width:
+          type: integer
+          description: Width measured from the top-left point of the face.
+        height:
+          type: integer
+          description: Height measured from the top-left point of the face.
+    ImageDescriptionDetails:
       type: object
-      required:
-      - id
-      - entities
-      - warnings
+      description: A collection of content tags, along with a list of captions sorted by confidence level, and image metadata.
       properties:
-        id:
-          type: string
-          description: Unique, non-empty document identifier.
-        entities:
+        tags:
           type: array
-          description: Recognized entities in the document.
+          description: A collection of image tags.
           items:
-            $ref: '#/components/schemas/Entity'
-        warnings:
+            type: string
+        captions:
           type: array
-          description: Warnings encountered while processing document.
+          description: A list of captions, sorted by confidence level.
           items:
-            $ref: '#/components/schemas/TextAnalyticsWarning'
-        statistics:
-          description: if showStats=true was specified in the request this field will contain information about the document payload.
-          $ref: '#/components/schemas/DocumentStatistics'
-    PiiResult:
-      type: object
-      required:
-      - documents
-      - errors
-      - modelVersion
-      properties:
-        documents:
-          type: array
-          description: Response by document
-          items:
-            $ref: '#/components/schemas/PiiDocumentEntities'
-        errors:
-          type: array
-          description: Errors by document id.
-          items:
-            $ref: '#/components/schemas/DocumentError'
-        statistics:
-          $ref: '#/components/schemas/RequestStatistics'
-        modelVersion:
-          type: string
-          description: This field indicates which model is used for scoring.
-    ComputerVisionError:
-      type: object
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: string
-          description: The error code.
-          enum:
-          - InvalidImageUrl
-          - InvalidImageFormat
-          - InvalidImageSize
-          - NotSupportedVisualFeature
-          - NotSupportedImage
-          - InvalidDetails
-          - NotSupportedLanguage
-          - BadArgument
-          - FailedToProcess
-          - Timeout
-          - InternalServerError
-          - Unspecified
-          - StorageException
-          x-ms-enum:
-            name: ComputerVisionErrorCodes
-            modelAsString: false
-        message:
-          type: string
-          description: A message explaining the error reported by the service.
+            $ref: '#/components/schemas/ImageCaption'
         requestId:
           type: string
-          description: A unique request identifier.
+          description: Id of the REST API request.
+        metadata:
+          $ref: '#/components/schemas/ImageMetadata'
     FaceDescription:
       type: object
       description: An object describing a face identified in the image.
@@ -272,106 +275,6 @@ components:
           - Female
         faceRectangle:
           $ref: '#/components/schemas/FaceRectangle'
-    EntitiesResult:
-      type: object
-      required:
-      - documents
-      - errors
-      - modelVersion
-      properties:
-        documents:
-          type: array
-          description: Response by document
-          items:
-            $ref: '#/components/schemas/DocumentEntities'
-        errors:
-          type: array
-          description: Errors by document id.
-          items:
-            $ref: '#/components/schemas/DocumentError'
-        statistics:
-          $ref: '#/components/schemas/RequestStatistics'
-        modelVersion:
-          type: string
-          description: This field indicates which model is used for scoring.
-    InnerError:
-      type: object
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: string
-          enum:
-          - InvalidParameterValue
-          - InvalidRequestBodyFormat
-          - EmptyRequest
-          - MissingInputRecords
-          - InvalidDocument
-          - ModelVersionIncorrect
-          - InvalidDocumentBatch
-          - UnsupportedLanguageCode
-          - InvalidCountryHint
-          x-ms-enum:
-            name: InnerErrorCodeValue
-            modelAsString: true
-          description: Error code.
-        message:
-          type: string
-          description: Error message.
-        details:
-          type: object
-          additionalProperties:
-            type: string
-          description: Error details.
-        target:
-          type: string
-          description: Error target.
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: Inner error contains more specific information.
-    CelebritiesModel:
-      type: object
-      description: An object describing possible celebrity identification.
-      properties:
-        name:
-          type: string
-          description: Name of the celebrity.
-        confidence:
-          type: number
-          format: double
-          description: Level of confidence ranging from 0 to 1.
-        faceRectangle:
-          $ref: '#/components/schemas/FaceRectangle'
-    FaceRectangle:
-      type: object
-      description: An object describing face rectangle.
-      properties:
-        left:
-          type: integer
-          description: X-coordinate of the top left point of the face.
-        top:
-          type: integer
-          description: Y-coordinate of the top left point of the face.
-        width:
-          type: integer
-          description: Width measured from the top-left point of the face.
-        height:
-          type: integer
-          description: Height measured from the top-left point of the face.
-    AnalyzeJobState:
-      allOf:
-      - $ref: '#/components/schemas/AnalyzeJobMetadata'
-      - $ref: '#/components/schemas/TasksState'
-      - properties:
-          errors:
-            items:
-              $ref: '#/components/schemas/TextAnalyticsError'
-            type: array
-          statistics:
-            $ref: '#/components/schemas/RequestStatistics'
-        type: object
-      - $ref: '#/components/schemas/Pagination'
     ImageAnalysis:
       type: object
       description: Result of AnalyzeImage operation.
@@ -404,37 +307,53 @@ components:
           description: Id of the request for tracking purposes.
         metadata:
           $ref: '#/components/schemas/ImageMetadata'
-    DocumentError:
+    ImageMetadata:
+      type: object
+      description: Image metadata
+      properties:
+        width:
+          type: integer
+          format: int32
+          description: Image width
+        height:
+          type: integer
+          format: int32
+          description: Image height
+        format:
+          type: string
+          description: Image format
+    ComputerVisionError:
       type: object
       required:
-      - id
-      - error
+      - code
+      - message
       properties:
-        id:
+        code:
           type: string
-          description: Document Id.
-        error:
-          type: object
-          description: Document Error.
-          $ref: '#/components/schemas/TextAnalyticsError'
-    AdultInfo:
-      type: object
-      description: An object describing whether the image contains adult-oriented content and/or is racy.
-      properties:
-        isAdultContent:
-          type: boolean
-          description: A value indicating if the image contains adult-oriented content.
-        isRacyContent:
-          type: boolean
-          description: A value indicating if the image is race.
-        adultScore:
-          type: number
-          format: double
-          description: Score from 0 to 1 that indicates how much of adult content is within the image.
-        racyScore:
-          type: number
-          format: double
-          description: Score from 0 to 1 that indicates how suggestive is the image.
+          description: The error code.
+          enum:
+          - InvalidImageUrl
+          - InvalidImageFormat
+          - InvalidImageSize
+          - NotSupportedVisualFeature
+          - NotSupportedImage
+          - InvalidDetails
+          - NotSupportedLanguage
+          - BadArgument
+          - FailedToProcess
+          - Timeout
+          - InternalServerError
+          - Unspecified
+          - StorageException
+          x-ms-enum:
+            name: ComputerVisionErrorCodes
+            modelAsString: false
+        message:
+          type: string
+          description: A message explaining the error reported by the service.
+        requestId:
+          type: string
+          description: A unique request identifier.
     TextAnalyticsWarning:
       type: object
       required:
@@ -456,18 +375,13 @@ components:
         targetRef:
           type: string
           description: A JSON pointer reference indicating the target object.
-    ImageTag:
-      type: object
-      description: An image caption, i.e. a brief description of what the image depicts.
+    JobDescriptor:
       properties:
-        name:
+        displayName:
+          description: Optional display name for the analysis job.
           type: string
-          description: The tag value
-        confidence:
-          type: number
-          format: double
-          description: The level of confidence the service has in the caption
-    KeyPhraseResult:
+      type: object
+    EntitiesResult:
       type: object
       required:
       - documents
@@ -478,7 +392,7 @@ components:
           type: array
           description: Response by document
           items:
-            $ref: '#/components/schemas/DocumentKeyPhrases'
+            $ref: '#/components/schemas/DocumentEntities'
         errors:
           type: array
           description: Errors by document id.
@@ -489,31 +403,66 @@ components:
         modelVersion:
           type: string
           description: This field indicates which model is used for scoring.
-    RequestStatistics:
+    TaskState:
+      properties:
+        lastUpdateDateTime:
+          format: date-time
+          type: string
+        name:
+          type: string
+        status:
+          enum:
+          - notStarted
+          - running
+          - succeeded
+          - failed
+          - rejected
+          - cancelled
+          - cancelling
+          x-ms-enum:
+            modelAsString: false
+            name: State
+      required:
+      - status
+      - lastUpdateDateTime
+      type: object
+    DocumentStatistics:
       type: object
       required:
-      - documentsCount
-      - validDocumentsCount
-      - erroneousDocumentsCount
+      - charactersCount
       - transactionsCount
       properties:
-        documentsCount:
+        charactersCount:
           type: integer
           format: int32
-          description: Number of documents submitted in the request.
-        validDocumentsCount:
-          type: integer
-          format: int32
-          description: Number of valid documents. This excludes empty, over-size limit or non-supported languages documents.
-        erroneousDocumentsCount:
-          type: integer
-          format: int32
-          description: Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
+          description: Number of text elements recognized in the document.
         transactionsCount:
           type: integer
-          format: int64
-          description: Number of transactions for the request.
-      description: if showStats=true was specified in the request this field will contain information about the request payload.
+          format: int32
+          description: Number of transactions for the document.
+      description: if showStats=true was specified in the request this field will contain information about the document payload.
+    PiiResult:
+      type: object
+      required:
+      - documents
+      - errors
+      - modelVersion
+      properties:
+        documents:
+          type: array
+          description: Response by document
+          items:
+            $ref: '#/components/schemas/PiiDocumentEntities'
+        errors:
+          type: array
+          description: Errors by document id.
+          items:
+            $ref: '#/components/schemas/DocumentError'
+        statistics:
+          $ref: '#/components/schemas/RequestStatistics'
+        modelVersion:
+          type: string
+          description: This field indicates which model is used for scoring.
     LinkedEntity:
       type: object
       required:
@@ -546,216 +495,6 @@ components:
         bingId:
           type: string
           description: Bing Entity Search API unique identifier of the recognized entity.
-    DocumentLinkedEntities:
-      type: object
-      required:
-      - id
-      - entities
-      - warnings
-      properties:
-        id:
-          type: string
-          description: Unique, non-empty document identifier.
-        entities:
-          type: array
-          description: Recognized well known entities in the document.
-          items:
-            $ref: '#/components/schemas/LinkedEntity'
-        warnings:
-          type: array
-          description: Warnings encountered while processing document.
-          items:
-            $ref: '#/components/schemas/TextAnalyticsWarning'
-        statistics:
-          description: if showStats=true was specified in the request this field will contain information about the document payload.
-          $ref: '#/components/schemas/DocumentStatistics'
-    DocumentKeyPhrases:
-      type: object
-      required:
-      - id
-      - keyPhrases
-      - warnings
-      properties:
-        id:
-          type: string
-          description: Unique, non-empty document identifier.
-        keyPhrases:
-          type: array
-          description: A list of representative words or phrases. The number of key phrases returned is proportional to the number of words in the input document.
-          items:
-            type: string
-        warnings:
-          type: array
-          description: Warnings encountered while processing document.
-          items:
-            $ref: '#/components/schemas/TextAnalyticsWarning'
-        statistics:
-          description: if showStats=true was specified in the request this field will contain information about the document payload.
-          $ref: '#/components/schemas/DocumentStatistics'
-    PiiDocumentEntities:
-      type: object
-      required:
-      - id
-      - redactedText
-      - entities
-      - warnings
-      properties:
-        id:
-          type: string
-          description: Unique, non-empty document identifier.
-        redactedText:
-          type: string
-          description: Returns redacted text.
-        entities:
-          type: array
-          description: Recognized entities in the document.
-          items:
-            $ref: '#/components/schemas/Entity'
-        warnings:
-          type: array
-          description: Warnings encountered while processing document.
-          items:
-            $ref: '#/components/schemas/TextAnalyticsWarning'
-        statistics:
-          description: if showStats=true was specified in the request this field will contain information about the document payload.
-          $ref: '#/components/schemas/DocumentStatistics'
-    TaskState:
-      properties:
-        lastUpdateDateTime:
-          format: date-time
-          type: string
-        name:
-          type: string
-        status:
-          enum:
-          - notStarted
-          - running
-          - succeeded
-          - failed
-          - rejected
-          - cancelled
-          - cancelling
-          x-ms-enum:
-            modelAsString: false
-            name: State
-      required:
-      - status
-      - lastUpdateDateTime
-      type: object
-    AnalyzeJobMetadata:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/JobMetadata'
-      - properties:
-          displayName:
-            type: string
-    ColorInfo:
-      type: object
-      description: An object providing additional metadata describing color attributes.
-      properties:
-        dominantColorForeground:
-          type: string
-          description: Possible dominant foreground color.
-        dominantColorBackground:
-          type: string
-          description: Possible dominant background color.
-        dominantColors:
-          type: array
-          description: An array of possible dominant colors.
-          items:
-            type: string
-        accentColor:
-          type: string
-          description: Possible accent color.
-        isBWImg:
-          type: boolean
-          description: A value indicating if the image is black and white.
-    DocumentStatistics:
-      type: object
-      required:
-      - charactersCount
-      - transactionsCount
-      properties:
-        charactersCount:
-          type: integer
-          format: int32
-          description: Number of text elements recognized in the document.
-        transactionsCount:
-          type: integer
-          format: int32
-          description: Number of transactions for the document.
-      description: if showStats=true was specified in the request this field will contain information about the document payload.
-    ImageMetadata:
-      type: object
-      description: Image metadata
-      properties:
-        width:
-          type: integer
-          format: int32
-          description: Image width
-        height:
-          type: integer
-          format: int32
-          description: Image height
-        format:
-          type: string
-          description: Image format
-    CategoryDetail:
-      type: object
-      description: An object describing additional category details.
-      properties:
-        celebrities:
-          type: array
-          description: An array of celebrities if any identified.
-          items:
-            $ref: '#/components/schemas/CelebritiesModel'
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          description: Document Error.
-          $ref: '#/components/schemas/TextAnalyticsError'
-    ImageCaption:
-      type: object
-      description: An image caption, i.e. a brief description of what the image depicts.
-      properties:
-        text:
-          type: string
-          description: The text of the caption
-        confidence:
-          type: number
-          format: double
-          description: The level of confidence the service has in the caption
-    EntityLinkingResult:
-      type: object
-      required:
-      - documents
-      - errors
-      - modelVersion
-      properties:
-        documents:
-          type: array
-          description: Response by document
-          items:
-            $ref: '#/components/schemas/DocumentLinkedEntities'
-        errors:
-          type: array
-          description: Errors by document id.
-          items:
-            $ref: '#/components/schemas/DocumentError'
-        statistics:
-          $ref: '#/components/schemas/RequestStatistics'
-        modelVersion:
-          type: string
-          description: This field indicates which model is used for scoring.
-    Pagination:
-      properties:
-        '@nextLink':
-          type: string
-      type: object
     JobMetadata:
       properties:
         createdDateTime:
@@ -789,16 +528,185 @@ components:
       - createdDateTime
       - status
       type: object
-    ImageType:
-      type: object
-      description: An object providing possible image types and matching confidence levels.
+    PiiTask:
       properties:
-        clipArtType:
-          type: number
-          description: Confidence level that the image is a clip art.
-        lineDrawingType:
-          type: number
-          description: Confidence level that the image is a line drawing.
+        parameters:
+          properties:
+            domain:
+              default: none
+              enum:
+              - phi
+              - none
+              type: string
+            model-version:
+              default: latest
+              type: string
+            pii-categories:
+              $ref: '#/components/schemas/PiiCategories'
+            stringIndexType:
+              $ref: '#/components/schemas/StringIndexType'
+          type: object
+      type: object
+    MultiLanguageBatchInput:
+      type: object
+      required:
+      - documents
+      properties:
+        documents:
+          type: array
+          description: The set of documents to process as part of this batch.
+          items:
+            $ref: '#/components/schemas/MultiLanguageInput'
+      description: Contains a set of input documents to be analyzed by the service.
+    MultiLanguageInput:
+      type: object
+      required:
+      - id
+      - text
+      properties:
+        id:
+          type: string
+          description: A unique, non-empty document identifier.
+        text:
+          type: string
+          description: The input text to process.
+        language:
+          type: string
+          description: (Optional) This is the 2 letter ISO 639-1 representation of a language. For example, use "en" for English; "es" for Spanish etc. If not set, use "en" for English as default.
+      description: Contains an input document to be analyzed by the service.
+    RequestStatistics:
+      type: object
+      required:
+      - documentsCount
+      - validDocumentsCount
+      - erroneousDocumentsCount
+      - transactionsCount
+      properties:
+        documentsCount:
+          type: integer
+          format: int32
+          description: Number of documents submitted in the request.
+        validDocumentsCount:
+          type: integer
+          format: int32
+          description: Number of valid documents. This excludes empty, over-size limit or non-supported languages documents.
+        erroneousDocumentsCount:
+          type: integer
+          format: int32
+          description: Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
+        transactionsCount:
+          type: integer
+          format: int64
+          description: Number of transactions for the request.
+      description: if showStats=true was specified in the request this field will contain information about the request payload.
+    DocumentLinkedEntities:
+      type: object
+      required:
+      - id
+      - entities
+      - warnings
+      properties:
+        id:
+          type: string
+          description: Unique, non-empty document identifier.
+        entities:
+          type: array
+          description: Recognized well known entities in the document.
+          items:
+            $ref: '#/components/schemas/LinkedEntity'
+        warnings:
+          type: array
+          description: Warnings encountered while processing document.
+          items:
+            $ref: '#/components/schemas/TextAnalyticsWarning'
+        statistics:
+          description: if showStats=true was specified in the request this field will contain information about the document payload.
+          $ref: '#/components/schemas/DocumentStatistics'
+    AnalyzeJobMetadata:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/JobMetadata'
+      - properties:
+          displayName:
+            type: string
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          description: Document Error.
+          $ref: '#/components/schemas/TextAnalyticsError'
+    DocumentEntities:
+      type: object
+      required:
+      - id
+      - entities
+      - warnings
+      properties:
+        id:
+          type: string
+          description: Unique, non-empty document identifier.
+        entities:
+          type: array
+          description: Recognized entities in the document.
+          items:
+            $ref: '#/components/schemas/Entity'
+        warnings:
+          type: array
+          description: Warnings encountered while processing document.
+          items:
+            $ref: '#/components/schemas/TextAnalyticsWarning'
+        statistics:
+          description: if showStats=true was specified in the request this field will contain information about the document payload.
+          $ref: '#/components/schemas/DocumentStatistics'
+    EntitiesTask:
+      properties:
+        parameters:
+          properties:
+            model-version:
+              default: latest
+              type: string
+            stringIndexType:
+              $ref: '#/components/schemas/StringIndexType'
+          type: object
+      type: object
+    AnalyzeJobState:
+      allOf:
+      - $ref: '#/components/schemas/AnalyzeJobMetadata'
+      - $ref: '#/components/schemas/TasksState'
+      - properties:
+          errors:
+            items:
+              $ref: '#/components/schemas/TextAnalyticsError'
+            type: array
+          statistics:
+            $ref: '#/components/schemas/RequestStatistics'
+        type: object
+      - $ref: '#/components/schemas/Pagination'
+    EntityLinkingResult:
+      type: object
+      required:
+      - documents
+      - errors
+      - modelVersion
+      properties:
+        documents:
+          type: array
+          description: Response by document
+          items:
+            $ref: '#/components/schemas/DocumentLinkedEntities'
+        errors:
+          type: array
+          description: Errors by document id.
+          items:
+            $ref: '#/components/schemas/DocumentError'
+        statistics:
+          $ref: '#/components/schemas/RequestStatistics'
+        modelVersion:
+          type: string
+          description: This field indicates which model is used for scoring.
     TasksState:
       properties:
         tasks:
@@ -864,25 +772,6 @@ components:
       required:
       - tasks
       type: object
-    ImageDescriptionDetails:
-      type: object
-      description: A collection of content tags, along with a list of captions sorted by confidence level, and image metadata.
-      properties:
-        tags:
-          type: array
-          description: A collection of image tags.
-          items:
-            type: string
-        captions:
-          type: array
-          description: A list of captions, sorted by confidence level.
-          items:
-            $ref: '#/components/schemas/ImageCaption'
-        requestId:
-          type: string
-          description: Id of the REST API request.
-        metadata:
-          $ref: '#/components/schemas/ImageMetadata'
     Entity:
       type: object
       required:
@@ -913,22 +802,443 @@ components:
           type: number
           format: double
           description: Confidence score between 0 and 1 of the extracted entity.
-  parameters:
-    ServiceLanguage:
-      name: language
-      in: query
-      description: The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
-      required: false
-      x-ms-parameter-location: method
-      schema:
+    JobManifest:
+      properties:
+        tasks:
+          description: The set of tasks to execute on the input documents. Cannot specify the same task more than once.
+          properties:
+            entityRecognitionTasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntitiesTask'
+            entityRecognitionPiiTasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/PiiTask'
+            keyPhraseExtractionTasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/KeyPhrasesTask'
+            entityLinkingTasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityLinkingTask'
+          type: object
+      required:
+      - tasks
+      type: object
+    EntityLinkingTask:
+      properties:
+        parameters:
+          properties:
+            model-version:
+              default: latest
+              type: string
+            stringIndexType:
+              $ref: '#/components/schemas/StringIndexType'
+          type: object
+      type: object
+    Match:
+      type: object
+      required:
+      - confidenceScore
+      - text
+      - offset
+      - length
+      properties:
+        confidenceScore:
+          type: number
+          format: double
+          description: If a well known item is recognized, a decimal number denoting the confidence level between 0 and 1 will be returned.
+        text:
+          type: string
+          description: Entity text as appears in the request.
+        offset:
+          type: integer
+          format: int32
+          description: Start position for the entity match text.
+        length:
+          type: integer
+          format: int32
+          description: Length for the entity match text.
+    DocumentKeyPhrases:
+      type: object
+      required:
+      - id
+      - keyPhrases
+      - warnings
+      properties:
+        id:
+          type: string
+          description: Unique, non-empty document identifier.
+        keyPhrases:
+          type: array
+          description: A list of representative words or phrases. The number of key phrases returned is proportional to the number of words in the input document.
+          items:
+            type: string
+        warnings:
+          type: array
+          description: Warnings encountered while processing document.
+          items:
+            $ref: '#/components/schemas/TextAnalyticsWarning'
+        statistics:
+          description: if showStats=true was specified in the request this field will contain information about the document payload.
+          $ref: '#/components/schemas/DocumentStatistics'
+    KeyPhrasesTask:
+      properties:
+        parameters:
+          properties:
+            model-version:
+              default: latest
+              type: string
+          type: object
+      type: object
+    StringIndexType:
+      default: TextElements_v8
+      enum:
+      - TextElements_v8
+      - UnicodeCodePoint
+      - Utf16CodeUnit
+      x-ms-enum:
+        name: StringIndexType
+        modelAsString: true
+        values:
+        - value: TextElements_v8
+          description: Returned offset and length values will correspond to TextElements (Graphemes and Grapheme clusters) confirming to the Unicode 8.0.0 standard. Use this option if your application is written in .Net Framework or .Net Core and you will be using StringInfo.
+        - value: UnicodeCodePoint
+          description: Returned offset and length values will correspond to Unicode code points. Use this option if your application is written in a language that support Unicode, for example Python.
+        - value: Utf16CodeUnit
+          description: Returned offset and length values will correspond to UTF-16 code units. Use this option if your application is written in a language that support Unicode, for example Java, JavaScript.
+      type: string
+    PiiDocumentEntities:
+      type: object
+      required:
+      - id
+      - redactedText
+      - entities
+      - warnings
+      properties:
+        id:
+          type: string
+          description: Unique, non-empty document identifier.
+        redactedText:
+          type: string
+          description: Returns redacted text.
+        entities:
+          type: array
+          description: Recognized entities in the document.
+          items:
+            $ref: '#/components/schemas/Entity'
+        warnings:
+          type: array
+          description: Warnings encountered while processing document.
+          items:
+            $ref: '#/components/schemas/TextAnalyticsWarning'
+        statistics:
+          description: if showStats=true was specified in the request this field will contain information about the document payload.
+          $ref: '#/components/schemas/DocumentStatistics'
+    Pagination:
+      properties:
+        '@nextLink':
+          type: string
+      type: object
+    KeyPhraseResult:
+      type: object
+      required:
+      - documents
+      - errors
+      - modelVersion
+      properties:
+        documents:
+          type: array
+          description: Response by document
+          items:
+            $ref: '#/components/schemas/DocumentKeyPhrases'
+        errors:
+          type: array
+          description: Errors by document id.
+          items:
+            $ref: '#/components/schemas/DocumentError'
+        statistics:
+          $ref: '#/components/schemas/RequestStatistics'
+        modelVersion:
+          type: string
+          description: This field indicates which model is used for scoring.
+    TextAnalyticsError:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          enum:
+          - InvalidRequest
+          - InvalidArgument
+          - InternalServerError
+          - ServiceUnavailable
+          - NotFound
+          x-ms-enum:
+            name: ErrorCodeValue
+            modelAsString: false
+          description: Error code.
+        message:
+          type: string
+          description: Error message.
+        target:
+          type: string
+          description: Error target.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: Inner error contains more specific information.
+        details:
+          type: array
+          description: Details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/TextAnalyticsError'
+    DocumentError:
+      type: object
+      required:
+      - id
+      - error
+      properties:
+        id:
+          type: string
+          description: Document Id.
+        error:
+          type: object
+          description: Document Error.
+          $ref: '#/components/schemas/TextAnalyticsError'
+    InnerError:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          enum:
+          - InvalidParameterValue
+          - InvalidRequestBodyFormat
+          - EmptyRequest
+          - MissingInputRecords
+          - InvalidDocument
+          - ModelVersionIncorrect
+          - InvalidDocumentBatch
+          - UnsupportedLanguageCode
+          - InvalidCountryHint
+          x-ms-enum:
+            name: InnerErrorCodeValue
+            modelAsString: true
+          description: Error code.
+        message:
+          type: string
+          description: Error message.
+        details:
+          type: object
+          additionalProperties:
+            type: string
+          description: Error details.
+        target:
+          type: string
+          description: Error target.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: Inner error contains more specific information.
+    PiiCategories:
+      description: (Optional) describes the PII categories to return
+      items:
         type: string
+        x-ms-enum:
+          name: PiiCategory
+          modelAsString: true
         enum:
-        - en
-        - es
-        - ja
-        - pt
-        - zh
-        default: en
+        - ABARoutingNumber
+        - ARNationalIdentityNumber
+        - AUBankAccountNumber
+        - AUDriversLicenseNumber
+        - AUMedicalAccountNumber
+        - AUPassportNumber
+        - AUTaxFileNumber
+        - AUBusinessNumber
+        - AUCompanyNumber
+        - ATIdentityCard
+        - ATTaxIdentificationNumber
+        - ATValueAddedTaxNumber
+        - AzureDocumentDBAuthKey
+        - AzureIAASDatabaseConnectionAndSQLString
+        - AzureIoTConnectionString
+        - AzurePublishSettingPassword
+        - AzureRedisCacheString
+        - AzureSAS
+        - AzureServiceBusString
+        - AzureStorageAccountKey
+        - AzureStorageAccountGeneric
+        - BENationalNumber
+        - BENationalNumberV2
+        - BEValueAddedTaxNumber
+        - BRCPFNumber
+        - BRLegalEntityNumber
+        - BRNationalIDRG
+        - BGUniformCivilNumber
+        - CABankAccountNumber
+        - CADriversLicenseNumber
+        - CAHealthServiceNumber
+        - CAPassportNumber
+        - CAPersonalHealthIdentification
+        - CASocialInsuranceNumber
+        - CLIdentityCardNumber
+        - CNResidentIdentityCardNumber
+        - CreditCardNumber
+        - HRIdentityCardNumber
+        - HRNationalIDNumber
+        - HRPersonalIdentificationNumber
+        - HRPersonalIdentificationOIBNumberV2
+        - CYIdentityCard
+        - CYTaxIdentificationNumber
+        - CZPersonalIdentityNumber
+        - CZPersonalIdentityV2
+        - DKPersonalIdentificationNumber
+        - DKPersonalIdentificationV2
+        - DrugEnforcementAgencyNumber
+        - EEPersonalIdentificationCode
+        - EUDebitCardNumber
+        - EUDriversLicenseNumber
+        - EUGPSCoordinates
+        - EUNationalIdentificationNumber
+        - EUPassportNumber
+        - EUSocialSecurityNumber
+        - EUTaxIdentificationNumber
+        - FIEuropeanHealthNumber
+        - FINationalID
+        - FINationalIDV2
+        - FIPassportNumber
+        - FRDriversLicenseNumber
+        - FRHealthInsuranceNumber
+        - FRNationalID
+        - FRPassportNumber
+        - FRSocialSecurityNumber
+        - FRTaxIdentificationNumber
+        - FRValueAddedTaxNumber
+        - DEDriversLicenseNumber
+        - DEPassportNumber
+        - DEIdentityCardNumber
+        - DETaxIdentificationNumber
+        - DEValueAddedNumber
+        - GRNationalIDCard
+        - GRNationalIDV2
+        - GRTaxIdentificationNumber
+        - HKIdentityCardNumber
+        - HUValueAddedNumber
+        - HUPersonalIdentificationNumber
+        - HUTaxIdentificationNumber
+        - INPermanentAccount
+        - INUniqueIdentificationNumber
+        - IDIdentityCardNumber
+        - InternationalBankingAccountNumber
+        - IEPersonalPublicServiceNumber
+        - IEPersonalPublicServiceNumberV2
+        - ILBankAccountNumber
+        - ILNationalID
+        - ITDriversLicenseNumber
+        - ITFiscalCode
+        - ITValueAddedTaxNumber
+        - JPBankAccountNumber
+        - JPDriversLicenseNumber
+        - JPPassportNumber
+        - JPResidentRegistrationNumber
+        - JPSocialInsuranceNumber
+        - JPMyNumberCorporate
+        - JPMyNumberPersonal
+        - JPResidenceCardNumber
+        - LVPersonalCode
+        - LTPersonalCode
+        - LUNationalIdentificationNumberNatural
+        - LUNationalIdentificationNumberNonNatural
+        - MYIdentityCardNumber
+        - MTIdentityCardNumber
+        - MTTaxIDNumber
+        - NLCitizensServiceNumber
+        - NLCitizensServiceNumberV2
+        - NLTaxIdentificationNumber
+        - NLValueAddedTaxNumber
+        - NZBankAccountNumber
+        - NZDriversLicenseNumber
+        - NZInlandRevenueNumber
+        - NZMinistryOfHealthNumber
+        - NZSocialWelfareNumber
+        - NOIdentityNumber
+        - PHUnifiedMultiPurposeIDNumber
+        - PLIdentityCard
+        - PLNationalID
+        - PLNationalIDV2
+        - PLPassportNumber
+        - PLTaxIdentificationNumber
+        - PLREGONNumber
+        - PTCitizenCardNumber
+        - PTCitizenCardNumberV2
+        - PTTaxIdentificationNumber
+        - ROPersonalNumericalCode
+        - RUPassportNumberDomestic
+        - RUPassportNumberInternational
+        - SANationalID
+        - SGNationalRegistrationIdentityCardNumber
+        - SKPersonalNumber
+        - SITaxIdentificationNumber
+        - SIUniqueMasterCitizenNumber
+        - ZAIdentificationNumber
+        - KRResidentRegistrationNumber
+        - ESDNI
+        - ESSocialSecurityNumber
+        - ESTaxIdentificationNumber
+        - SQLServerConnectionString
+        - SENationalID
+        - SENationalIDV2
+        - SEPassportNumber
+        - SETaxIdentificationNumber
+        - SWIFTCode
+        - CHSocialSecurityNumber
+        - TWNationalID
+        - TWPassportNumber
+        - TWResidentCertificate
+        - THPopulationIdentificationCode
+        - TRNationalIdentificationNumber
+        - UKDriversLicenseNumber
+        - UKElectoralRollNumber
+        - UKNationalHealthNumber
+        - UKNationalInsuranceNumber
+        - UKUniqueTaxpayerNumber
+        - USUKPassportNumber
+        - USBankAccountNumber
+        - USDriversLicenseNumber
+        - USIndividualTaxpayerIdentification
+        - USSocialSecurityNumber
+        - UAPassportNumberDomestic
+        - UAPassportNumberInternational
+        - Organization
+        - Email
+        - URL
+        - Age
+        - PhoneNumber
+        - IPAddress
+        - Date
+        - Person
+        - Address
+        - All
+        - Default
+      type: array
+      uniqueItems: true
+    AnalyzeBatchInput:
+      allOf:
+      - $ref: '#/components/schemas/JobDescriptor'
+      - type: object
+        required:
+        - analysisInput
+        properties:
+          analysisInput:
+            $ref: '#/components/schemas/MultiLanguageBatchInput'
+      - $ref: '#/components/schemas/JobManifest'
+  parameters:
     VisualFeatures:
       name: visualFeatures
       in: query
@@ -952,6 +1262,21 @@ components:
           - Color
           - Tags
           - Description
+    ServiceLanguage:
+      name: language
+      in: query
+      description: The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        enum:
+        - en
+        - es
+        - ja
+        - pt
+        - zh
+        default: en
     ShowStats:
       name: showStats
       in: query
@@ -968,6 +1293,14 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
+  securitySchemes:
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+x-refined-from:
+- computer-vision-api-openapi-original.yml
+- text-analytics-client-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

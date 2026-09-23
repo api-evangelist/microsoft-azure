@@ -1,0 +1,241 @@
+openapi: 3.2.0
+info:
+  title: Microsoft Azure Metrics Advisor Ingestion Status API
+  description: Microsoft Azure Metrics Advisor REST API (OpenAPI v2)
+  version: '1.0'
+security:
+- apim_key: []
+  ma_api_key: []
+tags:
+- name: ingestion > status
+paths:
+  /dataFeeds/{dataFeedId}/ingestionStatus/query:
+    post:
+      tags:
+      - ingestion > status
+      summary: Microsoft Azure Get Data Ingestion Status By Data Feed
+      operationId: microsoftAzureGetdatafeedingestionstatus
+      parameters:
+      - in: path
+        name: dataFeedId
+        description: The data feed unique id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: $skip
+        description: for paging, skipped number
+        schema:
+          type: integer
+          format: int32
+      - in: query
+        name: $maxpagesize
+        description: the maximum number of items in one page
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionStatusList'
+        default:
+          description: Client error or server error (4xx or 5xx)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorCode'
+      x-ms-pageable:
+        nextLinkName: '@nextLink'
+      x-ms-examples:
+        Get data ingestion status by data feed:
+          $ref: ./examples/getDataFeedIngestionStatus.json
+      description: Needs a more full description created.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionStatusQueryOptions'
+        description: The query time range
+        required: true
+  /dataFeeds/{dataFeedId}/ingestionProgress/reset:
+    post:
+      tags:
+      - ingestion > status
+      summary: Microsoft Azure Reset Data Ingestion Status By Data Feed To Backfill Data
+      operationId: microsoftAzureResetdatafeedingestionstatus
+      parameters:
+      - in: path
+        name: dataFeedId
+        description: The data feed unique id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Success
+        default:
+          description: Client error or server error (4xx or 5xx)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorCode'
+      x-ms-examples:
+        Reset data ingestion status by data feed to backfill data:
+          $ref: ./examples/resetDataFeedIngestionStatus.json
+      description: Needs a more full description created.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionProgressResetOptions'
+        description: The backfill time range
+        required: true
+  /dataFeeds/{dataFeedId}/ingestionProgress:
+    get:
+      tags:
+      - ingestion > status
+      summary: Microsoft Azure Get Data Last Success Ingestion Job Timestamp By Data Feed
+      operationId: microsoftAzureGetingestionprogress
+      parameters:
+      - in: path
+        name: dataFeedId
+        description: The data feed unique id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataFeedIngestionProgress'
+        default:
+          description: Client error or server error (4xx or 5xx)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorCode'
+      x-ms-examples:
+        Get data last success ingestion job timestamp by data feed:
+          $ref: ./examples/getIngestionProgress.json
+      description: Needs a more full description created.
+components:
+  schemas:
+    IngestionStatusQueryOptions:
+      required:
+      - endTime
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: the start point of time range to query data ingestion status.
+          type: string
+        endTime:
+          format: date-time
+          description: the end point of time range to query data ingestion status.
+          type: string
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+    IngestionStatusList:
+      type: object
+      properties:
+        '@nextLink':
+          type: string
+          readOnly: true
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestionStatus'
+          readOnly: true
+    ErrorCode:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+    IngestionProgressResetOptions:
+      required:
+      - endTime
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: the start point of time range to reset data ingestion status.
+          type: string
+        endTime:
+          format: date-time
+          description: the end point of time range to reset data ingestion status.
+          type: string
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+    DataFeedIngestionProgress:
+      type: object
+      properties:
+        latestSuccessTimestamp:
+          format: date-time
+          description: 'the timestamp of latest success ingestion job.
+
+            null indicates not available'
+          type: string
+          readOnly: true
+        latestActiveTimestamp:
+          format: date-time
+          description: 'the timestamp of latest ingestion job with status update.
+
+            null indicates not available'
+          type: string
+          readOnly: true
+    IngestionStatus:
+      type: object
+      properties:
+        timestamp:
+          format: date-time
+          description: data slice timestamp.
+          type: string
+          readOnly: true
+        status:
+          description: latest ingestion task status for this data slice.
+          enum:
+          - NotStarted
+          - Scheduled
+          - Running
+          - Succeeded
+          - Failed
+          - NoData
+          - Error
+          - Paused
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: IngestionStatusType
+            modelAsString: true
+        message:
+          description: the trimmed message of last ingestion job.
+          type: string
+          readOnly: true
+  securitySchemes:
+    ma_api_key:
+      type: apiKey
+      name: x-api-key
+      in: header
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}/metricsadvisor/v1.0'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/components/parameters/Endpoint'

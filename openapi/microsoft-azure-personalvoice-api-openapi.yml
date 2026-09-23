@@ -1,7 +1,14 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Personal Voice API
+  title: Microsoft Azure Custom voice Personal Voice API
+  description: Custom voice API to create and deploy your voice.
+  contact:
+    name: Azure AI - Speech Services
+    url: https://learn.microsoft.com/azure/ai-services/speech-service/
+  version: 2023-12-01-preview
+security:
+- subscription_key: []
+  AADToken: []
 tags:
 - name: PersonalVoice
 paths:
@@ -194,65 +201,68 @@ paths:
               required:
               - projectId
 components:
+  parameters:
+    QueryMaxPageSize:
+      name: maxpagesize
+      in: query
+      description: The maximum number of items to include in a single response.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+        default: 100
+    HeaderOperationId:
+      name: Operation-Id
+      in: header
+      description: ID of the status monitor for the operation. If the Operation-Id header matches an existing operation and the request is not identical to the prior request, it will fail with a 400 Bad Request.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
+    PathId:
+      name: id
+      in: path
+      description: The ID of the resource.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
+    QueryApiVersion:
+      name: api-version
+      in: query
+      description: The API version to use for this operation.
+      required: true
+      x-ms-parameter-location: method
+      x-ms-client-name: apiVersion
+      schema:
+        type: string
+        minLength: 1
+    QuerySkip:
+      name: skip
+      in: query
+      description: The number of result items to skip.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    QueryFilter:
+      name: filter
+      in: query
+      description: "Filter condition.\n  - **Supported properties:** projectId, createdDateTime, locale, kind\n  - **Operators:**\n    - eq, ne are supported for all properties.\n    - gt, ge, lt, le are supported for createdDateTime.\n  - **Example:**\n    - ```filter=projectId eq 'Jessica'``` (filter by project ID)\n    - ```filter=kind eq 'ProfessionalVoice'``` (filter project by kind)\n    - ```filter=locale eq 'en-US'``` (filter training set and model by locale)\n    - ```filter=createdDateTime gt 2022-12-30T23:59:59.99Z``` (filter resource created time after 2023-11-01)"
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
   schemas:
-    ErrorResponse:
-      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-    PersonalVoiceProperties:
-      description: Personal voice properties
-      type: object
-      properties:
-        failureReason:
-          $ref: '#/components/schemas/ModelFailureReason'
-      readOnly: true
-    PaginatedPersonalVoices:
-      description: Paginated personal voice list
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: Personal voice list
-          type: array
-          items:
-            $ref: '#/components/schemas/PersonalVoice'
-        nextLink:
-          description: Link to next page.
-          format: uri
-          type: string
-    Error:
-      description: Top-level error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains an top-level error with error code, message, details, target and an inner error with more descriptive details.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          $ref: '#/components/schemas/ErrorCode'
-        target:
-          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
-          type: string
-        message:
-          description: Top-level error message.
-          type: string
-        details:
-          description: Additional supportive details regarding the error and/or expected policies.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    ResourceId:
-      description: Resource id
-      type: string
-      pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-      minLength: 3
-      maxLength: 64
     PersonalVoice:
       description: Personal voice object
       required:
@@ -294,6 +304,42 @@ components:
           format: date-time
           type: string
           readOnly: true
+    Status:
+      description: Status of a resource.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      - Disabling
+      - Disabled
+      type: string
+      x-ms-enum:
+        name: Status
+        modelAsString: true
+    PersonalVoiceProperties:
+      description: Personal voice properties
+      type: object
+      properties:
+        failureReason:
+          $ref: '#/components/schemas/ModelFailureReason'
+      readOnly: true
+    ErrorCode:
+      description: Top-level error code
+      enum:
+      - BadRequest
+      - BadArgument
+      - Unauthorized
+      - Forbidden
+      - NotFound
+      - UnsupportedMediaType
+      - TooManyRequests
+      - InternalServerError
+      - ServiceUnavailable
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
     AzureBlobContentSource:
       description: Azure Blob Storage content. With the examples below, it represents files https://contoso.blob.core.windows.net/voicecontainer/jessica/*.wav
       type: object
@@ -316,22 +362,42 @@ components:
           items:
             type: string
             example: .wav
-    ErrorCode:
-      description: Top-level error code
-      enum:
-      - BadRequest
-      - BadArgument
-      - Unauthorized
-      - Forbidden
-      - NotFound
-      - UnsupportedMediaType
-      - TooManyRequests
-      - InternalServerError
-      - ServiceUnavailable
+    ErrorResponse:
+      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    ResourceId:
+      description: Resource id
       type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
+      pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
+      minLength: 3
+      maxLength: 64
+    Error:
+      description: Top-level error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains an top-level error with error code, message, details, target and an inner error with more descriptive details.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        target:
+          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
+          type: string
+        message:
+          description: Top-level error message.
+          type: string
+        details:
+          description: Additional supportive details regarding the error and/or expected policies.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     ModelFailureReason:
       description: Model training failure reason
       enum:
@@ -359,82 +425,41 @@ components:
           type: string
         innererror:
           $ref: '#/components/schemas/InnerError'
-    Status:
-      description: Status of a resource.
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      - Disabling
-      - Disabled
-      type: string
-      x-ms-enum:
-        name: Status
-        modelAsString: true
-  parameters:
-    HeaderOperationId:
-      name: Operation-Id
+    PaginatedPersonalVoices:
+      description: Paginated personal voice list
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: Personal voice list
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalVoice'
+        nextLink:
+          description: Link to next page.
+          format: uri
+          type: string
+  securitySchemes:
+    subscription_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
       in: header
-      description: ID of the status monitor for the operation. If the Operation-Id header matches an existing operation and the request is not identical to the prior request, it will fail with a 400 Bad Request.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-    QuerySkip:
-      name: skip
-      in: query
-      description: The number of result items to skip.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-        default: 0
-    QueryApiVersion:
-      name: api-version
-      in: query
-      description: The API version to use for this operation.
-      required: true
-      x-ms-parameter-location: method
-      x-ms-client-name: apiVersion
-      schema:
-        type: string
-        minLength: 1
-    PathId:
-      name: id
-      in: path
-      description: The ID of the resource.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-    QueryMaxPageSize:
-      name: maxpagesize
-      in: query
-      description: The maximum number of items to include in a single response.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-        default: 100
-    QueryFilter:
-      name: filter
-      in: query
-      description: "Filter condition.\n  - **Supported properties:** projectId, createdDateTime, locale, kind\n  - **Operators:**\n    - eq, ne are supported for all properties.\n    - gt, ge, lt, le are supported for createdDateTime.\n  - **Example:**\n    - ```filter=projectId eq 'Jessica'``` (filter by project ID)\n    - ```filter=kind eq 'ProfessionalVoice'``` (filter project by kind)\n    - ```filter=locale eq 'en-US'``` (filter training set and model by locale)\n    - ```filter=createdDateTime gt 2022-12-30T23:59:59.99Z``` (filter resource created time after 2023-11-01)"
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
+      description: Provide your Speech resource key here.
+    AADToken:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            https://cognitiveservices.azure.com/.default: https://cognitiveservices.azure.com/.default
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: These are the [Microsoft identity platform](entra/identity-platform/v2-overview) flows.
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: '{endpoint}/customvoice'
   useSchemePrefix: false
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  - name: endpoint
+    in: path
+    description: 'Supported Cognitive Services endpoints (protocol and hostname, for example: https://eastus.api.cognitive.microsoft.com).'
+    required: true
+    type: string

@@ -1,7 +1,14 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Replication Vault Health API
+  version: '2023-06-01'
+  title: Microsoft Azure SiteRecoveryManagementClient Replication…
+  x-ms-code-generation-settings:
+    header: MICROSOFT_MIT_NO_VERSION
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: ReplicationVaultHealth
 paths:
@@ -54,25 +61,83 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    ResourceHealthSummary:
-      description: Base class to define the health summary of the resources contained under an Arm resource.
+    VaultHealthDetails:
+      description: Vault health details definition.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/VaultHealthProperties'
+          description: The vault health related data.
+    HealthErrorSummary:
+      description: class to define the summary of the health error details.
       type: object
       properties:
-        resourceCount:
-          format: int32
-          description: The count of total resources under the container.
-          type: integer
-        issues:
-          description: The list of summary of health errors across the resources under the container.
+        summaryCode:
+          description: The code of the health error.
+          type: string
+        category:
+          description: The category of the health error.
+          enum:
+          - None
+          - Replication
+          - TestFailover
+          - Configuration
+          - FabricInfrastructure
+          - VersionExpiry
+          - AgentAutoUpdateInfra
+          - AgentAutoUpdateArtifactDeleted
+          - AgentAutoUpdateRunAsAccount
+          - AgentAutoUpdateRunAsAccountExpiry
+          - AgentAutoUpdateRunAsAccountExpired
+          type: string
+          x-ms-enum:
+            name: HealthErrorCategory
+            modelAsString: true
+        severity:
+          description: Severity of error.
+          enum:
+          - NONE
+          - Warning
+          - Error
+          - Info
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+        summaryMessage:
+          description: The summary message of the health error.
+          type: string
+        affectedResourceType:
+          description: The type of affected ARM resource.
+          type: string
+        affectedResourceSubtype:
+          description: The sub type of any subcomponent within the ARM resource that this might be applicable. Value remains null if not applicable.
+          type: string
+        affectedResourceCorrelationIds:
+          description: The list of affected resource correlation Ids. This can be used to uniquely identify the count of items affected by a specific category and severity as well as count of item affected by an specific issue.
           type: array
           items:
-            $ref: '#/components/schemas/HealthErrorSummary'
-        categorizedResourceCounts:
-          description: The categorized resource counts.
-          type: object
-          additionalProperties:
-            format: int32
-            type: integer
+            type: string
+    VaultHealthProperties:
+      description: class to define the health summary of the Vault.
+      type: object
+      properties:
+        vaultErrors:
+          description: The list of errors on the vault.
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthError'
+        protectedItemsHealth:
+          $ref: '#/components/schemas/ResourceHealthSummary'
+          description: The list of the health detail of the protected items in the vault.
+        fabricsHealth:
+          $ref: '#/components/schemas/ResourceHealthSummary'
+          description: The list of the health detail of the fabrics in the vault.
+        containersHealth:
+          $ref: '#/components/schemas/ResourceHealthSummary'
+          description: The list of the health detail of the containers in the vault.
     HealthError:
       description: Health Error.
       type: object
@@ -131,56 +196,45 @@ components:
           x-ms-enum:
             name: HealthErrorCustomerResolvability
             modelAsString: true
-    HealthErrorSummary:
-      description: class to define the summary of the health error details.
+    Resource:
+      description: Azure resource.
       type: object
       properties:
-        summaryCode:
-          description: The code of the health error.
+        id:
+          description: Resource Id
           type: string
-        category:
-          description: The category of the health error.
-          enum:
-          - None
-          - Replication
-          - TestFailover
-          - Configuration
-          - FabricInfrastructure
-          - VersionExpiry
-          - AgentAutoUpdateInfra
-          - AgentAutoUpdateArtifactDeleted
-          - AgentAutoUpdateRunAsAccount
-          - AgentAutoUpdateRunAsAccountExpiry
-          - AgentAutoUpdateRunAsAccountExpired
+          readOnly: true
+        name:
+          description: Resource Name
           type: string
-          x-ms-enum:
-            name: HealthErrorCategory
-            modelAsString: true
-        severity:
-          description: Severity of error.
-          enum:
-          - NONE
-          - Warning
-          - Error
-          - Info
+          readOnly: true
+        type:
+          description: Resource Type
           type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-        summaryMessage:
-          description: The summary message of the health error.
+          readOnly: true
+        location:
+          description: Resource Location
           type: string
-        affectedResourceType:
-          description: The type of affected ARM resource.
-          type: string
-        affectedResourceSubtype:
-          description: The sub type of any subcomponent within the ARM resource that this might be applicable. Value remains null if not applicable.
-          type: string
-        affectedResourceCorrelationIds:
-          description: The list of affected resource correlation Ids. This can be used to uniquely identify the count of items affected by a specific category and severity as well as count of item affected by an specific issue.
+      x-ms-azure-resource: true
+    ResourceHealthSummary:
+      description: Base class to define the health summary of the resources contained under an Arm resource.
+      type: object
+      properties:
+        resourceCount:
+          format: int32
+          description: The count of total resources under the container.
+          type: integer
+        issues:
+          description: The list of summary of health errors across the resources under the container.
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/HealthErrorSummary'
+        categorizedResourceCounts:
+          description: The categorized resource counts.
+          type: object
+          additionalProperties:
+            format: int32
+            type: integer
     InnerHealthError:
       description: Implements InnerHealthError class. HealthError object has a list of InnerHealthErrors as child errors. InnerHealthError is used because this will prevent an infinite loop of structures when Hydra tries to auto-generate the contract. We are exposing the related health errors as inner health errors and all API consumers can utilize this in the same fashion as Exception -&gt; InnerException.
       type: object
@@ -234,75 +288,13 @@ components:
           x-ms-enum:
             name: HealthErrorCustomerResolvability
             modelAsString: true
-    VaultHealthProperties:
-      description: class to define the health summary of the Vault.
-      type: object
-      properties:
-        vaultErrors:
-          description: The list of errors on the vault.
-          type: array
-          items:
-            $ref: '#/components/schemas/HealthError'
-        protectedItemsHealth:
-          $ref: '#/components/schemas/ResourceHealthSummary'
-          description: The list of the health detail of the protected items in the vault.
-        fabricsHealth:
-          $ref: '#/components/schemas/ResourceHealthSummary'
-          description: The list of the health detail of the fabrics in the vault.
-        containersHealth:
-          $ref: '#/components/schemas/ResourceHealthSummary'
-          description: The list of the health detail of the containers in the vault.
-    Resource:
-      description: Azure resource.
-      type: object
-      properties:
-        id:
-          description: Resource Id
-          type: string
-          readOnly: true
-        name:
-          description: Resource Name
-          type: string
-          readOnly: true
-        type:
-          description: Resource Type
-          type: string
-          readOnly: true
-        location:
-          description: Resource Location
-          type: string
-      x-ms-azure-resource: true
-    VaultHealthDetails:
-      description: Vault health details definition.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/VaultHealthProperties'
-          description: The vault health related data.
   parameters:
-    ResourceName:
-      name: resourceName
-      in: path
-      description: The name of the recovery services vault.
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
     ResourceGroupName:
       name: resourceGroupName
       in: path
       description: The name of the resource group where the recovery services vault is present.
       required: true
       x-ms-parameter-location: client
-      schema:
-        type: string
-    ApiVersion:
-      name: api-version
-      in: query
-      description: Client Api Version.
-      required: true
       schema:
         type: string
     SubscriptionId:
@@ -312,8 +304,27 @@ components:
       required: true
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    ApiVersion:
+      name: api-version
+      in: query
+      description: Client Api Version.
+      required: true
+      schema:
+        type: string
+    ResourceName:
+      name: resourceName
+      in: path
+      description: The name of the recovery services vault.
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account.
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

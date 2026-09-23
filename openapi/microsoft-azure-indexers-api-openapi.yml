@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Indexers API
+  title: Microsoft Azure SearchServiceClient Indexers API
+  description: Client that can be used to manage and query indexes and documents, as well as manage other resources, on a search service.
+  version: 2019-05-06-Preview
+  x-ms-code-generation-settings:
+    useDateTimeOffset: true
 tags:
 - name: Indexers
 paths:
@@ -35,7 +38,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchError'
-      summary: Microsoft Azure Post Indexers Indexername  Search Reset
+      summary: Microsoft Azure Post Indexers Indexername Search Reset
   /indexers('{indexerName}')/search.run:
     post:
       tags:
@@ -66,7 +69,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchError'
-      summary: Microsoft Azure Post Indexers Indexername  Search Run
+      summary: Microsoft Azure Post Indexers Indexername Search Run
   /indexers('{indexerName}'):
     put:
       tags:
@@ -290,22 +293,133 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchError'
-      summary: Microsoft Azure Get Indexers Indexername  Search Status
+      summary: Microsoft Azure Get Indexers Indexername Search Status
 components:
+  parameters:
+    IfNoneMatchParameter:
+      name: If-None-Match
+      in: header
+      required: false
+      description: Defines the If-None-Match condition. The operation will be performed only if the ETag on the server does not match this value.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
+      schema:
+        type: string
+    IfMatchParameter:
+      name: If-Match
+      in: header
+      required: false
+      description: Defines the If-Match condition. The operation will be performed only if the ETag on the server matches this value.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    PreferHeaderParameter:
+      name: Prefer
+      in: header
+      required: true
+      description: For HTTP PUT requests, instructs the service to return the created/updated resource on success.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        enum:
+        - return=representation
+    ClientRequestIdParameter:
+      name: x-ms-client-request-id
+      in: header
+      required: false
+      description: The tracking ID sent with the request to help with debugging.
+      x-ms-client-request-id: true
+      x-ms-parameter-grouping:
+        name: request-options
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
   schemas:
-    IndexingSchedule:
+    SearchIndexerLimits:
       properties:
-        interval:
+        maxRunTime:
           type: string
           format: duration
-          description: The interval of time between indexer executions.
-        startTime:
+          readOnly: true
+          description: The maximum duration that the indexer is permitted to run for one execution.
+        maxDocumentExtractionSize:
+          type: number
+          format: int64
+          readOnly: true
+          description: The maximum size of a document, in bytes, which will be considered valid for indexing.
+        maxDocumentContentCharactersToExtract:
+          type: number
+          format: int64
+          readOnly: true
+          description: The maximum number of characters that will be extracted from a document picked up for indexing.
+    IndexingParameters:
+      properties:
+        batchSize:
+          type: integer
+          format: int32
+          description: The number of items that are read from the data source and indexed as a single batch in order to improve performance. The default depends on the data source type.
+        maxFailedItems:
+          type: integer
+          format: int32
+          default: 0
+          description: The maximum number of items that can fail indexing for indexer execution to still be considered successful. -1 means no limit. Default is 0.
+        maxFailedItemsPerBatch:
+          type: integer
+          format: int32
+          default: 0
+          description: The maximum number of items in a single batch that can fail indexing for the batch to still be considered successful. -1 means no limit. Default is 0.
+        configuration:
+          type: object
+          additionalProperties:
+            type: object
+          description: A dictionary of indexer-specific configuration properties. Each name is the name of a specific property. Each value must be of a primitive type.
+      description: Represents parameters for indexer execution.
+    IndexerStatus:
+      type: string
+      enum:
+      - unknown
+      - error
+      - running
+      x-ms-enum:
+        name: IndexerStatus
+        modelAsString: false
+        values:
+        - value: unknown
+          name: Unknown
+          description: Indicates that the indexer is in an unknown state.
+        - value: error
+          name: Error
+          description: Indicates that the indexer experienced an error that cannot be corrected without human intervention.
+        - value: running
+          name: Running
+          description: Indicates that the indexer is running normally.
+      description: Represents the overall indexer status.
+    SearchError:
+      properties:
+        code:
           type: string
-          format: date-time
-          description: The time when an indexer should start running.
+          readOnly: true
+          description: One of a server-defined set of error codes.
+        message:
+          type: string
+          readOnly: true
+          description: A human-readable representation of the error.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchError'
+          readOnly: true
+          description: An array of details about specific errors that led to this reported error.
       required:
-      - interval
-      description: Represents a schedule for indexer execution.
+      - message
+      description: Describes an error condition for the Azure Cognitive Search API.
     SearchIndexer:
       properties:
         name:
@@ -386,48 +500,78 @@ components:
       - executionHistory
       - limits
       description: Represents the current status and execution history of an indexer.
-    IndexingParameters:
+    SearchIndexerError:
       properties:
-        batchSize:
+        key:
+          type: string
+          readOnly: true
+          description: The key of the item for which indexing failed.
+        errorMessage:
+          type: string
+          readOnly: true
+          description: The message describing the error that occurred while processing the item.
+        statusCode:
           type: integer
           format: int32
-          description: The number of items that are read from the data source and indexed as a single batch in order to improve performance. The default depends on the data source type.
-        maxFailedItems:
-          type: integer
-          format: int32
-          default: 0
-          description: The maximum number of items that can fail indexing for indexer execution to still be considered successful. -1 means no limit. Default is 0.
-        maxFailedItemsPerBatch:
-          type: integer
-          format: int32
-          default: 0
-          description: The maximum number of items in a single batch that can fail indexing for the batch to still be considered successful. -1 means no limit. Default is 0.
-        configuration:
-          type: object
-          additionalProperties:
-            type: object
-          description: A dictionary of indexer-specific configuration properties. Each name is the name of a specific property. Each value must be of a primitive type.
-      description: Represents parameters for indexer execution.
-    IndexerStatus:
-      type: string
-      enum:
-      - unknown
-      - error
-      - running
-      x-ms-enum:
-        name: IndexerStatus
-        modelAsString: false
-        values:
-        - value: unknown
-          name: Unknown
-          description: Indicates that the indexer is in an unknown state.
-        - value: error
-          name: Error
-          description: Indicates that the indexer experienced an error that cannot be corrected without human intervention.
-        - value: running
-          name: Running
-          description: Indicates that the indexer is running normally.
-      description: Represents the overall indexer status.
+          readOnly: true
+          description: 'The status code indicating why the indexing operation failed. Possible values include: 400 for a malformed input document, 404 for document not found, 409 for a version conflict, 422 when the index is temporarily unavailable, or 503 for when the service is too busy.'
+        name:
+          type: string
+          readOnly: true
+          description: The name of the source at which the error originated. For example, this could refer to a particular skill in the attached skillset. This may not be always available.
+        details:
+          type: string
+          readOnly: true
+          description: Additional, verbose details about the error to assist in debugging the indexer. This may not be always available.
+        documentationLink:
+          type: string
+          readOnly: true
+          description: A link to a troubleshooting guide for these classes of errors. This may not be always available.
+      required:
+      - errorMessage
+      - statusCode
+      description: Represents an item- or document-level indexing error.
+    SearchIndexerWarning:
+      properties:
+        key:
+          type: string
+          readOnly: true
+          description: The key of the item which generated a warning.
+        message:
+          type: string
+          readOnly: true
+          description: The message describing the warning that occurred while processing the item.
+        name:
+          type: string
+          readOnly: true
+          description: The name of the source at which the warning originated. For example, this could refer to a particular skill in the attached skillset. This may not be always available.
+        details:
+          type: string
+          readOnly: true
+          description: Additional, verbose details about the warning to assist in debugging the indexer. This may not be always available.
+        documentationLink:
+          type: string
+          readOnly: true
+          description: A link to a troubleshooting guide for these classes of warnings. This may not be always available.
+      required:
+      - message
+      description: Represents an item-level warning.
+    FieldMapping:
+      properties:
+        sourceFieldName:
+          type: string
+          description: The name of the field in the data source.
+        targetFieldName:
+          type: string
+          description: The name of the target field in the index. Same as the source field name by default.
+        mappingFunction:
+          $ref: '#/components/schemas/FieldMappingFunction'
+          description: A function to apply to each source field value before indexing.
+      required:
+      - sourceFieldName
+      description: Defines a mapping between a field in a data source and a target field in an index.
+      externalDocs:
+        url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
     IndexerExecutionStatus:
       type: string
       enum:
@@ -452,38 +596,31 @@ components:
           name: Reset
           description: Indexer has been reset.
       description: Represents the status of an individual indexer execution.
-    SearchIndexerLimits:
+    ListIndexersResult:
       properties:
-        maxRunTime:
+        value:
+          x-ms-client-name: Indexers
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/SearchIndexer'
+          description: The indexers in the Search service.
+      required:
+      - value
+      description: Response from a List Indexers request. If successful, it includes the full definitions of all indexers.
+    IndexingSchedule:
+      properties:
+        interval:
           type: string
           format: duration
-          readOnly: true
-          description: The maximum duration that the indexer is permitted to run for one execution.
-        maxDocumentExtractionSize:
-          type: number
-          format: int64
-          readOnly: true
-          description: The maximum size of a document, in bytes, which will be considered valid for indexing.
-        maxDocumentContentCharactersToExtract:
-          type: number
-          format: int64
-          readOnly: true
-          description: The maximum number of characters that will be extracted from a document picked up for indexing.
-    FieldMappingFunction:
-      properties:
-        name:
+          description: The interval of time between indexer executions.
+        startTime:
           type: string
-          description: The name of the field mapping function.
-        parameters:
-          type: object
-          additionalProperties:
-            type: object
-          description: A dictionary of parameter name/value pairs to pass to the function. Each value must be of a primitive type.
+          format: date-time
+          description: The time when an indexer should start running.
       required:
-      - name
-      description: Represents a function that transforms a value from a data source before indexing.
-      externalDocs:
-        url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
+      - interval
+      description: Represents a schedule for indexer execution.
     IndexerExecutionResult:
       properties:
         status:
@@ -543,157 +680,23 @@ components:
       - itemsProcessed
       - itemsFailed
       description: Represents the result of an individual indexer execution.
-    SearchError:
+    FieldMappingFunction:
       properties:
-        code:
-          type: string
-          readOnly: true
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          readOnly: true
-          description: A human-readable representation of the error.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/SearchError'
-          readOnly: true
-          description: An array of details about specific errors that led to this reported error.
-      required:
-      - message
-      description: Describes an error condition for the Azure Cognitive Search API.
-    SearchIndexerWarning:
-      properties:
-        key:
-          type: string
-          readOnly: true
-          description: The key of the item which generated a warning.
-        message:
-          type: string
-          readOnly: true
-          description: The message describing the warning that occurred while processing the item.
         name:
           type: string
-          readOnly: true
-          description: The name of the source at which the warning originated. For example, this could refer to a particular skill in the attached skillset. This may not be always available.
-        details:
-          type: string
-          readOnly: true
-          description: Additional, verbose details about the warning to assist in debugging the indexer. This may not be always available.
-        documentationLink:
-          type: string
-          readOnly: true
-          description: A link to a troubleshooting guide for these classes of warnings. This may not be always available.
+          description: The name of the field mapping function.
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+          description: A dictionary of parameter name/value pairs to pass to the function. Each value must be of a primitive type.
       required:
-      - message
-      description: Represents an item-level warning.
-    ListIndexersResult:
-      properties:
-        value:
-          x-ms-client-name: Indexers
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/SearchIndexer'
-          description: The indexers in the Search service.
-      required:
-      - value
-      description: Response from a List Indexers request. If successful, it includes the full definitions of all indexers.
-    SearchIndexerError:
-      properties:
-        key:
-          type: string
-          readOnly: true
-          description: The key of the item for which indexing failed.
-        errorMessage:
-          type: string
-          readOnly: true
-          description: The message describing the error that occurred while processing the item.
-        statusCode:
-          type: integer
-          format: int32
-          readOnly: true
-          description: 'The status code indicating why the indexing operation failed. Possible values include: 400 for a malformed input document, 404 for document not found, 409 for a version conflict, 422 when the index is temporarily unavailable, or 503 for when the service is too busy.'
-        name:
-          type: string
-          readOnly: true
-          description: The name of the source at which the error originated. For example, this could refer to a particular skill in the attached skillset. This may not be always available.
-        details:
-          type: string
-          readOnly: true
-          description: Additional, verbose details about the error to assist in debugging the indexer. This may not be always available.
-        documentationLink:
-          type: string
-          readOnly: true
-          description: A link to a troubleshooting guide for these classes of errors. This may not be always available.
-      required:
-      - errorMessage
-      - statusCode
-      description: Represents an item- or document-level indexing error.
-    FieldMapping:
-      properties:
-        sourceFieldName:
-          type: string
-          description: The name of the field in the data source.
-        targetFieldName:
-          type: string
-          description: The name of the target field in the index. Same as the source field name by default.
-        mappingFunction:
-          $ref: '#/components/schemas/FieldMappingFunction'
-          description: A function to apply to each source field value before indexing.
-      required:
-      - sourceFieldName
-      description: Defines a mapping between a field in a data source and a target field in an index.
+      - name
+      description: Represents a function that transforms a value from a data source before indexing.
       externalDocs:
         url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client Api Version.
-      schema:
-        type: string
-    PreferHeaderParameter:
-      name: Prefer
-      in: header
-      required: true
-      description: For HTTP PUT requests, instructs the service to return the created/updated resource on success.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        enum:
-        - return=representation
-    ClientRequestIdParameter:
-      name: x-ms-client-request-id
-      in: header
-      required: false
-      description: The tracking ID sent with the request to help with debugging.
-      x-ms-client-request-id: true
-      x-ms-parameter-grouping:
-        name: request-options
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    IfMatchParameter:
-      name: If-Match
-      in: header
-      required: false
-      description: Defines the If-Match condition. The operation will be performed only if the ETag on the server matches this value.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    IfNoneMatchParameter:
-      name: If-None-Match
-      in: header
-      required: false
-      description: Defines the If-None-Match condition. The operation will be performed only if the ETag on the server does not match this value.
-      x-ms-parameter-location: method
-      schema:
-        type: string
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  - $ref: '#/components/parameters/EndpointParameter'

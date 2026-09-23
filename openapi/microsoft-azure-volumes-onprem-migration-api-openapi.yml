@@ -1,7 +1,15 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Volumes OnPrem Migration API
+  title: Microsoft Azure Microsoft NetApp Volumes OnPrem Migration…
+  description: Microsoft NetApp Azure Resource Provider specification
+  version: 2023-07-01-preview
+  x-ms-code-generation-settings:
+    name: AzureNetAppFilesManagementClient
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Volumes OnPrem Migration
 paths:
@@ -55,7 +63,7 @@ paths:
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/createOnPremMigrationReplication
   : post:
       summary: Microsoft Azure Start Migration Process
-      description: Starts SVM peering and returns a command to be run on the external ONTAP to accept it.  Once the SVMs have been peered a SnapMirror will be created
+      description: Starts SVM peering and returns a command to be run on the external ONTAP to accept it. Once the SVMs have been peered a SnapMirror will be created
       tags:
       - Volumes OnPrem Migration
       operationId: microsoftAzureVolumesCreateonpremmigrationreplication
@@ -126,24 +134,53 @@ paths:
         Volumes_PerformReplicationTransfer:
           $ref: examples/Volumes_PerformReplicationTransfer.json
 components:
+  parameters:
+    PoolName:
+      name: poolName
+      in: path
+      required: true
+      description: The name of the capacity pool
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
+    AccountName:
+      name: accountName
+      in: path
+      required: true
+      description: The name of the NetApp account
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
+    VolumeName:
+      name: volumeName
+      in: path
+      required: true
+      description: The name of the volume
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+        pattern: ^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$
   schemas:
-    remotePath:
-      description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
+    clusterPeerCommandResponse:
+      description: Information about cluster peering process
       type: object
-      required:
-      - externalHostName
-      - serverName
-      - volumeName
       properties:
-        externalHostName:
+        peerAcceptCommand:
+          description: A command that needs to be run on the external ONTAP to accept cluster peering.  Will only be present if <code>clusterPeeringStatus</code> is <code>pending</code>
           type: string
-          description: The Path to a ONTAP Host
-        serverName:
+    svmPeerCommandResponse:
+      description: Information about SVM peering process
+      type: object
+      properties:
+        svmPeeringCommand:
+          description: A command that needs to be run on the external ONTAP to accept SVM peering.  Will only be present if <code>svmPeeringStatus</code> is <code>pending</code>
           type: string
-          description: The name of a server on the ONTAP Host
-        volumeName:
-          type: string
-          description: The name of a volume on the server
     peerClusterForVolumeMigrationRequest:
       description: Source cluster properties for a cluster peer request
       type: object
@@ -170,54 +207,29 @@ components:
           x-ms-mutability:
           - read
           - create
-    clusterPeerCommandResponse:
-      description: Information about cluster peering process
+    remotePath:
+      description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
       type: object
+      required:
+      - externalHostName
+      - serverName
+      - volumeName
       properties:
-        peerAcceptCommand:
-          description: A command that needs to be run on the external ONTAP to accept cluster peering.  Will only be present if <code>clusterPeeringStatus</code> is <code>pending</code>
+        externalHostName:
           type: string
-    svmPeerCommandResponse:
-      description: Information about SVM peering process
-      type: object
-      properties:
-        svmPeeringCommand:
-          description: A command that needs to be run on the external ONTAP to accept SVM peering.  Will only be present if <code>svmPeeringStatus</code> is <code>pending</code>
+          description: The Path to a ONTAP Host
+        serverName:
           type: string
-  parameters:
-    PoolName:
-      name: poolName
-      in: path
-      required: true
-      description: The name of the capacity pool
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
-    VolumeName:
-      name: volumeName
-      in: path
-      required: true
-      description: The name of the volume
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-        pattern: ^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$
-    AccountName:
-      name: accountName
-      in: path
-      required: true
-      description: The name of the NetApp account
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+          description: The name of a server on the ONTAP Host
+        volumeName:
+          type: string
+          description: The name of a volume on the server
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

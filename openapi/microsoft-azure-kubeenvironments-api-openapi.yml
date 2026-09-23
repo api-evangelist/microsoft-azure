@@ -1,7 +1,12 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Kube Environments API
+  version: '2023-01-01'
+  title: Microsoft Azure API Client Kube Environments API
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: KubeEnvironments
 paths:
@@ -221,17 +226,48 @@ paths:
         required: true
 components:
   schemas:
-    FrontEndConfiguration:
+    ArcConfiguration:
       type: object
       properties:
-        kind:
+        artifactsStorageType:
           enum:
-          - NodePort
-          - LoadBalancer
+          - LocalNode
+          - NetworkFileSystem
           type: string
           x-ms-enum:
-            name: FrontEndServiceType
+            name: StorageType
             modelAsString: false
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageClassName:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageMountPath:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageNodeName:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageAccessMode:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        frontEndServiceConfiguration:
+          $ref: '#/components/schemas/FrontEndConfiguration'
+        kubeConfig:
+          type: string
+          x-ms-mutability:
+          - create
+          - update
+          x-ms-secret: true
     AppLogsConfiguration:
       type: object
       properties:
@@ -278,145 +314,6 @@ components:
           x-ms-mutability:
           - create
           - read
-    KubeEnvironmentCollection:
-      description: Collection of Kubernetes Environments
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: Collection of resources.
-          type: array
-          items:
-            $ref: '#/components/schemas/KubeEnvironment'
-        nextLink:
-          description: Link to next page of resources.
-          type: string
-          readOnly: true
-    LogAnalyticsConfiguration:
-      type: object
-      properties:
-        customerId:
-          type: string
-        sharedKey:
-          type: string
-          x-ms-mutability:
-          - create
-          - update
-          x-ms-secret: true
-    KubeEnvironmentPatchResource:
-      description: ARM resource for a KubeEnvironment when patching
-      type: object
-      allOf:
-      - $ref: ./CommonDefinitions.json#/definitions/ProxyOnlyResource
-      properties:
-        properties:
-          description: KubeEnvironmentPatchResource resource specific properties
-          type: object
-          properties:
-            provisioningState:
-              description: Provisioning state of the Kubernetes Environment.
-              enum:
-              - Succeeded
-              - Failed
-              - Canceled
-              - Waiting
-              - InitializationInProgress
-              - InfrastructureSetupInProgress
-              - InfrastructureSetupComplete
-              - ScheduledForDelete
-              - UpgradeRequested
-              - UpgradeFailed
-              type: string
-              readOnly: true
-              x-ms-enum:
-                name: KubeEnvironmentProvisioningState
-                modelAsString: false
-            deploymentErrors:
-              description: Any errors that occurred during deployment or deployment validation
-              type: string
-              readOnly: true
-            internalLoadBalancerEnabled:
-              description: Only visible within Vnet/Subnet
-              type: boolean
-              x-ms-mutability:
-              - create
-              - read
-            defaultDomain:
-              description: Default Domain Name for the cluster
-              type: string
-              readOnly: true
-            staticIp:
-              description: Static IP of the KubeEnvironment
-              type: string
-              x-ms-mutability:
-              - create
-              - read
-            arcConfiguration:
-              $ref: '#/components/schemas/ArcConfiguration'
-              description: 'Cluster configuration which determines the ARC cluster
-
-                components types. Eg: Choosing between BuildService kind,
-
-                FrontEnd Service ArtifactsStorageType etc.'
-            appLogsConfiguration:
-              $ref: '#/components/schemas/AppLogsConfiguration'
-              description: 'Cluster configuration which enables the log daemon to export
-
-                app logs to a destination. Currently only "log-analytics" is
-
-                supported'
-            containerAppsConfiguration:
-              $ref: '#/components/schemas/ContainerAppsConfiguration'
-              description: Cluster configuration for Container Apps Environments to configure Dapr Instrumentation Key and VNET Configuration
-            aksResourceID:
-              type: string
-              x-ms-mutability:
-              - create
-              - read
-          x-ms-client-flatten: true
-    ArcConfiguration:
-      type: object
-      properties:
-        artifactsStorageType:
-          enum:
-          - LocalNode
-          - NetworkFileSystem
-          type: string
-          x-ms-enum:
-            name: StorageType
-            modelAsString: false
-          x-ms-mutability:
-          - create
-          - read
-        artifactStorageClassName:
-          type: string
-          x-ms-mutability:
-          - create
-          - read
-        artifactStorageMountPath:
-          type: string
-          x-ms-mutability:
-          - create
-          - read
-        artifactStorageNodeName:
-          type: string
-          x-ms-mutability:
-          - create
-          - read
-        artifactStorageAccessMode:
-          type: string
-          x-ms-mutability:
-          - create
-          - read
-        frontEndServiceConfiguration:
-          $ref: '#/components/schemas/FrontEndConfiguration'
-        kubeConfig:
-          type: string
-          x-ms-mutability:
-          - create
-          - update
-          x-ms-secret: true
     KubeEnvironment:
       description: A Kubernetes cluster specialized for web workloads by Azure App Service
       type: object
@@ -496,19 +393,127 @@ components:
           x-ms-client-flatten: true
         extendedLocation:
           $ref: ./CommonDefinitions.json#/definitions/ExtendedLocation
+    KubeEnvironmentCollection:
+      description: Collection of Kubernetes Environments
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: Collection of resources.
+          type: array
+          items:
+            $ref: '#/components/schemas/KubeEnvironment'
+        nextLink:
+          description: Link to next page of resources.
+          type: string
+          readOnly: true
+    FrontEndConfiguration:
+      type: object
+      properties:
+        kind:
+          enum:
+          - NodePort
+          - LoadBalancer
+          type: string
+          x-ms-enum:
+            name: FrontEndServiceType
+            modelAsString: false
+    KubeEnvironmentPatchResource:
+      description: ARM resource for a KubeEnvironment when patching
+      type: object
+      allOf:
+      - $ref: ./CommonDefinitions.json#/definitions/ProxyOnlyResource
+      properties:
+        properties:
+          description: KubeEnvironmentPatchResource resource specific properties
+          type: object
+          properties:
+            provisioningState:
+              description: Provisioning state of the Kubernetes Environment.
+              enum:
+              - Succeeded
+              - Failed
+              - Canceled
+              - Waiting
+              - InitializationInProgress
+              - InfrastructureSetupInProgress
+              - InfrastructureSetupComplete
+              - ScheduledForDelete
+              - UpgradeRequested
+              - UpgradeFailed
+              type: string
+              readOnly: true
+              x-ms-enum:
+                name: KubeEnvironmentProvisioningState
+                modelAsString: false
+            deploymentErrors:
+              description: Any errors that occurred during deployment or deployment validation
+              type: string
+              readOnly: true
+            internalLoadBalancerEnabled:
+              description: Only visible within Vnet/Subnet
+              type: boolean
+              x-ms-mutability:
+              - create
+              - read
+            defaultDomain:
+              description: Default Domain Name for the cluster
+              type: string
+              readOnly: true
+            staticIp:
+              description: Static IP of the KubeEnvironment
+              type: string
+              x-ms-mutability:
+              - create
+              - read
+            arcConfiguration:
+              $ref: '#/components/schemas/ArcConfiguration'
+              description: 'Cluster configuration which determines the ARC cluster
+
+                components types. Eg: Choosing between BuildService kind,
+
+                FrontEnd Service ArtifactsStorageType etc.'
+            appLogsConfiguration:
+              $ref: '#/components/schemas/AppLogsConfiguration'
+              description: 'Cluster configuration which enables the log daemon to export
+
+                app logs to a destination. Currently only "log-analytics" is
+
+                supported'
+            containerAppsConfiguration:
+              $ref: '#/components/schemas/ContainerAppsConfiguration'
+              description: Cluster configuration for Container Apps Environments to configure Dapr Instrumentation Key and VNET Configuration
+            aksResourceID:
+              type: string
+              x-ms-mutability:
+              - create
+              - read
+          x-ms-client-flatten: true
+    LogAnalyticsConfiguration:
+      type: object
+      properties:
+        customerId:
+          type: string
+        sharedKey:
+          type: string
+          x-ms-mutability:
+          - create
+          - update
+          x-ms-secret: true
   parameters:
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
     apiVersionParameter:
       name: api-version
       in: query
       description: API Version
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
       required: true
       x-ms-parameter-location: client
       schema:
@@ -524,8 +529,12 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+[^\.]$
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

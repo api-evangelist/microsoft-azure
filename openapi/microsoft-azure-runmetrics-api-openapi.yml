@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Run Metrics API
+  version: '2019-09-30'
+  title: Microsoft Azure Run History Run Metrics API
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: RunMetrics
 paths:
@@ -199,28 +202,14 @@ paths:
         description: Query Parameters for data sorting and filtering.
 components:
   schemas:
-    ErrorResponse:
-      description: The error response.
+    BatchMetric:
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/RootError'
-          description: The top level error that occurred.
-        correlation:
-          description: Dictionary containing correlation details for the error.
-          type: object
-          additionalProperties:
-            type: string
-        environment:
-          description: The hosting environment.
-          type: string
-        location:
-          description: The Azure region.
-          type: string
-        time:
-          format: date-time
-          description: The time in UTC.
-          type: string
+        values:
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
     Metric:
       type: object
       properties:
@@ -254,19 +243,16 @@ components:
               type: object
         schema:
           $ref: '#/components/schemas/MetricSchema'
-    ErrorDetails:
-      description: The error details.
+    InnerErrorResponse:
+      description: A nested structure of errors.
       type: object
       properties:
         code:
           description: The error code.
           type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     QueryParams:
       description: The set of supported filters.
       type: object
@@ -309,28 +295,6 @@ components:
         nextLink:
           description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
-    RootError:
-      description: The root error.
-      type: object
-      properties:
-        code:
-          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
-          type: string
-        message:
-          description: A human-readable representation of the error.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
-        details:
-          description: The related errors that occurred during the request.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetails'
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     RunMetric:
       type: object
       properties:
@@ -366,13 +330,25 @@ components:
               type: object
         schema:
           $ref: '#/components/schemas/MetricSchema'
-    InnerErrorResponse:
-      description: A nested structure of errors.
+    RootError:
+      description: The root error.
       type: object
       properties:
         code:
-          description: The error code.
+          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
           type: string
+        message:
+          description: A human-readable representation of the error.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
+        details:
+          description: The related errors that occurred during the request.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
         innerError:
           $ref: '#/components/schemas/InnerErrorResponse'
           description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
@@ -385,6 +361,28 @@ components:
           type: string
         type:
           type: string
+    ErrorResponse:
+      description: The error response.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/RootError'
+          description: The top level error that occurred.
+        correlation:
+          description: Dictionary containing correlation details for the error.
+          type: object
+          additionalProperties:
+            type: string
+        environment:
+          description: The hosting environment.
+          type: string
+        location:
+          description: The Azure region.
+          type: string
+        time:
+          format: date-time
+          description: The time in UTC.
+          type: string
     MetricSchema:
       type: object
       properties:
@@ -396,31 +394,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MetricSchemaProperty'
-    BatchMetric:
+    ErrorDetails:
+      description: The error details.
       type: object
       properties:
-        values:
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
+        code:
+          description: The error code.
+          type: string
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
   parameters:
-    workspaceNameParameter:
-      name: workspaceName
-      in: path
-      description: The name of the workspace.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The Name of the resource group in which the workspace is located.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -430,8 +417,27 @@ components:
       schema:
         type: string
         format: uuid
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The Name of the resource group in which the workspace is located.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    workspaceNameParameter:
+      name: workspaceName
+      in: path
+      description: The name of the workspace.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize

@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector VM Instance Guest Agents API
+  title: Microsoft Azure Azure Arc VMware Management Service VM…
+  description: Self service experience for VMware.
+  version: 2023-03-01-preview
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: VMInstanceGuestAgents
 paths:
@@ -171,20 +177,37 @@ components:
           $ref: '#/components/schemas/ResourceProvisioningState'
           description: Gets the provisioning state.
           readOnly: true
-    GuestAgentList:
-      description: List of GuestAgent.
+    ProvisioningAction:
+      description: Defines the different types of operations for guest agent.
+      enum:
+      - install
+      - uninstall
+      - repair
+      type: string
+      x-ms-enum:
+        modelAsString: true
+        name: ProvisioningAction
+    GuestAgent:
+      description: Defines the GuestAgent.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Resource properties.
+          $ref: '#/components/schemas/GuestAgentProperties'
+      x-ms-azure-resource: true
+    HttpProxyConfiguration:
+      description: HTTP Proxy configuration for the VM.
       type: object
       properties:
-        nextLink:
-          description: Url to follow for getting next page of GuestAgent.
+        httpsProxy:
+          description: Gets or sets httpsProxy url.
           type: string
-        value:
-          description: Array of GuestAgent
-          type: array
-          items:
-            $ref: '#/components/schemas/GuestAgent'
-      required:
-      - value
     ResourceStatus:
       description: The resource status information.
       type: object
@@ -214,13 +237,20 @@ components:
           type: string
           format: date-time
           readOnly: true
-    HttpProxyConfiguration:
-      description: HTTP Proxy configuration for the VM.
+    GuestCredential:
+      description: Username / Password Credentials to connect to guest.
       type: object
       properties:
-        httpsProxy:
-          description: Gets or sets httpsProxy url.
+        username:
+          description: Gets or sets username to connect with the guest.
           type: string
+        password:
+          description: Gets or sets the password to connect with the guest.
+          type: string
+          x-ms-mutability:
+          - create
+          - update
+          x-ms-secret: true
     ResourceProvisioningState:
       type: string
       description: The current deployment state of resource.
@@ -236,44 +266,20 @@ components:
       x-ms-enum:
         name: ProvisioningState
         modelAsString: true
-    ProvisioningAction:
-      description: Defines the different types of operations for guest agent.
-      enum:
-      - install
-      - uninstall
-      - repair
-      type: string
-      x-ms-enum:
-        modelAsString: true
-        name: ProvisioningAction
-    GuestAgent:
-      description: Defines the GuestAgent.
+    GuestAgentList:
+      description: List of GuestAgent.
+      type: object
+      properties:
+        nextLink:
+          description: Url to follow for getting next page of GuestAgent.
+          type: string
+        value:
+          description: Array of GuestAgent
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestAgent'
       required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Resource properties.
-          $ref: '#/components/schemas/GuestAgentProperties'
-      x-ms-azure-resource: true
-    GuestCredential:
-      description: Username / Password Credentials to connect to guest.
-      type: object
-      properties:
-        username:
-          description: Gets or sets username to connect with the guest.
-          type: string
-        password:
-          description: Gets or sets the password to connect with the guest.
-          type: string
-          x-ms-mutability:
-          - create
-          - update
-          x-ms-secret: true
+      - value
   parameters:
     api-version:
       in: query
@@ -291,8 +297,12 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow.

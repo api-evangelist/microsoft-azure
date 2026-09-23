@@ -1,0 +1,201 @@
+openapi: 3.2.0
+info:
+  title: Microsoft Azure Purview Workflow Service User Requests API
+  version: 2022-05-01-preview
+  description: Workflows are automated, repeatable business processes which allow organizations to track changes, enforce policy compliance, and ensure quality data across their data landscape.Workflow service is a micro service within Microsoft Purview to validate and orchestrate CUD (create, update, delete) operations on their data entities. This spec defines REST API of Purview Workflow Service, which could used for creating Purview workflow client.
+servers:
+- url: https://purview.azure.com/workflow
+security:
+- azure_auth:
+  - https://purview.azure.net/.default
+tags:
+- name: User Requests
+paths:
+  /userrequests:
+    post:
+      tags:
+      - User Requests
+      description: Submit a user request for requestor, a user request describes user ask to do operation(s) on Purview. If any workflow's trigger matches with an operation in request, a run of the workflow is created.
+      operationId: microsoftAzureSubmituserrequests
+      x-ms-examples:
+        UserRequests_Submit:
+          $ref: ./examples/SubmitUserRequests.json
+      parameters:
+      - $ref: '#/components/parameters/api-version'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRequestResponse'
+        default:
+          description: Error response describing why the operation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Microsoft Azure Post Userrequests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestPayload'
+        description: The payload of submitting a user request.
+        required: true
+components:
+  schemas:
+    UserRequestResponse:
+      description: Describes user ask to do operation(s) on Purview.
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+          description: The user request id.
+        requestor:
+          $ref: '#/components/schemas/RequestorId'
+        operations:
+          type: array
+          description: The list of operations user want to submit, each operation matches one Purview API call and will do the operation directly.
+          items:
+            type: object
+            description: The operation user wants to perform.
+            properties:
+              type:
+                $ref: '#/components/schemas/OperationType'
+              payload:
+                type: object
+                description: The payload of each operation which user want to submit.
+              workflowRunIds:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkflowRunId'
+            required:
+            - type
+            - payload
+        comment:
+          type: string
+          description: The comment when submit a user request.
+        status:
+          $ref: '#/components/schemas/Status'
+      required:
+      - requestId
+      - requestor
+      - operations
+      - status
+    Status:
+      type: string
+      description: The status.
+      enum:
+      - NotStarted
+      - InProgress
+      - Failed
+      - Completed
+      - Canceling
+      - CancellationFailed
+      - Canceled
+      x-ms-enum:
+        name: UserRequestStatus
+        modelAsString: true
+    OperationType:
+      type: string
+      description: The operation type.
+      enum:
+      - CreateTerm
+      - UpdateTerm
+      - DeleteTerm
+      - ImportTerms
+      - UpdateAsset
+      - GrantDataAccess
+      x-ms-enum:
+        name: OperationType
+        modelAsString: true
+    WorkflowRunId:
+      type: string
+      format: uuid
+      description: The workflow run id.
+    ErrorModel:
+      description: Default error model
+      type: object
+      properties:
+        code:
+          description: Gets or sets the code.
+          type: string
+        details:
+          description: Gets or sets the details.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorModel'
+          x-ms-identifiers:
+          - code
+        message:
+          description: Gets or sets the messages.
+          type: string
+        target:
+          description: Gets or sets the target.
+          type: string
+      required:
+      - code
+      - message
+    UserRequestPayload:
+      type: object
+      properties:
+        operations:
+          type: array
+          description: The list of operations user want to submit, each operation matches one Purview API call and will do the operation directly.
+          items:
+            $ref: '#/components/schemas/Operation'
+        comment:
+          type: string
+          description: The comment when submit a user request.
+      required:
+      - operations
+    RequestorId:
+      type: string
+      format: uuid
+      description: The person who submitted the user request.
+    Operation:
+      type: object
+      description: The operation user wants to perform.
+      properties:
+        type:
+          $ref: '#/components/schemas/OperationType'
+        payload:
+          type: object
+          description: The payload of each operation which user want to submit.
+      required:
+      - type
+      - payload
+    ErrorResponse:
+      description: Default error response model
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorModel'
+      required:
+      - error
+  parameters:
+    api-version:
+      name: api-version
+      description: Version of Purview APIs
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            https://purview.azure.net/.default: Default authorization scope.
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow
+x-ms-parameterized-host:
+  hostTemplate: '{endpoint}'
+  useSchemePrefix: false
+  parameters:
+  - $ref: '#/components/parameters/endpoint'

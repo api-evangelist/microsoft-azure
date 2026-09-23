@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Endpoint Keys API
+  version: v5.0-preview.1
+  title: Microsoft Azure QnAMaker Client Endpoint Keys API
+  description: An API for QnAMaker Service
+security:
+- apim_key: []
 tags:
 - name: EndpointKeys
 paths:
@@ -76,15 +79,17 @@ paths:
       - EndpointKeys
 components:
   schemas:
-    ErrorResponse:
+    InnerErrorModel:
       type: object
-      description: Error response. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
       additionalProperties: false
       properties:
-        error:
-          description: The error object.
-          allOf:
-          - $ref: '#/components/schemas/Error'
+        code:
+          type: string
+          description: A more specific error code than was provided by the containing error.
+        innerError:
+          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/InnerErrorModel'
     ActiveLearningSettingsDTO:
       type: object
       description: Active Learning settings of the endpoint.
@@ -93,15 +98,47 @@ components:
         enable:
           type: string
           description: True/False string providing Active Learning
-    EndpointSettingsDTO:
+    ErrorCode:
+      type: string
+      description: Human readable error code.
+      x-ms-enum:
+        name: ErrorCodeType
+        modelAsString: true
+      enum:
+      - BadArgument
+      - Forbidden
+      - NotFound
+      - KbNotFound
+      - Unauthorized
+      - Unspecified
+      - EndpointKeysError
+      - QuotaExceeded
+      - QnaRuntimeError
+      - SKULimitExceeded
+      - OperationNotFound
+      - ServiceError
+      - ValidationFailure
+      - ExtractionFailure
+    EndpointKeysDTO:
       type: object
-      description: Endpoint settings.
+      description: Schema for EndpointKeys generate/refresh operations.
       additionalProperties: false
       properties:
-        activeLearning:
-          description: Active Learning settings of the endpoint.
-          allOf:
-          - $ref: '#/components/schemas/ActiveLearningSettingsDTO'
+        primaryEndpointKey:
+          type: string
+          description: Primary Access Key.
+        secondaryEndpointKey:
+          type: string
+          description: Secondary Access Key.
+        installedVersion:
+          type: string
+          description: Current version of runtime.
+        lastStableVersion:
+          type: string
+          description: Latest version of runtime.
+        language:
+          type: string
+          description: Language setting of runtime.
     Error:
       type: object
       description: The error object. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
@@ -126,67 +163,25 @@ components:
         innerError:
           description: An object containing more specific information than the current object about the error.
           $ref: '#/components/schemas/InnerErrorModel'
-    EndpointKeysDTO:
+    ErrorResponse:
       type: object
-      description: Schema for EndpointKeys generate/refresh operations.
+      description: Error response. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
       additionalProperties: false
       properties:
-        primaryEndpointKey:
-          type: string
-          description: Primary Access Key.
-        secondaryEndpointKey:
-          type: string
-          description: Secondary Access Key.
-        installedVersion:
-          type: string
-          description: Current version of runtime.
-        lastStableVersion:
-          type: string
-          description: Latest version of runtime.
-        language:
-          type: string
-          description: Language setting of runtime.
-    InnerErrorModel:
+        error:
+          description: The error object.
+          allOf:
+          - $ref: '#/components/schemas/Error'
+    EndpointSettingsDTO:
       type: object
-      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      description: Endpoint settings.
       additionalProperties: false
       properties:
-        code:
-          type: string
-          description: A more specific error code than was provided by the containing error.
-        innerError:
-          description: An object containing more specific information than the current object about the error.
-          $ref: '#/components/schemas/InnerErrorModel'
-    ErrorCode:
-      type: string
-      description: Human readable error code.
-      x-ms-enum:
-        name: ErrorCodeType
-        modelAsString: true
-      enum:
-      - BadArgument
-      - Forbidden
-      - NotFound
-      - KbNotFound
-      - Unauthorized
-      - Unspecified
-      - EndpointKeysError
-      - QuotaExceeded
-      - QnaRuntimeError
-      - SKULimitExceeded
-      - OperationNotFound
-      - ServiceError
-      - ValidationFailure
-      - ExtractionFailure
+        activeLearning:
+          description: Active Learning settings of the endpoint.
+          allOf:
+          - $ref: '#/components/schemas/ActiveLearningSettingsDTO'
   parameters:
-    KeyType:
-      name: keyType
-      in: path
-      required: true
-      description: Type of Key
-      x-ms-parameter-location: method
-      schema:
-        type: string
     EndpointSettingsPayload:
       name: endpointSettingsPayload
       in: body
@@ -195,8 +190,21 @@ components:
         $ref: '#/components/schemas/EndpointSettingsDTO'
       description: Post body of the request.
       x-ms-parameter-location: method
+    KeyType:
+      name: keyType
+      in: path
+      required: true
+      description: Type of Key
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: '{Endpoint}/qnamaker/v5.0-preview.1'
   useSchemePrefix: false
   parameters:
   - $ref: '#/components/parameters/Endpoint'

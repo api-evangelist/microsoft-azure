@@ -1,8 +1,12 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Evaluations20220901 Preview API
-  description: Manages evaluations operations.
+  version: 2022-09-01-preview
+  title: Microsoft Azure Personalizer Client 2022-09-01-preview…
+  description: Personalizer Service is an Azure Cognitive Service that makes it easy to target content and experiences without complex pre-analysis or cleanup of past data. Given a context and featurized content, the Personalizer Service returns which content item to show to users in rewardActionId. As rewards are sent in response to the use of rewardActionId, the reinforcement learning algorithm will improve the model and improve performance of future rank calls.
+servers:
+- url: /personalizer
+security:
+- {}
 tags:
 - name: Evaluations20220901Preview
   description: Manages evaluations operations.
@@ -224,23 +228,6 @@ paths:
           $ref: ./examples/Evaluations_List.json
 components:
   schemas:
-    ErrorResponse:
-      description: Used to return an error to the client
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/PersonalizerError'
-    TimeSeries:
-      type: object
-      properties:
-        data:
-          description: Time series.
-          type: array
-          items:
-            $ref: '#/components/schemas/Data'
-          readOnly: true
     Summary:
       type: object
       properties:
@@ -256,41 +243,57 @@ components:
             format: float
             type: number
           readOnly: true
-    PolicyResult:
+    EvaluationContract:
+      description: A counterfactual evaluation.
+      required:
+      - endTime
+      - name
+      - policies
+      - startTime
       type: object
       properties:
+        enablePolicyOptimization:
+          description: True if the evaluation should explore for a more optimal learning settings.
+          type: boolean
         name:
-          description: The name of the Learning Settings.
+          description: The name of the evaluation.
+          maxLength: 256
+          type: string
+        startTime:
+          format: date-time
+          description: The start time of the evaluation.
+          type: string
+        endTime:
+          format: date-time
+          description: The end time of the evaluation.
+          type: string
+        policies:
+          description: Additional learning settings to evaluate.
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyContract'
+    Data:
+      type: object
+      properties:
+        timeStamp:
+          format: date-time
+          description: Timestamp of the aggregation.
           type: string
           readOnly: true
-        slotId:
-          description: Slot id. Empty for overall results and single slot results.
-          type: string
+        expectedReward:
+          format: float
+          description: Average reward.
+          type: number
           readOnly: true
-        arguments:
-          description: The arguments of the Learning Settings.
-          type: string
+        confidenceInterval:
+          description: Confidence interval.
+          type: array
+          items:
+            format: float
+            type: number
           readOnly: true
-        policySource:
-          description: The source of the Learning Settings.
-          enum:
-          - Online
-          - Baseline
-          - Random
-          - Custom
-          - OfflineExperimentation
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: PolicySource
-            modelAsString: true
-        summary:
-          $ref: '#/components/schemas/Summary'
-          readOnly: true
-        timeseries:
-          $ref: '#/components/schemas/TimeSeries'
-          readOnly: true
-    EvaluationDetails:
+    Evaluation:
+      description: A counterfactual evaluation.
       type: object
       properties:
         id:
@@ -335,7 +338,7 @@ components:
             name: EvaluationJobStatus
             modelAsString: true
         evaluationType:
-          description: Type of evaluation.
+          description: The type of evaluation.
           enum:
           - Manual
           - Auto
@@ -344,6 +347,100 @@ components:
           x-ms-enum:
             name: EvaluationType
             modelAsString: true
+        optimalPolicy:
+          description: Optimal policy found by the evaluation job.
+          type: string
+          readOnly: true
+        content:
+          $ref: '#/components/schemas/EvaluationResult'
+        description:
+          description: Description of the evaluation job.
+          type: string
+          readOnly: true
+    PolicyResult:
+      type: object
+      properties:
+        name:
+          description: The name of the Learning Settings.
+          type: string
+          readOnly: true
+        slotId:
+          description: Slot id. Empty for overall results and single slot results.
+          type: string
+          readOnly: true
+        arguments:
+          description: The arguments of the Learning Settings.
+          type: string
+          readOnly: true
+        policySource:
+          description: The source of the Learning Settings.
+          enum:
+          - Online
+          - Baseline
+          - Random
+          - Custom
+          - OfflineExperimentation
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: PolicySource
+            modelAsString: true
+        summary:
+          $ref: '#/components/schemas/Summary'
+          readOnly: true
+        timeseries:
+          $ref: '#/components/schemas/TimeSeries'
+          readOnly: true
+    ErrorResponse:
+      description: Used to return an error to the client
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/PersonalizerError'
+    EvaluationResult:
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: Start time of the time series.
+          type: string
+          readOnly: true
+        endTime:
+          format: date-time
+          description: End time of the time series.
+          type: string
+          readOnly: true
+        intervalInMinutes:
+          format: int32
+          description: Aggregation window.
+          type: integer
+          readOnly: true
+        value:
+          description: Time series of the learning settings results.
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyResult'
+    InternalError:
+      description: An object containing more specific information than the parent object about the error.
+      type: object
+      properties:
+        code:
+          description: Detailed error code.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InternalError'
+    Evaluations:
+      description: Evaluations
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluationDetails'
+        nextLink:
+          type: string
     PersonalizerError:
       description: The error object.
       required:
@@ -524,85 +621,7 @@ components:
           readOnly: true
         innerError:
           $ref: '#/components/schemas/InternalError'
-    Evaluations:
-      description: Evaluations
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/EvaluationDetails'
-        nextLink:
-          type: string
-    InternalError:
-      description: An object containing more specific information than the parent object about the error.
-      type: object
-      properties:
-        code:
-          description: Detailed error code.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InternalError'
-    EvaluationResult:
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: Start time of the time series.
-          type: string
-          readOnly: true
-        endTime:
-          format: date-time
-          description: End time of the time series.
-          type: string
-          readOnly: true
-        intervalInMinutes:
-          format: int32
-          description: Aggregation window.
-          type: integer
-          readOnly: true
-        value:
-          description: Time series of the learning settings results.
-          type: array
-          items:
-            $ref: '#/components/schemas/PolicyResult'
-    Data:
-      type: object
-      properties:
-        timeStamp:
-          format: date-time
-          description: Timestamp of the aggregation.
-          type: string
-          readOnly: true
-        expectedReward:
-          format: float
-          description: Average reward.
-          type: number
-          readOnly: true
-        confidenceInterval:
-          description: Confidence interval.
-          type: array
-          items:
-            format: float
-            type: number
-          readOnly: true
-    PolicyContract:
-      description: Learning settings specifying how to train the model.
-      required:
-      - arguments
-      - name
-      type: object
-      properties:
-        name:
-          description: Name of the learning settings.
-          maxLength: 256
-          type: string
-        arguments:
-          description: Arguments of the learning settings.
-          maxLength: 1024
-          type: string
-    Evaluation:
-      description: A counterfactual evaluation.
+    EvaluationDetails:
       type: object
       properties:
         id:
@@ -647,7 +666,7 @@ components:
             name: EvaluationJobStatus
             modelAsString: true
         evaluationType:
-          description: The type of evaluation.
+          description: Type of evaluation.
           enum:
           - Manual
           - Auto
@@ -656,47 +675,37 @@ components:
           x-ms-enum:
             name: EvaluationType
             modelAsString: true
-        optimalPolicy:
-          description: Optimal policy found by the evaluation job.
-          type: string
-          readOnly: true
-        content:
-          $ref: '#/components/schemas/EvaluationResult'
-        description:
-          description: Description of the evaluation job.
-          type: string
-          readOnly: true
-    EvaluationContract:
-      description: A counterfactual evaluation.
-      required:
-      - endTime
-      - name
-      - policies
-      - startTime
+    TimeSeries:
       type: object
       properties:
-        enablePolicyOptimization:
-          description: True if the evaluation should explore for a more optimal learning settings.
-          type: boolean
-        name:
-          description: The name of the evaluation.
-          maxLength: 256
-          type: string
-        startTime:
-          format: date-time
-          description: The start time of the evaluation.
-          type: string
-        endTime:
-          format: date-time
-          description: The end time of the evaluation.
-          type: string
-        policies:
-          description: Additional learning settings to evaluate.
+        data:
+          description: Time series.
           type: array
           items:
-            $ref: '#/components/schemas/PolicyContract'
+            $ref: '#/components/schemas/Data'
+          readOnly: true
+    PolicyContract:
+      description: Learning settings specifying how to train the model.
+      required:
+      - arguments
+      - name
+      type: object
+      properties:
+        name:
+          description: Name of the learning settings.
+          maxLength: 256
+          type: string
+        arguments:
+          description: Arguments of the learning settings.
+          maxLength: 1024
+          type: string
+  securitySchemes:
+    apim_key:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: '{Endpoint}'
   useSchemePrefix: false
   parameters:
   - $ref: '#/components/parameters/Endpoint'

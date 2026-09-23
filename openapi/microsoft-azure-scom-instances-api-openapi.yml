@@ -1,14 +1,22 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector SCOM Instances API
+  title: Microsoft Azure Azure API for managing SCOM managed…
+  description: Azure Monitor Operations Manager Managed Instance (SCOM MI) management APIs
+  version: 2023-07-07-preview
+  x-ms-code-generation-settings:
+    name: scomClient
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: SCOM Instances
 paths:
   /subscriptions/{subscriptionId}/providers/Microsoft.Scom/managedInstances:
     get:
       operationId: microsoftAzureInstancesListbysubscription
-      description: 'Lists all SCOM managed instances in a subscription '
+      description: Lists all SCOM managed instances in a subscription
       x-ms-pageable:
         nextLinkName: nextLink
       tags:
@@ -32,7 +40,7 @@ paths:
       x-ms-examples:
         Instances_ListBySubscription:
           $ref: ./examples/Instances_ListBySubscription.json
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft Scom Managedinstances
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft Scom…
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Scom/managedInstances/{instanceName}
   : put:
       operationId: microsoftAzureInstancesCreateorupdate
@@ -89,7 +97,7 @@ paths:
       x-ms-examples:
         Instances_CreateOrUpdate:
           $ref: ./examples/Instance_Create.json
-      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Scom Managedinstances Instancename
+      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups…
       requestBody:
         content:
           application/json:
@@ -134,7 +142,7 @@ paths:
       x-ms-examples:
         Instances_Delete:
           $ref: ./examples/Instance_Delete.json
-      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Scom Managedinstances Instancename
+      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
     ManagementServerProperties:
@@ -189,6 +197,33 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/UserIdentity'
+    DomainUserCredentials:
+      description: Get Domain user name and password from key vault
+      type: object
+      properties:
+        keyVaultUrl:
+          description: Key vault url to get the domain username and password
+          type: string
+        userNameSecret:
+          description: 'Domain user name secret '
+          type: string
+        passwordSecret:
+          description: 'Domain Password secret '
+          type: string
+    DomainControllerProperties:
+      description: The properties of domain controller to which SCOM and SQL servers join for AuthN/AuthZ.
+      type: object
+      properties:
+        domainName:
+          description: Fully qualified domain name
+          type: string
+        dnsServer:
+          description: 'IP address of DNS server '
+          type: string
+        ouPath:
+          description: Organizational Unit path in which the SCOM servers will be present
+          type: string
+          default: ''
     ManagedInstance:
       type: object
       description: A SCOM instance resource
@@ -204,40 +239,30 @@ components:
           x-ms-mutability:
           - create
           - read
-    LicenseTypeEnum:
-      description: The license type associated with different SCOM infrastructure components.
-      type: string
-      enum:
-      - None
-      - AzureHybridBenefit
-      x-ms-enum:
-        name: hybridLicenseType
-        modelAsString: true
-    DomainUserCredentials:
-      description: Get Domain user name and password from key vault
+    logAnalyticsConfiguration:
       type: object
+      description: Configuration for Log Analytics linking to SCOM managed instance.
       properties:
-        keyVaultUrl:
-          description: Key vault url to get the domain username and password
+        workspaceId:
+          description: The resource ID of the Log Analytics workspace to be used.
           type: string
-        userNameSecret:
-          description: 'Domain user name secret '
-          type: string
-        passwordSecret:
-          description: 'Domain Password secret '
-          type: string
-    UserIdentity:
-      description: Azure Active Directory identity configuration for a resource.
-      type: object
-      properties:
-        principalId:
-          description: The Azure Active Directory principal id.
-          type: string
-          readOnly: true
-        clientId:
-          description: The Azure Active Directory client id.
-          type: string
-          readOnly: true
+        dataTypes:
+          description: The types of data to be ingested to Log Analytics workspace.
+          type: array
+          items:
+            type: string
+            enum:
+            - State
+            - Performance
+            - Event
+            - Audit
+            x-ms-enum:
+              name: DataType
+              modelAsString: true
+        importData:
+          description: A one-time optional parameter to import data of last 7 days.
+          default: false
+          type: boolean
     MonitoringInstanceProperties:
       description: The properties of a SCOM instance resource
       type: object
@@ -287,20 +312,72 @@ components:
             $ref: '#/components/schemas/ManagedInstanceOperationStatus'
           x-ms-identifiers:
           - id
-    DomainControllerProperties:
-      description: The properties of domain controller to which SCOM and SQL servers join for AuthN/AuthZ.
+    ManagedInstanceOperationStatus:
+      description: Gets status of current and latest SCOM managed instance operation.
       type: object
       properties:
-        domainName:
-          description: Fully qualified domain name
+        operationName:
+          description: Operation Name
           type: string
-        dnsServer:
-          description: 'IP address of DNS server '
+          readOnly: true
+        operationState:
+          description: Operation status
           type: string
-        ouPath:
-          description: Organizational Unit path in which the SCOM servers will be present
+          readOnly: true
+        id:
+          description: Operation id
           type: string
-          default: ''
+          readOnly: true
+    AzureHybridBenefitProperties:
+      type: object
+      description: The properties to maximize savings by using Azure Hybrid Benefit
+      properties:
+        scomLicenseType:
+          description: SCOM license type. Maximize savings by using license you already own
+          $ref: '#/components/schemas/LicenseTypeEnum'
+        windowsServerLicenseType:
+          description: Specifies that the image or disk that is being used was licensed on-premises. <br><br> For more information, see [Azure Hybrid Use Benefit for Windows Server](https://docs.microsoft.com/azure/virtual-machines/virtual-machines-windows-hybrid-use-benefit-licensing?toc=%2fazure%2fvirtual-machines%2fwindows%2ftoc.json)
+          $ref: '#/components/schemas/LicenseTypeEnum'
+        sqlServerLicenseType:
+          description: SQL Server license type. Maximize savings by using Azure Hybrid Benefit for SQL Server with license you already own
+          $ref: '#/components/schemas/LicenseTypeEnum'
+    LicenseTypeEnum:
+      description: The license type associated with different SCOM infrastructure components.
+      type: string
+      enum:
+      - None
+      - AzureHybridBenefit
+      x-ms-enum:
+        name: hybridLicenseType
+        modelAsString: true
+    UserIdentity:
+      description: Azure Active Directory identity configuration for a resource.
+      type: object
+      properties:
+        principalId:
+          description: The Azure Active Directory principal id.
+          type: string
+          readOnly: true
+        clientId:
+          description: The Azure Active Directory client id.
+          type: string
+          readOnly: true
+    GmsaDetails:
+      description: Gmsa Details
+      type: object
+      properties:
+        loadBalancerIP:
+          description: Frontend IP configuration for Load Balancer, which should be an available IP in customer VNet
+          type: string
+        gmsaAccount:
+          description: gMSA account under which context all Management Server services will run
+          type: string
+        managementServerGroupName:
+          description: OnPrem AD Computer Group where we will join VMs for ease of management
+          type: string
+        dnsName:
+          description: Frontend DNS name for Load Balancer which will be used by Agents to initiate communication
+          type: string
     DatabaseInstanceProperties:
       description: The properties of database instance
       type: object
@@ -324,62 +401,6 @@ components:
           description: Resource Id of warehouse database on database instance
           type: string
           readOnly: true
-    logAnalyticsConfiguration:
-      type: object
-      description: Configuration for Log Analytics linking to SCOM managed instance.
-      properties:
-        workspaceId:
-          description: The resource ID of the Log Analytics workspace to be used.
-          type: string
-        dataTypes:
-          description: The types of data to be ingested to Log Analytics workspace.
-          type: array
-          items:
-            type: string
-            enum:
-            - State
-            - Performance
-            - Event
-            - Audit
-            x-ms-enum:
-              name: DataType
-              modelAsString: true
-        importData:
-          description: A one-time optional parameter to import data of last 7 days.
-          default: false
-          type: boolean
-    ManagedInstanceOperationStatus:
-      description: Gets status of current and latest SCOM managed instance operation.
-      type: object
-      properties:
-        operationName:
-          description: Operation Name
-          type: string
-          readOnly: true
-        operationState:
-          description: Operation status
-          type: string
-          readOnly: true
-        id:
-          description: Operation id
-          type: string
-          readOnly: true
-    GmsaDetails:
-      description: Gmsa Details
-      type: object
-      properties:
-        loadBalancerIP:
-          description: Frontend IP configuration for Load Balancer, which should be an available IP in customer VNet
-          type: string
-        gmsaAccount:
-          description: gMSA account under which context all Management Server services will run
-          type: string
-        managementServerGroupName:
-          description: OnPrem AD Computer Group where we will join VMs for ease of management
-          type: string
-        dnsName:
-          description: Frontend DNS name for Load Balancer which will be used by Agents to initiate communication
-          type: string
     MonitoringInstanceList:
       description: A paged list of SCOM managed instances
       type: object
@@ -394,19 +415,6 @@ components:
           description: URL to get the next page if any
           type: string
           readOnly: true
-    AzureHybridBenefitProperties:
-      type: object
-      description: The properties to maximize savings by using Azure Hybrid Benefit
-      properties:
-        scomLicenseType:
-          description: SCOM license type. Maximize savings by using license you already own
-          $ref: '#/components/schemas/LicenseTypeEnum'
-        windowsServerLicenseType:
-          description: Specifies that the image or disk that is being used was licensed on-premises. <br><br> For more information, see [Azure Hybrid Use Benefit for Windows Server](https://docs.microsoft.com/azure/virtual-machines/virtual-machines-windows-hybrid-use-benefit-licensing?toc=%2fazure%2fvirtual-machines%2fwindows%2ftoc.json)
-          $ref: '#/components/schemas/LicenseTypeEnum'
-        sqlServerLicenseType:
-          description: SQL Server license type. Maximize savings by using Azure Hybrid Benefit for SQL Server with license you already own
-          $ref: '#/components/schemas/LicenseTypeEnum'
   parameters:
     instanceName:
       name: instanceName
@@ -417,8 +425,12 @@ components:
       schema:
         type: string
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9-_]*$
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

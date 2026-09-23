@@ -1,7 +1,14 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Info API
+  title: Microsoft Azure Document Intelligence (formerly Form…
+  version: 2024-02-29-preview
+  description: Extracts content, layout, and structured data from documents.
+  x-typespec-generated:
+  - emitter: '@azure-tools/typespec-autorest'
+security:
+- ApiKeyAuth: []
+- OAuth2Auth:
+  - https://cognitiveservices.azure.com/.default
 tags:
 - name: Info
 paths:
@@ -32,6 +39,72 @@ paths:
       - Info
 components:
   schemas:
+    CustomDocumentModelsDetails:
+      type: object
+      description: Details regarding custom document models.
+      properties:
+        count:
+          type: integer
+          format: int32
+          description: Number of custom document models in the current resource.
+        limit:
+          type: integer
+          format: int32
+          description: Maximum number of custom document models supported in the current resource.
+      required:
+      - count
+      - limit
+    ResourceDetails:
+      type: object
+      description: General information regarding the current resource.
+      properties:
+        customDocumentModels:
+          $ref: '#/components/schemas/CustomDocumentModelsDetails'
+          description: Details regarding custom document models.
+        customNeuralDocumentModelBuilds:
+          $ref: '#/components/schemas/QuotaDetails'
+          description: Quota used, limit, and next reset date/time.
+      required:
+      - customDocumentModels
+      - customNeuralDocumentModelBuilds
+    Error:
+      type: object
+      description: The error object.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          description: The target of the error.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/Error'
+          x-ms-identifiers: []
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: An object containing more specific information than the current object about the error.
+      required:
+      - code
+      - message
+    InnerError:
+      type: object
+      description: An object containing more specific information about the error.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: Inner error.
     ErrorResponse:
       type: object
       description: Error response object.
@@ -61,72 +134,6 @@ components:
       - used
       - quota
       - quotaResetDateTime
-    Error:
-      type: object
-      description: The error object.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Error'
-          x-ms-identifiers: []
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: An object containing more specific information than the current object about the error.
-      required:
-      - code
-      - message
-    CustomDocumentModelsDetails:
-      type: object
-      description: Details regarding custom document models.
-      properties:
-        count:
-          type: integer
-          format: int32
-          description: Number of custom document models in the current resource.
-        limit:
-          type: integer
-          format: int32
-          description: Maximum number of custom document models supported in the current resource.
-      required:
-      - count
-      - limit
-    ResourceDetails:
-      type: object
-      description: General information regarding the current resource.
-      properties:
-        customDocumentModels:
-          $ref: '#/components/schemas/CustomDocumentModelsDetails'
-          description: Details regarding custom document models.
-        customNeuralDocumentModelBuilds:
-          $ref: '#/components/schemas/QuotaDetails'
-          description: Quota used, limit, and next reset date/time.
-      required:
-      - customDocumentModels
-      - customNeuralDocumentModelBuilds
-    InnerError:
-      type: object
-      description: An object containing more specific information about the error.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: Inner error.
   parameters:
     Azure.Core.Foundations.ApiVersionParameter:
       name: api-version
@@ -138,8 +145,218 @@ components:
       schema:
         type: string
         minLength: 1
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+    OAuth2Auth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            https://cognitiveservices.azure.com/.default: ''
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/token
 x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
+  hostTemplate: '{endpoint}/documentintelligence'
   useSchemePrefix: false
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  - name: endpoint
+    in: path
+    description: The Document Intelligence service endpoint.
+    required: true
+    type: string
+x-ms-paths:
+  /documentClassifiers/{classifierId}:analyze?_overload=classifyDocument:
+    post:
+      operationId: DocumentClassifiers_ClassifyDocument
+      description: Classifies document with document classifier.
+      parameters:
+      - $ref: '#/components/parameters/Azure.Core.Foundations.ApiVersionParameter'
+      - $ref: '#/components/parameters/DocumentClassifierAnalyzeRequestParams.classifierId'
+      - $ref: '#/components/parameters/DocumentClassifierAnalyzeRequestParams.stringIndexType'
+      - $ref: '#/components/parameters/DocumentClassifierAnalyzeRequestParams.split'
+      - name: classifyRequest
+        in: body
+        description: Classify request parameters.
+        required: true
+        schema:
+          $ref: '#/components/schemas/ClassifyDocumentRequest'
+      responses:
+        '202':
+          description: The request has been accepted for processing, but processing has not yet completed.
+          headers:
+            Operation-Location:
+              type: string
+              format: uri
+              description: The location of an instance of AnalyzeResultOperation
+            Retry-After:
+              type: integer
+              format: int32
+              description: The Retry-After header can indicate how long the client should wait before polling the operation status.
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-examples:
+        Classify Document from Url:
+          $ref: ./examples/ClassifyDocument_Url.json
+      x-ms-long-running-operation: true
+  /documentModels/{modelId}:analyze?_overload=analyzeDocument:
+    post:
+      operationId: DocumentModels_AnalyzeDocument
+      description: Analyzes document with document model.
+      parameters:
+      - $ref: '#/components/parameters/Azure.Core.Foundations.ApiVersionParameter'
+      - $ref: '#/components/parameters/DocumentModelAnalyzeRequestParams.modelId'
+      - $ref: '#/components/parameters/DocumentModelAnalyzeRequestParams.pages'
+      - $ref: '#/components/parameters/DocumentModelAnalyzeRequestParams.locale'
+      - $ref: '#/components/parameters/DocumentModelAnalyzeRequestParams.stringIndexType'
+      - $ref: '#/components/parameters/DocumentModelAnalyzeRequestParams.features'
+      - $ref: '#/components/parameters/DocumentModelAnalyzeRequestParams.queryFields'
+      - $ref: '#/components/parameters/DocumentModelAnalyzeRequestParams.outputContentFormat'
+      - name: analyzeRequest
+        in: body
+        description: Analyze request parameters.
+        required: false
+        schema:
+          $ref: '#/components/schemas/AnalyzeDocumentRequest'
+      responses:
+        '202':
+          description: The request has been accepted for processing, but processing has not yet completed.
+          headers:
+            Operation-Location:
+              type: string
+              format: uri
+              description: The location of an instance of AnalyzeResultOperation
+            Retry-After:
+              type: integer
+              format: int32
+              description: The Retry-After header can indicate how long the client should wait before polling the operation status.
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-examples:
+        Analyze Document from Base64:
+          $ref: ./examples/AnalyzeDocument_Base64.json
+        Analyze Document from Url:
+          $ref: ./examples/AnalyzeDocument_Url.json
+      x-ms-long-running-operation: true
+  /operations/{operationId}?_overload=getDocumentModelComposeOperation:
+    get:
+      operationId: MiscellaneousOperations_GetDocumentModelComposeOperation
+      description: Gets operation info.
+      parameters:
+      - $ref: '#/components/parameters/Azure.Core.Foundations.ApiVersionParameter'
+      - name: operationId
+        in: path
+        description: Operation ID
+        required: true
+        type: string
+      - $ref: '#/components/parameters/Azure.Core.ClientRequestIdHeader'
+      responses:
+        '200':
+          description: The request has succeeded.
+          schema:
+            $ref: '#/components/schemas/DocumentModelComposeOperationDetails'
+          headers:
+            x-ms-client-request-id:
+              type: string
+              format: uuid
+              description: An opaque, globally-unique, client-generated string identifier for the request.
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-examples:
+        Get Operation - Document Model Compose:
+          $ref: ./examples/GetOperation_DocumentModelCompose.json
+  /operations/{operationId}?_overload=getDocumentModelCopyToOperation:
+    get:
+      operationId: MiscellaneousOperations_GetDocumentModelCopyToOperation
+      description: Gets operation info.
+      parameters:
+      - $ref: '#/components/parameters/Azure.Core.Foundations.ApiVersionParameter'
+      - name: operationId
+        in: path
+        description: Operation ID
+        required: true
+        type: string
+      - $ref: '#/components/parameters/Azure.Core.ClientRequestIdHeader'
+      responses:
+        '200':
+          description: The request has succeeded.
+          schema:
+            $ref: '#/components/schemas/DocumentModelCopyToOperationDetails'
+          headers:
+            x-ms-client-request-id:
+              type: string
+              format: uuid
+              description: An opaque, globally-unique, client-generated string identifier for the request.
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-examples:
+        Get Operation - Document Model Copy To:
+          $ref: ./examples/GetOperation_DocumentModelCopyTo.json
+  /operations/{operationId}?_overload=getDocumentClassifierBuildOperation:
+    get:
+      operationId: MiscellaneousOperations_GetDocumentClassifierBuildOperation
+      description: Gets operation info.
+      parameters:
+      - $ref: '#/components/parameters/Azure.Core.Foundations.ApiVersionParameter'
+      - name: operationId
+        in: path
+        description: Operation ID
+        required: true
+        type: string
+      - $ref: '#/components/parameters/Azure.Core.ClientRequestIdHeader'
+      responses:
+        '200':
+          description: The request has succeeded.
+          schema:
+            $ref: '#/components/schemas/DocumentClassifierBuildOperationDetails'
+          headers:
+            x-ms-client-request-id:
+              type: string
+              format: uuid
+              description: An opaque, globally-unique, client-generated string identifier for the request.
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-examples:
+        Get Operation - Document Classifier Build:
+          $ref: ./examples/GetOperation_DocumentClassifierBuild.json
+  /operations/{operationId}?_overload=getOperation:
+    get:
+      operationId: MiscellaneousOperations_GetOperation
+      description: Gets operation info.
+      parameters:
+      - $ref: '#/components/parameters/Azure.Core.Foundations.ApiVersionParameter'
+      - name: operationId
+        in: path
+        description: Operation ID
+        required: true
+        type: string
+      - $ref: '#/components/parameters/Azure.Core.ClientRequestIdHeader'
+      responses:
+        '200':
+          description: The request has succeeded.
+          schema:
+            $ref: '#/components/schemas/OperationDetails'
+          headers:
+            x-ms-client-request-id:
+              type: string
+              format: uuid
+              description: An opaque, globally-unique, client-generated string identifier for the request.
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      x-ms-examples:
+        Get Operation:
+          $ref: ./examples/GetOperation.json

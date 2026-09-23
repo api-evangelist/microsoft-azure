@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Mesh Applications API
+  title: Microsoft Azure Service Fabric Client Mesh Applications API
+  description: Service Fabric REST Client APIs allows management of Service Fabric clusters, applications and services.
+  version: '8.2'
+servers:
+- url: http://localhost:19080
+- url: https://localhost:19080
 tags:
 - name: MeshApplications
 paths:
@@ -123,7 +127,7 @@ paths:
       x-ms-examples:
         GetApplicationResourceUpgrade:
           $ref: ./examples/Resources/Applications/get_upgrade.json
-      summary: Microsoft Azure Gets The Progress Of The Latest Upgrade Performed On This Application Resource
+      summary: Microsoft Azure Gets The Progress Of The Latest Upgrade Performed On This…
       description: Gets the upgrade progress information about the Application resource with the given name. The information include percentage of completion and other upgrade state information of the Application resource.
       parameters:
       - $ref: '#/components/parameters/ApiVersion_7-0_RequiredQueryParam'
@@ -145,117 +149,48 @@ paths:
                 $ref: '#/components/schemas/FabricError'
 components:
   schemas:
-    EnvironmentVariableType:
-      type: string
-      description: The type of the environment variable being given in value
-      default: ClearText
-      enum:
-      - ClearText
-      - KeyVaultReference
-      - SecretValueReference
-      x-ms-enum:
-        name: EnvironmentVariableType
-        modelAsString: true
-        values:
-        - value: ClearText
-          description: The environment variable in clear text, will not be processed in any way and passed in as is
-        - value: KeyVaultReference
-          description: The URI to a KeyVault secret version, will be resolved using the application's managed identity (this type is only valid if the app was assigned a managed identity) before getting passed in
-        - value: SecretValueReference
-          description: The reference to a SecretValue resource, will be resolved before getting passed in
-    ProbeHttpGetHeaders:
-      description: Http headers.
+    Setting:
+      description: Describes a setting for the container. The setting file path can be fetched from environment variable "Fabric_SettingPath". The path for Windows container is "C:\\secrets". The path for Linux container is "/var/secrets".
       properties:
+        type:
+          $ref: '#/components/schemas/SettingType'
+          description: The type of the setting being given in value
         name:
-          description: The name of the header.
+          description: The name of the setting.
           type: string
         value:
-          description: The value of the header.
+          description: The value of the setting, will be processed based on the type provided.
           type: string
-      required:
-      - name
-      - value
-    ContainerEvent:
-      description: A container event.
+    ServiceReplicaProperties:
+      description: Describes the properties of a service replica.
       properties:
-        name:
-          type: string
-          description: The name of the container event.
-        count:
-          type: integer
-          description: The count of the event.
-        firstTimestamp:
-          type: string
-          description: Date/time of the first event.
-        lastTimestamp:
-          type: string
-          description: Date/time of the last event.
-        message:
-          type: string
-          description: The event message
-        type:
-          type: string
-          description: The event type.
-    ProbeHttpGet:
-      description: Http probe for the container.
+        osType:
+          $ref: '#/components/schemas/OperatingSystemType'
+          description: The operation system required by the code in service.
+        codePackages:
+          description: Describes the set of code packages that forms the service. A code package describes the container and the properties for running it. All the code packages are started together on the same host and share the same context (network, process etc.).
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerCodePackageProperties'
+        networkRefs:
+          type: array
+          description: The names of the private networks that this service needs to be part of.
+          items:
+            $ref: '#/components/schemas/NetworkRef'
+        diagnostics:
+          $ref: '#/components/schemas/DiagnosticsRef'
+          description: Reference to sinks in DiagnosticsDescription.
+      required:
+      - osType
+      - codePackages
+    ProbeTcpSocket:
+      description: Tcp port to probe inside the container.
       properties:
         port:
           description: Port to access for probe.
           type: integer
-        path:
-          description: Path to access on the HTTP request.
-          type: string
-        host:
-          description: Host IP to connect to.
-          type: string
-        httpHeaders:
-          description: Headers to set in the request.
-          type: array
-          items:
-            $ref: '#/components/schemas/ProbeHttpGetHeaders'
-        scheme:
-          type: string
-          description: Scheme for the http probe. Can be Http or Https.
-          enum:
-          - http
-          - https
-          x-ms-enum:
-            name: scheme
-            modelAsString: true
-            values:
-            - value: http
-              description: Indicates that the probe is http.
-            - value: https
-              description: Indicates that the probe is https. No cert validation.
       required:
       - port
-    UserAssignedIdentityMap:
-      type: object
-      description: Defines a map that contains user assigned identities.
-      additionalProperties:
-        $ref: '#/components/schemas/IdentityItemDescription'
-    AutoScalingMechanism:
-      type: object
-      discriminator:
-        propertyName: kind
-      description: Describes the mechanism for performing auto scaling operation. Derived classes will describe the actual mechanism.
-      properties:
-        kind:
-          $ref: '#/components/schemas/AutoScalingMechanismKind'
-          description: The type of auto scaling mechanism.
-      required:
-      - kind
-    ResourceRequirements:
-      description: This type describes the resource requirements for a container or a service.
-      properties:
-        requests:
-          $ref: '#/components/schemas/ResourceRequests'
-          description: Describes the requested resources for a given container.
-        limits:
-          $ref: '#/components/schemas/ResourceLimits'
-          description: Describes the maximum limits on the resources for a given container.
-      required:
-      - requests
     AutoScalingPolicy:
       description: Describes the auto scaling policy
       type: object
@@ -273,6 +208,69 @@ components:
       - name
       - trigger
       - mechanism
+    ImageRegistryPasswordType:
+      type: string
+      description: The type of the image registry password being given in password
+      default: ClearText
+      enum:
+      - ClearText
+      - KeyVaultReference
+      - SecretValueReference
+      x-ms-enum:
+        name: ImageRegistryPasswordType
+        modelAsString: true
+        values:
+        - value: ClearText
+          description: The image registry password in clear text, will not be processed in any way and used directly
+        - value: KeyVaultReference
+          description: The URI to a KeyVault secret version, will be resolved using the application's managed identity (this type is only valid if the app was assigned a managed identity) before getting used
+        - value: SecretValueReference
+          description: The reference to a SecretValue resource, will be resolved before getting used
+    ReliableCollectionsRef:
+      description: Specifying this parameter adds support for reliable collections
+      properties:
+        name:
+          description: Name of ReliableCollection resource. Right now it's not used and you can use any string.
+          type: string
+        doNotPersistState:
+          description: False (the default) if ReliableCollections state is persisted to disk as usual. True if you do not want to persist state, in which case replication is still enabled and you can use ReliableCollections as distributed cache.
+          type: boolean
+      required:
+      - name
+    ServiceUpgradeProgress:
+      description: Information about how many replicas are completed or pending for a specific service during upgrade.
+      properties:
+        ServiceName:
+          type: string
+          description: Name of the Service resource.
+        CompletedReplicaCount:
+          type: string
+          description: The number of replicas that completes the upgrade in the service.
+        PendingReplicaCount:
+          type: string
+          description: The number of replicas that are waiting to be upgraded in the service.
+    FabricError:
+      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
+      properties:
+        Error:
+          $ref: '#/components/schemas/FabricErrorError'
+          description: Error object containing error code and error message.
+      required:
+      - Error
+    ContinuationToken:
+      type: string
+      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+    ResourceLimits:
+      description: This type describes the resource limits for a given container. It describes the most amount of resources a container is allowed to use before being restarted.
+      properties:
+        memoryInGB:
+          description: The memory limit in GB.
+          type: number
+          format: double
+        cpu:
+          description: CPU limits in cores. At present, only full cores are supported.
+          type: number
+          format: double
     ResourceRequests:
       description: This type describes the requested resources for a given container. It describes the least amount of resources required for the container. A container can consume more than requested resources up to the specified limits before being restarted. Currently, the requested resources are treated as limits.
       properties:
@@ -287,6 +285,51 @@ components:
       required:
       - memoryInGB
       - cpu
+    SettingType:
+      type: string
+      description: The type of the setting being given in value
+      default: ClearText
+      enum:
+      - ClearText
+      - KeyVaultReference
+      - SecretValueReference
+      x-ms-enum:
+        name: SettingType
+        modelAsString: true
+        values:
+        - value: ClearText
+          description: The setting in clear text, will not be processed in any way and passed in as is
+        - value: KeyVaultReference
+          description: The URI to a KeyVault secret version, will be resolved using the application's managed identity (this type is only valid if the app was assigned a managed identity) before getting passed in
+        - value: SecretValueReference
+          description: The reference to a SecretValue resource, will be resolved before getting passed in
+    VolumeReference:
+      description: Describes a reference to a volume resource.
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the volume being referenced.
+        readOnly:
+          type: boolean
+          description: The flag indicating whether the volume is read only. Default is 'false'.
+        destinationPath:
+          type: string
+          description: The path within the container at which the volume should be mounted. Only valid path characters are allowed.
+      required:
+      - name
+      - destinationPath
+    AutoScalingMechanismKind:
+      type: string
+      description: Enumerates the mechanisms for auto scaling.
+      enum:
+      - AddRemoveReplica
+      x-ms-enum:
+        name: AutoScalingMechanismKind
+        modelAsString: true
+        values:
+        - value: AddRemoveReplica
+          description: Indicates that scaling should be performed by adding or removing replicas.
     FabricErrorCodes:
       type: string
       description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
@@ -463,109 +506,176 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
-    OperatingSystemType:
-      type: string
-      description: The operation system required by the code in service.
-      enum:
-      - Linux
-      - Windows
-      x-ms-enum:
-        name: OperatingSystemType
-        modelAsString: true
-        values:
-        - value: Linux
-          description: The required operating system is Linux.
-        - value: Windows
-          description: The required operating system is Windows.
-    EndpointRef:
-      description: Describes a reference to a service endpoint.
+    PagedApplicationResourceDescriptionList:
+      type: object
+      description: The list of application resources. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+      properties:
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        Items:
+          type: array
+          description: One page of the list.
+          items:
+            $ref: '#/components/schemas/ApplicationResourceDescription'
+    FabricErrorError:
+      description: Error object containing error code and error message.
+      properties:
+        Code:
+          $ref: '#/components/schemas/FabricErrorCodes'
+          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
+        Message:
+          type: string
+          description: Error message.
+      required:
+      - Code
+    ServiceResourceProperties:
+      description: This type describes properties of a service resource.
+      allOf:
+      - $ref: '#/components/schemas/ServiceReplicaProperties'
+      - $ref: '#/components/schemas/ServiceProperties'
+    ProbeHttpGet:
+      description: Http probe for the container.
+      properties:
+        port:
+          description: Port to access for probe.
+          type: integer
+        path:
+          description: Path to access on the HTTP request.
+          type: string
+        host:
+          description: Host IP to connect to.
+          type: string
+        httpHeaders:
+          description: Headers to set in the request.
+          type: array
+          items:
+            $ref: '#/components/schemas/ProbeHttpGetHeaders'
+        scheme:
+          type: string
+          description: Scheme for the http probe. Can be Http or Https.
+          enum:
+          - http
+          - https
+          x-ms-enum:
+            name: scheme
+            modelAsString: true
+            values:
+            - value: http
+              description: Indicates that the probe is http.
+            - value: https
+              description: Indicates that the probe is https. No cert validation.
+      required:
+      - port
+    UserAssignedIdentityMap:
+      type: object
+      description: Defines a map that contains user assigned identities.
+      additionalProperties:
+        $ref: '#/components/schemas/IdentityItemDescription'
+    EndpointProperties:
+      description: Describes a container endpoint.
+      properties:
+        name:
+          description: The name of the endpoint.
+          type: string
+        port:
+          description: Port used by the container.
+          type: integer
+      required:
+      - name
+    AutoScalingTrigger:
+      type: object
+      discriminator:
+        propertyName: kind
+      description: Describes the trigger for performing auto scaling operation.
+      properties:
+        kind:
+          $ref: '#/components/schemas/AutoScalingTriggerKind'
+          description: The type of auto scaling trigger
+      required:
+      - kind
+    ExecutionPolicy:
+      type: object
+      discriminator:
+        propertyName: type
+      description: The execution policy of the service
+      properties:
+        type:
+          $ref: '#/components/schemas/ExecutionPolicyType'
+          description: Enumerates the execution policy types for services.
+      required:
+      - type
+    ApplicationResourceDescription:
+      description: This type describes a application resource.
+      properties:
+        name:
+          $ref: '#/components/schemas/ApplicationResourceName'
+          description: Name of the Application resource.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ApplicationProperties'
+          description: Describes properties of a application resource.
+        identity:
+          $ref: '#/components/schemas/IdentityDescription'
+          description: Describes the identity of the application.
+      required:
+      - name
+      - properties
+    ContainerEvent:
+      description: A container event.
       properties:
         name:
           type: string
-          description: Name of the endpoint.
-    AutoScalingTriggerKind:
-      type: string
-      description: Enumerates the triggers for auto scaling.
-      enum:
-      - AverageLoad
-      x-ms-enum:
-        name: AutoScalingTriggerKind
-        modelAsString: true
-        values:
-        - value: AverageLoad
-          description: Indicates that scaling should be performed based on average load of all replicas in the service.
-    IdentityDescription:
-      description: Information describing the identities associated with this application.
-      properties:
-        tokenServiceEndpoint:
+          description: The name of the container event.
+        count:
+          type: integer
+          description: The count of the event.
+        firstTimestamp:
           type: string
-          description: the endpoint for the token service managing this identity
+          description: Date/time of the first event.
+        lastTimestamp:
+          type: string
+          description: Date/time of the last event.
+        message:
+          type: string
+          description: The event message
         type:
           type: string
-          description: the types of identities associated with this resource; currently restricted to 'SystemAssigned and UserAssigned'
-        tenantId:
+          description: The event type.
+    DiagnosticsSinkProperties:
+      description: Properties of a DiagnosticsSink.
+      discriminator:
+        propertyName: kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/DiagnosticsSinkKind'
+          description: The kind of DiagnosticsSink.
+        name:
+          description: Name of the sink. This value is referenced by DiagnosticsReferenceDescription
           type: string
-          description: the identifier of the tenant containing the application's identity.
-        principalId:
+        description:
+          description: A description of the sink.
           type: string
-          description: the object identifier of the Service Principal of the identity associated with this resource.
-        userAssignedIdentities:
-          $ref: '#/components/schemas/UserAssignedIdentityMap'
-          description: represents user assigned identities map.
       required:
-      - type
-    ApplicationScopedVolumeKind:
-      description: Specifies the application-scoped volume kind.
+      - kind
+    EnvironmentVariableType:
       type: string
+      description: The type of the environment variable being given in value
+      default: ClearText
       enum:
-      - ServiceFabricVolumeDisk
+      - ClearText
+      - KeyVaultReference
+      - SecretValueReference
       x-ms-enum:
-        name: ApplicationScopedVolumeKind
+        name: EnvironmentVariableType
         modelAsString: true
         values:
-        - value: ServiceFabricVolumeDisk
-          description: Provides Service Fabric High Availability Volume Disk
-    ServiceProperties:
-      description: Describes properties of a service resource.
-      properties:
-        description:
-          type: string
-          description: User readable description of the service.
-        replicaCount:
-          type: integer
-          description: The number of replicas of the service to create. Defaults to 1 if not specified.
-        executionPolicy:
-          $ref: '#/components/schemas/ExecutionPolicy'
-          description: The execution policy of the service
-        autoScalingPolicies:
-          type: array
-          items:
-            $ref: '#/components/schemas/AutoScalingPolicy'
-          description: Auto scaling policies
-        status:
-          readOnly: true
-          $ref: '#/components/schemas/ResourceStatus'
-          description: Status of the service.
-        statusDetails:
-          readOnly: true
-          type: string
-          description: Gives additional information about the current status of the service.
-        healthState:
-          readOnly: true
-          $ref: '#/components/schemas/HealthState'
-          description: Describes the health state of an application resource.
-        unhealthyEvaluation:
-          readOnly: true
-          type: string
-          description: When the service's health state is not 'Ok', this additional details from service fabric Health Manager for the user to know why the service is marked unhealthy.
-        identityRefs:
-          description: The service identity list.
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceIdentity'
-        dnsName:
-          type: string
-          description: Dns name of the service.
+        - value: ClearText
+          description: The environment variable in clear text, will not be processed in any way and passed in as is
+        - value: KeyVaultReference
+          description: The URI to a KeyVault secret version, will be resolved using the application's managed identity (this type is only valid if the app was assigned a managed identity) before getting passed in
+        - value: SecretValueReference
+          description: The reference to a SecretValue resource, will be resolved before getting passed in
     ResourceStatus:
       description: Status of the resource.
       type: string
@@ -592,59 +702,169 @@ components:
           description: Indicates the resource is being deleted. The value is 4.
         - value: Failed
           description: Indicates the resource is not functional due to persistent failures. See statusDetails property for more details. The value is 5.
-    EndpointProperties:
-      description: Describes a container endpoint.
+    ContainerState:
+      description: The container state.
       properties:
-        name:
-          description: The name of the endpoint.
+        state:
           type: string
-        port:
-          description: Port used by the container.
-          type: integer
-      required:
-      - name
-    PagedApplicationResourceDescriptionList:
+          description: The state of this container
+        startTime:
+          type: string
+          format: date-time
+          description: Date/time when the container state started.
+        exitCode:
+          type: string
+          description: The container exit code.
+        finishTime:
+          type: string
+          format: date-time
+          description: Date/time when the container state finished.
+        detailStatus:
+          description: Human-readable status of this state.
+          type: string
+    AutoScalingMechanism:
       type: object
-      description: The list of application resources. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+      discriminator:
+        propertyName: kind
+      description: Describes the mechanism for performing auto scaling operation. Derived classes will describe the actual mechanism.
       properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        Items:
-          type: array
-          description: One page of the list.
-          items:
-            $ref: '#/components/schemas/ApplicationResourceDescription'
-    ContinuationToken:
-      type: string
-      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-    AutoScalingMechanismKind:
-      type: string
-      description: Enumerates the mechanisms for auto scaling.
-      enum:
-      - AddRemoveReplica
-      x-ms-enum:
-        name: AutoScalingMechanismKind
-        modelAsString: true
-        values:
-        - value: AddRemoveReplica
-          description: Indicates that scaling should be performed by adding or removing replicas.
-    DiagnosticsDescription:
-      description: Describes the diagnostics options available
+        kind:
+          $ref: '#/components/schemas/AutoScalingMechanismKind'
+          description: The type of auto scaling mechanism.
+      required:
+      - kind
+    ImageRegistryCredential:
+      description: Image registry credential.
       properties:
-        sinks:
-          description: List of supported sinks that can be referenced.
-          type: array
-          items:
-            $ref: '#/components/schemas/DiagnosticsSinkProperties'
+        server:
+          type: string
+          description: Docker image registry server, without protocol such as `http` and `https`.
+        username:
+          type: string
+          description: The username for the private registry.
+        passwordType:
+          $ref: '#/components/schemas/ImageRegistryPasswordType'
+          description: The type of the image registry password being given in password
+        password:
+          type: string
+          description: The password for the private registry. The password is required for create or update operations, however it is not returned in the get or list operations. Will be processed based on the type provided.
+      required:
+      - server
+      - username
+    ApplicationScopedVolumeCreationParameters:
+      description: Describes parameters for creating application-scoped volumes.
+      type: object
+      discriminator:
+        propertyName: kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/ApplicationScopedVolumeKind'
+          description: Specifies the application-scoped volume kind.
+        description:
+          description: User readable description of the volume.
+          type: string
+      required:
+      - kind
+    DiagnosticsRef:
+      description: Reference to sinks in DiagnosticsDescription.
+      properties:
         enabled:
           description: Status of whether or not sinks are enabled.
           type: boolean
-        defaultSinkRefs:
-          description: The sinks to be used if diagnostics is enabled. Sink choices can be overridden at the service and code package level.
+        sinkRefs:
+          description: List of sinks to be used if enabled. References the list of sinks in DiagnosticsDescription.
           type: array
           items:
             type: string
+    ApplicationScopedVolume:
+      description: Describes a volume whose lifetime is scoped to the application's lifetime.
+      allOf:
+      - $ref: '#/components/schemas/VolumeReference'
+      properties:
+        creationParameters:
+          $ref: '#/components/schemas/ApplicationScopedVolumeCreationParameters'
+          description: Describes parameters for creating application-scoped volumes.
+      required:
+      - creationParameters
+    ServiceUpgradeProgressList:
+      type: array
+      description: List of service upgrade progresses.
+      items:
+        $ref: '#/components/schemas/ServiceUpgradeProgress'
+    ApplicationResourceUpgradeState:
+      type: string
+      description: The state of the application resource upgrade.
+      enum:
+      - Invalid
+      - ProvisioningTarget
+      - RollingForward
+      - UnprovisioningCurrent
+      - CompletedRollforward
+      - RollingBack
+      - UnprovisioningTarget
+      - CompletedRollback
+      - Failed
+      x-ms-enum:
+        name: ApplicationResourceUpgradeState
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the upgrade state is invalid. All Service Fabric enumerations have the invalid type. The value is 0.
+        - value: ProvisioningTarget
+          description: The upgrade is in the progress of provisioning target application type version. The value is 1.
+        - value: RollingForward
+          description: The upgrade is rolling forward to the target version but is not complete yet. The value is 2.
+        - value: UnprovisioningCurrent
+          description: The upgrade is in the progress of unprovisioning current application type version and rolling forward to the target version is completed. The value is 3.
+        - value: CompletedRollforward
+          description: The upgrade has finished rolling forward. The value is 4.
+        - value: RollingBack
+          description: The upgrade is rolling back to the previous version but is not complete yet. The value is 5.
+        - value: UnprovisioningTarget
+          description: The upgrade is in the progress of unprovisioning target application type version and rolling back to the current version is completed. The value is 6.
+        - value: CompletedRollback
+          description: The upgrade has finished rolling back. The value is 7.
+        - value: Failed
+          description: The upgrade has failed and is unable to execute FailureAction. The value is 8.
+    IdentityItemDescription:
+      description: Describes a single user-assigned identity associated with the application.
+      type: object
+      properties:
+        principalId:
+          type: string
+          description: the object identifier of the Service Principal which this identity represents.
+        clientId:
+          type: string
+          description: the client identifier of the Service Principal which this identity represents.
+    HealthState:
+      type: string
+      description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+      enum:
+      - Invalid
+      - Ok
+      - Warning
+      - Error
+      - Unknown
+      x-ms-enum:
+        name: HealthState
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid health state. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Ok
+          description: Indicates the health state is okay. The value is 1.
+        - value: Warning
+          description: Indicates the health state is at a warning level. The value is 2.
+        - value: Error
+          description: Indicates the health state is at an error level. Error health state should be investigated, as they can impact the correct functionality of the cluster. The value is 3.
+        - value: Unknown
+          description: Indicates an unknown health status. The value is 65535.
+    EndpointRef:
+      description: Describes a reference to a service endpoint.
+      properties:
+        name:
+          type: string
+          description: Name of the endpoint.
     ApplicationProperties:
       description: Describes properties of a application resource.
       properties:
@@ -684,6 +904,227 @@ components:
           readOnly: true
           type: string
           description: When the application's health state is not 'Ok', this additional details from service fabric Health Manager for the user to know why the application is marked unhealthy.
+    ServiceIdentity:
+      description: Map service identity friendly name to an application identity.
+      properties:
+        name:
+          description: The identity friendly name.
+          type: string
+        identityRef:
+          description: The application identity name.
+          type: string
+    OperatingSystemType:
+      type: string
+      description: The operation system required by the code in service.
+      enum:
+      - Linux
+      - Windows
+      x-ms-enum:
+        name: OperatingSystemType
+        modelAsString: true
+        values:
+        - value: Linux
+          description: The required operating system is Linux.
+        - value: Windows
+          description: The required operating system is Windows.
+    AutoScalingTriggerKind:
+      type: string
+      description: Enumerates the triggers for auto scaling.
+      enum:
+      - AverageLoad
+      x-ms-enum:
+        name: AutoScalingTriggerKind
+        modelAsString: true
+        values:
+        - value: AverageLoad
+          description: Indicates that scaling should be performed based on average load of all replicas in the service.
+    ProbeHttpGetHeaders:
+      description: Http headers.
+      properties:
+        name:
+          description: The name of the header.
+          type: string
+        value:
+          description: The value of the header.
+          type: string
+      required:
+      - name
+      - value
+    EnvironmentVariable:
+      description: Describes an environment variable for the container.
+      properties:
+        type:
+          $ref: '#/components/schemas/EnvironmentVariableType'
+          description: The type of the environment variable being given in value
+        name:
+          description: The name of the environment variable.
+          type: string
+        value:
+          description: The value of the environment variable, will be processed based on the type provided.
+          type: string
+    ApplicationResourceUpgradeProgressInfo:
+      description: This type describes an application resource upgrade.
+      properties:
+        Name:
+          type: string
+          description: Name of the Application resource.
+        TargetApplicationTypeVersion:
+          type: string
+          description: The target application version for the application upgrade.
+        StartTimestampUtc:
+          type: string
+          description: The estimated UTC datetime when the upgrade started.
+        UpgradeState:
+          $ref: '#/components/schemas/ApplicationResourceUpgradeState'
+          description: The state of the application resource upgrade.
+        PercentCompleted:
+          type: string
+          description: The estimated percent of replicas are completed in the upgrade.
+        ServiceUpgradeProgress:
+          $ref: '#/components/schemas/ServiceUpgradeProgressList'
+          description: List of service upgrade progresses.
+        RollingUpgradeMode:
+          $ref: '#/components/schemas/RollingUpgradeMode'
+          description: The mode used to monitor health during a rolling upgrade. The values are UnmonitoredAuto, UnmonitoredManual, and Monitored.
+        UpgradeDuration:
+          type: string
+          description: The estimated amount of time that the overall upgrade elapsed. It is first interpreted as a string representing an ISO 8601 duration. If that fails, then it is interpreted as a number representing the total number of milliseconds.
+          default: PT0H2M0S
+        ApplicationUpgradeStatusDetails:
+          type: string
+          description: Additional detailed information about the status of the pending upgrade.
+        UpgradeReplicaSetCheckTimeoutInSeconds:
+          type: integer
+          format: int64
+          description: The maximum amount of time to block processing of an upgrade domain and prevent loss of availability when there are unexpected issues. When this timeout expires, processing of the upgrade domain will proceed regardless of availability loss issues. The timeout is reset at the start of each upgrade domain. Valid values are between 0 and 42949672925 inclusive. (unsigned 32-bit integer).
+          default: 42949672925
+        FailureTimestampUtc:
+          type: string
+          description: The estimated UTC datetime when the upgrade failed and FailureAction was executed.
+    ServiceResourceDescription:
+      description: This type describes a service resource.
+      properties:
+        name:
+          $ref: '#/components/schemas/ServiceResourceName'
+          description: Name of the Service resource.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ServiceResourceProperties'
+          description: This type describes properties of a service resource.
+      required:
+      - name
+      - properties
+    NetworkRef:
+      description: Describes a network reference in a service.
+      properties:
+        name:
+          type: string
+          description: Name of the network
+        endpointRefs:
+          description: A list of endpoints that are exposed on this network.
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointRef'
+    ContainerInstanceView:
+      description: Runtime information of a container instance.
+      properties:
+        restartCount:
+          type: integer
+          description: The number of times the container has been restarted.
+        currentState:
+          $ref: '#/components/schemas/ContainerState'
+          description: Current container instance state.
+        previousState:
+          $ref: '#/components/schemas/ContainerState'
+          description: Previous container instance state.
+        events:
+          description: The events of this container instance.
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerEvent'
+    ServiceResourceName:
+      type: string
+      description: Name of the Service resource.
+    Probe:
+      description: Probes have a number of fields that you can use to control their behavior.
+      properties:
+        initialDelaySeconds:
+          type: integer
+          description: The initial delay in seconds to start executing probe once codepackage has started.
+          default: 0
+        periodSeconds:
+          type: integer
+          description: Periodic seconds to execute probe.
+          default: 10
+        timeoutSeconds:
+          type: integer
+          description: Period after which probe is considered as failed if it hasn't completed successfully.
+          default: 1
+        successThreshold:
+          type: integer
+          description: The count of successful probe executions after which probe is considered success.
+          default: 1
+        failureThreshold:
+          type: integer
+          description: The count of failures after which probe is considered failed.
+          default: 3
+        exec:
+          $ref: '#/components/schemas/ProbeExec'
+          description: Exec command to run inside the container.
+        httpGet:
+          $ref: '#/components/schemas/ProbeHttpGet'
+          description: Http probe for the container.
+        tcpSocket:
+          $ref: '#/components/schemas/ProbeTcpSocket'
+          description: Tcp port to probe inside the container.
+    ResourceRequirements:
+      description: This type describes the resource requirements for a container or a service.
+      properties:
+        requests:
+          $ref: '#/components/schemas/ResourceRequests'
+          description: Describes the requested resources for a given container.
+        limits:
+          $ref: '#/components/schemas/ResourceLimits'
+          description: Describes the maximum limits on the resources for a given container.
+      required:
+      - requests
+    ContainerLabel:
+      description: Describes a container label.
+      properties:
+        name:
+          description: The name of the container label.
+          type: string
+        value:
+          description: The value of the container label.
+          type: string
+      required:
+      - name
+      - value
+    ApplicationScopedVolumeKind:
+      description: Specifies the application-scoped volume kind.
+      type: string
+      enum:
+      - ServiceFabricVolumeDisk
+      x-ms-enum:
+        name: ApplicationScopedVolumeKind
+        modelAsString: true
+        values:
+        - value: ServiceFabricVolumeDisk
+          description: Provides Service Fabric High Availability Volume Disk
+    ExecutionPolicyType:
+      type: string
+      description: Enumerates the execution policy types for services.
+      enum:
+      - Default
+      - RunToCompletion
+      x-ms-enum:
+        name: ExecutionPolicyType
+        modelAsString: true
+        values:
+        - value: Default
+          description: Indicates the default execution policy, always restart the service if an exit occurs.
+        - value: RunToCompletion
+          description: Indicates that the service will perform its desired operation and complete successfully. If the service encounters failure, it will restarted based on restart policy specified. If the service completes its operation successfully, it will not be restarted again.
     ContainerCodePackageProperties:
       description: Describes a container and its runtime properties.
       properties:
@@ -763,151 +1204,6 @@ components:
       - name
       - image
       - resources
-    FabricErrorError:
-      description: Error object containing error code and error message.
-      properties:
-        Code:
-          $ref: '#/components/schemas/FabricErrorCodes'
-          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
-        Message:
-          type: string
-          description: Error message.
-      required:
-      - Code
-    ExecutionPolicyType:
-      type: string
-      description: Enumerates the execution policy types for services.
-      enum:
-      - Default
-      - RunToCompletion
-      x-ms-enum:
-        name: ExecutionPolicyType
-        modelAsString: true
-        values:
-        - value: Default
-          description: Indicates the default execution policy, always restart the service if an exit occurs.
-        - value: RunToCompletion
-          description: Indicates that the service will perform its desired operation and complete successfully. If the service encounters failure, it will restarted based on restart policy specified. If the service completes its operation successfully, it will not be restarted again.
-    ProbeTcpSocket:
-      description: Tcp port to probe inside the container.
-      properties:
-        port:
-          description: Port to access for probe.
-          type: integer
-      required:
-      - port
-    VolumeReference:
-      description: Describes a reference to a volume resource.
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of the volume being referenced.
-        readOnly:
-          type: boolean
-          description: The flag indicating whether the volume is read only. Default is 'false'.
-        destinationPath:
-          type: string
-          description: The path within the container at which the volume should be mounted. Only valid path characters are allowed.
-      required:
-      - name
-      - destinationPath
-    DiagnosticsRef:
-      description: Reference to sinks in DiagnosticsDescription.
-      properties:
-        enabled:
-          description: Status of whether or not sinks are enabled.
-          type: boolean
-        sinkRefs:
-          description: List of sinks to be used if enabled. References the list of sinks in DiagnosticsDescription.
-          type: array
-          items:
-            type: string
-    ServiceResourceProperties:
-      description: This type describes properties of a service resource.
-      allOf:
-      - $ref: '#/components/schemas/ServiceReplicaProperties'
-      - $ref: '#/components/schemas/ServiceProperties'
-    SettingType:
-      type: string
-      description: The type of the setting being given in value
-      default: ClearText
-      enum:
-      - ClearText
-      - KeyVaultReference
-      - SecretValueReference
-      x-ms-enum:
-        name: SettingType
-        modelAsString: true
-        values:
-        - value: ClearText
-          description: The setting in clear text, will not be processed in any way and passed in as is
-        - value: KeyVaultReference
-          description: The URI to a KeyVault secret version, will be resolved using the application's managed identity (this type is only valid if the app was assigned a managed identity) before getting passed in
-        - value: SecretValueReference
-          description: The reference to a SecretValue resource, will be resolved before getting passed in
-    ApplicationScopedVolumeCreationParameters:
-      description: Describes parameters for creating application-scoped volumes.
-      type: object
-      discriminator:
-        propertyName: kind
-      properties:
-        kind:
-          $ref: '#/components/schemas/ApplicationScopedVolumeKind'
-          description: Specifies the application-scoped volume kind.
-        description:
-          description: User readable description of the volume.
-          type: string
-      required:
-      - kind
-    DiagnosticsSinkKind:
-      type: string
-      description: The kind of DiagnosticsSink.
-      enum:
-      - Invalid
-      - AzureInternalMonitoringPipeline
-      x-ms-enum:
-        name: DiagnosticsSinkKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid sink kind. All Service Fabric enumerations have the invalid type.
-        - value: AzureInternalMonitoringPipeline
-          description: Diagnostics settings for Geneva.
-    ServiceReplicaProperties:
-      description: Describes the properties of a service replica.
-      properties:
-        osType:
-          $ref: '#/components/schemas/OperatingSystemType'
-          description: The operation system required by the code in service.
-        codePackages:
-          description: Describes the set of code packages that forms the service. A code package describes the container and the properties for running it. All the code packages are started together on the same host and share the same context (network, process etc.).
-          type: array
-          items:
-            $ref: '#/components/schemas/ContainerCodePackageProperties'
-        networkRefs:
-          type: array
-          description: The names of the private networks that this service needs to be part of.
-          items:
-            $ref: '#/components/schemas/NetworkRef'
-        diagnostics:
-          $ref: '#/components/schemas/DiagnosticsRef'
-          description: Reference to sinks in DiagnosticsDescription.
-      required:
-      - osType
-      - codePackages
-    EnvironmentVariable:
-      description: Describes an environment variable for the container.
-      properties:
-        type:
-          $ref: '#/components/schemas/EnvironmentVariableType'
-          description: The type of the environment variable being given in value
-        name:
-          description: The name of the environment variable.
-          type: string
-        value:
-          description: The value of the environment variable, will be processed based on the type provided.
-          type: string
     RollingUpgradeMode:
       type: string
       description: The mode used to monitor health during a rolling upgrade. The values are UnmonitoredAuto, UnmonitoredManual, and Monitored.
@@ -929,337 +1225,22 @@ components:
           description: The upgrade will stop after completing each upgrade domain, giving the opportunity to manually monitor health before proceeding. The value is 2
         - value: Monitored
           description: The upgrade will stop after completing each upgrade domain and automatically monitor health before proceeding. The value is 3
-    ServiceResourceDescription:
-      description: This type describes a service resource.
+    DiagnosticsDescription:
+      description: Describes the diagnostics options available
       properties:
-        name:
-          $ref: '#/components/schemas/ServiceResourceName'
-          description: Name of the Service resource.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ServiceResourceProperties'
-          description: This type describes properties of a service resource.
-      required:
-      - name
-      - properties
-    ServiceUpgradeProgress:
-      description: Information about how many replicas are completed or pending for a specific service during upgrade.
-      properties:
-        ServiceName:
-          type: string
-          description: Name of the Service resource.
-        CompletedReplicaCount:
-          type: string
-          description: The number of replicas that completes the upgrade in the service.
-        PendingReplicaCount:
-          type: string
-          description: The number of replicas that are waiting to be upgraded in the service.
-    ReliableCollectionsRef:
-      description: Specifying this parameter adds support for reliable collections
-      properties:
-        name:
-          description: Name of ReliableCollection resource. Right now it's not used and you can use any string.
-          type: string
-        doNotPersistState:
-          description: False (the default) if ReliableCollections state is persisted to disk as usual. True if you do not want to persist state, in which case replication is still enabled and you can use ReliableCollections as distributed cache.
+        sinks:
+          description: List of supported sinks that can be referenced.
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticsSinkProperties'
+        enabled:
+          description: Status of whether or not sinks are enabled.
           type: boolean
-      required:
-      - name
-    IdentityItemDescription:
-      description: Describes a single user-assigned identity associated with the application.
-      type: object
-      properties:
-        principalId:
-          type: string
-          description: the object identifier of the Service Principal which this identity represents.
-        clientId:
-          type: string
-          description: the client identifier of the Service Principal which this identity represents.
-    ContainerState:
-      description: The container state.
-      properties:
-        state:
-          type: string
-          description: The state of this container
-        startTime:
-          type: string
-          format: date-time
-          description: Date/time when the container state started.
-        exitCode:
-          type: string
-          description: The container exit code.
-        finishTime:
-          type: string
-          format: date-time
-          description: Date/time when the container state finished.
-        detailStatus:
-          description: Human-readable status of this state.
-          type: string
-    ContainerInstanceView:
-      description: Runtime information of a container instance.
-      properties:
-        restartCount:
-          type: integer
-          description: The number of times the container has been restarted.
-        currentState:
-          $ref: '#/components/schemas/ContainerState'
-          description: Current container instance state.
-        previousState:
-          $ref: '#/components/schemas/ContainerState'
-          description: Previous container instance state.
-        events:
-          description: The events of this container instance.
+        defaultSinkRefs:
+          description: The sinks to be used if diagnostics is enabled. Sink choices can be overridden at the service and code package level.
           type: array
           items:
-            $ref: '#/components/schemas/ContainerEvent'
-    AutoScalingTrigger:
-      type: object
-      discriminator:
-        propertyName: kind
-      description: Describes the trigger for performing auto scaling operation.
-      properties:
-        kind:
-          $ref: '#/components/schemas/AutoScalingTriggerKind'
-          description: The type of auto scaling trigger
-      required:
-      - kind
-    HealthState:
-      type: string
-      description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-      enum:
-      - Invalid
-      - Ok
-      - Warning
-      - Error
-      - Unknown
-      x-ms-enum:
-        name: HealthState
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid health state. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Ok
-          description: Indicates the health state is okay. The value is 1.
-        - value: Warning
-          description: Indicates the health state is at a warning level. The value is 2.
-        - value: Error
-          description: Indicates the health state is at an error level. Error health state should be investigated, as they can impact the correct functionality of the cluster. The value is 3.
-        - value: Unknown
-          description: Indicates an unknown health status. The value is 65535.
-    DiagnosticsSinkProperties:
-      description: Properties of a DiagnosticsSink.
-      discriminator:
-        propertyName: kind
-      properties:
-        kind:
-          $ref: '#/components/schemas/DiagnosticsSinkKind'
-          description: The kind of DiagnosticsSink.
-        name:
-          description: Name of the sink. This value is referenced by DiagnosticsReferenceDescription
-          type: string
-        description:
-          description: A description of the sink.
-          type: string
-      required:
-      - kind
-    ServiceIdentity:
-      description: Map service identity friendly name to an application identity.
-      properties:
-        name:
-          description: The identity friendly name.
-          type: string
-        identityRef:
-          description: The application identity name.
-          type: string
-    Probe:
-      description: Probes have a number of fields that you can use to control their behavior.
-      properties:
-        initialDelaySeconds:
-          type: integer
-          description: The initial delay in seconds to start executing probe once codepackage has started.
-          default: 0
-        periodSeconds:
-          type: integer
-          description: Periodic seconds to execute probe.
-          default: 10
-        timeoutSeconds:
-          type: integer
-          description: Period after which probe is considered as failed if it hasn't completed successfully.
-          default: 1
-        successThreshold:
-          type: integer
-          description: The count of successful probe executions after which probe is considered success.
-          default: 1
-        failureThreshold:
-          type: integer
-          description: The count of failures after which probe is considered failed.
-          default: 3
-        exec:
-          $ref: '#/components/schemas/ProbeExec'
-          description: Exec command to run inside the container.
-        httpGet:
-          $ref: '#/components/schemas/ProbeHttpGet'
-          description: Http probe for the container.
-        tcpSocket:
-          $ref: '#/components/schemas/ProbeTcpSocket'
-          description: Tcp port to probe inside the container.
-    ApplicationResourceUpgradeState:
-      type: string
-      description: The state of the application resource upgrade.
-      enum:
-      - Invalid
-      - ProvisioningTarget
-      - RollingForward
-      - UnprovisioningCurrent
-      - CompletedRollforward
-      - RollingBack
-      - UnprovisioningTarget
-      - CompletedRollback
-      - Failed
-      x-ms-enum:
-        name: ApplicationResourceUpgradeState
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the upgrade state is invalid. All Service Fabric enumerations have the invalid type. The value is 0.
-        - value: ProvisioningTarget
-          description: The upgrade is in the progress of provisioning target application type version. The value is 1.
-        - value: RollingForward
-          description: The upgrade is rolling forward to the target version but is not complete yet. The value is 2.
-        - value: UnprovisioningCurrent
-          description: The upgrade is in the progress of unprovisioning current application type version and rolling forward to the target version is completed. The value is 3.
-        - value: CompletedRollforward
-          description: The upgrade has finished rolling forward. The value is 4.
-        - value: RollingBack
-          description: The upgrade is rolling back to the previous version but is not complete yet. The value is 5.
-        - value: UnprovisioningTarget
-          description: The upgrade is in the progress of unprovisioning target application type version and rolling back to the current version is completed. The value is 6.
-        - value: CompletedRollback
-          description: The upgrade has finished rolling back. The value is 7.
-        - value: Failed
-          description: The upgrade has failed and is unable to execute FailureAction. The value is 8.
-    Setting:
-      description: Describes a setting for the container. The setting file path can be fetched from environment variable "Fabric_SettingPath". The path for Windows container is "C:\\secrets". The path for Linux container is "/var/secrets".
-      properties:
-        type:
-          $ref: '#/components/schemas/SettingType'
-          description: The type of the setting being given in value
-        name:
-          description: The name of the setting.
-          type: string
-        value:
-          description: The value of the setting, will be processed based on the type provided.
-          type: string
-    ImageRegistryPasswordType:
-      type: string
-      description: The type of the image registry password being given in password
-      default: ClearText
-      enum:
-      - ClearText
-      - KeyVaultReference
-      - SecretValueReference
-      x-ms-enum:
-        name: ImageRegistryPasswordType
-        modelAsString: true
-        values:
-        - value: ClearText
-          description: The image registry password in clear text, will not be processed in any way and used directly
-        - value: KeyVaultReference
-          description: The URI to a KeyVault secret version, will be resolved using the application's managed identity (this type is only valid if the app was assigned a managed identity) before getting used
-        - value: SecretValueReference
-          description: The reference to a SecretValue resource, will be resolved before getting used
-    ApplicationResourceUpgradeProgressInfo:
-      description: This type describes an application resource upgrade.
-      properties:
-        Name:
-          type: string
-          description: Name of the Application resource.
-        TargetApplicationTypeVersion:
-          type: string
-          description: The target application version for the application upgrade.
-        StartTimestampUtc:
-          type: string
-          description: The estimated UTC datetime when the upgrade started.
-        UpgradeState:
-          $ref: '#/components/schemas/ApplicationResourceUpgradeState'
-          description: The state of the application resource upgrade.
-        PercentCompleted:
-          type: string
-          description: The estimated percent of replicas are completed in the upgrade.
-        ServiceUpgradeProgress:
-          $ref: '#/components/schemas/ServiceUpgradeProgressList'
-          description: List of service upgrade progresses.
-        RollingUpgradeMode:
-          $ref: '#/components/schemas/RollingUpgradeMode'
-          description: The mode used to monitor health during a rolling upgrade. The values are UnmonitoredAuto, UnmonitoredManual, and Monitored.
-        UpgradeDuration:
-          type: string
-          description: The estimated amount of time that the overall upgrade elapsed. It is first interpreted as a string representing an ISO 8601 duration. If that fails, then it is interpreted as a number representing the total number of milliseconds.
-          default: PT0H2M0S
-        ApplicationUpgradeStatusDetails:
-          type: string
-          description: Additional detailed information about the status of the pending upgrade.
-        UpgradeReplicaSetCheckTimeoutInSeconds:
-          type: integer
-          format: int64
-          description: The maximum amount of time to block processing of an upgrade domain and prevent loss of availability when there are unexpected issues. When this timeout expires, processing of the upgrade domain will proceed regardless of availability loss issues. The timeout is reset at the start of each upgrade domain. Valid values are between 0 and 42949672925 inclusive. (unsigned 32-bit integer).
-          default: 42949672925
-        FailureTimestampUtc:
-          type: string
-          description: The estimated UTC datetime when the upgrade failed and FailureAction was executed.
-    ContainerLabel:
-      description: Describes a container label.
-      properties:
-        name:
-          description: The name of the container label.
-          type: string
-        value:
-          description: The value of the container label.
-          type: string
-      required:
-      - name
-      - value
-    ApplicationResourceDescription:
-      description: This type describes a application resource.
-      properties:
-        name:
-          $ref: '#/components/schemas/ApplicationResourceName'
-          description: Name of the Application resource.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ApplicationProperties'
-          description: Describes properties of a application resource.
-        identity:
-          $ref: '#/components/schemas/IdentityDescription'
-          description: Describes the identity of the application.
-      required:
-      - name
-      - properties
-    NetworkRef:
-      description: Describes a network reference in a service.
-      properties:
-        name:
-          type: string
-          description: Name of the network
-        endpointRefs:
-          description: A list of endpoints that are exposed on this network.
-          type: array
-          items:
-            $ref: '#/components/schemas/EndpointRef'
-    ApplicationResourceName:
-      type: string
-      description: Name of the Application resource.
-    ServiceResourceName:
-      type: string
-      description: Name of the Service resource.
-    FabricError:
-      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
-      properties:
-        Error:
-          $ref: '#/components/schemas/FabricErrorError'
-          description: Error object containing error code and error message.
-      required:
-      - Error
+            type: string
     ProbeExec:
       description: Exec command to run inside the container.
       properties:
@@ -1268,62 +1249,119 @@ components:
           type: string
       required:
       - command
-    ImageRegistryCredential:
-      description: Image registry credential.
+    ApplicationResourceName:
+      type: string
+      description: Name of the Application resource.
+    ServiceProperties:
+      description: Describes properties of a service resource.
       properties:
-        server:
+        description:
           type: string
-          description: Docker image registry server, without protocol such as `http` and `https`.
-        username:
+          description: User readable description of the service.
+        replicaCount:
+          type: integer
+          description: The number of replicas of the service to create. Defaults to 1 if not specified.
+        executionPolicy:
+          $ref: '#/components/schemas/ExecutionPolicy'
+          description: The execution policy of the service
+        autoScalingPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutoScalingPolicy'
+          description: Auto scaling policies
+        status:
+          readOnly: true
+          $ref: '#/components/schemas/ResourceStatus'
+          description: Status of the service.
+        statusDetails:
+          readOnly: true
           type: string
-          description: The username for the private registry.
-        passwordType:
-          $ref: '#/components/schemas/ImageRegistryPasswordType'
-          description: The type of the image registry password being given in password
-        password:
+          description: Gives additional information about the current status of the service.
+        healthState:
+          readOnly: true
+          $ref: '#/components/schemas/HealthState'
+          description: Describes the health state of an application resource.
+        unhealthyEvaluation:
+          readOnly: true
           type: string
-          description: The password for the private registry. The password is required for create or update operations, however it is not returned in the get or list operations. Will be processed based on the type provided.
-      required:
-      - server
-      - username
-    ApplicationScopedVolume:
-      description: Describes a volume whose lifetime is scoped to the application's lifetime.
-      allOf:
-      - $ref: '#/components/schemas/VolumeReference'
+          description: When the service's health state is not 'Ok', this additional details from service fabric Health Manager for the user to know why the service is marked unhealthy.
+        identityRefs:
+          description: The service identity list.
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceIdentity'
+        dnsName:
+          type: string
+          description: Dns name of the service.
+    IdentityDescription:
+      description: Information describing the identities associated with this application.
       properties:
-        creationParameters:
-          $ref: '#/components/schemas/ApplicationScopedVolumeCreationParameters'
-          description: Describes parameters for creating application-scoped volumes.
-      required:
-      - creationParameters
-    ServiceUpgradeProgressList:
-      type: array
-      description: List of service upgrade progresses.
-      items:
-        $ref: '#/components/schemas/ServiceUpgradeProgress'
-    ResourceLimits:
-      description: This type describes the resource limits for a given container. It describes the most amount of resources a container is allowed to use before being restarted.
-      properties:
-        memoryInGB:
-          description: The memory limit in GB.
-          type: number
-          format: double
-        cpu:
-          description: CPU limits in cores. At present, only full cores are supported.
-          type: number
-          format: double
-    ExecutionPolicy:
-      type: object
-      discriminator:
-        propertyName: type
-      description: The execution policy of the service
-      properties:
+        tokenServiceEndpoint:
+          type: string
+          description: the endpoint for the token service managing this identity
         type:
-          $ref: '#/components/schemas/ExecutionPolicyType'
-          description: Enumerates the execution policy types for services.
+          type: string
+          description: the types of identities associated with this resource; currently restricted to 'SystemAssigned and UserAssigned'
+        tenantId:
+          type: string
+          description: the identifier of the tenant containing the application's identity.
+        principalId:
+          type: string
+          description: the object identifier of the Service Principal of the identity associated with this resource.
+        userAssignedIdentities:
+          $ref: '#/components/schemas/UserAssignedIdentityMap'
+          description: represents user assigned identities map.
       required:
       - type
+    DiagnosticsSinkKind:
+      type: string
+      description: The kind of DiagnosticsSink.
+      enum:
+      - Invalid
+      - AzureInternalMonitoringPipeline
+      x-ms-enum:
+        name: DiagnosticsSinkKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid sink kind. All Service Fabric enumerations have the invalid type.
+        - value: AzureInternalMonitoringPipeline
+          description: Diagnostics settings for Geneva.
   parameters:
+    ApplicationResourceDescriptionRequiredBodyParam:
+      name: applicationResourceDescription
+      in: body
+      description: Description for creating a Application resource.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/ApplicationResourceDescription'
+    ApplicationResourceNameRequiredPathParam:
+      name: applicationResourceName
+      in: path
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      required: true
+      description: The identity of the application.
+      schema:
+        type: string
+    ApiVersion_6-4-Preview_RequiredQueryParam:
+      name: api-version
+      in: query
+      x-ms-parameter-location: method
+      required: true
+      description: The version of the API. This parameter is required and its value must be '6.4-preview'.
+      x-ms-enum:
+        name: ApiVersion_6-4-Preview_RequiredQueryParam
+        modelAsString: true
+        values:
+        - value: 6.4-preview
+          description: The version number for the preview functionality of 6.4 runtime
+      schema:
+        type: string
+        enum:
+        - 6.4-preview
+        default: 6.4-preview
     ApiVersion_7-0_RequiredQueryParam:
       name: api-version
       in: query
@@ -1347,42 +1385,3 @@ components:
         enum:
         - '7.0'
         default: '7.0'
-    ApplicationResourceDescriptionRequiredBodyParam:
-      name: applicationResourceDescription
-      in: body
-      description: Description for creating a Application resource.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/ApplicationResourceDescription'
-    ApiVersion_6-4-Preview_RequiredQueryParam:
-      name: api-version
-      in: query
-      x-ms-parameter-location: method
-      required: true
-      description: The version of the API. This parameter is required and its value must be '6.4-preview'.
-      x-ms-enum:
-        name: ApiVersion_6-4-Preview_RequiredQueryParam
-        modelAsString: true
-        values:
-        - value: 6.4-preview
-          description: The version number for the preview functionality of 6.4 runtime
-      schema:
-        type: string
-        enum:
-        - 6.4-preview
-        default: 6.4-preview
-    ApplicationResourceNameRequiredPathParam:
-      name: applicationResourceName
-      in: path
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      required: true
-      description: The identity of the application.
-      schema:
-        type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'

@@ -1,11 +1,23 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Resource Groups API
-  description: Operations for managing resource groups
+  title: Microsoft Azure Azure Resource Manager Resource Groups API
+  description: Azure Resource Manager is the deployment and management service for Azure. It provides a management layer that enables you to create, update, and delete resources in your Azure account. You use management features like access control, locks, and tags to secure and organize your resources after deployment. The Resource Manager REST API provides operations for managing resources, resource groups, deployments, subscriptions, tenants, providers, and tags.
+  version: '2024-03-01'
+  contact:
+    name: Microsoft Azure Support
+    url: https://azure.microsoft.com/en-us/support/
+    email: azuresupport@microsoft.com
+  license:
+    name: Microsoft API License
+    url: https://learn.microsoft.com/en-us/legal/
+  x-logo:
+    url: https://azure.microsoft.com/svghandler/azure-logo.png
 servers:
 - url: https://management.azure.com
   description: Azure Resource Manager global endpoint
+security:
+- oauth2:
+  - https://management.azure.com/.default
 tags:
 - name: Resource Groups
   description: Operations for managing resource groups
@@ -328,41 +340,148 @@ paths:
       x-microcks-operation:
         delay: 0
         dispatcher: FALLBACK
+    head:
+      tags:
+      - Resource Groups
+      operationId: microsoftAzureResourcegroupsCheckexistence
+      description: Checks whether a resource group exists.
+      parameters:
+      - name: resourceGroupName
+        in: path
+        required: true
+        description: The name of the resource group to check. The name is case insensitive.
+        schema:
+          type: string
+          maxLength: 90
+          minLength: 1
+          pattern: ^[-\w\._\(\)]+$
+      - $ref: '#/components/parameters/ApiVersionParameter'
+      - $ref: '#/components/parameters/SubscriptionIdParameter'
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+        default:
+          description: Error response describing why the operation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudError'
+      summary: Microsoft Azure Head Subscriptions Subscriptionid Resourcegroups…
+  /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/resources:
+    get:
+      tags:
+      - Resource Groups
+      operationId: microsoftAzureResourcesListbyresourcegroup
+      description: Get all the resources for a resource group.
+      parameters:
+      - name: resourceGroupName
+        in: path
+        required: true
+        description: The resource group with the resources to get.
+        schema:
+          type: string
+          maxLength: 90
+          minLength: 1
+          pattern: ^[-\w\._\(\)]+$
+      - name: $filter
+        in: query
+        required: false
+        description: 'The filter to apply on the operation.<br><br>The properties you can use for eq (equals) or ne (not equals) are: location, resourceType, name, resourceGroup, identity, identity/principalId, plan, plan/publisher, plan/product, plan/name, plan/version, and plan/promotionCode.<br><br>For example, to filter by a resource type, use: $filter=resourceType eq ''Microsoft.Network/virtualNetworks''<br><br>You can use substringof(value, property) in the filter. The properties you can use for substring are: name and resourceGroup.<br><br>For example, to get all resources with ''demo'' anywhere in the name, use: $filter=substringof(''demo'', name)<br><br>You can link more than one substringof together by adding and/or operators.<br><br>You can filter by tag names and values. For example, to filter for a tag name and value, use $filter=tagName eq ''tag1'' and tagValue eq ''Value1''. When you filter by a tag name and value, the tags for each resource are not returned in the results.<br><br>You can use some properties together when filtering. The combinations you can use are: substringof and/or resourceType, plan and plan/publisher and plan/name, identity and identity/principalId.'
+        schema:
+          type: string
+      - name: $expand
+        in: query
+        required: false
+        description: Comma-separated list of additional properties to be included in the response. Valid values include `createdTime`, `changedTime` and `provisioningState`. For example, `$expand=createdTime,changedTime`.
+        schema:
+          type: string
+      - name: $top
+        in: query
+        required: false
+        description: The number of results to return. If null is passed, returns all resources.
+        schema:
+          type: integer
+          format: int32
+      - $ref: '#/components/parameters/ApiVersionParameter'
+      - $ref: '#/components/parameters/SubscriptionIdParameter'
+      responses:
+        '200':
+          description: OK - Returns an array of resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceListResult'
+        default:
+          description: Error response describing why the operation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudError'
+      x-ms-pageable:
+        nextLinkName: nextLink
+      x-ms-odata: '#/definitions/GenericResourceFilter'
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
+  /subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/exportTemplate:
+    post:
+      tags:
+      - Resource Groups
+      operationId: microsoftAzureResourcegroupsExporttemplate
+      description: Captures the specified resource group as a template.
+      parameters:
+      - $ref: ../../../../../common-types/resource-management/v1/types.json#/parameters/SubscriptionIdParameter
+      - $ref: ../../../../../common-types/resource-management/v1/types.json#/parameters/ResourceGroupNameParameter
+      - $ref: ../../../../../common-types/resource-management/v1/types.json#/parameters/ApiVersionParameter
+      x-ms-examples:
+        Export a resource group:
+          $ref: ./examples/ExportResourceGroup.json
+        Export a resource group with filtering:
+          $ref: ./examples/ExportResourceGroupWithFiltering.json
+      responses:
+        '200':
+          description: OK - Returns the result of the export.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupExportResult'
+        '202':
+          description: Accepted
+        default:
+          description: Error response describing why the operation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudError'
+      x-ms-long-running-operation: true
+      x-ms-long-running-operation-options:
+        final-state-via: location
+      summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportTemplateRequest'
+        description: Parameters for exporting the template.
+        required: true
 components:
   schemas:
-    ErrorResponse:
+    ResourceGroupPatchable:
       type: object
-      description: Common error response for all Azure Resource Manager APIs.
+      description: Resource group information for update.
       properties:
-        code:
+        name:
           type: string
-          readOnly: true
-          description: The error code.
+          description: The name of the resource group.
+          example: Example Title
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: The tags attached to the resource group.
           example: example_value
-        message:
-          type: string
-          readOnly: true
-          description: The error message.
-          example: example_value
-        target:
-          type: string
-          readOnly: true
-          description: The error target.
-          example: example_value
-        details:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/ErrorResponse'
-          description: The error details.
-          example: []
-        additionalInfo:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/ErrorAdditionalInfo'
-          description: The error additional info.
-          example: []
+        properties:
+          $ref: '#/components/schemas/ResourceGroupProperties'
     ResourceGroupListResult:
       type: object
       description: List of resource groups.
@@ -384,22 +503,6 @@ components:
       properties:
         error:
           $ref: '#/components/schemas/ErrorResponse'
-    ResourceGroupPatchable:
-      type: object
-      description: Resource group information for update.
-      properties:
-        name:
-          type: string
-          description: The name of the resource group.
-          example: Example Title
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: The tags attached to the resource group.
-          example: example_value
-        properties:
-          $ref: '#/components/schemas/ResourceGroupProperties'
     ResourceGroupProperties:
       type: object
       description: The resource group properties.
@@ -408,20 +511,6 @@ components:
           type: string
           readOnly: true
           description: The provisioning state.
-          example: example_value
-    ErrorAdditionalInfo:
-      type: object
-      description: The resource management error additional info.
-      properties:
-        type:
-          type: string
-          readOnly: true
-          description: The additional info type.
-          example: example_value
-        info:
-          type: object
-          readOnly: true
-          description: The additional info.
           example: example_value
     ResourceGroup:
       type: object
@@ -460,7 +549,259 @@ components:
           $ref: '#/components/schemas/ResourceGroupProperties'
       required:
       - location
+    ErrorAdditionalInfo:
+      type: object
+      description: The resource management error additional info.
+      properties:
+        type:
+          type: string
+          readOnly: true
+          description: The additional info type.
+          example: example_value
+        info:
+          type: object
+          readOnly: true
+          description: The additional info.
+          example: example_value
+    ErrorResponse:
+      type: object
+      description: Common error response for all Azure Resource Manager APIs.
+      properties:
+        code:
+          type: string
+          readOnly: true
+          description: The error code.
+          example: example_value
+        message:
+          type: string
+          readOnly: true
+          description: The error message.
+          example: example_value
+        target:
+          type: string
+          readOnly: true
+          description: The error target.
+          example: example_value
+        details:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ErrorResponse'
+          description: The error details.
+          example: []
+        additionalInfo:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ErrorAdditionalInfo'
+          description: The error additional info.
+          example: []
+    ResourceListResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericResourceExpanded'
+          description: An array of resources.
+        nextLink:
+          readOnly: true
+          type: string
+          description: The URL to use for getting the next set of results.
+      description: List of resource groups.
+    ExtendedLocation:
+      properties:
+        type:
+          type: string
+          enum:
+          - EdgeZone
+          x-ms-enum:
+            name: ExtendedLocationType
+            modelAsString: true
+          description: The extended location type.
+        name:
+          type: string
+          description: The extended location name.
+      description: Resource extended location.
+    GenericResource:
+      properties:
+        plan:
+          $ref: '#/components/schemas/Plan'
+          description: The plan of the resource.
+        properties:
+          type: object
+          description: The resource properties.
+        kind:
+          type: string
+          description: The kind of the resource.
+          pattern: ^[-\w\._,\(\)]+$
+        managedBy:
+          type: string
+          description: ID of the resource that manages this resource.
+        sku:
+          $ref: '#/components/schemas/Sku'
+          description: The SKU of the resource.
+        identity:
+          $ref: '#/components/schemas/Identity'
+          description: The identity of the resource.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      description: Resource information.
+    Identity:
+      properties:
+        principalId:
+          readOnly: true
+          type: string
+          description: The principal ID of resource identity.
+        tenantId:
+          readOnly: true
+          type: string
+          description: The tenant ID of resource.
+        type:
+          type: string
+          description: The identity type.
+          enum:
+          - SystemAssigned
+          - UserAssigned
+          - SystemAssigned, UserAssigned
+          - None
+          x-ms-enum:
+            name: ResourceIdentityType
+            modelAsString: false
+        userAssignedIdentities:
+          type: object
+          additionalProperties:
+            type: object
+            x-ms-client-name: IdentityUserAssignedIdentitiesValue
+            properties:
+              principalId:
+                readOnly: true
+                type: string
+                description: The principal id of user assigned identity.
+              clientId:
+                readOnly: true
+                type: string
+                description: The client id of user assigned identity.
+          description: 'The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.'
+      description: Identity for the resource.
+    Plan:
+      properties:
+        name:
+          type: string
+          description: The plan ID.
+        publisher:
+          type: string
+          description: The publisher ID.
+        product:
+          type: string
+          description: The offer ID.
+        promotionCode:
+          type: string
+          description: The promotion code.
+        version:
+          type: string
+          description: The plan's version.
+      description: Plan for the resource.
+    GenericResourceExpanded:
+      properties:
+        createdTime:
+          readOnly: true
+          type: string
+          format: date-time
+          description: The created time of the resource. This is only present if requested via the $expand query parameter.
+        changedTime:
+          readOnly: true
+          type: string
+          format: date-time
+          description: The changed time of the resource. This is only present if requested via the $expand query parameter.
+        provisioningState:
+          readOnly: true
+          type: string
+          description: The provisioning state of the resource. This is only present if requested via the $expand query parameter.
+      allOf:
+      - $ref: '#/components/schemas/GenericResource'
+      description: Resource information.
+    ExportTemplateRequest:
+      properties:
+        resources:
+          type: array
+          items:
+            type: string
+          description: The IDs of the resources to filter the export by. To export all resources, supply an array with single entry '*'.
+        options:
+          type: string
+          description: 'The export template options. A CSV-formatted list containing zero or more of the following: ''IncludeParameterDefaultValue'', ''IncludeComments'', ''SkipResourceNameParameterization'', ''SkipAllParameterization'''
+      description: Export resource group template request parameters.
+    Resource:
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Resource ID
+        name:
+          readOnly: true
+          type: string
+          description: Resource name
+        type:
+          readOnly: true
+          type: string
+          description: Resource type
+        location:
+          type: string
+          description: Resource location
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocation'
+          x-ms-mutability:
+          - read
+          - create
+          description: Resource extended location.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags
+      x-ms-azure-resource: true
+      description: Specified resource.
+    Sku:
+      properties:
+        name:
+          type: string
+          description: The SKU name.
+        tier:
+          type: string
+          description: The SKU tier.
+        size:
+          type: string
+          description: The SKU size.
+        family:
+          type: string
+          description: The SKU family.
+        model:
+          type: string
+          description: The SKU model.
+        capacity:
+          type: integer
+          format: int32
+          description: The SKU capacity.
+      description: SKU for the resource.
+    ResourceGroupExportResult:
+      properties:
+        template:
+          type: object
+          description: The template content.
+        error:
+          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
+          description: The template export error.
+      description: Resource group export result.
   parameters:
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: The name of the resource group. The name is case insensitive.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 90
     ApiVersionParameter:
       name: api-version
       in: query
@@ -477,17 +818,19 @@ components:
       schema:
         type: string
         format: uuid
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      description: The name of the resource group. The name is case insensitive.
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 90
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+          scopes:
+            https://management.azure.com/.default: Access Azure Resource Manager
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Share Subscription API
+  version: 2018-11-01-preview
+  title: Microsoft Azure DataShareManagementClient Share…
+  description: Creates a Microsoft.DataShare management client.
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: ShareSubscription
 paths:
@@ -101,7 +107,7 @@ paths:
   : post:
       tags:
       - ShareSubscription
-      summary: Microsoft Azure Get Source Share Synchronization Settings For A Sharesubscription
+      summary: Microsoft Azure Get Source Share Synchronization Settings For A…
       description: Get synchronization settings set on a share
       operationId: microsoftAzureSharesubscriptionsListsourcesharesynchronizationsettings
       parameters:
@@ -143,7 +149,7 @@ paths:
   : post:
       tags:
       - ShareSubscription
-      summary: Microsoft Azure List Data Set Level Details For A Share Subscription Synchronization
+      summary: Microsoft Azure List Data Set Level Details For A Share Subscription…
       description: List synchronization details
       operationId: microsoftAzureSharesubscriptionsListsynchronizationdetails
       parameters:
@@ -472,8 +478,38 @@ paths:
           $ref: ./examples/ShareSubscriptions_ListByAccount.json
 components:
   schemas:
-    ShareSubscriptionList:
-      description: List response for get ShareSubscription.
+    OperationResponse:
+      description: Response for long running operation
+      required:
+      - status
+      type: object
+      properties:
+        endTime:
+          format: date-time
+          description: start time
+          type: string
+        error:
+          $ref: '#/components/schemas/DataShareErrorInfo'
+          description: The error property when status is failed.
+        startTime:
+          format: date-time
+          description: start time
+          type: string
+        status:
+          description: Operation state of the long running operation.
+          enum:
+          - Accepted
+          - InProgress
+          - TransientFailure
+          - Succeeded
+          - Failed
+          - Canceled
+          type: string
+          x-ms-enum:
+            name: status
+            modelAsString: true
+    SourceShareSynchronizationSettingList:
+      description: List response for get source share Synchronization settings
       required:
       - value
       type: object
@@ -486,7 +522,105 @@ components:
           uniqueItems: false
           type: array
           items:
-            $ref: '#/components/schemas/ShareSubscription'
+            $ref: '#/components/schemas/SourceShareSynchronizationSetting'
+    ShareSubscriptionProperties:
+      description: Share subscription property bag.
+      required:
+      - invitationId
+      type: object
+      properties:
+        createdAt:
+          format: date-time
+          description: Time at which the share subscription was created.
+          type: string
+          readOnly: true
+        invitationId:
+          description: The invitation id.
+          type: string
+        providerEmail:
+          description: Email of the provider who created the resource
+          type: string
+          readOnly: true
+        providerName:
+          description: Name of the provider who created the resource
+          type: string
+          readOnly: true
+        providerTenantName:
+          description: Tenant name of the provider who created the resource
+          type: string
+          readOnly: true
+        provisioningState:
+          description: Provisioning state of the share subscription
+          enum:
+          - Succeeded
+          - Creating
+          - Deleting
+          - Moving
+          - Failed
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: provisioningState
+            modelAsString: true
+        shareDescription:
+          description: Description of share
+          type: string
+          readOnly: true
+        shareKind:
+          description: Kind of share
+          enum:
+          - CopyBased
+          - InPlace
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: shareKind
+            modelAsString: true
+        shareName:
+          description: Name of the share
+          type: string
+          readOnly: true
+        shareSubscriptionStatus:
+          description: Gets the current status of share subscription.
+          enum:
+          - Active
+          - Revoked
+          - SourceDeleted
+          - Revoking
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: shareSubscriptionStatus
+            modelAsString: true
+        shareTerms:
+          description: Terms of a share
+          type: string
+          readOnly: true
+        userEmail:
+          description: Email of the user who created the resource
+          type: string
+          readOnly: true
+        userName:
+          description: Name of the user who created the resource
+          type: string
+          readOnly: true
+    ProxyDto:
+      description: Base data transfer object implementation for proxy resources.
+      type: object
+      properties:
+        id:
+          description: The resource id of the azure resource
+          type: string
+          readOnly: true
+        name:
+          description: Name of the azure resource
+          type: string
+          readOnly: true
+        type:
+          description: Type of the azure resource
+          type: string
+          readOnly: true
+      x-ms-azure-resource: true
     DataShareErrorInfo:
       description: The data share error body model.
       required:
@@ -509,6 +643,166 @@ components:
         target:
           description: Target of the error
           type: string
+    ConsumerSourceDataSet:
+      description: A consumer side dataSet data transfer object.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ProxyDto'
+      properties:
+        properties:
+          $ref: '#/components/schemas/ConsumerSourceDataSetProperties'
+          description: source dataSet properties
+          x-ms-client-flatten: true
+    SourceShareSynchronizationSetting:
+      description: A view of synchronization setting added by the provider
+      required:
+      - kind
+      type: object
+      properties:
+        kind:
+          description: Kind of synchronization setting on share.
+          enum:
+          - ScheduleBased
+          type: string
+          x-ms-enum:
+            name: sourceShareSynchronizationSettingKind
+            modelAsString: true
+      discriminator:
+        propertyName: kind
+    ShareSubscriptionSynchronization:
+      description: A ShareSubscriptionSynchronization data transfer object.
+      required:
+      - synchronizationId
+      type: object
+      properties:
+        durationMs:
+          format: int32
+          description: Synchronization duration
+          type: integer
+          readOnly: true
+        endTime:
+          format: date-time
+          description: End time of synchronization
+          type: string
+          readOnly: true
+        message:
+          description: message of Synchronization
+          type: string
+          readOnly: true
+        startTime:
+          format: date-time
+          description: start time of synchronization
+          type: string
+          readOnly: true
+        status:
+          description: Raw Status
+          type: string
+          readOnly: true
+        synchronizationId:
+          description: Synchronization id
+          type: string
+        synchronizationMode:
+          description: Synchronization Mode
+          enum:
+          - Incremental
+          - FullSync
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: synchronizationMode
+            modelAsString: true
+    ConsumerSourceDataSetList:
+      description: A consumer side list of source dataSets
+      required:
+      - value
+      type: object
+      properties:
+        nextLink:
+          description: The Url of next result page.
+          type: string
+        value:
+          description: Collection of items of type DataTransferObjects.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsumerSourceDataSet'
+    SynchronizationDetailsList:
+      description: details of synchronization
+      required:
+      - value
+      type: object
+      properties:
+        nextLink:
+          description: The Url of next result page.
+          type: string
+        value:
+          description: Collection of items of type DataTransferObjects.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/SynchronizationDetails'
+    DataShareError:
+      description: The data share error model.
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/DataShareErrorInfo'
+          description: The data share error body
+    Synchronize:
+      description: Payload for the synchronizing the data.
+      type: object
+      properties:
+        synchronizationMode:
+          description: Mode of synchronization used in triggers and snapshot sync. Incremental by default
+          enum:
+          - Incremental
+          - FullSync
+          type: string
+          x-ms-enum:
+            name: synchronizationMode
+            modelAsString: true
+    ConsumerSourceDataSetProperties:
+      description: Properties of consumer source dataSet
+      type: object
+      properties:
+        dataSetId:
+          description: DataSet Id
+          type: string
+          readOnly: true
+        dataSetLocation:
+          description: Location of the data set.
+          type: string
+          readOnly: true
+        dataSetName:
+          description: DataSet name
+          type: string
+          readOnly: true
+        dataSetPath:
+          description: DataSet path
+          type: string
+          readOnly: true
+        dataSetType:
+          description: Type of data set
+          enum:
+          - Blob
+          - Container
+          - BlobFolder
+          - AdlsGen2FileSystem
+          - AdlsGen2Folder
+          - AdlsGen2File
+          - AdlsGen1Folder
+          - AdlsGen1File
+          - KustoCluster
+          - KustoDatabase
+          - SqlDBTable
+          - SqlDWTable
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: dataSetType
+            modelAsString: true
     SynchronizationDetails:
       description: Synchronization details at data set level
       type: object
@@ -599,8 +893,8 @@ components:
           description: The vCore units consumed for the data set synchronization
           type: integer
           readOnly: true
-    SynchronizationDetailsList:
-      description: details of synchronization
+    ShareSubscriptionList:
+      description: List response for get ShareSubscription.
       required:
       - value
       type: object
@@ -613,37 +907,7 @@ components:
           uniqueItems: false
           type: array
           items:
-            $ref: '#/components/schemas/SynchronizationDetails'
-    OperationResponse:
-      description: Response for long running operation
-      required:
-      - status
-      type: object
-      properties:
-        endTime:
-          format: date-time
-          description: start time
-          type: string
-        error:
-          $ref: '#/components/schemas/DataShareErrorInfo'
-          description: The error property when status is failed.
-        startTime:
-          format: date-time
-          description: start time
-          type: string
-        status:
-          description: Operation state of the long running operation.
-          enum:
-          - Accepted
-          - InProgress
-          - TransientFailure
-          - Succeeded
-          - Failed
-          - Canceled
-          type: string
-          x-ms-enum:
-            name: status
-            modelAsString: true
+            $ref: '#/components/schemas/ShareSubscription'
     ShareSubscriptionSynchronizationList:
       description: A consumer side list of share subscription synchronizations
       required:
@@ -659,249 +923,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ShareSubscriptionSynchronization'
-    Synchronize:
-      description: Payload for the synchronizing the data.
-      type: object
-      properties:
-        synchronizationMode:
-          description: Mode of synchronization used in triggers and snapshot sync. Incremental by default
-          enum:
-          - Incremental
-          - FullSync
-          type: string
-          x-ms-enum:
-            name: synchronizationMode
-            modelAsString: true
-    ShareSubscriptionSynchronization:
-      description: A ShareSubscriptionSynchronization data transfer object.
-      required:
-      - synchronizationId
-      type: object
-      properties:
-        durationMs:
-          format: int32
-          description: Synchronization duration
-          type: integer
-          readOnly: true
-        endTime:
-          format: date-time
-          description: End time of synchronization
-          type: string
-          readOnly: true
-        message:
-          description: message of Synchronization
-          type: string
-          readOnly: true
-        startTime:
-          format: date-time
-          description: start time of synchronization
-          type: string
-          readOnly: true
-        status:
-          description: Raw Status
-          type: string
-          readOnly: true
-        synchronizationId:
-          description: Synchronization id
-          type: string
-        synchronizationMode:
-          description: Synchronization Mode
-          enum:
-          - Incremental
-          - FullSync
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: synchronizationMode
-            modelAsString: true
-    ConsumerSourceDataSetProperties:
-      description: Properties of consumer source dataSet
-      type: object
-      properties:
-        dataSetId:
-          description: DataSet Id
-          type: string
-          readOnly: true
-        dataSetLocation:
-          description: Location of the data set.
-          type: string
-          readOnly: true
-        dataSetName:
-          description: DataSet name
-          type: string
-          readOnly: true
-        dataSetPath:
-          description: DataSet path
-          type: string
-          readOnly: true
-        dataSetType:
-          description: Type of data set
-          enum:
-          - Blob
-          - Container
-          - BlobFolder
-          - AdlsGen2FileSystem
-          - AdlsGen2Folder
-          - AdlsGen2File
-          - AdlsGen1Folder
-          - AdlsGen1File
-          - KustoCluster
-          - KustoDatabase
-          - SqlDBTable
-          - SqlDWTable
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: dataSetType
-            modelAsString: true
-    DataShareError:
-      description: The data share error model.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/DataShareErrorInfo'
-          description: The data share error body
-    ProxyDto:
-      description: Base data transfer object implementation for proxy resources.
-      type: object
-      properties:
-        id:
-          description: The resource id of the azure resource
-          type: string
-          readOnly: true
-        name:
-          description: Name of the azure resource
-          type: string
-          readOnly: true
-        type:
-          description: Type of the azure resource
-          type: string
-          readOnly: true
-      x-ms-azure-resource: true
-    SourceShareSynchronizationSettingList:
-      description: List response for get source share Synchronization settings
-      required:
-      - value
-      type: object
-      properties:
-        nextLink:
-          description: The Url of next result page.
-          type: string
-        value:
-          description: Collection of items of type DataTransferObjects.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/SourceShareSynchronizationSetting'
-    ConsumerSourceDataSet:
-      description: A consumer side dataSet data transfer object.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ProxyDto'
-      properties:
-        properties:
-          $ref: '#/components/schemas/ConsumerSourceDataSetProperties'
-          description: source dataSet properties
-          x-ms-client-flatten: true
-    ShareSubscriptionProperties:
-      description: Share subscription property bag.
-      required:
-      - invitationId
-      type: object
-      properties:
-        createdAt:
-          format: date-time
-          description: Time at which the share subscription was created.
-          type: string
-          readOnly: true
-        invitationId:
-          description: The invitation id.
-          type: string
-        providerEmail:
-          description: Email of the provider who created the resource
-          type: string
-          readOnly: true
-        providerName:
-          description: Name of the provider who created the resource
-          type: string
-          readOnly: true
-        providerTenantName:
-          description: Tenant name of the provider who created the resource
-          type: string
-          readOnly: true
-        provisioningState:
-          description: Provisioning state of the share subscription
-          enum:
-          - Succeeded
-          - Creating
-          - Deleting
-          - Moving
-          - Failed
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: provisioningState
-            modelAsString: true
-        shareDescription:
-          description: Description of share
-          type: string
-          readOnly: true
-        shareKind:
-          description: Kind of share
-          enum:
-          - CopyBased
-          - InPlace
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: shareKind
-            modelAsString: true
-        shareName:
-          description: Name of the share
-          type: string
-          readOnly: true
-        shareSubscriptionStatus:
-          description: Gets the current status of share subscription.
-          enum:
-          - Active
-          - Revoked
-          - SourceDeleted
-          - Revoking
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: shareSubscriptionStatus
-            modelAsString: true
-        shareTerms:
-          description: Terms of a share
-          type: string
-          readOnly: true
-        userEmail:
-          description: Email of the user who created the resource
-          type: string
-          readOnly: true
-        userName:
-          description: Name of the user who created the resource
-          type: string
-          readOnly: true
-    SourceShareSynchronizationSetting:
-      description: A view of synchronization setting added by the provider
-      required:
-      - kind
-      type: object
-      properties:
-        kind:
-          description: Kind of synchronization setting on share.
-          enum:
-          - ScheduleBased
-          type: string
-          x-ms-enum:
-            name: sourceShareSynchronizationSettingKind
-            modelAsString: true
-      discriminator:
-        propertyName: kind
     ShareSubscription:
       description: A share subscription data transfer object.
       required:
@@ -914,22 +935,14 @@ components:
           $ref: '#/components/schemas/ShareSubscriptionProperties'
           description: Properties on the share subscription
           x-ms-client-flatten: true
-    ConsumerSourceDataSetList:
-      description: A consumer side list of source dataSets
-      required:
-      - value
-      type: object
-      properties:
-        nextLink:
-          description: The Url of next result page.
-          type: string
-        value:
-          description: Collection of items of type DataTransferObjects.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ConsumerSourceDataSet'
   parameters:
+    api-version:
+      name: api-version
+      in: query
+      description: The api version to use.
+      required: true
+      schema:
+        type: string
     subscriptionId:
       name: subscriptionId
       in: path
@@ -953,15 +966,12 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    api-version:
-      name: api-version
-      in: query
-      description: The api version to use.
-      required: true
-      schema:
-        type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow.

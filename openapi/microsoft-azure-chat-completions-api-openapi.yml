@@ -1,13 +1,28 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Chat Completions API
-  description: Operations for chat-based completions
+  title: Microsoft Azure Azure OpenAI Service Chat Completions API
+  description: Azure OpenAI Service provides REST API access to OpenAI's language models including GPT-4, GPT-4 Turbo, GPT-3.5-Turbo, and the Embeddings model series. These models can be adapted to tasks including content generation, summarization, semantic search, and natural language to code translation. Users access the service through REST APIs, Python SDK, or the web-based interface in the Azure AI Foundry portal.
+  version: '2024-06-01'
+  contact:
+    name: Microsoft Azure Support
+    url: https://azure.microsoft.com/en-us/support/
+    email: azuresupport@microsoft.com
+  license:
+    name: Microsoft API License
+    url: https://learn.microsoft.com/en-us/legal/
+  x-logo:
+    url: https://azure.microsoft.com/svghandler/azure-logo.png
 servers:
-  - url: https://{endpoint}/openai
-    variables:
-      endpoint:
-        default: your-resource-name.openai.azure.com
+- url: https://{endpoint}/openai
+  description: Azure OpenAI Service endpoint
+  variables:
+    endpoint:
+      default: your-resource-name.openai.azure.com
+      description: 'The Azure OpenAI resource endpoint. Format: https://{resource-name}.openai.azure.com'
+security:
+- apiKey: []
+- oauth2:
+  - https://cognitiveservices.azure.com/.default
 tags:
 - name: Chat Completions
   description: Operations for chat-based completions
@@ -102,40 +117,21 @@ paths:
         dispatcher: FALLBACK
 components:
   schemas:
-    ErrorResponse:
+    ChatCompletionTool:
       type: object
-      description: Error response.
+      description: A tool the model may call.
       properties:
-        error:
-          type: object
-          description: The error object.
-          properties:
-            code:
-              type: string
-              description: The error code.
-            message:
-              type: string
-              description: The error message.
-            param:
-              type: string
-              description: The parameter that caused the error.
-            type:
-              type: string
-              description: The error type.
-            inner_error:
-              type: object
-              description: Inner error details.
-              properties:
-                code:
-                  type: string
-                  description: The inner error code.
-                content_filter_result:
-                  type: object
-                  description: Content filter results, if applicable.
-          required:
-          - code
-          - message
-          example: example_value
+        type:
+          type: string
+          enum:
+          - function
+          description: The type of the tool.
+          example: function
+        function:
+          $ref: '#/components/schemas/FunctionDefinition'
+      required:
+      - type
+      - function
     CreateChatCompletionRequest:
       type: object
       description: Request body for creating a chat completion.
@@ -294,46 +290,6 @@ components:
       - index
       - message
       - finish_reason
-    CreateChatCompletionResponse:
-      type: object
-      description: Represents a chat completion response returned by model.
-      properties:
-        id:
-          type: string
-          description: A unique identifier for the chat completion.
-          example: abc123
-        object:
-          type: string
-          enum:
-          - chat.completion
-          description: The object type.
-          example: chat.completion
-        created:
-          type: integer
-          description: The Unix timestamp of when the chat completion was created.
-          example: 10
-        model:
-          type: string
-          description: The model used for the chat completion.
-          example: example_value
-        choices:
-          type: array
-          description: A list of chat completion choices.
-          items:
-            $ref: '#/components/schemas/ChatCompletionChoice'
-          example: []
-        usage:
-          $ref: '#/components/schemas/Usage'
-        system_fingerprint:
-          type: string
-          description: The system fingerprint representing the backend configuration.
-          example: example_value
-      required:
-      - id
-      - object
-      - created
-      - model
-      - choices
     Usage:
       type: object
       description: Usage statistics for the API call.
@@ -420,22 +376,88 @@ components:
           example: '500123'
       required:
       - role
-    ChatCompletionTool:
+    ErrorResponse:
       type: object
-      description: A tool the model may call.
+      description: Error response.
       properties:
-        type:
+        error:
+          type: object
+          description: The error object.
+          properties:
+            code:
+              type: string
+              description: The error code.
+            message:
+              type: string
+              description: The error message.
+            param:
+              type: string
+              description: The parameter that caused the error.
+            type:
+              type: string
+              description: The error type.
+            inner_error:
+              type: object
+              description: Inner error details.
+              properties:
+                code:
+                  type: string
+                  description: The inner error code.
+                content_filter_result:
+                  type: object
+                  description: Content filter results, if applicable.
+          required:
+          - code
+          - message
+          example: example_value
+    CreateChatCompletionResponse:
+      type: object
+      description: Represents a chat completion response returned by model.
+      properties:
+        id:
+          type: string
+          description: A unique identifier for the chat completion.
+          example: abc123
+        object:
           type: string
           enum:
-          - function
-          description: The type of the tool.
-          example: function
-        function:
-          $ref: '#/components/schemas/FunctionDefinition'
+          - chat.completion
+          description: The object type.
+          example: chat.completion
+        created:
+          type: integer
+          description: The Unix timestamp of when the chat completion was created.
+          example: 10
+        model:
+          type: string
+          description: The model used for the chat completion.
+          example: example_value
+        choices:
+          type: array
+          description: A list of chat completion choices.
+          items:
+            $ref: '#/components/schemas/ChatCompletionChoice'
+          example: []
+        usage:
+          $ref: '#/components/schemas/Usage'
+        system_fingerprint:
+          type: string
+          description: The system fingerprint representing the backend configuration.
+          example: example_value
       required:
-      - type
-      - function
+      - id
+      - object
+      - created
+      - model
+      - choices
   parameters:
+    DeploymentIdParameter:
+      name: deployment-id
+      in: path
+      required: true
+      description: The deployment ID of the model to use for this request.
+      schema:
+        type: string
     ApiVersionParameter:
       name: api-version
       in: query
@@ -444,15 +466,16 @@ components:
       schema:
         type: string
         default: '2024-06-01'
-    DeploymentIdParameter:
-      name: deployment-id
-      in: path
-      required: true
-      description: The deployment ID of the model to use for this request.
-      schema:
-        type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      name: api-key
+      in: header
+      description: Azure OpenAI API key authentication.
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+          scopes:
+            https://cognitiveservices.azure.com/.default: Access Azure OpenAI

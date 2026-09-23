@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Data Connections API
+  title: Microsoft Azure Defender EASM Data Connections API
+  version: 2023-03-01-preview
+  description: Defender EASM discovers and maps your digital attack surface to provide an "outside-in" perspective using probes to discover assets. The assets are provided with detailed metadata associated, including vulnerabilities, configurations and web components, allowing customers to view and prioritize external risk. The EASM REST API enables you to develop clients that integrate with your application.
+  x-typespec-generated:
+  - emitter: '@azure-tools/typespec-autorest'
+security:
+- OAuth2Auth:
+  - https://easm.defender.microsoft.com/.default
 tags:
 - name: Data Connections
 paths:
@@ -185,15 +191,6 @@ paths:
         required: true
 components:
   schemas:
-    DataConnectionContent:
-      type: string
-      description: The type of data the data connection will transfer
-      enum:
-      - assets
-      - attackSurfaceInsights
-      x-ms-enum:
-        name: DataConnectionContent
-        modelAsString: true
     ValidateResult:
       type: object
       description: Validate result for validate action endpoints
@@ -254,31 +251,44 @@ components:
       required:
       - kind
       - name
-    Azure.Core.Foundations.Error:
+    InnerError:
       type: object
-      description: The error object.
+      description: This is an object containing more specific information than the current object about the error.
+      properties:
+        code:
+          type: string
+          description: This is a more specific error code than was provided by the containing error.
+        value:
+          description: This is an additional field representing the value that caused the error to help with debugging.
+    DataConnectionFrequency:
+      type: string
+      description: The rate at which the data connection will receive updates.
+      enum:
+      - daily
+      - weekly
+      - monthly
+      x-ms-enum:
+        name: DataConnectionFrequency
+        modelAsString: true
+    DataConnectionContent:
+      type: string
+      description: The type of data the data connection will transfer
+      enum:
+      - assets
+      - attackSurfaceInsights
+      x-ms-enum:
+        name: DataConnectionContent
+        modelAsString: true
+    Azure.Core.Foundations.InnerError:
+      type: object
+      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
       properties:
         code:
           type: string
           description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          x-ms-identifiers: []
         innererror:
           $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: An object containing more specific information than the current object about the error.
-      required:
-      - code
-      - message
+          description: Inner error.
     PagedDataConnection:
       type: object
       description: Paged collection of DataConnection items
@@ -321,26 +331,40 @@ components:
         propertyName: kind
       required:
       - kind
-    Azure.Core.Foundations.InnerError:
+    Azure.Core.Foundations.ErrorResponse:
       type: object
-      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      description: A response containing error details.
+      properties:
+        error:
+          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          description: The error object.
+      required:
+      - error
+    Azure.Core.Foundations.Error:
+      type: object
+      description: The error object.
       properties:
         code:
           type: string
           description: One of a server-defined set of error codes.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          description: The target of the error.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          x-ms-identifiers: []
         innererror:
           $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: Inner error.
-    DataConnectionFrequency:
-      type: string
-      description: The rate at which the data connection will receive updates.
-      enum:
-      - daily
-      - weekly
-      - monthly
-      x-ms-enum:
-        name: DataConnectionFrequency
-        modelAsString: true
+          description: An object containing more specific information than the current object about the error.
+      required:
+      - code
+      - message
     ErrorDetail:
       type: object
       description: This is the top-level error object whose code matches the x-ms-error-code response header.
@@ -366,34 +390,7 @@ components:
       required:
       - code
       - message
-    Azure.Core.Foundations.ErrorResponse:
-      type: object
-      description: A response containing error details.
-      properties:
-        error:
-          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          description: The error object.
-      required:
-      - error
-    InnerError:
-      type: object
-      description: This is an object containing more specific information than the current object about the error.
-      properties:
-        code:
-          type: string
-          description: This is a more specific error code than was provided by the containing error.
-        value:
-          description: This is an additional field representing the value that caused the error to help with debugging.
   parameters:
-    Azure.Core.MaxPageSizeQueryParameter:
-      name: maxpagesize
-      in: query
-      description: The maximum number of result items per page.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
     Azure.Core.Foundations.ApiVersionParameter:
       name: api-version
       in: query
@@ -404,6 +401,15 @@ components:
       schema:
         type: string
         minLength: 1
+    Azure.Core.MaxPageSizeQueryParameter:
+      name: maxpagesize
+      in: query
+      description: The maximum number of result items per page.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
     Azure.Core.SkipQueryParameter:
       name: skip
       in: query
@@ -414,8 +420,20 @@ components:
         type: integer
         format: int32
         default: 0
+  securitySchemes:
+    OAuth2Auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            https://easm.defender.microsoft.com/.default: ''
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  - name: endpoint
+    in: path
+    description: The endpoint hosting the requested resource. For example, https://{region}.easm.defender.microsoft.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/workspaces/{workspaceName}
+    required: true
+    type: string

@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Origin Groups API
+  version: 2023-07-01-preview
+  title: Microsoft Azure CdnManagementClient Origin Groups API
+  description: Use these APIs to manage Azure CDN resources through the Azure Resource Manager. You must make sure that requests made to these resources are secure.
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: OriginGroups
 paths:
@@ -45,7 +51,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-ms-pageable:
         nextLinkName: nextLink
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Cdn Profiles Profilename Endpoints Endpointname Origingroups
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/originGroups/{originGroupName}
   : get:
       tags:
@@ -90,7 +96,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Cdn Profiles Profilename Endpoints Endpointname Origingroups Origingroupname
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
     put:
       tags:
       - OriginGroups
@@ -151,7 +157,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-ms-long-running-operation: true
-      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Cdn Profiles Profilename Endpoints Endpointname Origingroups Origingroupname
+      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups…
       requestBody:
         content:
           application/json:
@@ -213,7 +219,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-ms-long-running-operation: true
-      summary: Microsoft Azure Patch Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Cdn Profiles Profilename Endpoints Endpointname Origingroups Origingroupname
+      summary: Microsoft Azure Patch Subscriptions Subscriptionid Resourcegroups…
       requestBody:
         content:
           application/json:
@@ -269,36 +275,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-ms-long-running-operation: true
-      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Cdn Profiles Profilename Endpoints Endpointname Origingroups Origingroupname
+      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ErrorResponse:
-      title: Error response
-      description: Error response indicates Azure Front Door Standard or Azure Front Door Premium or CDN service is not able to process the incoming request. The reason is provided in the error message.
-      type: object
+    ResponseBasedOriginErrorDetectionParameters:
+      description: The JSON object that contains the properties to determine origin health using real requests/responses.
       properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ErrorDetail
-    OriginGroupUpdateParameters:
-      type: object
-      description: Origin group properties needed for origin group creation or update.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/OriginGroupUpdatePropertiesParameters'
-      x-ms-azure-resource: true
-    OriginGroupListResult:
-      description: Result of the request to list origin groups. It contains a list of origin groups objects and a URL link to get the next set of results.
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/OriginGroup'
-          description: List of CDN origin groups within an endpoint
-        nextLink:
+        responseBasedDetectedErrorTypes:
+          description: Type of response errors for real user requests for which origin will be deemed unhealthy
           type: string
-          description: URL to get the next set of origin objects if there are any.
+          enum:
+          - None
+          - TcpErrorsOnly
+          - TcpAndHttpErrors
+          x-ms-enum:
+            name: ResponseBasedDetectedErrorTypes
+            modelAsString: false
+        responseBasedFailoverThresholdPercentage:
+          description: The percentage of failed requests in the sample where failover should trigger.
+          type: integer
+          format: int32
+          maximum: 100
+          minimum: 0
+        httpErrorRanges:
+          description: The list of Http status code ranges that are considered as server errors for origin and it is marked as unhealthy.
+          type: array
+          items:
+            $ref: '#/components/schemas/HttpErrorRangeParameters'
+          x-ms-identifiers: []
+    ResourceReference:
+      properties:
+        id:
+          type: string
+          description: Resource ID.
+      description: Reference to another resource.
+      x-ms-azure-resource: true
+    ProxyResource:
+      description: The resource model definition for a ARM proxy resource. It will have everything other than required location and tags
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties: {}
+    SystemData:
+      description: Read only system data
+      readOnly: true
+      type: object
+      properties:
+        createdBy:
+          type: string
+          description: An identifier for the identity that created the resource
+        createdByType:
+          $ref: '#/components/schemas/IdentityType'
+          description: The type of identity that created the resource
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp of resource creation (UTC)
+        lastModifiedBy:
+          type: string
+          description: An identifier for the identity that last modified the resource
+        lastModifiedByType:
+          $ref: '#/components/schemas/IdentityType'
+          description: The type of identity that last modified the resource
+        lastModifiedAt:
+          type: string
+          format: date-time
+          description: The timestamp of resource last modification (UTC)
     HealthProbeParameters:
       description: The JSON object that contains the properties to send health probes to origin.
       properties:
@@ -331,31 +372,102 @@ components:
           format: int32
           maximum: 255
           minimum: 1
-    ResponseBasedOriginErrorDetectionParameters:
-      description: The JSON object that contains the properties to determine origin health using real requests/responses.
+    OriginGroupListResult:
+      description: Result of the request to list origin groups. It contains a list of origin groups objects and a URL link to get the next set of results.
       properties:
-        responseBasedDetectedErrorTypes:
-          description: Type of response errors for real user requests for which origin will be deemed unhealthy
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/OriginGroup'
+          description: List of CDN origin groups within an endpoint
+        nextLink:
           type: string
-          enum:
-          - None
-          - TcpErrorsOnly
-          - TcpAndHttpErrors
-          x-ms-enum:
-            name: ResponseBasedDetectedErrorTypes
-            modelAsString: false
-        responseBasedFailoverThresholdPercentage:
-          description: The percentage of failed requests in the sample where failover should trigger.
-          type: integer
-          format: int32
-          maximum: 100
-          minimum: 0
-        httpErrorRanges:
-          description: The list of Http status code ranges that are considered as server errors for origin and it is marked as unhealthy.
+          description: URL to get the next set of origin objects if there are any.
+    OriginGroupUpdatePropertiesParameters:
+      description: The JSON object that contains the properties of the origin group.
+      properties:
+        healthProbeSettings:
+          description: Health probe settings to the origin that is used to determine the health of the origin.
+          type: object
+          $ref: '#/components/schemas/HealthProbeParameters'
+        origins:
+          description: The source of the content being delivered via CDN within given origin group.
           type: array
           items:
-            $ref: '#/components/schemas/HttpErrorRangeParameters'
-          x-ms-identifiers: []
+            description: A reference to a origin.
+            $ref: '#/components/schemas/ResourceReference'
+        trafficRestorationTimeToHealedOrNewEndpointsInMinutes:
+          description: Time in minutes to shift the traffic to the endpoint gradually when an unhealthy endpoint comes healthy or a new endpoint is added. Default is 10 mins. This property is currently not supported.
+          type: integer
+          format: int32
+          maximum: 50
+          minimum: 0
+        responseBasedOriginErrorDetectionSettings:
+          description: The JSON object that contains the properties to determine origin health using real requests/responses. This property is currently not supported.
+          type: object
+          $ref: '#/components/schemas/ResponseBasedOriginErrorDetectionParameters'
+    ErrorResponse:
+      title: Error response
+      description: Error response indicates Azure Front Door Standard or Azure Front Door Premium or CDN service is not able to process the incoming request. The reason is provided in the error message.
+      type: object
+      properties:
+        error:
+          $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ErrorDetail
+    IdentityType:
+      description: The type of identity that creates/modifies resources
+      type: string
+      enum:
+      - user
+      - application
+      - managedIdentity
+      - key
+      x-ms-enum:
+        name: IdentityType
+        modelAsString: true
+    HttpErrorRangeParameters:
+      description: The JSON object that represents the range for http status codes
+      properties:
+        begin:
+          description: The inclusive start of the http status code range.
+          type: integer
+          format: int32
+          maximum: 999
+          minimum: 100
+        end:
+          description: The inclusive end of the http status code range.
+          type: integer
+          format: int32
+          maximum: 999
+          minimum: 100
+    OriginGroup:
+      description: Origin group comprising of origins is used for load balancing to origins when the content cannot be served from CDN.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/OriginGroupProperties'
+    Resource:
+      description: The core properties of ARM resources
+      properties:
+        id:
+          description: Resource ID.
+          readOnly: true
+          type: string
+        name:
+          description: Resource name.
+          readOnly: true
+          type: string
+        type:
+          description: Resource type.
+          readOnly: true
+          type: string
+        systemData:
+          $ref: '#/components/schemas/SystemData'
+          readOnly: true
+      x-ms-azure-resource: true
     OriginGroupProperties:
       description: The JSON object that contains the properties of the origin group.
       type: object
@@ -388,133 +500,20 @@ components:
           x-ms-enum:
             name: OriginGroupProvisioningState
             modelAsString: true
-    HttpErrorRangeParameters:
-      description: The JSON object that represents the range for http status codes
-      properties:
-        begin:
-          description: The inclusive start of the http status code range.
-          type: integer
-          format: int32
-          maximum: 999
-          minimum: 100
-        end:
-          description: The inclusive end of the http status code range.
-          type: integer
-          format: int32
-          maximum: 999
-          minimum: 100
-    IdentityType:
-      description: The type of identity that creates/modifies resources
-      type: string
-      enum:
-      - user
-      - application
-      - managedIdentity
-      - key
-      x-ms-enum:
-        name: IdentityType
-        modelAsString: true
-    SystemData:
-      description: Read only system data
-      readOnly: true
+    OriginGroupUpdateParameters:
       type: object
-      properties:
-        createdBy:
-          type: string
-          description: An identifier for the identity that created the resource
-        createdByType:
-          $ref: '#/components/schemas/IdentityType'
-          description: The type of identity that created the resource
-        createdAt:
-          type: string
-          format: date-time
-          description: The timestamp of resource creation (UTC)
-        lastModifiedBy:
-          type: string
-          description: An identifier for the identity that last modified the resource
-        lastModifiedByType:
-          $ref: '#/components/schemas/IdentityType'
-          description: The type of identity that last modified the resource
-        lastModifiedAt:
-          type: string
-          format: date-time
-          description: The timestamp of resource last modification (UTC)
-    Resource:
-      description: The core properties of ARM resources
-      properties:
-        id:
-          description: Resource ID.
-          readOnly: true
-          type: string
-        name:
-          description: Resource name.
-          readOnly: true
-          type: string
-        type:
-          description: Resource type.
-          readOnly: true
-          type: string
-        systemData:
-          $ref: '#/components/schemas/SystemData'
-          readOnly: true
-      x-ms-azure-resource: true
-    OriginGroupUpdatePropertiesParameters:
-      description: The JSON object that contains the properties of the origin group.
-      properties:
-        healthProbeSettings:
-          description: Health probe settings to the origin that is used to determine the health of the origin.
-          type: object
-          $ref: '#/components/schemas/HealthProbeParameters'
-        origins:
-          description: The source of the content being delivered via CDN within given origin group.
-          type: array
-          items:
-            description: A reference to a origin.
-            $ref: '#/components/schemas/ResourceReference'
-        trafficRestorationTimeToHealedOrNewEndpointsInMinutes:
-          description: Time in minutes to shift the traffic to the endpoint gradually when an unhealthy endpoint comes healthy or a new endpoint is added. Default is 10 mins. This property is currently not supported.
-          type: integer
-          format: int32
-          maximum: 50
-          minimum: 0
-        responseBasedOriginErrorDetectionSettings:
-          description: The JSON object that contains the properties to determine origin health using real requests/responses. This property is currently not supported.
-          type: object
-          $ref: '#/components/schemas/ResponseBasedOriginErrorDetectionParameters'
-    ResourceReference:
-      properties:
-        id:
-          type: string
-          description: Resource ID.
-      description: Reference to another resource.
-      x-ms-azure-resource: true
-    OriginGroup:
-      description: Origin group comprising of origins is used for load balancing to origins when the content cannot be served from CDN.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
+      description: Origin group properties needed for origin group creation or update.
       properties:
         properties:
           x-ms-client-flatten: true
-          $ref: '#/components/schemas/OriginGroupProperties'
-    ProxyResource:
-      description: The resource model definition for a ARM proxy resource. It will have everything other than required location and tags
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties: {}
+          $ref: '#/components/schemas/OriginGroupUpdatePropertiesParameters'
+      x-ms-azure-resource: true
   parameters:
     subscriptionIdParameter:
       name: subscriptionId
       in: path
       description: Azure Subscription ID.
       required: true
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Version of the API to be used with the client request. Current version is 2023-05-01.
       schema:
         type: string
     resourceGroupNameParameter:
@@ -528,8 +527,19 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+$
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    apiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Version of the API to be used with the client request. Current version is 2023-05-01.
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow.

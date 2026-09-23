@@ -1,13 +1,28 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Audio API
-  description: Operations for audio transcription and translation
+  title: Microsoft Azure Azure OpenAI Service Audio API
+  description: Azure OpenAI Service provides REST API access to OpenAI's language models including GPT-4, GPT-4 Turbo, GPT-3.5-Turbo, and the Embeddings model series. These models can be adapted to tasks including content generation, summarization, semantic search, and natural language to code translation. Users access the service through REST APIs, Python SDK, or the web-based interface in the Azure AI Foundry portal.
+  version: '2024-06-01'
+  contact:
+    name: Microsoft Azure Support
+    url: https://azure.microsoft.com/en-us/support/
+    email: azuresupport@microsoft.com
+  license:
+    name: Microsoft API License
+    url: https://learn.microsoft.com/en-us/legal/
+  x-logo:
+    url: https://azure.microsoft.com/svghandler/azure-logo.png
 servers:
-  - url: https://{endpoint}/openai
-    variables:
-      endpoint:
-        default: your-resource-name.openai.azure.com
+- url: https://{endpoint}/openai
+  description: Azure OpenAI Service endpoint
+  variables:
+    endpoint:
+      default: your-resource-name.openai.azure.com
+      description: 'The Azure OpenAI resource endpoint. Format: https://{resource-name}.openai.azure.com'
+security:
+- apiKey: []
+- oauth2:
+  - https://cognitiveservices.azure.com/.default
 tags:
 - name: Audio
   description: Operations for audio transcription and translation
@@ -196,40 +211,47 @@ paths:
         dispatcher: FALLBACK
 components:
   schemas:
-    ErrorResponse:
+    CreateTranslationRequest:
       type: object
-      description: Error response.
+      description: Request body for creating an audio translation.
       properties:
-        error:
-          type: object
-          description: The error object.
-          properties:
-            code:
-              type: string
-              description: The error code.
-            message:
-              type: string
-              description: The error message.
-            param:
-              type: string
-              description: The parameter that caused the error.
-            type:
-              type: string
-              description: The error type.
-            inner_error:
-              type: object
-              description: Inner error details.
-              properties:
-                code:
-                  type: string
-                  description: The inner error code.
-                content_filter_result:
-                  type: object
-                  description: Content filter results, if applicable.
-          required:
-          - code
-          - message
+        file:
+          type: string
+          format: binary
+          description: The audio file object to translate.
           example: example_value
+        prompt:
+          type: string
+          description: An optional text to guide the model.
+          example: example_value
+        response_format:
+          type: string
+          enum:
+          - json
+          - text
+          - srt
+          - verbose_json
+          - vtt
+          default: json
+          description: The format of the transcript output.
+          example: json
+        temperature:
+          type: number
+          default: 0
+          description: The sampling temperature, between 0 and 1.
+          example: 42.5
+      required:
+      - file
+    AudioTranscriptionResponse:
+      type: object
+      description: Response from audio transcription.
+      properties:
+        text:
+          type: string
+          description: The transcribed text.
+          example: example_value
+      required:
+      - text
     CreateSpeechRequest:
       type: object
       description: Request body for generating speech from text.
@@ -278,6 +300,40 @@ components:
       - model
       - input
       - voice
+    ErrorResponse:
+      type: object
+      description: Error response.
+      properties:
+        error:
+          type: object
+          description: The error object.
+          properties:
+            code:
+              type: string
+              description: The error code.
+            message:
+              type: string
+              description: The error message.
+            param:
+              type: string
+              description: The parameter that caused the error.
+            type:
+              type: string
+              description: The error type.
+            inner_error:
+              type: object
+              description: Inner error details.
+              properties:
+                code:
+                  type: string
+                  description: The inner error code.
+                content_filter_result:
+                  type: object
+                  description: Content filter results, if applicable.
+          required:
+          - code
+          - message
+          example: example_value
     AudioTranslationResponse:
       type: object
       description: Response from audio translation.
@@ -285,16 +341,6 @@ components:
         text:
           type: string
           description: The translated text.
-          example: example_value
-      required:
-      - text
-    AudioTranscriptionResponse:
-      type: object
-      description: Response from audio transcription.
-      properties:
-        text:
-          type: string
-          description: The transcribed text.
           example: example_value
       required:
       - text
@@ -333,38 +379,14 @@ components:
           example: 42.5
       required:
       - file
-    CreateTranslationRequest:
-      type: object
-      description: Request body for creating an audio translation.
-      properties:
-        file:
-          type: string
-          format: binary
-          description: The audio file object to translate.
-          example: example_value
-        prompt:
-          type: string
-          description: An optional text to guide the model.
-          example: example_value
-        response_format:
-          type: string
-          enum:
-          - json
-          - text
-          - srt
-          - verbose_json
-          - vtt
-          default: json
-          description: The format of the transcript output.
-          example: json
-        temperature:
-          type: number
-          default: 0
-          description: The sampling temperature, between 0 and 1.
-          example: 42.5
-      required:
-      - file
   parameters:
+    DeploymentIdParameter:
+      name: deployment-id
+      in: path
+      required: true
+      description: The deployment ID of the model to use for this request.
+      schema:
+        type: string
     ApiVersionParameter:
       name: api-version
       in: query
@@ -373,15 +395,16 @@ components:
       schema:
         type: string
         default: '2024-06-01'
-    DeploymentIdParameter:
-      name: deployment-id
-      in: path
-      required: true
-      description: The deployment ID of the model to use for this request.
-      schema:
-        type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      name: api-key
+      in: header
+      description: Azure OpenAI API key authentication.
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+          scopes:
+            https://cognitiveservices.azure.com/.default: Access Azure OpenAI

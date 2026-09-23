@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Client Groups API
+  title: Microsoft Azure Service Map Client Groups API
+  description: Service Map API Reference
+  version: 2015-11-01-preview
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Client Groups
 paths:
@@ -47,7 +53,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Operationalinsights Workspaces Workspacename Features Servicemap Clientgroups Clientgroupname
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/clientGroups/{clientGroupName}/membersCount
   : get:
       tags:
@@ -90,7 +96,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Operationalinsights Workspaces Workspacename Features Servicemap Clientgroups Clientgroupname Memberscount
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/features/serviceMap/clientGroups/{clientGroupName}/members
   : get:
       tags:
@@ -144,23 +150,38 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-ms-pageable:
         nextLinkName: nextLink
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Operationalinsights Workspaces Workspacename Features Servicemap Clientgroups Clientgroupname Members
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    MachineReference:
-      description: Reference to a machine.
-      allOf:
-      - $ref: '#/components/schemas/ResourceReference'
-      x-ms-discriminator-value: ref:machine
-    ErrorResponse:
-      type: object
-      description: An error response from the API.
+    ResourceReference:
+      description: Represents a reference to another resource.
+      discriminator:
+        propertyName: kind
       properties:
-        error:
-          $ref: '#/components/schemas/Error'
-          description: Error information.
+        id:
+          type: string
+          description: Resource URI.
+        type:
+          type: string
+          description: Resource type qualifier.
+          readOnly: true
+        name:
+          type: string
+          description: Resource name.
+          readOnly: true
+        kind:
+          type: string
+          description: Specifies the sub-class of the reference.
+          enum:
+          - ref:machine
+          - ref:machinewithhints
+          - ref:process
+          - ref:port
+          - ref:onmachine
+          - ref:clientgroup
       required:
-      - error
+      - id
+      - kind
     ClientGroupMember:
       description: Represents a member of a client group
       allOf:
@@ -182,6 +203,39 @@ components:
               items:
                 $ref: '#/components/schemas/ProcessReference'
               description: Processes accepting on the above port that received connections from this client.
+    MachineReference:
+      description: Reference to a machine.
+      allOf:
+      - $ref: '#/components/schemas/ResourceReference'
+      x-ms-discriminator-value: ref:machine
+    ClientGroupMembersCollection:
+      type: object
+      description: Collection of ClientGroupMember resources.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientGroupMember'
+          description: Collection of ClientGroupMember resources.
+        nextLink:
+          type: string
+          description: The URL to the next set of resources.
+    ClientGroup:
+      description: Represents a collection of clients of a resource. A client group can represent the clients of a port, process, or a machine.
+      allOf:
+      - $ref: '#/components/schemas/CoreResource'
+      x-ms-discriminator-value: clientGroup
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          type: object
+          description: Resource properties.
+          properties:
+            clientsOf:
+              $ref: '#/components/schemas/ResourceReference'
+              description: Reference to the resource whose clients are represented by this group.
+          required:
+          - clientsOf
     CoreResource:
       description: Marker resource for the core Service Map resources
       allOf:
@@ -238,18 +292,6 @@ components:
           description: Error message in the caller's locale.
       required:
       - code
-    ClientGroupMembersCollection:
-      type: object
-      description: Collection of ClientGroupMember resources.
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClientGroupMember'
-          description: Collection of ClientGroupMember resources.
-        nextLink:
-          type: string
-          description: The URL to the next set of resources.
     ClientGroupMembersCount:
       description: Specifies the number of members in a client group.
       type: object
@@ -309,35 +351,15 @@ components:
           description: Resource name.
           readOnly: true
       x-ms-azure-resource: true
-    ResourceReference:
-      description: Represents a reference to another resource.
-      discriminator:
-        propertyName: kind
+    ErrorResponse:
+      type: object
+      description: An error response from the API.
       properties:
-        id:
-          type: string
-          description: Resource URI.
-        type:
-          type: string
-          description: Resource type qualifier.
-          readOnly: true
-        name:
-          type: string
-          description: Resource name.
-          readOnly: true
-        kind:
-          type: string
-          description: Specifies the sub-class of the reference.
-          enum:
-          - ref:machine
-          - ref:machinewithhints
-          - ref:process
-          - ref:port
-          - ref:onmachine
-          - ref:clientgroup
+        error:
+          $ref: '#/components/schemas/Error'
+          description: Error information.
       required:
-      - id
-      - kind
+      - error
     Accuracy:
       description: Specifies the accuracy of a computation.
       type: string
@@ -347,40 +369,7 @@ components:
       x-ms-enum:
         name: Accuracy
         modelAsString: false
-    ClientGroup:
-      description: Represents a collection of clients of a resource. A client group can represent the clients of a port, process, or a machine.
-      allOf:
-      - $ref: '#/components/schemas/CoreResource'
-      x-ms-discriminator-value: clientGroup
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          type: object
-          description: Resource properties.
-          properties:
-            clientsOf:
-              $ref: '#/components/schemas/ResourceReference'
-              description: Reference to the resource whose clients are represented by this group.
-          required:
-          - clientsOf
   parameters:
-    ClientGroupNameParameter:
-      name: clientGroupName
-      in: path
-      x-ms-parameter-location: method
-      required: true
-      description: Client Group resource name.
-      schema:
-        type: string
-        maxLength: 256
-        minLength: 3
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: API version.
-      schema:
-        type: string
     WorkspaceNameParameter:
       name: workspaceName
       in: path
@@ -392,13 +381,16 @@ components:
         maxLength: 63
         minLength: 3
         pattern: '[a-zA-Z0-9_][a-zA-Z0-9_-]+[a-zA-Z0-9_]'
-    SubscriptionIdParameter:
-      name: subscriptionId
+    ClientGroupNameParameter:
+      name: clientGroupName
       in: path
+      x-ms-parameter-location: method
       required: true
-      description: Azure subscription identifier.
+      description: Client Group resource name.
       schema:
         type: string
+        maxLength: 256
+        minLength: 3
     ResourceGroupNameParameter:
       name: resourceGroupName
       in: path
@@ -410,8 +402,26 @@ components:
         maxLength: 64
         minLength: 1
         pattern: '[a-zA-Z0-9_-]+'
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: API version.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Azure subscription identifier.
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

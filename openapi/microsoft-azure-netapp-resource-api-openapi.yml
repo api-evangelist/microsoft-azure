@@ -1,7 +1,15 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector NetApp Resource API
+  title: Microsoft Azure Microsoft NetApp NetApp Resource API
+  description: Microsoft NetApp Azure Resource Provider specification
+  version: 2023-07-01-preview
+  x-ms-code-generation-settings:
+    name: AzureNetAppFilesManagementClient
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: NetApp Resource
 paths:
@@ -327,28 +335,123 @@ paths:
         description: Update for the specified network sibling set.
         required: true
 components:
-  parameters:
-    QuotaLimitName:
-      name: quotaLimitName
-      in: path
-      required: true
-      description: The name of the Quota Limit
-      x-ms-parameter-location: method
-      schema:
-        type: string
   schemas:
-    QueryNetworkSiblingSetRequest:
-      title: QueryNetworkSiblingSetRequest
-      description: Network sibling set query.
+    networkSiblingSetProvisioningState:
+      readOnly: true
+      type: string
+      description: Gets the status of the NetworkSiblingSet at the time the operation was called.
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Updating
+      x-ms-enum:
+        name: NetworkSiblingSetProvisioningState
+        modelAsString: true
+    SubscriptionQuotaItemProperties:
+      description: SubscriptionQuotaItem Properties
       type: object
-      required:
-      - networkSiblingSetId
-      - subnetId
+      properties:
+        current:
+          description: The current quota value.
+          readOnly: true
+          type: integer
+          format: int32
+        default:
+          description: The default quota value.
+          readOnly: true
+          type: integer
+          format: int32
+    nicInfo:
+      title: NIC information
+      description: NIC information and list of volumes for which the NIC has the primary mount ip address.
+      type: object
+      properties:
+        ipAddress:
+          $ref: '#/components/schemas/ipAddress'
+        volumeResourceIds:
+          $ref: '#/components/schemas/volumeResourceIds'
+    regionInfosList:
+      description: List of regionInfo resources
+      type: object
+      properties:
+        value:
+          description: A list of regionInfo resources
+          type: array
+          items:
+            $ref: '#/components/schemas/regionInfoResource'
+        nextLink:
+          type: string
+          description: URL to get the next set of results.
+    SubscriptionQuotaItem:
+      description: Information regarding Subscription Quota Item.
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          description: SubscriptionQuotaItem properties
+          $ref: '#/components/schemas/SubscriptionQuotaItemProperties'
+          x-ms-client-flatten: true
+    subnetId:
+      title: Subnet resource Id
+      description: The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes. Example /subscriptions/subscriptionId/resourceGroups/resourceGroup/providers/Microsoft.Network/virtualNetworks/testVnet/subnets/{mySubnet}
+      type: string
+      format: arm-id
+      x-ms-arm-id-details:
+        allowedResources:
+        - type: Microsoft.Network/virtualNetworks/subnets
+    networkSiblingSet:
+      title: Network sibling set
+      description: Describes the contents of a network sibling set.
+      type: object
       properties:
         networkSiblingSetId:
           $ref: '#/components/schemas/networkSiblingSetId'
         subnetId:
           $ref: '#/components/schemas/subnetId'
+        networkSiblingSetStateId:
+          $ref: '#/components/schemas/networkSiblingSetStateId'
+        networkFeatures:
+          $ref: '#/components/schemas/networkFeatures'
+        provisioningState:
+          $ref: '#/components/schemas/networkSiblingSetProvisioningState'
+        nicInfoList:
+          type: array
+          x-ms-identifiers: []
+          description: List of NIC information
+          items:
+            $ref: '#/components/schemas/nicInfo'
+    FilePathAvailabilityRequest:
+      description: File path availability request content - availability is based on the name and the subnetId.
+      required:
+      - name
+      - subnetId
+      type: object
+      properties:
+        name:
+          description: File path to verify.
+          type: string
+        subnetId:
+          type: string
+          description: The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes
+        availabilityZone:
+          title: Logical availability zone
+          type:
+          - string
+          - 'null'
+          example: '1'
+          description: The Azure Resource logical availability zone which is used within zone mapping lookup for the subscription and region. The lookup will retrieve the physical zone where volume is placed.
+    volumeResourceIds:
+      title: Volume resource Ids
+      type: array
+      items:
+        title: Resource Id of volume
+        type: string
+        format: arm-id
+        x-ms-arm-id-details:
+          allowedResources:
+          - type: Microsoft.NetApp/netAppAccounts/capacityPools/volumes
     QuotaAvailabilityRequest:
       description: Quota availability request content.
       required:
@@ -374,6 +477,11 @@ components:
         resourceGroup:
           description: Resource group name.
           type: string
+    ipAddress:
+      title: ipAddress
+      type: string
+      readOnly: true
+      example: 1.2.3.4
     SubscriptionQuotaItemList:
       description: List of Subscription Quota Items
       type: object
@@ -383,121 +491,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SubscriptionQuotaItem'
-    subnetId:
-      title: Subnet resource Id
-      description: The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes. Example /subscriptions/subscriptionId/resourceGroups/resourceGroup/providers/Microsoft.Network/virtualNetworks/testVnet/subnets/{mySubnet}
-      type: string
-      format: arm-id
-      x-ms-arm-id-details:
-        allowedResources:
-        - type: Microsoft.Network/virtualNetworks/subnets
-    volumeResourceIds:
-      title: Volume resource Ids
-      type: array
-      items:
-        title: Resource Id of volume
-        type: string
-        format: arm-id
-        x-ms-arm-id-details:
-          allowedResources:
-          - type: Microsoft.NetApp/netAppAccounts/capacityPools/volumes
-    regionInfosList:
-      description: List of regionInfo resources
-      type: object
-      properties:
-        value:
-          description: A list of regionInfo resources
-          type: array
-          items:
-            $ref: '#/components/schemas/regionInfoResource'
-        nextLink:
-          type: string
-          description: URL to get the next set of results.
-    networkFeatures:
-      title: Network features
-      description: Network features available to the volume, or current state of update.
-      type: string
-      enum:
-      - Basic
-      - Standard
-      - Basic_Standard
-      - Standard_Basic
-      x-ms-enum:
-        name: NetworkFeatures
-        modelAsString: true
-        values:
-        - value: Basic
-          description: Basic network features.
-        - value: Standard
-          description: Standard network features.
-        - value: Basic_Standard
-          description: Updating from Basic to Standard network features.
-        - value: Standard_Basic
-          description: Updating from Standard to Basic network features.
-      example: Standard
-      default: Basic
-    FilePathAvailabilityRequest:
-      description: File path availability request content - availability is based on the name and the subnetId.
-      required:
-      - name
-      - subnetId
-      type: object
-      properties:
-        name:
-          description: File path to verify.
-          type: string
-        subnetId:
-          type: string
-          description: The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes
-        availabilityZone:
-          title: Logical availability zone
-          type:
-          - string
-          - 'null'
-          example: '1'
-          description: The Azure Resource logical availability zone which is used within zone mapping lookup for the subscription and region. The lookup will retrieve the physical zone where volume is placed.
-    networkSiblingSetId:
-      title: Network Sibling Set ID
-      description: Network Sibling Set ID for a group of volumes sharing networking resources in a subnet.
-      type: string
-      pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
-      maxLength: 36
-      minLength: 36
-      example: 9760acf5-4638-11e7-9bdb-020073ca3333
-    SubscriptionQuotaItemProperties:
-      description: SubscriptionQuotaItem Properties
-      type: object
-      properties:
-        current:
-          description: The current quota value.
-          readOnly: true
-          type: integer
-          format: int32
-        default:
-          description: The default quota value.
-          readOnly: true
-          type: integer
-          format: int32
-    regionInfoResource:
-      description: Information regarding regionInfo Item.
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          description: regionInfo properties
-          $ref: '#/components/schemas/regionInfo'
-          x-ms-client-flatten: true
-    SubscriptionQuotaItem:
-      description: Information regarding Subscription Quota Item.
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          description: SubscriptionQuotaItem properties
-          $ref: '#/components/schemas/SubscriptionQuotaItemProperties'
-          x-ms-client-flatten: true
     regionInfo:
       description: Provides region specific information.
       type: object
@@ -553,11 +546,44 @@ components:
                 description: Available availability zone
                 type: boolean
                 example: true
-    ipAddress:
-      title: ipAddress
+    networkFeatures:
+      title: Network features
+      description: Network features available to the volume, or current state of update.
       type: string
-      readOnly: true
-      example: 1.2.3.4
+      enum:
+      - Basic
+      - Standard
+      - Basic_Standard
+      - Standard_Basic
+      x-ms-enum:
+        name: NetworkFeatures
+        modelAsString: true
+        values:
+        - value: Basic
+          description: Basic network features.
+        - value: Standard
+          description: Standard network features.
+        - value: Basic_Standard
+          description: Updating from Basic to Standard network features.
+        - value: Standard_Basic
+          description: Updating from Standard to Basic network features.
+      example: Standard
+      default: Basic
+    regionInfoResource:
+      description: Information regarding regionInfo Item.
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          description: regionInfo properties
+          $ref: '#/components/schemas/regionInfo'
+          x-ms-client-flatten: true
+    networkSiblingSetStateId:
+      title: Network sibling set state Id
+      description: Network sibling set state Id identifying the current state of the sibling set.
+      type: string
+      example: '12345_44420.8001578125'
     ResourceNameAvailabilityRequest:
       description: Resource name availability request content.
       required:
@@ -583,42 +609,6 @@ components:
         resourceGroup:
           description: Resource group name.
           type: string
-    CheckAvailabilityResponse:
-      description: Information regarding availability of a resource.
-      type: object
-      properties:
-        isAvailable:
-          description: <code>true</code> indicates name is valid and available. <code>false</code> indicates the name is invalid, unavailable, or both.
-          type: boolean
-        reason:
-          description: <code>Invalid</code> indicates the name provided does not match Azure App Service naming requirements. <code>AlreadyExists</code> indicates that the name is already in use and is therefore unavailable.
-          enum:
-          - Invalid
-          - AlreadyExists
-          type: string
-          x-ms-enum:
-            name: InAvailabilityReasonType
-            modelAsString: true
-        message:
-          description: If reason == invalid, provide the user with the reason why the given name is invalid, and provide the resource naming requirements so that the user can select a valid name. If reason == AlreadyExists, explain that resource name is already in use, and direct them to select a different name.
-          type: string
-    networkSiblingSetStateId:
-      title: Network sibling set state Id
-      description: Network sibling set state Id identifying the current state of the sibling set.
-      type: string
-      example: '12345_44420.8001578125'
-    networkSiblingSetProvisioningState:
-      readOnly: true
-      type: string
-      description: Gets the status of the NetworkSiblingSet at the time the operation was called.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Updating
-      x-ms-enum:
-        name: NetworkSiblingSetProvisioningState
-        modelAsString: true
     UpdateNetworkSiblingSetRequest:
       title: UpdateNetworkSiblingSetRequest
       description: Network sibling set update.
@@ -638,38 +628,60 @@ components:
         networkFeatures:
           $ref: '#/components/schemas/networkFeatures'
           description: Network features available to the volume
-    nicInfo:
-      title: NIC information
-      description: NIC information and list of volumes for which the NIC has the primary mount ip address.
+    networkSiblingSetId:
+      title: Network Sibling Set ID
+      description: Network Sibling Set ID for a group of volumes sharing networking resources in a subnet.
+      type: string
+      pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
+      maxLength: 36
+      minLength: 36
+      example: 9760acf5-4638-11e7-9bdb-020073ca3333
+    QueryNetworkSiblingSetRequest:
+      title: QueryNetworkSiblingSetRequest
+      description: Network sibling set query.
       type: object
-      properties:
-        ipAddress:
-          $ref: '#/components/schemas/ipAddress'
-        volumeResourceIds:
-          $ref: '#/components/schemas/volumeResourceIds'
-    networkSiblingSet:
-      title: Network sibling set
-      description: Describes the contents of a network sibling set.
-      type: object
+      required:
+      - networkSiblingSetId
+      - subnetId
       properties:
         networkSiblingSetId:
           $ref: '#/components/schemas/networkSiblingSetId'
         subnetId:
           $ref: '#/components/schemas/subnetId'
-        networkSiblingSetStateId:
-          $ref: '#/components/schemas/networkSiblingSetStateId'
-        networkFeatures:
-          $ref: '#/components/schemas/networkFeatures'
-        provisioningState:
-          $ref: '#/components/schemas/networkSiblingSetProvisioningState'
-        nicInfoList:
-          type: array
-          x-ms-identifiers: []
-          description: List of NIC information
-          items:
-            $ref: '#/components/schemas/nicInfo'
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
+    CheckAvailabilityResponse:
+      description: Information regarding availability of a resource.
+      type: object
+      properties:
+        isAvailable:
+          description: <code>true</code> indicates name is valid and available. <code>false</code> indicates the name is invalid, unavailable, or both.
+          type: boolean
+        reason:
+          description: <code>Invalid</code> indicates the name provided does not match Azure App Service naming requirements. <code>AlreadyExists</code> indicates that the name is already in use and is therefore unavailable.
+          enum:
+          - Invalid
+          - AlreadyExists
+          type: string
+          x-ms-enum:
+            name: InAvailabilityReasonType
+            modelAsString: true
+        message:
+          description: If reason == invalid, provide the user with the reason why the given name is invalid, and provide the resource naming requirements so that the user can select a valid name. If reason == AlreadyExists, explain that resource name is already in use, and direct them to select a different name.
+          type: string
   parameters:
-  - $ref: '#/components/parameters/Endpoint'
+    QuotaLimitName:
+      name: quotaLimitName
+      in: path
+      required: true
+      description: The name of the Quota Limit
+      x-ms-parameter-location: method
+      schema:
+        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow

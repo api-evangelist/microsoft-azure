@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Node API
+  title: Microsoft Azure Service Fabric Client Node API
+  description: Service Fabric REST Client APIs allows management of Service Fabric clusters, applications and services.
+  version: '8.2'
+servers:
+- url: http://localhost:19080
+- url: https://localhost:19080
 tags:
 - name: Node
 paths:
@@ -40,7 +44,7 @@ paths:
                 $ref: '#/components/schemas/FabricError'
   /Nodes/{nodeName}:
     get:
-      summary: Microsoft Azure Gets The Information About A Specific Node In The Service Fabric Cluster
+      summary: Microsoft Azure Gets The Information About A Specific Node In The Service…
       description: The response includes the name, status, ID, health, uptime, and other details about the node.
       operationId: microsoftAzureGetnodeinfo
       parameters:
@@ -94,7 +98,7 @@ paths:
                 $ref: '#/components/schemas/FabricError'
     post:
       operationId: microsoftAzureGetnodehealthusingpolicy
-      summary: Microsoft Azure Gets The Health Of A Service Fabric Node, By Using The Specified Health Policy
+      summary: Microsoft Azure Gets The Health Of A Service Fabric Node, By Using The…
       description: Gets the health of a Service Fabric node. Use EventsHealthStateFilter to filter the collection of health events reported on the node based on the health state. Use ClusterHealthPolicy in the POST body to override the health policies used to evaluate the health. If the node that you specify by name does not exist in the health store, this returns an error.
       tags:
       - Node
@@ -121,7 +125,15 @@ paths:
     post:
       operationId: microsoftAzureReportnodehealth
       summary: Microsoft Azure Sends A Health Report On The Service Fabric Node
-      description: Reports health state of the specified Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.<br>The report is sent to a Service Fabric gateway node, which forwards to the health store.<br>The report may be accepted by the gateway, but rejected by the health store after extra validation.<br>For example, the health store may reject the report because of an invalid parameter, like a stale sequence number.<br>To see whether the report was applied in the health store, run GetNodeHealth and check that the report appears in the HealthEvents section.
+      description: 'Reports health state of the specified Service Fabric node. The report must contain the information about the source of the health report and property on which it is reported.
+
+        The report is sent to a Service Fabric gateway node, which forwards to the health store.
+
+        The report may be accepted by the gateway, but rejected by the health store after extra validation.
+
+        For example, the health store may reject the report because of an invalid parameter, like a stale sequence number.
+
+        To see whether the report was applied in the health store, run GetNodeHealth and check that the report appears in the HealthEvents section.'
       tags:
       - Node
       parameters:
@@ -166,7 +178,7 @@ paths:
   /Nodes/{nodeName}/$/Deactivate:
     post:
       operationId: microsoftAzureDisablenode
-      summary: Microsoft Azure Deactivate A Service Fabric Cluster Node With The Specified Deactivation Intent
+      summary: Microsoft Azure Deactivate A Service Fabric Cluster Node With The Specified…
       description: Deactivate a Service Fabric cluster node with the specified deactivation intent. Once the deactivation is in progress, the deactivation intent can be increased, but not decreased (for example, a node that is deactivated with the Pause intent can be deactivated further with Restart, but not the other way around. Nodes may be reactivated using the Activate a node operation any time after they are deactivated. If the deactivation is not complete, this will cancel the deactivation. A node that goes down and comes back up while deactivated will still need to be reactivated before services will be placed on that node.
       tags:
       - Node
@@ -187,7 +199,7 @@ paths:
   /Nodes/{nodeName}/$/Activate:
     post:
       operationId: microsoftAzureEnablenode
-      summary: Microsoft Azure Activate A Service Fabric Cluster Node That Is Currently Deactivated
+      summary: Microsoft Azure Activate A Service Fabric Cluster Node That Is Currently…
       description: Activates a Service Fabric cluster node that is currently deactivated. Once activated, the node will again become a viable target for placing new replicas, and any deactivated replicas remaining on the node will be reactivated.
       tags:
       - Node
@@ -207,7 +219,7 @@ paths:
   /Nodes/{nodeName}/$/RemoveNodeState:
     post:
       operationId: microsoftAzureRemovenodestate
-      summary: Microsoft Azure Notifies Service Fabric That The Persisted State On A Node Has Been Permanently Removed Or Lost
+      summary: Microsoft Azure Notifies Service Fabric That The Persisted State On A Node Has…
       description: This implies that it is not possible to recover the persisted state of that node. This generally happens if a hard disk has been wiped clean, or if a hard disk crashes. The node has to be down for this operation to be successful. This operation lets Service Fabric know that the replicas on that node no longer exist, and that Service Fabric should stop waiting for those replicas to come back up. Do not run this cmdlet if the state on the node has not been removed and the node can come back up with its state intact. Starting from Service Fabric 6.5, in order to use this API for seed nodes, please change the seed nodes to regular (non-seed) nodes and then invoke this API to remove the node state. If the cluster is running on Azure, after the seed node goes down, Service Fabric will try to change it to a non-seed node automatically. To make this happen, make sure the number of non-seed nodes in the primary node type is no less than the number of Down seed nodes. If necessary, add more nodes to the primary node type to achieve this. For standalone cluster, if the Down seed node is not expected to come back up with its state intact, please remove the node from the cluster, see https://docs.microsoft.com/azure/service-fabric/service-fabric-cluster-windows-server-add-remove-nodes
       tags:
       - Node
@@ -353,122 +365,72 @@ paths:
                 $ref: '#/components/schemas/FabricError'
 components:
   schemas:
-    NodeDeactivationTaskId:
-      description: Identity of the task related to deactivation operation on the node.
+    FabricError:
+      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
+      properties:
+        Error:
+          $ref: '#/components/schemas/FabricErrorError'
+          description: Error object containing error code and error message.
+      required:
+      - Error
+    HealthStatistics:
+      description: 'The health statistics of an entity, returned as part of the health query result when the query description is configured to include statistics.
+
+        The statistics include health state counts for all children types of the current entity.
+
+        For example, for cluster, the health statistics include health state counts for nodes, applications, services, partitions, replicas, deployed applications and deployed service packages.
+
+        For partition, the health statistics include health counts for replicas.'
+      properties:
+        HealthStateCountList:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityKindHealthStateCount'
+          description: List of health state counts per entity kind, which keeps track of how many children of the queried entity are in Ok, Warning and Error state.
+    NodeId:
+      description: An internal ID used by Service Fabric to uniquely identify a node. Node Id is deterministically generated from node name.
       properties:
         Id:
           type: string
-          description: Value of the task id.
-        NodeDeactivationTaskType:
-          $ref: '#/components/schemas/NodeDeactivationTaskType'
-          description: The type of the task that performed the node deactivation. Following are the possible values.
-    NodeDeactivationTaskType:
+          description: Value of the node Id. This is a 128 bit integer.
+    ContinuationToken:
       type: string
-      description: The type of the task that performed the node deactivation. Following are the possible values.
+      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+    NodeStatus:
+      type: string
+      description: The status of the node.
       enum:
       - Invalid
-      - Infrastructure
-      - Repair
-      - Client
+      - Up
+      - Down
+      - Enabling
+      - Disabling
+      - Disabled
+      - Unknown
+      - Removed
       x-ms-enum:
-        name: NodeDeactivationTaskType
+        name: NodeStatus
         modelAsString: true
         values:
         - value: Invalid
-          description: Indicates the node deactivation task type is invalid. All Service Fabric enumerations have the invalid type. The value is zero. This value is not used.
-        - value: Infrastructure
-          description: Specifies the task created by Infrastructure hosting the nodes. The value is 1.
-        - value: Repair
-          description: Specifies the task that was created by the Repair Manager service. The value is 2.
-        - value: Client
-          description: Specifies that the task was created by using the public API. The value is 3.
-    SafetyCheckWrapper:
-      description: A wrapper for the safety check object. Safety checks are performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state.
-      properties:
-        SafetyCheck:
-          $ref: '#/components/schemas/SafetyCheck'
-          description: Represents a safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state.
-    NodeDeactivationTask:
-      description: The task representing the deactivation operation on the node.
-      properties:
-        NodeDeactivationTaskId:
-          $ref: '#/components/schemas/NodeDeactivationTaskId'
-          description: Identity of the task related to deactivation operation on the node.
-        NodeDeactivationIntent:
-          $ref: '#/components/schemas/NodeDeactivationIntent'
-          description: The intent or the reason for deactivating the node. Following are the possible values for it.
-    HealthEvaluationWrapper:
-      description: Wrapper object for health evaluation.
-      properties:
-        HealthEvaluation:
-          $ref: '#/components/schemas/HealthEvaluation'
-          description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
-    SafetyCheckInfoList:
-      type: array
-      description: List of pending safety checks
-      items:
-        $ref: '#/components/schemas/SafetyCheckWrapper'
-    NodeDeactivationInfo:
-      description: Information about the node deactivation. This information is valid for a node that is undergoing deactivation or has already been deactivated.
-      properties:
-        NodeDeactivationIntent:
-          $ref: '#/components/schemas/NodeDeactivationIntent'
-          description: The intent or the reason for deactivating the node. Following are the possible values for it.
-        NodeDeactivationStatus:
-          $ref: '#/components/schemas/NodeDeactivationStatus'
-          description: The status of node deactivation operation. Following are the possible values.
-        NodeDeactivationTask:
-          $ref: '#/components/schemas/NodeDeactivationTaskList'
-          description: List of tasks representing the deactivation operation on the node.
-        PendingSafetyChecks:
-          $ref: '#/components/schemas/SafetyCheckInfoList'
-          description: List of pending safety checks
-    NodeLoadInfo:
-      description: Information about load on a Service Fabric node. It holds a summary of all metrics and their load on a node.
-      properties:
-        NodeName:
-          $ref: '#/components/schemas/NodeName'
-          description: Name of the node for which the load information is provided by this object.
-        NodeLoadMetricInformation:
-          type: array
-          items:
-            $ref: '#/components/schemas/NodeLoadMetricInformation'
-          description: List that contains metrics and their load information on this node.
-    EntityKind:
+          description: Indicates the node status is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Up
+          description: Indicates the node is up. The value is 1.
+        - value: Down
+          description: Indicates the node is down. The value is 2.
+        - value: Enabling
+          description: Indicates the node is in process of being enabled. The value is 3.
+        - value: Disabling
+          description: Indicates the node is in the process of being disabled. The value is 4.
+        - value: Disabled
+          description: Indicates the node is disabled. The value is 5.
+        - value: Unknown
+          description: Indicates the node is unknown. A node would be in Unknown state if Service Fabric does not have authoritative information about that node. This can happen if the system learns about a node at runtime.The value is 6.
+        - value: Removed
+          description: Indicates the node is removed. A node would be in Removed state if NodeStateRemoved API has been called for this node. In other words, Service Fabric has been informed that the persisted state on the node has been permanently lost. The value is 7.
+    NodeName:
       type: string
-      description: The entity type of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-      enum:
-      - Invalid
-      - Node
-      - Partition
-      - Service
-      - Application
-      - Replica
-      - DeployedApplication
-      - DeployedServicePackage
-      - Cluster
-      x-ms-enum:
-        name: EntityKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid entity kind. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Node
-          description: Indicates the entity is a Service Fabric node. The value is 1.
-        - value: Partition
-          description: Indicates the entity is a Service Fabric partition. The value is 2.
-        - value: Service
-          description: Indicates the entity is a Service Fabric service. The value is 3.
-        - value: Application
-          description: Indicates the entity is a Service Fabric application. The value is 4.
-        - value: Replica
-          description: Indicates the entity is a Service Fabric replica. The value is 5.
-        - value: DeployedApplication
-          description: Indicates the entity is a Service Fabric deployed application. The value is 6.
-        - value: DeployedServicePackage
-          description: Indicates the entity is a Service Fabric deployed service package. The value is 7.
-        - value: Cluster
-          description: Indicates the entity is a Service Fabric cluster. The value is 8.
+      description: The name of a Service Fabric node.
     FabricErrorCodes:
       type: string
       description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
@@ -645,62 +607,261 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
-    NodeLoadMetricInformation:
-      description: Represents data structure that contains load information for a certain metric on a node.
+    NodeDeactivationInfo:
+      description: Information about the node deactivation. This information is valid for a node that is undergoing deactivation or has already been deactivated.
+      properties:
+        NodeDeactivationIntent:
+          $ref: '#/components/schemas/NodeDeactivationIntent'
+          description: The intent or the reason for deactivating the node. Following are the possible values for it.
+        NodeDeactivationStatus:
+          $ref: '#/components/schemas/NodeDeactivationStatus'
+          description: The status of node deactivation operation. Following are the possible values.
+        NodeDeactivationTask:
+          $ref: '#/components/schemas/NodeDeactivationTaskList'
+          description: List of tasks representing the deactivation operation on the node.
+        PendingSafetyChecks:
+          $ref: '#/components/schemas/SafetyCheckInfoList'
+          description: List of pending safety checks
+    NodeTypeHealthPolicyMap:
+      type: array
+      items:
+        $ref: '#/components/schemas/NodeTypeHealthPolicyMapItem'
+      description: "Defines a map with max percentage unhealthy nodes for specific node types.\nEach entry specifies as key the node type name and as value an integer that represents the MaxPercentUnhealthyNodes percentage used to evaluate the nodes of the specified node type.\n\nThe node type health policy map can be used during cluster health evaluation to describe special node types. \nThey are evaluated against the percentages associated with their node type name in the map. \nSetting this has no impact on the global pool of nodes used for MaxPercentUnhealthyNodes. \nThe node type health policy map is used only if the cluster manifest enables node type health evaluation using the configuration entry for HealthManager/EnableNodeTypeHealthEvaluation.\n\nFor example, given a cluster with many nodes of different types, with important work hosted on node type \"SpecialNodeType\" that should not tolerate any nodes down. \nYou can specify global MaxPercentUnhealthyNodes to 20% to tolerate some failures for all nodes, but for the node type \"SpecialNodeType\", set the MaxPercentUnhealthyNodes to 0 by \nsetting the value in the key value pair in NodeTypeHealthPolicyMapItem. The key is the node type name. \nThis way, as long as no nodes of type \"SpecialNodeType\" are in Error state, \neven if some of the many nodes in the global pool are in Error state, but below the global unhealthy percentage, the cluster would be evaluated to Warning. \nA Warning health state does not impact cluster upgrade or other monitoring triggered by Error health state. \nBut even one node of type SpecialNodeType in Error would make cluster unhealthy (in Error rather than Warning/Ok), which triggers rollback or pauses the cluster upgrade, depending on the upgrade configuration. \n\nConversely, setting the global MaxPercentUnhealthyNodes to 0, and setting SpecialNodeType's max percent unhealthy nodes to 100, \nwith one node of type SpecialNodeType in Error state would still put the cluster in an Error state, since the global restriction is more strict in this case."
+    FabricErrorError:
+      description: Error object containing error code and error message.
+      properties:
+        Code:
+          $ref: '#/components/schemas/FabricErrorCodes'
+          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
+        Message:
+          type: string
+          description: Error message.
+      required:
+      - Code
+    RestartNodeDescription:
+      description: Describes the parameters to restart a Service Fabric node.
+      properties:
+        NodeInstanceId:
+          type: string
+          description: The instance ID of the target node. If instance ID is specified the node is restarted only if it matches with the current instance of the node. A default value of "0" would match any instance ID. The instance ID can be obtained using get node query.
+          default: '0'
+        CreateFabricDump:
+          type: string
+          description: Specify True to create a dump of the fabric node process. This is case-sensitive.
+          enum:
+          - 'False'
+          - 'True'
+          default: 'False'
+          x-ms-enum:
+            name: CreateFabricDump
+            modelAsString: true
+            values:
+            - value: 'False'
+            - value: 'True'
+      required:
+      - NodeInstanceId
+    SafetyCheckInfoList:
+      type: array
+      description: List of pending safety checks
+      items:
+        $ref: '#/components/schemas/SafetyCheckWrapper'
+    HealthEvaluation:
+      discriminator:
+        propertyName: Kind
+      description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
+      properties:
+        Kind:
+          $ref: '#/components/schemas/HealthEvaluationKind'
+          description: The health manager in the cluster performs health evaluations in determining the aggregated health state of an entity. This enumeration provides information on the kind of evaluation that was performed. Following are the possible values.
+        AggregatedHealthState:
+          $ref: '#/components/schemas/HealthState'
+          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+        Description:
+          type: string
+          description: Description of the health evaluation, which represents a summary of the evaluation process.
+      required:
+      - Kind
+    ConfigParameterOverrideList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ConfigParameterOverride'
+      description: List that contains parameters, sections that they belong and their values.
+    HealthEvaluationWrapper:
+      description: Wrapper object for health evaluation.
+      properties:
+        HealthEvaluation:
+          $ref: '#/components/schemas/HealthEvaluation'
+          description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
+    NodeInfo:
+      description: Information about a node in Service Fabric cluster.
       properties:
         Name:
+          $ref: '#/components/schemas/NodeName'
+          description: The name of a Service Fabric node.
+        IpAddressOrFQDN:
           type: string
-          description: Name of the metric for which this load information is provided.
-        NodeCapacity:
+          description: The IP address or fully qualified domain name of the node.
+        Type:
           type: string
-          description: Total capacity on the node for this metric.
-        NodeLoad:
+          description: The type of the node.
+        CodeVersion:
           type: string
-          description: Current load on the node for this metric. In future releases of Service Fabric this parameter will be deprecated in favor of CurrentNodeLoad.
-        NodeRemainingCapacity:
+          description: The version of Service Fabric binaries that the node is running.
+        ConfigVersion:
           type: string
-          description: The remaining capacity on the node for this metric. In future releases of Service Fabric this parameter will be deprecated in favor of NodeCapacityRemaining.
-        IsCapacityViolation:
+          description: The version of Service Fabric cluster manifest that the node is using.
+        NodeStatus:
+          $ref: '#/components/schemas/NodeStatus'
+          description: The status of the node.
+        NodeUpTimeInSeconds:
+          type: string
+          description: Time in seconds since the node has been in NodeStatus Up. Value zero indicates that the node is not Up.
+        HealthState:
+          $ref: '#/components/schemas/HealthState'
+          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+        IsSeedNode:
           type: boolean
-          description: Indicates if there is a capacity violation for this metric on the node.
-        NodeBufferedCapacity:
+          description: Indicates if the node is a seed node or not. Returns true if the node is a seed node, otherwise false. A quorum of seed nodes are required for proper operation of Service Fabric cluster.
+        UpgradeDomain:
           type: string
-          description: The value that indicates the reserved capacity for this metric on the node.
-        NodeRemainingBufferedCapacity:
+          description: The upgrade domain of the node.
+        FaultDomain:
           type: string
-          description: The remaining reserved capacity for this metric on the node. In future releases of Service Fabric this parameter will be deprecated in favor of BufferedNodeCapacityRemaining.
-        CurrentNodeLoad:
+          description: The fault domain of the node.
+        Id:
+          $ref: '#/components/schemas/NodeId'
+          description: An internal ID used by Service Fabric to uniquely identify a node. Node Id is deterministically generated from node name.
+        InstanceId:
           type: string
-          format: double
-          description: Current load on the node for this metric.
-        NodeCapacityRemaining:
+          description: The ID representing the node instance. While the ID of the node is deterministically generated from the node name and remains same across restarts, the InstanceId changes every time node restarts.
+        NodeDeactivationInfo:
+          $ref: '#/components/schemas/NodeDeactivationInfo'
+          description: Information about the node deactivation. This information is valid for a node that is undergoing deactivation or has already been deactivated.
+        IsStopped:
+          type: boolean
+          description: Indicates if the node is stopped by calling stop node API or not. Returns true if the node is stopped, otherwise false.
+        NodeDownTimeInSeconds:
           type: string
-          format: double
-          description: The remaining capacity on the node for the metric.
-        BufferedNodeCapacityRemaining:
+          description: Time in seconds since the node has been in NodeStatus Down. Value zero indicates node is not NodeStatus Down.
+        NodeUpAt:
           type: string
-          format: double
-          description: The remaining capacity which is not reserved by NodeBufferPercentage for this metric on the node.
-        PlannedNodeLoadRemoval:
+          format: date-time
+          description: Date time in UTC when the node came up. If the node has never been up then this value will be zero date time.
+        NodeDownAt:
           type: string
-          format: double
-          description: 'This value represents the load of the replicas that are planned to be removed in the future.
-
-            This kind of load is reported for replicas that are currently being moving to other nodes and for replicas that are currently being dropped but still use the load on the source node.'
-    HealthStatistics:
-      description: 'The health statistics of an entity, returned as part of the health query result when the query description is configured to include statistics.
-
-        The statistics include health state counts for all children types of the current entity.
-
-        For example, for cluster, the health statistics include health state counts for nodes, applications, services, partitions, replicas, deployed applications and deployed service packages.
-
-        For partition, the health statistics include health counts for replicas.'
+          format: date-time
+          description: Date time in UTC when the node went down. If node has never been down then this value will be zero date time.
+        NodeTags:
+          $ref: '#/components/schemas/NodeTagsList'
+          description: List that contains tags, which will be applied to the nodes.
+        IsNodeByNodeUpgradeInProgress:
+          type: boolean
+          description: Indicates if a node-by-node upgrade is currently being performed on this node.
+        InfrastructurePlacementID:
+          type: string
+          description: PlacementID used by the InfrastructureService.
+    EntityKindHealthStateCount:
+      description: Represents health state count for entities of the specified entity kind.
       properties:
-        HealthStateCountList:
+        EntityKind:
+          $ref: '#/components/schemas/EntityKind'
+          description: The entity kind for which health states are evaluated.
+        HealthStateCount:
+          $ref: '#/components/schemas/HealthStateCount'
+          description: The health state count for the entities of the specified kind.
+    NodeDeactivationIntent:
+      type: string
+      description: The intent or the reason for deactivating the node. Following are the possible values for it.
+      enum:
+      - Invalid
+      - Pause
+      - Restart
+      - RemoveData
+      - RemoveNode
+      x-ms-enum:
+        name: NodeDeactivationIntent
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the node deactivation intent is invalid. All Service Fabric enumerations have the invalid type. The value is zero. This value is not used.
+        - value: Pause
+          description: Indicates that the node should be paused. The value is 1.
+        - value: Restart
+          description: Indicates that the intent is for the node to be restarted after a short period of time. Service Fabric does not restart the node, this action is done outside of Service Fabric. The value is 2.
+        - value: RemoveData
+          description: Indicates that the intent is to reimage the node. Service Fabric does not reimage the node, this action is done outside of Service Fabric. The value is 3.
+        - value: RemoveNode
+          description: Indicates that the node is being decommissioned and is not expected to return. Service Fabric does not decommission the node, this action is done outside of Service Fabric. The value is 4.
+    DeactivationIntentDescription:
+      description: Describes the intent or reason for deactivating the node.
+      properties:
+        DeactivationIntent:
+          type: string
+          description: Describes the intent or reason for deactivating the node. The possible values are following.
+          enum:
+          - Pause
+          - Restart
+          - RemoveData
+          x-ms-enum:
+            name: DeactivationIntent
+            modelAsString: true
+            values:
+            - value: Pause
+              description: Indicates that the node should be paused. The value is 1.
+            - value: Restart
+              description: Indicates that the intent is for the node to be restarted after a short period of time. The value is 2.
+            - value: RemoveData
+              description: Indicates the intent is for the node to remove data. The value is 3.
+    EntityHealth:
+      description: Health information common to all entities in the cluster. It contains the aggregated health state, health events and unhealthy evaluation.
+      properties:
+        AggregatedHealthState:
+          $ref: '#/components/schemas/HealthState'
+          description: 'The HealthState representing the aggregated health state of the entity computed by Health Manager.
+
+            The health evaluation of the entity reflects all events reported on the entity and its children (if any).
+
+            The aggregation is done by applying the desired health policy.'
+        HealthEvents:
           type: array
           items:
-            $ref: '#/components/schemas/EntityKindHealthStateCount'
-          description: List of health state counts per entity kind, which keeps track of how many children of the queried entity are in Ok, Warning and Error state.
+            $ref: '#/components/schemas/HealthEvent'
+          description: The list of health events reported on the entity.
+        UnhealthyEvaluations:
+          $ref: '#/components/schemas/UnhealthyEvaluations'
+          description: The unhealthy evaluations that show why the current aggregated health state was returned by Health Manager.
+        HealthStatistics:
+          $ref: '#/components/schemas/HealthStatistics'
+          description: Shows the health statistics for all children types of the queried entity.
+    NodeDeactivationTaskId:
+      description: Identity of the task related to deactivation operation on the node.
+      properties:
+        Id:
+          type: string
+          description: Value of the task id.
+        NodeDeactivationTaskType:
+          $ref: '#/components/schemas/NodeDeactivationTaskType'
+          description: The type of the task that performed the node deactivation. Following are the possible values.
+    NodeDeactivationStatus:
+      type: string
+      description: The status of node deactivation operation. Following are the possible values.
+      enum:
+      - None
+      - SafetyCheckInProgress
+      - SafetyCheckComplete
+      - Completed
+      x-ms-enum:
+        name: NodeDeactivationStatus
+        modelAsString: true
+        values:
+        - value: None
+          description: No status is associated with the task. The value is zero.
+        - value: SafetyCheckInProgress
+          description: When a node is deactivated Service Fabric performs checks to ensure that the operation is safe to proceed to ensure availability of the service and reliability of the state. This value indicates that one or more safety checks are in progress. The value is 1.
+        - value: SafetyCheckComplete
+          description: When a node is deactivated Service Fabric performs checks to ensure that the operation is safe to proceed to ensure availability of the service and reliability of the state. This value indicates that all safety checks have been completed. The value is 2.
+        - value: Completed
+          description: The task is completed. The value is 3.
     ClusterHealthPolicy:
       description: Defines a health policy used to evaluate the health of the cluster or of a cluster node.
       properties:
@@ -760,84 +921,6 @@ components:
         NodeTypeHealthPolicyMap:
           $ref: '#/components/schemas/NodeTypeHealthPolicyMap'
           description: "Defines a map with max percentage unhealthy nodes for specific node types.\nEach entry specifies as key the node type name and as value an integer that represents the MaxPercentUnhealthyNodes percentage used to evaluate the nodes of the specified node type.\n\nThe node type health policy map can be used during cluster health evaluation to describe special node types. \nThey are evaluated against the percentages associated with their node type name in the map. \nSetting this has no impact on the global pool of nodes used for MaxPercentUnhealthyNodes. \nThe node type health policy map is used only if the cluster manifest enables node type health evaluation using the configuration entry for HealthManager/EnableNodeTypeHealthEvaluation.\n\nFor example, given a cluster with many nodes of different types, with important work hosted on node type \"SpecialNodeType\" that should not tolerate any nodes down. \nYou can specify global MaxPercentUnhealthyNodes to 20% to tolerate some failures for all nodes, but for the node type \"SpecialNodeType\", set the MaxPercentUnhealthyNodes to 0 by \nsetting the value in the key value pair in NodeTypeHealthPolicyMapItem. The key is the node type name. \nThis way, as long as no nodes of type \"SpecialNodeType\" are in Error state, \neven if some of the many nodes in the global pool are in Error state, but below the global unhealthy percentage, the cluster would be evaluated to Warning. \nA Warning health state does not impact cluster upgrade or other monitoring triggered by Error health state. \nBut even one node of type SpecialNodeType in Error would make cluster unhealthy (in Error rather than Warning/Ok), which triggers rollback or pauses the cluster upgrade, depending on the upgrade configuration. \n\nConversely, setting the global MaxPercentUnhealthyNodes to 0, and setting SpecialNodeType's max percent unhealthy nodes to 100, \nwith one node of type SpecialNodeType in Error state would still put the cluster in an Error state, since the global restriction is more strict in this case."
-    NodeTypeHealthPolicyMap:
-      type: array
-      items:
-        $ref: '#/components/schemas/NodeTypeHealthPolicyMapItem'
-      description: "Defines a map with max percentage unhealthy nodes for specific node types.\nEach entry specifies as key the node type name and as value an integer that represents the MaxPercentUnhealthyNodes percentage used to evaluate the nodes of the specified node type.\n\nThe node type health policy map can be used during cluster health evaluation to describe special node types. \nThey are evaluated against the percentages associated with their node type name in the map. \nSetting this has no impact on the global pool of nodes used for MaxPercentUnhealthyNodes. \nThe node type health policy map is used only if the cluster manifest enables node type health evaluation using the configuration entry for HealthManager/EnableNodeTypeHealthEvaluation.\n\nFor example, given a cluster with many nodes of different types, with important work hosted on node type \"SpecialNodeType\" that should not tolerate any nodes down. \nYou can specify global MaxPercentUnhealthyNodes to 20% to tolerate some failures for all nodes, but for the node type \"SpecialNodeType\", set the MaxPercentUnhealthyNodes to 0 by \nsetting the value in the key value pair in NodeTypeHealthPolicyMapItem. The key is the node type name. \nThis way, as long as no nodes of type \"SpecialNodeType\" are in Error state, \neven if some of the many nodes in the global pool are in Error state, but below the global unhealthy percentage, the cluster would be evaluated to Warning. \nA Warning health state does not impact cluster upgrade or other monitoring triggered by Error health state. \nBut even one node of type SpecialNodeType in Error would make cluster unhealthy (in Error rather than Warning/Ok), which triggers rollback or pauses the cluster upgrade, depending on the upgrade configuration. \n\nConversely, setting the global MaxPercentUnhealthyNodes to 0, and setting SpecialNodeType's max percent unhealthy nodes to 100, \nwith one node of type SpecialNodeType in Error state would still put the cluster in an Error state, since the global restriction is more strict in this case."
-    PagedNodeInfoList:
-      description: The list of nodes in the cluster. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
-      properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        Items:
-          type: array
-          description: List of node information.
-          items:
-            $ref: '#/components/schemas/NodeInfo'
-    NodeHealth:
-      description: Information about the health of a Service Fabric node.
-      allOf:
-      - $ref: '#/components/schemas/EntityHealth'
-      properties:
-        Name:
-          $ref: '#/components/schemas/NodeName'
-          description: Name of the node whose health information is described by this object.
-    NodeTypeHealthPolicyMapItem:
-      description: Defines an item in NodeTypeHealthPolicyMap.
-      required:
-      - Key
-      - Value
-      properties:
-        Key:
-          type: string
-          description: The key of the node type health policy map item. This is the name of the node type.
-        Value:
-          type: integer
-          description: "The value of the node type health policy map item.\nIf the percentage is respected but there is at least one unhealthy node in the node type, the health is evaluated as Warning. \nThe percentage is calculated by dividing the number of unhealthy nodes over the total number of nodes in the node type. \nThe computation rounds up to tolerate one failure on small numbers of nodes.\nThe max percent unhealthy nodes allowed for the node type. Must be between zero and 100."
-    DeactivationIntentDescription:
-      description: Describes the intent or reason for deactivating the node.
-      properties:
-        DeactivationIntent:
-          type: string
-          description: Describes the intent or reason for deactivating the node. The possible values are following.
-          enum:
-          - Pause
-          - Restart
-          - RemoveData
-          x-ms-enum:
-            name: DeactivationIntent
-            modelAsString: true
-            values:
-            - value: Pause
-              description: Indicates that the node should be paused. The value is 1.
-            - value: Restart
-              description: Indicates that the intent is for the node to be restarted after a short period of time. The value is 2.
-            - value: RemoveData
-              description: Indicates the intent is for the node to remove data. The value is 3.
-    ContinuationToken:
-      type: string
-      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-    NodeName:
-      type: string
-      description: The name of a Service Fabric node.
-    NodeDeactivationTaskList:
-      type: array
-      items:
-        $ref: '#/components/schemas/NodeDeactivationTask'
-      description: List of tasks representing the deactivation operation on the node.
-    FabricErrorError:
-      description: Error object containing error code and error message.
-      properties:
-        Code:
-          $ref: '#/components/schemas/FabricErrorCodes'
-          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
-        Message:
-          type: string
-          description: Error message.
-      required:
-      - Code
     HealthInformation:
       description: Represents common health report information. It is included in all health reports sent to health store and in all health events returned by health queries.
       required:
@@ -920,438 +1003,15 @@ components:
           description: 'A health report ID which identifies the health report and can be used to find more detailed information about a specific health event at
 
             aka.ms/sfhealthid'
-    HealthEvent:
-      description: Represents health information reported on a health entity, such as cluster, application or node, with additional metadata added by the Health Manager.
-      allOf:
-      - $ref: '#/components/schemas/HealthInformation'
+    NodeDeactivationTask:
+      description: The task representing the deactivation operation on the node.
       properties:
-        IsExpired:
-          type: boolean
-          description: Returns true if the health event is expired, otherwise false.
-        SourceUtcTimestamp:
-          type: string
-          format: date-time
-          description: The date and time when the health report was sent by the source.
-        LastModifiedUtcTimestamp:
-          type: string
-          format: date-time
-          description: The date and time when the health report was last modified by the health store.
-        LastOkTransitionAt:
-          type: string
-          format: date-time
-          description: 'If the current health state is ''Ok'', this property returns the time at which the health report was first reported with ''Ok''.
-
-            For periodic reporting, many reports with the same state may have been generated.
-
-            This property returns the date and time when the first ''Ok'' health report was received.
-
-
-            If the current health state is ''Error'' or ''Warning'', returns the date and time at which the health state was last in ''Ok'', before transitioning to a different state.
-
-
-            If the health state was never ''Ok'', the value will be zero date-time.'
-        LastWarningTransitionAt:
-          type: string
-          format: date-time
-          description: 'If the current health state is ''Warning'', this property returns the time at which the health report was first reported with ''Warning''. For periodic reporting, many reports with the same state may have been generated however, this property returns only the date and time at the first ''Warning'' health report was received.
-
-
-            If the current health state is ''Ok'' or ''Error'', returns the date and time at which the health state was last in ''Warning'', before transitioning to a different state.
-
-
-            If the health state was never ''Warning'', the value will be zero date-time.'
-        LastErrorTransitionAt:
-          type: string
-          format: date-time
-          description: 'If the current health state is ''Error'', this property returns the time at which the health report was first reported with ''Error''. For periodic reporting, many reports with the same state may have been generated however, this property returns only the date and time at the first ''Error'' health report was received.
-
-
-            If the current health state is ''Ok'' or ''Warning'', returns the date and time at which the health state was last in ''Error'', before transitioning to a different state.
-
-
-            If the health state was never ''Error'', the value will be zero date-time.'
-    ApplicationTypeHealthPolicyMapItem:
-      description: Defines an item in ApplicationTypeHealthPolicyMap.
-      required:
-      - Key
-      - Value
-      properties:
-        Key:
-          type: string
-          description: The key of the application type health policy map item. This is the name of the application type.
-        Value:
-          type: integer
-          description: 'The value of the application type health policy map item.
-
-            The max percent unhealthy applications allowed for the application type. Must be between zero and 100.'
-    NodeTagsList:
-      type: array
-      items:
-        type: string
-      description: List that contains tags, which will be applied to the nodes.
-    NodeDeactivationStatus:
-      type: string
-      description: The status of node deactivation operation. Following are the possible values.
-      enum:
-      - None
-      - SafetyCheckInProgress
-      - SafetyCheckComplete
-      - Completed
-      x-ms-enum:
-        name: NodeDeactivationStatus
-        modelAsString: true
-        values:
-        - value: None
-          description: No status is associated with the task. The value is zero.
-        - value: SafetyCheckInProgress
-          description: When a node is deactivated Service Fabric performs checks to ensure that the operation is safe to proceed to ensure availability of the service and reliability of the state. This value indicates that one or more safety checks are in progress. The value is 1.
-        - value: SafetyCheckComplete
-          description: When a node is deactivated Service Fabric performs checks to ensure that the operation is safe to proceed to ensure availability of the service and reliability of the state. This value indicates that all safety checks have been completed. The value is 2.
-        - value: Completed
-          description: The task is completed. The value is 3.
-    RestartNodeDescription:
-      description: Describes the parameters to restart a Service Fabric node.
-      properties:
-        NodeInstanceId:
-          type: string
-          description: The instance ID of the target node. If instance ID is specified the node is restarted only if it matches with the current instance of the node. A default value of "0" would match any instance ID. The instance ID can be obtained using get node query.
-          default: '0'
-        CreateFabricDump:
-          type: string
-          description: Specify True to create a dump of the fabric node process. This is case-sensitive.
-          enum:
-          - 'False'
-          - 'True'
-          default: 'False'
-          x-ms-enum:
-            name: CreateFabricDump
-            modelAsString: true
-            values:
-            - value: 'False'
-            - value: 'True'
-      required:
-      - NodeInstanceId
-    NodeDeactivationIntent:
-      type: string
-      description: The intent or the reason for deactivating the node. Following are the possible values for it.
-      enum:
-      - Invalid
-      - Pause
-      - Restart
-      - RemoveData
-      - RemoveNode
-      x-ms-enum:
-        name: NodeDeactivationIntent
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the node deactivation intent is invalid. All Service Fabric enumerations have the invalid type. The value is zero. This value is not used.
-        - value: Pause
-          description: Indicates that the node should be paused. The value is 1.
-        - value: Restart
-          description: Indicates that the intent is for the node to be restarted after a short period of time. Service Fabric does not restart the node, this action is done outside of Service Fabric. The value is 2.
-        - value: RemoveData
-          description: Indicates that the intent is to reimage the node. Service Fabric does not reimage the node, this action is done outside of Service Fabric. The value is 3.
-        - value: RemoveNode
-          description: Indicates that the node is being decommissioned and is not expected to return. Service Fabric does not decommission the node, this action is done outside of Service Fabric. The value is 4.
-    ApplicationTypeHealthPolicyMap:
-      type: array
-      items:
-        $ref: '#/components/schemas/ApplicationTypeHealthPolicyMapItem'
-      description: 'Defines a map with max percentage unhealthy applications for specific application types.
-
-        Each entry specifies as key the application type name and as value an integer that represents the MaxPercentUnhealthyApplications percentage used to evaluate the applications of the specified application type.
-
-
-        The application type health policy map can be used during cluster health evaluation to describe special application types.
-
-        The application types included in the map are evaluated against the percentage specified in the map, and not with the global MaxPercentUnhealthyApplications defined in the cluster health policy.
-
-        The applications of application types specified in the map are not counted against the global pool of applications.
-
-        For example, if some applications of a type are critical, the cluster administrator can add an entry to the map for that application type
-
-        and assign it a value of 0% (that is, do not tolerate any failures).
-
-        All other applications can be evaluated with MaxPercentUnhealthyApplications set to 20% to tolerate some failures out of the thousands of application instances.
-
-        The application type health policy map is used only if the cluster manifest enables application type health evaluation using the configuration entry for HealthManager/EnableApplicationTypeHealthEvaluation.'
-    ConfigParameterOverride:
-      description: Information about a configuration parameter override.
-      properties:
-        SectionName:
-          type: string
-          description: Name of the section for the parameter override.
-        ParameterName:
-          type: string
-          description: Name of the parameter that has been overridden.
-        ParameterValue:
-          type: string
-          description: Value of the overridden parameter.
-        Timeout:
-          type: string
-          format: duration
-          description: The duration until config override is considered as valid.
-        PersistAcrossUpgrade:
-          type: boolean
-          description: A value that indicates whether config override will be removed on upgrade or will still be considered as valid.
-      required:
-      - SectionName
-      - ParameterName
-      - ParameterValue
-    ConfigParameterOverrideList:
-      type: array
-      items:
-        $ref: '#/components/schemas/ConfigParameterOverride'
-      description: List that contains parameters, sections that they belong and their values.
-    HealthState:
-      type: string
-      description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-      enum:
-      - Invalid
-      - Ok
-      - Warning
-      - Error
-      - Unknown
-      x-ms-enum:
-        name: HealthState
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid health state. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Ok
-          description: Indicates the health state is okay. The value is 1.
-        - value: Warning
-          description: Indicates the health state is at a warning level. The value is 2.
-        - value: Error
-          description: Indicates the health state is at an error level. Error health state should be investigated, as they can impact the correct functionality of the cluster. The value is 3.
-        - value: Unknown
-          description: Indicates an unknown health status. The value is 65535.
-    NodeInfo:
-      description: Information about a node in Service Fabric cluster.
-      properties:
-        Name:
-          $ref: '#/components/schemas/NodeName'
-          description: The name of a Service Fabric node.
-        IpAddressOrFQDN:
-          type: string
-          description: The IP address or fully qualified domain name of the node.
-        Type:
-          type: string
-          description: The type of the node.
-        CodeVersion:
-          type: string
-          description: The version of Service Fabric binaries that the node is running.
-        ConfigVersion:
-          type: string
-          description: The version of Service Fabric cluster manifest that the node is using.
-        NodeStatus:
-          $ref: '#/components/schemas/NodeStatus'
-          description: The status of the node.
-        NodeUpTimeInSeconds:
-          type: string
-          description: Time in seconds since the node has been in NodeStatus Up. Value zero indicates that the node is not Up.
-        HealthState:
-          $ref: '#/components/schemas/HealthState'
-          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-        IsSeedNode:
-          type: boolean
-          description: Indicates if the node is a seed node or not. Returns true if the node is a seed node, otherwise false. A quorum of seed nodes are required for proper operation of Service Fabric cluster.
-        UpgradeDomain:
-          type: string
-          description: The upgrade domain of the node.
-        FaultDomain:
-          type: string
-          description: The fault domain of the node.
-        Id:
-          $ref: '#/components/schemas/NodeId'
-          description: An internal ID used by Service Fabric to uniquely identify a node. Node Id is deterministically generated from node name.
-        InstanceId:
-          type: string
-          description: The ID representing the node instance. While the ID of the node is deterministically generated from the node name and remains same across restarts, the InstanceId changes every time node restarts.
-        NodeDeactivationInfo:
-          $ref: '#/components/schemas/NodeDeactivationInfo'
-          description: Information about the node deactivation. This information is valid for a node that is undergoing deactivation or has already been deactivated.
-        IsStopped:
-          type: boolean
-          description: Indicates if the node is stopped by calling stop node API or not. Returns true if the node is stopped, otherwise false.
-        NodeDownTimeInSeconds:
-          type: string
-          description: Time in seconds since the node has been in NodeStatus Down. Value zero indicates node is not NodeStatus Down.
-        NodeUpAt:
-          type: string
-          format: date-time
-          description: Date time in UTC when the node came up. If the node has never been up then this value will be zero date time.
-        NodeDownAt:
-          type: string
-          format: date-time
-          description: Date time in UTC when the node went down. If node has never been down then this value will be zero date time.
-        NodeTags:
-          $ref: '#/components/schemas/NodeTagsList'
-          description: List that contains tags, which will be applied to the nodes.
-        IsNodeByNodeUpgradeInProgress:
-          type: boolean
-          description: Indicates if a node-by-node upgrade is currently being performed on this node.
-        InfrastructurePlacementID:
-          type: string
-          description: PlacementID used by the InfrastructureService.
-    SafetyCheckKind:
-      type: string
-      description: The kind of safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state. Following are the kinds of safety checks.
-      enum:
-      - Invalid
-      - EnsureSeedNodeQuorum
-      - EnsurePartitionQuorum
-      - WaitForPrimaryPlacement
-      - WaitForPrimarySwap
-      - WaitForReconfiguration
-      - WaitForInbuildReplica
-      - EnsureAvailability
-      x-ms-enum:
-        name: SafetyCheckKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates that the upgrade safety check kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: EnsureSeedNodeQuorum
-          description: Indicates that if we bring down the node then this will result in global seed node quorum loss. The value is 1.
-        - value: EnsurePartitionQuorum
-          description: Indicates that there is some partition for which if we bring down the replica on the node, it will result in quorum loss for that partition. The value is 2.
-        - value: WaitForPrimaryPlacement
-          description: Indicates that there is some replica on the node that was moved out of this node due to upgrade. Service Fabric is now waiting for the primary to be moved back to this node. The value is 3.
-        - value: WaitForPrimarySwap
-          description: Indicates that Service Fabric is waiting for a primary replica to be moved out of the node before starting upgrade on that node. The value is 4.
-        - value: WaitForReconfiguration
-          description: Indicates that there is some replica on the node that is involved in a reconfiguration. Service Fabric is waiting for the reconfiguration to be complete before staring upgrade on that node. The value is 5.
-        - value: WaitForInbuildReplica
-          description: Indicates that there is either a replica on the node that is going through copy, or there is a primary replica on the node that is copying data to some other replica. In both cases, bringing down the replica on the node due to upgrade will abort the copy. The value is 6.
-        - value: EnsureAvailability
-          description: Indicates that there is either a stateless service partition on the node having exactly one instance, or there is a primary replica on the node for which the partition is quorum loss. In both cases, bringing down the replicas due to upgrade will result in loss of availability. The value is 7.
-    UnhealthyEvaluations:
-      description: List of health evaluations that resulted in the current aggregated health state.
-      type: array
-      items:
-        $ref: '#/components/schemas/HealthEvaluationWrapper'
-    HealthEvaluation:
-      discriminator:
-        propertyName: Kind
-      description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
-      properties:
-        Kind:
-          $ref: '#/components/schemas/HealthEvaluationKind'
-          description: The health manager in the cluster performs health evaluations in determining the aggregated health state of an entity. This enumeration provides information on the kind of evaluation that was performed. Following are the possible values.
-        AggregatedHealthState:
-          $ref: '#/components/schemas/HealthState'
-          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-        Description:
-          type: string
-          description: Description of the health evaluation, which represents a summary of the evaluation process.
-      required:
-      - Kind
-    SafetyCheck:
-      discriminator:
-        propertyName: Kind
-      description: Represents a safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state.
-      properties:
-        Kind:
-          $ref: '#/components/schemas/SafetyCheckKind'
-          description: The kind of safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state. Following are the kinds of safety checks.
-      required:
-      - Kind
-    NodeId:
-      description: An internal ID used by Service Fabric to uniquely identify a node. Node Id is deterministically generated from node name.
-      properties:
-        Id:
-          type: string
-          description: Value of the node Id. This is a 128 bit integer.
-    NodeStatus:
-      type: string
-      description: The status of the node.
-      enum:
-      - Invalid
-      - Up
-      - Down
-      - Enabling
-      - Disabling
-      - Disabled
-      - Unknown
-      - Removed
-      x-ms-enum:
-        name: NodeStatus
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the node status is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Up
-          description: Indicates the node is up. The value is 1.
-        - value: Down
-          description: Indicates the node is down. The value is 2.
-        - value: Enabling
-          description: Indicates the node is in process of being enabled. The value is 3.
-        - value: Disabling
-          description: Indicates the node is in the process of being disabled. The value is 4.
-        - value: Disabled
-          description: Indicates the node is disabled. The value is 5.
-        - value: Unknown
-          description: Indicates the node is unknown. A node would be in Unknown state if Service Fabric does not have authoritative information about that node. This can happen if the system learns about a node at runtime.The value is 6.
-        - value: Removed
-          description: Indicates the node is removed. A node would be in Removed state if NodeStateRemoved API has been called for this node. In other words, Service Fabric has been informed that the persisted state on the node has been permanently lost. The value is 7.
-    FabricError:
-      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
-      properties:
-        Error:
-          $ref: '#/components/schemas/FabricErrorError'
-          description: Error object containing error code and error message.
-      required:
-      - Error
-    EntityHealth:
-      description: Health information common to all entities in the cluster. It contains the aggregated health state, health events and unhealthy evaluation.
-      properties:
-        AggregatedHealthState:
-          $ref: '#/components/schemas/HealthState'
-          description: 'The HealthState representing the aggregated health state of the entity computed by Health Manager.
-
-            The health evaluation of the entity reflects all events reported on the entity and its children (if any).
-
-            The aggregation is done by applying the desired health policy.'
-        HealthEvents:
-          type: array
-          items:
-            $ref: '#/components/schemas/HealthEvent'
-          description: The list of health events reported on the entity.
-        UnhealthyEvaluations:
-          $ref: '#/components/schemas/UnhealthyEvaluations'
-          description: The unhealthy evaluations that show why the current aggregated health state was returned by Health Manager.
-        HealthStatistics:
-          $ref: '#/components/schemas/HealthStatistics'
-          description: Shows the health statistics for all children types of the queried entity.
-    EntityKindHealthStateCount:
-      description: Represents health state count for entities of the specified entity kind.
-      properties:
-        EntityKind:
-          $ref: '#/components/schemas/EntityKind'
-          description: The entity kind for which health states are evaluated.
-        HealthStateCount:
-          $ref: '#/components/schemas/HealthStateCount'
-          description: The health state count for the entities of the specified kind.
-    HealthStateCount:
-      description: Represents information about how many health entities are in Ok, Warning and Error health state.
-      properties:
-        OkCount:
-          type: integer
-          format: int64
-          description: The number of health entities with aggregated health state Ok.
-          minimum: 0
-        WarningCount:
-          type: integer
-          format: int64
-          description: The number of health entities with aggregated health state Warning.
-          minimum: 0
-        ErrorCount:
-          type: integer
-          format: int64
-          description: The number of health entities with aggregated health state Error.
-          minimum: 0
+        NodeDeactivationTaskId:
+          $ref: '#/components/schemas/NodeDeactivationTaskId'
+          description: Identity of the task related to deactivation operation on the node.
+        NodeDeactivationIntent:
+          $ref: '#/components/schemas/NodeDeactivationIntent'
+          description: The intent or the reason for deactivating the node. Following are the possible values for it.
     HealthEvaluationKind:
       type: string
       description: The health manager in the cluster performs health evaluations in determining the aggregated health state of an entity. This enumeration provides information on the kind of evaluation that was performed. Following are the possible values.
@@ -1429,129 +1089,359 @@ components:
           description: – Indicates that the health evaluation is for applications of an application type. The value is 21.
         - value: NodeTypeNodes
           description: – Indicates that the health evaluation is for nodes of a node type. The value is 22.
+    PagedNodeInfoList:
+      description: The list of nodes in the cluster. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+      properties:
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        Items:
+          type: array
+          description: List of node information.
+          items:
+            $ref: '#/components/schemas/NodeInfo'
+    HealthState:
+      type: string
+      description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+      enum:
+      - Invalid
+      - Ok
+      - Warning
+      - Error
+      - Unknown
+      x-ms-enum:
+        name: HealthState
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid health state. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Ok
+          description: Indicates the health state is okay. The value is 1.
+        - value: Warning
+          description: Indicates the health state is at a warning level. The value is 2.
+        - value: Error
+          description: Indicates the health state is at an error level. Error health state should be investigated, as they can impact the correct functionality of the cluster. The value is 3.
+        - value: Unknown
+          description: Indicates an unknown health status. The value is 65535.
+    SafetyCheck:
+      discriminator:
+        propertyName: Kind
+      description: Represents a safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state.
+      properties:
+        Kind:
+          $ref: '#/components/schemas/SafetyCheckKind'
+          description: The kind of safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state. Following are the kinds of safety checks.
+      required:
+      - Kind
+    NodeDeactivationTaskList:
+      type: array
+      items:
+        $ref: '#/components/schemas/NodeDeactivationTask'
+      description: List of tasks representing the deactivation operation on the node.
+    SafetyCheckKind:
+      type: string
+      description: The kind of safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state. Following are the kinds of safety checks.
+      enum:
+      - Invalid
+      - EnsureSeedNodeQuorum
+      - EnsurePartitionQuorum
+      - WaitForPrimaryPlacement
+      - WaitForPrimarySwap
+      - WaitForReconfiguration
+      - WaitForInbuildReplica
+      - EnsureAvailability
+      x-ms-enum:
+        name: SafetyCheckKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates that the upgrade safety check kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: EnsureSeedNodeQuorum
+          description: Indicates that if we bring down the node then this will result in global seed node quorum loss. The value is 1.
+        - value: EnsurePartitionQuorum
+          description: Indicates that there is some partition for which if we bring down the replica on the node, it will result in quorum loss for that partition. The value is 2.
+        - value: WaitForPrimaryPlacement
+          description: Indicates that there is some replica on the node that was moved out of this node due to upgrade. Service Fabric is now waiting for the primary to be moved back to this node. The value is 3.
+        - value: WaitForPrimarySwap
+          description: Indicates that Service Fabric is waiting for a primary replica to be moved out of the node before starting upgrade on that node. The value is 4.
+        - value: WaitForReconfiguration
+          description: Indicates that there is some replica on the node that is involved in a reconfiguration. Service Fabric is waiting for the reconfiguration to be complete before staring upgrade on that node. The value is 5.
+        - value: WaitForInbuildReplica
+          description: Indicates that there is either a replica on the node that is going through copy, or there is a primary replica on the node that is copying data to some other replica. In both cases, bringing down the replica on the node due to upgrade will abort the copy. The value is 6.
+        - value: EnsureAvailability
+          description: Indicates that there is either a stateless service partition on the node having exactly one instance, or there is a primary replica on the node for which the partition is quorum loss. In both cases, bringing down the replicas due to upgrade will result in loss of availability. The value is 7.
+    SafetyCheckWrapper:
+      description: A wrapper for the safety check object. Safety checks are performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state.
+      properties:
+        SafetyCheck:
+          $ref: '#/components/schemas/SafetyCheck'
+          description: Represents a safety check performed by service fabric before continuing with the operations. These checks ensure the availability of the service and the reliability of the state.
+    ConfigParameterOverride:
+      description: Information about a configuration parameter override.
+      properties:
+        SectionName:
+          type: string
+          description: Name of the section for the parameter override.
+        ParameterName:
+          type: string
+          description: Name of the parameter that has been overridden.
+        ParameterValue:
+          type: string
+          description: Value of the overridden parameter.
+        Timeout:
+          type: string
+          format: duration
+          description: The duration until config override is considered as valid.
+        PersistAcrossUpgrade:
+          type: boolean
+          description: A value that indicates whether config override will be removed on upgrade or will still be considered as valid.
+      required:
+      - SectionName
+      - ParameterName
+      - ParameterValue
+    EntityKind:
+      type: string
+      description: The entity type of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+      enum:
+      - Invalid
+      - Node
+      - Partition
+      - Service
+      - Application
+      - Replica
+      - DeployedApplication
+      - DeployedServicePackage
+      - Cluster
+      x-ms-enum:
+        name: EntityKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid entity kind. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Node
+          description: Indicates the entity is a Service Fabric node. The value is 1.
+        - value: Partition
+          description: Indicates the entity is a Service Fabric partition. The value is 2.
+        - value: Service
+          description: Indicates the entity is a Service Fabric service. The value is 3.
+        - value: Application
+          description: Indicates the entity is a Service Fabric application. The value is 4.
+        - value: Replica
+          description: Indicates the entity is a Service Fabric replica. The value is 5.
+        - value: DeployedApplication
+          description: Indicates the entity is a Service Fabric deployed application. The value is 6.
+        - value: DeployedServicePackage
+          description: Indicates the entity is a Service Fabric deployed service package. The value is 7.
+        - value: Cluster
+          description: Indicates the entity is a Service Fabric cluster. The value is 8.
+    NodeDeactivationTaskType:
+      type: string
+      description: The type of the task that performed the node deactivation. Following are the possible values.
+      enum:
+      - Invalid
+      - Infrastructure
+      - Repair
+      - Client
+      x-ms-enum:
+        name: NodeDeactivationTaskType
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the node deactivation task type is invalid. All Service Fabric enumerations have the invalid type. The value is zero. This value is not used.
+        - value: Infrastructure
+          description: Specifies the task created by Infrastructure hosting the nodes. The value is 1.
+        - value: Repair
+          description: Specifies the task that was created by the Repair Manager service. The value is 2.
+        - value: Client
+          description: Specifies that the task was created by using the public API. The value is 3.
+    HealthEvent:
+      description: Represents health information reported on a health entity, such as cluster, application or node, with additional metadata added by the Health Manager.
+      allOf:
+      - $ref: '#/components/schemas/HealthInformation'
+      properties:
+        IsExpired:
+          type: boolean
+          description: Returns true if the health event is expired, otherwise false.
+        SourceUtcTimestamp:
+          type: string
+          format: date-time
+          description: The date and time when the health report was sent by the source.
+        LastModifiedUtcTimestamp:
+          type: string
+          format: date-time
+          description: The date and time when the health report was last modified by the health store.
+        LastOkTransitionAt:
+          type: string
+          format: date-time
+          description: 'If the current health state is ''Ok'', this property returns the time at which the health report was first reported with ''Ok''.
+
+            For periodic reporting, many reports with the same state may have been generated.
+
+            This property returns the date and time when the first ''Ok'' health report was received.
+
+
+            If the current health state is ''Error'' or ''Warning'', returns the date and time at which the health state was last in ''Ok'', before transitioning to a different state.
+
+
+            If the health state was never ''Ok'', the value will be zero date-time.'
+        LastWarningTransitionAt:
+          type: string
+          format: date-time
+          description: 'If the current health state is ''Warning'', this property returns the time at which the health report was first reported with ''Warning''. For periodic reporting, many reports with the same state may have been generated however, this property returns only the date and time at the first ''Warning'' health report was received.
+
+
+            If the current health state is ''Ok'' or ''Error'', returns the date and time at which the health state was last in ''Warning'', before transitioning to a different state.
+
+
+            If the health state was never ''Warning'', the value will be zero date-time.'
+        LastErrorTransitionAt:
+          type: string
+          format: date-time
+          description: 'If the current health state is ''Error'', this property returns the time at which the health report was first reported with ''Error''. For periodic reporting, many reports with the same state may have been generated however, this property returns only the date and time at the first ''Error'' health report was received.
+
+
+            If the current health state is ''Ok'' or ''Warning'', returns the date and time at which the health state was last in ''Error'', before transitioning to a different state.
+
+
+            If the health state was never ''Error'', the value will be zero date-time.'
+    ApplicationTypeHealthPolicyMap:
+      type: array
+      items:
+        $ref: '#/components/schemas/ApplicationTypeHealthPolicyMapItem'
+      description: 'Defines a map with max percentage unhealthy applications for specific application types.
+
+        Each entry specifies as key the application type name and as value an integer that represents the MaxPercentUnhealthyApplications percentage used to evaluate the applications of the specified application type.
+
+
+        The application type health policy map can be used during cluster health evaluation to describe special application types.
+
+        The application types included in the map are evaluated against the percentage specified in the map, and not with the global MaxPercentUnhealthyApplications defined in the cluster health policy.
+
+        The applications of application types specified in the map are not counted against the global pool of applications.
+
+        For example, if some applications of a type are critical, the cluster administrator can add an entry to the map for that application type
+
+        and assign it a value of 0% (that is, do not tolerate any failures).
+
+        All other applications can be evaluated with MaxPercentUnhealthyApplications set to 20% to tolerate some failures out of the thousands of application instances.
+
+        The application type health policy map is used only if the cluster manifest enables application type health evaluation using the configuration entry for HealthManager/EnableApplicationTypeHealthEvaluation.'
+    NodeLoadMetricInformation:
+      description: Represents data structure that contains load information for a certain metric on a node.
+      properties:
+        Name:
+          type: string
+          description: Name of the metric for which this load information is provided.
+        NodeCapacity:
+          type: string
+          description: Total capacity on the node for this metric.
+        NodeLoad:
+          type: string
+          description: Current load on the node for this metric. In future releases of Service Fabric this parameter will be deprecated in favor of CurrentNodeLoad.
+        NodeRemainingCapacity:
+          type: string
+          description: The remaining capacity on the node for this metric. In future releases of Service Fabric this parameter will be deprecated in favor of NodeCapacityRemaining.
+        IsCapacityViolation:
+          type: boolean
+          description: Indicates if there is a capacity violation for this metric on the node.
+        NodeBufferedCapacity:
+          type: string
+          description: The value that indicates the reserved capacity for this metric on the node.
+        NodeRemainingBufferedCapacity:
+          type: string
+          description: The remaining reserved capacity for this metric on the node. In future releases of Service Fabric this parameter will be deprecated in favor of BufferedNodeCapacityRemaining.
+        CurrentNodeLoad:
+          type: string
+          format: double
+          description: Current load on the node for this metric.
+        NodeCapacityRemaining:
+          type: string
+          format: double
+          description: The remaining capacity on the node for the metric.
+        BufferedNodeCapacityRemaining:
+          type: string
+          format: double
+          description: The remaining capacity which is not reserved by NodeBufferPercentage for this metric on the node.
+        PlannedNodeLoadRemoval:
+          type: string
+          format: double
+          description: 'This value represents the load of the replicas that are planned to be removed in the future.
+
+            This kind of load is reported for replicas that are currently being moving to other nodes and for replicas that are currently being dropped but still use the load on the source node.'
+    NodeLoadInfo:
+      description: Information about load on a Service Fabric node. It holds a summary of all metrics and their load on a node.
+      properties:
+        NodeName:
+          $ref: '#/components/schemas/NodeName'
+          description: Name of the node for which the load information is provided by this object.
+        NodeLoadMetricInformation:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeLoadMetricInformation'
+          description: List that contains metrics and their load information on this node.
+    UnhealthyEvaluations:
+      description: List of health evaluations that resulted in the current aggregated health state.
+      type: array
+      items:
+        $ref: '#/components/schemas/HealthEvaluationWrapper'
+    NodeTagsList:
+      type: array
+      items:
+        type: string
+      description: List that contains tags, which will be applied to the nodes.
+    NodeHealth:
+      description: Information about the health of a Service Fabric node.
+      allOf:
+      - $ref: '#/components/schemas/EntityHealth'
+      properties:
+        Name:
+          $ref: '#/components/schemas/NodeName'
+          description: Name of the node whose health information is described by this object.
+    ApplicationTypeHealthPolicyMapItem:
+      description: Defines an item in ApplicationTypeHealthPolicyMap.
+      required:
+      - Key
+      - Value
+      properties:
+        Key:
+          type: string
+          description: The key of the application type health policy map item. This is the name of the application type.
+        Value:
+          type: integer
+          description: 'The value of the application type health policy map item.
+
+            The max percent unhealthy applications allowed for the application type. Must be between zero and 100.'
+    HealthStateCount:
+      description: Represents information about how many health entities are in Ok, Warning and Error health state.
+      properties:
+        OkCount:
+          type: integer
+          format: int64
+          description: The number of health entities with aggregated health state Ok.
+          minimum: 0
+        WarningCount:
+          type: integer
+          format: int64
+          description: The number of health entities with aggregated health state Warning.
+          minimum: 0
+        ErrorCount:
+          type: integer
+          format: int64
+          description: The number of health entities with aggregated health state Error.
+          minimum: 0
+    NodeTypeHealthPolicyMapItem:
+      description: Defines an item in NodeTypeHealthPolicyMap.
+      required:
+      - Key
+      - Value
+      properties:
+        Key:
+          type: string
+          description: The key of the node type health policy map item. This is the name of the node type.
+        Value:
+          type: integer
+          description: "The value of the node type health policy map item.\nIf the percentage is respected but there is at least one unhealthy node in the node type, the health is evaluated as Warning. \nThe percentage is calculated by dividing the number of unhealthy nodes over the total number of nodes in the node type. \nThe computation rounds up to tolerate one failure on small numbers of nodes.\nThe max percent unhealthy nodes allowed for the node type. Must be between zero and 100."
   parameters:
-    RestartNodeDescriptionRequiredBodyParam:
-      name: RestartNodeDescription
-      in: body
-      description: The instance of the node to be restarted and a flag indicating the need to take dump of the fabric process.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/RestartNodeDescription'
-    ContinuationTokenOptionalQueryParam:
-      name: ContinuationToken
-      in: query
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      required: false
-      description: The continuation token parameter is used to obtain next set of results. A continuation token with a non-empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
-      schema:
-        type: string
-    ConfigurationOverrideListRequiredParam:
-      name: ConfigParameterOverrideList
-      in: body
-      description: Description for adding list of configuration overrides.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/ConfigParameterOverrideList'
-    ApiVersion_6-3_RequiredQueryParam:
-      name: api-version
-      in: query
-      x-ms-parameter-location: method
-      required: true
-      description: 'The version of the API. This parameter is required and its value must be ''6.3''.
-
-
-        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
-
-
-        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
-      x-ms-enum:
-        name: ApiVersion_6-3_RequiredQueryParam
-        modelAsString: true
-        values:
-        - value: '6.3'
-          description: The 6.3 version of the API.
-      schema:
-        type: string
-        enum:
-        - '6.3'
-        default: '6.3'
-    TimeoutOptionalQueryParam:
-      name: timeout
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
-      schema:
-        type: integer
-        format: int64
-        default: 60
-        maximum: 4294967295
-        minimum: 1
-    ImmediateOptionalQueryParam:
-      name: Immediate
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: 'A flag that indicates whether the report should be sent immediately.
-
-        A health report is sent to a Service Fabric gateway Application, which forwards to the health store.
-
-        If Immediate is set to true, the report is sent immediately from HTTP Gateway to the health store, regardless of the fabric client settings that the HTTP Gateway Application is using.
-
-        This is useful for critical reports that should be sent as soon as possible.
-
-        Depending on timing and other conditions, sending the report may still fail, for example if the HTTP Gateway is closed or the message doesn''t reach the Gateway.
-
-        If Immediate is set to false, the report is sent based on the health client settings from the HTTP Gateway. Therefore, it will be batched according to the HealthReportSendInterval configuration.
-
-        This is the recommended setting because it allows the health client to optimize health reporting messages to health store as well as health report processing.
-
-        By default, reports are not sent immediately.'
-      schema:
-        type: boolean
-        default: false
-    ApiVersion_7-0_RequiredQueryParam:
-      name: api-version
-      in: query
-      x-ms-parameter-location: method
-      required: true
-      description: 'The version of the API. This parameter is required and its value must be ''7.0''.
-
-
-        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
-
-
-        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
-      x-ms-enum:
-        name: ApiVersion_7-0_RequiredQueryParam
-        modelAsString: true
-        values:
-        - value: '7.0'
-          description: The 7.0 version of the API.
-      schema:
-        type: string
-        enum:
-        - '7.0'
-        default: '7.0'
-    NodeNameRequiredPathParam:
-      name: nodeName
-      in: path
-      x-ms-parameter-location: method
-      required: true
-      description: The name of the node.
-      schema:
-        type: string
-    DeactivationIntentDescriptionRequiredBodyParam:
-      name: DeactivationIntentDescription
-      in: body
-      description: Describes the intent or reason for deactivating the node.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/DeactivationIntentDescription'
     ApiVersion_7-2_RequiredQueryParam:
       name: api-version
       in: query
@@ -1575,22 +1465,46 @@ components:
         enum:
         - '7.2'
         default: '7.2'
-    ForceConfigurationOverrideOptionalParam:
-      name: Force
+    ImmediateOptionalQueryParam:
+      name: Immediate
       in: query
       x-ms-parameter-location: method
       required: false
-      description: Force adding configuration overrides on specified nodes.
+      description: 'A flag that indicates whether the report should be sent immediately.
+
+        A health report is sent to a Service Fabric gateway Application, which forwards to the health store.
+
+        If Immediate is set to true, the report is sent immediately from HTTP Gateway to the health store, regardless of the fabric client settings that the HTTP Gateway Application is using.
+
+        This is useful for critical reports that should be sent as soon as possible.
+
+        Depending on timing and other conditions, sending the report may still fail, for example if the HTTP Gateway is closed or the message doesn''t reach the Gateway.
+
+        If Immediate is set to false, the report is sent based on the health client settings from the HTTP Gateway. Therefore, it will be batched according to the HealthReportSendInterval configuration.
+
+        This is the recommended setting because it allows the health client to optimize health reporting messages to health store as well as health report processing.
+
+        By default, reports are not sent immediately.'
       schema:
         type: boolean
-    NodeTagsListRequiredParam:
-      name: NodeTags
+        default: false
+    ClusterHealthPolicyOptionalBodyParam:
+      name: ClusterHealthPolicy
       in: body
-      description: Description for adding list of node tags.
-      required: true
+      description: Describes the health policies used to evaluate the health of a cluster or node. If not present, the health evaluation uses the health policy from cluster manifest or the default health policy.
+      required: false
       x-ms-parameter-location: method
       schema:
-        $ref: '#/components/schemas/NodeTagsList'
+        $ref: '#/components/schemas/ClusterHealthPolicy'
+    ContinuationTokenOptionalQueryParam:
+      name: ContinuationToken
+      in: query
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      required: false
+      description: The continuation token parameter is used to obtain next set of results. A continuation token with a non-empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
+      schema:
+        type: string
     MaxResultsOptionalQueryParam:
       name: MaxResults
       in: query
@@ -1610,6 +1524,22 @@ components:
       x-ms-parameter-location: method
       schema:
         $ref: '#/components/schemas/HealthInformation'
+    NodeTagsListRequiredParam:
+      name: NodeTags
+      in: body
+      description: Description for adding list of node tags.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/NodeTagsList'
+    DeactivationIntentDescriptionRequiredBodyParam:
+      name: DeactivationIntentDescription
+      in: body
+      description: Describes the intent or reason for deactivating the node.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/DeactivationIntentDescription'
     EventsHealthStateFilterOptionalQueryParam:
       name: EventsHealthStateFilter
       description: 'Allows filtering the collection of HealthEvent objects returned based on health state.
@@ -1638,14 +1568,49 @@ components:
       schema:
         type: integer
         default: 0
-    ClusterHealthPolicyOptionalBodyParam:
-      name: ClusterHealthPolicy
-      in: body
-      description: Describes the health policies used to evaluate the health of a cluster or node. If not present, the health evaluation uses the health policy from cluster manifest or the default health policy.
-      required: false
+    TimeoutOptionalQueryParam:
+      name: timeout
+      in: query
       x-ms-parameter-location: method
+      required: false
+      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
       schema:
-        $ref: '#/components/schemas/ClusterHealthPolicy'
+        type: integer
+        format: int64
+        default: 60
+        maximum: 4294967295
+        minimum: 1
+    ForceConfigurationOverrideOptionalParam:
+      name: Force
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: Force adding configuration overrides on specified nodes.
+      schema:
+        type: boolean
+    ApiVersion_7-0_RequiredQueryParam:
+      name: api-version
+      in: query
+      x-ms-parameter-location: method
+      required: true
+      description: 'The version of the API. This parameter is required and its value must be ''7.0''.
+
+
+        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
+
+
+        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
+      x-ms-enum:
+        name: ApiVersion_7-0_RequiredQueryParam
+        modelAsString: true
+        values:
+        - value: '7.0'
+          description: The 7.0 version of the API.
+      schema:
+        type: string
+        enum:
+        - '7.0'
+        default: '7.0'
     NodeStatusFilterOptionalQueryParam:
       name: NodeStatusFilter
       description: Allows filtering the nodes based on the NodeStatus. Only the nodes that are matching the specified filter value will be returned. The filter value can be one of the following.
@@ -1687,6 +1652,53 @@ components:
         - unknown
         - removed
         default: default
+    ApiVersion_6-3_RequiredQueryParam:
+      name: api-version
+      in: query
+      x-ms-parameter-location: method
+      required: true
+      description: 'The version of the API. This parameter is required and its value must be ''6.3''.
+
+
+        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
+
+
+        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
+      x-ms-enum:
+        name: ApiVersion_6-3_RequiredQueryParam
+        modelAsString: true
+        values:
+        - value: '6.3'
+          description: The 6.3 version of the API.
+      schema:
+        type: string
+        enum:
+        - '6.3'
+        default: '6.3'
+    ConfigurationOverrideListRequiredParam:
+      name: ConfigParameterOverrideList
+      in: body
+      description: Description for adding list of configuration overrides.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/ConfigParameterOverrideList'
+    NodeNameRequiredPathParam:
+      name: nodeName
+      in: path
+      x-ms-parameter-location: method
+      required: true
+      description: The name of the node.
+      schema:
+        type: string
+    RestartNodeDescriptionRequiredBodyParam:
+      name: RestartNodeDescription
+      in: body
+      description: The instance of the node to be restarted and a flag indicating the need to take dump of the fabric process.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/RestartNodeDescription'
     ApiVersion_6-0_RequiredQueryParam:
       name: api-version
       in: query
@@ -1710,8 +1722,3 @@ components:
         enum:
         - '6.0'
         default: '6.0'
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'

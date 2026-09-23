@@ -1,7 +1,14 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Triggers API
+  title: Microsoft Azure Triggers API
+  version: '1.0'
+  description: 'Operations tagged Triggers across 2 of this provider''s published API definitions: databoxedgemanagementclient-openapi-original.yml, microsoftscanningclient-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://management.azure.com
+- url: https://purview.azure.com/scan
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: Triggers
 paths:
@@ -45,7 +52,9 @@ paths:
       x-ms-examples:
         TriggerGetAllInDevice:
           $ref: ./examples/TriggerGetAllInDevice.json
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Databoxedge Databoxedgedevices Devicename Triggers
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
+    servers:
+    - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/triggers/{name}
   : get:
       tags:
@@ -84,7 +93,7 @@ paths:
       x-ms-examples:
         TriggerGet:
           $ref: ./examples/TriggerGet.json
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Databoxedge Databoxedgedevices Devicename Triggers Name
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
     put:
       tags:
       - Triggers
@@ -125,7 +134,7 @@ paths:
       x-ms-examples:
         TriggerPut:
           $ref: ./examples/TriggerPut.json
-      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Databoxedge Databoxedgedevices Devicename Triggers Name
+      summary: Microsoft Azure Put Subscriptions Subscriptionid Resourcegroups…
       requestBody:
         content:
           application/json:
@@ -171,7 +180,9 @@ paths:
       x-ms-examples:
         TriggerDelete:
           $ref: ./examples/TriggerDelete.json
-      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers Microsoft Databoxedge Databoxedgedevices Devicename Triggers Name
+      summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
+    servers:
+    - url: https://management.azure.com
   /datasources/{dataSourceName}/scans/{scanName}/triggers/default:
     get:
       tags:
@@ -288,9 +299,52 @@ paths:
       x-ms-examples:
         Triggers_DeleteTrigger:
           $ref: ./examples/Triggers_DeleteTrigger.json
-      summary: Microsoft Azure Delete Datasources Datasourcename Scans Scanname Triggers Default
+      summary: Microsoft Azure Delete Datasources Datasourcename Scans Scanname Triggers…
+    servers:
+    - url: https://purview.azure.com/scan
 components:
   schemas:
+    CloudError:
+      description: An error response from the service.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: The error details.
+      x-ms-external: true
+    ARMBaseModel:
+      description: Represents the base class for all object models.
+      type: object
+      properties:
+        id:
+          description: The path ID that uniquely identifies the object.
+          type: string
+          readOnly: true
+        name:
+          description: The object name.
+          type: string
+          readOnly: true
+        type:
+          description: The hierarchical type of the object.
+          type: string
+          readOnly: true
+      x-ms-azure-resource: true
+    TriggerList:
+      description: Collection of all trigger on the data box edge device.
+      type: object
+      properties:
+        value:
+          description: The list of triggers.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/Trigger'
+          readOnly: true
+          x-ms-identifiers: []
+        nextLink:
+          description: Link to the next set of results.
+          type: string
+          readOnly: true
     CloudErrorBody:
       description: An error response from the service.
       type: object
@@ -308,6 +362,29 @@ components:
             $ref: '#/components/schemas/CloudErrorBody'
           x-ms-identifiers: []
       x-ms-external: true
+    Trigger:
+      description: Trigger details.
+      required:
+      - kind
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ARMBaseModel'
+      properties:
+        kind:
+          description: Trigger Kind.
+          enum:
+          - FileEvent
+          - PeriodicTimerEvent
+          type: string
+          x-ms-enum:
+            name: TriggerEventType
+            modelAsString: true
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+          description: Metadata pertaining to creation and last modification of Trigger
+          readOnly: true
+      discriminator:
+        propertyName: kind
     RecurrenceSchedule:
       type: object
       properties:
@@ -349,25 +426,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RecurrenceScheduleOccurrence'
-    ErrorResponseModel:
-      type: object
-      properties:
-        error:
-          allOf:
-          - $ref: '#/components/schemas/ErrorModel'
-    ErrorModel:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        target:
-          type: string
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorModel'
     TriggerRecurrence:
       type: object
       properties:
@@ -395,6 +453,15 @@ components:
           - $ref: '#/components/schemas/RecurrenceSchedule'
         timeZone:
           type: string
+    ProxyResource:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
     RecurrenceScheduleOccurrence:
       type: object
       properties:
@@ -418,14 +485,19 @@ components:
         occurrence:
           format: int32
           type: integer
-    CloudError:
-      description: An error response from the service.
+    ErrorModel:
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: The error details.
-      x-ms-external: true
+        code:
+          type: string
+        message:
+          type: string
+        target:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorModel'
     Trigger_2:
       type: object
       allOf:
@@ -434,29 +506,12 @@ components:
         properties:
           allOf:
           - $ref: '#/components/schemas/TriggerProperties'
-    Trigger:
-      description: Trigger details.
-      required:
-      - kind
+    ErrorResponseModel:
       type: object
-      allOf:
-      - $ref: '#/components/schemas/ARMBaseModel'
       properties:
-        kind:
-          description: Trigger Kind.
-          enum:
-          - FileEvent
-          - PeriodicTimerEvent
-          type: string
-          x-ms-enum:
-            name: TriggerEventType
-            modelAsString: true
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-          description: Metadata pertaining to creation and last modification of Trigger
-          readOnly: true
-      discriminator:
-        propertyName: kind
+        error:
+          allOf:
+          - $ref: '#/components/schemas/ErrorModel'
     TriggerProperties:
       type: object
       properties:
@@ -488,53 +543,11 @@ components:
         incrementalScanStartTime:
           format: date-time
           type: string
-    TriggerList:
-      description: Collection of all trigger on the data box edge device.
-      type: object
-      properties:
-        value:
-          description: The list of triggers.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/Trigger'
-          readOnly: true
-          x-ms-identifiers: []
-        nextLink:
-          description: Link to the next set of results.
-          type: string
-          readOnly: true
-    ARMBaseModel:
-      description: Represents the base class for all object models.
-      type: object
-      properties:
-        id:
-          description: The path ID that uniquely identifies the object.
-          type: string
-          readOnly: true
-        name:
-          description: The object name.
-          type: string
-          readOnly: true
-        type:
-          description: The hierarchical type of the object.
-          type: string
-          readOnly: true
-      x-ms-azure-resource: true
-    ProxyResource:
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-        name:
-          type: string
-          readOnly: true
   parameters:
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The API version.
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The subscription ID.
       required: true
       schema:
         type: string
@@ -546,6 +559,13 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The API version.
+      required: true
+      schema:
+        type: string
     api-version:
       in: query
       name: api-version
@@ -554,13 +574,18 @@ components:
       x-ms-client-name: ApiVersion
       schema:
         type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The subscription ID.
-      required: true
-      schema:
-        type: string
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow
+x-refined-from:
+- databoxedgemanagementclient-openapi-original.yml
+- microsoftscanningclient-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

@@ -1,7 +1,11 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Predictions API
+  title: Microsoft Azure Predictions API
+  version: '1.0'
+  description: 'Operations tagged PredictionsApi across 2 of this provider''s published API definitions: custom-vision-training-client-openapi-original.yml, trainingapi-openapi-original.yml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://southcentralus.api.cognitive.microsoft.com/customvision/v3.3/training
+- url: https://southcentralus.api.cognitive.microsoft.com/customvision/v2.1/Training
 tags:
 - name: PredictionsApi
 paths:
@@ -9,7 +13,7 @@ paths:
     delete:
       tags:
       - PredictionsApi
-      summary: Microsoft Azure Delete A Set Of Predicted Images And Their Associated Prediction Results
+      summary: Microsoft Azure Delete A Set Of Predicted Images And Their Associated…
       operationId: microsoftAzureDeleteprediction
       parameters:
       - name: projectId
@@ -45,6 +49,10 @@ paths:
         Successful DeletePrediction request:
           $ref: ./examples/DeletePrediction.json
       description: Needs a more full description created.
+      security:
+      - apim_key: []
+    servers:
+    - url: https://southcentralus.api.cognitive.microsoft.com/customvision/v3.3/training
   /projects/{projectId}/predictions/query:
     post:
       tags:
@@ -104,6 +112,10 @@ paths:
               $ref: '#/components/schemas/PredictionQueryToken'
         description: Parameters used to query the predictions. Limited to combining 2 tags.
         required: true
+      security:
+      - apim_key: []
+    servers:
+    - url: https://southcentralus.api.cognitive.microsoft.com/customvision/v3.3/training
   /projects/{projectId}/quicktest/image:
     post:
       tags:
@@ -183,6 +195,10 @@ paths:
                   format: binary
               required:
               - imageData
+      security:
+      - apim_key: []
+    servers:
+    - url: https://southcentralus.api.cognitive.microsoft.com/customvision/v3.3/training
   /projects/{projectId}/quicktest/url:
     post:
       tags:
@@ -256,18 +272,12 @@ paths:
               $ref: '#/components/schemas/ImageUrl'
         description: An ImageUrl that contains the url of the image to be evaluated.
         required: true
+      security:
+      - apim_key: []
+    servers:
+    - url: https://southcentralus.api.cognitive.microsoft.com/customvision/v3.3/training
 components:
   schemas:
-    ImageUrl:
-      description: Image url.
-      required:
-      - url
-      type: object
-      properties:
-        url:
-          description: Url of the image.
-          type: string
-          readOnly: false
     PredictionQueryTag:
       type: object
       properties:
@@ -282,6 +292,16 @@ components:
         maxThreshold:
           format: float
           type: number
+          readOnly: false
+    ImageUrl:
+      description: Image url.
+      required:
+      - url
+      type: object
+      properties:
+        url:
+          description: Url of the image.
+          type: string
           readOnly: false
     PredictionQueryToken:
       type: object
@@ -332,72 +352,50 @@ components:
         application:
           type: string
           readOnly: false
-    Prediction:
-      description: Prediction result.
+    PredictionQueryResult:
+      description: Query result of the prediction images that were sent to your prediction endpoint.
       type: object
       properties:
-        probability:
-          format: float
-          description: Probability of the tag.
-          type: number
+        token:
+          $ref: '#/components/schemas/PredictionQueryToken'
+          description: Prediction Query Token.
+          readOnly: false
+        results:
+          description: Result of an image prediction request.
+          type: array
+          items:
+            $ref: '#/components/schemas/StoredImagePrediction'
           readOnly: true
-        tagId:
+    ImagePrediction:
+      description: Result of an image prediction request.
+      type: object
+      properties:
+        id:
           format: uuid
-          description: Id of the predicted tag.
+          description: Prediction Id.
           type: string
           readOnly: true
-        tagName:
-          description: Name of the predicted tag.
-          type:
-          - string
-          - 'null'
+        project:
+          format: uuid
+          description: Project Id.
+          type: string
           readOnly: true
-        boundingBox:
-          $ref: '#/components/schemas/BoundingBox'
-          description: Bounding box of the prediction.
+        iteration:
+          format: uuid
+          description: Iteration Id.
+          type: string
           readOnly: true
-        tagType:
-          description: Type of the predicted tag.
-          enum:
-          - Regular
-          - Negative
-          - GeneralProduct
-          type:
-          - string
-          - 'null'
+        created:
+          format: date-time
+          description: Date this prediction was created.
+          type: string
           readOnly: true
-          x-ms-enum:
-            name: TagType
-            modelAsString: true
-    BoundingBox:
-      description: Bounding box that defines a region of an image.
-      required:
-      - left
-      - top
-      - width
-      - height
-      type: object
-      properties:
-        left:
-          format: float
-          description: Coordinate of the left boundary.
-          type: number
-          readOnly: false
-        top:
-          format: float
-          description: Coordinate of the top boundary.
-          type: number
-          readOnly: false
-        width:
-          format: float
-          description: Width.
-          type: number
-          readOnly: false
-        height:
-          format: float
-          description: Height.
-          type: number
-          readOnly: false
+        predictions:
+          description: List of predictions.
+          type: array
+          items:
+            $ref: '#/components/schemas/Prediction'
+          readOnly: true
     CustomVisionError:
       required:
       - code
@@ -544,6 +542,72 @@ components:
         message:
           description: A message explaining the error reported by the service.
           type: string
+    BoundingBox:
+      description: Bounding box that defines a region of an image.
+      required:
+      - left
+      - top
+      - width
+      - height
+      type: object
+      properties:
+        left:
+          format: float
+          description: Coordinate of the left boundary.
+          type: number
+          readOnly: false
+        top:
+          format: float
+          description: Coordinate of the top boundary.
+          type: number
+          readOnly: false
+        width:
+          format: float
+          description: Width.
+          type: number
+          readOnly: false
+        height:
+          format: float
+          description: Height.
+          type: number
+          readOnly: false
+    Prediction:
+      description: Prediction result.
+      type: object
+      properties:
+        probability:
+          format: float
+          description: Probability of the tag.
+          type: number
+          readOnly: true
+        tagId:
+          format: uuid
+          description: Id of the predicted tag.
+          type: string
+          readOnly: true
+        tagName:
+          description: Name of the predicted tag.
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        boundingBox:
+          $ref: '#/components/schemas/BoundingBox'
+          description: Bounding box of the prediction.
+          readOnly: true
+        tagType:
+          description: Type of the predicted tag.
+          enum:
+          - Regular
+          - Negative
+          - GeneralProduct
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          x-ms-enum:
+            name: TagType
+            modelAsString: true
     StoredImagePrediction:
       description: Result of an image prediction request.
       type: object
@@ -591,50 +655,223 @@ components:
           items:
             $ref: '#/components/schemas/Prediction'
           readOnly: true
-    ImagePrediction:
-      description: Result of an image prediction request.
-      type: object
+    PredictionQueryTag_2:
+      type:
+      - object
+      - 'null'
       properties:
         id:
           format: uuid
-          description: Prediction Id.
+          type: string
+          readOnly: true
+        minThreshold:
+          format: float
+          type: number
+          readOnly: true
+        maxThreshold:
+          format: float
+          type: number
+          readOnly: true
+    ImageUrl_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        url:
+          type:
+          - string
+          - 'null'
+    PredictionQueryToken_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        session:
+          type:
+          - string
+          - 'null'
+        continuation:
+          type:
+          - string
+          - 'null'
+        maxCount:
+          format: int32
+          type: integer
+        orderBy:
+          enum:
+          - Newest
+          - Oldest
+          - Suggested
+          type: string
+          x-ms-enum:
+            name: OrderBy
+            modelAsString: true
+        tags:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/PredictionQueryTag_2'
+        iterationId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        startTime:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        endTime:
+          format: date-time
+          type:
+          - string
+          - 'null'
+        application:
+          type:
+          - string
+          - 'null'
+    PredictionQueryResult_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        token:
+          $ref: '#/components/schemas/PredictionQueryToken_2'
+          readOnly: true
+        results:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/StoredImagePrediction_2'
+          readOnly: true
+    ImagePrediction_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        id:
+          format: uuid
           type: string
           readOnly: true
         project:
           format: uuid
-          description: Project Id.
           type: string
           readOnly: true
         iteration:
           format: uuid
-          description: Iteration Id.
           type: string
           readOnly: true
         created:
           format: date-time
-          description: Date this prediction was created.
           type: string
           readOnly: true
         predictions:
-          description: List of predictions.
-          type: array
+          type:
+          - array
+          - 'null'
           items:
-            $ref: '#/components/schemas/Prediction'
+            $ref: '#/components/schemas/Prediction_2'
           readOnly: true
-    PredictionQueryResult:
-      description: Query result of the prediction images that were sent to your prediction endpoint.
-      type: object
+    BoundingBox_2:
+      type:
+      - object
+      - 'null'
       properties:
-        token:
-          $ref: '#/components/schemas/PredictionQueryToken'
-          description: Prediction Query Token.
-          readOnly: false
-        results:
-          description: Result of an image prediction request.
-          type: array
-          items:
-            $ref: '#/components/schemas/StoredImagePrediction'
+        left:
+          format: float
+          type: number
+        top:
+          format: float
+          type: number
+        width:
+          format: float
+          type: number
+        height:
+          format: float
+          type: number
+    Prediction_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        probability:
+          format: float
+          type: number
           readOnly: true
+        tagId:
+          format: uuid
+          type: string
+          readOnly: true
+        tagName:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        boundingBox:
+          $ref: '#/components/schemas/BoundingBox_2'
+          readOnly: true
+    StoredImagePrediction_2:
+      description: result of an image classification request
+      type:
+      - object
+      - 'null'
+      properties:
+        imageUri:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        thumbnailUri:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        domain:
+          format: uuid
+          type: string
+          readOnly: true
+        id:
+          format: uuid
+          type: string
+          readOnly: true
+        project:
+          format: uuid
+          type: string
+          readOnly: true
+        iteration:
+          format: uuid
+          type: string
+          readOnly: true
+        created:
+          format: date-time
+          type: string
+          readOnly: true
+        predictions:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/Prediction_2'
+          readOnly: true
+  parameters:
+    ApiKey:
+      name: Training-Key
+      in: header
+      required: true
+      x-ms-client-name: ApiKey
+      x-ms-parameter-location: client
+      schema:
+        type: string
+  securitySchemes:
+    apim_key:
+      type: apiKey
+      name: Training-Key
+      in: header
+x-refined-from:
+- custom-vision-training-client-openapi-original.yml
+- trainingapi-openapi-original.yml
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

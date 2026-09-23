@@ -1,7 +1,13 @@
 openapi: 3.2.0
 info:
-  version: 2020-08-01-preview
-  title: Microsoft Azure AccessControlClient AccessConnector Community Gallery Images API
+  title: Microsoft Azure CommunityGalleryServiceClient Community…
+  description: Community Gallery Service Client.
+  version: '2021-07-01'
+servers:
+- url: https://management.azure.com
+security:
+- azure_auth:
+  - user_impersonation
 tags:
 - name: CommunityGalleryImages
 paths:
@@ -33,9 +39,16 @@ paths:
       x-ms-examples:
         Get a gallery.:
           $ref: ./examples/communityGallery/GetACommunityGalleryImage.json
-      summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft Compute Locations Location Communitygalleries Publicgalleryname Images Galleryimagename
+      summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft Compute…
 components:
   schemas:
+    RecommendedMachineConfiguration:
+      properties:
+        vCPUs:
+          $ref: '#/components/schemas/ResourceRange'
+        memory:
+          $ref: '#/components/schemas/ResourceRange'
+      description: The properties describe the recommended machine configuration for this Image Definition. These properties are updatable.
     GalleryImageFeature:
       properties:
         name:
@@ -45,13 +58,44 @@ components:
           type: string
           description: The value of the gallery image feature.
       description: A feature for gallery image.
-    RecommendedMachineConfiguration:
+    PirCommunityGalleryResource:
       properties:
-        vCPUs:
-          $ref: '#/components/schemas/ResourceRange'
-        memory:
-          $ref: '#/components/schemas/ResourceRange'
-      description: The properties describe the recommended machine configuration for this Image Definition. These properties are updatable.
+        name:
+          readOnly: true
+          type: string
+          description: Resource name
+        location:
+          readOnly: true
+          type: string
+          description: Resource location
+        type:
+          readOnly: true
+          type: string
+          description: Resource type
+        identifier:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/CommunityGalleryIdentifier'
+      description: Base information about the community gallery resource in pir.
+    CommunityGalleryImage:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/CommunityGalleryImageProperties'
+      allOf:
+      - $ref: '#/components/schemas/PirCommunityGalleryResource'
+      description: Specifies information about the gallery image definition that you want to create or update.
+    ApiErrorBase:
+      properties:
+        code:
+          type: string
+          description: The error code.
+        target:
+          type: string
+          description: The target of the particular error.
+        message:
+          type: string
+          description: The error message.
+      description: Api error base.
     Disallowed:
       properties:
         diskTypes:
@@ -60,6 +104,57 @@ components:
             type: string
           description: A list of disk types.
       description: Describes the disallowed disk types.
+    ApiError:
+      properties:
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiErrorBase'
+          x-ms-identifiers:
+          - message
+          - target
+          description: The Api error details
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: The Api inner error
+        code:
+          type: string
+          description: The error code.
+        target:
+          type: string
+          description: The target of the particular error.
+        message:
+          type: string
+          description: The error message.
+      description: Api error.
+    GalleryImageIdentifier:
+      properties:
+        publisher:
+          type: string
+          description: The name of the gallery image definition publisher.
+        offer:
+          type: string
+          description: The name of the gallery image definition offer.
+        sku:
+          type: string
+          description: The name of the gallery image definition SKU.
+      required:
+      - publisher
+      - offer
+      - sku
+      description: This is the gallery image definition identifier.
+    ImagePurchasePlan:
+      properties:
+        name:
+          type: string
+          description: The plan ID.
+        publisher:
+          type: string
+          description: The publisher ID.
+        product:
+          type: string
+          description: The product ID.
+      description: Describes the gallery image definition purchase plan. This is used by marketplace images.
     CommunityGalleryImageProperties:
       properties:
         osType:
@@ -113,69 +208,18 @@ components:
       - osState
       - identifier
       description: Describes the properties of a gallery image definition.
-    PirCommunityGalleryResource:
+    CloudError:
+      x-ms-external: true
       properties:
-        name:
-          readOnly: true
-          type: string
-          description: Resource name
-        location:
-          readOnly: true
-          type: string
-          description: Resource location
-        type:
-          readOnly: true
-          type: string
-          description: Resource type
-        identifier:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/CommunityGalleryIdentifier'
-      description: Base information about the community gallery resource in pir.
-    InnerError:
+        error:
+          $ref: '#/components/schemas/ApiError'
+      description: An error response from the Compute service.
+    CommunityGalleryIdentifier:
       properties:
-        exceptiontype:
+        uniqueId:
           type: string
-          description: The exception type.
-        errordetail:
-          type: string
-          description: The internal error message or exception dump.
-      description: Inner error details.
-    CommunityGalleryImage:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/CommunityGalleryImageProperties'
-      allOf:
-      - $ref: '#/components/schemas/PirCommunityGalleryResource'
-      description: Specifies information about the gallery image definition that you want to create or update.
-    GalleryImageIdentifier:
-      properties:
-        publisher:
-          type: string
-          description: The name of the gallery image definition publisher.
-        offer:
-          type: string
-          description: The name of the gallery image definition offer.
-        sku:
-          type: string
-          description: The name of the gallery image definition SKU.
-      required:
-      - publisher
-      - offer
-      - sku
-      description: This is the gallery image definition identifier.
-    ImagePurchasePlan:
-      properties:
-        name:
-          type: string
-          description: The plan ID.
-        publisher:
-          type: string
-          description: The publisher ID.
-        product:
-          type: string
-          description: The product ID.
-      description: Describes the gallery image definition purchase plan. This is used by marketplace images.
+          description: The unique id of this community gallery.
+      description: The identifier information of community gallery.
     ResourceRange:
       properties:
         min:
@@ -187,59 +231,36 @@ components:
           format: int32
           description: The maximum number of the resource.
       description: Describes the resource range.
-    ApiError:
+    InnerError:
       properties:
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ApiErrorBase'
-          x-ms-identifiers:
-          - message
-          - target
-          description: The Api error details
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: The Api inner error
-        code:
+        exceptiontype:
           type: string
-          description: The error code.
-        target:
+          description: The exception type.
+        errordetail:
           type: string
-          description: The target of the particular error.
-        message:
-          type: string
-          description: The error message.
-      description: Api error.
-    CommunityGalleryIdentifier:
-      properties:
-        uniqueId:
-          type: string
-          description: The unique id of this community gallery.
-      description: The identifier information of community gallery.
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          $ref: '#/components/schemas/ApiError'
-      description: An error response from the Compute service.
-    ApiErrorBase:
-      properties:
-        code:
-          type: string
-          description: The error code.
-        target:
-          type: string
-          description: The target of the particular error.
-        message:
-          type: string
-          description: The error message.
-      description: Api error base.
+          description: The internal error message or exception dump.
+      description: Inner error details.
   parameters:
     ApiVersionParameter:
       name: api-version
       in: query
       required: true
       description: Client Api Version.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+      schema:
+        type: string
+    GalleryImageNameParameter:
+      name: galleryImageName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: The name of the community gallery image definition.
       schema:
         type: string
     PublicGalleryNameParameter:
@@ -258,23 +279,12 @@ components:
       description: Resource location.
       schema:
         type: string
-    GalleryImageNameParameter:
-      name: galleryImageName
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: The name of the community gallery image definition.
-      schema:
-        type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-      schema:
-        type: string
-x-ms-parameterized-host:
-  hostTemplate: '{endpoint}'
-  useSchemePrefix: false
-  parameters:
-  - $ref: '#/components/parameters/Endpoint'
+  securitySchemes:
+    azure_auth:
+      type: oauth2
+      flows:
+        implicit:
+          scopes:
+            user_impersonation: impersonate your user account
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+      description: Azure Active Directory OAuth2 Flow
