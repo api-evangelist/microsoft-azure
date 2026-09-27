@@ -87,6 +87,39 @@ paths:
           $ref: examples/GetAssetConversionJob.json
       description: Needs a more full description created.
 components:
+  parameters:
+    ApiVersionParameter:
+      in: query
+      name: api-version
+      description: The API version.
+      required: true
+      schema:
+        type: string
+    ClientRequestCorrelationVectorParameter:
+      in: header
+      name: x-mrc-cv
+      description: The client request correlation vector, which should be set to a new value for each request.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    AccountIdParameter:
+      in: path
+      name: accountId
+      description: Identifier for the Azure Object Anchors account.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    JobIdParameter:
+      in: path
+      name: jobId
+      description: Identifier for the Azure Object Anchors ingestion job.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
   schemas:
     IngestionConfiguration:
       description: Represents an ingestion configuration.
@@ -132,6 +165,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Pose'
+    ErrorResponse:
+      description: Represents an error response.
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          description: The Error object.
+          $ref: '#/components/schemas/ErrorDetail'
     Vector3:
       description: Represents a vector with three single-precision floating-point values.
       required:
@@ -152,8 +194,8 @@ components:
           format: float
           description: The z component of the vector.
           type: number
-    Vector4:
-      description: Represents a vector with four single-precision floating-point values.
+    Quaternion:
+      description: Represents a vector that is used to encode three-dimensional physical rotations.
       required:
       - x
       - y
@@ -163,20 +205,34 @@ components:
       properties:
         x:
           format: float
-          description: The x component of the vector.
+          description: The x value of the vector component of the quaternion.
           type: number
         y:
           format: float
-          description: The y component of the vector.
+          description: The y value of the vector component of the quaternion.
           type: number
         z:
           format: float
-          description: The z component of the vector.
+          description: The z value of the vector component of the quaternion.
           type: number
         w:
           format: float
-          description: The w component of the vector.
+          description: The rotation component of the quaternion.
           type: number
+        isIdentity:
+          description: Gets a value that indicates whether the current instance is the identity quaternion
+          type: boolean
+          readOnly: true
+    InnerError:
+      description: Inner error.
+      type: object
+      properties:
+        code:
+          description: A more specific error code than was provided by the containing error.
+          type: string
+        innererror:
+          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/InnerError'
     ConversionErrorCode:
       description: The asset conversion error code.
       enum:
@@ -241,35 +297,6 @@ components:
         - value: ASSET_CANNOT_BE_CONVERTED
           description: The provided asset was corrupted, malformed, or otherwise unable to be converted in its provided format.
           name: AssetCannotBeConverted
-    Quaternion:
-      description: Represents a vector that is used to encode three-dimensional physical rotations.
-      required:
-      - x
-      - y
-      - z
-      - w
-      type: object
-      properties:
-        x:
-          format: float
-          description: The x value of the vector component of the quaternion.
-          type: number
-        y:
-          format: float
-          description: The y value of the vector component of the quaternion.
-          type: number
-        z:
-          format: float
-          description: The z value of the vector component of the quaternion.
-          type: number
-        w:
-          format: float
-          description: The rotation component of the quaternion.
-          type: number
-        isIdentity:
-          description: Gets a value that indicates whether the current instance is the identity quaternion
-          type: boolean
-          readOnly: true
     Pose:
       description: Represents a pose.
       required:
@@ -283,16 +310,41 @@ components:
         translation:
           description: The pose's translation.
           $ref: '#/components/schemas/Vector3'
-    InnerError:
-      description: Inner error.
+    ErrorDetail:
+      description: Represents an error.
+      required:
+      - code
+      - message
       type: object
       properties:
         code:
-          description: A more specific error code than was provided by the containing error.
+          description: The error code.
           type: string
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error.
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
         innererror:
           description: An object containing more specific information than the current object about the error.
           $ref: '#/components/schemas/InnerError'
+    JobStatus:
+      description: Represents job status state.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      - Cancelled
+      type: string
+      x-ms-enum:
+        name: JobStatus
+        modelAsString: false
     IngestionProperties:
       description: Represents the status of an AOA asset conversion job.
       type: object
@@ -341,80 +393,28 @@ components:
           description: The scaled dimensions of the asset.
           $ref: '#/components/schemas/Vector3'
           readOnly: true
-    ErrorResponse:
-      description: Represents an error response.
+    Vector4:
+      description: Represents a vector with four single-precision floating-point values.
       required:
-      - error
+      - x
+      - y
+      - z
+      - w
       type: object
       properties:
-        error:
-          description: The Error object.
-          $ref: '#/components/schemas/ErrorDetail'
-    ErrorDetail:
-      description: Represents an error.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error.
-          type: string
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-        innererror:
-          description: An object containing more specific information than the current object about the error.
-          $ref: '#/components/schemas/InnerError'
-    JobStatus:
-      description: Represents job status state.
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      - Cancelled
-      type: string
-      x-ms-enum:
-        name: JobStatus
-        modelAsString: false
-  parameters:
-    AccountIdParameter:
-      in: path
-      name: accountId
-      description: Identifier for the Azure Object Anchors account.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    ApiVersionParameter:
-      in: query
-      name: api-version
-      description: The API version.
-      required: true
-      schema:
-        type: string
-    JobIdParameter:
-      in: path
-      name: jobId
-      description: Identifier for the Azure Object Anchors ingestion job.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    ClientRequestCorrelationVectorParameter:
-      in: header
-      name: x-mrc-cv
-      description: The client request correlation vector, which should be set to a new value for each request.
-      x-ms-parameter-location: method
-      schema:
-        type: string
+        x:
+          format: float
+          description: The x component of the vector.
+          type: number
+        y:
+          format: float
+          description: The y component of the vector.
+          type: number
+        z:
+          format: float
+          description: The z component of the vector.
+          type: number
+        w:
+          format: float
+          description: The w component of the vector.
+          type: number

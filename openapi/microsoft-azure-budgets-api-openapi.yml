@@ -136,20 +136,39 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       summary: Microsoft Azure Delete Scope Providers Microsoft Consumption Budgets Budgetname
 components:
+  parameters:
+    budgetNameParameter:
+      name: budgetName
+      in: path
+      description: Budget Name.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Version of the API to be used with the client request. The current version is 2019-04-01-preview.
+      schema:
+        type: string
+    scopeBudgetParameter:
+      name: scope
+      in: path
+      required: true
+      description: The scope associated with budget operations. This includes '/subscriptions/{subscriptionId}/' for subscription scope, '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}' for resourceGroup scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}' for Billing Account scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/departments/{departmentId}' for Department scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/enrollmentAccounts/{enrollmentAccountId}' for EnrollmentAccount scope, '/providers/Microsoft.Management/managementGroups/{managementGroupId}' for Management Group scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}' for billingProfile scope, 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for invoiceSection scope.
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
   schemas:
-    BudgetTimePeriod:
-      description: The start and end date for a budget.
+    ErrorResponse:
+      description: Error response indicates that the service is not able to process the incoming request. The reason is provided in the error message.
+      type: object
       properties:
-        startDate:
-          description: The start date for the budget.
-          type: string
-          format: date-time
-        endDate:
-          description: The end date for the budget. If not provided, we default this to 10 years from the start date.
-          type: string
-          format: date-time
-      required:
-      - startDate
+        error:
+          description: The details of the error.
+          $ref: '#/components/schemas/ErrorDetails'
     ProxyResource:
       description: The Resource model definition.
       properties:
@@ -169,131 +188,6 @@ components:
           type: string
           description: eTag of the resource. To handle concurrent update scenario, this field will be used to determine whether the user is updating the latest version or not.
       x-ms-azure-resource: true
-    BudgetProperties:
-      description: The properties of the budget.
-      properties:
-        category:
-          description: The category of the budget, whether the budget tracks cost or usage.
-          type: string
-          enum:
-          - Cost
-          - Usage
-          x-ms-enum:
-            name: CategoryType
-            modelAsString: true
-        amount:
-          description: The total amount of cost to track with the budget
-          type: number
-          format: decimal
-        timeGrain:
-          description: The time covered by a budget. Tracking of the amount will be reset based on the time grain.
-          type: string
-          enum:
-          - Monthly
-          - Quarterly
-          - Annually
-          x-ms-enum:
-            name: TimeGrainType
-            modelAsString: true
-        timePeriod:
-          description: Has start and end date of the budget. The start date must be first of the month and should be less than the end date. Budget start date must be on or after June 1, 2017. Future start date should not be more than three months. Past start date should  be selected within the timegrain period. There are no restrictions on the end date.
-          $ref: '#/components/schemas/BudgetTimePeriod'
-        filters:
-          description: May be used to filter budgets by resource group, resource, or meter.
-          type: object
-          $ref: '#/components/schemas/Filters'
-        currentSpend:
-          description: The current amount of cost which is being tracked for a budget.
-          $ref: '#/components/schemas/CurrentSpend'
-          readOnly: true
-        notifications:
-          type: object
-          description: Dictionary of notifications associated with the budget. Budget can have up to five notifications.
-          additionalProperties:
-            type: object
-            $ref: '#/components/schemas/Notification'
-          maxItems: 5
-      required:
-      - category
-      - amount
-      - timeGrain
-      - timePeriod
-    ErrorResponse:
-      description: Error response indicates that the service is not able to process the incoming request. The reason is provided in the error message.
-      type: object
-      properties:
-        error:
-          description: The details of the error.
-          $ref: '#/components/schemas/ErrorDetails'
-    BudgetsListResult:
-      description: Result of listing budgets. It contains a list of available budgets in the scope provided.
-      properties:
-        value:
-          description: The list of budgets.
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/Budget'
-        nextLink:
-          description: The link (url) to the next page of results.
-          type: string
-          readOnly: true
-    CurrentSpend:
-      description: The current amount of cost which is being tracked for a budget.
-      properties:
-        amount:
-          description: The total amount of cost which is being tracked by the budget.
-          type: number
-          format: decimal
-          readOnly: true
-        unit:
-          description: The unit of measure for the budget amount.
-          type: string
-          readOnly: true
-    Filters:
-      description: May be used to filter budgets by resource group, resource, or meter.
-      properties:
-        resourceGroups:
-          description: The list of filters on resource groups, allowed at subscription level only.
-          type: array
-          items:
-            type: string
-          minItems: 0
-          maxItems: 10
-        resources:
-          description: The list of filters on resources.
-          type: array
-          items:
-            type: string
-          minItems: 0
-          maxItems: 10
-        meters:
-          description: 'The list of filters on meters (GUID), mandatory for budgets of usage category. '
-          type: array
-          items:
-            type: string
-            format: uuid
-          minItems: 0
-          maxItems: 10
-        tags:
-          type: object
-          description: The dictionary of filters on tags.
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          minItems: 0
-          maxItems: 10
-    Budget:
-      description: A budget resource.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BudgetProperties'
-          title: Budget properties
     Notification:
       description: The notification associated with a budget.
       properties:
@@ -349,31 +243,137 @@ components:
           description: Error message indicating why the operation failed.
           type: string
           readOnly: true
-  parameters:
-    scopeBudgetParameter:
-      name: scope
-      in: path
-      required: true
-      description: The scope associated with budget operations. This includes '/subscriptions/{subscriptionId}/' for subscription scope, '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}' for resourceGroup scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}' for Billing Account scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/departments/{departmentId}' for Department scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/enrollmentAccounts/{enrollmentAccountId}' for EnrollmentAccount scope, '/providers/Microsoft.Management/managementGroups/{managementGroupId}' for Management Group scope, '/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}' for billingProfile scope, 'providers/Microsoft.Billing/billingAccounts/{billingAccountId}/invoiceSections/{invoiceSectionId}' for invoiceSection scope.
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    budgetNameParameter:
-      name: budgetName
-      in: path
-      description: Budget Name.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Version of the API to be used with the client request. The current version is 2019-04-01-preview.
-      schema:
-        type: string
+    BudgetProperties:
+      description: The properties of the budget.
+      properties:
+        category:
+          description: The category of the budget, whether the budget tracks cost or usage.
+          type: string
+          enum:
+          - Cost
+          - Usage
+          x-ms-enum:
+            name: CategoryType
+            modelAsString: true
+        amount:
+          description: The total amount of cost to track with the budget
+          type: number
+          format: decimal
+        timeGrain:
+          description: The time covered by a budget. Tracking of the amount will be reset based on the time grain.
+          type: string
+          enum:
+          - Monthly
+          - Quarterly
+          - Annually
+          x-ms-enum:
+            name: TimeGrainType
+            modelAsString: true
+        timePeriod:
+          description: Has start and end date of the budget. The start date must be first of the month and should be less than the end date. Budget start date must be on or after June 1, 2017. Future start date should not be more than three months. Past start date should  be selected within the timegrain period. There are no restrictions on the end date.
+          $ref: '#/components/schemas/BudgetTimePeriod'
+        filters:
+          description: May be used to filter budgets by resource group, resource, or meter.
+          type: object
+          $ref: '#/components/schemas/Filters'
+        currentSpend:
+          description: The current amount of cost which is being tracked for a budget.
+          $ref: '#/components/schemas/CurrentSpend'
+          readOnly: true
+        notifications:
+          type: object
+          description: Dictionary of notifications associated with the budget. Budget can have up to five notifications.
+          additionalProperties:
+            type: object
+            $ref: '#/components/schemas/Notification'
+          maxItems: 5
+      required:
+      - category
+      - amount
+      - timeGrain
+      - timePeriod
+    Filters:
+      description: May be used to filter budgets by resource group, resource, or meter.
+      properties:
+        resourceGroups:
+          description: The list of filters on resource groups, allowed at subscription level only.
+          type: array
+          items:
+            type: string
+          minItems: 0
+          maxItems: 10
+        resources:
+          description: The list of filters on resources.
+          type: array
+          items:
+            type: string
+          minItems: 0
+          maxItems: 10
+        meters:
+          description: 'The list of filters on meters (GUID), mandatory for budgets of usage category. '
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 0
+          maxItems: 10
+        tags:
+          type: object
+          description: The dictionary of filters on tags.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          minItems: 0
+          maxItems: 10
+    BudgetsListResult:
+      description: Result of listing budgets. It contains a list of available budgets in the scope provided.
+      properties:
+        value:
+          description: The list of budgets.
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Budget'
+        nextLink:
+          description: The link (url) to the next page of results.
+          type: string
+          readOnly: true
+    BudgetTimePeriod:
+      description: The start and end date for a budget.
+      properties:
+        startDate:
+          description: The start date for the budget.
+          type: string
+          format: date-time
+        endDate:
+          description: The end date for the budget. If not provided, we default this to 10 years from the start date.
+          type: string
+          format: date-time
+      required:
+      - startDate
+    CurrentSpend:
+      description: The current amount of cost which is being tracked for a budget.
+      properties:
+        amount:
+          description: The total amount of cost which is being tracked by the budget.
+          type: number
+          format: decimal
+          readOnly: true
+        unit:
+          description: The unit of measure for the budget amount.
+          type: string
+          readOnly: true
+    Budget:
+      description: A budget resource.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BudgetProperties'
+          title: Budget properties
   securitySchemes:
     azure_auth:
       type: oauth2

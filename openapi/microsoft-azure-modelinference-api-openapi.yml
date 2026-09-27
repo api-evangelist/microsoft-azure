@@ -289,21 +289,29 @@ paths:
       summary: Microsoft Azure Get Model Inference Models Microsoft Soil Moisture Infer Data…
 components:
   schemas:
-    SoilMoistureModelJob:
-      description: Schema of soil moisture model job.
+    ErrorResponse:
+      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+        traceId:
+          description: Unique trace Id.
+          type: string
+    BiomassModelJob:
+      description: Schema of biomass model job.
       required:
       - boundaryId
+      - cropName
       - imageFormat
       - imageResolution
       - inferenceEndDateTime
-      - inferenceStartDateTime
       - modelVersion
       - partyId
+      - plantingStartDateTime
       - satelliteProvider
       - satelliteSource
-      - sensorDataModelId
-      - sensorDefinition
-      - sensorPartnerId
+      - weatherExtensionId
       type: object
       properties:
         partyId:
@@ -311,24 +319,35 @@ components:
           minLength: 1
           type: string
         boundaryId:
-          description: The id of the boundary object for which soil moisture is being calculated.
+          description: The id of the boundary object for which biomass is being calculated.
           minLength: 1
           type: string
-        sensorDataModelId:
-          description: Sensor data model Id.
+        modelVersion:
+          description: 'The version of the biomass model to be run. Available Value: 1.0 .'
           minLength: 1
           type: string
-        sensorPartnerId:
-          description: Sensor partner Id.
+        cropName:
+          description: 'Crop name for biomass model. Available Value: Corn.'
           minLength: 1
+          enum:
+          - Corn
           type: string
-        inferenceStartDateTime:
+          x-ms-enum:
+            name: CropName
+            modelAsString: true
+        plantingStartDateTime:
           format: date-time
-          description: Inference start date time for soil moisture calculations.
+          description: 'Planting datetime for biomass calculations. Sample format: yyyy-MM-ddTHH:mm:ssZ.'
           type: string
         inferenceEndDateTime:
           format: date-time
-          description: Inference end date time for soil moisture calculations.
+          description: 'End datetime till which biomass will be calculated. Sample format: yyyy-MM-ddTHH:mm:ssZ.'
+          type: string
+        weatherExtensionId:
+          description: 'ExtensionId of weather data. Available values: DTN.ClearAg, DTN.ContentServices.'
+          maxLength: 100
+          minLength: 2
+          pattern: ^[a-zA-Z]{3,50}[.][a-zA-Z]{3,100}$
           type: string
         satelliteProvider:
           description: 'Provider of satellite data. Available Value: Microsoft.'
@@ -362,12 +381,6 @@ components:
           x-ms-enum:
             name: ImageFormat
             modelAsString: true
-        modelVersion:
-          description: The version of the soil moisture model to be run.
-          minLength: 1
-          type: string
-        sensorDefinition:
-          $ref: '#/components/schemas/SoilMoistureModelSensorDefinition'
         id:
           description: Unique job id.
           type: string
@@ -580,6 +593,15 @@ components:
           example:
             key1: value1
             key2: 123.45
+    InnerError:
+      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
+      type: object
+      properties:
+        code:
+          description: Specific error code than was provided by the containing error.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     Error:
       description: An error from the Azure AgPlatform service.
       required:
@@ -605,20 +627,21 @@ components:
             $ref: '#/components/schemas/Error'
         innererror:
           $ref: '#/components/schemas/InnerError'
-    BiomassModelJob:
-      description: Schema of biomass model job.
+    SoilMoistureModelJob:
+      description: Schema of soil moisture model job.
       required:
       - boundaryId
-      - cropName
       - imageFormat
       - imageResolution
       - inferenceEndDateTime
+      - inferenceStartDateTime
       - modelVersion
       - partyId
-      - plantingStartDateTime
       - satelliteProvider
       - satelliteSource
-      - weatherExtensionId
+      - sensorDataModelId
+      - sensorDefinition
+      - sensorPartnerId
       type: object
       properties:
         partyId:
@@ -626,35 +649,24 @@ components:
           minLength: 1
           type: string
         boundaryId:
-          description: The id of the boundary object for which biomass is being calculated.
+          description: The id of the boundary object for which soil moisture is being calculated.
           minLength: 1
           type: string
-        modelVersion:
-          description: 'The version of the biomass model to be run. Available Value: 1.0 .'
+        sensorDataModelId:
+          description: Sensor data model Id.
           minLength: 1
           type: string
-        cropName:
-          description: 'Crop name for biomass model. Available Value: Corn.'
+        sensorPartnerId:
+          description: Sensor partner Id.
           minLength: 1
-          enum:
-          - Corn
           type: string
-          x-ms-enum:
-            name: CropName
-            modelAsString: true
-        plantingStartDateTime:
+        inferenceStartDateTime:
           format: date-time
-          description: 'Planting datetime for biomass calculations. Sample format: yyyy-MM-ddTHH:mm:ssZ.'
+          description: Inference start date time for soil moisture calculations.
           type: string
         inferenceEndDateTime:
           format: date-time
-          description: 'End datetime till which biomass will be calculated. Sample format: yyyy-MM-ddTHH:mm:ssZ.'
-          type: string
-        weatherExtensionId:
-          description: 'ExtensionId of weather data. Available values: DTN.ClearAg, DTN.ContentServices.'
-          maxLength: 100
-          minLength: 2
-          pattern: ^[a-zA-Z]{3,50}[.][a-zA-Z]{3,100}$
+          description: Inference end date time for soil moisture calculations.
           type: string
         satelliteProvider:
           description: 'Provider of satellite data. Available Value: Microsoft.'
@@ -688,6 +700,12 @@ components:
           x-ms-enum:
             name: ImageFormat
             modelAsString: true
+        modelVersion:
+          description: The version of the soil moisture model to be run.
+          minLength: 1
+          type: string
+        sensorDefinition:
+          $ref: '#/components/schemas/SoilMoistureModelSensorDefinition'
         id:
           description: Unique job id.
           type: string
@@ -764,24 +782,6 @@ components:
           example:
             key1: value1
             key2: 123.45
-    InnerError:
-      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
-      type: object
-      properties:
-        code:
-          description: Specific error code than was provided by the containing error.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    ErrorResponse:
-      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-        traceId:
-          description: Unique trace Id.
-          type: string
     SoilMoistureModelSensorDefinition:
       description: Schema for storing sensor definition keywords.
       required:

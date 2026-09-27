@@ -152,14 +152,6 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   parameters:
-    CommitmentPlanNameParameter:
-      x-ms-parameter-location: method
-      name: commitmentPlanName
-      description: The Azure ML commitment plan name.
-      in: path
-      required: true
-      schema:
-        type: string
     SkipTokenParameter:
       x-ms-parameter-location: method
       name: $skipToken
@@ -168,10 +160,25 @@ components:
       required: false
       schema:
         type: string
+    CommitmentPlanNameParameter:
+      x-ms-parameter-location: method
+      name: commitmentPlanName
+      description: The Azure ML commitment plan name.
+      in: path
+      required: true
+      schema:
+        type: string
     ResourceGroupNameParameter:
       x-ms-parameter-location: method
       name: resourceGroupName
       description: The resource group name.
+      in: path
+      required: true
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      description: Azure Subscription ID.
       in: path
       required: true
       schema:
@@ -183,40 +190,39 @@ components:
       required: true
       schema:
         type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      description: Azure Subscription ID.
-      in: path
-      required: true
-      schema:
-        type: string
   schemas:
-    CommitmentPlanListResult:
+    CommitmentPlanPatchPayload:
       type: object
-      description: A page of commitment plan resources.
+      description: The properties of a commitment plan which may be updated via PATCH.
       properties:
-        nextLink:
-          type: string
-          description: A URI to retrieve the next page of results.
-        value:
-          type: array
-          description: The set of results for this page.
-          items:
-            $ref: '#/components/schemas/CommitmentPlan'
-    ResourceSku:
+        tags:
+          description: User-defined tags for the commitment plan.
+          $ref: '#/components/schemas/Tags'
+        sku:
+          description: The commitment plan SKU.
+          $ref: '#/components/schemas/ResourceSku'
+    PlanQuantity:
       type: object
-      description: The SKU of a resource.
+      description: Represents the quantity a commitment plan provides of a metered resource.
       properties:
-        capacity:
-          format: int32
-          type: integer
-          description: The scale-out capacity of the resource. 1 is 1x, 2 is 2x, etc. This impacts the quantities and cost of any commitment plan resource.
-        name:
+        allowance:
+          format: double
+          type: number
+          description: The quantity added to the commitment plan at an interval specified by its allowance frequency.
+          readOnly: true
+        amount:
+          format: double
+          type: number
+          description: The quantity available to the plan the last time usage was calculated.
+          readOnly: true
+        includedQuantityMeter:
           type: string
-          description: The SKU name. Along with tier, uniquely identifies the SKU.
-        tier:
+          description: The Azure meter for usage against included quantities.
+          readOnly: true
+        overageMeter:
           type: string
-          description: The SKU tier. Along with name, uniquely identifies the SKU.
+          description: The Azure meter for usage which exceeds included quantities.
+          readOnly: true
     CommitmentPlan:
       type: object
       description: An Azure ML commitment plan resource.
@@ -233,6 +239,18 @@ components:
         sku:
           description: The commitment plan SKU.
           $ref: '#/components/schemas/ResourceSku'
+    CommitmentPlanListResult:
+      type: object
+      description: A page of commitment plan resources.
+      properties:
+        nextLink:
+          type: string
+          description: A URI to retrieve the next page of results.
+        value:
+          type: array
+          description: The set of results for this page.
+          items:
+            $ref: '#/components/schemas/CommitmentPlan'
     Resource:
       x-ms-azure-resource: true
       description: Common properties of an ARM resource.
@@ -257,78 +275,6 @@ components:
         tags:
           description: User-defined tags for the resource.
           $ref: '#/components/schemas/Tags'
-    Tags:
-      type: object
-      description: Resource tags
-      additionalProperties:
-        type: string
-    CommitmentPlanPatchPayload:
-      type: object
-      description: The properties of a commitment plan which may be updated via PATCH.
-      properties:
-        tags:
-          description: User-defined tags for the commitment plan.
-          $ref: '#/components/schemas/Tags'
-        sku:
-          description: The commitment plan SKU.
-          $ref: '#/components/schemas/ResourceSku'
-    PlanUsageHistoryListResult:
-      type: object
-      description: A page of usage history.
-      properties:
-        nextLink:
-          type: string
-          description: A URI to retrieve the next page of results.
-        value:
-          type: array
-          description: The set of results for this page.
-          items:
-            $ref: '#/components/schemas/PlanUsageHistory'
-          x-ms-identifiers: []
-    PlanUsageHistory:
-      type: object
-      description: Represents historical information about usage of the Azure resources associated with a commitment plan.
-      properties:
-        planDeletionOverage:
-          type: object
-          description: Overage incurred as a result of deleting a commitment plan.
-          additionalProperties:
-            format: double
-            type: number
-        planMigrationOverage:
-          type: object
-          description: Overage incurred as a result of migrating a commitment plan from one SKU to another.
-          additionalProperties:
-            format: double
-            type: number
-        planQuantitiesAfterUsage:
-          type: object
-          description: Included quantities remaining after usage against the commitment plan's associated resources was calculated.
-          additionalProperties:
-            format: double
-            type: number
-        planQuantitiesBeforeUsage:
-          type: object
-          description: Included quantities remaining before usage against the commitment plan's associated resources was calculated.
-          additionalProperties:
-            format: double
-            type: number
-        planUsageOverage:
-          type: object
-          description: Usage against the commitment plan's associated resources which was not covered by included quantities and is therefore overage.
-          additionalProperties:
-            format: double
-            type: number
-        usage:
-          type: object
-          description: Usage against the commitment plan's associated resources.
-          additionalProperties:
-            format: double
-            type: number
-        usageDate:
-          format: date-time
-          type: string
-          description: The date of usage, in ISO 8601 format.
     CommitmentPlanProperties:
       type: object
       description: Properties of an Azure ML commitment plan.
@@ -380,28 +326,82 @@ components:
           type: boolean
           description: Indicates whether this commitment plan will be moved into a suspended state if usage goes beyond the commitment plan's included quantities.
           readOnly: true
-    PlanQuantity:
+    Tags:
       type: object
-      description: Represents the quantity a commitment plan provides of a metered resource.
+      description: Resource tags
+      additionalProperties:
+        type: string
+    PlanUsageHistory:
+      type: object
+      description: Represents historical information about usage of the Azure resources associated with a commitment plan.
       properties:
-        allowance:
-          format: double
-          type: number
-          description: The quantity added to the commitment plan at an interval specified by its allowance frequency.
-          readOnly: true
-        amount:
-          format: double
-          type: number
-          description: The quantity available to the plan the last time usage was calculated.
-          readOnly: true
-        includedQuantityMeter:
+        planDeletionOverage:
+          type: object
+          description: Overage incurred as a result of deleting a commitment plan.
+          additionalProperties:
+            format: double
+            type: number
+        planMigrationOverage:
+          type: object
+          description: Overage incurred as a result of migrating a commitment plan from one SKU to another.
+          additionalProperties:
+            format: double
+            type: number
+        planQuantitiesAfterUsage:
+          type: object
+          description: Included quantities remaining after usage against the commitment plan's associated resources was calculated.
+          additionalProperties:
+            format: double
+            type: number
+        planQuantitiesBeforeUsage:
+          type: object
+          description: Included quantities remaining before usage against the commitment plan's associated resources was calculated.
+          additionalProperties:
+            format: double
+            type: number
+        planUsageOverage:
+          type: object
+          description: Usage against the commitment plan's associated resources which was not covered by included quantities and is therefore overage.
+          additionalProperties:
+            format: double
+            type: number
+        usage:
+          type: object
+          description: Usage against the commitment plan's associated resources.
+          additionalProperties:
+            format: double
+            type: number
+        usageDate:
+          format: date-time
           type: string
-          description: The Azure meter for usage against included quantities.
-          readOnly: true
-        overageMeter:
+          description: The date of usage, in ISO 8601 format.
+    PlanUsageHistoryListResult:
+      type: object
+      description: A page of usage history.
+      properties:
+        nextLink:
           type: string
-          description: The Azure meter for usage which exceeds included quantities.
-          readOnly: true
+          description: A URI to retrieve the next page of results.
+        value:
+          type: array
+          description: The set of results for this page.
+          items:
+            $ref: '#/components/schemas/PlanUsageHistory'
+          x-ms-identifiers: []
+    ResourceSku:
+      type: object
+      description: The SKU of a resource.
+      properties:
+        capacity:
+          format: int32
+          type: integer
+          description: The scale-out capacity of the resource. 1 is 1x, 2 is 2x, etc. This impacts the quantities and cost of any commitment plan resource.
+        name:
+          type: string
+          description: The SKU name. Along with tier, uniquely identifies the SKU.
+        tier:
+          type: string
+          description: The SKU tier. Along with name, uniquely identifies the SKU.
   securitySchemes:
     azure_auth:
       type: oauth2

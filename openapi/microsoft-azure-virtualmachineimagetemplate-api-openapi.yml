@@ -293,26 +293,44 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ImageTemplateCustomizer:
-      discriminator:
-        propertyName: type
+    ImageTemplateLastRunStatus:
       properties:
-        type:
+        startTime:
           type: string
-          description: The type of customization tool you want to use on the Image. For example, "Shell" can be shell customizer
-        name:
+          format: date-time
+          description: Start time of the last run (UTC)
+        endTime:
           type: string
-          description: Friendly Name to provide context on what this customization step does
-      required:
-      - type
-    ProvisioningState:
-      type: string
-      enum:
-      - Creating
-      - Succeeded
-      - Failed
-      - Deleting
-      description: Provisioning state of the resource
+          format: date-time
+          description: End time of the last run (UTC)
+        runState:
+          type: string
+          enum:
+          - Running
+          - Succeeded
+          - PartiallySucceeded
+          - Failed
+          description: State of the last run
+        runSubState:
+          type: string
+          enum:
+          - Queued
+          - Building
+          - Customizing
+          - Distributing
+          description: Sub-state of the last run
+        message:
+          type: string
+          description: Verbose information about the last run state
+    InnerError:
+      properties:
+        exceptionType:
+          type: string
+          description: The exception type.
+        errorDetail:
+          type: string
+          description: The internal error message or exception dump.
+      description: Inner error details.
     ApiErrorBase:
       properties:
         code:
@@ -325,21 +343,18 @@ components:
           type: string
           description: The error message.
       description: Api error base.
-    RunOutput:
-      description: Represents an output that was created by running an image template.
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
+    ImageTemplateCustomizer:
+      discriminator:
+        propertyName: type
       properties:
-        properties:
-          $ref: '#/components/schemas/RunOutputProperties'
-          x-ms-client-flatten: true
-    ImageTemplate:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ImageTemplateProperties'
-      allOf:
-      - $ref: '#/components/schemas/Resource'
+        type:
+          type: string
+          description: The type of customization tool you want to use on the Image. For example, "Shell" can be shell customizer
+        name:
+          type: string
+          description: Friendly Name to provide context on what this customization step does
+      required:
+      - type
     ApiError:
       properties:
         details:
@@ -360,56 +375,14 @@ components:
           type: string
           description: The error message.
       description: Api error.
-    RunOutputProperties:
+    ImageTemplateUpdateParameters:
       properties:
-        artifactId:
-          type: string
-          description: The resource id of the artifact.
-        artifactUri:
-          type: string
-          description: The location URI of the artifact.
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: Provisioning state of the resource
-          readOnly: true
-    Resource:
-      description: The Resource model definition.
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Resource Id
-        name:
-          readOnly: true
-          type: string
-          description: Resource name
-        type:
-          readOnly: true
-          type: string
-          description: Resource type
-        location:
-          type: string
-          description: Resource location
-          x-ms-mutability:
-          - create
-          - read
         tags:
           type: object
           additionalProperties:
             type: string
-          description: Resource tags
-      required:
-      - location
-      x-ms-azure-resource: true
-    InnerError:
-      properties:
-        exceptionType:
-          type: string
-          description: The exception type.
-        errorDetail:
-          type: string
-          description: The internal error message or exception dump.
-      description: Inner error details.
+          description: The user-specified tags associated with the image template.
+      description: Parameters for updating an image template.
     SubResource:
       description: The Sub Resource model definition.
       properties:
@@ -426,32 +399,26 @@ components:
           description: Resource type
       required:
       - name
-    ImageTemplateSource:
-      discriminator:
-        propertyName: type
+    ProvisioningError:
       properties:
-        type:
+        provisioningErrorCode:
           type: string
-          description: Specifies the type of source image you want to start with.
-      required:
-      - type
-    RunOutputCollection:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/RunOutput'
-        nextLink:
+          enum:
+          - BadSourceType
+          - BadPIRSource
+          - BadISOSource
+          - BadManagedImageSource
+          - BadCustomizerType
+          - UnsupportedCustomizerType
+          - NoCustomizerScript
+          - BadDistributeType
+          - BadSharedImageDistribute
+          - ServerError
+          - Other
+          description: Error code of the provisioning failure
+        message:
           type: string
-          description: The continuation token.
-    ImageTemplateUpdateParameters:
-      properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: The user-specified tags associated with the image template.
-      description: Parameters for updating an image template.
+          description: Verbose error message about the provisioning failure
     ImageTemplateProperties:
       properties:
         source:
@@ -503,35 +470,88 @@ components:
       required:
       - type
       - runOutputName
-    ImageTemplateLastRunStatus:
+    RunOutputProperties:
       properties:
-        startTime:
+        artifactId:
           type: string
-          format: date-time
-          description: Start time of the last run (UTC)
-        endTime:
+          description: The resource id of the artifact.
+        artifactUri:
           type: string
-          format: date-time
-          description: End time of the last run (UTC)
-        runState:
+          description: The location URI of the artifact.
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: Provisioning state of the resource
+          readOnly: true
+    ImageTemplateSource:
+      discriminator:
+        propertyName: type
+      properties:
+        type:
           type: string
-          enum:
-          - Running
-          - Succeeded
-          - PartiallySucceeded
-          - Failed
-          description: State of the last run
-        runSubState:
+          description: Specifies the type of source image you want to start with.
+      required:
+      - type
+    ImageTemplate:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ImageTemplateProperties'
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    RunOutput:
+      description: Represents an output that was created by running an image template.
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/RunOutputProperties'
+          x-ms-client-flatten: true
+    RunOutputCollection:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunOutput'
+        nextLink:
           type: string
-          enum:
-          - Queued
-          - Building
-          - Customizing
-          - Distributing
-          description: Sub-state of the last run
-        message:
+          description: The continuation token.
+    Resource:
+      description: The Resource model definition.
+      properties:
+        id:
+          readOnly: true
           type: string
-          description: Verbose information about the last run state
+          description: Resource Id
+        name:
+          readOnly: true
+          type: string
+          description: Resource name
+        type:
+          readOnly: true
+          type: string
+          description: Resource type
+        location:
+          type: string
+          description: Resource location
+          x-ms-mutability:
+          - create
+          - read
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags
+      required:
+      - location
+      x-ms-azure-resource: true
+    ProvisioningState:
+      type: string
+      enum:
+      - Creating
+      - Succeeded
+      - Failed
+      - Deleting
+      description: Provisioning state of the resource
     ImageTemplateListResult:
       properties:
         value:
@@ -541,26 +561,6 @@ components:
         nextLink:
           type: string
           description: The continuation token.
-    ProvisioningError:
-      properties:
-        provisioningErrorCode:
-          type: string
-          enum:
-          - BadSourceType
-          - BadPIRSource
-          - BadISOSource
-          - BadManagedImageSource
-          - BadCustomizerType
-          - UnsupportedCustomizerType
-          - NoCustomizerScript
-          - BadDistributeType
-          - BadSharedImageDistribute
-          - ServerError
-          - Other
-          description: Error code of the provisioning failure
-        message:
-          type: string
-          description: Verbose error message about the provisioning failure
   parameters:
     RunOutputNameParameter:
       name: runOutputName
@@ -579,13 +579,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client Api Version.
-      schema:
-        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -602,6 +595,13 @@ components:
       schema:
         type: string
         pattern: ^[A-Za-z0-9-_]{1,64}$
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

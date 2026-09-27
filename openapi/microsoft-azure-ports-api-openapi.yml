@@ -238,15 +238,30 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ProcessHostedService:
-      description: A service hosted by a process.
+    PortCollection:
+      type: object
+      description: Collection of Port resources.
       properties:
-        name:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Port'
+          description: Collection of Port resources.
+        nextLink:
           type: string
-          description: The name of the service.
-        displayName:
+          description: The URL to the next set of resources.
+    Error:
+      type: object
+      description: Error details.
+      properties:
+        code:
           type: string
-          description: The service's display name.
+          description: Error code identifying the specific error.
+        message:
+          type: string
+          description: Error message in the caller's locale.
+      required:
+      - code
     ConnectionProperties:
       description: Properties for a connection resource.
       allOf:
@@ -258,23 +273,113 @@ components:
         failureState:
           $ref: '#/components/schemas/ConnectionFailureState'
           description: Specifies whether there are only successful, failed or a mixture of both connections represented by this resource.
-    ProcessHostingConfiguration:
-      description: Describes the hosting configuration of a process.
+    ResourceReference:
+      description: Represents a reference to another resource.
       discriminator:
         propertyName: kind
       properties:
-        provider:
+        id:
           type: string
-          description: The hosting provider of the VM.
-          enum:
-          - azure
+          description: Resource URI.
+        type:
+          type: string
+          description: Resource type qualifier.
+          readOnly: true
+        name:
+          type: string
+          description: Resource name.
+          readOnly: true
         kind:
           type: string
-          description: Additional hosting configuration type qualifier.
+          description: Specifies the sub-class of the reference.
           enum:
-          - provider:azure
+          - ref:machine
+          - ref:machinewithhints
+          - ref:process
+          - ref:port
+          - ref:onmachine
+          - ref:clientgroup
+      required:
+      - id
+      - kind
+    ProcessCollection:
+      type: object
+      description: Collection of Process resources.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Process'
+          description: Collection of Process resources.
+        nextLink:
+          type: string
+          description: The URL to the next set of resources.
+    RelationshipProperties:
+      description: Relationship properties.
+      properties:
+        source:
+          $ref: '#/components/schemas/ResourceReference'
+          description: Source resource of the relationship.
+        destination:
+          $ref: '#/components/schemas/ResourceReference'
+          description: Destination resource of the relationship.
+        startTime:
+          type: string
+          format: date-time
+          description: Relationship start time.
+        endTime:
+          type: string
+          format: date-time
+          description: Relationship end time.
+      required:
+      - source
+      - destination
+    ConnectionCollection:
+      type: object
+      description: Collection of Connection resources.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Connection'
+          description: Collection of Connection resources.
+        nextLink:
+          type: string
+          description: The URL to the next set of resources.
+    Relationship:
+      description: A typed relationship between two entities.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      discriminator:
+        propertyName: kind
+      properties:
+        kind:
+          type: string
+          description: Additional resource type qualifier.
+          enum:
+          - rel:connection
+          - rel:acceptor
       required:
       - kind
+    Liveness:
+      description: Specifies the contents of a check liveness response.
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: Liveness interval start time.
+        endTime:
+          type: string
+          format: date-time
+          description: Liveness interval end time.
+        live:
+          type: boolean
+          description: '`true` if the resource is live during [startTime, endTime], `false` otherwise'
+      required:
+      - startTime
+      - endTime
+      - live
     Process:
       description: A process resource represents a process running on a machine. The process may be actively *monitored*, i.e., a Dependency Agent is running on its machine, or *discovered*, i.e., its existence was inferred by observing the data stream from monitored machines. A process resource represents a pool of actual operating system resources that share command lines and metadata. As the process pool evolves over time, prior versions of the process resource are preserved and available for access. A process is live during an interval of time, if that process is executing during (parts) of that interval
       allOf:
@@ -336,237 +441,6 @@ components:
             hosting:
               $ref: '#/components/schemas/ProcessHostingConfiguration'
               description: Information about the hosting environment
-    Port:
-      description: A port resource represents a server port on a machine. The port may be actively *monitored*, i.e., a Dependency Agent is running on its machine, or *discovered*, i.e., its existence was inferred by observing the data stream from monitored machines. A port is live during an interval of time, if that port had associated activity during (parts) of that interval.
-      allOf:
-      - $ref: '#/components/schemas/CoreResource'
-      x-ms-discriminator-value: port
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          type: object
-          description: Resource properties.
-          properties:
-            monitoringState:
-              $ref: '#/components/schemas/MonitoringState'
-              description: Specifies whether the port is actively monitored or discovered.
-            machine:
-              $ref: '#/components/schemas/ResourceReference'
-              description: Machine hosting this port.
-            displayName:
-              type: string
-              description: Name to use for display purposes.
-            ipAddress:
-              type: string
-              description: IP address associated with the port. At present only IPv4 addresses are supported.
-            portNumber:
-              type: integer
-              format: int32
-              description: Port number.
-    PortCollection:
-      type: object
-      description: Collection of Port resources.
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Port'
-          description: Collection of Port resources.
-        nextLink:
-          type: string
-          description: The URL to the next set of resources.
-    ResourceReference:
-      description: Represents a reference to another resource.
-      discriminator:
-        propertyName: kind
-      properties:
-        id:
-          type: string
-          description: Resource URI.
-        type:
-          type: string
-          description: Resource type qualifier.
-          readOnly: true
-        name:
-          type: string
-          description: Resource name.
-          readOnly: true
-        kind:
-          type: string
-          description: Specifies the sub-class of the reference.
-          enum:
-          - ref:machine
-          - ref:machinewithhints
-          - ref:process
-          - ref:port
-          - ref:onmachine
-          - ref:clientgroup
-      required:
-      - id
-      - kind
-    ProcessUser:
-      description: Describes the user under which a process is running.
-      properties:
-        userName:
-          type: string
-          description: User name under which the process is running.
-        userDomain:
-          type: string
-          description: Domain name for the user.
-    CoreResource:
-      description: Marker resource for the core Service Map resources
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      discriminator:
-        propertyName: kind
-      properties:
-        etag:
-          type: string
-          description: Resource ETAG.
-        kind:
-          type: string
-          description: Additional resource type qualifier.
-          enum:
-          - machine
-          - process
-          - port
-          - clientGroup
-          - machineGroup
-      required:
-      - kind
-    Liveness:
-      description: Specifies the contents of a check liveness response.
-      type: object
-      properties:
-        startTime:
-          type: string
-          format: date-time
-          description: Liveness interval start time.
-        endTime:
-          type: string
-          format: date-time
-          description: Liveness interval end time.
-        live:
-          type: boolean
-          description: '`true` if the resource is live during [startTime, endTime], `false` otherwise'
-      required:
-      - startTime
-      - endTime
-      - live
-    MonitoringState:
-      description: Used to specify if a resources is monitored or discovered.
-      type: string
-      enum:
-      - monitored
-      - discovered
-      x-ms-enum:
-        name: MonitoringState
-        modelAsString: false
-    ErrorResponse:
-      type: object
-      description: An error response from the API.
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-          description: Error information.
-      required:
-      - error
-    RelationshipProperties:
-      description: Relationship properties.
-      properties:
-        source:
-          $ref: '#/components/schemas/ResourceReference'
-          description: Source resource of the relationship.
-        destination:
-          $ref: '#/components/schemas/ResourceReference'
-          description: Destination resource of the relationship.
-        startTime:
-          type: string
-          format: date-time
-          description: Relationship start time.
-        endTime:
-          type: string
-          format: date-time
-          description: Relationship end time.
-      required:
-      - source
-      - destination
-    ConnectionCollection:
-      type: object
-      description: Collection of Connection resources.
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Connection'
-          description: Collection of Connection resources.
-        nextLink:
-          type: string
-          description: The URL to the next set of resources.
-    MachineReference:
-      description: Reference to a machine.
-      allOf:
-      - $ref: '#/components/schemas/ResourceReference'
-      x-ms-discriminator-value: ref:machine
-    ProcessCollection:
-      type: object
-      description: Collection of Process resources.
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Process'
-          description: Collection of Process resources.
-        nextLink:
-          type: string
-          description: The URL to the next set of resources.
-    Resource:
-      description: Resource model definition.
-      properties:
-        id:
-          type: string
-          description: Resource identifier.
-          readOnly: true
-        type:
-          type: string
-          description: Resource type.
-          readOnly: true
-        name:
-          type: string
-          description: Resource name.
-          readOnly: true
-      x-ms-azure-resource: true
-    ConnectionFailureState:
-      description: "Connection failure state:\n * ```ok``` indicates no failures\n * ```failed``` indicates only failures\n * ```mixed``` indicates both failures and successes"
-      type: string
-      enum:
-      - ok
-      - failed
-      - mixed
-      x-ms-enum:
-        name: ConnectionFailureState
-        modelAsString: false
-    Connection:
-      description: A network connection.
-      allOf:
-      - $ref: '#/components/schemas/Relationship'
-      x-ms-discriminator-value: rel:connection
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ConnectionProperties'
-    Error:
-      type: object
-      description: Error details.
-      properties:
-        code:
-          type: string
-          description: Error code identifying the specific error.
-        message:
-          type: string
-          description: Error message in the caller's locale.
-      required:
-      - code
     ProcessDetails:
       description: Describes process metadata.
       properties:
@@ -617,21 +491,42 @@ components:
         zoneName:
           type: string
           description: Process zone name (Linux only).
-    Relationship:
-      description: A typed relationship between two entities.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      discriminator:
-        propertyName: kind
+    MonitoringState:
+      description: Used to specify if a resources is monitored or discovered.
+      type: string
+      enum:
+      - monitored
+      - discovered
+      x-ms-enum:
+        name: MonitoringState
+        modelAsString: false
+    ErrorResponse:
+      type: object
+      description: An error response from the API.
       properties:
-        kind:
-          type: string
-          description: Additional resource type qualifier.
-          enum:
-          - rel:connection
-          - rel:acceptor
+        error:
+          $ref: '#/components/schemas/Error'
+          description: Error information.
       required:
-      - kind
+      - error
+    ProcessHostedService:
+      description: A service hosted by a process.
+      properties:
+        name:
+          type: string
+          description: The name of the service.
+        displayName:
+          type: string
+          description: The service's display name.
+    Connection:
+      description: A network connection.
+      allOf:
+      - $ref: '#/components/schemas/Relationship'
+      x-ms-discriminator-value: rel:connection
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ConnectionProperties'
     PortReference:
       description: Reference to a port.
       allOf:
@@ -655,18 +550,122 @@ components:
               type: integer
               format: int32
               description: Port number.
+    ConnectionFailureState:
+      description: "Connection failure state:\n * ```ok``` indicates no failures\n * ```failed``` indicates only failures\n * ```mixed``` indicates both failures and successes"
+      type: string
+      enum:
+      - ok
+      - failed
+      - mixed
+      x-ms-enum:
+        name: ConnectionFailureState
+        modelAsString: false
+    ProcessHostingConfiguration:
+      description: Describes the hosting configuration of a process.
+      discriminator:
+        propertyName: kind
+      properties:
+        provider:
+          type: string
+          description: The hosting provider of the VM.
+          enum:
+          - azure
+        kind:
+          type: string
+          description: Additional hosting configuration type qualifier.
+          enum:
+          - provider:azure
+      required:
+      - kind
+    MachineReference:
+      description: Reference to a machine.
+      allOf:
+      - $ref: '#/components/schemas/ResourceReference'
+      x-ms-discriminator-value: ref:machine
+    Resource:
+      description: Resource model definition.
+      properties:
+        id:
+          type: string
+          description: Resource identifier.
+          readOnly: true
+        type:
+          type: string
+          description: Resource type.
+          readOnly: true
+        name:
+          type: string
+          description: Resource name.
+          readOnly: true
+      x-ms-azure-resource: true
+    ProcessUser:
+      description: Describes the user under which a process is running.
+      properties:
+        userName:
+          type: string
+          description: User name under which the process is running.
+        userDomain:
+          type: string
+          description: Domain name for the user.
+    CoreResource:
+      description: Marker resource for the core Service Map resources
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      discriminator:
+        propertyName: kind
+      properties:
+        etag:
+          type: string
+          description: Resource ETAG.
+        kind:
+          type: string
+          description: Additional resource type qualifier.
+          enum:
+          - machine
+          - process
+          - port
+          - clientGroup
+          - machineGroup
+      required:
+      - kind
+    Port:
+      description: A port resource represents a server port on a machine. The port may be actively *monitored*, i.e., a Dependency Agent is running on its machine, or *discovered*, i.e., its existence was inferred by observing the data stream from monitored machines. A port is live during an interval of time, if that port had associated activity during (parts) of that interval.
+      allOf:
+      - $ref: '#/components/schemas/CoreResource'
+      x-ms-discriminator-value: port
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          type: object
+          description: Resource properties.
+          properties:
+            monitoringState:
+              $ref: '#/components/schemas/MonitoringState'
+              description: Specifies whether the port is actively monitored or discovered.
+            machine:
+              $ref: '#/components/schemas/ResourceReference'
+              description: Machine hosting this port.
+            displayName:
+              type: string
+              description: Name to use for display purposes.
+            ipAddress:
+              type: string
+              description: IP address associated with the port. At present only IPv4 addresses are supported.
+            portNumber:
+              type: integer
+              format: int32
+              description: Port number.
   parameters:
-    WorkspaceNameParameter:
-      name: workspaceName
+    PortNameParameter:
+      name: portName
       in: path
       x-ms-parameter-location: method
       required: true
-      description: OMS workspace containing the resources of interest.
+      description: Port resource name.
       schema:
         type: string
-        maxLength: 63
+        maxLength: 64
         minLength: 3
-        pattern: '[a-zA-Z0-9_][a-zA-Z0-9_-]+[a-zA-Z0-9_]'
     ResourceGroupNameParameter:
       name: resourceGroupName
       in: path
@@ -678,6 +677,24 @@ components:
         maxLength: 64
         minLength: 1
         pattern: '[a-zA-Z0-9_-]+'
+    WorkspaceNameParameter:
+      name: workspaceName
+      in: path
+      x-ms-parameter-location: method
+      required: true
+      description: OMS workspace containing the resources of interest.
+      schema:
+        type: string
+        maxLength: 63
+        minLength: 3
+        pattern: '[a-zA-Z0-9_][a-zA-Z0-9_-]+[a-zA-Z0-9_]'
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Azure subscription identifier.
+      schema:
+        type: string
     ApiVersionParameter:
       name: api-version
       in: query
@@ -695,23 +712,6 @@ components:
         type: string
         maxLength: 64
         minLength: 3
-    PortNameParameter:
-      name: portName
-      in: path
-      x-ms-parameter-location: method
-      required: true
-      description: Port resource name.
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: Azure subscription identifier.
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

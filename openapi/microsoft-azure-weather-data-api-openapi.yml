@@ -66,7 +66,7 @@ paths:
       tags:
       - Weather Data
       description: Returns a list of WeatherData.
-      operationId: microsoftAzureWeatherdataGet
+      operationId: postWeatherData:fetch
       parameters:
       - in: query
         name: api-version
@@ -104,152 +104,35 @@ paths:
               $ref: '#/components/schemas/WeatherDataProviderRequest_2'
         description: Weather data provider request.
         required: true
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureWeatherdataGet
 components:
   schemas:
-    WeatherLocation:
-      description: Schema of Location data.
-      required:
-      - type
-      - value
+    ErrorResponse:
+      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
       type: object
       properties:
-        type:
-          description: Location Type eg. LatLong/IataCode/IcaoCode/Placeid/PostalKey.
-          maxLength: 25
-          minLength: 2
-          enum:
-          - LatLong
-          - IataCode
-          - IcaoCode
-          - PlaceId
-          - PostalKey
+        error:
+          $ref: '#/components/schemas/Error'
+        traceId:
+          description: Unique trace Id.
           type: string
-          x-ms-enum:
-            name: LocationType
-            modelAsString: true
-        value:
-          description: Location Value eg. "10,-25" for LocationType Type "LatLong".
-          minLength: 1
-          type: string
-    WeatherDataProviderResponse:
-      description: Schema of Weather Data Provider Response.
-      required:
-      - weatherMetadata
+    ErrorForLocation:
+      description: Model for error information for a failed location.
       type: object
       properties:
-        weatherMetadata:
-          $ref: '#/components/schemas/WeatherMetadata'
-        status:
-          description: Indicates a Succeeded, Failed, or PartiallySucceeded response.
-          enum:
-          - Succeeded
-          - Failed
-          - PartiallySucceeded
-          type: string
-          x-ms-enum:
-            name: Status
-            modelAsString: true
-        locations:
-          description: List of weather data for all the weather locations.
-          type: array
-          items:
-            $ref: '#/components/schemas/WeatherLocationData'
-        errors:
-          $ref: '#/components/schemas/WeatherDataErrors'
-    WeatherDataErrors:
-      description: Model for errors encountered for all failed locations.
-      type: object
-      properties:
-        locations:
-          description: List of errors encountered for all failed locations.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorForLocation'
-    WeatherMetadata:
-      description: Schema of Weather Metadata.
-      required:
-      - extensionApiName
-      - extensionId
-      - extensionVersion
-      - units
-      - weatherDataType
-      type: object
-      properties:
-        extensionVersion:
-          description: Version of the weather data extension.
-          minLength: 1
-          type: string
-        weatherDataType:
-          description: Type of weather data (forecast/historical).
-          minLength: 1
-          type: string
-        extensionId:
-          description: Id of the extension to be used for the providerInput. eg. DTN.ClearAg.
-          minLength: 1
-          type: string
-        extensionApiName:
-          description: Extension api name to which request is to be made.
-          minLength: 1
-          type: string
-        language:
-          description: 'Language (IETF BCP 47 language tag) in which search results should be returned by the data provider. Examples: ''en-US'', ''es'', ''es-MX'', ''fr-FR''.'
-          type: string
-        startTimeHours:
-          format: int32
-          description: Start of time range. Hour 0 represents the current hour. (Only applicable for DTN.ClearAg extension.)
-          maximum: 240
-          minimum: 0
-          type: integer
-        endTimeHours:
-          format: int32
-          description: End of time range. (Only applicable for DTN.ClearAg extension.)
-          maximum: 240
-          minimum: 0
-          type: integer
-        duration:
-          format: int32
-          description: Specifies for how many days the daily forecast responses are returned. Available values are 1, 5, 10, 25 and 45. (Only applicable for Azure Weather Maps extension.)
-          type: integer
-        units:
-          description: Units for which request to data provider is to be sent. Supported values are 'e' for English units, 'm' for Metric units, 'h' for Hybrid units (UK) and 's' for Metric SI units.
-          minLength: 1
-          type: string
-        additionalParams:
-          $ref: '#/components/schemas/AdditionalProviderParameters'
-    InnerError:
-      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
-      type: object
-      properties:
+        location:
+          $ref: '#/components/schemas/WeatherLocation'
         code:
-          description: Specific error code than was provided by the containing error.
+          format: int32
+          description: Status code returned by data provider.
+          type: integer
+        description:
+          description: Description of the error.
           type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    Error:
-      description: An error from the Azure AgPlatform service.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          description: Server-defined set of error codes.
-          minLength: 1
-          type: string
-        message:
-          description: Human-readable representation of the error.
-          minLength: 1
-          type: string
-        target:
-          description: Target of the error.
-          type: string
-        details:
-          description: Array of details about specific errors that led to this reported error.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
+        retryable:
+          description: Flag suggesting if retry attempt with same request body should be made to fetch required data.
+          type: boolean
     WeatherDataForPassthrough:
       description: Schema of weather data.
       type: object
@@ -344,22 +227,74 @@ components:
           description: 'A collection of key value pairs that belongs to the resource. Each pair must not have a key greater than 50 characters and must not have a value greater than 250 characters. Note: A maximum of 100 key value pairs can be provided for a resource and only string and numeral values are supported.'
           type: object
           additionalProperties: {}
-    ErrorForLocation:
-      description: Model for error information for a failed location.
+    InnerError:
+      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
       type: object
       properties:
-        location:
-          $ref: '#/components/schemas/WeatherLocation'
         code:
-          format: int32
-          description: Status code returned by data provider.
-          type: integer
-        description:
-          description: Description of the error.
+          description: Specific error code than was provided by the containing error.
           type: string
-        retryable:
-          description: Flag suggesting if retry attempt with same request body should be made to fetch required data.
-          type: boolean
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    Error:
+      description: An error from the Azure AgPlatform service.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: Server-defined set of error codes.
+          minLength: 1
+          type: string
+        message:
+          description: Human-readable representation of the error.
+          minLength: 1
+          type: string
+        target:
+          description: Target of the error.
+          type: string
+        details:
+          description: Array of details about specific errors that led to this reported error.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    WeatherLocation:
+      description: Schema of Location data.
+      required:
+      - type
+      - value
+      type: object
+      properties:
+        type:
+          description: Location Type eg. LatLong/IataCode/IcaoCode/Placeid/PostalKey.
+          maxLength: 25
+          minLength: 2
+          enum:
+          - LatLong
+          - IataCode
+          - IcaoCode
+          - PlaceId
+          - PostalKey
+          type: string
+          x-ms-enum:
+            name: LocationType
+            modelAsString: true
+        value:
+          description: Location Value eg. "10,-25" for LocationType Type "LatLong".
+          minLength: 1
+          type: string
+    WeatherDataErrors:
+      description: Model for errors encountered for all failed locations.
+      type: object
+      properties:
+        locations:
+          description: List of errors encountered for all failed locations.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorForLocation'
     Measures:
       description: Schema for storing measurement readings and unit.
       type: object
@@ -375,6 +310,17 @@ components:
           items:
             format: double
             type: number
+    AdditionalProviderParameters:
+      description: Schema of additional parameters for weather data provider request.
+      type: object
+      properties:
+        iconResolution:
+          description: Icon Resolution (Only applicable for AzureWeatherMaps).
+          type: string
+        details:
+          description: Details (Only applicable for AzureWeatherMaps).
+          default: true
+          type: boolean
     WeatherLocationData:
       description: Schema of WeatherLocationData data.
       type: object
@@ -391,6 +337,57 @@ components:
           example: 2020-12-31T11:10:21Z.
         data:
           $ref: '#/components/schemas/WeatherDataForPassthrough'
+    WeatherMetadata:
+      description: Schema of Weather Metadata.
+      required:
+      - extensionApiName
+      - extensionId
+      - extensionVersion
+      - units
+      - weatherDataType
+      type: object
+      properties:
+        extensionVersion:
+          description: Version of the weather data extension.
+          minLength: 1
+          type: string
+        weatherDataType:
+          description: Type of weather data (forecast/historical).
+          minLength: 1
+          type: string
+        extensionId:
+          description: Id of the extension to be used for the providerInput. eg. DTN.ClearAg.
+          minLength: 1
+          type: string
+        extensionApiName:
+          description: Extension api name to which request is to be made.
+          minLength: 1
+          type: string
+        language:
+          description: 'Language (IETF BCP 47 language tag) in which search results should be returned by the data provider. Examples: ''en-US'', ''es'', ''es-MX'', ''fr-FR''.'
+          type: string
+        startTimeHours:
+          format: int32
+          description: Start of time range. Hour 0 represents the current hour. (Only applicable for DTN.ClearAg extension.)
+          maximum: 240
+          minimum: 0
+          type: integer
+        endTimeHours:
+          format: int32
+          description: End of time range. (Only applicable for DTN.ClearAg extension.)
+          maximum: 240
+          minimum: 0
+          type: integer
+        duration:
+          format: int32
+          description: Specifies for how many days the daily forecast responses are returned. Available values are 1, 5, 10, 25 and 45. (Only applicable for Azure Weather Maps extension.)
+          type: integer
+        units:
+          description: Units for which request to data provider is to be sent. Supported values are 'e' for English units, 'm' for Metric units, 'h' for Hybrid units (UK) and 's' for Metric SI units.
+          minLength: 1
+          type: string
+        additionalParams:
+          $ref: '#/components/schemas/AdditionalProviderParameters'
     WeatherDataProviderRequest:
       description: Schema of weather data provider request.
       required:
@@ -448,138 +445,31 @@ components:
           type: string
         additionalParams:
           $ref: '#/components/schemas/AdditionalProviderParameters'
-    ErrorResponse:
-      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-        traceId:
-          description: Unique trace Id.
-          type: string
-    AdditionalProviderParameters:
-      description: Schema of additional parameters for weather data provider request.
-      type: object
-      properties:
-        iconResolution:
-          description: Icon Resolution (Only applicable for AzureWeatherMaps).
-          type: string
-        details:
-          description: Details (Only applicable for AzureWeatherMaps).
-          default: true
-          type: boolean
-    ApiKeyAuthCredentials:
-      description: Api Key Auth Credentials class for API Key based Auth.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/AuthCredentials'
-      - required:
-        - apiKey
-        type: object
-        properties:
-          apiKey:
-            $ref: '#/components/schemas/KeyVaultProperties'
-      x-ms-discriminator-value: ApiKeyAuthCredentials
-    AuthCredentialsKind:
-      description: Enum for different types of AuthCredentials supported.
-      enum:
-      - OAuthClientCredentials
-      - ApiKeyAuthCredentials
-      type: string
-      x-ms-enum:
-        name: AuthCredentialsKind
-        modelAsString: true
-    WeatherLocation_2:
-      description: Schema of Location data.
+    WeatherDataProviderResponse:
+      description: Schema of Weather Data Provider Response.
       required:
-      - type
-      - value
+      - weatherMetadata
       type: object
       properties:
-        type:
-          description: Location Type eg. LatLong/IataCode/IcaoCode/Placeid/PostalKey.
-          maxLength: 25
-          minLength: 2
+        weatherMetadata:
+          $ref: '#/components/schemas/WeatherMetadata'
+        status:
+          description: Indicates a Succeeded, Failed, or PartiallySucceeded response.
           enum:
-          - LatLong
-          - IataCode
-          - IcaoCode
-          - PlaceId
-          - PostalKey
+          - Succeeded
+          - Failed
+          - PartiallySucceeded
           type: string
           x-ms-enum:
-            name: LocationType
+            name: Status
             modelAsString: true
-        value:
-          description: Location Value eg. "10,-25" for LocationType Type "LatLong".
-          maxLength: 100
-          minLength: 2
-          type: string
-    WeatherMetadata_2:
-      description: Schema of Weather Metadata.
-      required:
-      - extensionApiName
-      - extensionId
-      - extensionVersion
-      - units
-      - weatherDataType
-      type: object
-      properties:
-        extensionVersion:
-          description: Version of the weather data extension.
-          minLength: 1
-          type: string
-        weatherDataType:
-          description: Type of weather data (forecast/historical).
-          minLength: 1
-          type: string
-        extensionId:
-          description: Id of the extension to be used for the providerInput. eg. DTN.ClearAg.
-          maxLength: 100
-          minLength: 2
-          type: string
-        extensionApiName:
-          description: Extension api name to which request is to be made.
-          maxLength: 100
-          minLength: 2
-          type: string
-        language:
-          description: 'Language (IETF BCP 47 language tag) in which search results should be returned by the data provider. Examples: ''en-US'', ''es'', ''es-MX'', ''fr-FR''.'
-          maxLength: 100
-          minLength: 0
-          type: string
-        startTimeHours:
-          format: int32
-          description: Start of time range. Hour 0 represents the current hour. (Only applicable for DTN.ClearAg extension.)
-          maximum: 240
-          minimum: 0
-          type: integer
-        endTimeHours:
-          format: int32
-          description: End of time range. (Only applicable for DTN.ClearAg extension.)
-          maximum: 240
-          minimum: 0
-          type: integer
-        duration:
-          format: int32
-          description: Specifies for how many days the daily forecast responses are returned. Available values are 1, 5, 10, 25 and 45. (Only applicable for Azure Weather Maps extension.)
-          type: integer
-        units:
-          description: Units for which request to data provider is to be sent. Supported values are 'e' for English units, 'm' for Metric units, 'h' for Hybrid units (UK) and 's' for Metric SI units.
-          minLength: 1
-          type: string
-        additionalParams:
-          $ref: '#/components/schemas/AdditionalProviderParameters_2'
-    AuthCredentials:
-      description: AuthCredentials abstract base class for Auth Purpose.
-      required:
-      - kind
-      type: object
-      properties:
-        kind:
-          $ref: '#/components/schemas/AuthCredentialsKind'
-      discriminator:
-        propertyName: kind
+        locations:
+          description: List of weather data for all the weather locations.
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherLocationData'
+        errors:
+          $ref: '#/components/schemas/WeatherDataErrors'
     WeatherDataForPassthrough_2:
       description: Schema of weather data.
       type: object
@@ -677,6 +567,42 @@ components:
           type: array
           items:
             type: string
+    AuthCredentials:
+      description: AuthCredentials abstract base class for Auth Purpose.
+      required:
+      - kind
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/AuthCredentialsKind'
+      discriminator:
+        propertyName: kind
+    WeatherLocation_2:
+      description: Schema of Location data.
+      required:
+      - type
+      - value
+      type: object
+      properties:
+        type:
+          description: Location Type eg. LatLong/IataCode/IcaoCode/Placeid/PostalKey.
+          maxLength: 25
+          minLength: 2
+          enum:
+          - LatLong
+          - IataCode
+          - IcaoCode
+          - PlaceId
+          - PostalKey
+          type: string
+          x-ms-enum:
+            name: LocationType
+            modelAsString: true
+        value:
+          description: Location Value eg. "10,-25" for LocationType Type "LatLong".
+          maxLength: 100
+          minLength: 2
+          type: string
     Measures_2:
       description: Schema for storing measurement readings and unit.
       type: object
@@ -692,6 +618,19 @@ components:
           items:
             format: double
             type: number
+    AdditionalProviderParameters_2:
+      description: Schema of additional parameters for weather data provider request.
+      type: object
+      properties:
+        iconResolution:
+          description: Icon Resolution (Only applicable for AzureWeatherMaps).
+          maxLength: 100
+          minLength: 2
+          type: string
+        details:
+          description: Details (Only applicable for AzureWeatherMaps).
+          default: true
+          type: boolean
     WeatherLocationData_2:
       description: Schema of WeatherLocationData data.
       type: object
@@ -708,29 +647,61 @@ components:
           example: '2020-12-31T11:10:21Z'
         data:
           $ref: '#/components/schemas/WeatherDataForPassthrough_2'
-    KeyVaultProperties:
-      description: Properties of the key vault.
+    WeatherMetadata_2:
+      description: Schema of Weather Metadata.
       required:
-      - keyName
-      - keyVaultUri
-      - keyVersion
+      - extensionApiName
+      - extensionId
+      - extensionVersion
+      - units
+      - weatherDataType
       type: object
       properties:
-        keyVaultUri:
-          description: Uri of the key vault.
+        extensionVersion:
+          description: Version of the weather data extension.
+          minLength: 1
+          type: string
+        weatherDataType:
+          description: Type of weather data (forecast/historical).
+          minLength: 1
+          type: string
+        extensionId:
+          description: Id of the extension to be used for the providerInput. eg. DTN.ClearAg.
           maxLength: 100
           minLength: 2
           type: string
-        keyName:
-          description: Name of Key Vault key.
-          maxLength: 256
+        extensionApiName:
+          description: Extension api name to which request is to be made.
+          maxLength: 100
           minLength: 2
           type: string
-        keyVersion:
-          description: Version of Key Vault key.
-          maxLength: 256
-          minLength: 2
+        language:
+          description: 'Language (IETF BCP 47 language tag) in which search results should be returned by the data provider. Examples: ''en-US'', ''es'', ''es-MX'', ''fr-FR''.'
+          maxLength: 100
+          minLength: 0
           type: string
+        startTimeHours:
+          format: int32
+          description: Start of time range. Hour 0 represents the current hour. (Only applicable for DTN.ClearAg extension.)
+          maximum: 240
+          minimum: 0
+          type: integer
+        endTimeHours:
+          format: int32
+          description: End of time range. (Only applicable for DTN.ClearAg extension.)
+          maximum: 240
+          minimum: 0
+          type: integer
+        duration:
+          format: int32
+          description: Specifies for how many days the daily forecast responses are returned. Available values are 1, 5, 10, 25 and 45. (Only applicable for Azure Weather Maps extension.)
+          type: integer
+        units:
+          description: Units for which request to data provider is to be sent. Supported values are 'e' for English units, 'm' for Metric units, 'h' for Hybrid units (UK) and 's' for Metric SI units.
+          minLength: 1
+          type: string
+        additionalParams:
+          $ref: '#/components/schemas/AdditionalProviderParameters_2'
     WeatherDataProviderRequest_2:
       description: Schema of weather data provider request.
       required:
@@ -783,19 +754,50 @@ components:
           type: string
         additionalParams:
           $ref: '#/components/schemas/AdditionalProviderParameters_2'
-    AdditionalProviderParameters_2:
-      description: Schema of additional parameters for weather data provider request.
+    ApiKeyAuthCredentials:
+      description: Api Key Auth Credentials class for API Key based Auth.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/AuthCredentials'
+      - required:
+        - apiKey
+        type: object
+        properties:
+          apiKey:
+            $ref: '#/components/schemas/KeyVaultProperties'
+      x-ms-discriminator-value: ApiKeyAuthCredentials
+    KeyVaultProperties:
+      description: Properties of the key vault.
+      required:
+      - keyName
+      - keyVaultUri
+      - keyVersion
       type: object
       properties:
-        iconResolution:
-          description: Icon Resolution (Only applicable for AzureWeatherMaps).
+        keyVaultUri:
+          description: Uri of the key vault.
           maxLength: 100
           minLength: 2
           type: string
-        details:
-          description: Details (Only applicable for AzureWeatherMaps).
-          default: true
-          type: boolean
+        keyName:
+          description: Name of Key Vault key.
+          maxLength: 256
+          minLength: 2
+          type: string
+        keyVersion:
+          description: Version of Key Vault key.
+          maxLength: 256
+          minLength: 2
+          type: string
+    AuthCredentialsKind:
+      description: Enum for different types of AuthCredentials supported.
+      enum:
+      - OAuthClientCredentials
+      - ApiKeyAuthCredentials
+      type: string
+      x-ms-enum:
+        name: AuthCredentialsKind
+        modelAsString: true
   securitySchemes:
     Bearer:
       type: apiKey

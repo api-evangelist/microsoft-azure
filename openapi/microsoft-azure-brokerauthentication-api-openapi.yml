@@ -287,17 +287,67 @@ paths:
       summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    BrokerAuthenticatorMethodX509:
+    KeyVaultCredentialsProperties:
       type: object
-      description: X509 for BrokerAuthentication.
+      description: KeyVault credentials properties. NOTE - Future this will be ENUM.
       properties:
-        attributes:
-          $ref: '#/components/schemas/BrokerAuthenticatorMethodX509Attributes'
-          description: K8S Secret name to mount for username and password.
-        trustedClientCaCertConfigMap:
+        servicePrincipalLocalSecretName:
           type: string
-          description: Trusted client ca cert config map.
-          default: client-ca
+          description: KeyVault service principal local secret name.
+      required:
+      - servicePrincipalLocalSecretName
+    BrokerAuthenticatorMethodSat:
+      type: object
+      description: Service Account Token for BrokerAuthentication
+      properties:
+        audiences:
+          type: array
+          description: List of allowed audience.
+          items:
+            type: string
+      required:
+      - audiences
+    BrokerAuthenticatorCustomAuth:
+      type: object
+      description: Custom Authentication properties
+      properties:
+        x509:
+          $ref: '#/components/schemas/BrokerAuthenticatorCustomAuthX509'
+          description: X509 Custom Auth type details.
+      required:
+      - x509
+    BrokerAuthenticatorMethodUsernamePassword:
+      type: object
+      description: UsernamePassword for BrokerAuthentication
+      properties:
+        keyVault:
+          $ref: '#/components/schemas/KeyVaultSecretProperties'
+          description: Keyvault username password secret properties.
+        secretName:
+          type: string
+          description: Secret where username and password are stored.
+    BrokerAuthenticationProperties:
+      type: object
+      description: Broker Resource properties
+      properties:
+        authenticationMethods:
+          type: array
+          description: The list of authentication methods supported by the Authentication Resource. For each array element, NOTE - Enum only authenticator type supported.
+          items:
+            $ref: '#/components/schemas/BrokerAuthenticatorMethods'
+          x-ms-identifiers: []
+        listenerRef:
+          type: array
+          description: The array of listener Resources it supports.
+          items:
+            type: string
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
+      required:
+      - authenticationMethods
+      - listenerRef
     BrokerAuthenticationResourceListResult:
       type: object
       description: The response of a BrokerAuthenticationResource list operation.
@@ -313,6 +363,107 @@ components:
           description: The link to the next page of items
       required:
       - value
+    BrokerAuthenticatorMethodCustom:
+      type: object
+      description: Custom method for BrokerAuthentication
+      properties:
+        auth:
+          $ref: '#/components/schemas/BrokerAuthenticatorCustomAuth'
+          description: Custom Broker Authentication Method.
+        caCertConfigMap:
+          type: string
+          description: CA cert config map to use.
+        endpoint:
+          type: string
+          description: Endpoint to connect to.
+        headers:
+          type: object
+          description: Configuration Headers to use.
+          additionalProperties:
+            type: string
+      required:
+      - endpoint
+    KeyVaultCertificateProperties:
+      type: object
+      description: KeyVault certificate properties
+      properties:
+        vault:
+          $ref: '#/components/schemas/KeyVaultConnectionProperties'
+          description: KeyVault properties.
+        vaultCaChainSecret:
+          $ref: '#/components/schemas/KeyVaultSecretObject'
+          description: KeyVault CA chain secret details.
+        vaultCert:
+          $ref: '#/components/schemas/KeyVaultSecretObject'
+          description: KeyVault Cert secret details.
+      required:
+      - vault
+      - vaultCert
+    BrokerAuthenticatorMethodX509Attributes:
+      type: object
+      description: BrokerAuthenticatorMethodX509Attributes properties. NOTE - Enum only type supported at a time.
+      properties:
+        keyVault:
+          $ref: '#/components/schemas/KeyVaultSecretProperties'
+          description: Keyvault x509 attributes secret properties.
+        secretName:
+          type: string
+          description: Secret where x509 attributes are stored.
+    BrokerAuthenticationResource:
+      type: object
+      description: MQ broker/authentication resource
+      properties:
+        properties:
+          $ref: '#/components/schemas/BrokerAuthenticationProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocationProperty'
+          description: Extended Location
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    BrokerAuthenticatorMethods:
+      type: object
+      description: Collection of different CrdAuthenticator methods of Broker Resource. NOTE Enum - Only one method is supported for each entry.
+      properties:
+        custom:
+          $ref: '#/components/schemas/BrokerAuthenticatorMethodCustom'
+          description: Custom Authentication Method.
+        sat:
+          $ref: '#/components/schemas/BrokerAuthenticatorMethodSat'
+          description: Service Account Token Method.
+        svid:
+          $ref: '#/components/schemas/BrokerAuthenticatorMethodSvid'
+          description: Service Account Token Method.
+        usernamePassword:
+          $ref: '#/components/schemas/BrokerAuthenticatorMethodUsernamePassword'
+          description: UsernamePassword Method.
+        x509:
+          $ref: '#/components/schemas/BrokerAuthenticatorMethodX509'
+          description: X509 Method.
+    BrokerAuthenticationResourceUpdateProperties:
+      type: object
+      description: The updatable properties of the BrokerAuthenticationResource.
+      properties:
+        authenticationMethods:
+          type: array
+          description: The list of authentication methods supported by the Authentication Resource. For each array element, NOTE - Enum only authenticator type supported.
+          items:
+            $ref: '#/components/schemas/BrokerAuthenticatorMethods'
+          x-ms-identifiers: []
+        listenerRef:
+          type: array
+          description: The array of listener Resources it supports.
+          items:
+            type: string
     BrokerAuthenticatorMethodSvid:
       type: object
       description: SVID for BrokerAuthentication
@@ -336,18 +487,48 @@ components:
           maximum: 9223372036854000000
       required:
       - agentSocketPath
-    BrokerAuthenticationResourceUpdate:
+    KeyVaultSecretObject:
       type: object
-      description: The type used for update operations of the BrokerAuthenticationResource.
+      description: KeyVault secret object properties
       properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-        properties:
-          $ref: '#/components/schemas/BrokerAuthenticationResourceUpdateProperties'
-          x-ms-client-flatten: true
+        name:
+          type: string
+          description: KeyVault secret name.
+        version:
+          type: string
+          description: KeyVault secret version.
+      required:
+      - name
+    KeyVaultConnectionProperties:
+      type: object
+      description: KeyVault properties
+      properties:
+        credentials:
+          $ref: '#/components/schemas/KeyVaultCredentialsProperties'
+          description: KeyVault credentials.
+        directoryId:
+          type: string
+          description: KeyVault directoryId.
+        name:
+          type: string
+          description: KeyVault name.
+      required:
+      - credentials
+      - directoryId
+      - name
+    ExtendedLocationProperty:
+      type: object
+      description: ExtendedLocation properties
+      properties:
+        name:
+          type: string
+          description: The name of the extended location.
+        type:
+          $ref: '#/components/schemas/ExtendedLocationType'
+          description: Type of ExtendedLocation.
+      required:
+      - name
+      - type
     ProvisioningState:
       type: string
       description: The enum defining status of resource.
@@ -384,22 +565,16 @@ components:
         - name: Accepted
           value: Accepted
           description: Resource has been Accepted.
-    KeyVaultCertificateProperties:
+    BrokerAuthenticatorCustomAuthX509:
       type: object
-      description: KeyVault certificate properties
+      description: X509 Custom Authentication properties. NOTE - Enum only authenticator type supported at a time.
       properties:
-        vault:
-          $ref: '#/components/schemas/KeyVaultConnectionProperties'
-          description: KeyVault properties.
-        vaultCaChainSecret:
-          $ref: '#/components/schemas/KeyVaultSecretObject'
-          description: KeyVault CA chain secret details.
-        vaultCert:
-          $ref: '#/components/schemas/KeyVaultSecretObject'
-          description: KeyVault Cert secret details.
-      required:
-      - vault
-      - vaultCert
+        keyVault:
+          $ref: '#/components/schemas/KeyVaultCertificateProperties'
+          description: Keyvault X509 secret properties.
+        secretName:
+          type: string
+          description: Secret where cert details are stored.
     ExtendedLocationType:
       type: string
       description: The enum defining type of ExtendedLocation accepted.
@@ -412,83 +587,6 @@ components:
         - name: CustomLocation
           value: CustomLocation
           description: CustomLocation type
-    BrokerAuthenticatorMethodCustom:
-      type: object
-      description: Custom method for BrokerAuthentication
-      properties:
-        auth:
-          $ref: '#/components/schemas/BrokerAuthenticatorCustomAuth'
-          description: Custom Broker Authentication Method.
-        caCertConfigMap:
-          type: string
-          description: CA cert config map to use.
-        endpoint:
-          type: string
-          description: Endpoint to connect to.
-        headers:
-          type: object
-          description: Configuration Headers to use.
-          additionalProperties:
-            type: string
-      required:
-      - endpoint
-    BrokerAuthenticationProperties:
-      type: object
-      description: Broker Resource properties
-      properties:
-        authenticationMethods:
-          type: array
-          description: The list of authentication methods supported by the Authentication Resource. For each array element, NOTE - Enum only authenticator type supported.
-          items:
-            $ref: '#/components/schemas/BrokerAuthenticatorMethods'
-          x-ms-identifiers: []
-        listenerRef:
-          type: array
-          description: The array of listener Resources it supports.
-          items:
-            type: string
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
-      required:
-      - authenticationMethods
-      - listenerRef
-    KeyVaultCredentialsProperties:
-      type: object
-      description: KeyVault credentials properties. NOTE - Future this will be ENUM.
-      properties:
-        servicePrincipalLocalSecretName:
-          type: string
-          description: KeyVault service principal local secret name.
-      required:
-      - servicePrincipalLocalSecretName
-    BrokerAuthenticatorMethodSat:
-      type: object
-      description: Service Account Token for BrokerAuthentication
-      properties:
-        audiences:
-          type: array
-          description: List of allowed audience.
-          items:
-            type: string
-      required:
-      - audiences
-    BrokerAuthenticationResourceUpdateProperties:
-      type: object
-      description: The updatable properties of the BrokerAuthenticationResource.
-      properties:
-        authenticationMethods:
-          type: array
-          description: The list of authentication methods supported by the Authentication Resource. For each array element, NOTE - Enum only authenticator type supported.
-          items:
-            $ref: '#/components/schemas/BrokerAuthenticatorMethods'
-          x-ms-identifiers: []
-        listenerRef:
-          type: array
-          description: The array of listener Resources it supports.
-          items:
-            type: string
     KeyVaultSecretProperties:
       type: object
       description: KeyVault secret properties
@@ -502,127 +600,29 @@ components:
       required:
       - vault
       - vaultSecret
-    BrokerAuthenticatorMethodX509Attributes:
+    BrokerAuthenticationResourceUpdate:
       type: object
-      description: BrokerAuthenticatorMethodX509Attributes properties. NOTE - Enum only type supported at a time.
+      description: The type used for update operations of the BrokerAuthenticationResource.
       properties:
-        keyVault:
-          $ref: '#/components/schemas/KeyVaultSecretProperties'
-          description: Keyvault x509 attributes secret properties.
-        secretName:
-          type: string
-          description: Secret where x509 attributes are stored.
-    BrokerAuthenticatorMethodUsernamePassword:
-      type: object
-      description: UsernamePassword for BrokerAuthentication
-      properties:
-        keyVault:
-          $ref: '#/components/schemas/KeyVaultSecretProperties'
-          description: Keyvault username password secret properties.
-        secretName:
-          type: string
-          description: Secret where username and password are stored.
-    BrokerAuthenticatorCustomAuth:
-      type: object
-      description: Custom Authentication properties
-      properties:
-        x509:
-          $ref: '#/components/schemas/BrokerAuthenticatorCustomAuthX509'
-          description: X509 Custom Auth type details.
-      required:
-      - x509
-    KeyVaultSecretObject:
-      type: object
-      description: KeyVault secret object properties
-      properties:
-        name:
-          type: string
-          description: KeyVault secret name.
-        version:
-          type: string
-          description: KeyVault secret version.
-      required:
-      - name
-    BrokerAuthenticatorCustomAuthX509:
-      type: object
-      description: X509 Custom Authentication properties. NOTE - Enum only authenticator type supported at a time.
-      properties:
-        keyVault:
-          $ref: '#/components/schemas/KeyVaultCertificateProperties'
-          description: Keyvault X509 secret properties.
-        secretName:
-          type: string
-          description: Secret where cert details are stored.
-    ExtendedLocationProperty:
-      type: object
-      description: ExtendedLocation properties
-      properties:
-        name:
-          type: string
-          description: The name of the extended location.
-        type:
-          $ref: '#/components/schemas/ExtendedLocationType'
-          description: Type of ExtendedLocation.
-      required:
-      - name
-      - type
-    KeyVaultConnectionProperties:
-      type: object
-      description: KeyVault properties
-      properties:
-        credentials:
-          $ref: '#/components/schemas/KeyVaultCredentialsProperties'
-          description: KeyVault credentials.
-        directoryId:
-          type: string
-          description: KeyVault directoryId.
-        name:
-          type: string
-          description: KeyVault name.
-      required:
-      - credentials
-      - directoryId
-      - name
-    BrokerAuthenticatorMethods:
-      type: object
-      description: Collection of different CrdAuthenticator methods of Broker Resource. NOTE Enum - Only one method is supported for each entry.
-      properties:
-        custom:
-          $ref: '#/components/schemas/BrokerAuthenticatorMethodCustom'
-          description: Custom Authentication Method.
-        sat:
-          $ref: '#/components/schemas/BrokerAuthenticatorMethodSat'
-          description: Service Account Token Method.
-        svid:
-          $ref: '#/components/schemas/BrokerAuthenticatorMethodSvid'
-          description: Service Account Token Method.
-        usernamePassword:
-          $ref: '#/components/schemas/BrokerAuthenticatorMethodUsernamePassword'
-          description: UsernamePassword Method.
-        x509:
-          $ref: '#/components/schemas/BrokerAuthenticatorMethodX509'
-          description: X509 Method.
-    BrokerAuthenticationResource:
-      type: object
-      description: MQ broker/authentication resource
-      properties:
+        tags:
+          type: object
+          description: Resource tags.
+          additionalProperties:
+            type: string
         properties:
-          $ref: '#/components/schemas/BrokerAuthenticationProperties'
-          description: The resource-specific properties for this resource.
+          $ref: '#/components/schemas/BrokerAuthenticationResourceUpdateProperties'
           x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocationProperty'
-          description: Extended Location
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    BrokerAuthenticatorMethodX509:
+      type: object
+      description: X509 for BrokerAuthentication.
+      properties:
+        attributes:
+          $ref: '#/components/schemas/BrokerAuthenticatorMethodX509Attributes'
+          description: K8S Secret name to mount for username and password.
+        trustedClientCaCertConfigMap:
+          type: string
+          description: Trusted client ca cert config map.
+          default: client-ca
   securitySchemes:
     azure_auth:
       type: oauth2

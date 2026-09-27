@@ -275,7 +275,7 @@ paths:
     - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureSphere/catalogs/{catalogName}/products/{productName}/deviceGroups/{deviceGroupName}
   : get:
-      operationId: microsoftAzureDevicegroupsGet
+      operationId: getSubscriptionsBySubscriptionIdResourceGroupsByResourceGroupNameProvidersMicrosoftAzureSphereCatalogsByCatalogNameProductsByProductNameDeviceGroupsByDeviceGroupName
       tags:
       - Device Groups
       description: Get a DeviceGroup. '.default' and '.unassigned' are system defined values and cannot be used for product or device group name.
@@ -321,6 +321,8 @@ paths:
         DeviceGroups_Get:
           $ref: ./examples/GetDeviceGroup.json
       summary: Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers…
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureDevicegroupsGet
     put:
       operationId: microsoftAzureDevicegroupsCreateorupdate
       tags:
@@ -391,7 +393,7 @@ paths:
         description: Resource create parameters.
         required: true
     patch:
-      operationId: microsoftAzureDevicegroupsUpdate
+      operationId: patchSubscriptionsBySubscriptionIdResourceGroupsByResourceGroupNameProvidersMicrosoftAzureSphereCatalogsByCatalogNameProductsByProductNameDeviceGroupsByDeviceGroupName
       tags:
       - Device Groups
       description: Update a DeviceGroup. '.default' and '.unassigned' are system defined values and cannot be used for product or device group name.
@@ -459,6 +461,8 @@ paths:
               $ref: '#/components/schemas/DeviceGroupUpdate'
         description: The resource properties to be updated.
         required: true
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureDevicegroupsUpdate
     delete:
       operationId: microsoftAzureDevicegroupsDelete
       tags:
@@ -635,6 +639,20 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    DeviceGroupDeviceCollection:
+      description: The paged results of devices belonging to the device group.
+      type: object
+      properties:
+        value:
+          description: The collection of devices belonging to the device group.
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+        nextLink:
+          description: URL to get the next page of devices in the group.
+          type: string
+      required:
+      - value
     DeviceGroup:
       description: The device group definition.
       type: object
@@ -663,20 +681,35 @@ components:
       required:
       - displayName
       - filter
-    DeviceGroupDeviceCollection:
-      description: The paged results of devices belonging to the device group.
+    Error:
+      description: The response error definition.
       type: object
       properties:
-        value:
-          description: The collection of devices belonging to the device group.
-          type: array
-          items:
-            $ref: '#/components/schemas/Device'
-        nextLink:
-          description: URL to get the next page of devices in the group.
-          type: string
+        error:
+          description: Error details for current request.
+          $ref: '#/components/schemas/ErrorDetails'
       required:
-      - value
+      - error
+    ErrorDetails:
+      description: The detail information of the error.
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code.
+        message:
+          type: string
+          description: Error message details.
+        requestId:
+          type: string
+          description: Correlation Id for current request.
+        time:
+          type: string
+          format: date-time-rfc1123
+          description: The time that error request failed.
+      required:
+      - code
+      - message
     DeviceGroupCollection:
       description: The paged results of device groups.
       type: object
@@ -691,6 +724,33 @@ components:
           type: string
       required:
       - value
+    DeploymentManifest:
+      description: The deployment manifest used for edge devices.
+      type: object
+      properties:
+        id:
+          description: Unique ID of the deployment manifest.
+          type: string
+          readOnly: true
+        displayName:
+          description: Display name of the deployment manifest.
+          type: string
+          minLength: 1
+        data:
+          description: Content of the the deployment manifest.
+          type: object
+        etag:
+          description: Etag to prevent conflict when updating the deployment manifest.
+          type: string
+        organizations:
+          description: The organization that deployment manifest belongs to. If not present, the deployment manifest is root-level or personal. Only one organization is supported today, multiple organizations will be supported soon.
+          type: array
+          items:
+            type: string
+          maxItems: 1
+          minItems: 1
+      required:
+      - data
     Device:
       description: The device definition.
       type: object
@@ -740,62 +800,46 @@ components:
         deploymentManifest:
           description: The deployment manifest assigned to the device.
           $ref: '#/components/schemas/DeploymentManifest'
-    Error:
-      description: The response error definition.
+    RegionalDataBoundary:
+      type: string
+      description: Regional data boundary values.
+      enum:
+      - None
+      - EU
+      x-ms-enum:
+        name: RegionalDataBoundary
+        modelAsString: true
+        values:
+        - name: None
+          value: None
+          description: No data boundary
+        - name: EU
+          value: EU
+          description: EU data boundary
+    DeviceGroupUpdateProperties:
       type: object
+      description: The updatable properties of the DeviceGroup.
       properties:
-        error:
-          description: Error details for current request.
-          $ref: '#/components/schemas/ErrorDetails'
-      required:
-      - error
-    DeploymentManifest:
-      description: The deployment manifest used for edge devices.
+        description:
+          type: string
+          description: Description of the device group.
+        osFeedType:
+          $ref: '#/components/schemas/OSFeedType'
+          description: Operating system feed type of the device group.
+        updatePolicy:
+          $ref: '#/components/schemas/UpdatePolicy'
+          description: Update policy of the device group.
+        allowCrashDumpsCollection:
+          $ref: '#/components/schemas/AllowCrashDumpCollection'
+          description: Flag to define if the user allows for crash dump collection.
+        regionalDataBoundary:
+          $ref: '#/components/schemas/RegionalDataBoundary'
+          description: Regional data boundary for the device group.
+    CountDeviceResponse:
       type: object
-      properties:
-        id:
-          description: Unique ID of the deployment manifest.
-          type: string
-          readOnly: true
-        displayName:
-          description: Display name of the deployment manifest.
-          type: string
-          minLength: 1
-        data:
-          description: Content of the the deployment manifest.
-          type: object
-        etag:
-          description: Etag to prevent conflict when updating the deployment manifest.
-          type: string
-        organizations:
-          description: The organization that deployment manifest belongs to. If not present, the deployment manifest is root-level or personal. Only one organization is supported today, multiple organizations will be supported soon.
-          type: array
-          items:
-            type: string
-          maxItems: 1
-          minItems: 1
-      required:
-      - data
-    ErrorDetails:
-      description: The detail information of the error.
-      type: object
-      properties:
-        code:
-          type: string
-          description: Error code.
-        message:
-          type: string
-          description: Error message details.
-        requestId:
-          type: string
-          description: Correlation Id for current request.
-        time:
-          type: string
-          format: date-time-rfc1123
-          description: The time that error request failed.
-      required:
-      - code
-      - message
+      description: Response to the action call for count devices in a catalog (preview API).
+      allOf:
+      - $ref: '#/components/schemas/CountElementsResponse'
     DeviceGroup_2:
       type: object
       description: An device group resource belonging to a product resource.
@@ -809,48 +853,6 @@ components:
           - create
       allOf:
       - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
-    DeviceGroupListResult:
-      type: object
-      description: The response of a DeviceGroup list operation.
-      properties:
-        value:
-          type: array
-          description: The DeviceGroup items on this page
-          items:
-            $ref: '#/components/schemas/DeviceGroup_2'
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-          readOnly: true
-      required:
-      - value
-    OSFeedType:
-      type: string
-      description: OS feed type values.
-      enum:
-      - Retail
-      - RetailEval
-      x-ms-enum:
-        name: OSFeedType
-        modelAsString: true
-        values:
-        - name: Retail
-          value: Retail
-          description: Retail OS feed type.
-        - name: RetailEval
-          value: RetailEval
-          description: Retail evaluation OS feed type.
-    CountElementsResponse:
-      type: object
-      description: Response of the count for elements.
-      properties:
-        value:
-          type: integer
-          format: int32
-          description: Number of children resources in parent resource.
-      required:
-      - value
     DeviceGroupProperties:
       type: object
       description: The properties of deviceGroup
@@ -878,11 +880,22 @@ components:
           $ref: '#/components/schemas/ProvisioningState'
           description: The status of the last operation.
           readOnly: true
-    CountDeviceResponse:
-      type: object
-      description: Response to the action call for count devices in a catalog (preview API).
-      allOf:
-      - $ref: '#/components/schemas/CountElementsResponse'
+    OSFeedType:
+      type: string
+      description: OS feed type values.
+      enum:
+      - Retail
+      - RetailEval
+      x-ms-enum:
+        name: OSFeedType
+        modelAsString: true
+        values:
+        - name: Retail
+          value: Retail
+          description: Retail OS feed type.
+        - name: RetailEval
+          value: RetailEval
+          description: Retail evaluation OS feed type.
     ProvisioningState:
       type: string
       description: Provisioning state of resource.
@@ -919,52 +932,16 @@ components:
         - name: Accepted
           value: Accepted
           description: The resource create request has been accepted
-    DeviceGroupUpdateProperties:
+    CountElementsResponse:
       type: object
-      description: The updatable properties of the DeviceGroup.
+      description: Response of the count for elements.
       properties:
-        description:
-          type: string
-          description: Description of the device group.
-        osFeedType:
-          $ref: '#/components/schemas/OSFeedType'
-          description: Operating system feed type of the device group.
-        updatePolicy:
-          $ref: '#/components/schemas/UpdatePolicy'
-          description: Update policy of the device group.
-        allowCrashDumpsCollection:
-          $ref: '#/components/schemas/AllowCrashDumpCollection'
-          description: Flag to define if the user allows for crash dump collection.
-        regionalDataBoundary:
-          $ref: '#/components/schemas/RegionalDataBoundary'
-          description: Regional data boundary for the device group.
-    ClaimDevicesRequest:
-      type: object
-      description: Request to the action call to bulk claim devices.
-      properties:
-        deviceIdentifiers:
-          type: array
-          description: Device identifiers of the devices to be claimed.
-          items:
-            type: string
+        value:
+          type: integer
+          format: int32
+          description: Number of children resources in parent resource.
       required:
-      - deviceIdentifiers
-    RegionalDataBoundary:
-      type: string
-      description: Regional data boundary values.
-      enum:
-      - None
-      - EU
-      x-ms-enum:
-        name: RegionalDataBoundary
-        modelAsString: true
-        values:
-        - name: None
-          value: None
-          description: No data boundary
-        - name: EU
-          value: EU
-          description: EU data boundary
+      - value
     DeviceGroupUpdate:
       type: object
       description: The type used for update operations of the DeviceGroup.
@@ -972,22 +949,22 @@ components:
         properties:
           $ref: '#/components/schemas/DeviceGroupUpdateProperties'
           x-ms-client-flatten: true
-    AllowCrashDumpCollection:
-      type: string
-      description: Allow crash dumps values.
-      enum:
-      - Enabled
-      - Disabled
-      x-ms-enum:
-        name: AllowCrashDumpCollection
-        modelAsString: true
-        values:
-        - name: Enabled
-          value: Enabled
-          description: Crash dump collection enabled
-        - name: Disabled
-          value: Disabled
-          description: Crash dump collection disabled
+    DeviceGroupListResult:
+      type: object
+      description: The response of a DeviceGroup list operation.
+      properties:
+        value:
+          type: array
+          description: The DeviceGroup items on this page
+          items:
+            $ref: '#/components/schemas/DeviceGroup_2'
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+          readOnly: true
+      required:
+      - value
     UpdatePolicy:
       type: string
       description: Update policy values.
@@ -1004,15 +981,34 @@ components:
         - name: No3rdPartyAppUpdates
           value: No3rdPartyAppUpdates
           description: No update for 3rd party app policy.
+    AllowCrashDumpCollection:
+      type: string
+      description: Allow crash dumps values.
+      enum:
+      - Enabled
+      - Disabled
+      x-ms-enum:
+        name: AllowCrashDumpCollection
+        modelAsString: true
+        values:
+        - name: Enabled
+          value: Enabled
+          description: Crash dump collection enabled
+        - name: Disabled
+          value: Disabled
+          description: Crash dump collection disabled
+    ClaimDevicesRequest:
+      type: object
+      description: Request to the action call to bulk claim devices.
+      properties:
+        deviceIdentifiers:
+          type: array
+          description: Device identifiers of the devices to be claimed.
+          items:
+            type: string
+      required:
+      - deviceIdentifiers
   parameters:
-    Version:
-      in: query
-      name: api-version
-      description: The version of the API being called.
-      x-ms-parameter-location: client
-      required: true
-      schema:
-        type: string
     MaxPageSize:
       in: query
       name: maxpagesize
@@ -1032,22 +1028,6 @@ components:
       required: false
       schema:
         type: string
-    IfMatch:
-      in: header
-      name: If-Match
-      description: Only perform the operation if the entity's etag matches one of the etags provided or * is provided.
-      x-ms-parameter-location: method
-      required: false
-      schema:
-        type: string
-    Filter:
-      in: query
-      name: filter
-      description: An expression on the resource type that selects the resources to be returned.
-      x-ms-parameter-location: method
-      required: false
-      schema:
-        type: string
     DeviceGroupId:
       in: path
       name: deviceGroupId
@@ -1058,16 +1038,30 @@ components:
         type: string
         maxLength: 255
         pattern: ^[a-zA-Z0-9_-]*$
-    CustomSkipQueryParameter:
-      name: $skip
-      in: query
-      description: The number of result items to skip.
-      required: false
+    IfMatch:
+      in: header
+      name: If-Match
+      description: Only perform the operation if the entity's etag matches one of the etags provided or * is provided.
       x-ms-parameter-location: method
-      x-ms-client-name: skip
+      required: false
       schema:
-        type: integer
-        format: int32
+        type: string
+    Version:
+      in: query
+      name: api-version
+      description: The version of the API being called.
+      x-ms-parameter-location: client
+      required: true
+      schema:
+        type: string
+    Filter:
+      in: query
+      name: filter
+      description: An expression on the resource type that selects the resources to be returned.
+      x-ms-parameter-location: method
+      required: false
+      schema:
+        type: string
     CustomTopQueryParameter:
       name: $top
       in: query
@@ -1097,6 +1091,16 @@ components:
       x-ms-client-name: filter
       schema:
         type: string
+    CustomSkipQueryParameter:
+      name: $skip
+      in: query
+      description: The number of result items to skip.
+      required: false
+      x-ms-parameter-location: method
+      x-ms-client-name: skip
+      schema:
+        type: integer
+        format: int32
   securitySchemes:
     azure_auth:
       type: oauth2

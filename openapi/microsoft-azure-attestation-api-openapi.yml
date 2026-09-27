@@ -135,28 +135,15 @@ paths:
         description: Request object containing the quote
         required: true
 components:
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client API version. Current version is 2022-09-01-preview
+      schema:
+        type: string
   schemas:
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-      description: An error response from Attestation.
-    TpmAttestationRequest:
-      type: object
-      description: Attestation request for Trusted Platform Module (TPM) attestation.
-      properties:
-        data:
-          description: Protocol data containing artifacts for attestation.
-          type: string
-          format: base64url
-    AttestationResponse:
-      type: object
-      description: The result of an attestation operation
-      properties:
-        token:
-          description: An RFC 7519 JSON Web Token, the body of which is an AttestationResult object.
-          $ref: '#/components/schemas/JsonWebToken'
     RuntimeData:
       type: object
       description: Runtime data are a conduit for any information defined by the Trusted Execution Environment (TEE) when actually running.
@@ -168,6 +155,70 @@ components:
         dataType:
           description: The type of data contained within the "data" field
           $ref: '#/components/schemas/DataType'
+    CloudError:
+      x-ms-external: true
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+      description: An error response from Attestation.
+    JsonWebToken:
+      description: An RFC 7519 Json Web Token
+      type: string
+      pattern: '[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
+      externalDocs:
+        description: JSON Web Token RFC
+        url: https://tools.ietf.org/html/rfc7519
+    AttestationResponse:
+      type: object
+      description: The result of an attestation operation
+      properties:
+        token:
+          description: An RFC 7519 JSON Web Token, the body of which is an AttestationResult object.
+          $ref: '#/components/schemas/JsonWebToken'
+    CloudErrorBody:
+      x-ms-external: true
+      properties:
+        code:
+          type: string
+          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          type: string
+          description: A message describing the error, intended to be suitable for displaying in a user interface.
+      description: An error response from Attestation.
+    DataType:
+      description: Specifies the type of the data encoded contained within the "data" field of a "RuntimeData" or "InitTimeData" object
+      type: string
+      enum:
+      - Binary
+      - JSON
+      x-ms-enum:
+        name: DataType
+        modelAsString: true
+        values:
+        - value: Binary
+          description: The field's content should be treated as binary and not interpreted by MAA.
+        - value: JSON
+          description: The field's content should be treated as UTF-8 JSON text that may be further interpreted by MAA. Refer to RFC 8259 for a description of JSON serialization standards for interoperability.
+    AttestSgxEnclaveRequest:
+      type: object
+      description: Attestation request for Intel SGX enclaves
+      properties:
+        quote:
+          description: Quote of the enclave to be attested
+          type: string
+          format: base64url
+        runtimeData:
+          description: Runtime data provided by the enclave at the time of quote generation. The MAA will verify that the first 32 bytes of the report_data field of the quote contains the SHA256 hash of the decoded "data" field of the runtime data.
+          $ref: '#/components/schemas/RuntimeData'
+        initTimeData:
+          description: Initialization data provided when the enclave is created. MAA will verify that the init data was known to the enclave. Note that InitTimeData is invalid for CoffeeLake processors.
+          $ref: '#/components/schemas/InitTimeData'
+        draftPolicyForAttestation:
+          description: Attest against the provided draft policy. Note that the resulting token cannot be validated.
+          type: string
+        nonce:
+          description: Nonce for incoming request - emitted in the generated attestation token
+          type: string
     InitTimeData:
       type: object
       description: Initialization time data are a conduit for any configuration information that is unknown when building the Trusted Execution Environment (TEE) and is defined at TEE launch time. This data can be used with confidential container or VM scenarios to capture configuration settings such as disk volume content, network configuration, etc.
@@ -199,43 +250,6 @@ components:
         nonce:
           description: Nonce for incoming request - emitted in the generated attestation token
           type: string
-    CloudErrorBody:
-      x-ms-external: true
-      properties:
-        code:
-          type: string
-          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          type: string
-          description: A message describing the error, intended to be suitable for displaying in a user interface.
-      description: An error response from Attestation.
-    AttestSgxEnclaveRequest:
-      type: object
-      description: Attestation request for Intel SGX enclaves
-      properties:
-        quote:
-          description: Quote of the enclave to be attested
-          type: string
-          format: base64url
-        runtimeData:
-          description: Runtime data provided by the enclave at the time of quote generation. The MAA will verify that the first 32 bytes of the report_data field of the quote contains the SHA256 hash of the decoded "data" field of the runtime data.
-          $ref: '#/components/schemas/RuntimeData'
-        initTimeData:
-          description: Initialization data provided when the enclave is created. MAA will verify that the init data was known to the enclave. Note that InitTimeData is invalid for CoffeeLake processors.
-          $ref: '#/components/schemas/InitTimeData'
-        draftPolicyForAttestation:
-          description: Attest against the provided draft policy. Note that the resulting token cannot be validated.
-          type: string
-        nonce:
-          description: Nonce for incoming request - emitted in the generated attestation token
-          type: string
-    JsonWebToken:
-      description: An RFC 7519 Json Web Token
-      type: string
-      pattern: '[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
-      externalDocs:
-        description: JSON Web Token RFC
-        url: https://tools.ietf.org/html/rfc7519
     TpmAttestationResponse:
       type: object
       description: Attestation response for Trusted Platform Module (TPM) attestation.
@@ -263,28 +277,14 @@ components:
         nonce:
           description: Nonce for incoming request - emitted in the generated attestation token
           type: string
-    DataType:
-      description: Specifies the type of the data encoded contained within the "data" field of a "RuntimeData" or "InitTimeData" object
-      type: string
-      enum:
-      - Binary
-      - JSON
-      x-ms-enum:
-        name: DataType
-        modelAsString: true
-        values:
-        - value: Binary
-          description: The field's content should be treated as binary and not interpreted by MAA.
-        - value: JSON
-          description: The field's content should be treated as UTF-8 JSON text that may be further interpreted by MAA. Refer to RFC 8259 for a description of JSON serialization standards for interoperability.
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client API version. Current version is 2022-09-01-preview
-      schema:
-        type: string
+    TpmAttestationRequest:
+      type: object
+      description: Attestation request for Trusted Platform Module (TPM) attestation.
+      properties:
+        data:
+          description: Protocol data containing artifacts for attestation.
+          type: string
+          format: base64url
   securitySchemes:
     azure_auth:
       type: oauth2

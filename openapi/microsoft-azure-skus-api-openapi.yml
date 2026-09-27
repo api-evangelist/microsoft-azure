@@ -69,7 +69,7 @@ paths:
       tags:
       - Skus
       summary: Microsoft Azure List Available Skus Of Engagementfabric Resource
-      operationId: microsoftAzureSkusList
+      operationId: getSubscriptionsBySubscriptionIdProvidersMicrosoftEngagementFabricSkus
       parameters:
       - $ref: '#/components/parameters/SubscriptionIdParameter_2'
       - $ref: '#/components/parameters/ApiVersionParameter'
@@ -92,6 +92,8 @@ paths:
       x-ms-pageable:
         nextLinkName: null
       description: Needs a more full description created.
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureSkusList
     servers:
     - url: https://management.azure.com
   /subscriptions/{subscriptionId}/providers/Microsoft.StorageCache/skus:
@@ -120,11 +122,13 @@ paths:
       tags:
       - Skus
       description: Get the list of StorageCache.Cache SKUs available to this subscription.
-      operationId: microsoftAzureSkusList
+      operationId: getSubscriptionsBySubscriptionIdProvidersMicrosoftStorageCacheSkus
       summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft…
       security:
       - azure_auth:
         - user_impersonation
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureSkusList
     servers:
     - url: https://management.azure.com/
 components:
@@ -200,23 +204,6 @@ components:
             name: ResourceSkuRestrictionsReasonCode
             modelAsString: true
       description: Describes restrictions which would prevent a SKU from being used.
-    SkuCost:
-      type: object
-      description: Describes metadata for SKU cost info.
-      properties:
-        meterID:
-          type: string
-          readOnly: true
-          description: The meter used for this part of a SKU's cost.
-        quantity:
-          type: integer
-          readOnly: true
-          format: int64
-          description: The multiplier for the meter ID.
-        extendedUnit:
-          type: string
-          readOnly: true
-          description: The overall duration represented by the quantity.
     SkuListResult:
       type: object
       description: The list of commitment plan SKUs.
@@ -275,6 +262,23 @@ components:
             $ref: '#/components/schemas/SkuRestrictions'
           x-ms-identifiers: []
           description: Restrictions which would prevent a SKU from being used. This is empty if there are no restrictions.
+    SkuCost:
+      type: object
+      description: Describes metadata for SKU cost info.
+      properties:
+        meterID:
+          type: string
+          readOnly: true
+          description: The meter used for this part of a SKU's cost.
+        quantity:
+          type: integer
+          readOnly: true
+          format: int64
+          description: The multiplier for the meter ID.
+        extendedUnit:
+          type: string
+          readOnly: true
+          description: The overall duration represented by the quantity.
     SkuListResult_2:
       description: Results of the Microsoft.DevCenter SKU list operation.
       type: object
@@ -290,6 +294,33 @@ components:
           description: URL to get the next set of results if there are any.
           type: string
           readOnly: true
+    CloudError:
+      description: The default error response
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: Content of the error
+      x-ms-external: true
+    CloudErrorBody:
+      description: Content of the default error response
+      type: object
+      properties:
+        code:
+          description: The error code
+          type: string
+        message:
+          description: The error message
+          type: string
+        target:
+          description: The target of the particular error
+          type: string
+        details:
+          description: The list of additional details
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody'
+      x-ms-external: true
     SkuLocationInfoItem:
       description: The Locations and zones info for SKU
       type: object
@@ -302,14 +333,16 @@ components:
           type: array
           items:
             type: string
-    CloudError:
-      description: The default error response
+    SkuDescriptionList:
+      description: The list of the EngagementFabric SKU descriptions
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: Content of the error
-      x-ms-external: true
+        value:
+          description: SKU descriptions
+          type: array
+          items:
+            $ref: '#/components/schemas/SkuDescription'
+          readOnly: true
     SkuDescription:
       description: The EngagementFabric SKU description of given resource type
       type: object
@@ -344,35 +377,6 @@ components:
           items:
             type: object
           readOnly: true
-    CloudErrorBody:
-      description: Content of the default error response
-      type: object
-      properties:
-        code:
-          description: The error code
-          type: string
-        message:
-          description: The error message
-          type: string
-        target:
-          description: The target of the particular error
-          type: string
-        details:
-          description: The list of additional details
-          type: array
-          items:
-            $ref: '#/components/schemas/CloudErrorBody'
-      x-ms-external: true
-    SkuDescriptionList:
-      description: The list of the EngagementFabric SKU descriptions
-      type: object
-      properties:
-        value:
-          description: SKU descriptions
-          type: array
-          items:
-            $ref: '#/components/schemas/SkuDescription'
-          readOnly: true
     CloudError_2:
       x-ms-external: true
       description: An error response.
@@ -380,6 +384,84 @@ components:
         error:
           description: The body of the error.
           $ref: '#/components/schemas/CloudErrorBody_2'
+      type: object
+    Restriction:
+      type: object
+      properties:
+        type:
+          readOnly: true
+          type: string
+          description: The type of restrictions. In this version, the only possible value for this is location.
+        values:
+          readOnly: true
+          type: array
+          items:
+            type: string
+          description: The value of restrictions. If the restriction type is set to location, then this would be the different locations where the SKU is restricted.
+        reasonCode:
+          type: string
+          enum:
+          - QuotaId
+          - NotAvailableForSubscription
+          x-ms-enum:
+            name: ReasonCode
+            modelAsString: true
+          description: The reason for the restriction. As of now this can be "QuotaId" or "NotAvailableForSubscription". "QuotaId" is set when the SKU has requiredQuotas parameter as the subscription does not belong to that quota. "NotAvailableForSubscription" is related to capacity at the datacenter.
+      description: The restrictions preventing this SKU from being used.
+    CloudErrorBody_2:
+      description: An error response.
+      properties:
+        code:
+          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+          type: string
+        details:
+          description: A list of additional details about the error.
+          items:
+            $ref: '#/components/schemas/CloudErrorBody_2'
+          type: array
+          x-ms-identifiers: []
+        message:
+          description: A message describing the error, intended to be suitable for display in a user interface.
+          type: string
+        target:
+          description: The target of the particular error. For example, the name of the property in error.
+          type: string
+      type: object
+    ResourceSkuCapabilities:
+      description: A resource SKU capability.
+      properties:
+        name:
+          description: Name of a capability, such as ops/sec.
+          type: string
+        value:
+          description: Quantity, if the capability is measured by quantity.
+          type: string
+      type: object
+    ResourceSkusResult:
+      type: object
+      description: The response from the List Cache SKUs operation.
+      properties:
+        nextLink:
+          description: The URI to fetch the next page of cache SKUs.
+          type: string
+        value:
+          description: The list of SKUs available for the subscription.
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/ResourceSku'
+          type: array
+          x-ms-identifiers: []
+    ResourceSkuLocationInfo:
+      description: Resource SKU location information.
+      properties:
+        location:
+          description: Location where this SKU is available.
+          type: string
+        zones:
+          description: Zones if any.
+          type: array
+          items:
+            type: string
       type: object
     ResourceSku:
       description: A resource SKU.
@@ -417,96 +499,18 @@ components:
           description: The restrictions preventing this SKU from being used. This is empty if there are no restrictions.
           x-ms-identifiers: []
       type: object
-    ResourceSkuLocationInfo:
-      description: Resource SKU location information.
-      properties:
-        location:
-          description: Location where this SKU is available.
-          type: string
-        zones:
-          description: Zones if any.
-          type: array
-          items:
-            type: string
-      type: object
-    ResourceSkuCapabilities:
-      description: A resource SKU capability.
-      properties:
-        name:
-          description: Name of a capability, such as ops/sec.
-          type: string
-        value:
-          description: Quantity, if the capability is measured by quantity.
-          type: string
-      type: object
-    CloudErrorBody_2:
-      description: An error response.
-      properties:
-        code:
-          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-          type: string
-        details:
-          description: A list of additional details about the error.
-          items:
-            $ref: '#/components/schemas/CloudErrorBody_2'
-          type: array
-          x-ms-identifiers: []
-        message:
-          description: A message describing the error, intended to be suitable for display in a user interface.
-          type: string
-        target:
-          description: The target of the particular error. For example, the name of the property in error.
-          type: string
-      type: object
-    ResourceSkusResult:
-      type: object
-      description: The response from the List Cache SKUs operation.
-      properties:
-        nextLink:
-          description: The URI to fetch the next page of cache SKUs.
-          type: string
-        value:
-          description: The list of SKUs available for the subscription.
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/ResourceSku'
-          type: array
-          x-ms-identifiers: []
-    Restriction:
-      type: object
-      properties:
-        type:
-          readOnly: true
-          type: string
-          description: The type of restrictions. In this version, the only possible value for this is location.
-        values:
-          readOnly: true
-          type: array
-          items:
-            type: string
-          description: The value of restrictions. If the restriction type is set to location, then this would be the different locations where the SKU is restricted.
-        reasonCode:
-          type: string
-          enum:
-          - QuotaId
-          - NotAvailableForSubscription
-          x-ms-enum:
-            name: ReasonCode
-            modelAsString: true
-          description: The reason for the restriction. As of now this can be "QuotaId" or "NotAvailableForSubscription". "QuotaId" is set when the SKU has requiredQuotas parameter as the subscription does not belong to that quota. "NotAvailableForSubscription" is related to capacity at the datacenter.
-      description: The restrictions preventing this SKU from being used.
   parameters:
-    APIVersionParameter:
-      name: api-version
-      description: The version of the Microsoft.MachineLearning resource provider API to use.
-      in: query
-      required: true
-      schema:
-        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       description: Azure Subscription ID.
       in: path
+      required: true
+      schema:
+        type: string
+    APIVersionParameter:
+      name: api-version
+      description: The version of the Microsoft.MachineLearning resource provider API to use.
+      in: query
       required: true
       schema:
         type: string

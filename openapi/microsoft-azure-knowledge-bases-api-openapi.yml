@@ -259,81 +259,185 @@ paths:
           $ref: ./examples/SuccessfulTrain.json
       description: Needs a more full description created.
 components:
-  parameters:
-    CreateKbPayload:
-      name: createKbPayload
-      in: body
-      required: true
-      schema:
-        $ref: '#/components/schemas/CreateKbDTO'
-      description: Post body of the request.
-      x-ms-parameter-location: method
-    Environment:
-      name: environment
-      in: path
-      required: true
-      description: Specifies whether environment is Test or Prod.
-      x-ms-enum:
-        name: EnvironmentType
-        modelAsString: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        enum:
-        - Prod
-        - Test
-    KbId:
-      name: kbId
-      in: path
-      required: true
-      description: Knowledgebase id.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    UpdateKb:
-      name: updateKb
-      in: body
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdateKbOperationDTO'
-      description: Post body of the request.
-      x-ms-parameter-location: method
-    GenerateAnswerPayload:
-      name: generateAnswerPayload
-      in: body
-      required: true
-      schema:
-        $ref: '#/components/schemas/QueryDTO'
-      description: Post body of the request.
-      x-ms-parameter-location: method
-    ReplaceKb:
-      name: replaceKb
-      in: body
-      required: true
-      schema:
-        $ref: '#/components/schemas/ReplaceKbDTO'
-      description: An instance of ReplaceKbDTO which contains list of qnas to be uploaded
-      x-ms-parameter-location: method
-    TrainPayload:
-      name: trainPayload
-      in: body
-      required: true
-      schema:
-        $ref: '#/components/schemas/FeedbackRecordsDTO'
-      description: Post body of the request.
-      x-ms-parameter-location: method
   schemas:
-    FeedbackRecordsDTO:
+    QnASearchResultList:
       type: object
-      description: Active learning feedback records.
+      description: Represents List of Question Answers.
       additionalProperties: false
       properties:
-        feedbackRecords:
+        answers:
           type: array
-          description: List of feedback records.
-          maxLength: 1000
+          description: Represents Search Result list.
           items:
-            $ref: '#/components/schemas/FeedbackRecordDTO'
+            $ref: '#/components/schemas/QnASearchResult'
+    Operation:
+      type: object
+      description: Record to track long running operation.
+      additionalProperties: false
+      properties:
+        operationState:
+          description: Operation state.
+          $ref: '#/components/schemas/OperationState'
+        createdTimestamp:
+          type: string
+          description: Timestamp when the operation was created.
+        lastActionTimestamp:
+          type: string
+          description: Timestamp when the current state was entered.
+        resourceLocation:
+          type: string
+          description: Relative URI to the target resource location for completed resources.
+        userId:
+          type: string
+          description: User Id
+        operationId:
+          type: string
+          description: Operation Id.
+        errorResponse:
+          description: Error details in case of failures.
+          $ref: '#/components/schemas/ErrorResponse'
+    InnerErrorModel:
+      type: object
+      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          description: A more specific error code than was provided by the containing error.
+        innerError:
+          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/InnerErrorModel'
+    Error:
+      type: object
+      description: The error object. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      additionalProperties: false
+      required:
+      - code
+      properties:
+        code:
+          description: One of a server-defined set of error codes.
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          description: The target of the error.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/Error'
+        innerError:
+          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/InnerErrorModel'
+    QueryDTO:
+      type: object
+      description: POST body schema to query the knowledgebase.
+      additionalProperties: false
+      properties:
+        qnaId:
+          type: string
+          description: Exact qnaId to fetch from the knowledgebase, this field takes priority over question.
+        question:
+          type: string
+          description: User question to query against the knowledge base.
+        top:
+          type: integer
+          description: Max number of answers to be returned for the question.
+          format: int32
+        userId:
+          type: string
+          description: Unique identifier for the user.
+        isTest:
+          type: boolean
+          description: Query against the test index.
+        scoreThreshold:
+          type: number
+          description: Minimum threshold score for answers.
+        context:
+          description: Context object with previous QnA's information.
+          allOf:
+          - $ref: '#/components/schemas/QueryContextDTO'
+        rankerType:
+          type: string
+          description: Optional field. Set to 'QuestionOnly' for using a question only Ranker.
+        strictFilters:
+          type: array
+          description: Find QnAs that are associated with the given list of metadata.
+          items:
+            $ref: '#/components/schemas/MetadataDTO'
+        strictFiltersCompoundOperationType:
+          type: string
+          description: Optional field. Set to 'OR' for using OR operation for strict filters.
+          x-ms-enum:
+            name: StrictFiltersCompoundOperationType
+            modelAsString: true
+          enum:
+          - AND
+          - OR
+        answerSpanRequest:
+          description: To configure Answer span prediction feature.
+          allOf:
+          - $ref: '#/components/schemas/AnswerSpanRequestDTO'
+    ReplaceKbDTO:
+      type: object
+      description: Post body schema for Replace KB operation.
+      additionalProperties: false
+      required:
+      - qnAList
+      properties:
+        qnAList:
+          type: array
+          description: List of Q-A (QnADTO) to be added to the knowledgebase. Q-A Ids are assigned by the service and should be omitted.
+          items:
+            $ref: '#/components/schemas/QnADTO'
+    KnowledgebaseDTO:
+      type: object
+      description: Response schema for CreateKb operation.
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: Unique id that identifies a knowledgebase.
+        hostName:
+          type: string
+          description: URL host name at which the knowledgebase is hosted.
+        lastAccessedTimestamp:
+          type: string
+          description: Time stamp at which the knowledgebase was last accessed (UTC).
+        lastChangedTimestamp:
+          type: string
+          description: Time stamp at which the knowledgebase was last modified (UTC).
+        lastPublishedTimestamp:
+          type: string
+          description: Time stamp at which the knowledgebase was last published (UTC).
+        name:
+          type: string
+          description: Friendly name of the knowledgebase.
+        userId:
+          type: string
+          description: User who created / owns the knowledgebase.
+        urls:
+          type: array
+          description: URL sources from which Q-A were extracted and added to the knowledgebase.
+          items:
+            type: string
+        sources:
+          type: array
+          description: Custom sources from which Q-A were extracted or explicitly added to the knowledgebase.
+          items:
+            type: string
+    QnADocumentsDTO:
+      type: object
+      description: List of QnADTO
+      additionalProperties: false
+      properties:
+        qnaDocuments:
+          type: array
+          description: List of answers.
+          items:
+            $ref: '#/components/schemas/QnADTO'
     DeleteKbContentsDTO:
       type: object
       description: PATCH body schema of Delete Operation in UpdateKb
@@ -352,28 +456,89 @@ components:
           minLength: 1
           items:
             type: string
-    CreateKbInputDTO:
+    AnswerSpanResponseDTO:
       type: object
-      description: Input to create KB.
+      description: Answer span object of QnA.
       additionalProperties: false
       properties:
+        text:
+          type: string
+          description: Predicted text of answer span.
+        score:
+          type: number
+          description: Predicted score of answer span.
+          format: double
+        startIndex:
+          type: integer
+          description: Start index of answer span in answer.
+          format: int32
+        endIndex:
+          type: integer
+          description: End index of answer span in answer.
+          format: int32
+    UpdateQnaDTO:
+      type: object
+      description: PATCH Body schema for Update Qna List
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: Unique id for the Q-A
+          format: int32
+          maximum: 2147483647
+          minimum: 0
+        answer:
+          type: string
+          description: Answer text
+        source:
+          type: string
+          description: Source from which Q-A was indexed. eg. https://docs.microsoft.com/en-us/azure/cognitive-services/QnAMaker/FAQs
+          maxLength: 300
+        questions:
+          description: List of questions associated with the answer.
+          allOf:
+          - $ref: '#/components/schemas/UpdateQuestionsDTO'
+        metadata:
+          description: List of metadata associated with the answer to be updated
+          allOf:
+          - $ref: '#/components/schemas/UpdateMetadataDTO'
+        context:
+          description: Context associated with Qna to be updated.
+          allOf:
+          - $ref: '#/components/schemas/UpdateContextDTO'
+    UpdateKbContentsDTO:
+      type: object
+      description: PATCH body schema for Update operation in Update Kb
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Friendly name for the knowledgebase.
         qnaList:
           type: array
-          description: List of QNA to be added to the index. Ids are generated by the service and should be omitted.
+          description: List of Q-A (UpdateQnaDTO) to be added to the knowledgebase.
           items:
-            $ref: '#/components/schemas/QnADTO'
+            $ref: '#/components/schemas/UpdateQnaDTO'
         urls:
           type: array
-          description: List of URLs to be added to knowledgebase.
+          description: List of existing URLs to be refreshed. The content will be extracted again and re-indexed.
           maxLength: 10
           items:
             type: string
-        files:
-          type: array
-          description: List of files to be added to knowledgebase.
-          maxLength: 10
-          items:
-            $ref: '#/components/schemas/FileDTO'
+        defaultAnswer:
+          type: string
+          description: Default answer sent to user if no good match is found in the KB.
+          maxLength: 300
+          minLength: 1
+    ErrorResponse:
+      type: object
+      description: Error response. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      additionalProperties: false
+      properties:
+        error:
+          description: The error object.
+          allOf:
+          - $ref: '#/components/schemas/Error'
     UpdateContextDTO:
       type: object
       description: Update Body schema to represent context to be updated
@@ -396,31 +561,6 @@ components:
             true - Do not include this QnA as search result for queries without context
 
             false - ignores context and includes this QnA in search result'
-    UpdateKbOperationDTO:
-      type: object
-      description: Contains list of QnAs to be updated
-      additionalProperties: false
-      properties:
-        add:
-          description: An instance of CreateKbInputDTO for add operation
-          allOf:
-          - $ref: '#/components/schemas/CreateKbInputDTO'
-        delete:
-          description: An instance of DeleteKbContentsDTO for delete Operation
-          allOf:
-          - $ref: '#/components/schemas/DeleteKbContentsDTO'
-        update:
-          description: An instance of UpdateKbContentsDTO for Update Operation
-          allOf:
-          - $ref: '#/components/schemas/UpdateKbContentsDTO'
-        enableHierarchicalExtraction:
-          type: boolean
-          description: Enable hierarchical extraction of Q-A from files and urls. The value set during KB creation will be used if this field is not present.
-        defaultAnswerUsedForExtraction:
-          type: string
-          description: Text string to be used as the answer in any Q-A which has no extracted answer from the document but has a hierarchy. Required when EnableHierarchicalExtraction field is set to True.
-          maxLength: 300
-          minLength: 1
     UpdateQuestionsDTO:
       type: object
       description: PATCH Body schema for Update Kb which contains list of questions to be added and deleted
@@ -438,6 +578,124 @@ components:
           maxLength: 100
           items:
             type: string
+    PromptDTO:
+      type: object
+      description: Prompt for an answer.
+      properties:
+        displayOrder:
+          type: integer
+          description: Index of the prompt - used in ordering of the prompts
+          format: int32
+        qnaId:
+          type: integer
+          description: Qna id corresponding to the prompt - if QnaId is present, QnADTO object is ignored.
+          format: int32
+        qna:
+          description: QnADTO - Either QnaId or QnADTO needs to be present in a PromptDTO object
+          allOf:
+          - $ref: '#/components/schemas/QnADTO'
+        displayText:
+          type: string
+          description: Text displayed to represent a follow up question prompt
+          maxLength: 200
+    QnASearchResult:
+      type: object
+      description: Represents Search Result.
+      additionalProperties: false
+      properties:
+        questions:
+          type: array
+          description: List of questions.
+          items:
+            type: string
+        answer:
+          type: string
+          description: Answer.
+        score:
+          type: number
+          description: Search result score.
+        id:
+          type: integer
+          description: Id of the QnA result.
+          format: int32
+        source:
+          type: string
+          description: Source of QnA result.
+        metadata:
+          type: array
+          description: List of metadata.
+          items:
+            $ref: '#/components/schemas/MetadataDTO'
+        context:
+          type: object
+          description: Context object of the QnA
+          allOf:
+          - $ref: '#/components/schemas/ContextDTO'
+        answerSpan:
+          type: object
+          description: Answer span object of QnA with respect to user's question.
+          allOf:
+          - $ref: '#/components/schemas/AnswerSpanResponseDTO'
+    MetadataDTO:
+      type: object
+      description: Name - value pair of metadata.
+      additionalProperties: false
+      required:
+      - name
+      - value
+      properties:
+        name:
+          type: string
+          description: Metadata name.
+          maxLength: 100
+          minLength: 1
+        value:
+          type: string
+          description: Metadata value.
+          maxLength: 500
+          minLength: 1
+    QnADTO:
+      type: object
+      description: Q-A object.
+      additionalProperties: false
+      required:
+      - answer
+      - questions
+      properties:
+        id:
+          type: integer
+          description: Unique id for the Q-A.
+          format: int32
+        answer:
+          type: string
+          description: Answer text
+          maxLength: 25000
+          minLength: 1
+        source:
+          type: string
+          description: Source from which Q-A was indexed. eg. https://docs.microsoft.com/en-us/azure/cognitive-services/QnAMaker/FAQs
+          maxLength: 300
+        questions:
+          type: array
+          description: List of questions associated with the answer.
+          maxLength: 100
+          minLength: 1
+          items:
+            type: string
+        metadata:
+          type: array
+          description: List of metadata associated with the answer.
+          maxLength: 10
+          items:
+            $ref: '#/components/schemas/MetadataDTO'
+        context:
+          description: Context of a QnA
+          allOf:
+          - $ref: '#/components/schemas/ContextDTO'
+        lastUpdatedTimestamp:
+          type: string
+          description: Timestamp when the QnA was last updated.
+          maxLength: 300
     CreateKbDTO:
       type: object
       description: Post body schema for CreateKb operation.
@@ -489,17 +747,28 @@ components:
           description: Default answer sent to user if no good match is found in the KB.
           maxLength: 300
           minLength: 1
-    InnerErrorModel:
+    CreateKbInputDTO:
       type: object
-      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      description: Input to create KB.
       additionalProperties: false
       properties:
-        code:
-          type: string
-          description: A more specific error code than was provided by the containing error.
-        innerError:
-          description: An object containing more specific information than the current object about the error.
-          $ref: '#/components/schemas/InnerErrorModel'
+        qnaList:
+          type: array
+          description: List of QNA to be added to the index. Ids are generated by the service and should be omitted.
+          items:
+            $ref: '#/components/schemas/QnADTO'
+        urls:
+          type: array
+          description: List of URLs to be added to knowledgebase.
+          maxLength: 10
+          items:
+            type: string
+        files:
+          type: array
+          description: List of files to be added to knowledgebase.
+          maxLength: 10
+          items:
+            $ref: '#/components/schemas/FileDTO'
     AnswerSpanRequestDTO:
       type: object
       description: To configure Answer span prediction feature.
@@ -518,102 +787,17 @@ components:
           format: int32
           maximum: 10
           minimum: 1
-    UpdateKbContentsDTO:
-      type: object
-      description: PATCH body schema for Update operation in Update Kb
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          description: Friendly name for the knowledgebase.
-        qnaList:
-          type: array
-          description: List of Q-A (UpdateQnaDTO) to be added to the knowledgebase.
-          items:
-            $ref: '#/components/schemas/UpdateQnaDTO'
-        urls:
-          type: array
-          description: List of existing URLs to be refreshed. The content will be extracted again and re-indexed.
-          maxLength: 10
-          items:
-            type: string
-        defaultAnswer:
-          type: string
-          description: Default answer sent to user if no good match is found in the KB.
-          maxLength: 300
-          minLength: 1
-    MetadataDTO:
-      type: object
-      description: Name - value pair of metadata.
-      additionalProperties: false
-      required:
-      - name
-      - value
-      properties:
-        name:
-          type: string
-          description: Metadata name.
-          maxLength: 100
-          minLength: 1
-        value:
-          type: string
-          description: Metadata value.
-          maxLength: 500
-          minLength: 1
-    UpdateMetadataDTO:
-      type: object
-      description: PATCH Body schema to represent list of Metadata to be updated
-      additionalProperties: false
-      properties:
-        delete:
-          type: array
-          description: List of Metadata associated with answer to be deleted
-          maxLength: 100
-          items:
-            $ref: '#/components/schemas/MetadataDTO'
-        add:
-          type: array
-          description: List of metadata associated with answer to be added
-          maxLength: 100
-          items:
-            $ref: '#/components/schemas/MetadataDTO'
-    ErrorResponse:
-      type: object
-      description: Error response. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
-      additionalProperties: false
-      properties:
-        error:
-          description: The error object.
-          allOf:
-          - $ref: '#/components/schemas/Error'
-    ReplaceKbDTO:
-      type: object
-      description: Post body schema for Replace KB operation.
-      additionalProperties: false
-      required:
-      - qnAList
-      properties:
-        qnAList:
-          type: array
-          description: List of Q-A (QnADTO) to be added to the knowledgebase. Q-A Ids are assigned by the service and should be omitted.
-          items:
-            $ref: '#/components/schemas/QnADTO'
-    FeedbackRecordDTO:
-      type: object
-      description: Active learning feedback record.
-      additionalProperties: false
-      properties:
-        userId:
-          type: string
-          description: Unique identifier for the user.
-        userQuestion:
-          type: string
-          description: The suggested question being provided as feedback.
-          maxLength: 1000
-        qnaId:
-          type: integer
-          description: The qnaId for which the suggested question is provided as feedback.
-          format: int32
+    OperationState:
+      type: string
+      description: Enumeration of operation states.
+      x-ms-enum:
+        name: OperationStateType
+        modelAsString: true
+      enum:
+      - Failed
+      - NotStarted
+      - Running
+      - Succeeded
     ErrorCode:
       type: string
       description: Human readable error code.
@@ -652,112 +836,69 @@ components:
           maxItems: 20
           items:
             $ref: '#/components/schemas/PromptDTO'
-    AnswerSpanResponseDTO:
+    FeedbackRecordsDTO:
       type: object
-      description: Answer span object of QnA.
+      description: Active learning feedback records.
       additionalProperties: false
       properties:
-        text:
-          type: string
-          description: Predicted text of answer span.
-        score:
-          type: number
-          description: Predicted score of answer span.
-          format: double
-        startIndex:
-          type: integer
-          description: Start index of answer span in answer.
-          format: int32
-        endIndex:
-          type: integer
-          description: End index of answer span in answer.
-          format: int32
-    Operation:
+        feedbackRecords:
+          type: array
+          description: List of feedback records.
+          maxLength: 1000
+          items:
+            $ref: '#/components/schemas/FeedbackRecordDTO'
+    FeedbackRecordDTO:
       type: object
-      description: Record to track long running operation.
+      description: Active learning feedback record.
       additionalProperties: false
       properties:
-        operationState:
-          description: Operation state.
-          $ref: '#/components/schemas/OperationState'
-        createdTimestamp:
-          type: string
-          description: Timestamp when the operation was created.
-        lastActionTimestamp:
-          type: string
-          description: Timestamp when the current state was entered.
-        resourceLocation:
-          type: string
-          description: Relative URI to the target resource location for completed resources.
-        userId:
-          type: string
-          description: User Id
-        operationId:
-          type: string
-          description: Operation Id.
-        errorResponse:
-          description: Error details in case of failures.
-          $ref: '#/components/schemas/ErrorResponse'
-    OperationState:
-      type: string
-      description: Enumeration of operation states.
-      x-ms-enum:
-        name: OperationStateType
-        modelAsString: true
-      enum:
-      - Failed
-      - NotStarted
-      - Running
-      - Succeeded
-    QueryDTO:
-      type: object
-      description: POST body schema to query the knowledgebase.
-      additionalProperties: false
-      properties:
-        qnaId:
-          type: string
-          description: Exact qnaId to fetch from the knowledgebase, this field takes priority over question.
-        question:
-          type: string
-          description: User question to query against the knowledge base.
-        top:
-          type: integer
-          description: Max number of answers to be returned for the question.
-          format: int32
         userId:
           type: string
           description: Unique identifier for the user.
-        isTest:
+        userQuestion:
+          type: string
+          description: The suggested question being provided as feedback.
+          maxLength: 1000
+        qnaId:
+          type: integer
+          description: The qnaId for which the suggested question is provided as feedback.
+          format: int32
+    QueryContextDTO:
+      type: object
+      description: Context object with previous QnA's information.
+      additionalProperties: false
+      properties:
+        previousQnaId:
+          type: integer
+          description: Previous QnA Id - qnaId of the top result.
+        previousUserQuery:
+          type: string
+          description: Previous user query.
+    UpdateKbOperationDTO:
+      type: object
+      description: Contains list of QnAs to be updated
+      additionalProperties: false
+      properties:
+        add:
+          description: An instance of CreateKbInputDTO for add operation
+          allOf:
+          - $ref: '#/components/schemas/CreateKbInputDTO'
+        delete:
+          description: An instance of DeleteKbContentsDTO for delete Operation
+          allOf:
+          - $ref: '#/components/schemas/DeleteKbContentsDTO'
+        update:
+          description: An instance of UpdateKbContentsDTO for Update Operation
+          allOf:
+          - $ref: '#/components/schemas/UpdateKbContentsDTO'
+        enableHierarchicalExtraction:
           type: boolean
-          description: Query against the test index.
-        scoreThreshold:
-          type: number
-          description: Minimum threshold score for answers.
-        context:
-          description: Context object with previous QnA's information.
-          allOf:
-          - $ref: '#/components/schemas/QueryContextDTO'
-        rankerType:
+          description: Enable hierarchical extraction of Q-A from files and urls. The value set during KB creation will be used if this field is not present.
+        defaultAnswerUsedForExtraction:
           type: string
-          description: Optional field. Set to 'QuestionOnly' for using a question only Ranker.
-        strictFilters:
-          type: array
-          description: Find QnAs that are associated with the given list of metadata.
-          items:
-            $ref: '#/components/schemas/MetadataDTO'
-        strictFiltersCompoundOperationType:
-          type: string
-          description: Optional field. Set to 'OR' for using OR operation for strict filters.
-          x-ms-enum:
-            name: StrictFiltersCompoundOperationType
-            modelAsString: true
-          enum:
-          - AND
-          - OR
-        answerSpanRequest:
-          description: To configure Answer span prediction feature.
-          allOf:
-          - $ref: '#/components/schemas/AnswerSpanRequestDTO'
+          description: Text string to be used as the answer in any Q-A which has no extracted answer from the document but has a hierarchy. Required when EnableHierarchicalExtraction field is set to True.
+          maxLength: 300
+          minLength: 1
     FileDTO:
       type: object
       description: DTO to hold details of uploaded files.
@@ -774,207 +915,23 @@ components:
         fileUri:
           type: string
           description: Public URI of the file.
-    QnASearchResultList:
+    UpdateMetadataDTO:
       type: object
-      description: Represents List of Question Answers.
+      description: PATCH Body schema to represent list of Metadata to be updated
       additionalProperties: false
       properties:
-        answers:
+        delete:
           type: array
-          description: Represents Search Result list.
-          items:
-            $ref: '#/components/schemas/QnASearchResult'
-    UpdateQnaDTO:
-      type: object
-      description: PATCH Body schema for Update Qna List
-      additionalProperties: false
-      properties:
-        id:
-          type: integer
-          description: Unique id for the Q-A
-          format: int32
-          maximum: 2147483647
-          minimum: 0
-        answer:
-          type: string
-          description: Answer text
-        source:
-          type: string
-          description: Source from which Q-A was indexed. eg. https://docs.microsoft.com/en-us/azure/cognitive-services/QnAMaker/FAQs
-          maxLength: 300
-        questions:
-          description: List of questions associated with the answer.
-          allOf:
-          - $ref: '#/components/schemas/UpdateQuestionsDTO'
-        metadata:
-          description: List of metadata associated with the answer to be updated
-          allOf:
-          - $ref: '#/components/schemas/UpdateMetadataDTO'
-        context:
-          description: Context associated with Qna to be updated.
-          allOf:
-          - $ref: '#/components/schemas/UpdateContextDTO'
-    QueryContextDTO:
-      type: object
-      description: Context object with previous QnA's information.
-      additionalProperties: false
-      properties:
-        previousQnaId:
-          type: integer
-          description: Previous QnA Id - qnaId of the top result.
-        previousUserQuery:
-          type: string
-          description: Previous user query.
-    QnADTO:
-      type: object
-      description: Q-A object.
-      additionalProperties: false
-      required:
-      - answer
-      - questions
-      properties:
-        id:
-          type: integer
-          description: Unique id for the Q-A.
-          format: int32
-        answer:
-          type: string
-          description: Answer text
-          maxLength: 25000
-          minLength: 1
-        source:
-          type: string
-          description: Source from which Q-A was indexed. eg. https://docs.microsoft.com/en-us/azure/cognitive-services/QnAMaker/FAQs
-          maxLength: 300
-        questions:
-          type: array
-          description: List of questions associated with the answer.
+          description: List of Metadata associated with answer to be deleted
           maxLength: 100
-          minLength: 1
-          items:
-            type: string
-        metadata:
-          type: array
-          description: List of metadata associated with the answer.
-          maxLength: 10
           items:
             $ref: '#/components/schemas/MetadataDTO'
-        context:
-          description: Context of a QnA
-          allOf:
-          - $ref: '#/components/schemas/ContextDTO'
-        lastUpdatedTimestamp:
-          type: string
-          description: Timestamp when the QnA was last updated.
-          maxLength: 300
-    QnADocumentsDTO:
-      type: object
-      description: List of QnADTO
-      additionalProperties: false
-      properties:
-        qnaDocuments:
+        add:
           type: array
-          description: List of answers.
-          items:
-            $ref: '#/components/schemas/QnADTO'
-    Error:
-      type: object
-      description: The error object. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
-      additionalProperties: false
-      required:
-      - code
-      properties:
-        code:
-          description: One of a server-defined set of error codes.
-          $ref: '#/components/schemas/ErrorCode'
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Error'
-        innerError:
-          description: An object containing more specific information than the current object about the error.
-          $ref: '#/components/schemas/InnerErrorModel'
-    QnASearchResult:
-      type: object
-      description: Represents Search Result.
-      additionalProperties: false
-      properties:
-        questions:
-          type: array
-          description: List of questions.
-          items:
-            type: string
-        answer:
-          type: string
-          description: Answer.
-        score:
-          type: number
-          description: Search result score.
-        id:
-          type: integer
-          description: Id of the QnA result.
-          format: int32
-        source:
-          type: string
-          description: Source of QnA result.
-        metadata:
-          type: array
-          description: List of metadata.
+          description: List of metadata associated with answer to be added
+          maxLength: 100
           items:
             $ref: '#/components/schemas/MetadataDTO'
-        context:
-          type: object
-          description: Context object of the QnA
-          allOf:
-          - $ref: '#/components/schemas/ContextDTO'
-        answerSpan:
-          type: object
-          description: Answer span object of QnA with respect to user's question.
-          allOf:
-          - $ref: '#/components/schemas/AnswerSpanResponseDTO'
-    KnowledgebaseDTO:
-      type: object
-      description: Response schema for CreateKb operation.
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-          description: Unique id that identifies a knowledgebase.
-        hostName:
-          type: string
-          description: URL host name at which the knowledgebase is hosted.
-        lastAccessedTimestamp:
-          type: string
-          description: Time stamp at which the knowledgebase was last accessed (UTC).
-        lastChangedTimestamp:
-          type: string
-          description: Time stamp at which the knowledgebase was last modified (UTC).
-        lastPublishedTimestamp:
-          type: string
-          description: Time stamp at which the knowledgebase was last published (UTC).
-        name:
-          type: string
-          description: Friendly name of the knowledgebase.
-        userId:
-          type: string
-          description: User who created / owns the knowledgebase.
-        urls:
-          type: array
-          description: URL sources from which Q-A were extracted and added to the knowledgebase.
-          items:
-            type: string
-        sources:
-          type: array
-          description: Custom sources from which Q-A were extracted or explicitly added to the knowledgebase.
-          items:
-            type: string
     KnowledgebasesDTO:
       type: object
       description: Collection of knowledgebases owned by a user.
@@ -985,26 +942,69 @@ components:
           description: Collection of knowledgebase records.
           items:
             $ref: '#/components/schemas/KnowledgebaseDTO'
-    PromptDTO:
-      type: object
-      description: Prompt for an answer.
-      properties:
-        displayOrder:
-          type: integer
-          description: Index of the prompt - used in ordering of the prompts
-          format: int32
-        qnaId:
-          type: integer
-          description: Qna id corresponding to the prompt - if QnaId is present, QnADTO object is ignored.
-          format: int32
-        qna:
-          description: QnADTO - Either QnaId or QnADTO needs to be present in a PromptDTO object
-          allOf:
-          - $ref: '#/components/schemas/QnADTO'
-        displayText:
-          type: string
-          description: Text displayed to represent a follow up question prompt
-          maxLength: 200
+  parameters:
+    GenerateAnswerPayload:
+      name: generateAnswerPayload
+      in: body
+      required: true
+      schema:
+        $ref: '#/components/schemas/QueryDTO'
+      description: Post body of the request.
+      x-ms-parameter-location: method
+    CreateKbPayload:
+      name: createKbPayload
+      in: body
+      required: true
+      schema:
+        $ref: '#/components/schemas/CreateKbDTO'
+      description: Post body of the request.
+      x-ms-parameter-location: method
+    KbId:
+      name: kbId
+      in: path
+      required: true
+      description: Knowledgebase id.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    TrainPayload:
+      name: trainPayload
+      in: body
+      required: true
+      schema:
+        $ref: '#/components/schemas/FeedbackRecordsDTO'
+      description: Post body of the request.
+      x-ms-parameter-location: method
+    UpdateKb:
+      name: updateKb
+      in: body
+      required: true
+      schema:
+        $ref: '#/components/schemas/UpdateKbOperationDTO'
+      description: Post body of the request.
+      x-ms-parameter-location: method
+    Environment:
+      name: environment
+      in: path
+      required: true
+      description: Specifies whether environment is Test or Prod.
+      x-ms-enum:
+        name: EnvironmentType
+        modelAsString: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        enum:
+        - Prod
+        - Test
+    ReplaceKb:
+      name: replaceKb
+      in: body
+      required: true
+      schema:
+        $ref: '#/components/schemas/ReplaceKbDTO'
+      description: An instance of ReplaceKbDTO which contains list of qnas to be uploaded
+      x-ms-parameter-location: method
   securitySchemes:
     apim_key:
       type: apiKey

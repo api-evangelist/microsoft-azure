@@ -163,50 +163,145 @@ paths:
                 $ref: '#/components/schemas/FabricError'
 components:
   schemas:
-    TimeOfDay:
-      description: Defines an hour and minute of the day specified in 24 hour time.
+    Chaos:
+      description: Contains a description of Chaos.
       properties:
-        Hour:
+        ChaosParameters:
+          $ref: '#/components/schemas/ChaosParameters'
+          description: If Chaos is running, these are the parameters Chaos is running with.
+        Status:
+          $ref: '#/components/schemas/ChaosStatus'
+          description: Current status of the Chaos run.
+        ScheduleStatus:
+          $ref: '#/components/schemas/ChaosScheduleStatus'
+          description: Current status of the schedule.
+    ChaosParametersDictionaryItem:
+      description: Defines an item in ChaosParametersDictionary of the Chaos Schedule.
+      required:
+      - Key
+      - Value
+      properties:
+        Key:
+          type: string
+          description: The key identifying the Chaos Parameter in the dictionary. This key is referenced by Chaos Schedule Jobs.
+        Value:
+          $ref: '#/components/schemas/ChaosParameters'
+          description: Defines all the parameters to configure a Chaos run.
+    ChaosEvent:
+      discriminator:
+        propertyName: Kind
+      description: Represents an event generated during a Chaos run.
+      properties:
+        Kind:
+          $ref: '#/components/schemas/ChaosEventKind'
+          description: The kind of Chaos event.
+        TimeStampUtc:
+          type: string
+          description: The UTC timestamp when this Chaos event was generated.
+          format: date-time
+      required:
+      - Kind
+      - TimeStampUtc
+    ChaosScheduleJob:
+      description: Defines a repetition rule and parameters of Chaos to be used with the Chaos Schedule.
+      properties:
+        ChaosParameters:
+          type: string
+          description: A reference to which Chaos Parameters of the Chaos Schedule to use.
+        Days:
+          $ref: '#/components/schemas/ChaosScheduleJobActiveDaysOfWeek'
+          description: Defines the days of the week that a Chaos Schedule Job will run for.
+        Times:
+          description: A list of Time Ranges that specify when during active days that this job will run. The times are interpreted as UTC.
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeRange'
+    ClusterHealthPolicy:
+      description: Defines a health policy used to evaluate the health of the cluster or of a cluster node.
+      properties:
+        ConsiderWarningAsError:
+          type: boolean
+          description: Indicates whether warnings are treated with the same severity as errors.
+          default: false
+        MaxPercentUnhealthyNodes:
           type: integer
-          format: int32
-          description: Represents the hour of the day. Value must be between 0 and 23 inclusive.
-          minimum: 0
-          maximum: 23
-        Minute:
+          description: 'The maximum allowed percentage of unhealthy nodes before reporting an error. For example, to allow 10% of nodes to be unhealthy, this value would be 10.
+
+
+            The percentage represents the maximum tolerated percentage of nodes that can be unhealthy before the cluster is considered in error.
+
+            If the percentage is respected but there is at least one unhealthy node, the health is evaluated as Warning.
+
+            The percentage is calculated by dividing the number of unhealthy nodes over the total number of nodes in the cluster.
+
+            The computation rounds up to tolerate one failure on small numbers of nodes. Default percentage is zero.
+
+
+            In large clusters, some nodes will always be down or out for repairs, so this percentage should be configured to tolerate that.'
+          default: 0
+        MaxPercentUnhealthyApplications:
           type: integer
-          format: int32
-          description: Represents the minute of the hour. Value must be between 0 to 59 inclusive.
-          minimum: 0
-          maximum: 59
-    ChaosEventKind:
+          description: 'The maximum allowed percentage of unhealthy applications before reporting an error. For example, to allow 10% of applications to be unhealthy, this value would be 10.
+
+
+            The percentage represents the maximum tolerated percentage of applications that can be unhealthy before the cluster is considered in error.
+
+            If the percentage is respected but there is at least one unhealthy application, the health is evaluated as Warning.
+
+            This is calculated by dividing the number of unhealthy applications over the total number of application instances in the cluster, excluding applications of application types that are included in the ApplicationTypeHealthPolicyMap.
+
+            The computation rounds up to tolerate one failure on small numbers of applications. Default percentage is zero.'
+          default: 0
+        ApplicationTypeHealthPolicyMap:
+          $ref: '#/components/schemas/ApplicationTypeHealthPolicyMap'
+          description: 'Defines a map with max percentage unhealthy applications for specific application types.
+
+            Each entry specifies as key the application type name and as value an integer that represents the MaxPercentUnhealthyApplications percentage used to evaluate the applications of the specified application type.
+
+
+            The application type health policy map can be used during cluster health evaluation to describe special application types.
+
+            The application types included in the map are evaluated against the percentage specified in the map, and not with the global MaxPercentUnhealthyApplications defined in the cluster health policy.
+
+            The applications of application types specified in the map are not counted against the global pool of applications.
+
+            For example, if some applications of a type are critical, the cluster administrator can add an entry to the map for that application type
+
+            and assign it a value of 0% (that is, do not tolerate any failures).
+
+            All other applications can be evaluated with MaxPercentUnhealthyApplications set to 20% to tolerate some failures out of the thousands of application instances.
+
+            The application type health policy map is used only if the cluster manifest enables application type health evaluation using the configuration entry for HealthManager/EnableApplicationTypeHealthEvaluation.'
+        NodeTypeHealthPolicyMap:
+          $ref: '#/components/schemas/NodeTypeHealthPolicyMap'
+          description: "Defines a map with max percentage unhealthy nodes for specific node types.\nEach entry specifies as key the node type name and as value an integer that represents the MaxPercentUnhealthyNodes percentage used to evaluate the nodes of the specified node type.\n\nThe node type health policy map can be used during cluster health evaluation to describe special node types. \nThey are evaluated against the percentages associated with their node type name in the map. \nSetting this has no impact on the global pool of nodes used for MaxPercentUnhealthyNodes. \nThe node type health policy map is used only if the cluster manifest enables node type health evaluation using the configuration entry for HealthManager/EnableNodeTypeHealthEvaluation.\n\nFor example, given a cluster with many nodes of different types, with important work hosted on node type \"SpecialNodeType\" that should not tolerate any nodes down. \nYou can specify global MaxPercentUnhealthyNodes to 20% to tolerate some failures for all nodes, but for the node type \"SpecialNodeType\", set the MaxPercentUnhealthyNodes to 0 by \nsetting the value in the key value pair in NodeTypeHealthPolicyMapItem. The key is the node type name. \nThis way, as long as no nodes of type \"SpecialNodeType\" are in Error state, \neven if some of the many nodes in the global pool are in Error state, but below the global unhealthy percentage, the cluster would be evaluated to Warning. \nA Warning health state does not impact cluster upgrade or other monitoring triggered by Error health state. \nBut even one node of type SpecialNodeType in Error would make cluster unhealthy (in Error rather than Warning/Ok), which triggers rollback or pauses the cluster upgrade, depending on the upgrade configuration. \n\nConversely, setting the global MaxPercentUnhealthyNodes to 0, and setting SpecialNodeType's max percent unhealthy nodes to 100, \nwith one node of type SpecialNodeType in Error state would still put the cluster in an Error state, since the global restriction is more strict in this case."
+    ApplicationTypeHealthPolicyMap:
+      type: array
+      items:
+        $ref: '#/components/schemas/ApplicationTypeHealthPolicyMapItem'
+      description: 'Defines a map with max percentage unhealthy applications for specific application types.
+
+        Each entry specifies as key the application type name and as value an integer that represents the MaxPercentUnhealthyApplications percentage used to evaluate the applications of the specified application type.
+
+
+        The application type health policy map can be used during cluster health evaluation to describe special application types.
+
+        The application types included in the map are evaluated against the percentage specified in the map, and not with the global MaxPercentUnhealthyApplications defined in the cluster health policy.
+
+        The applications of application types specified in the map are not counted against the global pool of applications.
+
+        For example, if some applications of a type are critical, the cluster administrator can add an entry to the map for that application type
+
+        and assign it a value of 0% (that is, do not tolerate any failures).
+
+        All other applications can be evaluated with MaxPercentUnhealthyApplications set to 20% to tolerate some failures out of the thousands of application instances.
+
+        The application type health policy map is used only if the cluster manifest enables application type health evaluation using the configuration entry for HealthManager/EnableApplicationTypeHealthEvaluation.'
+    NodeType:
       type: string
-      description: The kind of Chaos event.
-      enum:
-      - Invalid
-      - Started
-      - ExecutingFaults
-      - Waiting
-      - ValidationFailed
-      - TestError
-      - Stopped
-      x-ms-enum:
-        name: ChaosEventKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid Chaos event kind. All Service Fabric enumerations have the invalid type.
-        - value: Started
-          description: Indicates a Chaos event that gets generated when Chaos is started.
-        - value: ExecutingFaults
-          description: Indicates a Chaos event that gets generated when Chaos has decided on the faults for an iteration. This Chaos event contains the details of the faults as a list of strings.
-        - value: Waiting
-          description: Indicates a Chaos event that gets generated when Chaos is waiting for the cluster to become ready for faulting, for example, Chaos may be waiting for the on-going upgrade to finish.
-        - value: ValidationFailed
-          description: Indicates a Chaos event that gets generated when the cluster entities do not become stable and healthy within ChaosParameters.MaxClusterStabilizationTimeoutInSeconds.
-        - value: TestError
-          description: Indicates a Chaos event that gets generated when an unexpected event has occurred in the Chaos engine, for example, due to the cluster snapshot being inconsistent, while faulting a faultable entity Chaos found that the entity was already faulted.
-        - value: Stopped
-          description: Indicates a Chaos event that gets generated when Chaos stops because either the user issued a stop or the time to run was up.
+      description: 'The type name of a Service Fabric node.
+
+        Refer to the article [The relationship between Service Fabric node types and Virtual Machine Scale Sets](https://docs.microsoft.com/azure/service-fabric/service-fabric-cluster-nodetypes) for more details.'
     FabricError:
       description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
       properties:
@@ -215,9 +310,6 @@ components:
           description: Error object containing error code and error message.
       required:
       - Error
-    ContinuationToken:
-      type: string
-      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
     FabricErrorCodes:
       type: string
       description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
@@ -394,42 +486,6 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
-    ChaosEvent:
-      discriminator:
-        propertyName: Kind
-      description: Represents an event generated during a Chaos run.
-      properties:
-        Kind:
-          $ref: '#/components/schemas/ChaosEventKind'
-          description: The kind of Chaos event.
-        TimeStampUtc:
-          type: string
-          description: The UTC timestamp when this Chaos event was generated.
-          format: date-time
-      required:
-      - Kind
-      - TimeStampUtc
-    NodeTypeHealthPolicyMap:
-      type: array
-      items:
-        $ref: '#/components/schemas/NodeTypeHealthPolicyMapItem'
-      description: "Defines a map with max percentage unhealthy nodes for specific node types.\nEach entry specifies as key the node type name and as value an integer that represents the MaxPercentUnhealthyNodes percentage used to evaluate the nodes of the specified node type.\n\nThe node type health policy map can be used during cluster health evaluation to describe special node types. \nThey are evaluated against the percentages associated with their node type name in the map. \nSetting this has no impact on the global pool of nodes used for MaxPercentUnhealthyNodes. \nThe node type health policy map is used only if the cluster manifest enables node type health evaluation using the configuration entry for HealthManager/EnableNodeTypeHealthEvaluation.\n\nFor example, given a cluster with many nodes of different types, with important work hosted on node type \"SpecialNodeType\" that should not tolerate any nodes down. \nYou can specify global MaxPercentUnhealthyNodes to 20% to tolerate some failures for all nodes, but for the node type \"SpecialNodeType\", set the MaxPercentUnhealthyNodes to 0 by \nsetting the value in the key value pair in NodeTypeHealthPolicyMapItem. The key is the node type name. \nThis way, as long as no nodes of type \"SpecialNodeType\" are in Error state, \neven if some of the many nodes in the global pool are in Error state, but below the global unhealthy percentage, the cluster would be evaluated to Warning. \nA Warning health state does not impact cluster upgrade or other monitoring triggered by Error health state. \nBut even one node of type SpecialNodeType in Error would make cluster unhealthy (in Error rather than Warning/Ok), which triggers rollback or pauses the cluster upgrade, depending on the upgrade configuration. \n\nConversely, setting the global MaxPercentUnhealthyNodes to 0, and setting SpecialNodeType's max percent unhealthy nodes to 100, \nwith one node of type SpecialNodeType in Error state would still put the cluster in an Error state, since the global restriction is more strict in this case."
-    FabricErrorError:
-      description: Error object containing error code and error message.
-      properties:
-        Code:
-          $ref: '#/components/schemas/FabricErrorCodes'
-          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
-        Message:
-          type: string
-          description: Error message.
-      required:
-      - Code
-    ChaosEventHistory:
-      type: array
-      description: An list of Chaos events that were generated during the time range passed into the GetChaosReport API call.
-      items:
-        $ref: '#/components/schemas/ChaosEventWrapper'
     ChaosScheduleStatus:
       type: string
       description: Current status of the schedule.
@@ -453,20 +509,6 @@ components:
           description: Indicates that the schedule is expired and will no longer be used to schedule runs of Chaos. The value is three.
         - value: Pending
           description: Indicates that the schedule is pending and is not yet being used to schedule runs of Chaos but will be used when the start time is passed. The value is four.
-    ChaosScheduleJob:
-      description: Defines a repetition rule and parameters of Chaos to be used with the Chaos Schedule.
-      properties:
-        ChaosParameters:
-          type: string
-          description: A reference to which Chaos Parameters of the Chaos Schedule to use.
-        Days:
-          $ref: '#/components/schemas/ChaosScheduleJobActiveDaysOfWeek'
-          description: Defines the days of the week that a Chaos Schedule Job will run for.
-        Times:
-          description: A list of Time Ranges that specify when during active days that this job will run. The times are interpreted as UTC.
-          type: array
-          items:
-            $ref: '#/components/schemas/TimeRange'
     TimeRange:
       description: Defines a time range in a 24 hour day specified by a start and end time.
       properties:
@@ -476,65 +518,120 @@ components:
         EndTime:
           $ref: '#/components/schemas/TimeOfDay'
           description: Defines an hour and minute of the day specified in 24 hour time.
-    ClusterHealthPolicy:
-      description: Defines a health policy used to evaluate the health of the cluster or of a cluster node.
+    ChaosEventKind:
+      type: string
+      description: The kind of Chaos event.
+      enum:
+      - Invalid
+      - Started
+      - ExecutingFaults
+      - Waiting
+      - ValidationFailed
+      - TestError
+      - Stopped
+      x-ms-enum:
+        name: ChaosEventKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid Chaos event kind. All Service Fabric enumerations have the invalid type.
+        - value: Started
+          description: Indicates a Chaos event that gets generated when Chaos is started.
+        - value: ExecutingFaults
+          description: Indicates a Chaos event that gets generated when Chaos has decided on the faults for an iteration. This Chaos event contains the details of the faults as a list of strings.
+        - value: Waiting
+          description: Indicates a Chaos event that gets generated when Chaos is waiting for the cluster to become ready for faulting, for example, Chaos may be waiting for the on-going upgrade to finish.
+        - value: ValidationFailed
+          description: Indicates a Chaos event that gets generated when the cluster entities do not become stable and healthy within ChaosParameters.MaxClusterStabilizationTimeoutInSeconds.
+        - value: TestError
+          description: Indicates a Chaos event that gets generated when an unexpected event has occurred in the Chaos engine, for example, due to the cluster snapshot being inconsistent, while faulting a faultable entity Chaos found that the entity was already faulted.
+        - value: Stopped
+          description: Indicates a Chaos event that gets generated when Chaos stops because either the user issued a stop or the time to run was up.
+    ContinuationToken:
+      type: string
+      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+    NodeTypeHealthPolicyMap:
+      type: array
+      items:
+        $ref: '#/components/schemas/NodeTypeHealthPolicyMapItem'
+      description: "Defines a map with max percentage unhealthy nodes for specific node types.\nEach entry specifies as key the node type name and as value an integer that represents the MaxPercentUnhealthyNodes percentage used to evaluate the nodes of the specified node type.\n\nThe node type health policy map can be used during cluster health evaluation to describe special node types. \nThey are evaluated against the percentages associated with their node type name in the map. \nSetting this has no impact on the global pool of nodes used for MaxPercentUnhealthyNodes. \nThe node type health policy map is used only if the cluster manifest enables node type health evaluation using the configuration entry for HealthManager/EnableNodeTypeHealthEvaluation.\n\nFor example, given a cluster with many nodes of different types, with important work hosted on node type \"SpecialNodeType\" that should not tolerate any nodes down. \nYou can specify global MaxPercentUnhealthyNodes to 20% to tolerate some failures for all nodes, but for the node type \"SpecialNodeType\", set the MaxPercentUnhealthyNodes to 0 by \nsetting the value in the key value pair in NodeTypeHealthPolicyMapItem. The key is the node type name. \nThis way, as long as no nodes of type \"SpecialNodeType\" are in Error state, \neven if some of the many nodes in the global pool are in Error state, but below the global unhealthy percentage, the cluster would be evaluated to Warning. \nA Warning health state does not impact cluster upgrade or other monitoring triggered by Error health state. \nBut even one node of type SpecialNodeType in Error would make cluster unhealthy (in Error rather than Warning/Ok), which triggers rollback or pauses the cluster upgrade, depending on the upgrade configuration. \n\nConversely, setting the global MaxPercentUnhealthyNodes to 0, and setting SpecialNodeType's max percent unhealthy nodes to 100, \nwith one node of type SpecialNodeType in Error state would still put the cluster in an Error state, since the global restriction is more strict in this case."
+    ApplicationName:
+      type: string
+      description: The name of the application, including the 'fabric:' URI scheme.
+    ChaosScheduleDescription:
+      description: Defines the Chaos Schedule used by Chaos and the version of the Chaos Schedule. The version value wraps back to 0 after surpassing 2,147,483,647.
       properties:
-        ConsiderWarningAsError:
+        Version:
+          description: The version number of the Schedule.
+          type: integer
+          format: int32
+          minimum: 0
+        Schedule:
+          $ref: '#/components/schemas/ChaosSchedule'
+          description: Defines the schedule used by Chaos.
+    ChaosContextMap:
+      additionalProperties:
+        type: string
+      description: Describes a map that contains a collection of ChaosContextMapItem's.
+    ChaosScheduleJobActiveDaysOfWeek:
+      description: Defines the days of the week that a Chaos Schedule Job will run for.
+      properties:
+        Sunday:
           type: boolean
-          description: Indicates whether warnings are treated with the same severity as errors.
+          description: Indicates if the Chaos Schedule Job will run on Sunday
           default: false
-        MaxPercentUnhealthyNodes:
+        Monday:
+          type: boolean
+          description: Indicates if the Chaos Schedule Job will run on Monday
+          default: false
+        Tuesday:
+          type: boolean
+          description: Indicates if the Chaos Schedule Job will run on Tuesday
+          default: false
+        Wednesday:
+          type: boolean
+          description: Indicates if the Chaos Schedule Job will run on Wednesday
+          default: false
+        Thursday:
+          type: boolean
+          description: Indicates if the Chaos Schedule Job will run on Thursday
+          default: false
+        Friday:
+          type: boolean
+          description: Indicates if the Chaos Schedule Job will run on Friday
+          default: false
+        Saturday:
+          type: boolean
+          description: Indicates if the Chaos Schedule Job will run on Saturday
+          default: false
+    NodeTypeHealthPolicyMapItem:
+      description: Defines an item in NodeTypeHealthPolicyMap.
+      required:
+      - Key
+      - Value
+      properties:
+        Key:
+          type: string
+          description: The key of the node type health policy map item. This is the name of the node type.
+        Value:
           type: integer
-          description: 'The maximum allowed percentage of unhealthy nodes before reporting an error. For example, to allow 10% of nodes to be unhealthy, this value would be 10.
-
-
-            The percentage represents the maximum tolerated percentage of nodes that can be unhealthy before the cluster is considered in error.
-
-            If the percentage is respected but there is at least one unhealthy node, the health is evaluated as Warning.
-
-            The percentage is calculated by dividing the number of unhealthy nodes over the total number of nodes in the cluster.
-
-            The computation rounds up to tolerate one failure on small numbers of nodes. Default percentage is zero.
-
-
-            In large clusters, some nodes will always be down or out for repairs, so this percentage should be configured to tolerate that.'
-          default: 0
-        MaxPercentUnhealthyApplications:
-          type: integer
-          description: 'The maximum allowed percentage of unhealthy applications before reporting an error. For example, to allow 10% of applications to be unhealthy, this value would be 10.
-
-
-            The percentage represents the maximum tolerated percentage of applications that can be unhealthy before the cluster is considered in error.
-
-            If the percentage is respected but there is at least one unhealthy application, the health is evaluated as Warning.
-
-            This is calculated by dividing the number of unhealthy applications over the total number of application instances in the cluster, excluding applications of application types that are included in the ApplicationTypeHealthPolicyMap.
-
-            The computation rounds up to tolerate one failure on small numbers of applications. Default percentage is zero.'
-          default: 0
-        ApplicationTypeHealthPolicyMap:
-          $ref: '#/components/schemas/ApplicationTypeHealthPolicyMap'
-          description: 'Defines a map with max percentage unhealthy applications for specific application types.
-
-            Each entry specifies as key the application type name and as value an integer that represents the MaxPercentUnhealthyApplications percentage used to evaluate the applications of the specified application type.
-
-
-            The application type health policy map can be used during cluster health evaluation to describe special application types.
-
-            The application types included in the map are evaluated against the percentage specified in the map, and not with the global MaxPercentUnhealthyApplications defined in the cluster health policy.
-
-            The applications of application types specified in the map are not counted against the global pool of applications.
-
-            For example, if some applications of a type are critical, the cluster administrator can add an entry to the map for that application type
-
-            and assign it a value of 0% (that is, do not tolerate any failures).
-
-            All other applications can be evaluated with MaxPercentUnhealthyApplications set to 20% to tolerate some failures out of the thousands of application instances.
-
-            The application type health policy map is used only if the cluster manifest enables application type health evaluation using the configuration entry for HealthManager/EnableApplicationTypeHealthEvaluation.'
-        NodeTypeHealthPolicyMap:
-          $ref: '#/components/schemas/NodeTypeHealthPolicyMap'
-          description: "Defines a map with max percentage unhealthy nodes for specific node types.\nEach entry specifies as key the node type name and as value an integer that represents the MaxPercentUnhealthyNodes percentage used to evaluate the nodes of the specified node type.\n\nThe node type health policy map can be used during cluster health evaluation to describe special node types. \nThey are evaluated against the percentages associated with their node type name in the map. \nSetting this has no impact on the global pool of nodes used for MaxPercentUnhealthyNodes. \nThe node type health policy map is used only if the cluster manifest enables node type health evaluation using the configuration entry for HealthManager/EnableNodeTypeHealthEvaluation.\n\nFor example, given a cluster with many nodes of different types, with important work hosted on node type \"SpecialNodeType\" that should not tolerate any nodes down. \nYou can specify global MaxPercentUnhealthyNodes to 20% to tolerate some failures for all nodes, but for the node type \"SpecialNodeType\", set the MaxPercentUnhealthyNodes to 0 by \nsetting the value in the key value pair in NodeTypeHealthPolicyMapItem. The key is the node type name. \nThis way, as long as no nodes of type \"SpecialNodeType\" are in Error state, \neven if some of the many nodes in the global pool are in Error state, but below the global unhealthy percentage, the cluster would be evaluated to Warning. \nA Warning health state does not impact cluster upgrade or other monitoring triggered by Error health state. \nBut even one node of type SpecialNodeType in Error would make cluster unhealthy (in Error rather than Warning/Ok), which triggers rollback or pauses the cluster upgrade, depending on the upgrade configuration. \n\nConversely, setting the global MaxPercentUnhealthyNodes to 0, and setting SpecialNodeType's max percent unhealthy nodes to 100, \nwith one node of type SpecialNodeType in Error state would still put the cluster in an Error state, since the global restriction is more strict in this case."
+          description: "The value of the node type health policy map item.\nIf the percentage is respected but there is at least one unhealthy node in the node type, the health is evaluated as Warning. \nThe percentage is calculated by dividing the number of unhealthy nodes over the total number of nodes in the node type. \nThe computation rounds up to tolerate one failure on small numbers of nodes.\nThe max percent unhealthy nodes allowed for the node type. Must be between zero and 100."
+    FabricErrorError:
+      description: Error object containing error code and error message.
+      properties:
+        Code:
+          $ref: '#/components/schemas/FabricErrorCodes'
+          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
+        Message:
+          type: string
+          description: Error message.
+      required:
+      - Code
+    ChaosEventHistory:
+      type: array
+      description: An list of Chaos events that were generated during the time range passed into the GetChaosReport API call.
+      items:
+        $ref: '#/components/schemas/ChaosEventWrapper'
     ChaosTargetFilter:
       description: 'Defines all filters for targeted Chaos faults, for example, faulting only certain node types or faulting only certain applications.
 
@@ -580,34 +677,35 @@ components:
             At most 1000 application names can be included in this list, to increase this number, a config upgrade is required for MaxNumberOfApplicationsInChaosEntityFilter configuration.'
           items:
             $ref: '#/components/schemas/ApplicationName'
+    ChaosSchedule:
+      description: Defines the schedule used by Chaos.
+      properties:
+        StartDate:
+          type: string
+          format: date-time
+          description: The date and time Chaos will start using this schedule.
+          default: '1601-01-01T00:00:00Z'
+        ExpiryDate:
+          type: string
+          format: date-time
+          description: The date and time Chaos will continue to use this schedule until.
+          default: '9999-12-31T23:59:59.999Z'
+        ChaosParametersDictionary:
+          type: array
+          description: A mapping of string names to Chaos Parameters to be referenced by Chaos Schedule Jobs.
+          items:
+            $ref: '#/components/schemas/ChaosParametersDictionaryItem'
+        Jobs:
+          description: A list of all Chaos Schedule Jobs that will be automated by the schedule.
+          type: array
+          items:
+            $ref: '#/components/schemas/ChaosScheduleJob'
     ChaosEventWrapper:
       description: Wrapper object for Chaos event.
       properties:
         ChaosEvent:
           $ref: '#/components/schemas/ChaosEvent'
           description: Represents an event generated during a Chaos run.
-    ApplicationTypeHealthPolicyMap:
-      type: array
-      items:
-        $ref: '#/components/schemas/ApplicationTypeHealthPolicyMapItem'
-      description: 'Defines a map with max percentage unhealthy applications for specific application types.
-
-        Each entry specifies as key the application type name and as value an integer that represents the MaxPercentUnhealthyApplications percentage used to evaluate the applications of the specified application type.
-
-
-        The application type health policy map can be used during cluster health evaluation to describe special application types.
-
-        The application types included in the map are evaluated against the percentage specified in the map, and not with the global MaxPercentUnhealthyApplications defined in the cluster health policy.
-
-        The applications of application types specified in the map are not counted against the global pool of applications.
-
-        For example, if some applications of a type are critical, the cluster administrator can add an entry to the map for that application type
-
-        and assign it a value of 0% (that is, do not tolerate any failures).
-
-        All other applications can be evaluated with MaxPercentUnhealthyApplications set to 20% to tolerate some failures out of the thousands of application instances.
-
-        The application type health policy map is used only if the cluster manifest enables application type health evaluation using the configuration entry for HealthManager/EnableApplicationTypeHealthEvaluation.'
     ChaosContext:
       description: 'Describes a map, which is a collection of (string, string) type key-value pairs. The map can be used to record information about
 
@@ -635,6 +733,44 @@ components:
           description: Indicates that Chaos is not stopped. The value is one.
         - value: Stopped
           description: Indicates that Chaos is not scheduling further faults. The value is two.
+    TimeOfDay:
+      description: Defines an hour and minute of the day specified in 24 hour time.
+      properties:
+        Hour:
+          type: integer
+          format: int32
+          description: Represents the hour of the day. Value must be between 0 and 23 inclusive.
+          minimum: 0
+          maximum: 23
+        Minute:
+          type: integer
+          format: int32
+          description: Represents the minute of the hour. Value must be between 0 to 59 inclusive.
+          minimum: 0
+          maximum: 59
+    ApplicationTypeHealthPolicyMapItem:
+      description: Defines an item in ApplicationTypeHealthPolicyMap.
+      required:
+      - Key
+      - Value
+      properties:
+        Key:
+          type: string
+          description: The key of the application type health policy map item. This is the name of the application type.
+        Value:
+          type: integer
+          description: 'The value of the application type health policy map item.
+
+            The max percent unhealthy applications allowed for the application type. Must be between zero and 100.'
+    ChaosEventsSegment:
+      description: Contains the list of Chaos events and the continuation token to get the next segment.
+      properties:
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        History:
+          $ref: '#/components/schemas/ChaosEventHistory'
+          description: List of Chaos events that meet the user-supplied criteria.
     ChaosParameters:
       description: Defines all the parameters to configure a Chaos run.
       properties:
@@ -705,230 +841,7 @@ components:
             This filter can be used to target Chaos faults only to certain node types or only to certain application instances. If ChaosTargetFilter is not used, Chaos faults all cluster entities.
 
             If ChaosTargetFilter is used, Chaos faults only the entities that meet the ChaosTargetFilter specification.'
-    ChaosScheduleJobActiveDaysOfWeek:
-      description: Defines the days of the week that a Chaos Schedule Job will run for.
-      properties:
-        Sunday:
-          type: boolean
-          description: Indicates if the Chaos Schedule Job will run on Sunday
-          default: false
-        Monday:
-          type: boolean
-          description: Indicates if the Chaos Schedule Job will run on Monday
-          default: false
-        Tuesday:
-          type: boolean
-          description: Indicates if the Chaos Schedule Job will run on Tuesday
-          default: false
-        Wednesday:
-          type: boolean
-          description: Indicates if the Chaos Schedule Job will run on Wednesday
-          default: false
-        Thursday:
-          type: boolean
-          description: Indicates if the Chaos Schedule Job will run on Thursday
-          default: false
-        Friday:
-          type: boolean
-          description: Indicates if the Chaos Schedule Job will run on Friday
-          default: false
-        Saturday:
-          type: boolean
-          description: Indicates if the Chaos Schedule Job will run on Saturday
-          default: false
-    ApplicationName:
-      type: string
-      description: The name of the application, including the 'fabric:' URI scheme.
-    Chaos:
-      description: Contains a description of Chaos.
-      properties:
-        ChaosParameters:
-          $ref: '#/components/schemas/ChaosParameters'
-          description: If Chaos is running, these are the parameters Chaos is running with.
-        Status:
-          $ref: '#/components/schemas/ChaosStatus'
-          description: Current status of the Chaos run.
-        ScheduleStatus:
-          $ref: '#/components/schemas/ChaosScheduleStatus'
-          description: Current status of the schedule.
-    ChaosEventsSegment:
-      description: Contains the list of Chaos events and the continuation token to get the next segment.
-      properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        History:
-          $ref: '#/components/schemas/ChaosEventHistory'
-          description: List of Chaos events that meet the user-supplied criteria.
-    ChaosSchedule:
-      description: Defines the schedule used by Chaos.
-      properties:
-        StartDate:
-          type: string
-          format: date-time
-          description: The date and time Chaos will start using this schedule.
-          default: '1601-01-01T00:00:00Z'
-        ExpiryDate:
-          type: string
-          format: date-time
-          description: The date and time Chaos will continue to use this schedule until.
-          default: '9999-12-31T23:59:59.999Z'
-        ChaosParametersDictionary:
-          type: array
-          description: A mapping of string names to Chaos Parameters to be referenced by Chaos Schedule Jobs.
-          items:
-            $ref: '#/components/schemas/ChaosParametersDictionaryItem'
-        Jobs:
-          description: A list of all Chaos Schedule Jobs that will be automated by the schedule.
-          type: array
-          items:
-            $ref: '#/components/schemas/ChaosScheduleJob'
-    ChaosParametersDictionaryItem:
-      description: Defines an item in ChaosParametersDictionary of the Chaos Schedule.
-      required:
-      - Key
-      - Value
-      properties:
-        Key:
-          type: string
-          description: The key identifying the Chaos Parameter in the dictionary. This key is referenced by Chaos Schedule Jobs.
-        Value:
-          $ref: '#/components/schemas/ChaosParameters'
-          description: Defines all the parameters to configure a Chaos run.
-    ApplicationTypeHealthPolicyMapItem:
-      description: Defines an item in ApplicationTypeHealthPolicyMap.
-      required:
-      - Key
-      - Value
-      properties:
-        Key:
-          type: string
-          description: The key of the application type health policy map item. This is the name of the application type.
-        Value:
-          type: integer
-          description: 'The value of the application type health policy map item.
-
-            The max percent unhealthy applications allowed for the application type. Must be between zero and 100.'
-    NodeTypeHealthPolicyMapItem:
-      description: Defines an item in NodeTypeHealthPolicyMap.
-      required:
-      - Key
-      - Value
-      properties:
-        Key:
-          type: string
-          description: The key of the node type health policy map item. This is the name of the node type.
-        Value:
-          type: integer
-          description: "The value of the node type health policy map item.\nIf the percentage is respected but there is at least one unhealthy node in the node type, the health is evaluated as Warning. \nThe percentage is calculated by dividing the number of unhealthy nodes over the total number of nodes in the node type. \nThe computation rounds up to tolerate one failure on small numbers of nodes.\nThe max percent unhealthy nodes allowed for the node type. Must be between zero and 100."
-    ChaosContextMap:
-      additionalProperties:
-        type: string
-      description: Describes a map that contains a collection of ChaosContextMapItem's.
-    ChaosScheduleDescription:
-      description: Defines the Chaos Schedule used by Chaos and the version of the Chaos Schedule. The version value wraps back to 0 after surpassing 2,147,483,647.
-      properties:
-        Version:
-          description: The version number of the Schedule.
-          type: integer
-          format: int32
-          minimum: 0
-        Schedule:
-          $ref: '#/components/schemas/ChaosSchedule'
-          description: Defines the schedule used by Chaos.
-    NodeType:
-      type: string
-      description: 'The type name of a Service Fabric node.
-
-        Refer to the article [The relationship between Service Fabric node types and Virtual Machine Scale Sets](https://docs.microsoft.com/azure/service-fabric/service-fabric-cluster-nodetypes) for more details.'
   parameters:
-    ChaosScheduleRequiredBodyParam:
-      name: ChaosSchedule
-      in: body
-      description: Describes the schedule used by Chaos.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/ChaosScheduleDescription'
-    ChaosParametersRequiredBodyParam:
-      name: ChaosParameters
-      in: body
-      description: Describes all the parameters to configure a Chaos run.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/ChaosParameters'
-    ContinuationTokenOptionalQueryParam:
-      name: ContinuationToken
-      in: query
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      required: false
-      description: The continuation token parameter is used to obtain next set of results. A continuation token with a non-empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
-      schema:
-        type: string
-    MaxResultsOptionalQueryParam:
-      name: MaxResults
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The maximum number of results to be returned as part of the paged queries. This parameter defines the upper bound on the number of results returned. The results returned can be less than the specified maximum results if they do not fit in the message as per the max message size restrictions defined in the configuration. If this parameter is zero or not specified, the paged query includes as many results as possible that fit in the return message.
-      schema:
-        type: integer
-        format: int64
-        default: 0
-        minimum: 0
-    TimeoutOptionalQueryParam:
-      name: timeout
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
-      schema:
-        type: integer
-        format: int64
-        default: 60
-        maximum: 4294967295
-        minimum: 1
-    ApiVersion_6-2_RequiredQueryParam:
-      name: api-version
-      in: query
-      x-ms-parameter-location: method
-      required: true
-      description: 'The version of the API. This parameter is required and its value must be ''6.2''.
-
-
-        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
-
-
-        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
-      x-ms-enum:
-        name: ApiVersion_6-2_RequiredQueryParam
-        modelAsString: true
-        values:
-        - value: '6.2'
-          description: The 6.2 version of the API.
-      schema:
-        type: string
-        enum:
-        - '6.2'
-        default: '6.2'
-    EndTimeUtcOptionalQueryParam:
-      name: EndTimeUtc
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The Windows file time representing the end time of the time range for which a Chaos report is to be generated. Consult [DateTime.ToFileTimeUtc Method](https://msdn.microsoft.com/library/system.datetime.tofiletimeutc(v=vs.110).aspx) for details.
-      schema:
-        type: string
-    StartTimeUtcOptionalQueryParam:
-      name: StartTimeUtc
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The Windows file time representing the start time of the time range for which a Chaos report is to be generated. Consult [DateTime.ToFileTimeUtc Method](https://msdn.microsoft.com/library/system.datetime.tofiletimeutc(v=vs.110).aspx) for details.
-      schema:
-        type: string
     ApiVersion_6-0_RequiredQueryParam:
       name: api-version
       in: query
@@ -952,3 +865,90 @@ components:
         enum:
         - '6.0'
         default: '6.0'
+    ContinuationTokenOptionalQueryParam:
+      name: ContinuationToken
+      in: query
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      required: false
+      description: The continuation token parameter is used to obtain next set of results. A continuation token with a non-empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
+      schema:
+        type: string
+    ChaosParametersRequiredBodyParam:
+      name: ChaosParameters
+      in: body
+      description: Describes all the parameters to configure a Chaos run.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/ChaosParameters'
+    ChaosScheduleRequiredBodyParam:
+      name: ChaosSchedule
+      in: body
+      description: Describes the schedule used by Chaos.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/ChaosScheduleDescription'
+    ApiVersion_6-2_RequiredQueryParam:
+      name: api-version
+      in: query
+      x-ms-parameter-location: method
+      required: true
+      description: 'The version of the API. This parameter is required and its value must be ''6.2''.
+
+
+        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
+
+
+        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
+      x-ms-enum:
+        name: ApiVersion_6-2_RequiredQueryParam
+        modelAsString: true
+        values:
+        - value: '6.2'
+          description: The 6.2 version of the API.
+      schema:
+        type: string
+        enum:
+        - '6.2'
+        default: '6.2'
+    StartTimeUtcOptionalQueryParam:
+      name: StartTimeUtc
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: The Windows file time representing the start time of the time range for which a Chaos report is to be generated. Consult [DateTime.ToFileTimeUtc Method](https://msdn.microsoft.com/library/system.datetime.tofiletimeutc(v=vs.110).aspx) for details.
+      schema:
+        type: string
+    TimeoutOptionalQueryParam:
+      name: timeout
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
+      schema:
+        type: integer
+        format: int64
+        default: 60
+        maximum: 4294967295
+        minimum: 1
+    MaxResultsOptionalQueryParam:
+      name: MaxResults
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: The maximum number of results to be returned as part of the paged queries. This parameter defines the upper bound on the number of results returned. The results returned can be less than the specified maximum results if they do not fit in the message as per the max message size restrictions defined in the configuration. If this parameter is zero or not specified, the paged query includes as many results as possible that fit in the return message.
+      schema:
+        type: integer
+        format: int64
+        default: 0
+        minimum: 0
+    EndTimeUtcOptionalQueryParam:
+      name: EndTimeUtc
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: The Windows file time representing the end time of the time range for which a Chaos report is to be generated. Consult [DateTime.ToFileTimeUtc Method](https://msdn.microsoft.com/library/system.datetime.tofiletimeutc(v=vs.110).aspx) for details.
+      schema:
+        type: string

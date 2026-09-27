@@ -354,21 +354,6 @@ paths:
         description: Information to determine the number of available IPs a subnet will need to host the AML file system.
 components:
   schemas:
-    RequiredAmlFilesystemSubnetsSize:
-      type: object
-      description: Information about the number of available IP addresses that are required for the AML file system.
-      properties:
-        filesystemSubnetSize:
-          description: The number of available IP addresses that are required for the AML file system.
-          type: integer
-          format: int32
-    AmlFilesystemEncryptionSettings:
-      description: AML file system encryption settings.
-      properties:
-        keyEncryptionKey:
-          $ref: storagecache.json#/definitions/KeyVaultKeyReference
-          description: Specifies the location of the encryption key in Key Vault.
-      type: object
     UserAssignedIdentities:
       type: object
       description: A dictionary where each key is a user assigned identity resource ID, and each key's value is an empty dictionary.
@@ -384,6 +369,124 @@ components:
             readOnly: true
             type: string
             description: The client ID of the user-assigned identity.
+    AmlFilesystemArchive:
+      description: Information about the AML file system archive
+      type: object
+      readOnly: true
+      properties:
+        filesystemPath:
+          readOnly: true
+          type: string
+          description: Lustre file system path to archive relative to the file system root.  Specify '/' to archive all modified data.
+        status:
+          description: The status of the archive
+          type: object
+          readOnly: true
+          properties:
+            state:
+              readOnly: true
+              description: The state of the archive operation
+              type: string
+              enum:
+              - NotConfigured
+              - Idle
+              - InProgress
+              - Canceled
+              - Completed
+              - Failed
+              - Cancelling
+              - FSScanInProgress
+              x-ms-enum:
+                name: ArchiveStatusType
+                modelAsString: true
+            lastCompletionTime:
+              readOnly: true
+              description: The time of the last completed archive operation
+              type: string
+              format: date-time
+            lastStartedTime:
+              readOnly: true
+              description: The time the latest archive operation started
+              type: string
+              format: date-time
+            percentComplete:
+              readOnly: true
+              description: The completion percentage of the archive operation
+              type: integer
+              format: int32
+            errorCode:
+              readOnly: true
+              description: Server-defined error code for the archive operation
+              type: string
+            errorMessage:
+              readOnly: true
+              description: Server-defined error message for the archive operation
+              type: string
+    SkuName:
+      x-ms-mutability:
+      - read
+      - create
+      description: SKU for the resource.
+      properties:
+        name:
+          description: SKU name for this resource.
+          type: string
+      type: object
+    AmlFilesystemHsmSettings:
+      description: AML file system HSM settings.
+      x-ms-mutability:
+      - read
+      - create
+      type: object
+      properties:
+        container:
+          description: Resource ID of storage container used for hydrating the namespace and archiving from the namespace. The resource provider must have permission to create SAS tokens on the storage account.
+          $ref: storagecache.json#/definitions/URLString
+        loggingContainer:
+          description: Resource ID of storage container used for logging events and errors.  Must be a separate container in the same storage account as the hydration and archive container. The resource provider must have permission to create SAS tokens on the storage account.
+          $ref: storagecache.json#/definitions/URLString
+        importPrefix:
+          description: Only blobs in the non-logging container that start with this path/prefix get hydrated into the cluster namespace.
+          type: string
+          default: /
+      required:
+      - container
+      - loggingContainer
+    AmlFilesystemArchiveInfo:
+      type: object
+      description: Information required to execute the archive operation
+      properties:
+        filesystemPath:
+          type: string
+          description: Lustre file system path to archive relative to the file system root.  Specify '/' to archive all modified data.
+          default: /
+    AmlFilesystemIdentity:
+      type: object
+      description: Managed Identity properties.
+      x-ms-mutability:
+      - read
+      - create
+      properties:
+        principalId:
+          readOnly: true
+          type: string
+          description: The principal ID for the user-assigned identity of the resource.
+        tenantId:
+          readOnly: true
+          type: string
+          description: The tenant ID associated with the resource.
+        type:
+          type: string
+          description: The type of identity used for the resource.
+          enum:
+          - UserAssigned
+          - None
+          x-ms-enum:
+            name: AmlFilesystemIdentityType
+            modelAsString: false
+        userAssignedIdentities:
+          description: A dictionary where each key is a user assigned identity resource ID, and each key's value is an empty dictionary.
+          $ref: '#/components/schemas/UserAssignedIdentities'
     RequiredAmlFilesystemSubnetsSizeInfo:
       type: object
       description: Information required to get the number of available IP addresses a subnet should have that will be used in AML file system create
@@ -395,98 +498,6 @@ components:
         sku:
           description: SKU for the resource.
           $ref: '#/components/schemas/SkuName'
-    AmlFilesystemHealth:
-      description: An indication of AML file system health. Gives more information about health than just that related to provisioning.
-      readOnly: true
-      properties:
-        state:
-          description: List of AML file system health states.
-          enum:
-          - Unavailable
-          - Available
-          - Degraded
-          - Transitioning
-          - Maintenance
-          x-ms-enum:
-            name: AmlFilesystemHealthStateType
-            modelAsString: true
-          type: string
-        statusCode:
-          description: Server-defined error code for the AML file system health
-          type: string
-        statusDescription:
-          description: Describes the health state.
-          type: string
-      type: object
-    AmlFilesystemArchiveInfo:
-      type: object
-      description: Information required to execute the archive operation
-      properties:
-        filesystemPath:
-          type: string
-          description: Lustre file system path to archive relative to the file system root.  Specify '/' to archive all modified data.
-          default: /
-    AmlFilesystemsListResult:
-      description: Result of the request to list AML file systems. It contains a list of AML file systems and a URL link to get the next set of results.
-      properties:
-        nextLink:
-          description: URL to get the next set of AML file system list results, if there are any.
-          type: string
-        value:
-          description: List of AML file systems.
-          items:
-            $ref: '#/components/schemas/AmlFilesystem'
-          type: array
-      type: object
-    AmlFilesystemUpdate:
-      description: An AML file system update instance.
-      type: object
-      properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags.
-        properties:
-          type: object
-          x-ms-client-flatten: true
-          description: Properties of the AML file system.
-          properties:
-            encryptionSettings:
-              $ref: '#/components/schemas/AmlFilesystemEncryptionSettings'
-              description: Specifies encryption settings of the AML file system.
-            maintenanceWindow:
-              description: Start time of a 30-minute weekly maintenance window.
-              type: object
-              properties:
-                dayOfWeek:
-                  type: string
-                  enum:
-                  - Monday
-                  - Tuesday
-                  - Wednesday
-                  - Thursday
-                  - Friday
-                  - Saturday
-                  - Sunday
-                  x-ms-enum:
-                    name: MaintenanceDayOfWeekType
-                    modelAsString: false
-                  description: Day of the week on which the maintenance window will occur.
-                timeOfDayUTC:
-                  type: string
-                  pattern: ^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$
-                  description: The time of day (in UTC) to start the maintenance window.
-    SkuName:
-      x-ms-mutability:
-      - read
-      - create
-      description: SKU for the resource.
-      properties:
-        name:
-          description: SKU name for this resource.
-          type: string
-      type: object
     AmlFilesystem:
       description: 'An AML file system instance. Follows Azure Resource Manager standards: https://github.com/Azure/azure-resource-manager-rpc/blob/master/v1.0/resource-api-reference.md'
       x-ms-azure-resource: true
@@ -605,6 +616,72 @@ components:
           - filesystemSubnet
           - storageCapacityTiB
           - maintenanceWindow
+    AmlFilesystemEncryptionSettings:
+      description: AML file system encryption settings.
+      properties:
+        keyEncryptionKey:
+          $ref: storagecache.json#/definitions/KeyVaultKeyReference
+          description: Specifies the location of the encryption key in Key Vault.
+      type: object
+    RequiredAmlFilesystemSubnetsSize:
+      type: object
+      description: Information about the number of available IP addresses that are required for the AML file system.
+      properties:
+        filesystemSubnetSize:
+          description: The number of available IP addresses that are required for the AML file system.
+          type: integer
+          format: int32
+    AmlFilesystemUpdate:
+      description: An AML file system update instance.
+      type: object
+      properties:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags.
+        properties:
+          type: object
+          x-ms-client-flatten: true
+          description: Properties of the AML file system.
+          properties:
+            encryptionSettings:
+              $ref: '#/components/schemas/AmlFilesystemEncryptionSettings'
+              description: Specifies encryption settings of the AML file system.
+            maintenanceWindow:
+              description: Start time of a 30-minute weekly maintenance window.
+              type: object
+              properties:
+                dayOfWeek:
+                  type: string
+                  enum:
+                  - Monday
+                  - Tuesday
+                  - Wednesday
+                  - Thursday
+                  - Friday
+                  - Saturday
+                  - Sunday
+                  x-ms-enum:
+                    name: MaintenanceDayOfWeekType
+                    modelAsString: false
+                  description: Day of the week on which the maintenance window will occur.
+                timeOfDayUTC:
+                  type: string
+                  pattern: ^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$
+                  description: The time of day (in UTC) to start the maintenance window.
+    AmlFilesystemsListResult:
+      description: Result of the request to list AML file systems. It contains a list of AML file systems and a URL link to get the next set of results.
+      properties:
+        nextLink:
+          description: URL to get the next set of AML file system list results, if there are any.
+          type: string
+        value:
+          description: List of AML file systems.
+          items:
+            $ref: '#/components/schemas/AmlFilesystem'
+          type: array
+      type: object
     AmlFilesystemCheckSubnetError:
       type: object
       description: The error details provided when the checkAmlFSSubnets call fails.
@@ -626,33 +703,29 @@ components:
             message:
               type: string
               description: The details of the AML file system subnet check.
-    AmlFilesystemIdentity:
-      type: object
-      description: Managed Identity properties.
-      x-ms-mutability:
-      - read
-      - create
+    AmlFilesystemHealth:
+      description: An indication of AML file system health. Gives more information about health than just that related to provisioning.
+      readOnly: true
       properties:
-        principalId:
-          readOnly: true
-          type: string
-          description: The principal ID for the user-assigned identity of the resource.
-        tenantId:
-          readOnly: true
-          type: string
-          description: The tenant ID associated with the resource.
-        type:
-          type: string
-          description: The type of identity used for the resource.
+        state:
+          description: List of AML file system health states.
           enum:
-          - UserAssigned
-          - None
+          - Unavailable
+          - Available
+          - Degraded
+          - Transitioning
+          - Maintenance
           x-ms-enum:
-            name: AmlFilesystemIdentityType
-            modelAsString: false
-        userAssignedIdentities:
-          description: A dictionary where each key is a user assigned identity resource ID, and each key's value is an empty dictionary.
-          $ref: '#/components/schemas/UserAssignedIdentities'
+            name: AmlFilesystemHealthStateType
+            modelAsString: true
+          type: string
+        statusCode:
+          description: Server-defined error code for the AML file system health
+          type: string
+        statusDescription:
+          description: Describes the health state.
+          type: string
+      type: object
     AmlFilesystemSubnetInfo:
       type: object
       description: Information required to validate the subnet that will be used in AML file system create
@@ -673,79 +746,6 @@ components:
           x-ms-mutability:
           - create
           - read
-    AmlFilesystemHsmSettings:
-      description: AML file system HSM settings.
-      x-ms-mutability:
-      - read
-      - create
-      type: object
-      properties:
-        container:
-          description: Resource ID of storage container used for hydrating the namespace and archiving from the namespace. The resource provider must have permission to create SAS tokens on the storage account.
-          $ref: storagecache.json#/definitions/URLString
-        loggingContainer:
-          description: Resource ID of storage container used for logging events and errors.  Must be a separate container in the same storage account as the hydration and archive container. The resource provider must have permission to create SAS tokens on the storage account.
-          $ref: storagecache.json#/definitions/URLString
-        importPrefix:
-          description: Only blobs in the non-logging container that start with this path/prefix get hydrated into the cluster namespace.
-          type: string
-          default: /
-      required:
-      - container
-      - loggingContainer
-    AmlFilesystemArchive:
-      description: Information about the AML file system archive
-      type: object
-      readOnly: true
-      properties:
-        filesystemPath:
-          readOnly: true
-          type: string
-          description: Lustre file system path to archive relative to the file system root.  Specify '/' to archive all modified data.
-        status:
-          description: The status of the archive
-          type: object
-          readOnly: true
-          properties:
-            state:
-              readOnly: true
-              description: The state of the archive operation
-              type: string
-              enum:
-              - NotConfigured
-              - Idle
-              - InProgress
-              - Canceled
-              - Completed
-              - Failed
-              - Cancelling
-              - FSScanInProgress
-              x-ms-enum:
-                name: ArchiveStatusType
-                modelAsString: true
-            lastCompletionTime:
-              readOnly: true
-              description: The time of the last completed archive operation
-              type: string
-              format: date-time
-            lastStartedTime:
-              readOnly: true
-              description: The time the latest archive operation started
-              type: string
-              format: date-time
-            percentComplete:
-              readOnly: true
-              description: The completion percentage of the archive operation
-              type: integer
-              format: int32
-            errorCode:
-              readOnly: true
-              description: Server-defined error code for the archive operation
-              type: string
-            errorMessage:
-              readOnly: true
-              description: Server-defined error message for the archive operation
-              type: string
   parameters:
     AmlFilesystemNameParameter:
       description: Name for the AML file system. Allows alphanumerics, underscores, and hyphens. Start and end with alphanumeric.

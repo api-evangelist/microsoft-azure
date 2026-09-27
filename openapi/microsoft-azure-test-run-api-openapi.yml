@@ -1135,6 +1135,56 @@ paths:
       - Bearer: []
 components:
   schemas:
+    MetricDefinitionCollection:
+      type: object
+      description: Represents collection of metric definitions.
+      properties:
+        value:
+          type: array
+          description: the values for the metric definitions.
+          items:
+            $ref: '#/components/schemas/MetricDefinition'
+          x-ms-identifiers: []
+      required:
+      - value
+    MetricDefinition:
+      type: object
+      description: Metric definition
+      properties:
+        dimensions:
+          type: array
+          description: List of dimensions
+          items:
+            $ref: '#/components/schemas/NameAndDesc'
+          x-ms-identifiers: []
+        description:
+          type: string
+          description: The metric description
+        name:
+          type: string
+          description: The metric name
+        namespace:
+          type: string
+          description: The namespace the metric belongs to.
+        primaryAggregationType:
+          $ref: '#/components/schemas/AggregationType'
+          description: The primary aggregation type value defining how to use the values for display.
+        supportedAggregationTypes:
+          type: array
+          description: The collection of what all aggregation types are supported.
+          items:
+            type: string
+        unit:
+          $ref: '#/components/schemas/MetricUnit'
+          description: The unit of the metric.
+        metricAvailabilities:
+          type: array
+          description: 'Metric availability specifies the time grain (aggregation interval or
+
+            frequency).'
+          items:
+            $ref: '#/components/schemas/MetricAvailability'
+          x-ms-identifiers: []
     SecretType:
       type: string
       description: Types of secrets supported.
@@ -1151,6 +1201,518 @@ components:
         - name: SECRET_VALUE
           value: SECRET_VALUE
           description: If the secret value provided as plain text.
+    MetricNamespace:
+      type: object
+      description: Metric namespace class specifies the metadata for a metric namespace.
+      properties:
+        description:
+          type: string
+          description: The namespace description.
+        name:
+          type: string
+          description: The metric namespace name.
+    TestRunCreateOrUpdate:
+      type: object
+      description: Load test run model
+      properties:
+        passFailCriteria:
+          $ref: '#/components/schemas/PassFailCriteria'
+          description: Pass fail criteria for a test.
+        autoStopCriteria:
+          $ref: '#/components/schemas/AutoStopCriteria'
+          description: Auto stop criteria for a test. This will automatically stop a load test if the error percentage is high for a certain time window.
+        secrets:
+          type: object
+          description: 'Secrets can be stored in an Azure Key Vault or any other secret store. If the
+
+            secret is stored in an Azure Key Vault, the value should be the secret
+
+            identifier and the type should be AKV_SECRET_URI. If the secret is stored
+
+            elsewhere, the secret value should be provided directly and the type should be
+
+            SECRET_VALUE.'
+          additionalProperties:
+            $ref: '#/components/schemas/Secret'
+        certificate:
+          $ref: '#/components/schemas/CertificateMetadata'
+          description: Certificates metadata
+        environmentVariables:
+          type: object
+          description: Environment variables which are defined as a set of <name,value> pairs.
+          additionalProperties:
+            type: string
+        loadTestConfiguration:
+          $ref: '#/components/schemas/LoadTestConfiguration'
+          description: The load test configuration.
+        displayName:
+          type: string
+          description: Display name of a testRun.
+          minLength: 2
+          maxLength: 50
+        testId:
+          type: string
+          description: Associated test Id.
+          minLength: 2
+          maxLength: 50
+        description:
+          type: string
+          description: The test run description.
+          maxLength: 100
+    TestKind:
+      type: string
+      description: Test kind
+      enum:
+      - URL
+      - JMX
+      x-ms-enum:
+        name: TestKind
+        modelAsString: true
+        values:
+        - name: URL
+          value: URL
+          description: URL Test
+        - name: JMX
+          value: JMX
+          description: JMX Test
+    AppComponentUpdate:
+      type: object
+      description: An Azure resource object (Refer azure generic resource model :https://docs.microsoft.com/en-us/rest/api/resources/resources/get-by-id#genericresource)
+      properties:
+        resourceName:
+          type: string
+          description: Azure resource name, required while creating the app component.
+        resourceType:
+          type: string
+          description: Azure resource type, required while creating the app component.
+        displayName:
+          type: string
+          description: Azure resource display name
+        kind:
+          type: string
+          description: Kind of Azure resource type
+    LoadTestConfiguration:
+      type: object
+      description: Configurations for the load test.
+      properties:
+        engineInstances:
+          type: integer
+          format: int32
+          description: The number of engine instances to execute load test. Supported values are in range of 1-400. Required for creating a new test.
+        splitAllCSVs:
+          type: boolean
+          description: 'If false, Azure Load Testing copies and processes your input files unmodified
+
+            across all test engine instances. If true, Azure Load Testing splits the CSV
+
+            input data evenly across all engine instances. If you provide multiple CSV
+
+            files, each file will be split evenly.'
+          default: false
+        quickStartTest:
+          type: boolean
+          description: 'If true, optionalLoadTestConfig is required and JMX script for the load test is
+
+            not required to upload.'
+          default: false
+        optionalLoadTestConfig:
+          $ref: '#/components/schemas/OptionalLoadTestConfig'
+          description: Configuration for quick load test
+    PassFailMetric:
+      type: object
+      description: Pass fail metric
+      properties:
+        clientMetric:
+          $ref: '#/components/schemas/PFMetrics'
+          description: The client metric on which the criteria should be applied.
+        aggregate:
+          $ref: '#/components/schemas/PFAgFunc'
+          description: 'The aggregation function to be applied on the client metric. Allowed functions
+
+            - ‘percentage’ - for error metric , ‘avg’, ‘p50’, ‘p90’, ‘p95’, ‘p99’, ‘min’,
+
+            ‘max’ - for response_time_ms and latency metric, ‘avg’ - for requests_per_sec,
+
+            ‘count’ - for requests'
+        condition:
+          type: string
+          description: 'The comparison operator. Supported types ‘>’, ‘<’ '
+        requestName:
+          type: string
+          description: 'Request name for which the Pass fail criteria has to be applied '
+        value:
+          type: number
+          format: double
+          description: 'The value to compare with the client metric. Allowed values - ‘error : [0.0 ,
+
+            100.0] unit- % ’, response_time_ms and latency : any integer value unit- ms.'
+        action:
+          type: string
+          description: Action taken after the threshold is met. Default is ‘continue’.
+          default: continue
+          enum:
+          - continue
+          - stop
+          x-ms-enum:
+            name: PFAction
+            modelAsString: true
+            values:
+            - name: continue
+              value: continue
+              description: Test will continue to run even if pass fail metric criteria metric gets failed.
+            - name: stop
+              value: stop
+              description: Test run will stop if pass fail criteria metric is not passed.
+        actualValue:
+          type: number
+          format: double
+          description: The actual value of the client metric for the test run.
+          readOnly: true
+        result:
+          $ref: '#/components/schemas/PFResult'
+          description: Outcome of the test run.
+          readOnly: true
+    PFAgFunc:
+      type: string
+      description: Aggregation functions for pass/fail criteria.
+      enum:
+      - count
+      - percentage
+      - avg
+      - p50
+      - p90
+      - p95
+      - p99
+      - min
+      - max
+      x-ms-enum:
+        name: PFAgFunc
+        modelAsString: true
+        values:
+        - name: count
+          value: count
+          description: Criteria applies for count value.
+        - name: percentage
+          value: percentage
+          description: Criteria applies for given percentage value.
+        - name: avg
+          value: avg
+          description: Criteria applies for avg value.
+        - name: p50
+          value: p50
+          description: Criteria applies for 50th percentile value.
+        - name: p90
+          value: p90
+          description: Criteria applies for 90th percentile value.
+        - name: p95
+          value: p95
+          description: Criteria applies for 95th percentile value.
+        - name: p99
+          value: p99
+          description: Criteria applies for 99th percentile value.
+        - name: min
+          value: min
+          description: Criteria applies for minimum value.
+        - name: max
+          value: max
+          description: Criteria applies for maximum value.
+    MetricRequestPayload:
+      type: object
+      description: Filters to fetch the set of metric.
+      properties:
+        filters:
+          type: array
+          description: 'Get metrics for specific dimension values. Example: Metric contains dimension
+
+            like SamplerName, Error. To retrieve all the time series data where SamplerName
+
+            is equals to HTTPRequest1 or HTTPRequest2, the DimensionFilter value will be
+
+            {"SamplerName", ["HTTPRequest1", "HTTPRequest2"}'
+          items:
+            $ref: '#/components/schemas/DimensionFilter'
+          x-ms-identifiers: []
+    NameAndDesc:
+      type: object
+      description: The name and description
+      properties:
+        description:
+          type: string
+          description: The description
+        name:
+          type: string
+          description: The name
+    TimeSeriesElement:
+      type: object
+      description: The time series returned when a data query is performed.
+      properties:
+        data:
+          type: array
+          description: An array of data points representing the metric values.
+          items:
+            $ref: '#/components/schemas/MetricValue'
+          x-ms-identifiers: []
+        dimensionValues:
+          type: array
+          description: 'The dimension values '
+          items:
+            $ref: '#/components/schemas/DimensionValue'
+          x-ms-identifiers: []
+    Status:
+      type: string
+      description: Test run status.
+      enum:
+      - ACCEPTED
+      - NOTSTARTED
+      - PROVISIONING
+      - PROVISIONED
+      - CONFIGURING
+      - CONFIGURED
+      - EXECUTING
+      - EXECUTED
+      - DEPROVISIONING
+      - DEPROVISIONED
+      - DONE
+      - CANCELLING
+      - CANCELLED
+      - FAILED
+      - VALIDATION_SUCCESS
+      - VALIDATION_FAILURE
+      x-ms-enum:
+        name: Status
+        modelAsString: true
+        values:
+        - name: ACCEPTED
+          value: ACCEPTED
+          description: Test run request is accepted.
+        - name: NOTSTARTED
+          value: NOTSTARTED
+          description: Test run is not yet started.
+        - name: PROVISIONING
+          value: PROVISIONING
+          description: Test run is provisioning.
+        - name: PROVISIONED
+          value: PROVISIONED
+          description: Test run is provisioned.
+        - name: CONFIGURING
+          value: CONFIGURING
+          description: Test run is getting configured.
+        - name: CONFIGURED
+          value: CONFIGURED
+          description: Test run configuration is done.
+        - name: EXECUTING
+          value: EXECUTING
+          description: Test run has started executing.
+        - name: EXECUTED
+          value: EXECUTED
+          description: Test run execution is completed.
+        - name: DEPROVISIONING
+          value: DEPROVISIONING
+          description: Test run is getting deprovisioned.
+        - name: DEPROVISIONED
+          value: DEPROVISIONED
+          description: Test run is deprovisioned.
+        - name: DONE
+          value: DONE
+          description: Test run is completed.
+        - name: CANCELLING
+          value: CANCELLING
+          description: Test run is being cancelled.
+        - name: CANCELLED
+          value: CANCELLED
+          description: Test run request is cancelled.
+        - name: FAILED
+          value: FAILED
+          description: Test run request is failed.
+        - name: VALIDATION_SUCCESS
+          value: VALIDATION_SUCCESS
+          description: Test run JMX file is validated.
+        - name: VALIDATION_FAILURE
+          value: VALIDATION_FAILURE
+          description: Test run JMX file validation is failed.
+    Azure.Core.Foundations.InnerError:
+      type: object
+      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        innererror:
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: Inner error.
+    CertificateMetadata:
+      type: object
+      description: Certificates metadata
+      properties:
+        value:
+          type: string
+          description: The value of the certificate for respective type
+        type:
+          $ref: '#/components/schemas/CertificateType'
+          description: Type of certificate
+        name:
+          type: string
+          description: Name of the certificate.
+    FileStatus:
+      type: string
+      description: File status.
+      enum:
+      - NOT_VALIDATED
+      - VALIDATION_SUCCESS
+      - VALIDATION_FAILURE
+      - VALIDATION_INITIATED
+      - VALIDATION_NOT_REQUIRED
+      x-ms-enum:
+        name: FileStatus
+        modelAsString: true
+        values:
+        - name: NOT_VALIDATED
+          value: NOT_VALIDATED
+          description: File is not validated.
+        - name: VALIDATION_SUCCESS
+          value: VALIDATION_SUCCESS
+          description: File is validated.
+        - name: VALIDATION_FAILURE
+          value: VALIDATION_FAILURE
+          description: File validation is failed.
+        - name: VALIDATION_INITIATED
+          value: VALIDATION_INITIATED
+          description: File validation is in progress.
+        - name: VALIDATION_NOT_REQUIRED
+          value: VALIDATION_NOT_REQUIRED
+          description: Validation is not required.
+    AutoStopCriteria:
+      type: object
+      description: Auto stop criteria for a test. This will automatically stop a load test if the error percentage is high for a certain time window.
+      properties:
+        autoStopDisabled:
+          type: boolean
+          description: Whether auto-stop should be disabled. The default value is false.
+          default: false
+        errorRate:
+          type: number
+          format: float
+          description: Threshold percentage of errors on which test run should be automatically stopped. Allowed values are in range of 0.0-100.0
+          default: 90
+        errorRateTimeWindowInSeconds:
+          type: integer
+          format: int32
+          description: Time window during which the error percentage should be evaluated in seconds.
+          default: 60
+    FileType:
+      type: string
+      description: Types of file supported.
+      enum:
+      - JMX_FILE
+      - USER_PROPERTIES
+      - ADDITIONAL_ARTIFACTS
+      - ZIPPED_ARTIFACTS
+      - URL_TEST_CONFIG_JSON
+      x-ms-enum:
+        name: FileType
+        modelAsString: true
+        values:
+        - name: JMX_FILE
+          value: JMX_FILE
+          description: If the file is a JMX script.
+        - name: USER_PROPERTIES
+          value: USER_PROPERTIES
+          description: If the file is a user properties file.
+        - name: ADDITIONAL_ARTIFACTS
+          value: ADDITIONAL_ARTIFACTS
+          description: If the file is not among any of the other supported file types.
+        - name: ZIPPED_ARTIFACTS
+          value: ZIPPED_ARTIFACTS
+          description: If the file is a compressed archive containing a collection of various artifacts or resources.
+        - name: URL_TEST_CONFIG_JSON
+          value: URL_TEST_CONFIG_JSON
+          description: If the file is a JSON config file to define the requests for a URL test.
+    Secret:
+      type: object
+      description: Secret
+      properties:
+        value:
+          type: string
+          description: The value of the secret for the respective type
+        type:
+          $ref: '#/components/schemas/SecretType'
+          description: Type of secret
+    AggregationType:
+      type: string
+      description: Aggregation type.
+      enum:
+      - Average
+      - Count
+      - None
+      - Total
+      - Percentile90
+      - Percentile95
+      - Percentile99
+      x-ms-enum:
+        name: AggregationType
+        modelAsString: true
+        values:
+        - name: Average
+          value: Average
+          description: Average value.
+        - name: Count
+          value: Count
+          description: Total count.
+        - name: None
+          value: None
+          description: Aggregation will be average in this case.
+        - name: Total
+          value: Total
+          description: Total sum.
+        - name: Percentile90
+          value: Percentile90
+          description: 90th percentile.
+        - name: Percentile95
+          value: Percentile95
+          description: 95th percentile.
+        - name: Percentile99
+          value: Percentile99
+          description: 99th percentile.
+    TestRunArtifacts:
+      type: object
+      description: Collection of test run artifacts
+      properties:
+        inputArtifacts:
+          $ref: '#/components/schemas/TestRunInputArtifacts'
+          description: The input artifacts for the test run.
+          readOnly: true
+        outputArtifacts:
+          $ref: '#/components/schemas/TestRunOutputArtifacts'
+          description: The output artifacts for the test run.
+    DimensionValueList:
+      type: object
+      description: Metrics dimension values.
+      properties:
+        name:
+          type: string
+          description: The dimension name
+          readOnly: true
+        value:
+          type: array
+          description: The dimension value
+          items:
+            type: string
+        nextLink:
+          type: string
+          format: uri
+          description: Link for the next set of values in case of paginated results, if applicable.
+    CertificateType:
+      type: string
+      description: Types of certificates supported.
+      enum:
+      - AKV_CERT_URI
+      x-ms-enum:
+        name: CertificateType
+        modelAsString: true
+        values:
+        - name: AKV_CERT_URI
+          value: AKV_CERT_URI
+          description: If the certificate is stored in an Azure Key Vault.
     TestRun:
       type: object
       description: Load test run model
@@ -1292,85 +1854,215 @@ components:
           readOnly: true
       required:
       - testRunId
-    MetricUnit:
+    ErrorDetails:
+      type: object
+      description: Error details if there is any failure in load test run
+      properties:
+        message:
+          type: string
+          description: Error details in case test run was not successfully run.
+          readOnly: true
+    TestRunFileInfo:
+      type: object
+      description: Test run file info.
+      properties:
+        fileName:
+          type: string
+          description: Name of the file.
+        url:
+          type: string
+          format: uri
+          description: File URL.
+          readOnly: true
+        fileType:
+          $ref: '#/components/schemas/FileType'
+          description: File type
+          readOnly: true
+        expireDateTime:
+          type: string
+          format: date-time
+          description: Expiry time of the file (RFC 3339 literal format)
+          readOnly: true
+        validationStatus:
+          $ref: '#/components/schemas/FileStatus'
+          description: Validation status of the file
+          readOnly: true
+        validationFailureDetails:
+          type: string
+          description: Validation failure error details
+          readOnly: true
+      required:
+      - fileName
+    PFTestResult:
       type: string
-      description: Metric unit.
+      description: Test result based on pass/fail criteria.
       enum:
-      - NotSpecified
-      - Percent
-      - Count
-      - Seconds
-      - Milliseconds
-      - Bytes
-      - BytesPerSecond
-      - CountPerSecond
+      - PASSED
+      - NOT_APPLICABLE
+      - FAILED
       x-ms-enum:
-        name: MetricUnit
+        name: PFTestResult
         modelAsString: true
         values:
-        - name: NotSpecified
-          value: NotSpecified
-          description: No unit specified.
-        - name: Percent
-          value: Percent
-          description: Percentage.
-        - name: Count
-          value: Count
-          description: Value count.
-        - name: Seconds
-          value: Seconds
-          description: Seconds.
-        - name: Milliseconds
-          value: Milliseconds
-          description: Milliseconds
-        - name: Bytes
-          value: Bytes
-          description: Bytes
-        - name: BytesPerSecond
-          value: BytesPerSecond
-          description: Bytes per second
-        - name: CountPerSecond
-          value: CountPerSecond
-          description: Count per second
-    CertificateMetadata:
+        - name: PASSED
+          value: PASSED
+          description: Pass/fail criteria has passed.
+        - name: NOT_APPLICABLE
+          value: NOT_APPLICABLE
+          description: Pass/fail criteria is not applicable.
+        - name: FAILED
+          value: FAILED
+          description: Pass/fail criteria has failed.
+    PassFailCriteria:
       type: object
-      description: Certificates metadata
+      description: Pass fail criteria for a test.
       properties:
-        value:
-          type: string
-          description: The value of the certificate for respective type
-        type:
-          $ref: '#/components/schemas/CertificateType'
-          description: Type of certificate
-        name:
-          type: string
-          description: Name of the certificate.
-    AppComponentUpdate:
+        passFailMetrics:
+          type: object
+          description: 'Map of id and pass fail metrics { id  : pass fail metrics }.'
+          additionalProperties:
+            $ref: '#/components/schemas/PassFailMetric'
+    MetricNamespaceCollection:
       type: object
-      description: An Azure resource object (Refer azure generic resource model :https://docs.microsoft.com/en-us/rest/api/resources/resources/get-by-id#genericresource)
-      properties:
-        resourceName:
-          type: string
-          description: Azure resource name, required while creating the app component.
-        resourceType:
-          type: string
-          description: Azure resource type, required while creating the app component.
-        displayName:
-          type: string
-          description: Azure resource display name
-        kind:
-          type: string
-          description: Kind of Azure resource type
-    MetricDefinitionCollection:
-      type: object
-      description: Represents collection of metric definitions.
+      description: Represents collection of metric namespaces.
       properties:
         value:
           type: array
-          description: the values for the metric definitions.
+          description: The values for the metric namespaces.
           items:
-            $ref: '#/components/schemas/MetricDefinition'
+            $ref: '#/components/schemas/MetricNamespace'
           x-ms-identifiers: []
+      required:
+      - value
+    TestRunInputArtifacts:
+      type: object
+      description: The input artifacts for the test run.
+      properties:
+        configFileInfo:
+          $ref: '#/components/schemas/TestRunFileInfo'
+          description: File info
+        testScriptFileInfo:
+          $ref: '#/components/schemas/TestRunFileInfo'
+          description: File info
+        userPropFileInfo:
+          $ref: '#/components/schemas/TestRunFileInfo'
+          description: File info
+        inputArtifactsZipFileInfo:
+          $ref: '#/components/schemas/TestRunFileInfo'
+          description: File info
+        urlTestConfigFileInfo:
+          $ref: '#/components/schemas/TestRunFileInfo'
+          description: The config json file for url based test
+        additionalFileInfo:
+          type: array
+          description: Additional supported files for the test run
+          items:
+            $ref: '#/components/schemas/TestRunFileInfo'
+          readOnly: true
+          x-ms-identifiers: []
+    ResourceMetric:
+      type: object
+      description: 'Associated metric definition for particular metrics of the azure resource (
+
+        Refer :
+
+        https://docs.microsoft.com/en-us/rest/api/monitor/metric-definitions/list#metricdefinition).'
+      properties:
+        id:
+          type: string
+          description: Unique name for metric.
+          readOnly: true
+        resourceId:
+          type: string
+          description: Azure resource id.
+        metricNamespace:
+          type: string
+          description: Metric name space.
+        displayDescription:
+          type: string
+          description: Metric description.
+        name:
+          type: string
+          description: The invariant value of metric name
+        aggregation:
+          type: string
+          description: Metric aggregation.
+        unit:
+          type: string
+          description: Metric unit.
+        resourceType:
+          type: string
+          description: Azure resource type.
+      required:
+      - resourceId
+      - metricNamespace
+      - name
+      - aggregation
+      - resourceType
+    Metrics:
+      type: object
+      description: The response to a metrics query.
+      properties:
+        value:
+          type: array
+          description: The TimeSeriesElement items on this page
+          items:
+            $ref: '#/components/schemas/TimeSeriesElement'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+      required:
+      - value
+    Azure.Core.Foundations.ErrorResponse:
+      type: object
+      description: A response containing error details.
+      properties:
+        error:
+          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          description: The error object.
+      required:
+      - error
+    TestRunAppComponentsUpdate:
+      type: object
+      description: Test run app component
+      properties:
+        components:
+          type: object
+          description: 'Azure resource collection { resource id (fully qualified resource Id e.g
+
+            subscriptions/{subId}/resourceGroups/{rg}/providers/Microsoft.LoadTestService/loadtests/{resName})
+
+            : resource object } '
+          additionalProperties:
+            $ref: '#/components/schemas/AppComponentUpdate'
+    DimensionFilter:
+      type: object
+      description: Dimension name and values to filter
+      properties:
+        name:
+          type: string
+          description: The dimension name
+        values:
+          type: array
+          description: The dimension values. Maximum values can be 20.
+          items:
+            type: string
+    PagedTestRun:
+      type: object
+      description: Paged collection of TestRun items
+      properties:
+        value:
+          type: array
+          description: The TestRun items on this page
+          items:
+            $ref: '#/components/schemas/TestRun'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
       required:
       - value
     TimeGrain:
@@ -1411,6 +2103,111 @@ components:
         value:
           type: string
           description: The value of the dimension.
+    AppComponent:
+      type: object
+      description: An Azure resource object (Refer azure generic resource model :https://docs.microsoft.com/en-us/rest/api/resources/resources/get-by-id#genericresource)
+      properties:
+        resourceId:
+          type: string
+          description: fully qualified resource Id e.g subscriptions/{subId}/resourceGroups/{rg}/providers/Microsoft.LoadTestService/loadtests/{resName}
+          readOnly: true
+        resourceName:
+          type: string
+          description: Azure resource name, required while creating the app component.
+        resourceType:
+          type: string
+          description: Azure resource type, required while creating the app component.
+        displayName:
+          type: string
+          description: Azure resource display name
+        resourceGroup:
+          type: string
+          description: Resource group name of the Azure resource
+          readOnly: true
+        subscriptionId:
+          type: string
+          description: Subscription Id of the Azure resource
+          readOnly: true
+        kind:
+          type: string
+          description: Kind of Azure resource type
+      required:
+      - resourceId
+      - resourceName
+      - resourceType
+    PFMetrics:
+      type: string
+      description: Metrics for pass/fail criteria.
+      enum:
+      - response_time_ms
+      - latency
+      - error
+      - requests
+      - requests_per_sec
+      x-ms-enum:
+        name: PFMetrics
+        modelAsString: true
+        values:
+        - name: response_time_ms
+          value: response_time_ms
+          description: Pass fail criteria for response time metric in milliseconds.
+        - name: latency
+          value: latency
+          description: Pass fail criteria for latency metric in milliseconds.
+        - name: error
+          value: error
+          description: Pass fail criteria for error metric.
+        - name: requests
+          value: requests
+          description: Pass fail criteria for total requests.
+        - name: requests_per_sec
+          value: requests_per_sec
+          description: Pass fail criteria for request per second.
+    Azure.Core.Foundations.Error:
+      type: object
+      description: The error object.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          description: The target of the error.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          x-ms-identifiers: []
+        innererror:
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: An object containing more specific information than the current object about the error.
+      required:
+      - code
+      - message
+    PFResult:
+      type: string
+      description: Pass/fail criteria result.
+      enum:
+      - passed
+      - undetermined
+      - failed
+      x-ms-enum:
+        name: PFResult
+        modelAsString: true
+        values:
+        - name: passed
+          value: passed
+          description: Given pass fail criteria metric has passed.
+        - name: undetermined
+          value: undetermined
+          description: Given pass fail criteria metric couldn't determine.
+        - name: failed
+          value: failed
+          description: Given pass fail criteria metric has failed.
     TestRunStatistics:
       type: object
       description: Test run statistics.
@@ -1484,572 +2281,30 @@ components:
           format: double
           description: Send network bytes.
           readOnly: true
-    AggregationType:
-      type: string
-      description: Aggregation type.
-      enum:
-      - Average
-      - Count
-      - None
-      - Total
-      - Percentile90
-      - Percentile95
-      - Percentile99
-      x-ms-enum:
-        name: AggregationType
-        modelAsString: true
-        values:
-        - name: Average
-          value: Average
-          description: Average value.
-        - name: Count
-          value: Count
-          description: Total count.
-        - name: None
-          value: None
-          description: Aggregation will be average in this case.
-        - name: Total
-          value: Total
-          description: Total sum.
-        - name: Percentile90
-          value: Percentile90
-          description: 90th percentile.
-        - name: Percentile95
-          value: Percentile95
-          description: 95th percentile.
-        - name: Percentile99
-          value: Percentile99
-          description: 99th percentile.
-    TestKind:
-      type: string
-      description: Test kind
-      enum:
-      - URL
-      - JMX
-      x-ms-enum:
-        name: TestKind
-        modelAsString: true
-        values:
-        - name: URL
-          value: URL
-          description: URL Test
-        - name: JMX
-          value: JMX
-          description: JMX Test
-    MetricRequestPayload:
+    ArtifactsContainerInfo:
       type: object
-      description: Filters to fetch the set of metric.
+      description: Artifacts container info.
       properties:
-        filters:
-          type: array
-          description: 'Get metrics for specific dimension values. Example: Metric contains dimension
-
-            like SamplerName, Error. To retrieve all the time series data where SamplerName
-
-            is equals to HTTPRequest1 or HTTPRequest2, the DimensionFilter value will be
-
-            {"SamplerName", ["HTTPRequest1", "HTTPRequest2"}'
-          items:
-            $ref: '#/components/schemas/DimensionFilter'
-          x-ms-identifiers: []
-    TestRunCreateOrUpdate:
-      type: object
-      description: Load test run model
-      properties:
-        passFailCriteria:
-          $ref: '#/components/schemas/PassFailCriteria'
-          description: Pass fail criteria for a test.
-        autoStopCriteria:
-          $ref: '#/components/schemas/AutoStopCriteria'
-          description: Auto stop criteria for a test. This will automatically stop a load test if the error percentage is high for a certain time window.
-        secrets:
-          type: object
-          description: 'Secrets can be stored in an Azure Key Vault or any other secret store. If the
-
-            secret is stored in an Azure Key Vault, the value should be the secret
-
-            identifier and the type should be AKV_SECRET_URI. If the secret is stored
-
-            elsewhere, the secret value should be provided directly and the type should be
-
-            SECRET_VALUE.'
-          additionalProperties:
-            $ref: '#/components/schemas/Secret'
-        certificate:
-          $ref: '#/components/schemas/CertificateMetadata'
-          description: Certificates metadata
-        environmentVariables:
-          type: object
-          description: Environment variables which are defined as a set of <name,value> pairs.
-          additionalProperties:
-            type: string
-        loadTestConfiguration:
-          $ref: '#/components/schemas/LoadTestConfiguration'
-          description: The load test configuration.
-        displayName:
-          type: string
-          description: Display name of a testRun.
-          minLength: 2
-          maxLength: 50
-        testId:
-          type: string
-          description: Associated test Id.
-          minLength: 2
-          maxLength: 50
-        description:
-          type: string
-          description: The test run description.
-          maxLength: 100
-    OptionalLoadTestConfig:
-      type: object
-      description: Configuration for quick load test
-      properties:
-        endpointUrl:
-          type: string
-          description: Test URL. Provide the complete HTTP URL. For example, https://contoso-app.azurewebsites.net/login
-        requestsPerSecond:
-          type: integer
-          format: int32
-          description: Target throughput (requests per second). This may not be necessarily achieved. The actual throughput will be lower if the application is not capable of handling it.
-        maxResponseTimeInMs:
-          type: integer
-          format: int32
-          description: Maximum response time in milliseconds of the API/endpoint.
-        virtualUsers:
-          type: integer
-          format: int32
-          description: No of concurrent virtual users.
-        rampUpTime:
-          type: integer
-          format: int32
-          description: Ramp up time in seconds.
-        duration:
-          type: integer
-          format: int32
-          description: Test run duration in seconds.
-    DimensionFilter:
-      type: object
-      description: Dimension name and values to filter
-      properties:
-        name:
-          type: string
-          description: The dimension name
-        values:
-          type: array
-          description: The dimension values. Maximum values can be 20.
-          items:
-            type: string
-    TestRunServerMetricConfig:
-      type: object
-      description: Test run server metrics configuration
-      properties:
-        testRunId:
-          type: string
-          description: Test run identifier
-          readOnly: true
-        metrics:
-          type: object
-          description: 'Azure resource metrics collection {metric id : metrics object} (Refer :
-
-            https://docs.microsoft.com/en-us/rest/api/monitor/metric-definitions/list#metricdefinition
-
-            for metric id).'
-          additionalProperties:
-            $ref: '#/components/schemas/ResourceMetric'
-        createdDateTime:
-          type: string
-          format: date-time
-          description: The creation datetime(RFC 3339 literal format).
-          readOnly: true
-        createdBy:
-          type: string
-          description: The user that created.
-          readOnly: true
-        lastModifiedDateTime:
-          type: string
-          format: date-time
-          description: The last Modified datetime(RFC 3339 literal format).
-          readOnly: true
-        lastModifiedBy:
-          type: string
-          description: The user that last modified.
-          readOnly: true
-    CertificateType:
-      type: string
-      description: Types of certificates supported.
-      enum:
-      - AKV_CERT_URI
-      x-ms-enum:
-        name: CertificateType
-        modelAsString: true
-        values:
-        - name: AKV_CERT_URI
-          value: AKV_CERT_URI
-          description: If the certificate is stored in an Azure Key Vault.
-    Secret:
-      type: object
-      description: Secret
-      properties:
-        value:
-          type: string
-          description: The value of the secret for the respective type
-        type:
-          $ref: '#/components/schemas/SecretType'
-          description: Type of secret
-    TestRunOutputArtifacts:
-      type: object
-      description: The output artifacts for the test run.
-      properties:
-        resultFileInfo:
-          $ref: '#/components/schemas/TestRunFileInfo'
-          description: File info
-        logsFileInfo:
-          $ref: '#/components/schemas/TestRunFileInfo'
-          description: File info
-        artifactsContainerInfo:
-          $ref: '#/components/schemas/ArtifactsContainerInfo'
-          description: The container for test run artifacts.
-    TestRunAppComponentsUpdate:
-      type: object
-      description: Test run app component
-      properties:
-        components:
-          type: object
-          description: 'Azure resource collection { resource id (fully qualified resource Id e.g
-
-            subscriptions/{subId}/resourceGroups/{rg}/providers/Microsoft.LoadTestService/loadtests/{resName})
-
-            : resource object } '
-          additionalProperties:
-            $ref: '#/components/schemas/AppComponentUpdate'
-    DimensionValueList:
-      type: object
-      description: Metrics dimension values.
-      properties:
-        name:
-          type: string
-          description: The dimension name
-          readOnly: true
-        value:
-          type: array
-          description: The dimension value
-          items:
-            type: string
-        nextLink:
+        url:
           type: string
           format: uri
-          description: Link for the next set of values in case of paginated results, if applicable.
-    TimeSeriesElement:
+          description: This is a SAS URI to an Azure Storage Container that contains the test run artifacts.
+        expireDateTime:
+          type: string
+          format: date-time
+          description: Expiry time of the container (RFC 3339 literal format)
+    MetricValue:
       type: object
-      description: The time series returned when a data query is performed.
+      description: Represents a metric value.
       properties:
-        data:
-          type: array
-          description: An array of data points representing the metric values.
-          items:
-            $ref: '#/components/schemas/MetricValue'
-          x-ms-identifiers: []
-        dimensionValues:
-          type: array
-          description: 'The dimension values '
-          items:
-            $ref: '#/components/schemas/DimensionValue'
-          x-ms-identifiers: []
-    Status:
-      type: string
-      description: Test run status.
-      enum:
-      - ACCEPTED
-      - NOTSTARTED
-      - PROVISIONING
-      - PROVISIONED
-      - CONFIGURING
-      - CONFIGURED
-      - EXECUTING
-      - EXECUTED
-      - DEPROVISIONING
-      - DEPROVISIONED
-      - DONE
-      - CANCELLING
-      - CANCELLED
-      - FAILED
-      - VALIDATION_SUCCESS
-      - VALIDATION_FAILURE
-      x-ms-enum:
-        name: Status
-        modelAsString: true
-        values:
-        - name: ACCEPTED
-          value: ACCEPTED
-          description: Test run request is accepted.
-        - name: NOTSTARTED
-          value: NOTSTARTED
-          description: Test run is not yet started.
-        - name: PROVISIONING
-          value: PROVISIONING
-          description: Test run is provisioning.
-        - name: PROVISIONED
-          value: PROVISIONED
-          description: Test run is provisioned.
-        - name: CONFIGURING
-          value: CONFIGURING
-          description: Test run is getting configured.
-        - name: CONFIGURED
-          value: CONFIGURED
-          description: Test run configuration is done.
-        - name: EXECUTING
-          value: EXECUTING
-          description: Test run has started executing.
-        - name: EXECUTED
-          value: EXECUTED
-          description: Test run execution is completed.
-        - name: DEPROVISIONING
-          value: DEPROVISIONING
-          description: Test run is getting deprovisioned.
-        - name: DEPROVISIONED
-          value: DEPROVISIONED
-          description: Test run is deprovisioned.
-        - name: DONE
-          value: DONE
-          description: Test run is completed.
-        - name: CANCELLING
-          value: CANCELLING
-          description: Test run is being cancelled.
-        - name: CANCELLED
-          value: CANCELLED
-          description: Test run request is cancelled.
-        - name: FAILED
-          value: FAILED
-          description: Test run request is failed.
-        - name: VALIDATION_SUCCESS
-          value: VALIDATION_SUCCESS
-          description: Test run JMX file is validated.
-        - name: VALIDATION_FAILURE
-          value: VALIDATION_FAILURE
-          description: Test run JMX file validation is failed.
-    FileType:
-      type: string
-      description: Types of file supported.
-      enum:
-      - JMX_FILE
-      - USER_PROPERTIES
-      - ADDITIONAL_ARTIFACTS
-      - ZIPPED_ARTIFACTS
-      - URL_TEST_CONFIG_JSON
-      x-ms-enum:
-        name: FileType
-        modelAsString: true
-        values:
-        - name: JMX_FILE
-          value: JMX_FILE
-          description: If the file is a JMX script.
-        - name: USER_PROPERTIES
-          value: USER_PROPERTIES
-          description: If the file is a user properties file.
-        - name: ADDITIONAL_ARTIFACTS
-          value: ADDITIONAL_ARTIFACTS
-          description: If the file is not among any of the other supported file types.
-        - name: ZIPPED_ARTIFACTS
-          value: ZIPPED_ARTIFACTS
-          description: If the file is a compressed archive containing a collection of various artifacts or resources.
-        - name: URL_TEST_CONFIG_JSON
-          value: URL_TEST_CONFIG_JSON
-          description: If the file is a JSON config file to define the requests for a URL test.
-    MetricNamespaceCollection:
-      type: object
-      description: Represents collection of metric namespaces.
-      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp for the metric value in RFC 3339 format.
         value:
-          type: array
-          description: The values for the metric namespaces.
-          items:
-            $ref: '#/components/schemas/MetricNamespace'
-          x-ms-identifiers: []
-      required:
-      - value
-    PassFailCriteria:
-      type: object
-      description: Pass fail criteria for a test.
-      properties:
-        passFailMetrics:
-          type: object
-          description: 'Map of id and pass fail metrics { id  : pass fail metrics }.'
-          additionalProperties:
-            $ref: '#/components/schemas/PassFailMetric'
-    TestRunArtifacts:
-      type: object
-      description: Collection of test run artifacts
-      properties:
-        inputArtifacts:
-          $ref: '#/components/schemas/TestRunInputArtifacts'
-          description: The input artifacts for the test run.
-          readOnly: true
-        outputArtifacts:
-          $ref: '#/components/schemas/TestRunOutputArtifacts'
-          description: The output artifacts for the test run.
-    ResourceMetric:
-      type: object
-      description: 'Associated metric definition for particular metrics of the azure resource (
-
-        Refer :
-
-        https://docs.microsoft.com/en-us/rest/api/monitor/metric-definitions/list#metricdefinition).'
-      properties:
-        id:
-          type: string
-          description: Unique name for metric.
-          readOnly: true
-        resourceId:
-          type: string
-          description: Azure resource id.
-        metricNamespace:
-          type: string
-          description: Metric name space.
-        displayDescription:
-          type: string
-          description: Metric description.
-        name:
-          type: string
-          description: The invariant value of metric name
-        aggregation:
-          type: string
-          description: Metric aggregation.
-        unit:
-          type: string
-          description: Metric unit.
-        resourceType:
-          type: string
-          description: Azure resource type.
-      required:
-      - resourceId
-      - metricNamespace
-      - name
-      - aggregation
-      - resourceType
-    MetricAvailability:
-      type: object
-      description: Metric availability specifies the time grain (aggregation interval or frequency)
-      properties:
-        timeGrain:
-          $ref: '#/components/schemas/TimeGrain'
-          description: 'The time grain specifies the aggregation interval for the metric. Expressed as
-
-            a duration ''PT1M'', ''PT1H'', etc.'
-    Azure.Core.Foundations.Error:
-      type: object
-      description: The error object.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          x-ms-identifiers: []
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: An object containing more specific information than the current object about the error.
-      required:
-      - code
-      - message
-    MetricNamespace:
-      type: object
-      description: Metric namespace class specifies the metadata for a metric namespace.
-      properties:
-        description:
-          type: string
-          description: The namespace description.
-        name:
-          type: string
-          description: The metric namespace name.
-    PFResult:
-      type: string
-      description: Pass/fail criteria result.
-      enum:
-      - passed
-      - undetermined
-      - failed
-      x-ms-enum:
-        name: PFResult
-        modelAsString: true
-        values:
-        - name: passed
-          value: passed
-          description: Given pass fail criteria metric has passed.
-        - name: undetermined
-          value: undetermined
-          description: Given pass fail criteria metric couldn't determine.
-        - name: failed
-          value: failed
-          description: Given pass fail criteria metric has failed.
-    AutoStopCriteria:
-      type: object
-      description: Auto stop criteria for a test. This will automatically stop a load test if the error percentage is high for a certain time window.
-      properties:
-        autoStopDisabled:
-          type: boolean
-          description: Whether auto-stop should be disabled. The default value is false.
-          default: false
-        errorRate:
           type: number
-          format: float
-          description: Threshold percentage of errors on which test run should be automatically stopped. Allowed values are in range of 0.0-100.0
-          default: 90
-        errorRateTimeWindowInSeconds:
-          type: integer
-          format: int32
-          description: Time window during which the error percentage should be evaluated in seconds.
-          default: 60
-    AppComponent:
-      type: object
-      description: An Azure resource object (Refer azure generic resource model :https://docs.microsoft.com/en-us/rest/api/resources/resources/get-by-id#genericresource)
-      properties:
-        resourceId:
-          type: string
-          description: fully qualified resource Id e.g subscriptions/{subId}/resourceGroups/{rg}/providers/Microsoft.LoadTestService/loadtests/{resName}
-          readOnly: true
-        resourceName:
-          type: string
-          description: Azure resource name, required while creating the app component.
-        resourceType:
-          type: string
-          description: Azure resource type, required while creating the app component.
-        displayName:
-          type: string
-          description: Azure resource display name
-        resourceGroup:
-          type: string
-          description: Resource group name of the Azure resource
-          readOnly: true
-        subscriptionId:
-          type: string
-          description: Subscription Id of the Azure resource
-          readOnly: true
-        kind:
-          type: string
-          description: Kind of Azure resource type
-      required:
-      - resourceId
-      - resourceName
-      - resourceType
-    Azure.Core.Foundations.InnerError:
-      type: object
-      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: Inner error.
+          format: double
+          description: The metric value.
     TestRunAppComponents:
       type: object
       description: Test run app component
@@ -2087,476 +2342,130 @@ components:
           readOnly: true
       required:
       - components
-    TestRunInputArtifacts:
+    TestRunOutputArtifacts:
       type: object
-      description: The input artifacts for the test run.
+      description: The output artifacts for the test run.
       properties:
-        configFileInfo:
+        resultFileInfo:
           $ref: '#/components/schemas/TestRunFileInfo'
           description: File info
-        testScriptFileInfo:
+        logsFileInfo:
           $ref: '#/components/schemas/TestRunFileInfo'
           description: File info
-        userPropFileInfo:
-          $ref: '#/components/schemas/TestRunFileInfo'
-          description: File info
-        inputArtifactsZipFileInfo:
-          $ref: '#/components/schemas/TestRunFileInfo'
-          description: File info
-        urlTestConfigFileInfo:
-          $ref: '#/components/schemas/TestRunFileInfo'
-          description: The config json file for url based test
-        additionalFileInfo:
-          type: array
-          description: Additional supported files for the test run
-          items:
-            $ref: '#/components/schemas/TestRunFileInfo'
-          readOnly: true
-          x-ms-identifiers: []
-    MetricDefinition:
+        artifactsContainerInfo:
+          $ref: '#/components/schemas/ArtifactsContainerInfo'
+          description: The container for test run artifacts.
+    MetricAvailability:
       type: object
-      description: Metric definition
+      description: Metric availability specifies the time grain (aggregation interval or frequency)
       properties:
-        dimensions:
-          type: array
-          description: List of dimensions
-          items:
-            $ref: '#/components/schemas/NameAndDesc'
-          x-ms-identifiers: []
-        description:
-          type: string
-          description: The metric description
-        name:
-          type: string
-          description: The metric name
-        namespace:
-          type: string
-          description: The namespace the metric belongs to.
-        primaryAggregationType:
-          $ref: '#/components/schemas/AggregationType'
-          description: The primary aggregation type value defining how to use the values for display.
-        supportedAggregationTypes:
-          type: array
-          description: The collection of what all aggregation types are supported.
-          items:
-            type: string
-        unit:
-          $ref: '#/components/schemas/MetricUnit'
-          description: The unit of the metric.
-        metricAvailabilities:
-          type: array
-          description: 'Metric availability specifies the time grain (aggregation interval or
+        timeGrain:
+          $ref: '#/components/schemas/TimeGrain'
+          description: 'The time grain specifies the aggregation interval for the metric. Expressed as
 
-            frequency).'
-          items:
-            $ref: '#/components/schemas/MetricAvailability'
-          x-ms-identifiers: []
-    PagedTestRun:
+            a duration ''PT1M'', ''PT1H'', etc.'
+    TestRunServerMetricConfig:
       type: object
-      description: Paged collection of TestRun items
-      properties:
-        value:
-          type: array
-          description: The TestRun items on this page
-          items:
-            $ref: '#/components/schemas/TestRun'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-      required:
-      - value
-    Azure.Core.Foundations.ErrorResponse:
-      type: object
-      description: A response containing error details.
-      properties:
-        error:
-          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          description: The error object.
-      required:
-      - error
-    ArtifactsContainerInfo:
-      type: object
-      description: Artifacts container info.
-      properties:
-        url:
-          type: string
-          format: uri
-          description: This is a SAS URI to an Azure Storage Container that contains the test run artifacts.
-        expireDateTime:
-          type: string
-          format: date-time
-          description: Expiry time of the container (RFC 3339 literal format)
-    FileStatus:
-      type: string
-      description: File status.
-      enum:
-      - NOT_VALIDATED
-      - VALIDATION_SUCCESS
-      - VALIDATION_FAILURE
-      - VALIDATION_INITIATED
-      - VALIDATION_NOT_REQUIRED
-      x-ms-enum:
-        name: FileStatus
-        modelAsString: true
-        values:
-        - name: NOT_VALIDATED
-          value: NOT_VALIDATED
-          description: File is not validated.
-        - name: VALIDATION_SUCCESS
-          value: VALIDATION_SUCCESS
-          description: File is validated.
-        - name: VALIDATION_FAILURE
-          value: VALIDATION_FAILURE
-          description: File validation is failed.
-        - name: VALIDATION_INITIATED
-          value: VALIDATION_INITIATED
-          description: File validation is in progress.
-        - name: VALIDATION_NOT_REQUIRED
-          value: VALIDATION_NOT_REQUIRED
-          description: Validation is not required.
-    ErrorDetails:
-      type: object
-      description: Error details if there is any failure in load test run
-      properties:
-        message:
-          type: string
-          description: Error details in case test run was not successfully run.
-          readOnly: true
-    PFMetrics:
-      type: string
-      description: Metrics for pass/fail criteria.
-      enum:
-      - response_time_ms
-      - latency
-      - error
-      - requests
-      - requests_per_sec
-      x-ms-enum:
-        name: PFMetrics
-        modelAsString: true
-        values:
-        - name: response_time_ms
-          value: response_time_ms
-          description: Pass fail criteria for response time metric in milliseconds.
-        - name: latency
-          value: latency
-          description: Pass fail criteria for latency metric in milliseconds.
-        - name: error
-          value: error
-          description: Pass fail criteria for error metric.
-        - name: requests
-          value: requests
-          description: Pass fail criteria for total requests.
-        - name: requests_per_sec
-          value: requests_per_sec
-          description: Pass fail criteria for request per second.
-    LoadTestConfiguration:
-      type: object
-      description: Configurations for the load test.
-      properties:
-        engineInstances:
-          type: integer
-          format: int32
-          description: The number of engine instances to execute load test. Supported values are in range of 1-400. Required for creating a new test.
-        splitAllCSVs:
-          type: boolean
-          description: 'If false, Azure Load Testing copies and processes your input files unmodified
-
-            across all test engine instances. If true, Azure Load Testing splits the CSV
-
-            input data evenly across all engine instances. If you provide multiple CSV
-
-            files, each file will be split evenly.'
-          default: false
-        quickStartTest:
-          type: boolean
-          description: 'If true, optionalLoadTestConfig is required and JMX script for the load test is
-
-            not required to upload.'
-          default: false
-        optionalLoadTestConfig:
-          $ref: '#/components/schemas/OptionalLoadTestConfig'
-          description: Configuration for quick load test
-    MetricValue:
-      type: object
-      description: Represents a metric value.
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-          description: The timestamp for the metric value in RFC 3339 format.
-        value:
-          type: number
-          format: double
-          description: The metric value.
-    PassFailMetric:
-      type: object
-      description: Pass fail metric
-      properties:
-        clientMetric:
-          $ref: '#/components/schemas/PFMetrics'
-          description: The client metric on which the criteria should be applied.
-        aggregate:
-          $ref: '#/components/schemas/PFAgFunc'
-          description: 'The aggregation function to be applied on the client metric. Allowed functions
-
-            - ‘percentage’ - for error metric , ‘avg’, ‘p50’, ‘p90’, ‘p95’, ‘p99’, ‘min’,
-
-            ‘max’ - for response_time_ms and latency metric, ‘avg’ - for requests_per_sec,
-
-            ‘count’ - for requests'
-        condition:
-          type: string
-          description: 'The comparison operator. Supported types ‘>’, ‘<’ '
-        requestName:
-          type: string
-          description: 'Request name for which the Pass fail criteria has to be applied '
-        value:
-          type: number
-          format: double
-          description: 'The value to compare with the client metric. Allowed values - ‘error : [0.0 ,
-
-            100.0] unit- % ’, response_time_ms and latency : any integer value unit- ms.'
-        action:
-          type: string
-          description: Action taken after the threshold is met. Default is ‘continue’.
-          default: continue
-          enum:
-          - continue
-          - stop
-          x-ms-enum:
-            name: PFAction
-            modelAsString: true
-            values:
-            - name: continue
-              value: continue
-              description: Test will continue to run even if pass fail metric criteria metric gets failed.
-            - name: stop
-              value: stop
-              description: Test run will stop if pass fail criteria metric is not passed.
-        actualValue:
-          type: number
-          format: double
-          description: The actual value of the client metric for the test run.
-          readOnly: true
-        result:
-          $ref: '#/components/schemas/PFResult'
-          description: Outcome of the test run.
-          readOnly: true
-    Metrics:
-      type: object
-      description: The response to a metrics query.
-      properties:
-        value:
-          type: array
-          description: The TimeSeriesElement items on this page
-          items:
-            $ref: '#/components/schemas/TimeSeriesElement'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-      required:
-      - value
-    TestRunFileInfo:
-      type: object
-      description: Test run file info.
-      properties:
-        fileName:
-          type: string
-          description: Name of the file.
-        url:
-          type: string
-          format: uri
-          description: File URL.
-          readOnly: true
-        fileType:
-          $ref: '#/components/schemas/FileType'
-          description: File type
-          readOnly: true
-        expireDateTime:
-          type: string
-          format: date-time
-          description: Expiry time of the file (RFC 3339 literal format)
-          readOnly: true
-        validationStatus:
-          $ref: '#/components/schemas/FileStatus'
-          description: Validation status of the file
-          readOnly: true
-        validationFailureDetails:
-          type: string
-          description: Validation failure error details
-          readOnly: true
-      required:
-      - fileName
-    PFAgFunc:
-      type: string
-      description: Aggregation functions for pass/fail criteria.
-      enum:
-      - count
-      - percentage
-      - avg
-      - p50
-      - p90
-      - p95
-      - p99
-      - min
-      - max
-      x-ms-enum:
-        name: PFAgFunc
-        modelAsString: true
-        values:
-        - name: count
-          value: count
-          description: Criteria applies for count value.
-        - name: percentage
-          value: percentage
-          description: Criteria applies for given percentage value.
-        - name: avg
-          value: avg
-          description: Criteria applies for avg value.
-        - name: p50
-          value: p50
-          description: Criteria applies for 50th percentile value.
-        - name: p90
-          value: p90
-          description: Criteria applies for 90th percentile value.
-        - name: p95
-          value: p95
-          description: Criteria applies for 95th percentile value.
-        - name: p99
-          value: p99
-          description: Criteria applies for 99th percentile value.
-        - name: min
-          value: min
-          description: Criteria applies for minimum value.
-        - name: max
-          value: max
-          description: Criteria applies for maximum value.
-    NameAndDesc:
-      type: object
-      description: The name and description
-      properties:
-        description:
-          type: string
-          description: The description
-        name:
-          type: string
-          description: The name
-    PFTestResult:
-      type: string
-      description: Test result based on pass/fail criteria.
-      enum:
-      - PASSED
-      - NOT_APPLICABLE
-      - FAILED
-      x-ms-enum:
-        name: PFTestResult
-        modelAsString: true
-        values:
-        - name: PASSED
-          value: PASSED
-          description: Pass/fail criteria has passed.
-        - name: NOT_APPLICABLE
-          value: NOT_APPLICABLE
-          description: Pass/fail criteria is not applicable.
-        - name: FAILED
-          value: FAILED
-          description: Pass/fail criteria has failed.
-    ErrorResponseBody:
-      description: The error response object.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The error target.
-          type: string
-        details:
-          description: Additional details and inner errors.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorResponseBody'
-    LoadTestConfig:
-      description: The load test configuration
-      type: object
-      properties:
-        engineInstances:
-          format: int32
-          description: The number of engine instances to execute load test. Supported values are in range of 1-50. Required for creating a new Test.
-          type: integer
-    OutputTestArtifacts:
-      description: The output artifacts for the test run
-      required:
-      - logsUrl
-      - resultUrl
-      type: object
-      properties:
-        resultUrl:
-          $ref: '#/components/schemas/FileUrl'
-        logsUrl:
-          $ref: '#/components/schemas/FileUrl'
-    TimeRange:
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: start DateTime(Iso8601Literal format) for the requested client metrics filter
-          type: string
-        endTime:
-          format: date-time
-          description: end DateTime(Iso8601Literal format) for the requested client metrics filter
-          type: string
-    PassFailCriteria_2:
-      description: Pass fail criteria for a test
-      type: object
-      properties:
-        passFailMetrics:
-          description: 'Map of id and pass fail metrics { id  : pass fail metrics }'
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/PassFailMetric_2'
-    InputTestArtifacts:
-      description: '[ReadOnly]The input artifacts for the test'
-      type: object
-      properties:
-        configUrl:
-          $ref: '#/components/schemas/FileUrl'
-        testScriptUrl:
-          $ref: '#/components/schemas/FileUrl'
-        inputArtifactsZipFileurl:
-          $ref: '#/components/schemas/FileUrl'
-        additionalUrls:
-          description: '[ReadOnly]The input artifacts file { name : url } map for the test run'
-          type: array
-          items:
-            $ref: '#/components/schemas/FileUrl'
-    ClientMetricsFilters:
-      type: object
+      description: Test run server metrics configuration
       properties:
         testRunId:
-          description: Test run name for which client metrics filters is required.
           type: string
-        filters:
-          $ref: '#/components/schemas/Filters'
-        timeRange:
-          $ref: '#/components/schemas/TimeRange'
-    SecretMetadata:
+          description: Test run identifier
+          readOnly: true
+        metrics:
+          type: object
+          description: 'Azure resource metrics collection {metric id : metrics object} (Refer :
+
+            https://docs.microsoft.com/en-us/rest/api/monitor/metric-definitions/list#metricdefinition
+
+            for metric id).'
+          additionalProperties:
+            $ref: '#/components/schemas/ResourceMetric'
+        createdDateTime:
+          type: string
+          format: date-time
+          description: The creation datetime(RFC 3339 literal format).
+          readOnly: true
+        createdBy:
+          type: string
+          description: The user that created.
+          readOnly: true
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+          description: The last Modified datetime(RFC 3339 literal format).
+          readOnly: true
+        lastModifiedBy:
+          type: string
+          description: The user that last modified.
+          readOnly: true
+    OptionalLoadTestConfig:
       type: object
+      description: Configuration for quick load test
       properties:
-        value:
-          description: The value of the secret. of type== akv-secret-uri or secret-value
+        endpointUrl:
           type: string
-        type:
-          description: Type of secret. eg. AKV_SECRET_URI/SECRET_VALUE
-          type: string
+          description: Test URL. Provide the complete HTTP URL. For example, https://contoso-app.azurewebsites.net/login
+        requestsPerSecond:
+          type: integer
+          format: int32
+          description: Target throughput (requests per second). This may not be necessarily achieved. The actual throughput will be lower if the application is not capable of handling it.
+        maxResponseTimeInMs:
+          type: integer
+          format: int32
+          description: Maximum response time in milliseconds of the API/endpoint.
+        virtualUsers:
+          type: integer
+          format: int32
+          description: No of concurrent virtual users.
+        rampUpTime:
+          type: integer
+          format: int32
+          description: Ramp up time in seconds.
+        duration:
+          type: integer
+          format: int32
+          description: Test run duration in seconds.
+    MetricUnit:
+      type: string
+      description: Metric unit.
+      enum:
+      - NotSpecified
+      - Percent
+      - Count
+      - Seconds
+      - Milliseconds
+      - Bytes
+      - BytesPerSecond
+      - CountPerSecond
+      x-ms-enum:
+        name: MetricUnit
+        modelAsString: true
+        values:
+        - name: NotSpecified
+          value: NotSpecified
+          description: No unit specified.
+        - name: Percent
+          value: Percent
+          description: Percentage.
+        - name: Count
+          value: Count
+          description: Value count.
+        - name: Seconds
+          value: Seconds
+          description: Seconds.
+        - name: Milliseconds
+          value: Milliseconds
+          description: Milliseconds
+        - name: Bytes
+          value: Bytes
+          description: Bytes
+        - name: BytesPerSecond
+          value: BytesPerSecond
+          description: Bytes per second
+        - name: CountPerSecond
+          value: CountPerSecond
+          description: Count per second
     FileUrl:
       description: FileUrl Model
       type: object
@@ -2574,37 +2483,58 @@ components:
           format: date-time
           description: Expiry time of the file
           type: string
-    Series:
+    PassFailMetric_2:
       type: object
       properties:
-        activeUsers:
-          description: Active users time series data
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/TimeSeries'
-        responseTime:
-          description: Response time, time series data
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/TimeSeries'
-        throughput:
-          description: Throughput time series data
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/TimeSeries'
-        errors:
-          description: Errors time series data
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/TimeSeries'
+        clientmetric:
+          description: 'The client metric on which the criteria should be applied. Allowed values - ‘response_time_ms’ , ‘latency’, ‘error’ '
+          type: string
+        aggregate:
+          description: 'The aggregation function to be applied on the client metric. Allowed functions - ‘percentage’ - for error metric , ‘avg’ - for response_time_ms and latency metric '
+          type: string
+        condition:
+          description: 'The comparison operator. Supported types ‘>’ '
+          type: string
+        value:
+          format: double
+          description: 'The value to compare with the client metric. Allowed values - ‘error : [0.0 , 100.0] unit- % ’, response_time_ms and latency : any integer value unit- ms'
+          type: number
+        action:
+          description: Either ‘stop’ or ‘continue’ after the threshold is met. Default is ‘continue’
+          type: string
+        actualValue:
+          format: double
+          description: '[ReadOnly] The actual value of the client metric for the test run '
+          type: number
+        result:
+          description: '[ReadOnly] Outcome of the testRun. possible outcome - ‘passed’ , ‘failed’ , ‘undetermined’ '
+          type: string
+    TimeRange:
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: start DateTime(Iso8601Literal format) for the requested client metrics filter
+          type: string
+        endTime:
+          format: date-time
+          description: end DateTime(Iso8601Literal format) for the requested client metrics filter
+          type: string
+    InputTestArtifacts:
+      description: '[ReadOnly]The input artifacts for the test'
+      type: object
+      properties:
+        configUrl:
+          $ref: '#/components/schemas/FileUrl'
+        testScriptUrl:
+          $ref: '#/components/schemas/FileUrl'
+        inputArtifactsZipFileurl:
+          $ref: '#/components/schemas/FileUrl'
+        additionalUrls:
+          description: '[ReadOnly]The input artifacts file { name : url } map for the test run'
+          type: array
+          items:
+            $ref: '#/components/schemas/FileUrl'
     TestArtifacts:
       required:
       - inputArtifacts
@@ -2614,6 +2544,16 @@ components:
           $ref: '#/components/schemas/InputTestArtifacts'
         outputArtifacts:
           $ref: '#/components/schemas/OutputTestArtifacts'
+    ClientMetricsFilters:
+      type: object
+      properties:
+        testRunId:
+          description: Test run name for which client metrics filters is required.
+          type: string
+        filters:
+          $ref: '#/components/schemas/Filters'
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
     TestRunModel:
       description: Load test run model
       type: object
@@ -2708,53 +2648,77 @@ components:
       properties:
         error:
           $ref: '#/components/schemas/ErrorResponseBody'
-    PassFailMetric_2:
+    OutputTestArtifacts:
+      description: The output artifacts for the test run
+      required:
+      - logsUrl
+      - resultUrl
       type: object
       properties:
-        clientmetric:
-          description: 'The client metric on which the criteria should be applied. Allowed values - ‘response_time_ms’ , ‘latency’, ‘error’ '
+        resultUrl:
+          $ref: '#/components/schemas/FileUrl'
+        logsUrl:
+          $ref: '#/components/schemas/FileUrl'
+    Filters:
+      type: object
+      properties:
+        requestSamplerValues:
+          description: List of request sampler for the test run, for which client metrics can be filtered
+          type: array
+          items:
+            type: string
+        errorFiltersValues:
+          description: List of errors occurred for the test run, for which client metrics can be filtered
+          type: array
+          items:
+            type: string
+    ErrorResponseBody:
+      description: The error response object.
+      type: object
+      properties:
+        code:
+          description: The error code.
           type: string
-        aggregate:
-          description: 'The aggregation function to be applied on the client metric. Allowed functions - ‘percentage’ - for error metric , ‘avg’ - for response_time_ms and latency metric '
+        message:
+          description: The error message.
           type: string
-        condition:
-          description: 'The comparison operator. Supported types ‘>’ '
+        target:
+          description: The error target.
           type: string
+        details:
+          description: Additional details and inner errors.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorResponseBody'
+    PassFailCriteria_2:
+      description: Pass fail criteria for a test
+      type: object
+      properties:
+        passFailMetrics:
+          description: 'Map of id and pass fail metrics { id  : pass fail metrics }'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/PassFailMetric_2'
+    TestRunModelResourceList:
+      description: List of Resources
+      type: object
+      properties:
         value:
-          format: double
-          description: 'The value to compare with the client metric. Allowed values - ‘error : [0.0 , 100.0] unit- % ’, response_time_ms and latency : any integer value unit- ms'
-          type: number
-        action:
-          description: Either ‘stop’ or ‘continue’ after the threshold is met. Default is ‘continue’
+          description: List of Resources
+          type: array
+          items:
+            $ref: '#/components/schemas/TestRunModel'
+        continuationToken:
+          description: Continuation token for list of resources in case of paginated results, if applicable
           type: string
-        actualValue:
-          format: double
-          description: '[ReadOnly] The actual value of the client metric for the test run '
-          type: number
-        result:
-          description: '[ReadOnly] Outcome of the testRun. possible outcome - ‘passed’ , ‘failed’ , ‘undetermined’ '
-          type: string
-    FileUrlPath:
+    LoadTestConfig:
+      description: The load test configuration
       type: object
       properties:
-        id:
-          description: Path of the file
-          type: string
-        url:
-          description: url of the file
-          type: string
-        expireTime:
-          format: date-time
-          description: Expiry time of the file
-          type: string
-    ClientMetricsResults:
-      type: object
-      properties:
-        testRunId:
-          description: Test run name for which client metrics results is required.
-          type: string
-        timeSeries:
-          $ref: '#/components/schemas/Series'
+        engineInstances:
+          format: int32
+          description: The number of engine instances to execute load test. Supported values are in range of 1-50. Required for creating a new Test.
+          type: integer
     TestRunStatisticsModel:
       description: '[Readonly] Test run statistics'
       type: object
@@ -2814,31 +2778,37 @@ components:
           format: double
           description: '[Readonly] Send network bytes'
           type: number
-    Filters:
+    Series:
       type: object
       properties:
-        requestSamplerValues:
-          description: List of request sampler for the test run, for which client metrics can be filtered
-          type: array
-          items:
-            type: string
-        errorFiltersValues:
-          description: List of errors occurred for the test run, for which client metrics can be filtered
-          type: array
-          items:
-            type: string
-    TestRunModelResourceList:
-      description: List of Resources
-      type: object
-      properties:
-        value:
-          description: List of Resources
-          type: array
-          items:
-            $ref: '#/components/schemas/TestRunModel'
-        continuationToken:
-          description: Continuation token for list of resources in case of paginated results, if applicable
-          type: string
+        activeUsers:
+          description: Active users time series data
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/TimeSeries'
+        responseTime:
+          description: Response time, time series data
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/TimeSeries'
+        throughput:
+          description: Throughput time series data
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/TimeSeries'
+        errors:
+          description: Errors time series data
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/TimeSeries'
     TimeSeries:
       type: object
       properties:
@@ -2850,29 +2820,47 @@ components:
           format: double
           description: Value at timestamp
           type: number
+    ClientMetricsResults:
+      type: object
+      properties:
+        testRunId:
+          description: Test run name for which client metrics results is required.
+          type: string
+        timeSeries:
+          $ref: '#/components/schemas/Series'
+    SecretMetadata:
+      type: object
+      properties:
+        value:
+          description: The value of the secret. of type== akv-secret-uri or secret-value
+          type: string
+        type:
+          description: Type of secret. eg. AKV_SECRET_URI/SECRET_VALUE
+          type: string
+    FileUrlPath:
+      type: object
+      properties:
+        id:
+          description: Path of the file
+          type: string
+        url:
+          description: url of the file
+          type: string
+        expireTime:
+          format: date-time
+          description: Expiry time of the file
+          type: string
   parameters:
-    MetricDimensionsRequest.metricname:
-      name: metricname
+    ListTestRunQueryParams.maxpagesize:
+      name: maxpagesize
       in: query
-      description: Metric name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    OldTestRunIdQueryParam:
-      name: oldTestRunId
-      in: query
-      description: 'Existing test run identifier that should be rerun, if this is provided, the
-
-        test will run with the JMX file, configuration and app components from the
-
-        existing test run. You can override the configuration values for new test run
-
-        in the request body.'
+      description: Number of results in response.
       required: false
       x-ms-parameter-location: method
       schema:
-        type: string
+        type: integer
+        format: int32
+        default: 50
     ListTestRunQueryParams.search:
       name: search
       in: query
@@ -2881,22 +2869,6 @@ components:
         executedUser. For example, to search for a test run, with description 500 VUs,
 
         the search parameter can be 500.'
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    MetricDimensionsRequest.timespan:
-      name: timespan
-      in: query
-      description: The timespan of the query. It is a string with the following format 'startDateTime_ISO/endDateTime_ISO'.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ListTestRunQueryParams.status:
-      name: status
-      in: query
-      description: Comma separated list of test run status.
       required: false
       x-ms-parameter-location: method
       schema:
@@ -2935,14 +2907,6 @@ components:
         - PT5M
         - PT1H
         default: PT1M
-    MetricDimensionsRequest.metricNamespace:
-      name: metricNamespace
-      in: query
-      description: Metric namespace to query metric definitions for.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     ListTestRunQueryParams.orderby:
       name: orderby
       in: query
@@ -2950,6 +2914,61 @@ components:
 
         asc. Supported fields - executedDateTime'
       required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    OldTestRunIdQueryParam:
+      name: oldTestRunId
+      in: query
+      description: 'Existing test run identifier that should be rerun, if this is provided, the
+
+        test will run with the JMX file, configuration and app components from the
+
+        existing test run. You can override the configuration values for new test run
+
+        in the request body.'
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ListTestRunQueryParams.executionTo:
+      name: executionTo
+      in: query
+      description: End DateTime(RFC 3339 literal format) of test-run execution time filter range.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: date-time
+    MetricDimensionsRequest.metricname:
+      name: metricname
+      in: query
+      description: Metric name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ListTestRunQueryParams.status:
+      name: status
+      in: query
+      description: Comma separated list of test run status.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    MetricDimensionsRequest.timespan:
+      name: timespan
+      in: query
+      description: The timespan of the query. It is a string with the following format 'startDateTime_ISO/endDateTime_ISO'.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    MetricDimensionsRequest.metricNamespace:
+      name: metricNamespace
+      in: query
+      description: Metric namespace to query metric definitions for.
+      required: true
       x-ms-parameter-location: method
       schema:
         type: string
@@ -2961,25 +2980,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    ListTestRunQueryParams.maxpagesize:
-      name: maxpagesize
-      in: query
-      description: Number of results in response.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-        default: 50
-    ListTestRunQueryParams.executionTo:
-      name: executionTo
-      in: query
-      description: End DateTime(RFC 3339 literal format) of test-run execution time filter range.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: date-time
     Azure.Core.Foundations.ApiVersionParameter:
       name: api-version
       in: query

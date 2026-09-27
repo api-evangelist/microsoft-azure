@@ -332,7 +332,7 @@ paths:
         * Removes chosen passphrase association.
 
         * Resets value of modelVersion.'
-      operationId: microsoftAzureTextindependentResetprofile
+      operationId: postTextIndependentProfilesByProfileIdReset
       summary: Microsoft Azure Reset Profile
       x-ms-examples:
         Successful Query:
@@ -350,6 +350,8 @@ paths:
           $ref: '#/components/responses/RateLimit'
         '500':
           $ref: '#/components/responses/ServerError'
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureTextindependentResetprofile
   /text-independent/profiles/{profileId}/verify:
     parameters:
     - $ref: '#/components/parameters/profileIdParam_2'
@@ -438,6 +440,173 @@ paths:
         required: true
 components:
   schemas:
+    LocaleInfo:
+      description: Speaker profile locale
+      type: object
+      required:
+      - locale
+      properties:
+        locale:
+          $ref: '#/components/schemas/Locale'
+    TiProfileInfoList:
+      description: Text-Independent Speaker profile info list
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/TiProfileInfo'
+        nextLink:
+          type: string
+          example: '{opaqueUrl}'
+    CreatedDateTime:
+      type: string
+      format: date-time
+      description: Profile creation datetime.
+      example: '2015-04-23T18:25:43.41Z'
+    Locale:
+      type: string
+      pattern: ^[a-zA-Z]{2}-?[a-zA-Z]{2}$
+      description: Language identifier consisting of a combination of language code and country code.
+      example: en-US
+    IdentifiedSingleSpeakerInfo:
+      type: object
+      properties:
+        identifiedProfile:
+          description: Object containing data of identified profile.
+          $ref: '#/components/schemas/IdentifyInfo'
+        profilesRanking:
+          description: Object containing data of the top 5 profiles (including identified profile) sorted in descending order by score.
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifyInfo'
+          example:
+          - profileId: 111f427c-3791-468f-b709-fcef7660fff9
+            score: 0.63
+          - profileId: 3669fa29-1bf3-45ad-beea-6b348d058d7e
+            score: 0.49
+          - profileId: 0e196cd9-32d5-4883-8631-54a0e7c7cb3d
+            score: 0.4
+          - profileId: 726e57d9-04e0-4214-b482-7f786fa83560
+            score: 0.1
+          - profileId: f95189fd-1bf5-4485-9c2e-e5897e0c98ca
+            score: 0.03
+    EnrollmentsSpeechLengthInSec:
+      type: number
+      description: Summation of pure speech (which is the amount of audio after removing silence and non-speech segments) across all profile enrollments in seconds.
+      example: 1.35
+    EnrollmentsCount:
+      type: integer
+      description: Number of enrollment audios accepted for this profile.
+      example: 1
+    SpeakerErrorInfo:
+      description: Speaker error message
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          required:
+          - code
+          - message
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    IdentifyInfo:
+      description: Identified speaker info
+      type: object
+      properties:
+        profileId:
+          type: string
+          description: ID of identified of profile. If no candidate is identified as the right speaker, the value is set to empty GUID.
+          example: 111f427c-3791-468f-b709-fcef7660fff9
+          format: uuid
+        score:
+          type: number
+          description: A float number indicating the similarity between input audio and targeted voice print. This number must be between 0 and 1. A higher number means higher similarity.
+          example: 0.63
+    ProfileId:
+      type: string
+      description: Unique identifier for profile id (guid).
+      format: uuid
+      example: 49a36324-fc4b-4387-aa06-090cfbf0064f
+    TiEnrollmentInfo:
+      description: Speaker profile enrollment info
+      type: object
+      properties:
+        profileId:
+          $ref: '#/components/schemas/ProfileId'
+        enrollmentStatus:
+          $ref: '#/components/schemas/EnrollmentStatus'
+        enrollmentsCount:
+          $ref: '#/components/schemas/EnrollmentsCount'
+        enrollmentsLengthInSec:
+          $ref: '#/components/schemas/EnrollmentsLengthInSec'
+        enrollmentsSpeechLengthInSec:
+          $ref: '#/components/schemas/EnrollmentsSpeechLengthInSec'
+        remainingEnrollmentsSpeechLengthInSec:
+          $ref: '#/components/schemas/RemainingEnrollmentsSpeechLengthInSec'
+        audioLengthInSec:
+          type: number
+          description: This enrollment audio length in seconds.
+          example: 1.83
+        audioSpeechLengthInSec:
+          type: number
+          description: This enrollment audio pure speech (which is the amount of audio after removing silence and non-speech segments) length in seconds.
+          example: 1.35
+    RemainingEnrollmentsSpeechLengthInSec:
+      type: number
+      description: Amount of pure speech (which is the amount of audio after removing silence and non-speech segments) needed to complete profile enrollment in seconds.
+      example: 18.65
+    LastUpdatedDateTime:
+      type: string
+      format: date-time
+      description: Last datetime when the profile was updated.
+      example: '2015-04-23T19:34:51.52Z'
+    EnrollmentStatus:
+      type: string
+      description: 'Status representing the current state of the profile enrollment. Available values are:
+
+        * Enrolling: profile has no voice print and not ready for recognition requests.
+
+        * Training: voice print of profile is being created and can’t be used for recognition at the moment.
+
+        * Enrolled: profile has a voice print and ready for recognition requests.'
+      enum:
+      - Enrolling
+      - Training
+      - Enrolled
+      x-ms-enum:
+        name: TrainingStatusType
+        modelAsString: false
+      example: Enrolling
+    ActivationPhrase:
+      type: string
+      description: Activation phrases available to activate a profile.
+      example: this is my activation phrase to identify me
+    ProfileStatus:
+      type: string
+      description: 'Status representing the current state of the profile activation. Available values are:
+
+        * Active: profile is active and can be used if the enrollment status is ''Enrolled''.
+
+        * Inactive: profile has not been activated and an activation phrase must be submitted.'
+      enum:
+      - Active
+      - Inactive
+      x-ms-enum:
+        name: ProfileStatusType
+        modelAsString: false
+      example: Inactive
+    EnrollmentsLengthInSec:
+      type: number
+      description: Total length of enrollment audios accepted for this profile in seconds.
+      example: 1.83
     TiProfileInfo:
       description: Text-Independent Speaker profile info
       type: object
@@ -464,174 +633,6 @@ components:
           $ref: '#/components/schemas/RemainingEnrollmentsSpeechLengthInSec'
         modelVersion:
           $ref: '#/components/schemas/ModelVersion'
-    EnrollmentStatus:
-      type: string
-      description: 'Status representing the current state of the profile enrollment. Available values are:
-
-        * Enrolling: profile has no voice print and not ready for recognition requests.
-
-        * Training: voice print of profile is being created and can’t be used for recognition at the moment.
-
-        * Enrolled: profile has a voice print and ready for recognition requests.'
-      enum:
-      - Enrolling
-      - Training
-      - Enrolled
-      x-ms-enum:
-        name: TrainingStatusType
-        modelAsString: false
-      example: Enrolling
-    TiProfileInfoList:
-      description: Text-Independent Speaker profile info list
-      type: object
-      required:
-      - value
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/TiProfileInfo'
-        nextLink:
-          type: string
-          example: '{opaqueUrl}'
-    ModelVersion:
-      type: string
-      format: date
-      description: Date specifying the model assigned to this profile. Format is yyyy-mm-dd. If profile has no enrollments, this value will be empty.
-      example: '2019-12-05'
-    ProfileId:
-      type: string
-      description: Unique identifier for profile id (guid).
-      format: uuid
-      example: 49a36324-fc4b-4387-aa06-090cfbf0064f
-    IdentifiedSingleSpeakerInfo:
-      type: object
-      properties:
-        identifiedProfile:
-          description: Object containing data of identified profile.
-          $ref: '#/components/schemas/IdentifyInfo'
-        profilesRanking:
-          description: Object containing data of the top 5 profiles (including identified profile) sorted in descending order by score.
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentifyInfo'
-          example:
-          - profileId: 111f427c-3791-468f-b709-fcef7660fff9
-            score: 0.63
-          - profileId: 3669fa29-1bf3-45ad-beea-6b348d058d7e
-            score: 0.49
-          - profileId: 0e196cd9-32d5-4883-8631-54a0e7c7cb3d
-            score: 0.4
-          - profileId: 726e57d9-04e0-4214-b482-7f786fa83560
-            score: 0.1
-          - profileId: f95189fd-1bf5-4485-9c2e-e5897e0c98ca
-            score: 0.03
-    IdentifyInfo:
-      description: Identified speaker info
-      type: object
-      properties:
-        profileId:
-          type: string
-          description: ID of identified of profile. If no candidate is identified as the right speaker, the value is set to empty GUID.
-          example: 111f427c-3791-468f-b709-fcef7660fff9
-          format: uuid
-        score:
-          type: number
-          description: A float number indicating the similarity between input audio and targeted voice print. This number must be between 0 and 1. A higher number means higher similarity.
-          example: 0.63
-    LocaleInfo:
-      description: Speaker profile locale
-      type: object
-      required:
-      - locale
-      properties:
-        locale:
-          $ref: '#/components/schemas/Locale'
-    EnrollmentsCount:
-      type: integer
-      description: Number of enrollment audios accepted for this profile.
-      example: 1
-    CreatedDateTime:
-      type: string
-      format: date-time
-      description: Profile creation datetime.
-      example: '2015-04-23T18:25:43.41Z'
-    ProfileStatus:
-      type: string
-      description: 'Status representing the current state of the profile activation. Available values are:
-
-        * Active: profile is active and can be used if the enrollment status is ''Enrolled''.
-
-        * Inactive: profile has not been activated and an activation phrase must be submitted.'
-      enum:
-      - Active
-      - Inactive
-      x-ms-enum:
-        name: ProfileStatusType
-        modelAsString: false
-      example: Inactive
-    EnrollmentsSpeechLengthInSec:
-      type: number
-      description: Summation of pure speech (which is the amount of audio after removing silence and non-speech segments) across all profile enrollments in seconds.
-      example: 1.35
-    ActivationPhrase:
-      type: string
-      description: Activation phrases available to activate a profile.
-      example: this is my activation phrase to identify me
-    Locale:
-      type: string
-      pattern: ^[a-zA-Z]{2}-?[a-zA-Z]{2}$
-      description: Language identifier consisting of a combination of language code and country code.
-      example: en-US
-    SpeakerErrorInfo:
-      description: Speaker error message
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          required:
-          - code
-          - message
-          type: object
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-    TiEnrollmentInfo:
-      description: Speaker profile enrollment info
-      type: object
-      properties:
-        profileId:
-          $ref: '#/components/schemas/ProfileId'
-        enrollmentStatus:
-          $ref: '#/components/schemas/EnrollmentStatus'
-        enrollmentsCount:
-          $ref: '#/components/schemas/EnrollmentsCount'
-        enrollmentsLengthInSec:
-          $ref: '#/components/schemas/EnrollmentsLengthInSec'
-        enrollmentsSpeechLengthInSec:
-          $ref: '#/components/schemas/EnrollmentsSpeechLengthInSec'
-        remainingEnrollmentsSpeechLengthInSec:
-          $ref: '#/components/schemas/RemainingEnrollmentsSpeechLengthInSec'
-        audioLengthInSec:
-          type: number
-          description: This enrollment audio length in seconds.
-          example: 1.83
-        audioSpeechLengthInSec:
-          type: number
-          description: This enrollment audio pure speech (which is the amount of audio after removing silence and non-speech segments) length in seconds.
-          example: 1.35
-    LastUpdatedDateTime:
-      type: string
-      format: date-time
-      description: Last datetime when the profile was updated.
-      example: '2015-04-23T19:34:51.52Z'
-    EnrollmentsLengthInSec:
-      type: number
-      description: Total length of enrollment audios accepted for this profile in seconds.
-      example: 1.83
     ActivationPhraseInfo:
       description: Activation phrase list
       type: object
@@ -645,50 +646,16 @@ components:
             properties:
               activationPhrase:
                 $ref: '#/components/schemas/ActivationPhrase'
-    RemainingEnrollmentsSpeechLengthInSec:
-      type: number
-      description: Amount of pure speech (which is the amount of audio after removing silence and non-speech segments) needed to complete profile enrollment in seconds.
-      example: 18.65
-    TiProfileInfo_2:
-      description: Text-Independent Speaker profile info
+    ModelVersion:
+      type: string
+      format: date
+      description: Date specifying the model assigned to this profile. Format is yyyy-mm-dd. If profile has no enrollments, this value will be empty.
+      example: '2019-12-05'
+    LocaleInfo_2:
+      description: Speaker profile locale
       properties:
-        profileId:
-          $ref: '#/components/schemas/ProfileId_2'
         locale:
           $ref: '#/components/schemas/Locale'
-        enrollmentStatus:
-          $ref: '#/components/schemas/EnrollmentStatus_2'
-        createdDateTime:
-          $ref: '#/components/schemas/CreatedDateTime_2'
-        lastUpdatedDateTime:
-          $ref: '#/components/schemas/LastUpdatedDateTime_2'
-        enrollmentsCount:
-          $ref: '#/components/schemas/EnrollmentsCount_2'
-        enrollmentsLength:
-          $ref: '#/components/schemas/EnrollmentsLength'
-        enrollmentsSpeechLength:
-          $ref: '#/components/schemas/EnrollmentsSpeechLength'
-        remainingEnrollmentsSpeechLength:
-          $ref: '#/components/schemas/RemainingEnrollmentsSpeechLength'
-        modelVersion:
-          $ref: '#/components/schemas/ModelVersion_2'
-    EnrollmentStatus_2:
-      type: string
-      description: 'Status representing the current state of the profile. Available values are:
-
-        * Enrolling: profile has no voice print and not ready for recognition requests.
-
-        * Training: voice print of profile is being created and can’t be used for recognition at the moment.
-
-        * Enrolled: profile has a voice print and ready for recognition requests.'
-      enum:
-      - Enrolling
-      - Training
-      - Enrolled
-      x-ms-enum:
-        name: TrainingStatusType
-        modelAsString: false
-      example: Enrolling
     TiProfileInfoList_2:
       description: Text-Independent Speaker profile info list
       properties:
@@ -698,59 +665,31 @@ components:
         '@nextLink':
           type: string
           example: https://{Endpoint}/text-independent/profiles?$top=35&$continuationToken=U21pdGg1QmVuOTk5
-    ModelVersion_2:
+    Error:
+      description: Speaker error message
+      required:
+      - error
+      properties:
+        error:
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    CreatedDateTime_2:
       type: string
-      pattern: ^\d{4}-\d{2}-\d{2}$
-      description: Date specifying the model assigned to this profile. Format is yyyy-mm-dd. If profile has no enrollments, this value will be empty.
-      example: '2019-12-05'
+      description: Profile creation datetime.
+      example: '2015-04-23T18:25:43.41Z'
+    EnrollmentsCount_2:
+      type: integer
+      description: Number of enrolment audios accepted for this profile.
+      example: 1
     ProfileId_2:
       type: string
       pattern: ^([0-9a-fA-F]){8}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){12}$
       description: Unique identifier for profile id (guid).
       format: uuid
       example: 49a36324-fc4b-4387-aa06-090cfbf0064f
-    EnrollmentsCount_2:
-      type: integer
-      description: Number of enrolment audios accepted for this profile.
-      example: 1
-    LocaleInfo_2:
-      description: Speaker profile locale
-      properties:
-        locale:
-          $ref: '#/components/schemas/Locale'
-    CreatedDateTime_2:
-      type: string
-      description: Profile creation datetime.
-      example: '2015-04-23T18:25:43.41Z'
-    EnrollmentsLength:
-      type: number
-      description: Total length of enrollment audios accepted for this profile in seconds.
-      example: 1.83
-    RemainingEnrollmentsSpeechLength:
-      type: number
-      description: Amount of pure speech (which is the amount of audio after removing silence and non-speech segments) needed to complete profile enrollment in seconds.
-      example: 18.65
-    RecognitionInfo:
-      description: Speaker recognition result
-      properties:
-        recognitionResult:
-          type: string
-          description: Does audio belong to targeted profile?
-          enum:
-          - accept
-          - reject
-          x-ms-enum:
-            name: ResultType
-            modelAsString: false
-          example: Accept
-        score:
-          type: number
-          description: A float number indicating the similarity between input audio and targeted voice print. This number must be between 0 and 1. A higher number means higher similarity.
-          example: 0.63
-    EnrollmentsSpeechLength:
-      type: number
-      description: Summation of pure speech (which is the amount of audio after removing silence and non-speech segments) across all profile enrollments in seconds.
-      example: 1.35
     TiEnrollmentInfo_2:
       description: Text-Independent Speaker profile enrollment info
       properties:
@@ -774,21 +713,124 @@ components:
           type: number
           description: This enrollment audio pure speech (which is the amount of audio after removing silence and non-speech segments) length in seconds.
           example: 1.35
+    EnrollmentsSpeechLength:
+      type: number
+      description: Summation of pure speech (which is the amount of audio after removing silence and non-speech segments) across all profile enrollments in seconds.
+      example: 1.35
+    RemainingEnrollmentsSpeechLength:
+      type: number
+      description: Amount of pure speech (which is the amount of audio after removing silence and non-speech segments) needed to complete profile enrollment in seconds.
+      example: 18.65
     LastUpdatedDateTime_2:
       type: string
       description: Last datetime when the profile was updated.
       example: '2015-04-23T19:34:51.52Z'
-    Error:
-      description: Speaker error message
-      required:
-      - error
+    EnrollmentsLength:
+      type: number
+      description: Total length of enrollment audios accepted for this profile in seconds.
+      example: 1.83
+    EnrollmentStatus_2:
+      type: string
+      description: 'Status representing the current state of the profile. Available values are:
+
+        * Enrolling: profile has no voice print and not ready for recognition requests.
+
+        * Training: voice print of profile is being created and can’t be used for recognition at the moment.
+
+        * Enrolled: profile has a voice print and ready for recognition requests.'
+      enum:
+      - Enrolling
+      - Training
+      - Enrolled
+      x-ms-enum:
+        name: TrainingStatusType
+        modelAsString: false
+      example: Enrolling
+    TiProfileInfo_2:
+      description: Text-Independent Speaker profile info
       properties:
-        error:
-          properties:
-            code:
-              type: string
-            message:
-              type: string
+        profileId:
+          $ref: '#/components/schemas/ProfileId_2'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        enrollmentStatus:
+          $ref: '#/components/schemas/EnrollmentStatus_2'
+        createdDateTime:
+          $ref: '#/components/schemas/CreatedDateTime_2'
+        lastUpdatedDateTime:
+          $ref: '#/components/schemas/LastUpdatedDateTime_2'
+        enrollmentsCount:
+          $ref: '#/components/schemas/EnrollmentsCount_2'
+        enrollmentsLength:
+          $ref: '#/components/schemas/EnrollmentsLength'
+        enrollmentsSpeechLength:
+          $ref: '#/components/schemas/EnrollmentsSpeechLength'
+        remainingEnrollmentsSpeechLength:
+          $ref: '#/components/schemas/RemainingEnrollmentsSpeechLength'
+        modelVersion:
+          $ref: '#/components/schemas/ModelVersion_2'
+    RecognitionInfo:
+      description: Speaker recognition result
+      properties:
+        recognitionResult:
+          type: string
+          description: Does audio belong to targeted profile?
+          enum:
+          - accept
+          - reject
+          x-ms-enum:
+            name: ResultType
+            modelAsString: false
+          example: Accept
+        score:
+          type: number
+          description: A float number indicating the similarity between input audio and targeted voice print. This number must be between 0 and 1. A higher number means higher similarity.
+          example: 0.63
+    ModelVersion_2:
+      type: string
+      pattern: ^\d{4}-\d{2}-\d{2}$
+      description: Date specifying the model assigned to this profile. Format is yyyy-mm-dd. If profile has no enrollments, this value will be empty.
+      example: '2019-12-05'
+  parameters:
+    profileIdParam:
+      in: path
+      name: profileId
+      required: true
+      description: Unique identifier for profile id (guid).
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    localeParam:
+      in: path
+      name: locale
+      required: true
+      description: A combination of language code and country code.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z]{2}-?[a-zA-Z]{2}$
+    apiVersionParam:
+      name: api-version
+      x-ms-parameter-location: client
+      in: query
+      required: true
+      description: Specifies the version of the operation to use for this request.
+      schema:
+        type: string
+        enum:
+        - '2021-09-05'
+        default: '2021-09-05'
+    profileIdParam_2:
+      in: path
+      name: profileId
+      required: true
+      description: Unique identifier for profile id (guid).
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+        pattern: ^([0-9a-fA-F]){8}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){12}$
   responses:
     SpeakerErrorResponse:
       description: Failure
@@ -813,17 +855,6 @@ components:
             error:
               code: InternalServerError
               message: Internal Server Error.
-    Unauthorized:
-      description: Request is not authorized. Make sure subscription key is included and valid.
-      x-ms-error-response: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error:
-              code: Unauthorized
-              message: Request is not authorized. Make sure subscription key is included and valid.
     RateLimit:
       description: Rate limit is exceeded.
       x-ms-error-response: true
@@ -835,6 +866,17 @@ components:
             error:
               code: RateLimit
               message: Rate limit is exceeded.
+    Unauthorized:
+      description: Request is not authorized. Make sure subscription key is included and valid.
+      x-ms-error-response: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: Unauthorized
+              message: Request is not authorized. Make sure subscription key is included and valid.
     NotFound:
       description: NotFound - Requested profile doesn't exist
       x-ms-error-response: true
@@ -846,46 +888,6 @@ components:
             error:
               code: Not Found
               message: Requested profile doesn't exist
-  parameters:
-    apiVersionParam:
-      name: api-version
-      x-ms-parameter-location: client
-      in: query
-      required: true
-      description: Specifies the version of the operation to use for this request.
-      schema:
-        type: string
-        enum:
-        - '2021-09-05'
-        default: '2021-09-05'
-    profileIdParam:
-      in: path
-      name: profileId
-      required: true
-      description: Unique identifier for profile id (guid).
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    localeParam:
-      in: path
-      name: locale
-      required: true
-      description: A combination of language code and country code.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z]{2}-?[a-zA-Z]{2}$
-    profileIdParam_2:
-      in: path
-      name: profileId
-      required: true
-      description: Unique identifier for profile id (guid).
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-        pattern: ^([0-9a-fA-F]){8}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){4}-?([0-9a-fA-F]){12}$
   securitySchemes:
     apiKeyHeader:
       type: apiKey

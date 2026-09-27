@@ -270,7 +270,196 @@ paths:
         description: The list of address geocoding queries/requests to process. The list can contain a max of 100 queries and must contain at least 1 query.
         required: true
 components:
+  parameters:
+    Top:
+      name: top
+      in: query
+      description: 'Maximum number of responses that will be returned. Default: 5, minimum: 1 and maximum: 20.'
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        default: 5
+        maximum: 20
+        minimum: 1
+    ApiVersion:
+      name: api-version
+      description: Version number of Azure Maps API.
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+        default: 2022-02-01-preview
+    Accept-Language:
+      name: Accept-Language
+      in: header
+      description: "Language in which search results should be returned. \n\nPlease refer to [Supported Languages](https://learn.microsoft.com/azure/azure-maps/supported-languages) for details."
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    View:
+      name: view
+      in: query
+      description: A string that an [ISO 3166-1 Alpha-2 region/country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This will alter Geopolitical disputed borders and labels to align with the specified user region.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    Bbox:
+      name: bbox
+      in: query
+      description: 'A rectangular area on the earth defined as a bounding box object. The sides of the rectangles are defined by latitude and longitude values. When you specify this parameter, the geographical area is taken into account when computing the results of a location query.
+
+
+        Example: lon1,lat1,lon2,lat2'
+      required: false
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: number
+          format: double
+        maxItems: 4
+        minItems: 4
+    Location:
+      name: location
+      in: query
+      description: 'A point on the earth specified as a latitude and longitude. When you specify this parameter, the user’s location is taken into account and the results returned may be more relevant to the user. Example: &location=lon,lat'
+      required: false
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: number
+          format: double
+        maxItems: 2
+        minItems: 2
   schemas:
+    Bbox:
+      description: Information on the coordinate range for point Geometry.  Please refer to [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946#section-5) for details.
+      type: array
+      minItems: 4
+      maxItems: 4
+      items:
+        type: number
+        format: double
+    GeocodingBatchResponseItem:
+      type: object
+      properties:
+        optionalId:
+          description: id of the batchItem which would be the same as the id in the request
+          type: string
+        type:
+          $ref: '#/components/schemas/FeatureType'
+        features:
+          $ref: '#/components/schemas/Features'
+        nextLink:
+          $ref: '#/components/schemas/NextLink'
+        error:
+          $ref: ../../../../../common-types/data-plane/v1/types.json#/definitions/ErrorDetail
+    FeaturesItem:
+      type: object
+      properties:
+        type:
+          type: string
+          description: must be Feature
+          enum:
+          - Feature
+          x-ms-enum:
+            name: FeaturesItemTypeEnum
+            modelAsString: true
+            values:
+            - value: Feature
+        id:
+          type: string
+          description: ID for feature returned
+        properties:
+          type: object
+          properties:
+            type:
+              type: string
+              description: "One of: \n* Address\n* RoadBlock\n* RoadIntersection"
+              readOnly: true
+            confidence:
+              $ref: '#/components/schemas/Confidence'
+            matchCodes:
+              $ref: '#/components/schemas/MatchCodes'
+            address:
+              $ref: '#/components/schemas/Address'
+            geocodePoints:
+              $ref: '#/components/schemas/GeocodePoints'
+        geometry:
+          $ref: '#/components/schemas/GeoJSONPoint'
+        bbox:
+          $ref: '#/components/schemas/Bbox'
+    Confidence:
+      description: 'The level of confidence that the geocoded location result is a match. Use this value with the match code to determine for more complete information about the match.
+
+
+        The confidence of a geocoded location is based on many factors including the relative importance of the geocoded location and the user’s location, if specified. The following description provides more information about how confidence scores are assigned and how results are ranked.
+
+
+        If the confidence is set to `High`, one or more strong matches were found. Multiple `High` confidence matches are sorted in ranked order by importance when applicable. For example, landmarks have importance but addresses do not.
+
+
+        If a request includes a location or a view, then the ranking may change appropriately. For example, a location query for "Paris" returns "Paris, France" and "Paris, TX" both with `High` confidence. "Paris, France" is always ranked first due to importance unless a user location indicates that the user is in or very close to Paris, TX or the map view indicates that the user is searching in that area.
+
+
+        In some situations, the returned match may not be at the same level as the information provided in the request. For example, a request may specify address information and the geocode service may only be able to match a postal code. In this case, if the geocode service has a confidence that the postal code matches the data, the confidence is set to `Medium` and the match code is set to `UpHierarchy` to specify that it could not match all of the information and had to search up-hierarchy.
+
+
+        If the location information in the query is ambiguous, and there is no additional information to rank the locations (such as user location or the relative importance of the location), the confidence is set to `Medium`. For example, a location query for "148th Ave, Bellevue" may return "148th Ave SE" and "148th Ave NE" both with `Medium` confidence.
+
+
+        If the location information in the query does not provide enough information to geocode a specific location, a less precise location value may be returned and the confidence is set to `Medium`. For example, if an address is provided, but a match is not found for the house number, the geocode result with a Roadblock entity type may be returned.'
+      type: string
+      enum:
+      - High
+      - Medium
+      - Low
+    GeocodePoints:
+      description: A collection of geocode points that differ in how they were calculated and their suggested use.
+      type: array
+      items:
+        type: object
+        properties:
+          geometry:
+            $ref: '#/components/schemas/GeoJSONPoint'
+          calculationMethod:
+            description: 'The method that was used to compute the geocode point.
+
+              - `Interpolation`: The geocode point was matched to a point on a road using interpolation.
+
+              - `InterpolationOffset`: The geocode point was matched to a point on a road using interpolation with an additional offset to shift the point to the side of the street.
+
+              - `Parcel`: The geocode point was matched to the center of a parcel.
+
+              - `Rooftop`: The geocode point was matched to the rooftop of a building.'
+            type: string
+            enum:
+            - Interpolation
+            - InterpolationOffset
+            - Parcel
+            - Rooftop
+          usageTypes:
+            description: 'The best use for the geocode point.
+
+              Each geocode point is defined as a `Route` point, a `Display` point or both.
+
+              Use `Route` points if you are creating a route to the location. Use `Display` points if you are showing the location on a map. For example, if the location is a park, a `Route` point may specify an entrance to the park where you can enter with a car, and a `Display` point may be a point that specifies the center of the park.'
+            type: array
+            items:
+              $ref: '#/components/schemas/UsageType'
+    FeatureType:
+      type: string
+      enum:
+      - FeatureCollection
     GeocodingBatchResponse:
       description: This object is returned from a successful Geocoding Batch service call.
       type: object
@@ -293,67 +482,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GeocodingBatchResponseItem'
-    GeocodingBatchRequestBody:
-      description: The list of address geocoding queries/requests to process. The list can contain a max of 100 queries and must contain at least 1 query.
-      type: object
-      properties:
-        batchItems:
-          description: The list of queries to process.
-          type: array
-          items:
-            $ref: '#/components/schemas/GeocodingBatchRequestItem'
-    Address:
-      description: The address of the result
-      type: object
-      properties:
-        addressLine:
-          description: AddressLine that includes Street Name and Number
-          type: string
-          readOnly: true
-        locality:
-          description: locality property
-          type: string
-          readOnly: true
-        neighborhood:
-          description: neighborhood property
-          type: string
-          readOnly: true
-        adminDistricts:
-          description: The subdivision name in the country or region for an address. This element is typically treated as the first order administrative subdivision, but in some cases it also contains the second, third, or fourth order subdivision in a country, dependency, or region.
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-                description: "The name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be full name of state such as Washington, \nFor adminDistrict[1], this could be the full name of the county"
-              shortName:
-                type: string
-                description: "The short name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be short name of state such as WA, \nFor adminDistrict[1], this could be the short name of the county"
-        postalCode:
-          description: Postal Code property
-          type: string
-          readOnly: true
-        countryRegion:
-          type: object
-          properties:
-            ISO:
-              description: ISO of country/region
-              type: string
-              readOnly: true
-            name:
-              description: name of country/region
-              type: string
-              readOnly: true
-        formattedAddress:
-          description: Formatted Address property
-          type: string
-          readOnly: true
-    UsageType:
-      type: string
-      enum:
-      - Display
-      - Route
     MatchCodes:
       description: 'One or more match code values that represent the geocoding level for each location in the response.
 
@@ -381,16 +509,11 @@ components:
         - Good
         - Ambiguous
         - UpHierarchy
-    GeocodingResponse:
-      description: This object is returned from a successful Geocoding call
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/FeatureType'
-        features:
-          $ref: '#/components/schemas/Features'
-        nextLink:
-          $ref: '#/components/schemas/NextLink'
+    UsageType:
+      type: string
+      enum:
+      - Display
+      - Route
     GeocodingBatchRequestItem:
       description: Batch Query object
       type: object
@@ -464,49 +587,28 @@ components:
               description: Do not restrict results to the specified countryRegion and adminDistrict.
             - value: strict
               description: Restrict results to the specified countryRegion and adminDistrict.
-    GeocodingBatchResponseItem:
+    GeocodingResponse:
+      description: This object is returned from a successful Geocoding call
       type: object
       properties:
-        optionalId:
-          description: id of the batchItem which would be the same as the id in the request
-          type: string
         type:
           $ref: '#/components/schemas/FeatureType'
         features:
           $ref: '#/components/schemas/Features'
         nextLink:
           $ref: '#/components/schemas/NextLink'
-        error:
-          $ref: ../../../../../common-types/data-plane/v1/types.json#/definitions/ErrorDetail
-    Features:
-      type: array
-      items:
-        $ref: '#/components/schemas/FeaturesItem'
-    Confidence:
-      description: 'The level of confidence that the geocoded location result is a match. Use this value with the match code to determine for more complete information about the match.
-
-
-        The confidence of a geocoded location is based on many factors including the relative importance of the geocoded location and the user’s location, if specified. The following description provides more information about how confidence scores are assigned and how results are ranked.
-
-
-        If the confidence is set to `High`, one or more strong matches were found. Multiple `High` confidence matches are sorted in ranked order by importance when applicable. For example, landmarks have importance but addresses do not.
-
-
-        If a request includes a location or a view, then the ranking may change appropriately. For example, a location query for "Paris" returns "Paris, France" and "Paris, TX" both with `High` confidence. "Paris, France" is always ranked first due to importance unless a user location indicates that the user is in or very close to Paris, TX or the map view indicates that the user is searching in that area.
-
-
-        In some situations, the returned match may not be at the same level as the information provided in the request. For example, a request may specify address information and the geocode service may only be able to match a postal code. In this case, if the geocode service has a confidence that the postal code matches the data, the confidence is set to `Medium` and the match code is set to `UpHierarchy` to specify that it could not match all of the information and had to search up-hierarchy.
-
-
-        If the location information in the query is ambiguous, and there is no additional information to rank the locations (such as user location or the relative importance of the location), the confidence is set to `Medium`. For example, a location query for "148th Ave, Bellevue" may return "148th Ave SE" and "148th Ave NE" both with `Medium` confidence.
-
-
-        If the location information in the query does not provide enough information to geocode a specific location, a less precise location value may be returned and the confidence is set to `Medium`. For example, if an address is provided, but a match is not found for the house number, the geocode result with a Roadblock entity type may be returned.'
+    GeocodingBatchRequestBody:
+      description: The list of address geocoding queries/requests to process. The list can contain a max of 100 queries and must contain at least 1 query.
+      type: object
+      properties:
+        batchItems:
+          description: The list of queries to process.
+          type: array
+          items:
+            $ref: '#/components/schemas/GeocodingBatchRequestItem'
+    NextLink:
       type: string
-      enum:
-      - High
-      - Medium
-      - Low
+      description: The is the link to the next page of the features returned. If it's the last page, no this field.
     GeoJSONPoint:
       type: object
       description: A structure for Point Geometry
@@ -529,159 +631,57 @@ components:
           items:
             type: number
             format: double
-    Bbox:
-      description: Information on the coordinate range for point Geometry.  Please refer to [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946#section-5) for details.
-      type: array
-      minItems: 4
-      maxItems: 4
-      items:
-        type: number
-        format: double
-    FeatureType:
-      type: string
-      enum:
-      - FeatureCollection
-    GeocodePoints:
-      description: A collection of geocode points that differ in how they were calculated and their suggested use.
+    Features:
       type: array
       items:
-        type: object
-        properties:
-          geometry:
-            $ref: '#/components/schemas/GeoJSONPoint'
-          calculationMethod:
-            description: 'The method that was used to compute the geocode point.
-
-              - `Interpolation`: The geocode point was matched to a point on a road using interpolation.
-
-              - `InterpolationOffset`: The geocode point was matched to a point on a road using interpolation with an additional offset to shift the point to the side of the street.
-
-              - `Parcel`: The geocode point was matched to the center of a parcel.
-
-              - `Rooftop`: The geocode point was matched to the rooftop of a building.'
-            type: string
-            enum:
-            - Interpolation
-            - InterpolationOffset
-            - Parcel
-            - Rooftop
-          usageTypes:
-            description: 'The best use for the geocode point.
-
-              Each geocode point is defined as a `Route` point, a `Display` point or both.
-
-              Use `Route` points if you are creating a route to the location. Use `Display` points if you are showing the location on a map. For example, if the location is a park, a `Route` point may specify an entrance to the park where you can enter with a car, and a `Display` point may be a point that specifies the center of the park.'
-            type: array
-            items:
-              $ref: '#/components/schemas/UsageType'
-    NextLink:
-      type: string
-      description: The is the link to the next page of the features returned. If it's the last page, no this field.
-    FeaturesItem:
+        $ref: '#/components/schemas/FeaturesItem'
+    Address:
+      description: The address of the result
       type: object
       properties:
-        type:
+        addressLine:
+          description: AddressLine that includes Street Name and Number
           type: string
-          description: must be Feature
-          enum:
-          - Feature
-          x-ms-enum:
-            name: FeaturesItemTypeEnum
-            modelAsString: true
-            values:
-            - value: Feature
-        id:
+          readOnly: true
+        locality:
+          description: locality property
           type: string
-          description: ID for feature returned
-        properties:
+          readOnly: true
+        neighborhood:
+          description: neighborhood property
+          type: string
+          readOnly: true
+        adminDistricts:
+          description: The subdivision name in the country or region for an address. This element is typically treated as the first order administrative subdivision, but in some cases it also contains the second, third, or fourth order subdivision in a country, dependency, or region.
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: "The name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be full name of state such as Washington, \nFor adminDistrict[1], this could be the full name of the county"
+              shortName:
+                type: string
+                description: "The short name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be short name of state such as WA, \nFor adminDistrict[1], this could be the short name of the county"
+        postalCode:
+          description: Postal Code property
+          type: string
+          readOnly: true
+        countryRegion:
           type: object
           properties:
-            type:
+            ISO:
+              description: ISO of country/region
               type: string
-              description: "One of: \n* Address\n* RoadBlock\n* RoadIntersection"
               readOnly: true
-            confidence:
-              $ref: '#/components/schemas/Confidence'
-            matchCodes:
-              $ref: '#/components/schemas/MatchCodes'
-            address:
-              $ref: '#/components/schemas/Address'
-            geocodePoints:
-              $ref: '#/components/schemas/GeocodePoints'
-        geometry:
-          $ref: '#/components/schemas/GeoJSONPoint'
-        bbox:
-          $ref: '#/components/schemas/Bbox'
-  parameters:
-    Accept-Language:
-      name: Accept-Language
-      in: header
-      description: "Language in which search results should be returned. \n\nPlease refer to [Supported Languages](https://learn.microsoft.com/azure/azure-maps/supported-languages) for details."
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    Bbox:
-      name: bbox
-      in: query
-      description: 'A rectangular area on the earth defined as a bounding box object. The sides of the rectangles are defined by latitude and longitude values. When you specify this parameter, the geographical area is taken into account when computing the results of a location query.
-
-
-        Example: lon1,lat1,lon2,lat2'
-      required: false
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: number
-          format: double
-        maxItems: 4
-        minItems: 4
-    View:
-      name: view
-      in: query
-      description: A string that an [ISO 3166-1 Alpha-2 region/country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This will alter Geopolitical disputed borders and labels to align with the specified user region.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    Location:
-      name: location
-      in: query
-      description: 'A point on the earth specified as a latitude and longitude. When you specify this parameter, the user’s location is taken into account and the results returned may be more relevant to the user. Example: &location=lon,lat'
-      required: false
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: number
-          format: double
-        maxItems: 2
-        minItems: 2
-    ApiVersion:
-      name: api-version
-      description: Version number of Azure Maps API.
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-        default: 2022-02-01-preview
-    Top:
-      name: top
-      in: query
-      description: 'Maximum number of responses that will be returned. Default: 5, minimum: 1 and maximum: 20.'
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        default: 5
-        maximum: 20
-        minimum: 1
+            name:
+              description: name of country/region
+              type: string
+              readOnly: true
+        formattedAddress:
+          description: Formatted Address property
+          type: string
+          readOnly: true
   securitySchemes:
     AADToken:
       type: oauth2

@@ -298,6 +298,54 @@ paths:
         required: true
 components:
   schemas:
+    ApiKey:
+      description: An API key used for authenticating with a configuration store endpoint.
+      type: object
+      properties:
+        id:
+          description: The key ID.
+          type: string
+          readOnly: true
+        name:
+          description: A name for the key describing its usage.
+          type: string
+          readOnly: true
+        value:
+          description: The value of the key that is used for authentication purposes.
+          type: string
+          readOnly: true
+        connectionString:
+          description: A connection string that can be used by supporting clients for authentication.
+          type: string
+          readOnly: true
+        lastModified:
+          format: date-time
+          description: The last time any of the key's properties were modified.
+          type: string
+          readOnly: true
+        readOnly:
+          description: Whether this key can only be used for read operations.
+          type: boolean
+          readOnly: true
+    ConfigurationStoreUpdateParameters:
+      description: The parameters for updating a configuration store.
+      type: object
+      properties:
+        properties:
+          $ref: '#/components/schemas/ConfigurationStorePropertiesUpdateParameters'
+          description: The properties for updating a configuration store.
+          x-ms-client-flatten: true
+        identity:
+          $ref: '#/components/schemas/ResourceIdentity'
+          description: The managed identity information for the configuration store.
+        sku:
+          $ref: '#/components/schemas/Sku'
+          description: The SKU of the configuration store.
+        tags:
+          description: The ARM resource tags.
+          type: object
+          additionalProperties:
+            type: string
     PrivateEndpoint:
       type: object
       description: Private endpoint which a connection belongs to.
@@ -305,20 +353,70 @@ components:
         id:
           description: The resource Id for private endpoint
           type: string
-    RegenerateKeyParameters:
-      description: The parameters used to regenerate an API key.
+    ResourceIdentity:
       type: object
+      description: An identity that can be associated with a resource.
+      properties:
+        type:
+          description: The type of managed identity used. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user-assigned identities. The type 'None' will remove any identities.
+          enum:
+          - None
+          - SystemAssigned
+          - UserAssigned
+          - SystemAssigned, UserAssigned
+          type: string
+          x-ms-enum:
+            name: IdentityType
+            modelAsString: true
+        userAssignedIdentities:
+          description: 'The list of user-assigned identities associated with the resource. The user-assigned identity dictionary keys will be ARM resource ids in the form: ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/UserIdentity'
+        principalId:
+          description: The principal id of the identity. This property will only be provided for a system-assigned identity.
+          type: string
+          readOnly: true
+        tenantId:
+          description: The tenant id associated with the resource's identity. This property will only be provided for a system-assigned identity.
+          type: string
+          readOnly: true
+    Sku:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          description: The SKU name of the configuration store.
+          type: string
+      description: Describes a configuration store SKU.
+    PrivateEndpointConnectionReference:
+      type: object
+      description: A reference to a related private endpoint connection.
       properties:
         id:
-          description: The id of the key to regenerate.
+          description: The resource ID.
           type: string
-    EncryptionProperties:
+          readOnly: true
+        name:
+          description: The name of the resource.
+          type: string
+          readOnly: true
+        type:
+          description: The type of the resource.
+          type: string
+          readOnly: true
+        properties:
+          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
+          description: The properties of a private endpoint connection.
+          x-ms-client-flatten: true
+    ErrorResponse:
+      description: Error response indicates that the service is not able to process the incoming request. The reason is provided in the error message.
       type: object
-      description: The encryption settings for a configuration store.
       properties:
-        keyVaultProperties:
-          $ref: '#/components/schemas/KeyVaultProperties'
-          description: Key vault properties.
+        error:
+          description: The details of the error.
+          $ref: '#/components/schemas/ErrorDetails'
     PrivateEndpointConnectionProperties:
       type: object
       description: Properties of a private endpoint connection.
@@ -345,6 +443,102 @@ components:
           description: A collection of information about the state of the connection between service consumer and provider.
       required:
       - privateLinkServiceConnectionState
+    ErrorAdditionalInfo:
+      properties:
+        type:
+          readOnly: true
+          type: string
+          description: The additional info type.
+        info:
+          readOnly: true
+          type: object
+          description: The additional info.
+      description: The resource management error additional info.
+    ErrorDetails:
+      description: The details of the error.
+      properties:
+        code:
+          description: Error code.
+          type: string
+          readOnly: true
+        message:
+          description: Error message indicating why the operation failed.
+          type: string
+          readOnly: true
+        additionalInfo:
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorAdditionalInfo'
+          x-ms-identifiers: []
+          description: The error additional info.
+    ConfigurationStorePropertiesUpdateParameters:
+      description: The properties for updating a configuration store.
+      type: object
+      properties:
+        encryption:
+          $ref: '#/components/schemas/EncryptionProperties'
+          description: The encryption settings of the configuration store.
+        disableLocalAuth:
+          type: boolean
+          description: Disables all authentication methods other than AAD authentication.
+        publicNetworkAccess:
+          description: Control permission for data plane traffic coming from public networks while private endpoint is enabled.
+          enum:
+          - Enabled
+          - Disabled
+          type: string
+          x-ms-enum:
+            name: PublicNetworkAccess
+            modelAsString: true
+    ConfigurationStore:
+      description: The configuration store along with all resource properties. The Configuration Store will have all information to begin utilizing it.
+      required:
+      - location
+      - sku
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
+      properties:
+        identity:
+          $ref: '#/components/schemas/ResourceIdentity'
+          description: The managed identity information, if configured.
+        properties:
+          $ref: '#/components/schemas/ConfigurationStoreProperties'
+          description: The properties of a configuration store.
+          x-ms-client-flatten: true
+        sku:
+          $ref: '#/components/schemas/Sku'
+          description: The sku of the configuration store.
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+          description: Resource system metadata.
+    EncryptionProperties:
+      type: object
+      description: The encryption settings for a configuration store.
+      properties:
+        keyVaultProperties:
+          $ref: '#/components/schemas/KeyVaultProperties'
+          description: Key vault properties.
+    UserIdentity:
+      type: object
+      description: A resource identity that is managed by the user of the service.
+      properties:
+        principalId:
+          description: The principal ID of the user-assigned identity.
+          type: string
+          readOnly: true
+        clientId:
+          description: The client ID of the user-assigned identity.
+          type: string
+          readOnly: true
+    RegenerateKeyParameters:
+      description: The parameters used to regenerate an API key.
+      type: object
+      properties:
+        id:
+          description: The id of the key to regenerate.
+          type: string
     ConfigurationStoreListResult:
       description: The result of a request to list configuration stores.
       type: object
@@ -385,36 +579,16 @@ components:
           x-ms-enum:
             name: ActionsRequired
             modelAsString: true
-    ErrorAdditionalInfo:
-      properties:
-        type:
-          readOnly: true
-          type: string
-          description: The additional info type.
-        info:
-          readOnly: true
-          type: object
-          description: The additional info.
-      description: The resource management error additional info.
-    ApiKeyListResult:
-      description: The result of a request to list API keys.
+    KeyVaultProperties:
       type: object
+      description: Settings concerning key vault encryption for a configuration store.
       properties:
-        value:
-          description: The collection value.
-          type: array
-          items:
-            $ref: '#/components/schemas/ApiKey'
-        nextLink:
-          description: The URI that can be used to request the next set of paged results.
+        keyIdentifier:
+          description: The URI of the key vault key used to encrypt data.
           type: string
-    ErrorResponse:
-      description: Error response indicates that the service is not able to process the incoming request. The reason is provided in the error message.
-      type: object
-      properties:
-        error:
-          description: The details of the error.
-          $ref: '#/components/schemas/ErrorDetails'
+        identityClientId:
+          description: The client id of the identity which will be used to access key vault.
+          type: string
     ConfigurationStoreProperties:
       description: The properties of a configuration store.
       type: object
@@ -484,192 +658,18 @@ components:
             modelAsString: false
           x-ms-mutability:
           - create
-    ConfigurationStorePropertiesUpdateParameters:
-      description: The properties for updating a configuration store.
+    ApiKeyListResult:
+      description: The result of a request to list API keys.
       type: object
       properties:
-        encryption:
-          $ref: '#/components/schemas/EncryptionProperties'
-          description: The encryption settings of the configuration store.
-        disableLocalAuth:
-          type: boolean
-          description: Disables all authentication methods other than AAD authentication.
-        publicNetworkAccess:
-          description: Control permission for data plane traffic coming from public networks while private endpoint is enabled.
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: PublicNetworkAccess
-            modelAsString: true
-    KeyVaultProperties:
-      type: object
-      description: Settings concerning key vault encryption for a configuration store.
-      properties:
-        keyIdentifier:
-          description: The URI of the key vault key used to encrypt data.
-          type: string
-        identityClientId:
-          description: The client id of the identity which will be used to access key vault.
-          type: string
-    ErrorDetails:
-      description: The details of the error.
-      properties:
-        code:
-          description: Error code.
-          type: string
-          readOnly: true
-        message:
-          description: Error message indicating why the operation failed.
-          type: string
-          readOnly: true
-        additionalInfo:
-          readOnly: true
+        value:
+          description: The collection value.
           type: array
           items:
-            $ref: '#/components/schemas/ErrorAdditionalInfo'
-          x-ms-identifiers: []
-          description: The error additional info.
-    PrivateEndpointConnectionReference:
-      type: object
-      description: A reference to a related private endpoint connection.
-      properties:
-        id:
-          description: The resource ID.
+            $ref: '#/components/schemas/ApiKey'
+        nextLink:
+          description: The URI that can be used to request the next set of paged results.
           type: string
-          readOnly: true
-        name:
-          description: The name of the resource.
-          type: string
-          readOnly: true
-        type:
-          description: The type of the resource.
-          type: string
-          readOnly: true
-        properties:
-          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
-          description: The properties of a private endpoint connection.
-          x-ms-client-flatten: true
-    ResourceIdentity:
-      type: object
-      description: An identity that can be associated with a resource.
-      properties:
-        type:
-          description: The type of managed identity used. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user-assigned identities. The type 'None' will remove any identities.
-          enum:
-          - None
-          - SystemAssigned
-          - UserAssigned
-          - SystemAssigned, UserAssigned
-          type: string
-          x-ms-enum:
-            name: IdentityType
-            modelAsString: true
-        userAssignedIdentities:
-          description: 'The list of user-assigned identities associated with the resource. The user-assigned identity dictionary keys will be ARM resource ids in the form: ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.'
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/UserIdentity'
-        principalId:
-          description: The principal id of the identity. This property will only be provided for a system-assigned identity.
-          type: string
-          readOnly: true
-        tenantId:
-          description: The tenant id associated with the resource's identity. This property will only be provided for a system-assigned identity.
-          type: string
-          readOnly: true
-    UserIdentity:
-      type: object
-      description: A resource identity that is managed by the user of the service.
-      properties:
-        principalId:
-          description: The principal ID of the user-assigned identity.
-          type: string
-          readOnly: true
-        clientId:
-          description: The client ID of the user-assigned identity.
-          type: string
-          readOnly: true
-    ApiKey:
-      description: An API key used for authenticating with a configuration store endpoint.
-      type: object
-      properties:
-        id:
-          description: The key ID.
-          type: string
-          readOnly: true
-        name:
-          description: A name for the key describing its usage.
-          type: string
-          readOnly: true
-        value:
-          description: The value of the key that is used for authentication purposes.
-          type: string
-          readOnly: true
-        connectionString:
-          description: A connection string that can be used by supporting clients for authentication.
-          type: string
-          readOnly: true
-        lastModified:
-          format: date-time
-          description: The last time any of the key's properties were modified.
-          type: string
-          readOnly: true
-        readOnly:
-          description: Whether this key can only be used for read operations.
-          type: boolean
-          readOnly: true
-    ConfigurationStoreUpdateParameters:
-      description: The parameters for updating a configuration store.
-      type: object
-      properties:
-        properties:
-          $ref: '#/components/schemas/ConfigurationStorePropertiesUpdateParameters'
-          description: The properties for updating a configuration store.
-          x-ms-client-flatten: true
-        identity:
-          $ref: '#/components/schemas/ResourceIdentity'
-          description: The managed identity information for the configuration store.
-        sku:
-          $ref: '#/components/schemas/Sku'
-          description: The SKU of the configuration store.
-        tags:
-          description: The ARM resource tags.
-          type: object
-          additionalProperties:
-            type: string
-    ConfigurationStore:
-      description: The configuration store along with all resource properties. The Configuration Store will have all information to begin utilizing it.
-      required:
-      - location
-      - sku
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
-      properties:
-        identity:
-          $ref: '#/components/schemas/ResourceIdentity'
-          description: The managed identity information, if configured.
-        properties:
-          $ref: '#/components/schemas/ConfigurationStoreProperties'
-          description: The properties of a configuration store.
-          x-ms-client-flatten: true
-        sku:
-          $ref: '#/components/schemas/Sku'
-          description: The sku of the configuration store.
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-          description: Resource system metadata.
-    Sku:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          description: The SKU name of the configuration store.
-          type: string
-      description: Describes a configuration store SKU.
   parameters:
     ResourceGroupNameParameter:
       name: resourceGroupName
@@ -679,17 +679,17 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      description: The client API version.
-      required: true
-      schema:
-        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
       description: The Microsoft Azure subscription ID.
+      required: true
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      description: The client API version.
       required: true
       schema:
         type: string

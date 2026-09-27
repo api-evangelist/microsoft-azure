@@ -156,7 +156,7 @@ paths:
     - url: https://management.azure.com
   ? /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureSphere/catalogs/{catalogName}/products/{productName}
   : get:
-      operationId: microsoftAzureProductsGet
+      operationId: getSubscriptionsBySubscriptionIdResourceGroupsByResourceGroupNameProvidersMicrosoftAzureSphereCatalogsByCatalogNameProductsByProductName
       tags:
       - Products
       description: Get a Product. '.default' and '.unassigned' are system defined values and cannot be used for product name.
@@ -195,6 +195,8 @@ paths:
         Products_Get:
           $ref: ./examples/GetProduct.json
       summary: Get Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers…
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureProductsGet
     put:
       operationId: microsoftAzureProductsCreateorupdate
       tags:
@@ -475,6 +477,16 @@ components:
         nextLink:
           type: string
           description: URI to the next page.
+    ProductResource:
+      description: Product resource.
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Properties of the resource.
+          $ref: '#/components/schemas/Product'
+      allOf:
+      - $ref: AzureBridge.json#/definitions/Resource
     Product:
       description: Properties for a product.
       type: object
@@ -496,25 +508,36 @@ components:
           $ref: AzureBridge.json#/definitions/ProvisioningState
       allOf:
       - $ref: AzureBridge.json#/definitions/ProductBase
-    ProductResource:
-      description: Product resource.
+    RegionalDataBoundary:
+      type: string
+      description: Regional data boundary values.
+      enum:
+      - None
+      - EU
+      x-ms-enum:
+        name: RegionalDataBoundary
+        modelAsString: true
+        values:
+        - name: None
+          value: None
+          description: No data boundary
+        - name: EU
+          value: EU
+          description: EU data boundary
+    CountDeviceResponse:
       type: object
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Properties of the resource.
-          $ref: '#/components/schemas/Product'
+      description: Response to the action call for count devices in a catalog (preview API).
       allOf:
-      - $ref: AzureBridge.json#/definitions/Resource
-    DeviceGroupListResult:
+      - $ref: '#/components/schemas/CountElementsResponse'
+    ProductListResult:
       type: object
-      description: The response of a DeviceGroup list operation.
+      description: The response of a Product list operation.
       properties:
         value:
           type: array
-          description: The DeviceGroup items on this page
+          description: The Product items on this page
           items:
-            $ref: '#/components/schemas/DeviceGroup'
+            $ref: '#/components/schemas/Product_2'
         nextLink:
           type: string
           format: uri
@@ -522,12 +545,52 @@ components:
           readOnly: true
       required:
       - value
+    DeviceGroupProperties:
+      type: object
+      description: The properties of deviceGroup
+      properties:
+        description:
+          type: string
+          description: Description of the device group.
+        osFeedType:
+          $ref: '#/components/schemas/OSFeedType'
+          description: Operating system feed type of the device group.
+        updatePolicy:
+          $ref: '#/components/schemas/UpdatePolicy'
+          description: Update policy of the device group.
+        allowCrashDumpsCollection:
+          $ref: '#/components/schemas/AllowCrashDumpCollection'
+          description: Flag to define if the user allows for crash dump collection.
+        regionalDataBoundary:
+          $ref: '#/components/schemas/RegionalDataBoundary'
+          description: Regional data boundary for the device group.
+        hasDeployment:
+          type: boolean
+          description: Deployment status for the device group.
+          readOnly: true
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
     DeviceGroup:
       type: object
       description: An device group resource belonging to a product resource.
       properties:
         properties:
           $ref: '#/components/schemas/DeviceGroupProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
+    Product_2:
+      type: object
+      description: An product resource belonging to a catalog resource.
+      properties:
+        properties:
+          $ref: '#/components/schemas/ProductProperties'
           description: The resource-specific properties for this resource.
           x-ms-client-flatten: true
           x-ms-mutability:
@@ -551,16 +614,6 @@ components:
         - name: RetailEval
           value: RetailEval
           description: Retail evaluation OS feed type.
-    CountElementsResponse:
-      type: object
-      description: Response of the count for elements.
-      properties:
-        value:
-          type: integer
-          format: int32
-          description: Number of children resources in parent resource.
-      required:
-      - value
     ProvisioningState:
       type: string
       description: Provisioning state of resource.
@@ -597,6 +650,29 @@ components:
         - name: Accepted
           value: Accepted
           description: The resource create request has been accepted
+    CountElementsResponse:
+      type: object
+      description: Response of the count for elements.
+      properties:
+        value:
+          type: integer
+          format: int32
+          description: Number of children resources in parent resource.
+      required:
+      - value
+    ProductProperties:
+      type: object
+      description: The properties of product
+      properties:
+        description:
+          type: string
+          description: Description of the product
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
+      required:
+      - description
     ProductUpdateProperties:
       type: object
       description: The updatable properties of the Product.
@@ -604,11 +680,38 @@ components:
         description:
           type: string
           description: Description of the product
-    CountDeviceResponse:
+    DeviceGroupListResult:
       type: object
-      description: Response to the action call for count devices in a catalog (preview API).
-      allOf:
-      - $ref: '#/components/schemas/CountElementsResponse'
+      description: The response of a DeviceGroup list operation.
+      properties:
+        value:
+          type: array
+          description: The DeviceGroup items on this page
+          items:
+            $ref: '#/components/schemas/DeviceGroup'
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+          readOnly: true
+      required:
+      - value
+    UpdatePolicy:
+      type: string
+      description: Update policy values.
+      enum:
+      - UpdateAll
+      - No3rdPartyAppUpdates
+      x-ms-enum:
+        name: UpdatePolicy
+        modelAsString: true
+        values:
+        - name: UpdateAll
+          value: UpdateAll
+          description: Update all policy.
+        - name: No3rdPartyAppUpdates
+          value: No3rdPartyAppUpdates
+          description: No update for 3rd party app policy.
     AllowCrashDumpCollection:
       type: string
       description: Allow crash dumps values.
@@ -632,107 +735,6 @@ components:
         properties:
           $ref: '#/components/schemas/ProductUpdateProperties'
           x-ms-client-flatten: true
-    ProductListResult:
-      type: object
-      description: The response of a Product list operation.
-      properties:
-        value:
-          type: array
-          description: The Product items on this page
-          items:
-            $ref: '#/components/schemas/Product_2'
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-          readOnly: true
-      required:
-      - value
-    RegionalDataBoundary:
-      type: string
-      description: Regional data boundary values.
-      enum:
-      - None
-      - EU
-      x-ms-enum:
-        name: RegionalDataBoundary
-        modelAsString: true
-        values:
-        - name: None
-          value: None
-          description: No data boundary
-        - name: EU
-          value: EU
-          description: EU data boundary
-    Product_2:
-      type: object
-      description: An product resource belonging to a catalog resource.
-      properties:
-        properties:
-          $ref: '#/components/schemas/ProductProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
-    DeviceGroupProperties:
-      type: object
-      description: The properties of deviceGroup
-      properties:
-        description:
-          type: string
-          description: Description of the device group.
-        osFeedType:
-          $ref: '#/components/schemas/OSFeedType'
-          description: Operating system feed type of the device group.
-        updatePolicy:
-          $ref: '#/components/schemas/UpdatePolicy'
-          description: Update policy of the device group.
-        allowCrashDumpsCollection:
-          $ref: '#/components/schemas/AllowCrashDumpCollection'
-          description: Flag to define if the user allows for crash dump collection.
-        regionalDataBoundary:
-          $ref: '#/components/schemas/RegionalDataBoundary'
-          description: Regional data boundary for the device group.
-        hasDeployment:
-          type: boolean
-          description: Deployment status for the device group.
-          readOnly: true
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
-    UpdatePolicy:
-      type: string
-      description: Update policy values.
-      enum:
-      - UpdateAll
-      - No3rdPartyAppUpdates
-      x-ms-enum:
-        name: UpdatePolicy
-        modelAsString: true
-        values:
-        - name: UpdateAll
-          value: UpdateAll
-          description: Update all policy.
-        - name: No3rdPartyAppUpdates
-          value: No3rdPartyAppUpdates
-          description: No update for 3rd party app policy.
-    ProductProperties:
-      type: object
-      description: The properties of product
-      properties:
-        description:
-          type: string
-          description: Description of the product
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
-      required:
-      - description
   securitySchemes:
     azure_auth:
       type: oauth2

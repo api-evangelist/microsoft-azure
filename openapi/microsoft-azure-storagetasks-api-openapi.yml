@@ -333,47 +333,6 @@ paths:
         required: true
 components:
   schemas:
-    StorageTaskOperation:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The operation to be performed on the object.
-          enum:
-          - SetBlobTier
-          - SetBlobTags
-          - SetBlobImmutabilityPolicy
-          - SetBlobLegalHold
-          - SetBlobExpiry
-          - DeleteBlob
-          - UndeleteBlob
-          x-ms-enum:
-            name: StorageTaskOperationName
-            modelAsString: true
-        parameters:
-          type: object
-          additionalProperties:
-            type: string
-          description: Key-value parameters for the operation.
-        onSuccess:
-          type: string
-          description: Action to be taken when the operation is successful for a object.
-          enum:
-          - continue
-          x-ms-enum:
-            name: onSuccess
-            modelAsString: false
-        onFailure:
-          type: string
-          description: Action to be taken when the operation fails for a object.
-          enum:
-          - break
-          x-ms-enum:
-            name: onFailure
-            modelAsString: false
-      required:
-      - name
-      description: Represents an operation to be performed on the object
     StorageTaskReportInstance:
       type: object
       properties:
@@ -382,65 +341,21 @@ components:
       allOf:
       - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
       description: Storage Tasks run report instance
-    StorageTaskReportSummary:
+    StorageTaskAssignmentsListResult:
       type: object
       properties:
         value:
           readOnly: true
           type: array
           items:
-            $ref: '#/components/schemas/StorageTaskReportInstance'
+            $ref: '#/components/schemas/StorageTaskAssignment'
           x-ms-identifiers: []
-          description: Gets storage tasks run result summary.
+          description: Gets the list of storage task assignment Ids.
         nextLink:
           type: string
-          description: Request URL that can be used to query next page of storage task run results summary. Returned when the number of run instances and summary reports exceed maximum page size.
+          description: Request URL that can be used to query next page of storage task assignment Ids. Returned when total number of requested storage task assignment Ids exceed maximum page size.
           readOnly: true
-      description: Fetch Storage Tasks Run Summary.
-    StorageTaskProperties:
-      type: object
-      properties:
-        taskVersion:
-          readOnly: true
-          type: integer
-          minimum: 1
-          maximum: 1
-          format: int64
-          description: Storage task version.
-        enabled:
-          type: boolean
-          description: Storage Task is enabled when set to true and disabled when set to false
-        description:
-          type: string
-          description: Text that describes the purpose of the storage task
-        action:
-          $ref: '#/components/schemas/StorageTaskAction'
-          description: The storage task action that is executed
-        provisioningState:
-          readOnly: true
-          type: string
-          description: Represents the provisioning state of the storage task.
-          enum:
-          - ValidateSubscriptionQuotaBegin
-          - ValidateSubscriptionQuotaEnd
-          - Creating
-          - Succeeded
-          - Deleting
-          - Canceled
-          - Failed
-          x-ms-enum:
-            name: ProvisioningState
-            modelAsString: false
-        creationTimeInUtc:
-          readOnly: true
-          type: string
-          format: date-time
-          description: The creation date and time of the storage task in UTC.
-      required:
-      - enabled
-      - description
-      - action
-      description: Properties of the storage task.
+      description: The response from the List Storage Tasks operation.
     StorageTaskPreviewActionProperties:
       type: object
       properties:
@@ -463,21 +378,92 @@ components:
       - blobs
       - action
       description: Storage task preview action properties.
-    StorageTaskAssignmentsListResult:
+    StorageTaskAction:
       type: object
       properties:
-        value:
-          readOnly: true
+        if:
+          $ref: '#/components/schemas/IfCondition'
+          description: The if block of storage task operation
+        else:
+          $ref: '#/components/schemas/ElseCondition'
+          description: The else block of storage task operation
+      required:
+      - if
+      description: The storage task action represents conditional statements and operations to be performed on target objects.
+    StorageTaskPreviewBlobProperties:
+      type: object
+      properties:
+        name:
+          type: string
+          description: property for the container name.
+        properties:
           type: array
           items:
-            $ref: '#/components/schemas/StorageTaskAssignment'
+            $ref: '#/components/schemas/StorageTaskPreviewKeyValueProperties'
           x-ms-identifiers: []
-          description: Gets the list of storage task assignment Ids.
-        nextLink:
+          description: properties key value pairs to be tested for a match against the provided condition.
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/StorageTaskPreviewKeyValueProperties'
+          x-ms-identifiers: []
+          description: metadata key value pairs to be tested for a match against the provided condition.
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/StorageTaskPreviewKeyValueProperties'
+          x-ms-identifiers: []
+          description: tags key value pairs to be tested for a match against the provided condition.
+        matchedBlock:
           type: string
-          description: Request URL that can be used to query next page of storage task assignment Ids. Returned when total number of requested storage task assignment Ids exceed maximum page size.
           readOnly: true
-      description: The response from the List Storage Tasks operation.
+          enum:
+          - If
+          - Else
+          - None
+          x-ms-enum:
+            name: matchedBlockName
+            modelAsString: true
+          description: Represents the condition block name that matched blob properties.
+      description: Storage task preview container properties
+    StorageTask:
+      type: object
+      properties:
+        identity:
+          $ref: ../../../../../common-types/resource-management/v5/managedidentity.json#/definitions/ManagedServiceIdentity
+          description: The managed service identity of the resource.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/StorageTaskProperties'
+          description: Properties of the storage task.
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/TrackedResource
+      description: Represents Storage Task.
+    StorageTaskAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: arm-id
+          description: ARM Id of the storage task assignments, associated with the storage tasks.
+          readOnly: true
+      description: Fetch the Storage task assignment ARM ids.
+    IfCondition:
+      type: object
+      properties:
+        condition:
+          type: string
+          description: 'The condition predicate which is composed of object properties, eg: blob and container properties.'
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/StorageTaskOperation'
+          x-ms-identifiers: []
+          description: List of operations to execute when the condition predicate satisfies.
+      required:
+      - condition
+      - operations
+      description: The if block of storage task operation
     StorageTaskReportProperties:
       type: object
       properties:
@@ -562,96 +548,6 @@ components:
             modelAsString: true
           description: Represents the overall result of the execution for the run instance
       description: Storage task execution report for a run instance.
-    StorageTask:
-      type: object
-      properties:
-        identity:
-          $ref: ../../../../../common-types/resource-management/v5/managedidentity.json#/definitions/ManagedServiceIdentity
-          description: The managed service identity of the resource.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/StorageTaskProperties'
-          description: Properties of the storage task.
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/TrackedResource
-      description: Represents Storage Task.
-    StorageTaskPreviewKeyValueProperties:
-      type: object
-      properties:
-        key:
-          type: string
-          description: Represents the key property of the pair.
-        value:
-          type: string
-          description: Represents the value property of the pair.
-      description: Storage task preview object key value pair properties.
-    ElseCondition:
-      type: object
-      properties:
-        operations:
-          type: array
-          items:
-            $ref: '#/components/schemas/StorageTaskOperation'
-          x-ms-identifiers: []
-          description: List of operations to execute in the else block
-      required:
-      - operations
-      description: The else block of storage task operation
-    StorageTaskPreviewActionIfCondition:
-      type: object
-      properties:
-        condition:
-          type: string
-          description: Storage task condition to bes tested for a match.
-      description: Represents storage task preview action condition.
-    StorageTaskPreviewBlobProperties:
-      type: object
-      properties:
-        name:
-          type: string
-          description: property for the container name.
-        properties:
-          type: array
-          items:
-            $ref: '#/components/schemas/StorageTaskPreviewKeyValueProperties'
-          x-ms-identifiers: []
-          description: properties key value pairs to be tested for a match against the provided condition.
-        metadata:
-          type: array
-          items:
-            $ref: '#/components/schemas/StorageTaskPreviewKeyValueProperties'
-          x-ms-identifiers: []
-          description: metadata key value pairs to be tested for a match against the provided condition.
-        tags:
-          type: array
-          items:
-            $ref: '#/components/schemas/StorageTaskPreviewKeyValueProperties'
-          x-ms-identifiers: []
-          description: tags key value pairs to be tested for a match against the provided condition.
-        matchedBlock:
-          type: string
-          readOnly: true
-          enum:
-          - If
-          - Else
-          - None
-          x-ms-enum:
-            name: matchedBlockName
-            modelAsString: true
-          description: Represents the condition block name that matched blob properties.
-      description: Storage task preview container properties
-    StorageTaskAction:
-      type: object
-      properties:
-        if:
-          $ref: '#/components/schemas/IfCondition'
-          description: The if block of storage task operation
-        else:
-          $ref: '#/components/schemas/ElseCondition'
-          description: The else block of storage task operation
-      required:
-      - if
-      description: The storage task action represents conditional statements and operations to be performed on target objects.
     StorageTaskPreviewContainerProperties:
       type: object
       properties:
@@ -665,22 +561,151 @@ components:
           x-ms-identifiers: []
           description: metadata key value pairs to be tested for a match against the provided condition.
       description: Storage task preview container properties
-    IfCondition:
+    StorageTaskProperties:
+      type: object
+      properties:
+        taskVersion:
+          readOnly: true
+          type: integer
+          minimum: 1
+          maximum: 1
+          format: int64
+          description: Storage task version.
+        enabled:
+          type: boolean
+          description: Storage Task is enabled when set to true and disabled when set to false
+        description:
+          type: string
+          description: Text that describes the purpose of the storage task
+        action:
+          $ref: '#/components/schemas/StorageTaskAction'
+          description: The storage task action that is executed
+        provisioningState:
+          readOnly: true
+          type: string
+          description: Represents the provisioning state of the storage task.
+          enum:
+          - ValidateSubscriptionQuotaBegin
+          - ValidateSubscriptionQuotaEnd
+          - Creating
+          - Succeeded
+          - Deleting
+          - Canceled
+          - Failed
+          x-ms-enum:
+            name: ProvisioningState
+            modelAsString: false
+        creationTimeInUtc:
+          readOnly: true
+          type: string
+          format: date-time
+          description: The creation date and time of the storage task in UTC.
+      required:
+      - enabled
+      - description
+      - action
+      description: Properties of the storage task.
+    StorageTaskPreviewKeyValueProperties:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Represents the key property of the pair.
+        value:
+          type: string
+          description: Represents the value property of the pair.
+      description: Storage task preview object key value pair properties.
+    StorageTaskPreviewActionIfCondition:
       type: object
       properties:
         condition:
           type: string
-          description: 'The condition predicate which is composed of object properties, eg: blob and container properties.'
-        operations:
+          description: Storage task condition to bes tested for a match.
+      description: Represents storage task preview action condition.
+    StorageTaskPreviewActionCondition:
+      type: object
+      properties:
+        if:
+          $ref: '#/components/schemas/StorageTaskPreviewActionIfCondition'
+          description: The condition to be tested for a match with container and blob properties.
+        elseBlockExists:
+          type: boolean
+          description: Specify whether the else block is present in the condition.
+      required:
+      - if
+      - elseBlockExists
+      description: Represents the storage task conditions to be tested for a match with container and blob properties.
+    StorageTaskReportSummary:
+      type: object
+      properties:
+        value:
+          readOnly: true
           type: array
           items:
-            $ref: '#/components/schemas/StorageTaskOperation'
+            $ref: '#/components/schemas/StorageTaskReportInstance'
           x-ms-identifiers: []
-          description: List of operations to execute when the condition predicate satisfies.
+          description: Gets storage tasks run result summary.
+        nextLink:
+          type: string
+          description: Request URL that can be used to query next page of storage task run results summary. Returned when the number of run instances and summary reports exceed maximum page size.
+          readOnly: true
+      description: Fetch Storage Tasks Run Summary.
+    StorageTasksListResult:
+      type: object
+      properties:
+        value:
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/StorageTask'
+          x-ms-identifiers: []
+          description: Gets the list of storage tasks and their properties.
+        nextLink:
+          type: string
+          description: Request URL that can be used to query next page of storage tasks. Returned when total number of requested storage tasks exceed maximum page size.
+          readOnly: true
+      description: The response from the List Storage Tasks operation.
+    StorageTaskOperation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The operation to be performed on the object.
+          enum:
+          - SetBlobTier
+          - SetBlobTags
+          - SetBlobImmutabilityPolicy
+          - SetBlobLegalHold
+          - SetBlobExpiry
+          - DeleteBlob
+          - UndeleteBlob
+          x-ms-enum:
+            name: StorageTaskOperationName
+            modelAsString: true
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+          description: Key-value parameters for the operation.
+        onSuccess:
+          type: string
+          description: Action to be taken when the operation is successful for a object.
+          enum:
+          - continue
+          x-ms-enum:
+            name: onSuccess
+            modelAsString: false
+        onFailure:
+          type: string
+          description: Action to be taken when the operation fails for a object.
+          enum:
+          - break
+          x-ms-enum:
+            name: onFailure
+            modelAsString: false
       required:
-      - condition
-      - operations
-      description: The if block of storage task operation
+      - name
+      description: Represents an operation to be performed on the object
     StorageTaskPreviewAction:
       type: object
       properties:
@@ -707,43 +732,18 @@ components:
           $ref: '#/components/schemas/StorageTaskProperties'
           description: Properties of the storage task.
       description: Parameters of the storage task update request
-    StorageTasksListResult:
+    ElseCondition:
       type: object
       properties:
-        value:
-          readOnly: true
+        operations:
           type: array
           items:
-            $ref: '#/components/schemas/StorageTask'
+            $ref: '#/components/schemas/StorageTaskOperation'
           x-ms-identifiers: []
-          description: Gets the list of storage tasks and their properties.
-        nextLink:
-          type: string
-          description: Request URL that can be used to query next page of storage tasks. Returned when total number of requested storage tasks exceed maximum page size.
-          readOnly: true
-      description: The response from the List Storage Tasks operation.
-    StorageTaskAssignment:
-      type: object
-      properties:
-        id:
-          type: string
-          format: arm-id
-          description: ARM Id of the storage task assignments, associated with the storage tasks.
-          readOnly: true
-      description: Fetch the Storage task assignment ARM ids.
-    StorageTaskPreviewActionCondition:
-      type: object
-      properties:
-        if:
-          $ref: '#/components/schemas/StorageTaskPreviewActionIfCondition'
-          description: The condition to be tested for a match with container and blob properties.
-        elseBlockExists:
-          type: boolean
-          description: Specify whether the else block is present in the condition.
+          description: List of operations to execute in the else block
       required:
-      - if
-      - elseBlockExists
-      description: Represents the storage task conditions to be tested for a match with container and blob properties.
+      - operations
+      description: The else block of storage task operation
   parameters:
     StorageTaskName:
       name: storageTaskName

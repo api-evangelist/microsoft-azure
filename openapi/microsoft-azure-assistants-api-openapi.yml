@@ -1694,34 +1694,38 @@ paths:
           default: your-resource-name.openai.azure.com
 components:
   schemas:
-    AssistantFile:
+    ToolDefinition:
       type: object
-      description: Information about a file attached to an assistant, as used by tools that can read files.
+      description: An abstract representation of an input tool definition that an assistant can use.
+      properties:
+        type:
+          type: string
+          description: The object type.
+      discriminator:
+        propertyName: type
+      required:
+      - type
+    AssistantDeletionStatus:
+      type: object
+      description: The status of an assistant deletion operation.
       properties:
         id:
           type: string
-          description: The identifier, which can be referenced in API endpoints.
+          description: The ID of the resource specified for deletion.
+        deleted:
+          type: boolean
+          description: A value indicating whether deletion was successful.
         object:
           type: string
-          description: The object type, which is always 'assistant.file'.
+          description: The object type, which is always 'assistant.deleted'.
           enum:
-          - assistant.file
+          - assistant.deleted
           x-ms-enum:
             modelAsString: false
-        created_at:
-          type: integer
-          format: unixtime
-          description: The Unix timestamp, in seconds, representing when this object was created.
-          x-ms-client-name: createdAt
-        assistant_id:
-          type: string
-          description: The assistant ID that the file is attached to.
-          x-ms-client-name: assistantId
       required:
       - id
+      - deleted
       - object
-      - created_at
-      - assistant_id
     AssistantCreationOptions:
       type: object
       description: The request details to use when creating a new assistant.
@@ -1767,91 +1771,6 @@ components:
             type: string
       required:
       - model
-    AssistantDeletionStatus:
-      type: object
-      description: The status of an assistant deletion operation.
-      properties:
-        id:
-          type: string
-          description: The ID of the resource specified for deletion.
-        deleted:
-          type: boolean
-          description: A value indicating whether deletion was successful.
-        object:
-          type: string
-          description: The object type, which is always 'assistant.deleted'.
-          enum:
-          - assistant.deleted
-          x-ms-enum:
-            modelAsString: false
-      required:
-      - id
-      - deleted
-      - object
-    AssistantFileDeletionStatus:
-      type: object
-      description: The status of an assistant file deletion operation.
-      properties:
-        id:
-          type: string
-          description: The ID of the resource specified for deletion.
-        deleted:
-          type: boolean
-          description: A value indicating whether deletion was successful.
-        object:
-          type: string
-          description: The object type, which is always 'assistant.file.deleted'.
-          enum:
-          - assistant.file.deleted
-          x-ms-enum:
-            modelAsString: false
-      required:
-      - id
-      - deleted
-      - object
-    AssistantModificationOptions:
-      type: object
-      description: The request details to use when modifying an existing assistant.
-      properties:
-        model:
-          type: string
-          description: The ID of the model to use.
-        name:
-          type:
-          - string
-          - 'null'
-          description: The modified name for the assistant to use.
-        description:
-          type:
-          - string
-          - 'null'
-          description: The modified description for the assistant to use.
-        instructions:
-          type:
-          - string
-          - 'null'
-          description: The modified system instructions for the new assistant to use.
-        tools:
-          type: array
-          description: The modified collection of tools to enable for the assistant.
-          default: []
-          items:
-            $ref: '#/components/schemas/ToolDefinition'
-          x-ms-identifiers: []
-        file_ids:
-          type: array
-          description: The modified list of previously uploaded fileIDs to attach to the assistant.
-          default: []
-          items:
-            type: string
-          x-ms-client-name: fileIds
-        metadata:
-          type:
-          - object
-          - 'null'
-          description: A set of up to 16 key/value pairs that can be attached to an object, used for storing additional information about that object in a structured format. Keys may be up to 64 characters in length and values may be up to 512 characters in length.
-          additionalProperties:
-            type: string
     Assistant:
       type: object
       description: Represents an assistant that can call the model and use tools.
@@ -1921,144 +1840,136 @@ components:
       - tools
       - file_ids
       - metadata
-    ToolDefinition:
+    AssistantFile:
       type: object
-      description: An abstract representation of an input tool definition that an assistant can use.
-      properties:
-        type:
-          type: string
-          description: The object type.
-      discriminator:
-        propertyName: type
-      required:
-      - type
-    runStepDetailsMessageCreationObject:
-      title: Message creation
-      type: object
-      description: Details of the message creation by the run step.
-      properties:
-        type:
-          description: Always `message_creation``.
-          type: string
-          enum:
-          - message_creation
-          x-ms-enum:
-            name: RunStepDetailsMessageCreationObjectType
-            modelAsString: true
-            values:
-            - value: message_creation
-        message_creation:
-          type: object
-          properties:
-            message_id:
-              type: string
-              description: The ID of the message that was created by this run step.
-          required:
-          - message_id
-      required:
-      - type
-      - message_creation
-    runStepDetailsToolCallsCodeObject:
-      title: Code interpreter tool call
-      type: object
-      description: Details of the Code Interpreter tool call the run step was involved in.
+      description: Information about a file attached to an assistant, as used by tools that can read files.
       properties:
         id:
           type: string
-          description: The ID of the tool call.
-        type:
-          type: string
-          description: The type of tool call. This is always going to be `code_interpreter` for this type of tool call.
-          enum:
-          - code_interpreter
-          x-ms-enum:
-            name: RunStepDetailsToolCallsCodeObjectType
-            modelAsString: true
-            values:
-            - value: code_interpreter
-        code_interpreter:
-          type: object
-          description: The Code Interpreter tool call definition.
-          required:
-          - input
-          - outputs
-          properties:
-            input:
-              type: string
-              description: The input to the Code Interpreter tool call.
-            outputs:
-              type: array
-              description: The outputs from the Code Interpreter tool call. Code Interpreter can output one or more items, including text (`logs`) or images (`image`). Each of these are represented by a different object type.
-              items:
-                type: object
-                oneOf:
-                - $ref: '#/components/schemas/runStepDetailsToolCallsCodeOutputLogsObject'
-                - $ref: '#/components/schemas/runStepDetailsToolCallsCodeOutputImageObject'
-      required:
-      - id
-      - type
-      - code_interpreter
-    runStepDetailsToolCallsFunctionObject:
-      type: object
-      title: Function tool call
-      properties:
-        id:
-          type: string
-          description: The ID of the tool call object.
-        type:
-          type: string
-          description: The type of tool call. This is always going to be `function` for this type of tool call.
-          enum:
-          - function
-          x-ms-enum:
-            name: RunStepDetailsToolCallsFunctionObjectType
-            modelAsString: true
-            values:
-            - value: function
-        function:
-          type: object
-          description: The definition of the function that was called.
-          properties:
-            name:
-              type: string
-              description: The name of the function.
-            arguments:
-              type: string
-              description: The arguments passed to the function.
-            output:
-              type:
-              - string
-              - 'null'
-              description: The output of the function. This will be `null` if the outputs have not been [submitted](/docs/api-reference/runs/submitToolOutputs) yet.
-          required:
-          - name
-          - arguments
-          - output
-      required:
-      - id
-      - type
-      - function
-    deleteAssistantFileResponse:
-      type: object
-      description: Deletes the association between the assistant and the file, but does not delete the [File](/docs/api-reference/files) object itself.
-      properties:
-        id:
-          type: string
-        deleted:
-          type: boolean
+          description: The identifier, which can be referenced in API endpoints.
         object:
           type: string
+          description: The object type, which is always 'assistant.file'.
           enum:
-          - assistant.file.deleted
+          - assistant.file
           x-ms-enum:
-            name: DeleteAssistantFileResponseType
-            modelAsString: true
-            values:
-            - value: assistant.file.deleted
+            modelAsString: false
+        created_at:
+          type: integer
+          format: unixtime
+          description: The Unix timestamp, in seconds, representing when this object was created.
+          x-ms-client-name: createdAt
+        assistant_id:
+          type: string
+          description: The assistant ID that the file is attached to.
+          x-ms-client-name: assistantId
       required:
       - id
       - object
+      - created_at
+      - assistant_id
+    AssistantFileDeletionStatus:
+      type: object
+      description: The status of an assistant file deletion operation.
+      properties:
+        id:
+          type: string
+          description: The ID of the resource specified for deletion.
+        deleted:
+          type: boolean
+          description: A value indicating whether deletion was successful.
+        object:
+          type: string
+          description: The object type, which is always 'assistant.file.deleted'.
+          enum:
+          - assistant.file.deleted
+          x-ms-enum:
+            modelAsString: false
+      required:
+      - id
       - deleted
+      - object
+    AssistantModificationOptions:
+      type: object
+      description: The request details to use when modifying an existing assistant.
+      properties:
+        model:
+          type: string
+          description: The ID of the model to use.
+        name:
+          type:
+          - string
+          - 'null'
+          description: The modified name for the assistant to use.
+        description:
+          type:
+          - string
+          - 'null'
+          description: The modified description for the assistant to use.
+        instructions:
+          type:
+          - string
+          - 'null'
+          description: The modified system instructions for the new assistant to use.
+        tools:
+          type: array
+          description: The modified collection of tools to enable for the assistant.
+          default: []
+          items:
+            $ref: '#/components/schemas/ToolDefinition'
+          x-ms-identifiers: []
+        file_ids:
+          type: array
+          description: The modified list of previously uploaded fileIDs to attach to the assistant.
+          default: []
+          items:
+            type: string
+          x-ms-client-name: fileIds
+        metadata:
+          type:
+          - object
+          - 'null'
+          description: A set of up to 16 key/value pairs that can be attached to an object, used for storing additional information about that object in a structured format. Keys may be up to 64 characters in length and values may be up to 512 characters in length.
+          additionalProperties:
+            type: string
+    createMessageRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - role
+      - content
+      properties:
+        role:
+          type: string
+          enum:
+          - user
+          x-ms-enum:
+            name: CreateMessageRequestRole
+            modelAsString: true
+            values:
+            - value: user
+              description: The create message role as `user`
+          description: The role of the entity that is creating the message. Currently only `user` is supported.
+        content:
+          type: string
+          minLength: 1
+          maxLength: 32768
+          description: The content of the message.
+        file_ids:
+          description: A list of [File](/docs/api-reference/files) IDs that the message should use. There can be a maximum of 10 files attached to a message. Useful for tools like `retrieval` and `code_interpreter` that can access and use files.
+          default: []
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            type: string
+        metadata:
+          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
+
+            '
+          type:
+          - object
+          - 'null'
     modifyRunRequest:
       type: object
       additionalProperties: false
@@ -2070,35 +1981,37 @@ components:
           type:
           - object
           - 'null'
-    runStepDetailsToolCallsCodeOutputImageObject:
-      title: Code interpreter image output
-      type: object
-      properties:
-        type:
-          description: Always `image`.
-          type: string
-          enum:
-          - image
-          x-ms-enum:
-            name: RunStepDetailsToolCallsCodeOutputImageObjectType
-            modelAsString: true
-            values:
-            - value: image
-        image:
-          type: object
-          properties:
-            file_id:
-              description: The [file](/docs/api-reference/files) ID of the image.
-              type: string
-          required:
-          - file_id
-      required:
-      - type
-      - image
-    modifyThreadRequest:
+    createThreadAndRunRequest:
       type: object
       additionalProperties: false
       properties:
+        assistant_id:
+          description: The ID of the [assistant](/docs/api-reference/assistants) to use to execute this run.
+          type: string
+        thread:
+          $ref: '#/components/schemas/createThreadRequest'
+          description: If no thread is provided, an empty thread will be created.
+        model:
+          description: The ID of the [Model](/docs/api-reference/models) to be used to execute this run. If a value is provided here, it will override the model associated with the assistant. If not, the model associated with the assistant will be used.
+          type:
+          - string
+          - 'null'
+        instructions:
+          description: Override the default system message of the assistant. This is useful for modifying the behavior on a per-run basis.
+          type:
+          - string
+          - 'null'
+        tools:
+          description: Override the tools the assistant can use for this run. This is useful for modifying the behavior on a per-run basis.
+          type:
+          - array
+          - 'null'
+          maxItems: 20
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/assistantToolsCode'
+            - $ref: '#/components/schemas/assistantToolsRetrieval'
+            - $ref: '#/components/schemas/assistantToolsFunction'
         metadata:
           description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
 
@@ -2106,101 +2019,204 @@ components:
           type:
           - object
           - 'null'
-    deleteThreadResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        deleted:
-          type: boolean
-        object:
-          type: string
-          enum:
-          - thread.deleted
-          x-ms-enum:
-            name: DeleteThreadResponseObjectState
-            modelAsString: true
-            values:
-            - value: thread.deleted
-              description: The delete thread response object state which is `thread.deleted`
       required:
-      - id
-      - object
-      - deleted
-    submitToolOutputsRunRequest:
+      - thread_id
+      - assistant_id
+    runStepDetailsToolCallsCodeOutputLogsObject:
+      title: Code interpreter log output
       type: object
-      additionalProperties: false
-      properties:
-        tool_outputs:
-          description: A list of tools for which the outputs are being submitted.
-          type: array
-          items:
-            type: object
-            properties:
-              tool_call_id:
-                type: string
-                description: The ID of the tool call in the `required_action` object within the run object the output is being submitted for.
-              output:
-                type: string
-                description: The output of the tool call to be submitted to continue the run.
-      required:
-      - tool_outputs
-    messageContentImageFileObject:
-      title: Image file
-      type: object
-      description: References an image [File](/docs/api-reference/files) in the content of a message.
+      description: Text output from the Code Interpreter tool call as part of a run step.
       properties:
         type:
-          description: Always `image_file`.
+          description: Always `logs`.
           type: string
           enum:
-          - image_file
+          - logs
           x-ms-enum:
-            name: MessageContentImageFileObjectType
+            name: RunStepDetailsToolCallsCodeOutputLogsObjectType
             modelAsString: true
             values:
-            - value: image_file
-              description: The message content image file type
-        image_file:
+            - value: code_interpreter
+        logs:
+          type: string
+          description: The text output from the Code Interpreter tool call.
+      required:
+      - type
+      - logs
+    messageContentTextAnnotationsFilePathObject:
+      title: File path
+      type: object
+      description: A URL for the file that's generated when the assistant used the `code_interpreter` tool to generate a file.
+      properties:
+        type:
+          description: Always `file_path`.
+          type: string
+          enum:
+          - file_path
+          x-ms-enum:
+            name: FilePathObjectType
+            modelAsString: true
+            values:
+            - value: file_path
+              description: The file path object type
+        text:
+          description: The text in the message content that needs to be replaced.
+          type: string
+        file_path:
           type: object
           properties:
             file_id:
-              description: The [File](/docs/api-reference/files) ID of the image in the message content.
+              description: The ID of the file that was generated.
               type: string
           required:
           - file_id
+        start_index:
+          type: integer
+          minimum: 0
+        end_index:
+          type: integer
+          minimum: 0
       required:
       - type
-      - image_file
-    runStepDetailsToolCallsObject:
-      title: Tool calls
+      - text
+      - file_path
+      - start_index
+      - end_index
+    createThreadRequest:
       type: object
-      description: Details of the tool call.
+      additionalProperties: false
       properties:
-        type:
-          description: Always `tool_calls`.
-          type: string
-          enum:
-          - tool_calls
-          x-ms-enum:
-            name: RunStepDetailsToolCallsObjectType
-            modelAsString: true
-            values:
-            - value: tool_calls
-        tool_calls:
+        messages:
+          description: A list of [messages](/docs/api-reference/messages) to start the thread with.
           type: array
-          description: 'An array of tool calls the run step was involved in. These can be associated with one of three types of tools: `code_interpreter`, `retrieval`, or `function`.
+          items:
+            $ref: '#/components/schemas/createMessageRequest'
+        metadata:
+          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
 
             '
-          items:
-            type: object
-            oneOf:
-            - $ref: '#/components/schemas/runStepDetailsToolCallsCodeObject'
-            - $ref: '#/components/schemas/runStepDetailsToolCallsRetrievalObject'
-            - $ref: '#/components/schemas/runStepDetailsToolCallsFunctionObject'
+          type:
+          - object
+          - 'null'
+    messageFileObject:
+      type: object
+      title: Message files
+      description: A list of files attached to a `message`.
+      properties:
+        id:
+          description: The identifier, which can be referenced in API endpoints.
+          type: string
+        object:
+          description: The object type, which is always `thread.message.file`.
+          type: string
+          enum:
+          - thread.message.file
+          x-ms-enum:
+            name: MessageFileObjectType
+            modelAsString: true
+            values:
+            - value: thread.message.file
+        created_at:
+          description: The Unix timestamp (in seconds) for when the message file was created.
+          type: integer
+        message_id:
+          description: The ID of the [message](/docs/api-reference/messages) that the [File](/docs/api-reference/files) is attached to.
+          type: string
       required:
-      - type
-      - tool_calls
+      - id
+      - object
+      - created_at
+      - message_id
+    messageObject:
+      type: object
+      title: The message object
+      description: Represents a message within a [thread](/docs/api-reference/threads).
+      properties:
+        id:
+          description: The identifier, which can be referenced in API endpoints.
+          type: string
+        object:
+          description: The object type, which is always `thread.message`.
+          type: string
+          enum:
+          - thread.message
+          x-ms-enum:
+            name: MessageObjectType
+            modelAsString: true
+            values:
+            - value: thread.message
+              description: The message object type which is `thread.message`
+        created_at:
+          description: The Unix timestamp (in seconds) for when the message was created.
+          type: integer
+        thread_id:
+          description: The [thread](/docs/api-reference/threads) ID that this message belongs to.
+          type: string
+        role:
+          description: The entity that produced the message. One of `user` or `assistant`.
+          type: string
+          enum:
+          - user
+          - assistant
+          x-ms-enum:
+            name: MessageObjectRole
+            modelAsString: true
+            values:
+            - value: user
+              description: Message object role as `user`
+            - value: assistant
+              description: Message object role as `assistant`
+        content:
+          description: The content of the message in array of text and/or images.
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/messageContentImageFileObject'
+            - $ref: '#/components/schemas/messageContentTextObject'
+        assistant_id:
+          description: If applicable, the ID of the [assistant](/docs/api-reference/assistants) that authored this message.
+          type:
+          - string
+          - 'null'
+        run_id:
+          description: If applicable, the ID of the [run](/docs/api-reference/runs) associated with the authoring of this message.
+          type:
+          - string
+          - 'null'
+        file_ids:
+          description: A list of [file](/docs/api-reference/files) IDs that the assistant should use. Useful for tools like retrieval and code_interpreter that can access files. A maximum of 10 files can be attached to a message.
+          default: []
+          maxItems: 10
+          type: array
+          items:
+            type: string
+        metadata:
+          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
+
+            '
+          type:
+          - object
+          - 'null'
+      required:
+      - id
+      - object
+      - created_at
+      - thread_id
+      - role
+      - content
+      - assistant_id
+      - run_id
+      - file_ids
+      - metadata
+    createAssistantFileRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        file_id:
+          description: A [File](/docs/api-reference/files) ID (with `purpose="assistants"`) that the assistant should use. Useful for tools like `retrieval` and `code_interpreter` that can access files.
+          type: string
+      required:
+      - file_id
     runStepObject:
       type: object
       title: Run steps
@@ -2346,32 +2362,7 @@ components:
       - failed_at
       - completed_at
       - metadata
-    runStepDetailsToolCallsRetrievalObject:
-      title: Retrieval tool call
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the tool call object.
-        type:
-          type: string
-          description: The type of tool call. This is always going to be `retrieval` for this type of tool call.
-          enum:
-          - retrieval
-          x-ms-enum:
-            name: RunStepDetailsToolCallsRetrievalObjectType
-            modelAsString: true
-            values:
-            - value: retrieval
-        retrieval:
-          type: object
-          description: For now, this is always going to be an empty object.
-      required:
-      - id
-      - type
-      - retrieval
-    listAssistantsResponse:
-      type: object
+    listRunStepsResponse:
       properties:
         object:
           type: string
@@ -2379,13 +2370,13 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/assistantObject'
+            $ref: '#/components/schemas/runStepObject'
         first_id:
           type: string
-          example: asst_hLBK7PXBv5Lr2NQT7KLY0ag1
+          example: step_hLBK7PXBv5Lr2NQT7KLY0ag1
         last_id:
           type: string
-          example: asst_QLoItBbqwyAJEzlTy4y9kOMM
+          example: step_QLoItBbqwyAJEzlTy4y9kOMM
         has_more:
           type: boolean
           example: false
@@ -2395,295 +2386,67 @@ components:
       - first_id
       - last_id
       - has_more
-    listRunsResponse:
+    chatCompletionFunctionParameters:
       type: object
-      properties:
-        object:
-          type: string
-          example: list
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/runObject'
-        first_id:
-          type: string
-          example: run_hLBK7PXBv5Lr2NQT7KLY0ag1
-        last_id:
-          type: string
-          example: run_QLoItBbqwyAJEzlTy4y9kOMM
-        has_more:
-          type: boolean
-          example: false
-      required:
-      - object
-      - data
-      - first_id
-      - last_id
-      - has_more
-    messageContentTextAnnotationsFileCitationObject:
-      title: File citation
+      description: The parameters the functions accepts, described as a JSON Schema object. See the [guide](/docs/guides/gpt/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+      additionalProperties: true
+    assistantToolsCode:
       type: object
-      description: A citation within the message that points to a specific quote from a specific File associated with the assistant or the message. Generated when the assistant uses the "retrieval" tool to search files.
-      properties:
-        type:
-          description: Always `file_citation`.
-          type: string
-          enum:
-          - file_citation
-          x-ms-enum:
-            name: FileCitationObjectType
-            modelAsString: true
-            values:
-            - value: file_citation
-              description: The file citation object type
-        text:
-          description: The text in the message content that needs to be replaced.
-          type: string
-        file_citation:
-          type: object
-          properties:
-            file_id:
-              description: The ID of the specific File the citation is from.
-              type: string
-            quote:
-              description: The specific quote in the file.
-              type: string
-          required:
-          - file_id
-          - quote
-        start_index:
-          type: integer
-          minimum: 0
-        end_index:
-          type: integer
-          minimum: 0
-      required:
-      - type
-      - text
-      - file_citation
-      - start_index
-      - end_index
-    assistantToolsRetrieval:
-      type: object
-      title: Retrieval tool
+      title: Code interpreter tool
       properties:
         type:
           type: string
-          description: 'The type of tool being defined: `retrieval`'
+          description: 'The type of tool being defined: `code_interpreter`'
           enum:
-          - retrieval
+          - code_interpreter
           x-ms-enum:
-            name: assistantToolsRetrievalType
-            modelAsString: true
-            values:
-            - value: retrieval
-              description: retrieval as type of tool being defined
-      required:
-      - type
-    messageContentTextAnnotationsFilePathObject:
-      title: File path
-      type: object
-      description: A URL for the file that's generated when the assistant used the `code_interpreter` tool to generate a file.
-      properties:
-        type:
-          description: Always `file_path`.
-          type: string
-          enum:
-          - file_path
-          x-ms-enum:
-            name: FilePathObjectType
-            modelAsString: true
-            values:
-            - value: file_path
-              description: The file path object type
-        text:
-          description: The text in the message content that needs to be replaced.
-          type: string
-        file_path:
-          type: object
-          properties:
-            file_id:
-              description: The ID of the file that was generated.
-              type: string
-          required:
-          - file_id
-        start_index:
-          type: integer
-          minimum: 0
-        end_index:
-          type: integer
-          minimum: 0
-      required:
-      - type
-      - text
-      - file_path
-      - start_index
-      - end_index
-    listMessageFilesResponse:
-      properties:
-        object:
-          type: string
-          example: list
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/messageFileObject'
-        first_id:
-          type: string
-          example: file-hLBK7PXBv5Lr2NQT7KLY0ag1
-        last_id:
-          type: string
-          example: file-QLoItBbqwyAJEzlTy4y9kOMM
-        has_more:
-          type: boolean
-          example: false
-      required:
-      - object
-      - data
-      - items
-      - first_id
-      - last_id
-      - has_more
-    assistantFileObject:
-      type: object
-      title: Assistant files
-      description: A list of [Files](/docs/api-reference/files) attached to an `assistant`.
-      properties:
-        id:
-          description: The identifier, which can be referenced in API endpoints.
-          type: string
-        object:
-          description: The object type, which is always `assistant.file`.
-          type: string
-          enum:
-          - assistant.file
-          x-ms-enum:
-            name: AssistantFileObjectType
-            modelAsString: true
-            values:
-            - value: assistant.file
-        created_at:
-          description: The Unix timestamp (in seconds) for when the assistant file was created.
-          type: integer
-        assistant_id:
-          description: The assistant ID that the file is attached to.
-          type: string
-      required:
-      - id
-      - object
-      - created_at
-      - assistant_id
-    assistantObject:
-      type: object
-      title: Assistant
-      description: Represents an `assistant` that can call the model and use tools.
-      properties:
-        id:
-          description: The identifier, which can be referenced in API endpoints.
-          type: string
-        object:
-          description: The object type, which is always `assistant`.
-          type: string
-          enum:
-          - assistant
-          x-ms-enum:
-            name: AssistantObjectType
-            modelAsString: true
-            values:
-            - value: assistant
-              description: The object type, which is always assistant
-        created_at:
-          description: The Unix timestamp (in seconds) for when the assistant was created.
-          type: integer
-        name:
-          description: 'The name of the assistant. The maximum length is 256 characters.
-
-            '
-          type:
-          - string
-          - 'null'
-          maxLength: 256
-        description:
-          description: 'The description of the assistant. The maximum length is 512 characters.
-
-            '
-          type:
-          - string
-          - 'null'
-          maxLength: 512
-        model:
-          description: 'ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.
-
-            '
-          type: string
-        instructions:
-          description: 'The system instructions that the assistant uses. The maximum length is 32768 characters.
-
-            '
-          type:
-          - string
-          - 'null'
-          maxLength: 32768
-        tools:
-          description: 'A list of tool enabled on the assistant. There can be a maximum of 128 tools per assistant. Tools can be of types `code_interpreter`, `retrieval`, or `function`.
-
-            '
-          default: []
-          type: array
-          maxItems: 128
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/assistantToolsCode'
-            - $ref: '#/components/schemas/assistantToolsRetrieval'
-            - $ref: '#/components/schemas/assistantToolsFunction'
-        file_ids:
-          description: 'A list of [file](/docs/api-reference/files) IDs attached to this assistant. There can be a maximum of 20 files attached to the assistant. Files are ordered by their creation date in ascending order.
-
-            '
-          default: []
-          type: array
-          maxItems: 20
-          items:
-            type: string
-        metadata:
-          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
-
-            '
-          type:
-          - object
-          - 'null'
-      required:
-      - id
-      - object
-      - created_at
-      - name
-      - description
-      - model
-      - instructions
-      - tools
-      - file_ids
-      - metadata
-    runStepDetailsToolCallsCodeOutputLogsObject:
-      title: Code interpreter log output
-      type: object
-      description: Text output from the Code Interpreter tool call as part of a run step.
-      properties:
-        type:
-          description: Always `logs`.
-          type: string
-          enum:
-          - logs
-          x-ms-enum:
-            name: RunStepDetailsToolCallsCodeOutputLogsObjectType
+            name: assistantToolsCodeType
             modelAsString: true
             values:
             - value: code_interpreter
-        logs:
-          type: string
-          description: The text output from the Code Interpreter tool call.
+              description: code_interpreter as type of tool being defined
       required:
       - type
-      - logs
+    runStepDetailsToolCallsCodeObject:
+      title: Code interpreter tool call
+      type: object
+      description: Details of the Code Interpreter tool call the run step was involved in.
+      properties:
+        id:
+          type: string
+          description: The ID of the tool call.
+        type:
+          type: string
+          description: The type of tool call. This is always going to be `code_interpreter` for this type of tool call.
+          enum:
+          - code_interpreter
+          x-ms-enum:
+            name: RunStepDetailsToolCallsCodeObjectType
+            modelAsString: true
+            values:
+            - value: code_interpreter
+        code_interpreter:
+          type: object
+          description: The Code Interpreter tool call definition.
+          required:
+          - input
+          - outputs
+          properties:
+            input:
+              type: string
+              description: The input to the Code Interpreter tool call.
+            outputs:
+              type: array
+              description: The outputs from the Code Interpreter tool call. Code Interpreter can output one or more items, including text (`logs`) or images (`image`). Each of these are represented by a different object type.
+              items:
+                type: object
+                oneOf:
+                - $ref: '#/components/schemas/runStepDetailsToolCallsCodeOutputLogsObject'
+                - $ref: '#/components/schemas/runStepDetailsToolCallsCodeOutputImageObject'
+      required:
+      - id
+      - type
+      - code_interpreter
     createAssistantRequest:
       type: object
       additionalProperties: false
@@ -2748,100 +2511,6 @@ components:
           - 'null'
       required:
       - model
-    listMessagesResponse:
-      properties:
-        object:
-          type: string
-          example: list
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/messageObject'
-        first_id:
-          type: string
-          example: msg_hLBK7PXBv5Lr2NQT7KLY0ag1
-        last_id:
-          type: string
-          example: msg_QLoItBbqwyAJEzlTy4y9kOMM
-        has_more:
-          type: boolean
-          example: false
-      required:
-      - object
-      - data
-      - first_id
-      - last_id
-      - has_more
-    modifyMessageRequest:
-      type: object
-      additionalProperties: false
-      properties:
-        metadata:
-          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
-
-            '
-          type:
-          - object
-          - 'null'
-    createRunRequest:
-      type: object
-      additionalProperties: false
-      properties:
-        assistant_id:
-          description: The ID of the [assistant](/docs/api-reference/assistants) to use to execute this run.
-          type: string
-        model:
-          description: The ID of the [Model](/docs/api-reference/models) to be used to execute this run. If a value is provided here, it will override the model associated with the assistant. If not, the model associated with the assistant will be used.
-          type:
-          - string
-          - 'null'
-        instructions:
-          description: Override the default system message of the assistant. This is useful for modifying the behavior on a per-run basis.
-          type:
-          - string
-          - 'null'
-        tools:
-          description: Override the tools the assistant can use for this run. This is useful for modifying the behavior on a per-run basis.
-          type:
-          - array
-          - 'null'
-          maxItems: 20
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/assistantToolsCode'
-            - $ref: '#/components/schemas/assistantToolsRetrieval'
-            - $ref: '#/components/schemas/assistantToolsFunction'
-        metadata:
-          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
-
-            '
-          type:
-          - object
-          - 'null'
-      required:
-      - thread_id
-      - assistant_id
-    deleteAssistantResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        deleted:
-          type: boolean
-        object:
-          type: string
-          enum:
-          - assistant.deleted
-          x-ms-enum:
-            name: DeleteAssistantResponseState
-            modelAsString: true
-            values:
-            - value: assistant.deleted
-              description: The assistant is deleted
-      required:
-      - id
-      - object
-      - deleted
     messageContentTextObject:
       title: Text
       type: object
@@ -2876,223 +2545,111 @@ components:
       required:
       - type
       - text
-    assistantToolsFunction:
+    assistantToolsRetrieval:
       type: object
-      title: Function tool
+      title: Retrieval tool
       properties:
         type:
           type: string
-          description: 'The type of tool being defined: `function`'
+          description: 'The type of tool being defined: `retrieval`'
           enum:
-          - function
+          - retrieval
           x-ms-enum:
-            name: assistantToolsFunction
+            name: assistantToolsRetrievalType
             modelAsString: true
             values:
             - value: retrieval
               description: retrieval as type of tool being defined
-        function:
-          type: object
-          description: The function definition.
-          properties:
-            description:
-              type: string
-              description: A description of what the function does, used by the model to choose when and how to call the function.
-            name:
-              type: string
-              description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
-            parameters:
-              $ref: '#/components/schemas/chatCompletionFunctionParameters'
-          required:
-          - name
-          - parameters
-          - description
       required:
       - type
-      - function
-    messageFileObject:
+    runStepDetailsToolCallsObject:
+      title: Tool calls
       type: object
-      title: Message files
-      description: A list of files attached to a `message`.
-      properties:
-        id:
-          description: The identifier, which can be referenced in API endpoints.
-          type: string
-        object:
-          description: The object type, which is always `thread.message.file`.
-          type: string
-          enum:
-          - thread.message.file
-          x-ms-enum:
-            name: MessageFileObjectType
-            modelAsString: true
-            values:
-            - value: thread.message.file
-        created_at:
-          description: The Unix timestamp (in seconds) for when the message file was created.
-          type: integer
-        message_id:
-          description: The ID of the [message](/docs/api-reference/messages) that the [File](/docs/api-reference/files) is attached to.
-          type: string
-      required:
-      - id
-      - object
-      - created_at
-      - message_id
-    createThreadRequest:
-      type: object
-      additionalProperties: false
-      properties:
-        messages:
-          description: A list of [messages](/docs/api-reference/messages) to start the thread with.
-          type: array
-          items:
-            $ref: '#/components/schemas/createMessageRequest'
-        metadata:
-          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
-
-            '
-          type:
-          - object
-          - 'null'
-    messageObject:
-      type: object
-      title: The message object
-      description: Represents a message within a [thread](/docs/api-reference/threads).
-      properties:
-        id:
-          description: The identifier, which can be referenced in API endpoints.
-          type: string
-        object:
-          description: The object type, which is always `thread.message`.
-          type: string
-          enum:
-          - thread.message
-          x-ms-enum:
-            name: MessageObjectType
-            modelAsString: true
-            values:
-            - value: thread.message
-              description: The message object type which is `thread.message`
-        created_at:
-          description: The Unix timestamp (in seconds) for when the message was created.
-          type: integer
-        thread_id:
-          description: The [thread](/docs/api-reference/threads) ID that this message belongs to.
-          type: string
-        role:
-          description: The entity that produced the message. One of `user` or `assistant`.
-          type: string
-          enum:
-          - user
-          - assistant
-          x-ms-enum:
-            name: MessageObjectRole
-            modelAsString: true
-            values:
-            - value: user
-              description: Message object role as `user`
-            - value: assistant
-              description: Message object role as `assistant`
-        content:
-          description: The content of the message in array of text and/or images.
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/messageContentImageFileObject'
-            - $ref: '#/components/schemas/messageContentTextObject'
-        assistant_id:
-          description: If applicable, the ID of the [assistant](/docs/api-reference/assistants) that authored this message.
-          type:
-          - string
-          - 'null'
-        run_id:
-          description: If applicable, the ID of the [run](/docs/api-reference/runs) associated with the authoring of this message.
-          type:
-          - string
-          - 'null'
-        file_ids:
-          description: A list of [file](/docs/api-reference/files) IDs that the assistant should use. Useful for tools like retrieval and code_interpreter that can access files. A maximum of 10 files can be attached to a message.
-          default: []
-          maxItems: 10
-          type: array
-          items:
-            type: string
-        metadata:
-          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
-
-            '
-          type:
-          - object
-          - 'null'
-      required:
-      - id
-      - object
-      - created_at
-      - thread_id
-      - role
-      - content
-      - assistant_id
-      - run_id
-      - file_ids
-      - metadata
-    assistantToolsCode:
-      type: object
-      title: Code interpreter tool
+      description: Details of the tool call.
       properties:
         type:
+          description: Always `tool_calls`.
           type: string
-          description: 'The type of tool being defined: `code_interpreter`'
           enum:
-          - code_interpreter
+          - tool_calls
           x-ms-enum:
-            name: assistantToolsCodeType
+            name: RunStepDetailsToolCallsObjectType
             modelAsString: true
             values:
-            - value: code_interpreter
-              description: code_interpreter as type of tool being defined
+            - value: tool_calls
+        tool_calls:
+          type: array
+          description: 'An array of tool calls the run step was involved in. These can be associated with one of three types of tools: `code_interpreter`, `retrieval`, or `function`.
+
+            '
+          items:
+            type: object
+            oneOf:
+            - $ref: '#/components/schemas/runStepDetailsToolCallsCodeObject'
+            - $ref: '#/components/schemas/runStepDetailsToolCallsRetrievalObject'
+            - $ref: '#/components/schemas/runStepDetailsToolCallsFunctionObject'
       required:
       - type
-    createAssistantFileRequest:
+      - tool_calls
+    runStepDetailsMessageCreationObject:
+      title: Message creation
       type: object
-      additionalProperties: false
+      description: Details of the message creation by the run step.
       properties:
-        file_id:
-          description: A [File](/docs/api-reference/files) ID (with `purpose="assistants"`) that the assistant should use. Useful for tools like `retrieval` and `code_interpreter` that can access files.
+        type:
+          description: Always `message_creation``.
           type: string
+          enum:
+          - message_creation
+          x-ms-enum:
+            name: RunStepDetailsMessageCreationObjectType
+            modelAsString: true
+            values:
+            - value: message_creation
+        message_creation:
+          type: object
+          properties:
+            message_id:
+              type: string
+              description: The ID of the message that was created by this run step.
+          required:
+          - message_id
       required:
-      - file_id
-    createThreadAndRunRequest:
+      - type
+      - message_creation
+    modifyThreadRequest:
       type: object
       additionalProperties: false
       properties:
-        assistant_id:
-          description: The ID of the [assistant](/docs/api-reference/assistants) to use to execute this run.
+        metadata:
+          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
+
+            '
+          type:
+          - object
+          - 'null'
+    threadObject:
+      type: object
+      title: Thread
+      description: Represents a thread that contains [messages](/docs/api-reference/messages).
+      properties:
+        id:
+          description: The identifier, which can be referenced in API endpoints.
           type: string
-        thread:
-          $ref: '#/components/schemas/createThreadRequest'
-          description: If no thread is provided, an empty thread will be created.
-        model:
-          description: The ID of the [Model](/docs/api-reference/models) to be used to execute this run. If a value is provided here, it will override the model associated with the assistant. If not, the model associated with the assistant will be used.
-          type:
-          - string
-          - 'null'
-        instructions:
-          description: Override the default system message of the assistant. This is useful for modifying the behavior on a per-run basis.
-          type:
-          - string
-          - 'null'
-        tools:
-          description: Override the tools the assistant can use for this run. This is useful for modifying the behavior on a per-run basis.
-          type:
-          - array
-          - 'null'
-          maxItems: 20
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/assistantToolsCode'
-            - $ref: '#/components/schemas/assistantToolsRetrieval'
-            - $ref: '#/components/schemas/assistantToolsFunction'
+        object:
+          description: The object type, which is always `thread`.
+          type: string
+          enum:
+          - thread
+          x-ms-enum:
+            name: ThreadObjectType
+            modelAsString: true
+            values:
+            - value: thread
+              description: The type of thread object which is always `thread`
+        created_at:
+          description: The Unix timestamp (in seconds) for when the thread was created.
+          type: integer
         metadata:
           description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
 
@@ -3101,8 +2658,80 @@ components:
           - object
           - 'null'
       required:
-      - thread_id
-      - assistant_id
+      - id
+      - object
+      - created_at
+      - metadata
+    deleteThreadResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        deleted:
+          type: boolean
+        object:
+          type: string
+          enum:
+          - thread.deleted
+          x-ms-enum:
+            name: DeleteThreadResponseObjectState
+            modelAsString: true
+            values:
+            - value: thread.deleted
+              description: The delete thread response object state which is `thread.deleted`
+      required:
+      - id
+      - object
+      - deleted
+    listRunsResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          example: list
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/runObject'
+        first_id:
+          type: string
+          example: run_hLBK7PXBv5Lr2NQT7KLY0ag1
+        last_id:
+          type: string
+          example: run_QLoItBbqwyAJEzlTy4y9kOMM
+        has_more:
+          type: boolean
+          example: false
+      required:
+      - object
+      - data
+      - first_id
+      - last_id
+      - has_more
+    listMessagesResponse:
+      properties:
+        object:
+          type: string
+          example: list
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/messageObject'
+        first_id:
+          type: string
+          example: msg_hLBK7PXBv5Lr2NQT7KLY0ag1
+        last_id:
+          type: string
+          example: msg_QLoItBbqwyAJEzlTy4y9kOMM
+        has_more:
+          type: boolean
+          example: false
+      required:
+      - object
+      - data
+      - first_id
+      - last_id
+      - has_more
     runObject:
       type: object
       title: A run on a thread
@@ -3285,37 +2914,91 @@ components:
       - tools
       - file_ids
       - metadata
-    createMessageRequest:
+    messageContentImageFileObject:
+      title: Image file
       type: object
-      additionalProperties: false
-      required:
-      - role
-      - content
+      description: References an image [File](/docs/api-reference/files) in the content of a message.
       properties:
-        role:
+        type:
+          description: Always `image_file`.
           type: string
           enum:
-          - user
+          - image_file
           x-ms-enum:
-            name: CreateMessageRequestRole
+            name: MessageContentImageFileObjectType
             modelAsString: true
             values:
-            - value: user
-              description: The create message role as `user`
-          description: The role of the entity that is creating the message. Currently only `user` is supported.
-        content:
+            - value: image_file
+              description: The message content image file type
+        image_file:
+          type: object
+          properties:
+            file_id:
+              description: The [File](/docs/api-reference/files) ID of the image in the message content.
+              type: string
+          required:
+          - file_id
+      required:
+      - type
+      - image_file
+    runStepDetailsToolCallsCodeOutputImageObject:
+      title: Code interpreter image output
+      type: object
+      properties:
+        type:
+          description: Always `image`.
           type: string
-          minLength: 1
-          maxLength: 32768
-          description: The content of the message.
-        file_ids:
-          description: A list of [File](/docs/api-reference/files) IDs that the message should use. There can be a maximum of 10 files attached to a message. Useful for tools like `retrieval` and `code_interpreter` that can access and use files.
-          default: []
-          type: array
-          minItems: 1
-          maxItems: 10
-          items:
-            type: string
+          enum:
+          - image
+          x-ms-enum:
+            name: RunStepDetailsToolCallsCodeOutputImageObjectType
+            modelAsString: true
+            values:
+            - value: image
+        image:
+          type: object
+          properties:
+            file_id:
+              description: The [file](/docs/api-reference/files) ID of the image.
+              type: string
+          required:
+          - file_id
+      required:
+      - type
+      - image
+    assistantFileObject:
+      type: object
+      title: Assistant files
+      description: A list of [Files](/docs/api-reference/files) attached to an `assistant`.
+      properties:
+        id:
+          description: The identifier, which can be referenced in API endpoints.
+          type: string
+        object:
+          description: The object type, which is always `assistant.file`.
+          type: string
+          enum:
+          - assistant.file
+          x-ms-enum:
+            name: AssistantFileObjectType
+            modelAsString: true
+            values:
+            - value: assistant.file
+        created_at:
+          description: The Unix timestamp (in seconds) for when the assistant file was created.
+          type: integer
+        assistant_id:
+          description: The assistant ID that the file is attached to.
+          type: string
+      required:
+      - id
+      - object
+      - created_at
+      - assistant_id
+    modifyMessageRequest:
+      type: object
+      additionalProperties: false
+      properties:
         metadata:
           description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
 
@@ -3323,30 +3006,6 @@ components:
           type:
           - object
           - 'null'
-    listRunStepsResponse:
-      properties:
-        object:
-          type: string
-          example: list
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/runStepObject'
-        first_id:
-          type: string
-          example: step_hLBK7PXBv5Lr2NQT7KLY0ag1
-        last_id:
-          type: string
-          example: step_QLoItBbqwyAJEzlTy4y9kOMM
-        has_more:
-          type: boolean
-          example: false
-      required:
-      - object
-      - data
-      - first_id
-      - last_id
-      - has_more
     listAssistantFilesResponse:
       properties:
         object:
@@ -3409,28 +3068,216 @@ components:
       - id
       - type
       - function
-    threadObject:
+    listAssistantsResponse:
       type: object
-      title: Thread
-      description: Represents a thread that contains [messages](/docs/api-reference/messages).
+      properties:
+        object:
+          type: string
+          example: list
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/assistantObject'
+        first_id:
+          type: string
+          example: asst_hLBK7PXBv5Lr2NQT7KLY0ag1
+        last_id:
+          type: string
+          example: asst_QLoItBbqwyAJEzlTy4y9kOMM
+        has_more:
+          type: boolean
+          example: false
+      required:
+      - object
+      - data
+      - first_id
+      - last_id
+      - has_more
+    assistantToolsFunction:
+      type: object
+      title: Function tool
+      properties:
+        type:
+          type: string
+          description: 'The type of tool being defined: `function`'
+          enum:
+          - function
+          x-ms-enum:
+            name: assistantToolsFunction
+            modelAsString: true
+            values:
+            - value: retrieval
+              description: retrieval as type of tool being defined
+        function:
+          type: object
+          description: The function definition.
+          properties:
+            description:
+              type: string
+              description: A description of what the function does, used by the model to choose when and how to call the function.
+            name:
+              type: string
+              description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+            parameters:
+              $ref: '#/components/schemas/chatCompletionFunctionParameters'
+          required:
+          - name
+          - parameters
+          - description
+      required:
+      - type
+      - function
+    runStepDetailsToolCallsFunctionObject:
+      type: object
+      title: Function tool call
+      properties:
+        id:
+          type: string
+          description: The ID of the tool call object.
+        type:
+          type: string
+          description: The type of tool call. This is always going to be `function` for this type of tool call.
+          enum:
+          - function
+          x-ms-enum:
+            name: RunStepDetailsToolCallsFunctionObjectType
+            modelAsString: true
+            values:
+            - value: function
+        function:
+          type: object
+          description: The definition of the function that was called.
+          properties:
+            name:
+              type: string
+              description: The name of the function.
+            arguments:
+              type: string
+              description: The arguments passed to the function.
+            output:
+              type:
+              - string
+              - 'null'
+              description: The output of the function. This will be `null` if the outputs have not been [submitted](/docs/api-reference/runs/submitToolOutputs) yet.
+          required:
+          - name
+          - arguments
+          - output
+      required:
+      - id
+      - type
+      - function
+    deleteAssistantFileResponse:
+      type: object
+      description: Deletes the association between the assistant and the file, but does not delete the [File](/docs/api-reference/files) object itself.
+      properties:
+        id:
+          type: string
+        deleted:
+          type: boolean
+        object:
+          type: string
+          enum:
+          - assistant.file.deleted
+          x-ms-enum:
+            name: DeleteAssistantFileResponseType
+            modelAsString: true
+            values:
+            - value: assistant.file.deleted
+      required:
+      - id
+      - object
+      - deleted
+    submitToolOutputsRunRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        tool_outputs:
+          description: A list of tools for which the outputs are being submitted.
+          type: array
+          items:
+            type: object
+            properties:
+              tool_call_id:
+                type: string
+                description: The ID of the tool call in the `required_action` object within the run object the output is being submitted for.
+              output:
+                type: string
+                description: The output of the tool call to be submitted to continue the run.
+      required:
+      - tool_outputs
+    assistantObject:
+      type: object
+      title: Assistant
+      description: Represents an `assistant` that can call the model and use tools.
       properties:
         id:
           description: The identifier, which can be referenced in API endpoints.
           type: string
         object:
-          description: The object type, which is always `thread`.
+          description: The object type, which is always `assistant`.
           type: string
           enum:
-          - thread
+          - assistant
           x-ms-enum:
-            name: ThreadObjectType
+            name: AssistantObjectType
             modelAsString: true
             values:
-            - value: thread
-              description: The type of thread object which is always `thread`
+            - value: assistant
+              description: The object type, which is always assistant
         created_at:
-          description: The Unix timestamp (in seconds) for when the thread was created.
+          description: The Unix timestamp (in seconds) for when the assistant was created.
           type: integer
+        name:
+          description: 'The name of the assistant. The maximum length is 256 characters.
+
+            '
+          type:
+          - string
+          - 'null'
+          maxLength: 256
+        description:
+          description: 'The description of the assistant. The maximum length is 512 characters.
+
+            '
+          type:
+          - string
+          - 'null'
+          maxLength: 512
+        model:
+          description: 'ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.
+
+            '
+          type: string
+        instructions:
+          description: 'The system instructions that the assistant uses. The maximum length is 32768 characters.
+
+            '
+          type:
+          - string
+          - 'null'
+          maxLength: 32768
+        tools:
+          description: 'A list of tool enabled on the assistant. There can be a maximum of 128 tools per assistant. Tools can be of types `code_interpreter`, `retrieval`, or `function`.
+
+            '
+          default: []
+          type: array
+          maxItems: 128
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/assistantToolsCode'
+            - $ref: '#/components/schemas/assistantToolsRetrieval'
+            - $ref: '#/components/schemas/assistantToolsFunction'
+        file_ids:
+          description: 'A list of [file](/docs/api-reference/files) IDs attached to this assistant. There can be a maximum of 20 files attached to the assistant. Files are ordered by their creation date in ascending order.
+
+            '
+          default: []
+          type: array
+          maxItems: 20
+          items:
+            type: string
         metadata:
           description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
 
@@ -3442,11 +3289,164 @@ components:
       - id
       - object
       - created_at
+      - name
+      - description
+      - model
+      - instructions
+      - tools
+      - file_ids
       - metadata
-    chatCompletionFunctionParameters:
+    runStepDetailsToolCallsRetrievalObject:
+      title: Retrieval tool call
       type: object
-      description: The parameters the functions accepts, described as a JSON Schema object. See the [guide](/docs/guides/gpt/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
-      additionalProperties: true
+      properties:
+        id:
+          type: string
+          description: The ID of the tool call object.
+        type:
+          type: string
+          description: The type of tool call. This is always going to be `retrieval` for this type of tool call.
+          enum:
+          - retrieval
+          x-ms-enum:
+            name: RunStepDetailsToolCallsRetrievalObjectType
+            modelAsString: true
+            values:
+            - value: retrieval
+        retrieval:
+          type: object
+          description: For now, this is always going to be an empty object.
+      required:
+      - id
+      - type
+      - retrieval
+    deleteAssistantResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        deleted:
+          type: boolean
+        object:
+          type: string
+          enum:
+          - assistant.deleted
+          x-ms-enum:
+            name: DeleteAssistantResponseState
+            modelAsString: true
+            values:
+            - value: assistant.deleted
+              description: The assistant is deleted
+      required:
+      - id
+      - object
+      - deleted
+    createRunRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        assistant_id:
+          description: The ID of the [assistant](/docs/api-reference/assistants) to use to execute this run.
+          type: string
+        model:
+          description: The ID of the [Model](/docs/api-reference/models) to be used to execute this run. If a value is provided here, it will override the model associated with the assistant. If not, the model associated with the assistant will be used.
+          type:
+          - string
+          - 'null'
+        instructions:
+          description: Override the default system message of the assistant. This is useful for modifying the behavior on a per-run basis.
+          type:
+          - string
+          - 'null'
+        tools:
+          description: Override the tools the assistant can use for this run. This is useful for modifying the behavior on a per-run basis.
+          type:
+          - array
+          - 'null'
+          maxItems: 20
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/assistantToolsCode'
+            - $ref: '#/components/schemas/assistantToolsRetrieval'
+            - $ref: '#/components/schemas/assistantToolsFunction'
+        metadata:
+          description: 'Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
+
+            '
+          type:
+          - object
+          - 'null'
+      required:
+      - thread_id
+      - assistant_id
+    listMessageFilesResponse:
+      properties:
+        object:
+          type: string
+          example: list
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/messageFileObject'
+        first_id:
+          type: string
+          example: file-hLBK7PXBv5Lr2NQT7KLY0ag1
+        last_id:
+          type: string
+          example: file-QLoItBbqwyAJEzlTy4y9kOMM
+        has_more:
+          type: boolean
+          example: false
+      required:
+      - object
+      - data
+      - items
+      - first_id
+      - last_id
+      - has_more
+    messageContentTextAnnotationsFileCitationObject:
+      title: File citation
+      type: object
+      description: A citation within the message that points to a specific quote from a specific File associated with the assistant or the message. Generated when the assistant uses the "retrieval" tool to search files.
+      properties:
+        type:
+          description: Always `file_citation`.
+          type: string
+          enum:
+          - file_citation
+          x-ms-enum:
+            name: FileCitationObjectType
+            modelAsString: true
+            values:
+            - value: file_citation
+              description: The file citation object type
+        text:
+          description: The text in the message content that needs to be replaced.
+          type: string
+        file_citation:
+          type: object
+          properties:
+            file_id:
+              description: The ID of the specific File the citation is from.
+              type: string
+            quote:
+              description: The specific quote in the file.
+              type: string
+          required:
+          - file_id
+          - quote
+        start_index:
+          type: integer
+          minimum: 0
+        end_index:
+          type: integer
+          minimum: 0
+      required:
+      - type
+      - text
+      - file_citation
+      - start_index
+      - end_index
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

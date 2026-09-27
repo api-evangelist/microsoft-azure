@@ -265,23 +265,55 @@ paths:
                 $ref: '#/components/schemas/FabricError'
 components:
   schemas:
-    ServiceKind:
+    PartitionScheme:
       type: string
-      description: The kind of service (Stateless or Stateful).
+      description: Enumerates the ways that a service can be partitioned.
       enum:
       - Invalid
-      - Stateless
-      - Stateful
+      - Singleton
+      - UniformInt64Range
+      - Named
       x-ms-enum:
-        name: ServiceKind
+        name: PartitionScheme
         modelAsString: true
         values:
         - value: Invalid
-          description: Indicates the service kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Stateless
-          description: Does not use Service Fabric to make its state highly available or reliable. The value is 1.
-        - value: Stateful
-          description: Uses Service Fabric to make its state or part of its state highly available and reliable. The value is 2.
+          description: Indicates the partition kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Singleton
+          description: Indicates that the partition is based on string names, and is a SingletonPartitionSchemeDescription object, The value is 1.
+        - value: UniformInt64Range
+          description: Indicates that the partition is based on Int64 key ranges, and is a UniformInt64RangePartitionSchemeDescription object. The value is 2.
+        - value: Named
+          description: Indicates that the partition is based on string names, and is a NamedPartitionSchemeDescription object. The value is 3
+    ServiceTypeName:
+      type: string
+      description: Name of the service type as specified in the service manifest.
+    PartitionInformation:
+      discriminator:
+        propertyName: ServicePartitionKind
+      description: Information about the partition identity, partitioning scheme and keys supported by it.
+      required:
+      - ServicePartitionKind
+      properties:
+        ServicePartitionKind:
+          $ref: '#/components/schemas/ServicePartitionKind'
+          description: The kind of partitioning scheme used to partition the service.
+        Id:
+          $ref: '#/components/schemas/PartitionId'
+          description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
+    ApplicationNameInfo:
+      description: Information about the application name.
+      properties:
+        Id:
+          $ref: '#/components/schemas/ApplicationId'
+          description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
+
+            Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
+
+            the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
+        Name:
+          $ref: '#/components/schemas/ApplicationName'
+          description: The name of the application, including the 'fabric:' URI scheme.
     ServiceEndpointRole:
       type: string
       description: The role of the replica where the endpoint is reported.
@@ -302,26 +334,142 @@ components:
           description: Indicates that the service endpoint is of a primary replica of a stateful service. The value is 2.
         - value: StatefulSecondary
           description: Indicates that the service endpoint is of a secondary replica of a stateful service. The value is 3.
-    ServicePartitionKind:
+    ServicePlacementPolicyType:
       type: string
-      description: The kind of partitioning scheme used to partition the service.
+      description: The type of placement policy for a service fabric service. Following are the possible values.
       enum:
       - Invalid
-      - Singleton
-      - Int64Range
-      - Named
+      - InvalidDomain
+      - RequireDomain
+      - PreferPrimaryDomain
+      - RequireDomainDistribution
+      - NonPartiallyPlaceService
+      - AllowMultipleStatelessInstancesOnNode
       x-ms-enum:
-        name: ServicePartitionKind
+        name: ServicePlacementPolicyType
         modelAsString: true
         values:
         - value: Invalid
-          description: Indicates the partition kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Singleton
-          description: Indicates that there is only one partition, and SingletonPartitionSchemeDescription was specified while creating the service. The value is 1.
-        - value: Int64Range
-          description: Indicates that the partition is based on Int64 key ranges, and UniformInt64RangePartitionSchemeDescription was specified while creating the service. The value is 2.
-        - value: Named
-          description: Indicates that the partition is based on string names, and NamedPartitionInformation  was specified while creating the service. The value is 3.
+          description: Indicates the type of the placement policy is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: InvalidDomain
+          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementInvalidDomainPolicyDescription, which indicates that a particular fault or upgrade domain cannot be used for placement of this service. The value is 1.
+        - value: RequireDomain
+          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementRequireDomainDistributionPolicyDescription indicating that the replicas of the service must be placed in a specific domain. The value is 2.
+        - value: PreferPrimaryDomain
+          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementPreferPrimaryDomainPolicyDescription, which indicates that if possible the Primary replica for the partitions of the service should be located in a particular domain as an optimization. The value is 3.
+        - value: RequireDomainDistribution
+          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementRequireDomainDistributionPolicyDescription, indicating that the system will disallow placement of any two replicas from the same partition in the same domain at any time. The value is 4.
+        - value: NonPartiallyPlaceService
+          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementNonPartiallyPlaceServicePolicyDescription, which indicates that if possible all replicas of a particular partition of the service should be placed atomically. The value is 5.
+        - value: AllowMultipleStatelessInstancesOnNode
+          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementAllowMultipleStatelessInstancesOnNodePolicyDescription, which indicates that multiple stateless instances of a particular partition of the service can be placed on a node. The value is 6.
+    ScalingTriggerDescription:
+      discriminator:
+        propertyName: Kind
+      description: Describes the trigger for performing a scaling operation.
+      required:
+      - Kind
+      properties:
+        Kind:
+          $ref: '#/components/schemas/ScalingTriggerKind'
+          description: Specifies the kind of scaling trigger
+    ScalingMechanismDescription:
+      discriminator:
+        propertyName: Kind
+      description: Describes the mechanism for performing a scaling operation.
+      required:
+      - Kind
+      properties:
+        Kind:
+          $ref: '#/components/schemas/ScalingMechanismKind'
+          description: Specifies the kind of scaling mechanism
+    ServiceUpdateDescription:
+      discriminator:
+        propertyName: ServiceKind
+      description: A ServiceUpdateDescription contains all of the information necessary to update a service.
+      required:
+      - ServiceKind
+      properties:
+        ServiceKind:
+          $ref: '#/components/schemas/ServiceKind'
+          description: The service kind.
+        Flags:
+          type: string
+          description: 'Flags indicating whether other properties are set. Each of the associated properties corresponds to a flag, specified below, which, if set, indicate that the property is specified.
+
+            This property can be a combination of those flags obtained using bitwise ''OR'' operator.
+
+            For example, if the provided value is 6 then the flags for ReplicaRestartWaitDuration (2) and QuorumLossWaitDuration (4) are set.
+
+
+            - None - Does not indicate any other properties are set. The value is zero.
+
+            - TargetReplicaSetSize/InstanceCount - Indicates whether the TargetReplicaSetSize property (for Stateful services) or the InstanceCount property (for Stateless services) is set. The value is 1.
+
+            - ReplicaRestartWaitDuration - Indicates the ReplicaRestartWaitDuration property is set. The value is  2.
+
+            - QuorumLossWaitDuration - Indicates the QuorumLossWaitDuration property is set. The value is 4.
+
+            - StandByReplicaKeepDuration - Indicates the StandByReplicaKeepDuration property is set. The value is 8.
+
+            - MinReplicaSetSize - Indicates the MinReplicaSetSize property is set. The value is 16.
+
+            - PlacementConstraints - Indicates the PlacementConstraints property is set. The value is 32.
+
+            - PlacementPolicyList - Indicates the ServicePlacementPolicies property is set. The value is 64.
+
+            - Correlation - Indicates the CorrelationScheme property is set. The value is 128.
+
+            - Metrics - Indicates the ServiceLoadMetrics property is set. The value is 256.
+
+            - DefaultMoveCost - Indicates the DefaultMoveCost property is set. The value is 512.
+
+            - ScalingPolicy - Indicates the ScalingPolicies property is set. The value is 1024.
+
+            - ServicePlacementTimeLimit - Indicates the ServicePlacementTimeLimit property is set. The value is 2048.
+
+            - MinInstanceCount - Indicates the MinInstanceCount property is set. The value is 4096.
+
+            - MinInstancePercentage - Indicates the MinInstancePercentage property is set. The value is 8192.
+
+            - InstanceCloseDelayDuration - Indicates the InstanceCloseDelayDuration property is set. The value is 16384.
+
+            - InstanceRestartWaitDuration - Indicates the InstanceCloseDelayDuration property is set. The value is 32768.
+
+            - DropSourceReplicaOnMove - Indicates the DropSourceReplicaOnMove property is set. The value is 65536.
+
+            - ServiceDnsName - Indicates the ServiceDnsName property is set. The value is 131072.
+
+            - TagsForPlacement - Indicates the TagsForPlacement property is set. The value is 1048576.
+
+            - TagsForRunning - Indicates the TagsForRunning property is set. The value is 2097152.'
+        PlacementConstraints:
+          type: string
+          description: 'The placement constraints as a string. Placement constraints are boolean expressions on node properties and allow for restricting a service to particular nodes based on the service requirements. For example, to place a service on nodes where NodeType is blue specify the following: "NodeColor == blue)".'
+        CorrelationScheme:
+          $ref: '#/components/schemas/CorrelationSchemeList'
+          description: The correlation scheme.
+        LoadMetrics:
+          $ref: '#/components/schemas/ServiceLoadMetricsList'
+          description: The service load metrics.
+        ServicePlacementPolicies:
+          $ref: '#/components/schemas/ServicePlacementPoliciesList'
+          description: The service placement policies.
+        DefaultMoveCost:
+          $ref: '#/components/schemas/MoveCost'
+          description: The move cost for the service.
+        ScalingPolicies:
+          $ref: '#/components/schemas/ScalingPolicyDescriptionList'
+          description: Scaling policies for this service.
+        ServiceDnsName:
+          type: string
+          description: The DNS name of the service.
+        TagsForPlacement:
+          $ref: '#/components/schemas/NodeTagsDescription'
+          description: Tags for placement of this service.
+        TagsForRunning:
+          $ref: '#/components/schemas/NodeTagsDescription'
+          description: Tags for running of this service.
     MoveCost:
       type: string
       description: Specifies the move cost for the service.
@@ -345,26 +493,120 @@ components:
           description: Specifies the move cost of the service as High. The value is 3.
         - value: VeryHigh
           description: Specifies the move cost of the service as VeryHigh. The value is 4.
-    PartitionScheme:
+    EntityHealth:
+      description: Health information common to all entities in the cluster. It contains the aggregated health state, health events and unhealthy evaluation.
+      properties:
+        AggregatedHealthState:
+          $ref: '#/components/schemas/HealthState'
+          description: 'The HealthState representing the aggregated health state of the entity computed by Health Manager.
+
+            The health evaluation of the entity reflects all events reported on the entity and its children (if any).
+
+            The aggregation is done by applying the desired health policy.'
+        HealthEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthEvent'
+          description: The list of health events reported on the entity.
+        UnhealthyEvaluations:
+          $ref: '#/components/schemas/UnhealthyEvaluations'
+          description: The unhealthy evaluations that show why the current aggregated health state was returned by Health Manager.
+        HealthStatistics:
+          $ref: '#/components/schemas/HealthStatistics'
+          description: Shows the health statistics for all children types of the queried entity.
+    ServicePlacementPolicyDescription:
+      discriminator:
+        propertyName: Type
+      description: Describes the policy to be used for placement of a Service Fabric service.
+      required:
+      - Type
+      properties:
+        Type:
+          $ref: '#/components/schemas/ServicePlacementPolicyType'
+          description: The type of placement policy for a service fabric service. Following are the possible values.
+    ScalingTriggerKind:
       type: string
-      description: Enumerates the ways that a service can be partitioned.
+      description: Enumerates the ways that a service can be scaled.
       enum:
       - Invalid
-      - Singleton
-      - UniformInt64Range
-      - Named
+      - AveragePartitionLoad
+      - AverageServiceLoad
       x-ms-enum:
-        name: PartitionScheme
+        name: ScalingTriggerKind
         modelAsString: true
         values:
         - value: Invalid
-          description: Indicates the partition kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Singleton
-          description: Indicates that the partition is based on string names, and is a SingletonPartitionSchemeDescription object, The value is 1.
-        - value: UniformInt64Range
-          description: Indicates that the partition is based on Int64 key ranges, and is a UniformInt64RangePartitionSchemeDescription object. The value is 2.
-        - value: Named
-          description: Indicates that the partition is based on string names, and is a NamedPartitionSchemeDescription object. The value is 3
+          description: Indicates the scaling trigger is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: AveragePartitionLoad
+          description: Indicates a trigger where scaling decisions are made based on average load of a partition. The value is 1.
+        - value: AverageServiceLoad
+          description: Indicates a trigger where scaling decisions are made based on average load of a service. The value is 2.
+    UnplacedReplicaInformation:
+      description: Contains information for an unplaced replica.
+      properties:
+        ServiceName:
+          $ref: '#/components/schemas/ServiceName'
+          description: The name of the service.
+        PartitionId:
+          $ref: '#/components/schemas/PartitionId'
+          description: The ID of the partition.
+        UnplacedReplicaDetails:
+          type: array
+          items:
+            type: string
+          description: List of reasons due to which a replica cannot be placed.
+    EntityKind:
+      type: string
+      description: The entity type of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+      enum:
+      - Invalid
+      - Node
+      - Partition
+      - Service
+      - Application
+      - Replica
+      - DeployedApplication
+      - DeployedServicePackage
+      - Cluster
+      x-ms-enum:
+        name: EntityKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid entity kind. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Node
+          description: Indicates the entity is a Service Fabric node. The value is 1.
+        - value: Partition
+          description: Indicates the entity is a Service Fabric partition. The value is 2.
+        - value: Service
+          description: Indicates the entity is a Service Fabric service. The value is 3.
+        - value: Application
+          description: Indicates the entity is a Service Fabric application. The value is 4.
+        - value: Replica
+          description: Indicates the entity is a Service Fabric replica. The value is 5.
+        - value: DeployedApplication
+          description: Indicates the entity is a Service Fabric deployed application. The value is 6.
+        - value: DeployedServicePackage
+          description: Indicates the entity is a Service Fabric deployed service package. The value is 7.
+        - value: Cluster
+          description: Indicates the entity is a Service Fabric cluster. The value is 8.
+    ServiceKind:
+      type: string
+      description: The kind of service (Stateless or Stateful).
+      enum:
+      - Invalid
+      - Stateless
+      - Stateful
+      x-ms-enum:
+        name: ServiceKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the service kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Stateless
+          description: Does not use Service Fabric to make its state highly available or reliable. The value is 1.
+        - value: Stateful
+          description: Uses Service Fabric to make its state or part of its state highly available and reliable. The value is 2.
     HealthStatistics:
       description: 'The health statistics of an entity, returned as part of the health query result when the query description is configured to include statistics.
 
@@ -379,33 +621,88 @@ components:
           items:
             $ref: '#/components/schemas/EntityKindHealthStateCount'
           description: List of health state counts per entity kind, which keeps track of how many children of the queried entity are in Ok, Warning and Error state.
-    ServiceName:
-      type: string
-      description: The full name of the service with 'fabric:' URI scheme.
-    ApplicationNameInfo:
-      description: Information about the application name.
+    HealthInformation:
+      description: Represents common health report information. It is included in all health reports sent to health store and in all health events returned by health queries.
+      required:
+      - SourceId
+      - Property
+      - HealthState
       properties:
-        Id:
-          $ref: '#/components/schemas/ApplicationId'
-          description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
+        SourceId:
+          type: string
+          description: The source name that identifies the client/watchdog/system component that generated the health information.
+        Property:
+          type: string
+          description: 'The property of the health information. An entity can have health reports for different properties.
 
-            Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
+            The property is a string and not a fixed enumeration to allow the reporter flexibility to categorize the state condition that triggers the report.
 
-            the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
-        Name:
-          $ref: '#/components/schemas/ApplicationName'
-          description: The name of the application, including the 'fabric:' URI scheme.
-    EntityHealthState:
-      description: A base type for the health state of various entities in the cluster. It contains the aggregated health state.
-      properties:
-        AggregatedHealthState:
+            For example, a reporter with SourceId "LocalWatchdog" can monitor the state of the available disk on a node,
+
+            so it can report "AvailableDisk" property on that node.
+
+            The same reporter can monitor the node connectivity, so it can report a property "Connectivity" on the same node.
+
+            In the health store, these reports are treated as separate health events for the specified node.
+
+
+            Together with the SourceId, the property uniquely identifies the health information.'
+        HealthState:
           $ref: '#/components/schemas/HealthState'
           description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-    ScalingPolicyDescriptionList:
-      type: array
-      items:
-        $ref: '#/components/schemas/ScalingPolicyDescription'
-      description: A list that describes the scaling policies.
+        TimeToLiveInMilliSeconds:
+          type: string
+          format: duration
+          description: 'The duration for which this health report is valid. This field uses ISO8601 format for specifying the duration.
+
+            When clients report periodically, they should send reports with higher frequency than time to live.
+
+            If clients report on transition, they can set the time to live to infinite.
+
+            When time to live expires, the health event that contains the health information
+
+            is either removed from health store, if RemoveWhenExpired is true, or evaluated at error, if RemoveWhenExpired false.
+
+
+            If not specified, time to live defaults to infinite value.'
+        Description:
+          type: string
+          description: 'The description of the health information. It represents free text used to add human readable information about the report.
+
+            The maximum string length for the description is 4096 characters.
+
+            If the provided string is longer, it will be automatically truncated.
+
+            When truncated, the last characters of the description contain a marker "[Truncated]", and total string size is 4096 characters.
+
+            The presence of the marker indicates to users that truncation occurred.
+
+            Note that when truncated, the description has less than 4096 characters from the original string.'
+        SequenceNumber:
+          type: string
+          description: 'The sequence number for this health report as a numeric string.
+
+            The report sequence number is used by the health store to detect stale reports.
+
+            If not specified, a sequence number is auto-generated by the health client when a report is added.'
+        RemoveWhenExpired:
+          type: boolean
+          description: 'Value that indicates whether the report is removed from health store when it expires.
+
+            If set to true, the report is removed from the health store after it expires.
+
+            If set to false, the report is treated as an error when expired. The value of this property is false by default.
+
+            When clients report periodically, they should set RemoveWhenExpired false (default).
+
+            This way, if the reporter has issues (e.g. deadlock) and can''t report, the entity is evaluated at error when the health report expires.
+
+            This flags the entity as being in Error health state.'
+        HealthReportId:
+          type: string
+          description: 'A health report ID which identifies the health report and can be used to find more detailed information about a specific health event at
+
+            aka.ms/sfhealthid'
     NodeTagsDescription:
       description: Describes the tags required for placement or running of the service.
       required:
@@ -420,51 +717,14 @@ components:
           items:
             type: string
           description: Array of size specified by the ‘Count’ parameter, for the placement tags of the service.
-    ApplicationId:
-      type: string
-      description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
-
-        Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
-
-        the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
-    PartitionId:
-      type: string
-      format: uuid
-      description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
-    ServicePackageActivationMode:
-      type: string
-      description: The activation mode of service package to be used for a Service Fabric service. This is specified at the time of creating the Service.
-      enum:
-      - SharedProcess
-      - ExclusiveProcess
-      x-ms-enum:
-        name: ServicePackageActivationMode
-        modelAsString: true
-        values:
-        - value: SharedProcess
-          description: This is the default activation mode. With this activation mode, replicas or instances from different partition(s) of service, on a given node, will share same activation of service package on a node. The value is zero.
-        - value: ExclusiveProcess
-          description: With this activation mode, each replica or instance of service, on a given node, will have its own dedicated activation of service package on a node. The value is 1.
-    ResolvedServiceEndpoint:
-      description: Endpoint of a resolved service partition.
+    FabricError:
+      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
       properties:
-        Kind:
-          $ref: '#/components/schemas/ServiceEndpointRole'
-          description: The role of the replica where the endpoint is reported.
-        Address:
-          type: string
-          description: The address of the endpoint. If the endpoint has multiple listeners the address is a JSON object with one property per listener with the value as the address of that listener.
-    FabricErrorError:
-      description: Error object containing error code and error message.
-      properties:
-        Code:
-          $ref: '#/components/schemas/FabricErrorCodes'
-          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
-        Message:
-          type: string
-          description: Error message.
+        Error:
+          $ref: '#/components/schemas/FabricErrorError'
+          description: Error object containing error code and error message.
       required:
-      - Code
+      - Error
     FabricErrorCodes:
       type: string
       description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
@@ -641,73 +901,18 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
-    ApplicationHealthPolicy:
-      description: Defines a health policy used to evaluate the health of an application or one of its children entities.
-      properties:
-        ConsiderWarningAsError:
-          type: boolean
-          description: Indicates whether warnings are treated with the same severity as errors.
-          default: false
-        MaxPercentUnhealthyDeployedApplications:
-          type: integer
-          description: 'The maximum allowed percentage of unhealthy deployed applications. Allowed values are Byte values from zero to 100.
-
-            The percentage represents the maximum tolerated percentage of deployed applications that can be unhealthy before the application is considered in error.
-
-            This is calculated by dividing the number of unhealthy deployed applications over the number of nodes where the application is currently deployed on in the cluster.
-
-            The computation rounds up to tolerate one failure on small numbers of nodes. Default percentage is zero.'
-          default: 0
-        DefaultServiceTypeHealthPolicy:
-          $ref: '#/components/schemas/ServiceTypeHealthPolicy'
-          description: The health policy used by default to evaluate the health of a service type.
-        ServiceTypeHealthPolicyMap:
-          $ref: '#/components/schemas/ServiceTypeHealthPolicyMap'
-          description: The map with service type health policy per service type name. The map is empty by default.
-    ServiceTypeName:
-      type: string
-      description: Name of the service type as specified in the service manifest.
-    ScalingMechanismDescription:
-      discriminator:
-        propertyName: Kind
-      description: Describes the mechanism for performing a scaling operation.
+    ServiceTypeHealthPolicyMapItem:
+      description: Defines an item in ServiceTypeHealthPolicyMap.
       required:
-      - Kind
+      - Key
+      - Value
       properties:
-        Kind:
-          $ref: '#/components/schemas/ScalingMechanismKind'
-          description: Specifies the kind of scaling mechanism
-    HealthEvaluation:
-      discriminator:
-        propertyName: Kind
-      description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
-      properties:
-        Kind:
-          $ref: '#/components/schemas/HealthEvaluationKind'
-          description: The health manager in the cluster performs health evaluations in determining the aggregated health state of an entity. This enumeration provides information on the kind of evaluation that was performed. Following are the possible values.
-        AggregatedHealthState:
-          $ref: '#/components/schemas/HealthState'
-          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-        Description:
+        Key:
           type: string
-          description: Description of the health evaluation, which represents a summary of the evaluation process.
-      required:
-      - Kind
-    HealthEvaluationWrapper:
-      description: Wrapper object for health evaluation.
-      properties:
-        HealthEvaluation:
-          $ref: '#/components/schemas/HealthEvaluation'
-          description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
-    EntityKindHealthStateCount:
-      description: Represents health state count for entities of the specified entity kind.
-      properties:
-        EntityKind:
-          $ref: '#/components/schemas/EntityKind'
-          description: The entity kind for which health states are evaluated.
-        HealthStateCount:
-          $ref: '#/components/schemas/HealthStateCount'
-          description: The health state count for the entities of the specified kind.
+          description: The key of the service type health policy map item. This is the name of the service type.
+        Value:
+          $ref: '#/components/schemas/ServiceTypeHealthPolicy'
+          description: The value of the service type health policy map item. This is the ServiceTypeHealthPolicy for this service type.
     ServiceLoadMetricDescription:
       description: Specifies a metric to load balance a service during runtime.
       required:
@@ -731,278 +936,100 @@ components:
         DefaultLoad:
           type: integer
           description: Used only for Stateless services. The default amount of load, as a number, that this service creates for this metric.
-    ServiceTypeHealthPolicyMapItem:
-      description: Defines an item in ServiceTypeHealthPolicyMap.
-      required:
-      - Key
-      - Value
+    ResolvedServiceEndpoint:
+      description: Endpoint of a resolved service partition.
       properties:
-        Key:
+        Kind:
+          $ref: '#/components/schemas/ServiceEndpointRole'
+          description: The role of the replica where the endpoint is reported.
+        Address:
           type: string
-          description: The key of the service type health policy map item. This is the name of the service type.
-        Value:
-          $ref: '#/components/schemas/ServiceTypeHealthPolicy'
-          description: The value of the service type health policy map item. This is the ServiceTypeHealthPolicy for this service type.
-    PartitionInformation:
-      discriminator:
-        propertyName: ServicePartitionKind
-      description: Information about the partition identity, partitioning scheme and keys supported by it.
+          description: The address of the endpoint. If the endpoint has multiple listeners the address is a JSON object with one property per listener with the value as the address of that listener.
+    ApplicationName:
+      type: string
+      description: The name of the application, including the 'fabric:' URI scheme.
+    ResolvedServiceEndpointList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ResolvedServiceEndpoint'
+      description: List of resolved service endpoints of a service partition.
+    ServiceLoadMetricsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ServiceLoadMetricDescription'
+      description: The service load metrics is given as an array of ServiceLoadMetricDescription objects.
+    PartitionId:
+      type: string
+      format: uuid
+      description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
+    ServicePlacementPoliciesList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ServicePlacementPolicyDescription'
+      description: A list that describes the correlation of the service with other services.
+    ResolvedServicePartition:
+      description: Information about a service partition and its associated endpoints.
       required:
-      - ServicePartitionKind
-      properties:
-        ServicePartitionKind:
-          $ref: '#/components/schemas/ServicePartitionKind'
-          description: The kind of partitioning scheme used to partition the service.
-        Id:
-          $ref: '#/components/schemas/PartitionId'
-          description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
-    EntityHealth:
-      description: Health information common to all entities in the cluster. It contains the aggregated health state, health events and unhealthy evaluation.
-      properties:
-        AggregatedHealthState:
-          $ref: '#/components/schemas/HealthState'
-          description: 'The HealthState representing the aggregated health state of the entity computed by Health Manager.
-
-            The health evaluation of the entity reflects all events reported on the entity and its children (if any).
-
-            The aggregation is done by applying the desired health policy.'
-        HealthEvents:
-          type: array
-          items:
-            $ref: '#/components/schemas/HealthEvent'
-          description: The list of health events reported on the entity.
-        UnhealthyEvaluations:
-          $ref: '#/components/schemas/UnhealthyEvaluations'
-          description: The unhealthy evaluations that show why the current aggregated health state was returned by Health Manager.
-        HealthStatistics:
-          $ref: '#/components/schemas/HealthStatistics'
-          description: Shows the health statistics for all children types of the queried entity.
-    ServiceHealth:
-      description: Information about the health of a Service Fabric service.
-      allOf:
-      - $ref: '#/components/schemas/EntityHealth'
+      - Name
+      - PartitionInformation
+      - Endpoints
+      - Version
       properties:
         Name:
           $ref: '#/components/schemas/ServiceName'
-          description: The name of the service whose health information is described by this object.
-        PartitionHealthStates:
-          type: array
-          items:
-            $ref: '#/components/schemas/PartitionHealthState'
-          description: The list of partition health states associated with the service.
-    ScalingMechanismKind:
+          description: The full name of the service with 'fabric:' URI scheme.
+        PartitionInformation:
+          $ref: '#/components/schemas/PartitionInformation'
+          description: A representation of the resolved partition.
+        Endpoints:
+          $ref: '#/components/schemas/ResolvedServiceEndpointList'
+          description: List of resolved service endpoints of a service partition.
+        Version:
+          type: string
+          description: The version of this resolved service partition result. This version should be passed in the next time the ResolveService call is made via the PreviousRspVersion query parameter.
+    ServiceName:
       type: string
-      description: Enumerates the ways that a service can be scaled.
-      enum:
-      - Invalid
-      - PartitionInstanceCount
-      - AddRemoveIncrementalNamedPartition
-      x-ms-enum:
-        name: ScalingMechanismKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the scaling mechanism is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: PartitionInstanceCount
-          description: Indicates a mechanism for scaling where new instances are added or removed from a partition. The value is 1.
-        - value: AddRemoveIncrementalNamedPartition
-          description: Indicates a mechanism for scaling where new named partitions are added or removed from a service. The value is 2.
-    HealthInformation:
-      description: Represents common health report information. It is included in all health reports sent to health store and in all health events returned by health queries.
-      required:
-      - SourceId
-      - Property
-      - HealthState
-      properties:
-        SourceId:
-          type: string
-          description: The source name that identifies the client/watchdog/system component that generated the health information.
-        Property:
-          type: string
-          description: 'The property of the health information. An entity can have health reports for different properties.
-
-            The property is a string and not a fixed enumeration to allow the reporter flexibility to categorize the state condition that triggers the report.
-
-            For example, a reporter with SourceId "LocalWatchdog" can monitor the state of the available disk on a node,
-
-            so it can report "AvailableDisk" property on that node.
-
-            The same reporter can monitor the node connectivity, so it can report a property "Connectivity" on the same node.
-
-            In the health store, these reports are treated as separate health events for the specified node.
-
-
-            Together with the SourceId, the property uniquely identifies the health information.'
-        HealthState:
-          $ref: '#/components/schemas/HealthState'
-          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-        TimeToLiveInMilliSeconds:
-          type: string
-          format: duration
-          description: 'The duration for which this health report is valid. This field uses ISO8601 format for specifying the duration.
-
-            When clients report periodically, they should send reports with higher frequency than time to live.
-
-            If clients report on transition, they can set the time to live to infinite.
-
-            When time to live expires, the health event that contains the health information
-
-            is either removed from health store, if RemoveWhenExpired is true, or evaluated at error, if RemoveWhenExpired false.
-
-
-            If not specified, time to live defaults to infinite value.'
-        Description:
-          type: string
-          description: 'The description of the health information. It represents free text used to add human readable information about the report.
-
-            The maximum string length for the description is 4096 characters.
-
-            If the provided string is longer, it will be automatically truncated.
-
-            When truncated, the last characters of the description contain a marker "[Truncated]", and total string size is 4096 characters.
-
-            The presence of the marker indicates to users that truncation occurred.
-
-            Note that when truncated, the description has less than 4096 characters from the original string.'
-        SequenceNumber:
-          type: string
-          description: 'The sequence number for this health report as a numeric string.
-
-            The report sequence number is used by the health store to detect stale reports.
-
-            If not specified, a sequence number is auto-generated by the health client when a report is added.'
-        RemoveWhenExpired:
-          type: boolean
-          description: 'Value that indicates whether the report is removed from health store when it expires.
-
-            If set to true, the report is removed from the health store after it expires.
-
-            If set to false, the report is treated as an error when expired. The value of this property is false by default.
-
-            When clients report periodically, they should set RemoveWhenExpired false (default).
-
-            This way, if the reporter has issues (e.g. deadlock) and can''t report, the entity is evaluated at error when the health report expires.
-
-            This flags the entity as being in Error health state.'
-        HealthReportId:
-          type: string
-          description: 'A health report ID which identifies the health report and can be used to find more detailed information about a specific health event at
-
-            aka.ms/sfhealthid'
-    PartitionHealthState:
-      description: Represents the health state of a partition, which contains the partition identifier and its aggregated health state.
-      allOf:
-      - $ref: '#/components/schemas/EntityHealthState'
-      properties:
-        PartitionId:
-          $ref: '#/components/schemas/PartitionId'
-          description: Id of the partition whose health state is described by this object.
-    ServicePlacementPolicyType:
-      type: string
-      description: The type of placement policy for a service fabric service. Following are the possible values.
-      enum:
-      - Invalid
-      - InvalidDomain
-      - RequireDomain
-      - PreferPrimaryDomain
-      - RequireDomainDistribution
-      - NonPartiallyPlaceService
-      - AllowMultipleStatelessInstancesOnNode
-      x-ms-enum:
-        name: ServicePlacementPolicyType
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the type of the placement policy is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: InvalidDomain
-          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementInvalidDomainPolicyDescription, which indicates that a particular fault or upgrade domain cannot be used for placement of this service. The value is 1.
-        - value: RequireDomain
-          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementRequireDomainDistributionPolicyDescription indicating that the replicas of the service must be placed in a specific domain. The value is 2.
-        - value: PreferPrimaryDomain
-          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementPreferPrimaryDomainPolicyDescription, which indicates that if possible the Primary replica for the partitions of the service should be located in a particular domain as an optimization. The value is 3.
-        - value: RequireDomainDistribution
-          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementRequireDomainDistributionPolicyDescription, indicating that the system will disallow placement of any two replicas from the same partition in the same domain at any time. The value is 4.
-        - value: NonPartiallyPlaceService
-          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementNonPartiallyPlaceServicePolicyDescription, which indicates that if possible all replicas of a particular partition of the service should be placed atomically. The value is 5.
-        - value: AllowMultipleStatelessInstancesOnNode
-          description: Indicates that the ServicePlacementPolicyDescription is of type ServicePlacementAllowMultipleStatelessInstancesOnNodePolicyDescription, which indicates that multiple stateless instances of a particular partition of the service can be placed on a node. The value is 6.
-    ServicePlacementPolicyDescription:
-      discriminator:
-        propertyName: Type
-      description: Describes the policy to be used for placement of a Service Fabric service.
-      required:
-      - Type
-      properties:
-        Type:
-          $ref: '#/components/schemas/ServicePlacementPolicyType'
-          description: The type of placement policy for a service fabric service. Following are the possible values.
-    ServiceUpdateDescription:
+      description: The full name of the service with 'fabric:' URI scheme.
+    ByteArray:
+      description: Array of bytes to be sent as an integer array. Each element of array is a number between 0 and 255.
+      type: array
+      items:
+        type: integer
+    ServiceDescription:
       discriminator:
         propertyName: ServiceKind
-      description: A ServiceUpdateDescription contains all of the information necessary to update a service.
+      description: A ServiceDescription contains all of the information necessary to create a service.
       required:
       - ServiceKind
+      - ServiceName
+      - ServiceTypeName
+      - PartitionDescription
       properties:
         ServiceKind:
           $ref: '#/components/schemas/ServiceKind'
           description: The service kind.
-        Flags:
-          type: string
-          description: 'Flags indicating whether other properties are set. Each of the associated properties corresponds to a flag, specified below, which, if set, indicate that the property is specified.
-
-            This property can be a combination of those flags obtained using bitwise ''OR'' operator.
-
-            For example, if the provided value is 6 then the flags for ReplicaRestartWaitDuration (2) and QuorumLossWaitDuration (4) are set.
-
-
-            - None - Does not indicate any other properties are set. The value is zero.
-
-            - TargetReplicaSetSize/InstanceCount - Indicates whether the TargetReplicaSetSize property (for Stateful services) or the InstanceCount property (for Stateless services) is set. The value is 1.
-
-            - ReplicaRestartWaitDuration - Indicates the ReplicaRestartWaitDuration property is set. The value is  2.
-
-            - QuorumLossWaitDuration - Indicates the QuorumLossWaitDuration property is set. The value is 4.
-
-            - StandByReplicaKeepDuration - Indicates the StandByReplicaKeepDuration property is set. The value is 8.
-
-            - MinReplicaSetSize - Indicates the MinReplicaSetSize property is set. The value is 16.
-
-            - PlacementConstraints - Indicates the PlacementConstraints property is set. The value is 32.
-
-            - PlacementPolicyList - Indicates the ServicePlacementPolicies property is set. The value is 64.
-
-            - Correlation - Indicates the CorrelationScheme property is set. The value is 128.
-
-            - Metrics - Indicates the ServiceLoadMetrics property is set. The value is 256.
-
-            - DefaultMoveCost - Indicates the DefaultMoveCost property is set. The value is 512.
-
-            - ScalingPolicy - Indicates the ScalingPolicies property is set. The value is 1024.
-
-            - ServicePlacementTimeLimit - Indicates the ServicePlacementTimeLimit property is set. The value is 2048.
-
-            - MinInstanceCount - Indicates the MinInstanceCount property is set. The value is 4096.
-
-            - MinInstancePercentage - Indicates the MinInstancePercentage property is set. The value is 8192.
-
-            - InstanceCloseDelayDuration - Indicates the InstanceCloseDelayDuration property is set. The value is 16384.
-
-            - InstanceRestartWaitDuration - Indicates the InstanceCloseDelayDuration property is set. The value is 32768.
-
-            - DropSourceReplicaOnMove - Indicates the DropSourceReplicaOnMove property is set. The value is 65536.
-
-            - ServiceDnsName - Indicates the ServiceDnsName property is set. The value is 131072.
-
-            - TagsForPlacement - Indicates the TagsForPlacement property is set. The value is 1048576.
-
-            - TagsForRunning - Indicates the TagsForRunning property is set. The value is 2097152.'
+        ApplicationName:
+          $ref: '#/components/schemas/ApplicationName'
+          description: The name of the application, including the 'fabric:' URI scheme.
+        ServiceName:
+          $ref: '#/components/schemas/ServiceName'
+          description: The full name of the service with 'fabric:' URI scheme.
+        ServiceTypeName:
+          $ref: '#/components/schemas/ServiceTypeName'
+          description: Name of the service type as specified in the service manifest.
+        InitializationData:
+          $ref: '#/components/schemas/ByteArray'
+          description: The initialization data as an array of bytes. Initialization data is passed to service instances or replicas when they are created.
+        PartitionDescription:
+          $ref: '#/components/schemas/PartitionSchemeDescription'
+          description: The partition description as an object.
         PlacementConstraints:
           type: string
           description: 'The placement constraints as a string. Placement constraints are boolean expressions on node properties and allow for restricting a service to particular nodes based on the service requirements. For example, to place a service on nodes where NodeType is blue specify the following: "NodeColor == blue)".'
         CorrelationScheme:
           $ref: '#/components/schemas/CorrelationSchemeList'
           description: The correlation scheme.
-        LoadMetrics:
+        ServiceLoadMetrics:
           $ref: '#/components/schemas/ServiceLoadMetricsList'
           description: The service load metrics.
         ServicePlacementPolicies:
@@ -1011,18 +1038,149 @@ components:
         DefaultMoveCost:
           $ref: '#/components/schemas/MoveCost'
           description: The move cost for the service.
+        IsDefaultMoveCostSpecified:
+          type: boolean
+          description: Indicates if the DefaultMoveCost property is specified.
+        ServicePackageActivationMode:
+          $ref: '#/components/schemas/ServicePackageActivationMode'
+          description: The activation mode of service package to be used for a service.
+        ServiceDnsName:
+          type: string
+          description: The DNS name of the service. It requires the DNS system service to be enabled in Service Fabric cluster.
         ScalingPolicies:
           $ref: '#/components/schemas/ScalingPolicyDescriptionList'
           description: Scaling policies for this service.
-        ServiceDnsName:
-          type: string
-          description: The DNS name of the service.
-        TagsForPlacement:
+        TagsRequiredToPlace:
           $ref: '#/components/schemas/NodeTagsDescription'
           description: Tags for placement of this service.
-        TagsForRunning:
+        TagsRequiredToRun:
           $ref: '#/components/schemas/NodeTagsDescription'
           description: Tags for running of this service.
+    FabricErrorError:
+      description: Error object containing error code and error message.
+      properties:
+        Code:
+          $ref: '#/components/schemas/FabricErrorCodes'
+          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
+        Message:
+          type: string
+          description: Error message.
+      required:
+      - Code
+    EntityHealthState:
+      description: A base type for the health state of various entities in the cluster. It contains the aggregated health state.
+      properties:
+        AggregatedHealthState:
+          $ref: '#/components/schemas/HealthState'
+          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+    HealthEvaluation:
+      discriminator:
+        propertyName: Kind
+      description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
+      properties:
+        Kind:
+          $ref: '#/components/schemas/HealthEvaluationKind'
+          description: The health manager in the cluster performs health evaluations in determining the aggregated health state of an entity. This enumeration provides information on the kind of evaluation that was performed. Following are the possible values.
+        AggregatedHealthState:
+          $ref: '#/components/schemas/HealthState'
+          description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+        Description:
+          type: string
+          description: Description of the health evaluation, which represents a summary of the evaluation process.
+      required:
+      - Kind
+    ServicePartitionKind:
+      type: string
+      description: The kind of partitioning scheme used to partition the service.
+      enum:
+      - Invalid
+      - Singleton
+      - Int64Range
+      - Named
+      x-ms-enum:
+        name: ServicePartitionKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the partition kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Singleton
+          description: Indicates that there is only one partition, and SingletonPartitionSchemeDescription was specified while creating the service. The value is 1.
+        - value: Int64Range
+          description: Indicates that the partition is based on Int64 key ranges, and UniformInt64RangePartitionSchemeDescription was specified while creating the service. The value is 2.
+        - value: Named
+          description: Indicates that the partition is based on string names, and NamedPartitionInformation  was specified while creating the service. The value is 3.
+    ScalingPolicyDescriptionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ScalingPolicyDescription'
+      description: A list that describes the scaling policies.
+    HealthState:
+      type: string
+      description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
+      enum:
+      - Invalid
+      - Ok
+      - Warning
+      - Error
+      - Unknown
+      x-ms-enum:
+        name: HealthState
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid health state. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Ok
+          description: Indicates the health state is okay. The value is 1.
+        - value: Warning
+          description: Indicates the health state is at a warning level. The value is 2.
+        - value: Error
+          description: Indicates the health state is at an error level. Error health state should be investigated, as they can impact the correct functionality of the cluster. The value is 3.
+        - value: Unknown
+          description: Indicates an unknown health status. The value is 65535.
+    HealthEvaluationWrapper:
+      description: Wrapper object for health evaluation.
+      properties:
+        HealthEvaluation:
+          $ref: '#/components/schemas/HealthEvaluation'
+          description: Represents a health evaluation which describes the data and the algorithm used by health manager to evaluate the health of an entity.
+    ServicePackageActivationMode:
+      type: string
+      description: The activation mode of service package to be used for a Service Fabric service. This is specified at the time of creating the Service.
+      enum:
+      - SharedProcess
+      - ExclusiveProcess
+      x-ms-enum:
+        name: ServicePackageActivationMode
+        modelAsString: true
+        values:
+        - value: SharedProcess
+          description: This is the default activation mode. With this activation mode, replicas or instances from different partition(s) of service, on a given node, will share same activation of service package on a node. The value is zero.
+        - value: ExclusiveProcess
+          description: With this activation mode, each replica or instance of service, on a given node, will have its own dedicated activation of service package on a node. The value is 1.
+    PartitionHealthState:
+      description: Represents the health state of a partition, which contains the partition identifier and its aggregated health state.
+      allOf:
+      - $ref: '#/components/schemas/EntityHealthState'
+      properties:
+        PartitionId:
+          $ref: '#/components/schemas/PartitionId'
+          description: Id of the partition whose health state is described by this object.
+    ApplicationId:
+      type: string
+      description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
+
+        Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
+
+        the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
+    EntityKindHealthStateCount:
+      description: Represents health state count for entities of the specified entity kind.
+      properties:
+        EntityKind:
+          $ref: '#/components/schemas/EntityKind'
+          description: The entity kind for which health states are evaluated.
+        HealthStateCount:
+          $ref: '#/components/schemas/HealthStateCount'
+          description: The health state count for the entities of the specified kind.
     HealthEvaluationKind:
       type: string
       description: The health manager in the cluster performs health evaluations in determining the aggregated health state of an entity. This enumeration provides information on the kind of evaluation that was performed. Following are the possible values.
@@ -1100,90 +1258,18 @@ components:
           description: – Indicates that the health evaluation is for applications of an application type. The value is 21.
         - value: NodeTypeNodes
           description: – Indicates that the health evaluation is for nodes of a node type. The value is 22.
-    HealthState:
-      type: string
-      description: The health state of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-      enum:
-      - Invalid
-      - Ok
-      - Warning
-      - Error
-      - Unknown
-      x-ms-enum:
-        name: HealthState
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid health state. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Ok
-          description: Indicates the health state is okay. The value is 1.
-        - value: Warning
-          description: Indicates the health state is at a warning level. The value is 2.
-        - value: Error
-          description: Indicates the health state is at an error level. Error health state should be investigated, as they can impact the correct functionality of the cluster. The value is 3.
-        - value: Unknown
-          description: Indicates an unknown health status. The value is 65535.
-    ServiceTypeHealthPolicyMap:
-      type: array
-      items:
-        $ref: '#/components/schemas/ServiceTypeHealthPolicyMapItem'
-      description: 'Defines a ServiceTypeHealthPolicy per service type name.
-
-
-        The entries in the map replace the default service type health policy for each specified service type. For example, in an application that contains both a stateless gateway service type and a stateful engine service type, the health policies for the stateless and stateful services can be configured differently. With policy per service type, there''s more granular control of the health of the service.
-
-
-        If no policy is specified for a service type name, the DefaultServiceTypeHealthPolicy is used for evaluation.'
-    ScalingTriggerDescription:
-      discriminator:
-        propertyName: Kind
-      description: Describes the trigger for performing a scaling operation.
+    ServiceCorrelationDescription:
+      description: Creates a particular correlation between services.
       required:
-      - Kind
+      - Scheme
+      - ServiceName
       properties:
-        Kind:
-          $ref: '#/components/schemas/ScalingTriggerKind'
-          description: Specifies the kind of scaling trigger
-    EntityKind:
-      type: string
-      description: The entity type of a Service Fabric entity such as Cluster, Node, Application, Service, Partition, Replica etc.
-      enum:
-      - Invalid
-      - Node
-      - Partition
-      - Service
-      - Application
-      - Replica
-      - DeployedApplication
-      - DeployedServicePackage
-      - Cluster
-      x-ms-enum:
-        name: EntityKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid entity kind. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Node
-          description: Indicates the entity is a Service Fabric node. The value is 1.
-        - value: Partition
-          description: Indicates the entity is a Service Fabric partition. The value is 2.
-        - value: Service
-          description: Indicates the entity is a Service Fabric service. The value is 3.
-        - value: Application
-          description: Indicates the entity is a Service Fabric application. The value is 4.
-        - value: Replica
-          description: Indicates the entity is a Service Fabric replica. The value is 5.
-        - value: DeployedApplication
-          description: Indicates the entity is a Service Fabric deployed application. The value is 6.
-        - value: DeployedServicePackage
-          description: Indicates the entity is a Service Fabric deployed service package. The value is 7.
-        - value: Cluster
-          description: Indicates the entity is a Service Fabric cluster. The value is 8.
-    ResolvedServiceEndpointList:
-      type: array
-      items:
-        $ref: '#/components/schemas/ResolvedServiceEndpoint'
-      description: List of resolved service endpoints of a service partition.
+        Scheme:
+          $ref: '#/components/schemas/ServiceCorrelationScheme'
+          description: The ServiceCorrelationScheme which describes the relationship between this service and the service specified via ServiceName.
+        ServiceName:
+          $ref: '#/components/schemas/ServiceName'
+          description: The name of the service that the correlation relationship is established with.
     ServiceCorrelationScheme:
       type: string
       description: The service correlation scheme.
@@ -1204,31 +1290,64 @@ components:
           description: Aligned affinity ensures that the primaries of the partitions of the affinitized services are collocated on the same nodes. This is the default and is the same as selecting the Affinity scheme. The value is 2.
         - value: NonAlignedAffinity
           description: Non-Aligned affinity guarantees that all replicas of each service will be placed on the same nodes. Unlike Aligned Affinity, this does not guarantee that replicas of particular role will be collocated. The value is 3.
-    ResolvedServicePartition:
-      description: Information about a service partition and its associated endpoints.
-      required:
-      - Name
-      - PartitionInformation
-      - Endpoints
-      - Version
+    ScalingMechanismKind:
+      type: string
+      description: Enumerates the ways that a service can be scaled.
+      enum:
+      - Invalid
+      - PartitionInstanceCount
+      - AddRemoveIncrementalNamedPartition
+      x-ms-enum:
+        name: ScalingMechanismKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the scaling mechanism is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: PartitionInstanceCount
+          description: Indicates a mechanism for scaling where new instances are added or removed from a partition. The value is 1.
+        - value: AddRemoveIncrementalNamedPartition
+          description: Indicates a mechanism for scaling where new named partitions are added or removed from a service. The value is 2.
+    ApplicationHealthPolicy:
+      description: Defines a health policy used to evaluate the health of an application or one of its children entities.
       properties:
-        Name:
-          $ref: '#/components/schemas/ServiceName'
-          description: The full name of the service with 'fabric:' URI scheme.
-        PartitionInformation:
-          $ref: '#/components/schemas/PartitionInformation'
-          description: A representation of the resolved partition.
-        Endpoints:
-          $ref: '#/components/schemas/ResolvedServiceEndpointList'
-          description: List of resolved service endpoints of a service partition.
-        Version:
-          type: string
-          description: The version of this resolved service partition result. This version should be passed in the next time the ResolveService call is made via the PreviousRspVersion query parameter.
-    ServiceLoadMetricsList:
-      type: array
-      items:
-        $ref: '#/components/schemas/ServiceLoadMetricDescription'
-      description: The service load metrics is given as an array of ServiceLoadMetricDescription objects.
+        ConsiderWarningAsError:
+          type: boolean
+          description: Indicates whether warnings are treated with the same severity as errors.
+          default: false
+        MaxPercentUnhealthyDeployedApplications:
+          type: integer
+          description: 'The maximum allowed percentage of unhealthy deployed applications. Allowed values are Byte values from zero to 100.
+
+            The percentage represents the maximum tolerated percentage of deployed applications that can be unhealthy before the application is considered in error.
+
+            This is calculated by dividing the number of unhealthy deployed applications over the number of nodes where the application is currently deployed on in the cluster.
+
+            The computation rounds up to tolerate one failure on small numbers of nodes. Default percentage is zero.'
+          default: 0
+        DefaultServiceTypeHealthPolicy:
+          $ref: '#/components/schemas/ServiceTypeHealthPolicy'
+          description: The health policy used by default to evaluate the health of a service type.
+        ServiceTypeHealthPolicyMap:
+          $ref: '#/components/schemas/ServiceTypeHealthPolicyMap'
+          description: The map with service type health policy per service type name. The map is empty by default.
+    HealthStateCount:
+      description: Represents information about how many health entities are in Ok, Warning and Error health state.
+      properties:
+        OkCount:
+          type: integer
+          format: int64
+          description: The number of health entities with aggregated health state Ok.
+          minimum: 0
+        WarningCount:
+          type: integer
+          format: int64
+          description: The number of health entities with aggregated health state Warning.
+          minimum: 0
+        ErrorCount:
+          type: integer
+          format: int64
+          description: The number of health entities with aggregated health state Error.
+          minimum: 0
     PartitionSchemeDescription:
       discriminator:
         propertyName: PartitionScheme
@@ -1239,20 +1358,73 @@ components:
         PartitionScheme:
           $ref: '#/components/schemas/PartitionScheme'
           description: Specifies how the service is partitioned.
-    UnplacedReplicaInformation:
-      description: Contains information for an unplaced replica.
+    ServiceHealth:
+      description: Information about the health of a Service Fabric service.
+      allOf:
+      - $ref: '#/components/schemas/EntityHealth'
       properties:
-        ServiceName:
+        Name:
           $ref: '#/components/schemas/ServiceName'
-          description: The name of the service.
-        PartitionId:
-          $ref: '#/components/schemas/PartitionId'
-          description: The ID of the partition.
-        UnplacedReplicaDetails:
+          description: The name of the service whose health information is described by this object.
+        PartitionHealthStates:
           type: array
           items:
-            type: string
-          description: List of reasons due to which a replica cannot be placed.
+            $ref: '#/components/schemas/PartitionHealthState'
+          description: The list of partition health states associated with the service.
+    ScalingPolicyDescription:
+      description: Describes how the scaling should be performed
+      required:
+      - ScalingTrigger
+      - ScalingMechanism
+      properties:
+        ScalingTrigger:
+          $ref: '#/components/schemas/ScalingTriggerDescription'
+          description: Specifies the trigger associated with this scaling policy
+        ScalingMechanism:
+          $ref: '#/components/schemas/ScalingMechanismDescription'
+          description: Specifies the mechanism associated with this scaling policy
+    ServiceTypeHealthPolicy:
+      description: Represents the health policy used to evaluate the health of services belonging to a service type.
+      properties:
+        MaxPercentUnhealthyPartitionsPerService:
+          type: integer
+          description: 'The maximum allowed percentage of unhealthy partitions per service. Allowed values are Byte values from zero to 100
+
+
+            The percentage represents the maximum tolerated percentage of partitions that can be unhealthy before the service is considered in error.
+
+            If the percentage is respected but there is at least one unhealthy partition, the health is evaluated as Warning.
+
+            The percentage is calculated by dividing the number of unhealthy partitions over the total number of partitions in the service.
+
+            The computation rounds up to tolerate one failure on small numbers of partitions. Default percentage is zero.'
+          default: 0
+        MaxPercentUnhealthyReplicasPerPartition:
+          type: integer
+          description: 'The maximum allowed percentage of unhealthy replicas per partition. Allowed values are Byte values from zero to 100.
+
+
+            The percentage represents the maximum tolerated percentage of replicas that can be unhealthy before the partition is considered in error.
+
+            If the percentage is respected but there is at least one unhealthy replica, the health is evaluated as Warning.
+
+            The percentage is calculated by dividing the number of unhealthy replicas over the total number of replicas in the partition.
+
+            The computation rounds up to tolerate one failure on small numbers of replicas. Default percentage is zero.'
+          default: 0
+        MaxPercentUnhealthyServices:
+          type: integer
+          description: 'The maximum allowed percentage of unhealthy services. Allowed values are Byte values from zero to 100.
+
+
+            The percentage represents the maximum tolerated percentage of services that can be unhealthy before the application is considered in error.
+
+            If the percentage is respected but there is at least one unhealthy service, the health is evaluated as Warning.
+
+            This is calculated by dividing the number of unhealthy services of the specific service type over the total number of services of the specific service type.
+
+            The computation rounds up to tolerate one failure on small numbers of services. Default percentage is zero.'
+          default: 0
     HealthEvent:
       description: Represents health information reported on a health entity, such as cluster, application or node, with additional metadata added by the Health Manager.
       allOf:
@@ -1303,187 +1475,27 @@ components:
 
 
             If the health state was never ''Error'', the value will be zero date-time.'
-    ServiceTypeHealthPolicy:
-      description: Represents the health policy used to evaluate the health of services belonging to a service type.
-      properties:
-        MaxPercentUnhealthyPartitionsPerService:
-          type: integer
-          description: 'The maximum allowed percentage of unhealthy partitions per service. Allowed values are Byte values from zero to 100
-
-
-            The percentage represents the maximum tolerated percentage of partitions that can be unhealthy before the service is considered in error.
-
-            If the percentage is respected but there is at least one unhealthy partition, the health is evaluated as Warning.
-
-            The percentage is calculated by dividing the number of unhealthy partitions over the total number of partitions in the service.
-
-            The computation rounds up to tolerate one failure on small numbers of partitions. Default percentage is zero.'
-          default: 0
-        MaxPercentUnhealthyReplicasPerPartition:
-          type: integer
-          description: 'The maximum allowed percentage of unhealthy replicas per partition. Allowed values are Byte values from zero to 100.
-
-
-            The percentage represents the maximum tolerated percentage of replicas that can be unhealthy before the partition is considered in error.
-
-            If the percentage is respected but there is at least one unhealthy replica, the health is evaluated as Warning.
-
-            The percentage is calculated by dividing the number of unhealthy replicas over the total number of replicas in the partition.
-
-            The computation rounds up to tolerate one failure on small numbers of replicas. Default percentage is zero.'
-          default: 0
-        MaxPercentUnhealthyServices:
-          type: integer
-          description: 'The maximum allowed percentage of unhealthy services. Allowed values are Byte values from zero to 100.
-
-
-            The percentage represents the maximum tolerated percentage of services that can be unhealthy before the application is considered in error.
-
-            If the percentage is respected but there is at least one unhealthy service, the health is evaluated as Warning.
-
-            This is calculated by dividing the number of unhealthy services of the specific service type over the total number of services of the specific service type.
-
-            The computation rounds up to tolerate one failure on small numbers of services. Default percentage is zero.'
-          default: 0
-    ScalingPolicyDescription:
-      description: Describes how the scaling should be performed
-      required:
-      - ScalingTrigger
-      - ScalingMechanism
-      properties:
-        ScalingTrigger:
-          $ref: '#/components/schemas/ScalingTriggerDescription'
-          description: Specifies the trigger associated with this scaling policy
-        ScalingMechanism:
-          $ref: '#/components/schemas/ScalingMechanismDescription'
-          description: Specifies the mechanism associated with this scaling policy
-    ApplicationName:
-      type: string
-      description: The name of the application, including the 'fabric:' URI scheme.
-    ServiceDescription:
-      discriminator:
-        propertyName: ServiceKind
-      description: A ServiceDescription contains all of the information necessary to create a service.
-      required:
-      - ServiceKind
-      - ServiceName
-      - ServiceTypeName
-      - PartitionDescription
-      properties:
-        ServiceKind:
-          $ref: '#/components/schemas/ServiceKind'
-          description: The service kind.
-        ApplicationName:
-          $ref: '#/components/schemas/ApplicationName'
-          description: The name of the application, including the 'fabric:' URI scheme.
-        ServiceName:
-          $ref: '#/components/schemas/ServiceName'
-          description: The full name of the service with 'fabric:' URI scheme.
-        ServiceTypeName:
-          $ref: '#/components/schemas/ServiceTypeName'
-          description: Name of the service type as specified in the service manifest.
-        InitializationData:
-          $ref: '#/components/schemas/ByteArray'
-          description: The initialization data as an array of bytes. Initialization data is passed to service instances or replicas when they are created.
-        PartitionDescription:
-          $ref: '#/components/schemas/PartitionSchemeDescription'
-          description: The partition description as an object.
-        PlacementConstraints:
-          type: string
-          description: 'The placement constraints as a string. Placement constraints are boolean expressions on node properties and allow for restricting a service to particular nodes based on the service requirements. For example, to place a service on nodes where NodeType is blue specify the following: "NodeColor == blue)".'
-        CorrelationScheme:
-          $ref: '#/components/schemas/CorrelationSchemeList'
-          description: The correlation scheme.
-        ServiceLoadMetrics:
-          $ref: '#/components/schemas/ServiceLoadMetricsList'
-          description: The service load metrics.
-        ServicePlacementPolicies:
-          $ref: '#/components/schemas/ServicePlacementPoliciesList'
-          description: The service placement policies.
-        DefaultMoveCost:
-          $ref: '#/components/schemas/MoveCost'
-          description: The move cost for the service.
-        IsDefaultMoveCostSpecified:
-          type: boolean
-          description: Indicates if the DefaultMoveCost property is specified.
-        ServicePackageActivationMode:
-          $ref: '#/components/schemas/ServicePackageActivationMode'
-          description: The activation mode of service package to be used for a service.
-        ServiceDnsName:
-          type: string
-          description: The DNS name of the service. It requires the DNS system service to be enabled in Service Fabric cluster.
-        ScalingPolicies:
-          $ref: '#/components/schemas/ScalingPolicyDescriptionList'
-          description: Scaling policies for this service.
-        TagsRequiredToPlace:
-          $ref: '#/components/schemas/NodeTagsDescription'
-          description: Tags for placement of this service.
-        TagsRequiredToRun:
-          $ref: '#/components/schemas/NodeTagsDescription'
-          description: Tags for running of this service.
-    ByteArray:
-      description: Array of bytes to be sent as an integer array. Each element of array is a number between 0 and 255.
-      type: array
-      items:
-        type: integer
-    UnhealthyEvaluations:
-      description: List of health evaluations that resulted in the current aggregated health state.
-      type: array
-      items:
-        $ref: '#/components/schemas/HealthEvaluationWrapper'
-    FabricError:
-      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
-      properties:
-        Error:
-          $ref: '#/components/schemas/FabricErrorError'
-          description: Error object containing error code and error message.
-      required:
-      - Error
-    ServicePlacementPoliciesList:
-      type: array
-      items:
-        $ref: '#/components/schemas/ServicePlacementPolicyDescription'
-      description: A list that describes the correlation of the service with other services.
-    ScalingTriggerKind:
-      type: string
-      description: Enumerates the ways that a service can be scaled.
-      enum:
-      - Invalid
-      - AveragePartitionLoad
-      - AverageServiceLoad
-      x-ms-enum:
-        name: ScalingTriggerKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the scaling trigger is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: AveragePartitionLoad
-          description: Indicates a trigger where scaling decisions are made based on average load of a partition. The value is 1.
-        - value: AverageServiceLoad
-          description: Indicates a trigger where scaling decisions are made based on average load of a service. The value is 2.
     CorrelationSchemeList:
       type: array
       items:
         $ref: '#/components/schemas/ServiceCorrelationDescription'
       description: A list that describes the correlation of the service with other services.
-    HealthStateCount:
-      description: Represents information about how many health entities are in Ok, Warning and Error health state.
-      properties:
-        OkCount:
-          type: integer
-          format: int64
-          description: The number of health entities with aggregated health state Ok.
-          minimum: 0
-        WarningCount:
-          type: integer
-          format: int64
-          description: The number of health entities with aggregated health state Warning.
-          minimum: 0
-        ErrorCount:
-          type: integer
-          format: int64
-          description: The number of health entities with aggregated health state Error.
-          minimum: 0
+    UnhealthyEvaluations:
+      description: List of health evaluations that resulted in the current aggregated health state.
+      type: array
+      items:
+        $ref: '#/components/schemas/HealthEvaluationWrapper'
+    ServiceTypeHealthPolicyMap:
+      type: array
+      items:
+        $ref: '#/components/schemas/ServiceTypeHealthPolicyMapItem'
+      description: 'Defines a ServiceTypeHealthPolicy per service type name.
+
+
+        The entries in the map replace the default service type health policy for each specified service type. For example, in an application that contains both a stateless gateway service type and a stateful engine service type, the health policies for the stateless and stateful services can be configured differently. With policy per service type, there''s more granular control of the health of the service.
+
+
+        If no policy is specified for a service type name, the DefaultServiceTypeHealthPolicy is used for evaluation.'
     ServiceLoadMetricWeight:
       type: string
       description: Determines the metric weight relative to the other metrics that are configured for this service. During runtime, if two metrics end up in conflict, the Cluster Resource Manager prefers the metric with the higher weight.
@@ -1504,106 +1516,15 @@ components:
           description: Specifies the metric weight of the service load as Medium. The value is 2.
         - value: High
           description: Specifies the metric weight of the service load as High. The value is 3.
-    ServiceCorrelationDescription:
-      description: Creates a particular correlation between services.
-      required:
-      - Scheme
-      - ServiceName
-      properties:
-        Scheme:
-          $ref: '#/components/schemas/ServiceCorrelationScheme'
-          description: The ServiceCorrelationScheme which describes the relationship between this service and the service specified via ServiceName.
-        ServiceName:
-          $ref: '#/components/schemas/ServiceName'
-          description: The name of the service that the correlation relationship is established with.
   parameters:
-    ApiVersion_6-4_RequiredQueryParam:
-      name: api-version
-      in: query
-      x-ms-parameter-location: method
+    HealthInformationRequiredBodyParam:
+      name: HealthInformation
+      in: body
+      description: Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
       required: true
-      description: 'The version of the API. This parameter is required and its value must be ''6.4''.
-
-
-        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
-
-
-        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
-      x-ms-enum:
-        name: ApiVersion_6-4_RequiredQueryParam
-        modelAsString: true
-        values:
-        - value: '6.4'
-          description: The 6.4 version of the API.
-      schema:
-        type: string
-        enum:
-        - '6.4'
-        default: '6.4'
-    ExcludeHealthStatisticsOptionalQueryParam:
-      name: ExcludeHealthStatistics
-      description: 'Indicates whether the health statistics should be returned as part of the query result. False by default.
-
-        The statistics show the number of children entities in health state Ok, Warning, and Error.'
-      in: query
       x-ms-parameter-location: method
-      required: false
       schema:
-        type: boolean
-        default: false
-    PartitionsHealthStateFilterOptionalQueryParam:
-      name: PartitionsHealthStateFilter
-      description: 'Allows filtering of the partitions health state objects returned in the result of service health query based on their health state.
-
-        The possible values for this parameter include integer value of one of the following health states.
-
-        Only partitions that match the filter are returned. All partitions are used to evaluate the aggregated health state.
-
-        If not specified, all entries are returned. The state values are flag-based enumeration, so the value could be a combination of these value
-
-        obtained using bitwise ''OR'' operator. For example, if the provided value is 6 then health state of partitions with HealthState value of OK (2) and Warning (4) will be returned.
-
-
-        - Default - Default value. Matches any HealthState. The value is zero.
-
-        - None - Filter that doesn''t match any HealthState value. Used in order to return no results on a given collection of states. The value is 1.
-
-        - Ok - Filter that matches input with HealthState value Ok. The value is 2.
-
-        - Warning - Filter that matches input with HealthState value Warning. The value is 4.
-
-        - Error - Filter that matches input with HealthState value Error. The value is 8.
-
-        - All - Filter that matches input with any HealthState value. The value is 65535.'
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      schema:
-        type: integer
-        default: 0
-    ImmediateOptionalQueryParam:
-      name: Immediate
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: 'A flag that indicates whether the report should be sent immediately.
-
-        A health report is sent to a Service Fabric gateway Application, which forwards to the health store.
-
-        If Immediate is set to true, the report is sent immediately from HTTP Gateway to the health store, regardless of the fabric client settings that the HTTP Gateway Application is using.
-
-        This is useful for critical reports that should be sent as soon as possible.
-
-        Depending on timing and other conditions, sending the report may still fail, for example if the HTTP Gateway is closed or the message doesn''t reach the Gateway.
-
-        If Immediate is set to false, the report is sent based on the health client settings from the HTTP Gateway. Therefore, it will be batched according to the HealthReportSendInterval configuration.
-
-        This is the recommended setting because it allows the health client to optimize health reporting messages to health store as well as health report processing.
-
-        By default, reports are not sent immediately.'
-      schema:
-        type: boolean
-        default: false
+        $ref: '#/components/schemas/HealthInformation'
     ApplicationHealthPolicyOptionalBodyParam:
       name: ApplicationHealthPolicy
       in: body
@@ -1614,6 +1535,29 @@ components:
       x-ms-parameter-location: method
       schema:
         $ref: '#/components/schemas/ApplicationHealthPolicy'
+    ApiVersion_6-0_RequiredQueryParam:
+      name: api-version
+      in: query
+      x-ms-parameter-location: method
+      required: true
+      description: 'The version of the API. This parameter is required and its value must be ''6.0''.
+
+
+        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
+
+
+        Additionally the runtime accept any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0, but if the runtime is 6.1, in order to make it easier to write the clients, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
+      x-ms-enum:
+        name: ApiVersion_6-0_RequiredQueryParam
+        modelAsString: true
+        values:
+        - value: '6.0'
+          description: The 6.0 version of the API.
+      schema:
+        type: string
+        enum:
+        - '6.0'
+        default: '6.0'
     OnlyQueryPrimariesOptionalQueryParam:
       name: OnlyQueryPrimaries
       description: Indicates that unplaced replica information will be queries only for primary replicas.
@@ -1631,32 +1575,25 @@ components:
       description: Remove a Service Fabric application or service forcefully without going through the graceful shutdown sequence. This parameter can be used to forcefully delete an application or service for which delete is timing out due to issues in the service code that prevents graceful close of replicas.
       schema:
         type: boolean
-    PartitionIdOptionalQueryParam:
-      name: PartitionId
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The identity of the partition.
-      schema:
-        type: string
-        format: uuid
-    HealthInformationRequiredBodyParam:
-      name: HealthInformation
+    ServiceUpdateDescriptionRequiredBodyParam:
+      name: ServiceUpdateDescription
       in: body
-      description: Describes the health information for the health report. This information needs to be present in all of the health reports sent to the health manager.
+      description: The information necessary to update a service.
       required: true
       x-ms-parameter-location: method
       schema:
-        $ref: '#/components/schemas/HealthInformation'
-    PartitionKeyValueOptionalQueryParam:
-      name: PartitionKeyValue
+        $ref: '#/components/schemas/ServiceUpdateDescription'
+    ExcludeHealthStatisticsOptionalQueryParam:
+      name: ExcludeHealthStatistics
+      description: 'Indicates whether the health statistics should be returned as part of the query result. False by default.
+
+        The statistics show the number of children entities in health state Ok, Warning, and Error.'
       in: query
       x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
       required: false
-      description: "Partition key. This is required if the partition scheme for the service is Int64Range or Named. \nThis is not the partition ID, but rather, either the integer key value, or the name of the partition ID.\nFor example, if your service is using ranged partitions from 0 to 10, then they PartitionKeyValue would be an\ninteger in that range. Query service description to see the range or name."
       schema:
-        type: string
+        type: boolean
+        default: false
     PartitionKeyTypeOptionalQueryParam:
       name: PartitionKeyType
       description: 'Key type for the partition. This parameter is required if the partition scheme for the service is Int64Range or Named. The possible values are following.
@@ -1671,15 +1608,17 @@ components:
       required: false
       schema:
         type: integer
-    EventsHealthStateFilterOptionalQueryParam:
-      name: EventsHealthStateFilter
-      description: 'Allows filtering the collection of HealthEvent objects returned based on health state.
+    PartitionsHealthStateFilterOptionalQueryParam:
+      name: PartitionsHealthStateFilter
+      description: 'Allows filtering of the partitions health state objects returned in the result of service health query based on their health state.
 
         The possible values for this parameter include integer value of one of the following health states.
 
-        Only events that match the filter are returned. All events are used to evaluate the aggregated health state.
+        Only partitions that match the filter are returned. All partitions are used to evaluate the aggregated health state.
 
-        If not specified, all entries are returned. The state values are flag-based enumeration, so the value could be a combination of these values, obtained using the bitwise ''OR'' operator. For example, If the provided value is 6 then all of the events with HealthState value of OK (2) and Warning (4) are returned.
+        If not specified, all entries are returned. The state values are flag-based enumeration, so the value could be a combination of these value
+
+        obtained using bitwise ''OR'' operator. For example, if the provided value is 6 then health state of partitions with HealthState value of OK (2) and Warning (4) will be returned.
 
 
         - Default - Default value. Matches any HealthState. The value is zero.
@@ -1711,6 +1650,75 @@ components:
         default: 60
         maximum: 4294967295
         minimum: 1
+    PartitionIdOptionalQueryParam:
+      name: PartitionId
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: The identity of the partition.
+      schema:
+        type: string
+        format: uuid
+    EventsHealthStateFilterOptionalQueryParam:
+      name: EventsHealthStateFilter
+      description: 'Allows filtering the collection of HealthEvent objects returned based on health state.
+
+        The possible values for this parameter include integer value of one of the following health states.
+
+        Only events that match the filter are returned. All events are used to evaluate the aggregated health state.
+
+        If not specified, all entries are returned. The state values are flag-based enumeration, so the value could be a combination of these values, obtained using the bitwise ''OR'' operator. For example, If the provided value is 6 then all of the events with HealthState value of OK (2) and Warning (4) are returned.
+
+
+        - Default - Default value. Matches any HealthState. The value is zero.
+
+        - None - Filter that doesn''t match any HealthState value. Used in order to return no results on a given collection of states. The value is 1.
+
+        - Ok - Filter that matches input with HealthState value Ok. The value is 2.
+
+        - Warning - Filter that matches input with HealthState value Warning. The value is 4.
+
+        - Error - Filter that matches input with HealthState value Error. The value is 8.
+
+        - All - Filter that matches input with any HealthState value. The value is 65535.'
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      schema:
+        type: integer
+        default: 0
+    PreviousRspVersionOptionalQueryParam:
+      name: PreviousRspVersion
+      in: query
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      required: false
+      description: The value in the Version field of the response that was received previously. This is required if the user knows that the result that was gotten previously is stale.
+      schema:
+        type: string
+    ApiVersion_6-4_RequiredQueryParam:
+      name: api-version
+      in: query
+      x-ms-parameter-location: method
+      required: true
+      description: 'The version of the API. This parameter is required and its value must be ''6.4''.
+
+
+        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This version is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
+
+
+        Additionally the runtime accepts any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0 and the runtime is 6.1, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
+      x-ms-enum:
+        name: ApiVersion_6-4_RequiredQueryParam
+        modelAsString: true
+        values:
+        - value: '6.4'
+          description: The 6.4 version of the API.
+      schema:
+        type: string
+        enum:
+        - '6.4'
+        default: '6.4'
     ServiceIdRequiredPathParam:
       name: serviceId
       in: path
@@ -1724,43 +1732,35 @@ components:
         For example, if the service name is "fabric:/myapp/app1/svc1", the service identity would be "myapp~app1~svc1" in 6.0+ and "myapp/app1/svc1" in previous versions.'
       schema:
         type: string
-    ServiceUpdateDescriptionRequiredBodyParam:
-      name: ServiceUpdateDescription
-      in: body
-      description: The information necessary to update a service.
-      required: true
+    ImmediateOptionalQueryParam:
+      name: Immediate
+      in: query
       x-ms-parameter-location: method
+      required: false
+      description: 'A flag that indicates whether the report should be sent immediately.
+
+        A health report is sent to a Service Fabric gateway Application, which forwards to the health store.
+
+        If Immediate is set to true, the report is sent immediately from HTTP Gateway to the health store, regardless of the fabric client settings that the HTTP Gateway Application is using.
+
+        This is useful for critical reports that should be sent as soon as possible.
+
+        Depending on timing and other conditions, sending the report may still fail, for example if the HTTP Gateway is closed or the message doesn''t reach the Gateway.
+
+        If Immediate is set to false, the report is sent based on the health client settings from the HTTP Gateway. Therefore, it will be batched according to the HealthReportSendInterval configuration.
+
+        This is the recommended setting because it allows the health client to optimize health reporting messages to health store as well as health report processing.
+
+        By default, reports are not sent immediately.'
       schema:
-        $ref: '#/components/schemas/ServiceUpdateDescription'
-    PreviousRspVersionOptionalQueryParam:
-      name: PreviousRspVersion
+        type: boolean
+        default: false
+    PartitionKeyValueOptionalQueryParam:
+      name: PartitionKeyValue
       in: query
       x-ms-parameter-location: method
       x-ms-skip-url-encoding: true
       required: false
-      description: The value in the Version field of the response that was received previously. This is required if the user knows that the result that was gotten previously is stale.
+      description: "Partition key. This is required if the partition scheme for the service is Int64Range or Named. \nThis is not the partition ID, but rather, either the integer key value, or the name of the partition ID.\nFor example, if your service is using ranged partitions from 0 to 10, then they PartitionKeyValue would be an\ninteger in that range. Query service description to see the range or name."
       schema:
         type: string
-    ApiVersion_6-0_RequiredQueryParam:
-      name: api-version
-      in: query
-      x-ms-parameter-location: method
-      required: true
-      description: 'The version of the API. This parameter is required and its value must be ''6.0''.
-
-
-        Service Fabric REST API version is based on the runtime version in which the API was introduced or was changed. Service Fabric runtime supports more than one version of the API. This is the latest supported version of the API. If a lower API version is passed, the returned response may be different from the one documented in this specification.
-
-
-        Additionally the runtime accept any version that is higher than the latest supported version up to the current version of the runtime. So if the latest API version is 6.0, but if the runtime is 6.1, in order to make it easier to write the clients, the runtime will accept version 6.1 for that API. However the behavior of the API will be as per the documented 6.0 version.'
-      x-ms-enum:
-        name: ApiVersion_6-0_RequiredQueryParam
-        modelAsString: true
-        values:
-        - value: '6.0'
-          description: The 6.0 version of the API.
-      schema:
-        type: string
-        enum:
-        - '6.0'
-        default: '6.0'

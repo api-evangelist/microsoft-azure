@@ -246,22 +246,24 @@ paths:
         required: true
 components:
   schemas:
-    EnvironmentImageAsset:
-      description: An Image asset.
+    AuthKeys:
       type: object
       properties:
-        id:
-          description: The Asset Id.
+        primaryKey:
+          description: The primary key.
           type: string
-        mimeType:
-          description: The mime type.
+        secondaryKey:
+          description: The secondary key.
           type: string
-        url:
-          description: The Url of the Asset.
+    SparkMavenPackage:
+      type: object
+      properties:
+        group:
           type: string
-        unpack:
-          description: Whether the Asset is unpacked.
-          type: boolean
+        artifact:
+          type: string
+        version:
+          type: string
     ModelErrorResponse:
       description: The Model Management Service Error object.
       type: object
@@ -282,6 +284,70 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ErrorDetails'
+    ModelSparkSection:
+      type: object
+      properties:
+        repositories:
+          description: The list of spark repositories.
+          uniqueItems: false
+          type: array
+          items:
+            type: string
+        packages:
+          description: The Spark packages to use.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/SparkMavenPackage'
+        precachePackages:
+          description: Whether to precache the packages.
+          type: boolean
+          example: 'True'
+    EnvironmentImageRequest:
+      description: Request to create a Docker image based on Environment.
+      type: object
+      properties:
+        driverProgram:
+          description: The name of the driver file.
+          type: string
+        assets:
+          description: The list of assets.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentImageAsset'
+        modelIds:
+          description: The list of model Ids.
+          uniqueItems: false
+          type: array
+          items:
+            type: string
+          example: '[mymodel:1, mymodel:2]'
+        environment:
+          $ref: '#/components/schemas/ModelEnvironmentDefinition'
+          description: The details of the AZURE ML environment.
+    ContainerRegistry:
+      type: object
+      properties:
+        address:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    PaginatedServiceList:
+      description: A paginated list of Services.
+      type: object
+      properties:
+        value:
+          description: An array of objects of type Service.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceResponseBase'
+        nextLink:
+          description: A continuation link (absolute URI) to the next page of results in the list.
+          type: string
     CreateServiceRequest:
       description: The base class for creating a service.
       required:
@@ -344,29 +410,32 @@ components:
           type: string
       discriminator:
         propertyName: computeType
-    EnvironmentImageRequest:
-      description: Request to create a Docker image based on Environment.
+    ErrorDetails:
+      description: The error details.
       type: object
       properties:
-        driverProgram:
-          description: The name of the driver file.
+        code:
+          description: The error code.
           type: string
-        assets:
-          description: The list of assets.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/EnvironmentImageAsset'
-        modelIds:
-          description: The list of model Ids.
-          uniqueItems: false
-          type: array
-          items:
-            type: string
-          example: '[mymodel:1, mymodel:2]'
-        environment:
-          $ref: '#/components/schemas/ModelEnvironmentDefinition'
-          description: The details of the AZURE ML environment.
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
+    ModelPythonSection:
+      type: object
+      properties:
+        interpreterPath:
+          description: The python interpreter path. This is only used when user_managed_dependencies=True.
+          type: string
+        userManagedDependencies:
+          description: True means that AzureML reuses an existing python environment; False means that AzureML will create a python environment based on the Conda dependencies specification.
+          type: boolean
+        condaDependencies:
+          type: object
+        baseCondaEnvironment:
+          type: string
     ModelDockerSection:
       type: object
       properties:
@@ -405,56 +474,21 @@ components:
         baseImageRegistry:
           $ref: '#/components/schemas/ContainerRegistry'
           description: Image registry that contains the base image.
-    ModelEnvironmentDefinition:
-      type: object
-      properties:
-        name:
-          description: The name of the environment.
-          type: string
-          example: mydevenvironment
-        version:
-          description: The environment version.
-          type: string
-          example: '1'
-        python:
-          $ref: '#/components/schemas/ModelPythonSection'
-          description: Settings for a Python environment.
-        environmentVariables:
-          description: Definition of environment variables to be defined in the environment.
-          type: object
-          additionalProperties:
-            type: string
-        docker:
-          $ref: '#/components/schemas/ModelDockerSection'
-          description: The definition of a Docker container.
-        spark:
-          $ref: '#/components/schemas/ModelSparkSection'
-          description: The configuration for a Spark environment.
-        inferencingStackVersion:
-          description: The Inferencing stack version.
-          type: string
-          example: latest
-    PaginatedServiceList:
-      description: A paginated list of Services.
+    JsonPatchOperation:
+      description: The Json Patch definition.
       type: object
       properties:
         value:
-          description: An array of objects of type Service.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceResponseBase'
-        nextLink:
-          description: A continuation link (absolute URI) to the next page of results in the list.
+          description: The value.
+          type: object
+        path:
+          description: The target location.
           type: string
-    AuthKeys:
-      type: object
-      properties:
-        primaryKey:
-          description: The primary key.
+        op:
+          description: The operation.
           type: string
-        secondaryKey:
-          description: The secondary key.
+        from:
+          description: The source location.
           type: string
     ServiceResponseBase:
       description: The base service response. The correct inherited response based on computeType will be returned (ex. ACIServiceResponse)
@@ -534,86 +568,60 @@ components:
             modelAsString: false
       discriminator:
         propertyName: computeType
-    ModelSparkSection:
+    EnvironmentImageAsset:
+      description: An Image asset.
       type: object
       properties:
-        repositories:
-          description: The list of spark repositories.
-          uniqueItems: false
-          type: array
-          items:
-            type: string
-        packages:
-          description: The Spark packages to use.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/SparkMavenPackage'
-        precachePackages:
-          description: Whether to precache the packages.
+        id:
+          description: The Asset Id.
+          type: string
+        mimeType:
+          description: The mime type.
+          type: string
+        url:
+          description: The Url of the Asset.
+          type: string
+        unpack:
+          description: Whether the Asset is unpacked.
           type: boolean
-          example: 'True'
-    ContainerRegistry:
+    ModelEnvironmentDefinition:
       type: object
       properties:
-        address:
+        name:
+          description: The name of the environment.
           type: string
-        username:
-          type: string
-        password:
-          type: string
-    JsonPatchOperation:
-      description: The Json Patch definition.
-      type: object
-      properties:
-        value:
-          description: The value.
-          type: object
-        path:
-          description: The target location.
-          type: string
-        op:
-          description: The operation.
-          type: string
-        from:
-          description: The source location.
-          type: string
-    SparkMavenPackage:
-      type: object
-      properties:
-        group:
-          type: string
-        artifact:
-          type: string
+          example: mydevenvironment
         version:
+          description: The environment version.
           type: string
-    ModelPythonSection:
-      type: object
-      properties:
-        interpreterPath:
-          description: The python interpreter path. This is only used when user_managed_dependencies=True.
-          type: string
-        userManagedDependencies:
-          description: True means that AzureML reuses an existing python environment; False means that AzureML will create a python environment based on the Conda dependencies specification.
-          type: boolean
-        condaDependencies:
+          example: '1'
+        python:
+          $ref: '#/components/schemas/ModelPythonSection'
+          description: Settings for a Python environment.
+        environmentVariables:
+          description: Definition of environment variables to be defined in the environment.
           type: object
-        baseCondaEnvironment:
+          additionalProperties:
+            type: string
+        docker:
+          $ref: '#/components/schemas/ModelDockerSection'
+          description: The definition of a Docker container.
+        spark:
+          $ref: '#/components/schemas/ModelSparkSection'
+          description: The configuration for a Spark environment.
+        inferencingStackVersion:
+          description: The Inferencing stack version.
           type: string
-    ErrorDetails:
-      description: The error details.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
+          example: latest
   parameters:
+    resourceGroupParameter:
+      name: resourceGroup
+      in: path
+      description: The Name of the resource group in which the workspace is located.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -623,14 +631,6 @@ components:
       schema:
         type: string
         format: uuid
-    resourceGroupParameter:
-      name: resourceGroup
-      in: path
-      description: The Name of the resource group in which the workspace is located.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     workspaceParameter:
       name: workspace
       in: path

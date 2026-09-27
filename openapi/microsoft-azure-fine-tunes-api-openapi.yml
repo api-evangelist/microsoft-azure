@@ -212,7 +212,7 @@ paths:
       tags:
       - 'Fine Tunes:'
       summary: Microsoft Azure Gets Details For A Single Fine Tune Job Specified By The Given…
-      operationId: microsoftAzureFinetunesGet
+      operationId: getFineTunesByFineTuneId
       parameters:
       - in: path
         name: fine-tune-id
@@ -238,11 +238,13 @@ paths:
         Getting a fine tune job.:
           $ref: ./examples/get_finetune.json
       description: Needs a more full description created.
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureFinetunesGet
     delete:
       tags:
       - 'Fine Tunes:'
       summary: Microsoft Azure Deletes The Fine Tune Job Specified By The Given Fine Tune Id
-      operationId: microsoftAzureFinetunesDelete
+      operationId: deleteFineTunesByFineTuneId
       parameters:
       - in: path
         name: fine-tune-id
@@ -264,12 +266,14 @@ paths:
         Deleting a fine tune job.:
           $ref: ./examples/delete_finetune.json
       description: Needs a more full description created.
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureFinetunesDelete
   /fine-tunes/{fine-tune-id}/events:
     get:
       tags:
       - 'Fine Tunes:'
       summary: Microsoft Azure Gets The Events For The Fine Tune Job Specified By The Given…
-      operationId: microsoftAzureFinetunesGetevents
+      operationId: getFineTunesByFineTuneIdEvents
       parameters:
       - in: path
         name: fine-tune-id
@@ -306,12 +310,14 @@ paths:
         Getting events of a fine tune job.:
           $ref: ./examples/get_finetune_events.json
       description: Needs a more full description created.
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureFinetunesGetevents
   /fine-tunes/{fine-tune-id}/cancel:
     post:
       tags:
       - 'Fine Tunes:'
       summary: Microsoft Azure Cancels The Processing Of The Fine Tune Job Specified By The…
-      operationId: microsoftAzureFinetunesCancel
+      operationId: postFineTunesByFineTuneIdCancel
       parameters:
       - in: path
         name: fine-tune-id
@@ -337,8 +343,64 @@ paths:
         Canceling a fine tune job.:
           $ref: ./examples/cancel_finetune.json
       description: Needs a more full description created.
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureFinetunesCancel
 components:
+  parameters:
+    apiVersionQueryParameter:
+      in: query
+      name: api-version
+      description: The requested API version.
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+        default: 2022-03-01-preview
+    apiVersionQueryParameter_2:
+      in: query
+      name: api-version
+      description: The requested API version.
+      required: true
+      x-ms-client-default: '2022-12-01'
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    apiVersionQueryParameter_3:
+      in: query
+      name: api-version
+      description: The requested API version.
+      required: true
+      x-ms-client-default: 2023-10-01-preview
+      x-ms-parameter-location: client
+      schema:
+        type: string
   schemas:
+    ErrorResponse:
+      title: ErrorResponse
+      description: 'Error response as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    Event:
+      title: Event
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        created_at:
+          format: int32
+          description: A timestamp when this event was created (in unix epochs).
+          type: integer
+          readOnly: true
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        message:
+          description: The message describing the event. This can be a change of state, e.g., enqueued, started, failed or completed, or other events like uploaded results.
+          type: string
+          readOnly: true
     HyperParameters:
       title: HyperParameters
       description: The hyper parameter settings used in a fine tune job.
@@ -372,44 +434,17 @@ components:
 
             If prompts are extremely long (relative to completions), it may make sense to reduce this weight so as to avoid over-prioritizing learning the prompt.'
           type: number
-    ErrorCode:
-      title: ErrorCode
-      description: 'Error codes as defined in the Microsoft REST guidelines
+    InnerError:
+      title: InnerError
+      description: 'Inner error as defined in the Microsoft REST guidelines
 
         (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      enum:
-      - conflict
-      - invalidPayload
-      - forbidden
-      - notFound
-      - unexpectedEntityState
-      - itemDoesAlreadyExist
-      - serviceUnavailable
-      - internalFailure
-      - quotaExceeded
-      type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
-        values:
-        - value: conflict
-          description: The requested operation conflicts with the current resource state.
-        - value: invalidPayload
-          description: The request data is invalid for this operation.
-        - value: forbidden
-          description: The operation is forbidden for the current user/api key.
-        - value: notFound
-          description: The resource is not found.
-        - value: unexpectedEntityState
-          description: The operation cannot be executed in the current resource's state.
-        - value: itemDoesAlreadyExist
-          description: The item does already exist.
-        - value: serviceUnavailable
-          description: The service is currently not available.
-        - value: internalFailure
-          description: Internal error. Please retry.
-        - value: quotaExceeded
-          description: Quota exceeded.
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/InnerErrorCode'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     State:
       title: State
       description: The state of a job or item.
@@ -438,43 +473,32 @@ components:
           description: The operation has completed processing with a failure and cannot be further consumed.
         - value: deleted
           description: The entity has been deleted but may still be referenced by other entities predating the deletion.
-    TypeDiscriminator:
-      title: TypeDiscriminator
-      description: Defines the type of an object.
-      enum:
-      - list
-      - fine-tune
-      - file
-      - fine-tune-event
-      - model
-      - deployment
-      type: string
-      readOnly: true
-      x-ms-enum:
-        name: TypeDiscriminator
-        modelAsString: true
-        values:
-        - value: list
-          description: This object represents a list of other objects.
-        - value: fine-tune
-          description: This object represents a fine tune job.
-        - value: file
-          description: This object represents a file.
-        - value: fine-tune-event
-          description: This object represents an event of a fine tune job.
-        - value: model
-          description: This object represents a model (can be a base models or fine tune job result).
-        - value: deployment
-          description: This object represents a deployment.
-    ErrorResponse:
-      title: ErrorResponse
-      description: 'Error response as defined in the Microsoft REST guidelines
+    Error:
+      title: Error
+      description: 'Error content as defined in the Microsoft REST guidelines
 
         (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      required:
+      - code
+      - message
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/Error'
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          description: The message of this error.
+          minLength: 1
+          type: string
+        target:
+          description: The location where the error happened if available.
+          type: string
+        details:
+          description: The error details if available.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     File:
       title: File
       description: A file is a document usable for training and validation. It can also be a service generated document with result details.
@@ -528,6 +552,34 @@ components:
         values:
         - value: invalidPayload
           description: The request data is invalid for this operation.
+    TypeDiscriminator:
+      title: TypeDiscriminator
+      description: Defines the type of an object.
+      enum:
+      - list
+      - fine-tune
+      - file
+      - fine-tune-event
+      - model
+      - deployment
+      type: string
+      readOnly: true
+      x-ms-enum:
+        name: TypeDiscriminator
+        modelAsString: true
+        values:
+        - value: list
+          description: This object represents a list of other objects.
+        - value: fine-tune
+          description: This object represents a fine tune job.
+        - value: file
+          description: This object represents a file.
+        - value: fine-tune-event
+          description: This object represents an event of a fine tune job.
+        - value: model
+          description: This object represents a model (can be a base models or fine tune job result).
+        - value: deployment
+          description: This object represents a deployment.
     FineTune:
       title: FineTune
       description: Fine tuning is a job to tailor a model to specific training data.
@@ -598,32 +650,85 @@ components:
           readOnly: true
         hyperparams:
           $ref: '#/components/schemas/HyperParameters'
-    Error:
-      title: Error
-      description: 'Error content as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      required:
-      - code
-      - message
+    FineTuneList:
+      title: FineTuneList
+      description: Represents a list of fine tunes.
       type: object
       properties:
-        code:
-          $ref: '#/components/schemas/ErrorCode'
-        message:
-          description: The message of this error.
-          minLength: 1
-          type: string
-        target:
-          description: The location where the error happened if available.
-          type: string
-        details:
-          description: The error details if available.
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        data:
+          description: The list of items.
           type: array
           items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
+            $ref: '#/components/schemas/FineTune'
+          readOnly: true
+    EventList:
+      title: EventList
+      description: Represents a list of events.
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        data:
+          description: The list of items.
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+          readOnly: true
+    Purpose:
+      title: Purpose
+      description: The intended purpose of the uploaded documents. Use "fine-tune" for fine-tuning. This allows us to validate the format of the uploaded file.
+      enum:
+      - fine-tune
+      - fine-tune-results
+      type: string
+      x-ms-enum:
+        name: Purpose
+        modelAsString: true
+        values:
+        - value: fine-tune
+          description: This file contains training data for a fine tune job.
+        - value: fine-tune-results
+          description: This file contains the results of a fine tune job.
+    ErrorCode:
+      title: ErrorCode
+      description: 'Error codes as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      enum:
+      - conflict
+      - invalidPayload
+      - forbidden
+      - notFound
+      - unexpectedEntityState
+      - itemDoesAlreadyExist
+      - serviceUnavailable
+      - internalFailure
+      - quotaExceeded
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
+        values:
+        - value: conflict
+          description: The requested operation conflicts with the current resource state.
+        - value: invalidPayload
+          description: The request data is invalid for this operation.
+        - value: forbidden
+          description: The operation is forbidden for the current user/api key.
+        - value: notFound
+          description: The resource is not found.
+        - value: unexpectedEntityState
+          description: The operation cannot be executed in the current resource's state.
+        - value: itemDoesAlreadyExist
+          description: The item does already exist.
+        - value: serviceUnavailable
+          description: The service is currently not available.
+        - value: internalFailure
+          description: Internal error. Please retry.
+        - value: quotaExceeded
+          description: Quota exceeded.
     LogLevel:
       title: LogLevel
       description: The verbosity level of an event.
@@ -643,75 +748,6 @@ components:
           description: This event represents a mitigated issue.
         - value: error
           description: This message represents a non recoverable issue.
-    FineTuneList:
-      title: FineTuneList
-      description: Represents a list of fine tunes.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        data:
-          description: The list of items.
-          type: array
-          items:
-            $ref: '#/components/schemas/FineTune'
-          readOnly: true
-    Event:
-      title: Event
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        created_at:
-          format: int32
-          description: A timestamp when this event was created (in unix epochs).
-          type: integer
-          readOnly: true
-        level:
-          $ref: '#/components/schemas/LogLevel'
-        message:
-          description: The message describing the event. This can be a change of state, e.g., enqueued, started, failed or completed, or other events like uploaded results.
-          type: string
-          readOnly: true
-    InnerError:
-      title: InnerError
-      description: 'Inner error as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      type: object
-      properties:
-        code:
-          $ref: '#/components/schemas/InnerErrorCode'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    Purpose:
-      title: Purpose
-      description: The intended purpose of the uploaded documents. Use "fine-tune" for fine-tuning. This allows us to validate the format of the uploaded file.
-      enum:
-      - fine-tune
-      - fine-tune-results
-      type: string
-      x-ms-enum:
-        name: Purpose
-        modelAsString: true
-        values:
-        - value: fine-tune
-          description: This file contains training data for a fine tune job.
-        - value: fine-tune-results
-          description: This file contains the results of a fine tune job.
-    EventList:
-      title: EventList
-      description: Represents a list of events.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        data:
-          description: The list of items.
-          type: array
-          items:
-            $ref: '#/components/schemas/Event'
-          readOnly: true
     FineTuneCreation:
       title: FineTuneCreation
       description: Defines the values of a fine tune job.
@@ -733,6 +769,37 @@ components:
           type: string
         hyperparams:
           $ref: '#/components/schemas/HyperParameters'
+    ErrorResponse_2:
+      title: ErrorResponse
+      description: 'Error response as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    Event_2:
+      title: Event
+      required:
+      - created_at
+      - level
+      - message
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        created_at:
+          format: unixtime
+          description: A timestamp when this event was created (in unix epochs).
+          type: integer
+        level:
+          $ref: '#/components/schemas/LogLevel_2'
+        message:
+          description: The message describing the event. This can be a change of state, e.g., enqueued, started, failed or completed, or other events like uploaded results.
+          minLength: 1
+          type: string
     HyperParameters_2:
       title: HyperParameters
       description: The hyper parameter settings used in a fine tune job.
@@ -798,50 +865,6 @@ components:
           items:
             format: double
             type: number
-    ErrorCode_2:
-      title: ErrorCode
-      description: 'Error codes as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      enum:
-      - conflict
-      - invalidPayload
-      - forbidden
-      - notFound
-      - unexpectedEntityState
-      - itemDoesAlreadyExist
-      - serviceUnavailable
-      - internalFailure
-      - quotaExceeded
-      - jsonlValidationFailed
-      - fileImportFailed
-      type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
-        values:
-        - value: conflict
-          description: The requested operation conflicts with the current resource state.
-        - value: invalidPayload
-          description: The request data is invalid for this operation.
-        - value: forbidden
-          description: The operation is forbidden for the current user/api key.
-        - value: notFound
-          description: The resource is not found.
-        - value: unexpectedEntityState
-          description: The operation cannot be executed in the current resource's state.
-        - value: itemDoesAlreadyExist
-          description: The item does already exist.
-        - value: serviceUnavailable
-          description: The service is currently not available.
-        - value: internalFailure
-          description: Internal error. Please retry.
-        - value: quotaExceeded
-          description: Quota exceeded.
-        - value: jsonlValidationFailed
-          description: Validation of jsonl data failed.
-        - value: fileImportFailed
-          description: Import of file failed.
     State_2:
       title: State
       description: The state of a job or item.
@@ -870,17 +893,6 @@ components:
           description: The operation has completed processing with a failure and cannot be further consumed.
         - value: deleted
           description: The entity has been deleted but may still be referenced by other entities predating the deletion.
-    ErrorResponse_2:
-      title: ErrorResponse
-      description: 'Error response as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
     File_2:
       title: File
       description: A file is a document usable for training and validation. It can also be a service generated document with result details.
@@ -924,19 +936,6 @@ components:
           $ref: '#/components/schemas/FileStatistics'
         error:
           $ref: '#/components/schemas/Error'
-    FileStatistics:
-      title: FileStatistics
-      description: A file is a document usable for training and validation. It can also be a service generated document with result details.
-      type: object
-      properties:
-        tokens:
-          format: int32
-          description: The number of tokens used in prompts and completions for files of kind "fine-tune" once validation of file content is complete.
-          type: integer
-        examples:
-          format: int32
-          description: The number of contained training examples in files of kind "fine-tune" once validation of file content is complete.
-          type: integer
     FineTune_2:
       title: FineTune
       description: Fine tuning is a job to tailor a model to specific training data.
@@ -1007,6 +1006,74 @@ components:
           type: string
         error:
           $ref: '#/components/schemas/Error'
+    FineTuneList_2:
+      title: FineTuneList
+      description: Represents a list of fine tunes.
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        data:
+          description: The list of items.
+          type: array
+          items:
+            $ref: '#/components/schemas/FineTune_2'
+    EventList_2:
+      title: EventList
+      description: Represents a list of events.
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        data:
+          description: The list of items.
+          type: array
+          items:
+            $ref: '#/components/schemas/Event_2'
+    ErrorCode_2:
+      title: ErrorCode
+      description: 'Error codes as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      enum:
+      - conflict
+      - invalidPayload
+      - forbidden
+      - notFound
+      - unexpectedEntityState
+      - itemDoesAlreadyExist
+      - serviceUnavailable
+      - internalFailure
+      - quotaExceeded
+      - jsonlValidationFailed
+      - fileImportFailed
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
+        values:
+        - value: conflict
+          description: The requested operation conflicts with the current resource state.
+        - value: invalidPayload
+          description: The request data is invalid for this operation.
+        - value: forbidden
+          description: The operation is forbidden for the current user/api key.
+        - value: notFound
+          description: The resource is not found.
+        - value: unexpectedEntityState
+          description: The operation cannot be executed in the current resource's state.
+        - value: itemDoesAlreadyExist
+          description: The item does already exist.
+        - value: serviceUnavailable
+          description: The service is currently not available.
+        - value: internalFailure
+          description: Internal error. Please retry.
+        - value: quotaExceeded
+          description: Quota exceeded.
+        - value: jsonlValidationFailed
+          description: Validation of jsonl data failed.
+        - value: fileImportFailed
+          description: Import of file failed.
     LogLevel_2:
       title: LogLevel
       description: The verbosity level of an event.
@@ -1025,50 +1092,6 @@ components:
           description: This event represents a mitigated issue.
         - value: error
           description: This message represents a non recoverable issue.
-    FineTuneList_2:
-      title: FineTuneList
-      description: Represents a list of fine tunes.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        data:
-          description: The list of items.
-          type: array
-          items:
-            $ref: '#/components/schemas/FineTune_2'
-    Event_2:
-      title: Event
-      required:
-      - created_at
-      - level
-      - message
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        created_at:
-          format: unixtime
-          description: A timestamp when this event was created (in unix epochs).
-          type: integer
-        level:
-          $ref: '#/components/schemas/LogLevel_2'
-        message:
-          description: The message describing the event. This can be a change of state, e.g., enqueued, started, failed or completed, or other events like uploaded results.
-          minLength: 1
-          type: string
-    EventList_2:
-      title: EventList
-      description: Represents a list of events.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        data:
-          description: The list of items.
-          type: array
-          items:
-            $ref: '#/components/schemas/Event_2'
     FineTuneCreation_2:
       title: FineTuneCreation
       description: Defines the values of a fine tune job.
@@ -1151,37 +1174,187 @@ components:
           items:
             format: double
             type: number
-    TypeDiscriminator_2:
-      title: TypeDiscriminator
-      description: Defines the type of an object.
+    FileStatistics:
+      title: FileStatistics
+      description: A file is a document usable for training and validation. It can also be a service generated document with result details.
+      type: object
+      properties:
+        tokens:
+          format: int32
+          description: The number of tokens used in prompts and completions for files of kind "fine-tune" once validation of file content is complete.
+          type: integer
+        examples:
+          format: int32
+          description: The number of contained training examples in files of kind "fine-tune" once validation of file content is complete.
+          type: integer
+    HyperParameters_3:
+      title: HyperParameters
+      description: The hyper parameter settings used in a fine tune job.
+      type: object
+      properties:
+        batch_size:
+          format: int32
+          description: 'The batch size to use for training. The batch size is the number of training examples used to train a single forward and backward pass.
+
+            In general, we''ve found that larger batch sizes tend to work better for larger datasets.
+
+            The default value as well as the maximum value for this property are specific to a base model.'
+          type: integer
+        learning_rate_multiplier:
+          format: double
+          description: 'The learning rate multiplier to use for training. The fine-tuning learning rate is the original learning rate used for pre-training multiplied by this value.
+
+            Larger learning rates tend to perform better with larger batch sizes.
+
+            We recommend experimenting with values in the range 0.02 to 0.2 to see what produces the best results.'
+          type: number
+        n_epochs:
+          format: int32
+          description: The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.
+          type: integer
+        prompt_loss_weight:
+          format: double
+          description: 'The weight to use for loss on the prompt tokens. This controls how much the model tries to learn to generate the prompt
+
+            (as compared to the completion which always has a weight of 1.0), and can add a stabilizing effect to training when completions are short.
+
+            If prompts are extremely long (relative to completions), it may make sense to reduce this weight so as to avoid over-prioritizing learning the prompt.'
+          type: number
+        compute_classification_metrics:
+          description: 'A value indicating whether to compute classification metrics.
+
+            If set, we calculate classification-specific metrics such as accuracy and F-1 score using the validation set at the end of every epoch.
+
+            These metrics can be viewed in the results file. In order to compute classification metrics, you must provide a validation_file.Additionally,
+
+            you must specify classification_n_classes for multiclass classification or classification_positive_class for binary classification.'
+          type: boolean
+        classification_n_classes:
+          format: int32
+          description: 'The number of classes in a classification task.
+
+            This parameter is required for multiclass classification.'
+          type: integer
+        classification_positive_class:
+          description: 'The positive class in binary classification.
+
+            This parameter is needed to generate precision, recall, and F1 metrics when doing binary classification.'
+          type: string
+        classification_betas:
+          description: 'The classification beta values. If this is provided, we calculate F-beta scores at the specified beta values.
+
+            The F-beta score is a generalization of F-1 score. This is only used for binary classification.
+
+            With a beta of 1 (i.e.the F-1 score), precision and recall are given the same weight.
+
+            A larger beta score puts more weight on recall and less on precision. A smaller beta score puts more weight on precision and less on recall.'
+          type: array
+          items:
+            format: double
+            type: number
+    Error_2:
+      title: Error
+      description: 'Error content as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode_3'
+        message:
+          description: The message of this error.
+          minLength: 1
+          type: string
+        target:
+          description: The location where the error happened if available.
+          type: string
+        details:
+          description: The error details if available.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error_2'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+      readOnly: true
+    File_3:
+      title: File
+      description: A file is a document usable for training and validation. It can also be a service generated document with result details.
+      required:
+      - filename
+      - purpose
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator_2'
+        created_at:
+          format: unixtime
+          description: A timestamp when this job or item was created (in unix epochs).
+          type: integer
+          readOnly: true
+        updated_at:
+          format: unixtime
+          description: A timestamp when this job or item was modified last (in unix epochs).
+          type: integer
+          readOnly: true
+        id:
+          description: The identity of this item.
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/FileState'
+        bytes:
+          format: int64
+          description: 'The size of this file when available (can be null). File sizes larger than 2^53-1 are not supported to ensure compatibility
+
+            with JavaScript integers.'
+          type: integer
+          readOnly: true
+        purpose:
+          $ref: '#/components/schemas/Purpose'
+        filename:
+          description: The name of the file.
+          minLength: 1
+          type: string
+        statistics:
+          $ref: '#/components/schemas/FileStatistics'
+        status_details:
+          description: The error message with details in case processing of this file failed.
+          type: string
+          readOnly: true
+    FileState:
+      title: FileState
+      description: The state of a file.
       enum:
-      - list
-      - fine-tune
-      - fine_tuning.job
-      - file
-      - fine-tune-event
-      - fine_tuning.job.event
-      - model
+      - uploaded
+      - pending
+      - running
+      - processed
+      - error
+      - deleting
+      - deleted
       type: string
       readOnly: true
       x-ms-enum:
-        name: TypeDiscriminator
+        name: FileState
         modelAsString: true
         values:
-        - value: list
-          description: This object represents a list of other objects.
-        - value: fine-tune
-          description: This object represents a fine tune job.
-        - value: fine_tuning.job
-          description: This object represents a fine tune job.
-        - value: file
-          description: This object represents a file.
-        - value: fine-tune-event
-          description: This object represents an event of a fine tune job.
-        - value: fine_tuning.job.event
-          description: This object represents an event of a fine tuning job.
-        - value: model
-          description: This object represents a model (can be a base model or fine tune job result).
+        - value: uploaded
+          description: The file has been uploaded but it's not yet processed. This state is not returned by Azure OpenAI and exposed only for compatibility. It can be categorized as an inactive state.
+        - value: pending
+          description: The operation was created and is not queued to be processed in the future. It can be categorized as an inactive state.
+        - value: running
+          description: The operation has started to be processed. It can be categorized as an active state.
+        - value: processed
+          description: The operation has successfully be processed and is ready for consumption. It can be categorized as a terminal state.
+        - value: error
+          description: The operation has completed processing with a failure and cannot be further consumed. It can be categorized as a terminal state.
+        - value: deleting
+          description: The entity is ni the process to be deleted. This state is not returned by Azure OpenAI and exposed only for compatibility. It can be categorized as an active state.
+        - value: deleted
+          description: The entity has been deleted but may still be referenced by other entities predating the deletion. It can be categorized as a terminal state.
     FineTune_3:
       title: FineTune
       description: Fine tuning is a job to tailor a model to specific training data.
@@ -1252,6 +1425,131 @@ components:
           type: string
         error:
           $ref: '#/components/schemas/Error_2'
+    EventList_3:
+      title: EventList
+      description: Represents a list of events.
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator_2'
+        data:
+          description: The list of items.
+          type: array
+          items:
+            $ref: '#/components/schemas/Event_3'
+    ErrorResponse_3:
+      title: ErrorResponse
+      description: 'Error response as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error_2'
+    TypeDiscriminator_2:
+      title: TypeDiscriminator
+      description: Defines the type of an object.
+      enum:
+      - list
+      - fine-tune
+      - fine_tuning.job
+      - file
+      - fine-tune-event
+      - fine_tuning.job.event
+      - model
+      type: string
+      readOnly: true
+      x-ms-enum:
+        name: TypeDiscriminator
+        modelAsString: true
+        values:
+        - value: list
+          description: This object represents a list of other objects.
+        - value: fine-tune
+          description: This object represents a fine tune job.
+        - value: fine_tuning.job
+          description: This object represents a fine tune job.
+        - value: file
+          description: This object represents a file.
+        - value: fine-tune-event
+          description: This object represents an event of a fine tune job.
+        - value: fine_tuning.job.event
+          description: This object represents an event of a fine tuning job.
+        - value: model
+          description: This object represents a model (can be a base model or fine tune job result).
+    ErrorCode_3:
+      title: ErrorCode
+      description: 'Error codes as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      enum:
+      - conflict
+      - invalidPayload
+      - forbidden
+      - notFound
+      - unexpectedEntityState
+      - itemDoesAlreadyExist
+      - serviceUnavailable
+      - internalFailure
+      - quotaExceeded
+      - jsonlValidationFailed
+      - fileImportFailed
+      - tooManyRequests
+      - unauthorized
+      - contentFilter
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
+        values:
+        - value: conflict
+          description: The requested operation conflicts with the current resource state.
+        - value: invalidPayload
+          description: The request data is invalid for this operation.
+        - value: forbidden
+          description: The operation is forbidden for the current user/api key.
+        - value: notFound
+          description: The resource is not found.
+        - value: unexpectedEntityState
+          description: The operation cannot be executed in the current resource's state.
+        - value: itemDoesAlreadyExist
+          description: The item does already exist.
+        - value: serviceUnavailable
+          description: The service is currently not available.
+        - value: internalFailure
+          description: Internal error. Please retry.
+        - value: quotaExceeded
+          description: Quota exceeded.
+        - value: jsonlValidationFailed
+          description: Validation of jsonl data failed.
+        - value: fileImportFailed
+          description: Import of file failed.
+        - value: tooManyRequests
+          description: Too many requests. Please retry later.
+        - value: unauthorized
+          description: The current user/api key is not authorized for the operation.
+        - value: contentFilter
+          description: Image generation failed as a result of our safety system.
+    LogLevel_3:
+      title: LogLevel
+      description: The verbosity level of an event.
+      enum:
+      - info
+      - warning
+      - error
+      type: string
+      x-ms-enum:
+        name: LogLevel
+        modelAsString: true
+        values:
+        - value: info
+          description: This event is for information only.
+        - value: warning
+          description: This event represents a mitigated issue.
+        - value: error
+          description: This message represents a non recoverable issue.
     FineTuneCreation_3:
       title: FineTuneCreation
       description: Defines the values of a fine tune job.
@@ -1334,241 +1632,6 @@ components:
           items:
             format: double
             type: number
-    File_3:
-      title: File
-      description: A file is a document usable for training and validation. It can also be a service generated document with result details.
-      required:
-      - filename
-      - purpose
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator_2'
-        created_at:
-          format: unixtime
-          description: A timestamp when this job or item was created (in unix epochs).
-          type: integer
-          readOnly: true
-        updated_at:
-          format: unixtime
-          description: A timestamp when this job or item was modified last (in unix epochs).
-          type: integer
-          readOnly: true
-        id:
-          description: The identity of this item.
-          type: string
-          readOnly: true
-        status:
-          $ref: '#/components/schemas/FileState'
-        bytes:
-          format: int64
-          description: 'The size of this file when available (can be null). File sizes larger than 2^53-1 are not supported to ensure compatibility
-
-            with JavaScript integers.'
-          type: integer
-          readOnly: true
-        purpose:
-          $ref: '#/components/schemas/Purpose'
-        filename:
-          description: The name of the file.
-          minLength: 1
-          type: string
-        statistics:
-          $ref: '#/components/schemas/FileStatistics'
-        status_details:
-          description: The error message with details in case processing of this file failed.
-          type: string
-          readOnly: true
-    FineTuneList_3:
-      title: FineTuneList
-      description: Represents a list of fine tunes.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator_2'
-        data:
-          description: The list of items.
-          type: array
-          items:
-            $ref: '#/components/schemas/FineTune_3'
-    LogLevel_3:
-      title: LogLevel
-      description: The verbosity level of an event.
-      enum:
-      - info
-      - warning
-      - error
-      type: string
-      x-ms-enum:
-        name: LogLevel
-        modelAsString: true
-        values:
-        - value: info
-          description: This event is for information only.
-        - value: warning
-          description: This event represents a mitigated issue.
-        - value: error
-          description: This message represents a non recoverable issue.
-    ErrorResponse_3:
-      title: ErrorResponse
-      description: 'Error response as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error_2'
-    FileState:
-      title: FileState
-      description: The state of a file.
-      enum:
-      - uploaded
-      - pending
-      - running
-      - processed
-      - error
-      - deleting
-      - deleted
-      type: string
-      readOnly: true
-      x-ms-enum:
-        name: FileState
-        modelAsString: true
-        values:
-        - value: uploaded
-          description: The file has been uploaded but it's not yet processed. This state is not returned by Azure OpenAI and exposed only for compatibility. It can be categorized as an inactive state.
-        - value: pending
-          description: The operation was created and is not queued to be processed in the future. It can be categorized as an inactive state.
-        - value: running
-          description: The operation has started to be processed. It can be categorized as an active state.
-        - value: processed
-          description: The operation has successfully be processed and is ready for consumption. It can be categorized as a terminal state.
-        - value: error
-          description: The operation has completed processing with a failure and cannot be further consumed. It can be categorized as a terminal state.
-        - value: deleting
-          description: The entity is ni the process to be deleted. This state is not returned by Azure OpenAI and exposed only for compatibility. It can be categorized as an active state.
-        - value: deleted
-          description: The entity has been deleted but may still be referenced by other entities predating the deletion. It can be categorized as a terminal state.
-    HyperParameters_3:
-      title: HyperParameters
-      description: The hyper parameter settings used in a fine tune job.
-      type: object
-      properties:
-        batch_size:
-          format: int32
-          description: 'The batch size to use for training. The batch size is the number of training examples used to train a single forward and backward pass.
-
-            In general, we''ve found that larger batch sizes tend to work better for larger datasets.
-
-            The default value as well as the maximum value for this property are specific to a base model.'
-          type: integer
-        learning_rate_multiplier:
-          format: double
-          description: 'The learning rate multiplier to use for training. The fine-tuning learning rate is the original learning rate used for pre-training multiplied by this value.
-
-            Larger learning rates tend to perform better with larger batch sizes.
-
-            We recommend experimenting with values in the range 0.02 to 0.2 to see what produces the best results.'
-          type: number
-        n_epochs:
-          format: int32
-          description: The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.
-          type: integer
-        prompt_loss_weight:
-          format: double
-          description: 'The weight to use for loss on the prompt tokens. This controls how much the model tries to learn to generate the prompt
-
-            (as compared to the completion which always has a weight of 1.0), and can add a stabilizing effect to training when completions are short.
-
-            If prompts are extremely long (relative to completions), it may make sense to reduce this weight so as to avoid over-prioritizing learning the prompt.'
-          type: number
-        compute_classification_metrics:
-          description: 'A value indicating whether to compute classification metrics.
-
-            If set, we calculate classification-specific metrics such as accuracy and F-1 score using the validation set at the end of every epoch.
-
-            These metrics can be viewed in the results file. In order to compute classification metrics, you must provide a validation_file.Additionally,
-
-            you must specify classification_n_classes for multiclass classification or classification_positive_class for binary classification.'
-          type: boolean
-        classification_n_classes:
-          format: int32
-          description: 'The number of classes in a classification task.
-
-            This parameter is required for multiclass classification.'
-          type: integer
-        classification_positive_class:
-          description: 'The positive class in binary classification.
-
-            This parameter is needed to generate precision, recall, and F1 metrics when doing binary classification.'
-          type: string
-        classification_betas:
-          description: 'The classification beta values. If this is provided, we calculate F-beta scores at the specified beta values.
-
-            The F-beta score is a generalization of F-1 score. This is only used for binary classification.
-
-            With a beta of 1 (i.e.the F-1 score), precision and recall are given the same weight.
-
-            A larger beta score puts more weight on recall and less on precision. A smaller beta score puts more weight on precision and less on recall.'
-          type: array
-          items:
-            format: double
-            type: number
-    ErrorCode_3:
-      title: ErrorCode
-      description: 'Error codes as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      enum:
-      - conflict
-      - invalidPayload
-      - forbidden
-      - notFound
-      - unexpectedEntityState
-      - itemDoesAlreadyExist
-      - serviceUnavailable
-      - internalFailure
-      - quotaExceeded
-      - jsonlValidationFailed
-      - fileImportFailed
-      - tooManyRequests
-      - unauthorized
-      - contentFilter
-      type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
-        values:
-        - value: conflict
-          description: The requested operation conflicts with the current resource state.
-        - value: invalidPayload
-          description: The request data is invalid for this operation.
-        - value: forbidden
-          description: The operation is forbidden for the current user/api key.
-        - value: notFound
-          description: The resource is not found.
-        - value: unexpectedEntityState
-          description: The operation cannot be executed in the current resource's state.
-        - value: itemDoesAlreadyExist
-          description: The item does already exist.
-        - value: serviceUnavailable
-          description: The service is currently not available.
-        - value: internalFailure
-          description: Internal error. Please retry.
-        - value: quotaExceeded
-          description: Quota exceeded.
-        - value: jsonlValidationFailed
-          description: Validation of jsonl data failed.
-        - value: fileImportFailed
-          description: Import of file failed.
-        - value: tooManyRequests
-          description: Too many requests. Please retry later.
-        - value: unauthorized
-          description: The current user/api key is not authorized for the operation.
-        - value: contentFilter
-          description: Image generation failed as a result of our safety system.
     Event_3:
       title: Event
       required:
@@ -1589,6 +1652,18 @@ components:
           description: The message describing the event. This can be a change of state, e.g., enqueued, started, failed or completed, or other events like uploaded results.
           minLength: 1
           type: string
+    FineTuneList_3:
+      title: FineTuneList
+      description: Represents a list of fine tunes.
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator_2'
+        data:
+          description: The list of items.
+          type: array
+          items:
+            $ref: '#/components/schemas/FineTune_3'
     FineTuningState:
       title: FineTuningState
       description: The state of a finetunes object or fine tuning job.
@@ -1617,73 +1692,6 @@ components:
           description: The operation has been cancelled and is incomplete. It can be categorized as a terminal state.
         - value: failed
           description: The operation has completed processing with a failure and cannot be further consumed. It can be categorized as a terminal state.
-    Error_2:
-      title: Error
-      description: 'Error content as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          $ref: '#/components/schemas/ErrorCode_3'
-        message:
-          description: The message of this error.
-          minLength: 1
-          type: string
-        target:
-          description: The location where the error happened if available.
-          type: string
-        details:
-          description: The error details if available.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error_2'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-      readOnly: true
-    EventList_3:
-      title: EventList
-      description: Represents a list of events.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator_2'
-        data:
-          description: The list of items.
-          type: array
-          items:
-            $ref: '#/components/schemas/Event_3'
-  parameters:
-    apiVersionQueryParameter:
-      in: query
-      name: api-version
-      description: The requested API version.
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-        default: 2022-03-01-preview
-    apiVersionQueryParameter_2:
-      in: query
-      name: api-version
-      description: The requested API version.
-      required: true
-      x-ms-client-default: '2022-12-01'
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    apiVersionQueryParameter_3:
-      in: query
-      name: api-version
-      description: The requested API version.
-      required: true
-      x-ms-client-default: 2023-10-01-preview
-      x-ms-parameter-location: client
-      schema:
-        type: string
   securitySchemes:
     api-key:
       type: apiKey

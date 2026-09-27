@@ -198,76 +198,7 @@ paths:
         description: The skillset containing one or more skills to create in a search service.
         required: true
 components:
-  parameters:
-    IfNoneMatchParameter:
-      name: If-None-Match
-      in: header
-      required: false
-      description: Defines the If-None-Match condition. The operation will be performed only if the ETag on the server does not match this value.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client Api Version.
-      schema:
-        type: string
-    IfMatchParameter:
-      name: If-Match
-      in: header
-      required: false
-      description: Defines the If-Match condition. The operation will be performed only if the ETag on the server matches this value.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    PreferHeaderParameter:
-      name: Prefer
-      in: header
-      required: true
-      description: For HTTP PUT requests, instructs the service to return the created/updated resource on success.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        enum:
-        - return=representation
-    ClientRequestIdParameter:
-      name: x-ms-client-request-id
-      in: header
-      required: false
-      description: The tracking ID sent with the request to help with debugging.
-      x-ms-client-request-id: true
-      x-ms-parameter-grouping:
-        name: request-options
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
   schemas:
-    SearchIndexerKnowledgeStoreFileProjectionSelector:
-      allOf:
-      - $ref: '#/components/schemas/SearchIndexerKnowledgeStoreBlobProjectionSelector'
-      description: Projection definition for what data to store in Azure Files.
-    SearchError:
-      properties:
-        code:
-          type: string
-          readOnly: true
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          readOnly: true
-          description: A human-readable representation of the error.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/SearchError'
-          readOnly: true
-          description: An array of details about specific errors that led to this reported error.
-      required:
-      - message
-      description: Describes an error condition for the Azure Cognitive Search API.
     SearchIndexerKnowledgeStoreBlobProjectionSelector:
       properties:
         storageContainer:
@@ -291,6 +222,25 @@ components:
       required:
       - '@odata.type'
       description: Base type for describing any cognitive service resource attached to a skillset.
+    InputFieldMappingEntry:
+      properties:
+        name:
+          type: string
+          description: The name of the input.
+        source:
+          type: string
+          description: The source of the input.
+        sourceContext:
+          type: string
+          description: The source context used for selecting recursive inputs.
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/InputFieldMappingEntry'
+          description: The recursive inputs used when creating a complex type.
+      required:
+      - name
+      description: Input field mapping for a skill.
     SearchIndexerKnowledgeStoreTableProjectionSelector:
       properties:
         tableName:
@@ -302,26 +252,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/SearchIndexerKnowledgeStoreProjectionSelector'
       description: Description for what data to store in Azure Tables.
-    SearchIndexerKnowledgeStoreProjectionSelector:
-      properties:
-        referenceKeyName:
-          type: string
-          description: Name of reference key to different projection.
-        generatedKeyName:
-          type: string
-          description: Name of generated key to store projection under.
-        source:
-          type: string
-          description: Source data to project.
-        sourceContext:
-          type: string
-          description: Source context for complex projections.
-        inputs:
-          type: array
-          items:
-            $ref: '#/components/schemas/InputFieldMappingEntry'
-          description: Nested inputs for complex projections.
-      description: Abstract class to share properties between concrete selectors.
     SearchIndexerSkill:
       discriminator:
         propertyName: '@odata.type'
@@ -355,18 +285,6 @@ components:
       externalDocs:
         url: https://docs.microsoft.com/azure/search/cognitive-search-predefined-skills
       description: Base type for skills.
-    ListSkillsetsResult:
-      properties:
-        value:
-          x-ms-client-name: Skillsets
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/SearchIndexerSkillset'
-          description: The skillsets defined in the Search service.
-      required:
-      - value
-      description: Response from a list skillset request. If successful, it includes the full definitions of all skillsets.
     SearchIndexerKnowledgeStoreProjection:
       properties:
         tables:
@@ -385,38 +303,41 @@ components:
             $ref: '#/components/schemas/SearchIndexerKnowledgeStoreFileProjectionSelector'
           description: Projections to Azure File storage.
       description: Container object for various projection selectors.
-    InputFieldMappingEntry:
+    SearchError:
       properties:
-        name:
+        code:
           type: string
-          description: The name of the input.
-        source:
+          readOnly: true
+          description: One of a server-defined set of error codes.
+        message:
           type: string
-          description: The source of the input.
-        sourceContext:
-          type: string
-          description: The source context used for selecting recursive inputs.
-        inputs:
+          readOnly: true
+          description: A human-readable representation of the error.
+        details:
           type: array
           items:
-            $ref: '#/components/schemas/InputFieldMappingEntry'
-          description: The recursive inputs used when creating a complex type.
+            $ref: '#/components/schemas/SearchError'
+          readOnly: true
+          description: An array of details about specific errors that led to this reported error.
       required:
-      - name
-      description: Input field mapping for a skill.
-    OutputFieldMappingEntry:
+      - message
+      description: Describes an error condition for the Azure Cognitive Search API.
+    SearchIndexerKnowledgeStore:
       properties:
-        name:
+        storageConnectionString:
           type: string
-          description: The name of the output defined by the skill.
-        targetName:
-          type: string
-          description: The target name of the output. It is optional and default to name.
+          description: The connection string to the storage account projections will be stored in.
+        projections:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchIndexerKnowledgeStoreProjection'
+          description: A list of additional projections to perform during indexing.
       required:
-      - name
+      - storageConnectionString
+      - projections
       externalDocs:
-        url: https://docs.microsoft.com/rest/api/searchservice/naming-rules
-      description: Output field mapping for a skill.
+        url: https://docs.microsoft.com/azure/search/knowledge-store-projection-overview
+      description: Definition of additional projections to azure blob, table, or files, of enriched data.
     SearchIndexerSkillset:
       properties:
         name:
@@ -447,26 +368,105 @@ components:
       externalDocs:
         url: https://docs.microsoft.com/azure/search/cognitive-search-tutorial-blob
       description: A list of skills.
-    SearchIndexerKnowledgeStore:
+    ListSkillsetsResult:
       properties:
-        storageConnectionString:
+        value:
+          x-ms-client-name: Skillsets
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/SearchIndexerSkillset'
+          description: The skillsets defined in the Search service.
+      required:
+      - value
+      description: Response from a list skillset request. If successful, it includes the full definitions of all skillsets.
+    SearchIndexerKnowledgeStoreFileProjectionSelector:
+      allOf:
+      - $ref: '#/components/schemas/SearchIndexerKnowledgeStoreBlobProjectionSelector'
+      description: Projection definition for what data to store in Azure Files.
+    SearchIndexerKnowledgeStoreProjectionSelector:
+      properties:
+        referenceKeyName:
           type: string
-          description: The connection string to the storage account projections will be stored in.
-        projections:
+          description: Name of reference key to different projection.
+        generatedKeyName:
+          type: string
+          description: Name of generated key to store projection under.
+        source:
+          type: string
+          description: Source data to project.
+        sourceContext:
+          type: string
+          description: Source context for complex projections.
+        inputs:
           type: array
           items:
-            $ref: '#/components/schemas/SearchIndexerKnowledgeStoreProjection'
-          description: A list of additional projections to perform during indexing.
+            $ref: '#/components/schemas/InputFieldMappingEntry'
+          description: Nested inputs for complex projections.
+      description: Abstract class to share properties between concrete selectors.
+    OutputFieldMappingEntry:
+      properties:
+        name:
+          type: string
+          description: The name of the output defined by the skill.
+        targetName:
+          type: string
+          description: The target name of the output. It is optional and default to name.
       required:
-      - storageConnectionString
-      - projections
+      - name
       externalDocs:
-        url: https://docs.microsoft.com/azure/search/knowledge-store-projection-overview
-      description: Definition of additional projections to azure blob, table, or files, of enriched data.
+        url: https://docs.microsoft.com/rest/api/searchservice/naming-rules
+      description: Output field mapping for a skill.
     SearchIndexerKnowledgeStoreObjectProjectionSelector:
       allOf:
       - $ref: '#/components/schemas/SearchIndexerKnowledgeStoreBlobProjectionSelector'
       description: Projection definition for what data to store in Azure Blob.
+  parameters:
+    IfMatchParameter:
+      name: If-Match
+      in: header
+      required: false
+      description: Defines the If-Match condition. The operation will be performed only if the ETag on the server matches this value.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    IfNoneMatchParameter:
+      name: If-None-Match
+      in: header
+      required: false
+      description: Defines the If-None-Match condition. The operation will be performed only if the ETag on the server does not match this value.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
+      schema:
+        type: string
+    ClientRequestIdParameter:
+      name: x-ms-client-request-id
+      in: header
+      required: false
+      description: The tracking ID sent with the request to help with debugging.
+      x-ms-client-request-id: true
+      x-ms-parameter-grouping:
+        name: request-options
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    PreferHeaderParameter:
+      name: Prefer
+      in: header
+      required: true
+      description: For HTTP PUT requests, instructs the service to return the created/updated resource on success.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        enum:
+        - return=representation
 x-ms-parameterized-host:
   hostTemplate: '{endpoint}'
   useSchemePrefix: false

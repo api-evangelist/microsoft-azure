@@ -217,46 +217,79 @@ paths:
         required: true
 components:
   schemas:
-    X509Certificates:
-      description: Primary and secondary certificates
-      type: object
-      properties:
-        primary:
-          $ref: '#/components/schemas/X509CertificateWithInfo'
-        secondary:
-          $ref: '#/components/schemas/X509CertificateWithInfo'
-    X509CertificateInfo:
-      description: X509 certificate info.
+    AttestationMechanism:
+      description: Attestation mechanism for individualEnrollment as well as enrollmentGroup.
       required:
-      - subjectName
-      - sha1Thumbprint
-      - sha256Thumbprint
-      - issuerName
-      - notBeforeUtc
-      - notAfterUtc
-      - serialNumber
-      - version
+      - type
       type: object
       properties:
-        subjectName:
+        type:
+          description: Attestation Type.
+          enum:
+          - none
+          - tpm
+          - x509
+          - symmetricKey
           type: string
-        sha1Thumbprint:
-          type: string
-        sha256Thumbprint:
-          type: string
-        issuerName:
-          type: string
-        notBeforeUtc:
+        tpm:
+          $ref: '#/components/schemas/TpmAttestation'
+          description: TPM attestation method.
+        x509:
+          $ref: '#/components/schemas/X509Attestation'
+          description: X509 attestation method.
+        symmetricKey:
+          $ref: '#/components/schemas/SymmetricKeyAttestation'
+          description: Symmetric Key attestation method.
+    Metadata:
+      description: Metadata for the TwinCollection
+      type: object
+      properties:
+        lastUpdated:
           format: date-time
+          description: Last time the TwinCollection was updated
           type: string
-        notAfterUtc:
-          format: date-time
-          type: string
-        serialNumber:
-          type: string
-        version:
-          format: int32
+        lastUpdatedVersion:
+          format: int64
+          description: This is null for reported properties metadata and is not null for desired properties metadata.
           type: integer
+    TpmAttestation:
+      description: Attestation via TPM.
+      required:
+      - endorsementKey
+      type: object
+      properties:
+        endorsementKey:
+          type: string
+        storageRootKey:
+          type: string
+    BulkEnrollmentGroupOperation:
+      description: Bulk enrollment operation.
+      required:
+      - enrollmentGroups
+      - mode
+      type: object
+      properties:
+        enrollmentGroups:
+          description: Enrollment items
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentGroup'
+        mode:
+          description: Operation mode.
+          enum:
+          - create
+          - update
+          - updateIfMatchETag
+          - delete
+          type: string
+    X509CertificateWithInfo:
+      description: Certificate and Certificate info
+      type: object
+      properties:
+        certificate:
+          type: string
+        info:
+          $ref: '#/components/schemas/X509CertificateInfo'
     DeviceCapabilities:
       description: Device capabilities.
       required:
@@ -267,14 +300,6 @@ components:
           description: If set to true, this device is an IoTEdge device.
           default: false
           type: boolean
-    X509CAReferences:
-      description: Primary and secondary CA references.
-      type: object
-      properties:
-        primary:
-          type: string
-        secondary:
-          type: string
     InitialTwin:
       description: Initial device twin. Contains a subset of the properties of Twin.
       type: object
@@ -285,37 +310,6 @@ components:
         properties:
           $ref: '#/components/schemas/InitialTwinProperties'
           description: Twin desired properties.
-    TwinCollection:
-      description: Represents a collection of properties within a Twin
-      type: object
-      properties:
-        version:
-          format: int64
-          description: Version of the TwinCollection
-          type: integer
-        count:
-          description: Number of properties in the TwinCollection
-          type: integer
-        metadata:
-          $ref: '#/components/schemas/Metadata'
-          description: Metadata for the TwinCollection
-      additionalProperties:
-        type: object
-    ReprovisionPolicy:
-      description: The behavior of the service when a device is re-provisioned to an IoT hub.
-      required:
-      - updateHubAssignment
-      - migrateDeviceData
-      type: object
-      properties:
-        updateHubAssignment:
-          description: When set to true (default), the Device Provisioning Service will evaluate the device's IoT Hub assignment and update it if necessary for any provisioning requests beyond the first from a given device. If set to false, the device will stay assigned to its current IoT hub.
-          default: true
-          type: boolean
-        migrateDeviceData:
-          description: When set to true (default), the Device Provisioning Service will migrate the device's data (twin, device capabilities, and device ID) from one IoT hub to another during an IoT hub assignment update. If set to false, the Device Provisioning Service will reset the device's data to the initial desired configuration stored in the corresponding enrollment list.
-          default: true
-          type: boolean
     EnrollmentGroup:
       description: Enrollment group record.
       required:
@@ -377,145 +371,6 @@ components:
         customAllocationDefinition:
           $ref: '#/components/schemas/CustomAllocationDefinition'
           description: This tells DPS which webhook to call when using custom allocation.
-    X509CertificateWithInfo:
-      description: Certificate and Certificate info
-      type: object
-      properties:
-        certificate:
-          type: string
-        info:
-          $ref: '#/components/schemas/X509CertificateInfo'
-    AttestationMechanism:
-      description: Attestation mechanism for individualEnrollment as well as enrollmentGroup.
-      required:
-      - type
-      type: object
-      properties:
-        type:
-          description: Attestation Type.
-          enum:
-          - none
-          - tpm
-          - x509
-          - symmetricKey
-          type: string
-        tpm:
-          $ref: '#/components/schemas/TpmAttestation'
-          description: TPM attestation method.
-        x509:
-          $ref: '#/components/schemas/X509Attestation'
-          description: X509 attestation method.
-        symmetricKey:
-          $ref: '#/components/schemas/SymmetricKeyAttestation'
-          description: Symmetric Key attestation method.
-    Metadata:
-      description: Metadata for the TwinCollection
-      type: object
-      properties:
-        lastUpdated:
-          format: date-time
-          description: Last time the TwinCollection was updated
-          type: string
-        lastUpdatedVersion:
-          format: int64
-          description: This is null for reported properties metadata and is not null for desired properties metadata.
-          type: integer
-    SymmetricKeyAttestation:
-      description: Attestation via SymmetricKey.
-      type: object
-      properties:
-        primaryKey:
-          description: Primary symmetric key.
-          type: string
-        secondaryKey:
-          description: Secondary symmetric key.
-          type: string
-    BulkEnrollmentGroupOperationResult:
-      description: Results of a bulk enrollment group operation.
-      required:
-      - isSuccessful
-      type: object
-      properties:
-        errors:
-          description: Registration errors
-          type: array
-          items:
-            $ref: '#/components/schemas/BulkEnrollmentGroupOperationError'
-        isSuccessful:
-          description: Indicates if the operation was successful in its entirety.
-          type: boolean
-    InitialTwinProperties:
-      description: Represents the initial properties that will be set on the device twin.
-      type: object
-      properties:
-        desired:
-          $ref: '#/components/schemas/TwinCollection'
-          description: Gets and sets the InitialTwin desired properties.
-    ProvisioningServiceErrorDetails:
-      description: Contains the properties of an error returned by the Azure IoT Hub Provisioning Service.
-      type: object
-      properties:
-        errorCode:
-          format: int32
-          type: integer
-        trackingId:
-          type: string
-        message:
-          type: string
-        info:
-          type: object
-          additionalProperties:
-            type: string
-        timestampUtc:
-          format: date-time
-          type: string
-    X509Attestation:
-      description: Attestation via X509.
-      type: object
-      properties:
-        clientCertificates:
-          $ref: '#/components/schemas/X509Certificates'
-        signingCertificates:
-          $ref: '#/components/schemas/X509Certificates'
-        caReferences:
-          $ref: '#/components/schemas/X509CAReferences'
-    BulkEnrollmentGroupOperation:
-      description: Bulk enrollment operation.
-      required:
-      - enrollmentGroups
-      - mode
-      type: object
-      properties:
-        enrollmentGroups:
-          description: Enrollment items
-          type: array
-          items:
-            $ref: '#/components/schemas/EnrollmentGroup'
-        mode:
-          description: Operation mode.
-          enum:
-          - create
-          - update
-          - updateIfMatchETag
-          - delete
-          type: string
-    TpmAttestation:
-      description: Attestation via TPM.
-      required:
-      - endorsementKey
-      type: object
-      properties:
-        endorsementKey:
-          type: string
-        storageRootKey:
-          type: string
-    QuerySpecification:
-      required:
-      - query
-      type: object
-      properties:
-        query:
-          type: string
     BulkEnrollmentGroupOperationError:
       description: Bulk enrollment operation error.
       required:
@@ -534,6 +389,151 @@ components:
         errorStatus:
           description: Error status.
           type: string
+    X509CertificateInfo:
+      description: X509 certificate info.
+      required:
+      - subjectName
+      - sha1Thumbprint
+      - sha256Thumbprint
+      - issuerName
+      - notBeforeUtc
+      - notAfterUtc
+      - serialNumber
+      - version
+      type: object
+      properties:
+        subjectName:
+          type: string
+        sha1Thumbprint:
+          type: string
+        sha256Thumbprint:
+          type: string
+        issuerName:
+          type: string
+        notBeforeUtc:
+          format: date-time
+          type: string
+        notAfterUtc:
+          format: date-time
+          type: string
+        serialNumber:
+          type: string
+        version:
+          format: int32
+          type: integer
+    TwinCollection:
+      description: Represents a collection of properties within a Twin
+      type: object
+      properties:
+        version:
+          format: int64
+          description: Version of the TwinCollection
+          type: integer
+        count:
+          description: Number of properties in the TwinCollection
+          type: integer
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+          description: Metadata for the TwinCollection
+      additionalProperties:
+        type: object
+    X509Attestation:
+      description: Attestation via X509.
+      type: object
+      properties:
+        clientCertificates:
+          $ref: '#/components/schemas/X509Certificates'
+        signingCertificates:
+          $ref: '#/components/schemas/X509Certificates'
+        caReferences:
+          $ref: '#/components/schemas/X509CAReferences'
+    X509CAReferences:
+      description: Primary and secondary CA references.
+      type: object
+      properties:
+        primary:
+          type: string
+        secondary:
+          type: string
+    ProvisioningServiceErrorDetails:
+      description: Contains the properties of an error returned by the Azure IoT Hub Provisioning Service.
+      type: object
+      properties:
+        errorCode:
+          format: int32
+          type: integer
+        trackingId:
+          type: string
+        message:
+          type: string
+        info:
+          type: object
+          additionalProperties:
+            type: string
+        timestampUtc:
+          format: date-time
+          type: string
+    QuerySpecification:
+      required:
+      - query
+      type: object
+      properties:
+        query:
+          type: string
+    InitialTwinProperties:
+      description: Represents the initial properties that will be set on the device twin.
+      type: object
+      properties:
+        desired:
+          $ref: '#/components/schemas/TwinCollection'
+          description: Gets and sets the InitialTwin desired properties.
+    X509Certificates:
+      description: Primary and secondary certificates
+      type: object
+      properties:
+        primary:
+          $ref: '#/components/schemas/X509CertificateWithInfo'
+        secondary:
+          $ref: '#/components/schemas/X509CertificateWithInfo'
+    SymmetricKeyAttestation:
+      description: Attestation via SymmetricKey.
+      type: object
+      properties:
+        primaryKey:
+          description: Primary symmetric key.
+          type: string
+        secondaryKey:
+          description: Secondary symmetric key.
+          type: string
+    ReprovisionPolicy:
+      description: The behavior of the service when a device is re-provisioned to an IoT hub.
+      required:
+      - updateHubAssignment
+      - migrateDeviceData
+      type: object
+      properties:
+        updateHubAssignment:
+          description: When set to true (default), the Device Provisioning Service will evaluate the device's IoT Hub assignment and update it if necessary for any provisioning requests beyond the first from a given device. If set to false, the device will stay assigned to its current IoT hub.
+          default: true
+          type: boolean
+        migrateDeviceData:
+          description: When set to true (default), the Device Provisioning Service will migrate the device's data (twin, device capabilities, and device ID) from one IoT hub to another during an IoT hub assignment update. If set to false, the Device Provisioning Service will reset the device's data to the initial desired configuration stored in the corresponding enrollment list.
+          default: true
+          type: boolean
+    BulkEnrollmentGroupOperationResult:
+      description: Results of a bulk enrollment group operation.
+      required:
+      - isSuccessful
+      type: object
+      properties:
+        errors:
+          description: Registration errors
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkEnrollmentGroupOperationError'
+        isSuccessful:
+          description: Indicates if the operation was successful in its entirety.
+          type: boolean
     CustomAllocationDefinition:
       description: This tells DPS which webhook to call when using custom allocation.
       required:

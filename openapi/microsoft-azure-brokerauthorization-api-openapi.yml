@@ -287,20 +287,61 @@ paths:
       summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ResourceInfoDefinition:
+    AuthorizationConfig:
       type: object
-      description: ResourceInfoDefinition properties of Basic Rule. This defines the objects that represent the actions or topics, such as - method.Connect, method.Publish, etc.
+      description: Broker AuthorizationConfig properties
       properties:
-        method:
-          $ref: '#/components/schemas/ResourceInfoDefinitionMethods'
-          description: 'The type of action that the clients can perform on the broker: Connect, Publish or Subscribe.'
-        topics:
+        enableCache:
+          type: boolean
+          description: Enable caching of the authorization rules.
+          default: true
+        rules:
           type: array
-          description: A list of topics or topic patterns that match the topics that the clients can publish or subscribe to. This subfield is required if the method is Publish or Subscribe.
+          description: Authorization Rules to be used. If no rule is set, but Authorization Resource is used that would mean DenyAll.
           items:
-            type: string
+            $ref: '#/components/schemas/AuthorizationBasicRule'
+          x-ms-identifiers: []
+    AuthorizationBasicRule:
+      type: object
+      description: BasicRules of AuthorizationConfig Polar rules are not supported
+      properties:
+        brokerResources:
+          type: array
+          description: This subfield defines the broker resources that the Basic Rule is applied on.
+          items:
+            $ref: '#/components/schemas/ResourceInfoDefinition'
+          x-ms-identifiers: []
+        principals:
+          $ref: '#/components/schemas/PrincipalDefinition'
+          description: This subfield defines the identities that represent the clients.
       required:
-      - method
+      - brokerResources
+      - principals
+    ExtendedLocationProperty:
+      type: object
+      description: ExtendedLocation properties
+      properties:
+        name:
+          type: string
+          description: The name of the extended location.
+        type:
+          $ref: '#/components/schemas/ExtendedLocationType'
+          description: Type of ExtendedLocation.
+      required:
+      - name
+      - type
+    BrokerAuthorizationResourceUpdate:
+      type: object
+      description: The type used for update operations of the BrokerAuthorizationResource.
+      properties:
+        tags:
+          type: object
+          description: Resource tags.
+          additionalProperties:
+            type: string
+        properties:
+          $ref: '#/components/schemas/BrokerAuthorizationResourceUpdateProperties'
+          x-ms-client-flatten: true
     BrokerAuthorizationResourceListResult:
       type: object
       description: The response of a BrokerAuthorizationResource list operation.
@@ -316,38 +357,6 @@ components:
           description: The link to the next page of items
       required:
       - value
-    BrokerAuthorizationResourceUpdate:
-      type: object
-      description: The type used for update operations of the BrokerAuthorizationResource.
-      properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-        properties:
-          $ref: '#/components/schemas/BrokerAuthorizationResourceUpdateProperties'
-          x-ms-client-flatten: true
-    ResourceInfoDefinitionMethods:
-      type: string
-      description: ResourceInfoDefinition methods allowed
-      enum:
-      - Connect
-      - Publish
-      - Subscribe
-      x-ms-enum:
-        name: ResourceInfoDefinitionMethods
-        modelAsString: true
-        values:
-        - name: Connect
-          value: Connect
-          description: Allowed Connecting to Broker
-        - name: Publish
-          value: Publish
-          description: Allowed Publishing to Broker
-        - name: Subscribe
-          value: Subscribe
-          description: Allowed Subscribing to Broker
     ProvisioningState:
       type: string
       description: The enum defining status of resource.
@@ -384,20 +393,71 @@ components:
         - name: Accepted
           value: Accepted
           description: Resource has been Accepted.
-    AuthorizationConfig:
+    BrokerAuthorizationResource:
       type: object
-      description: Broker AuthorizationConfig properties
+      description: MQ broker/authorization resource
       properties:
-        enableCache:
-          type: boolean
-          description: Enable caching of the authorization rules.
-          default: true
-        rules:
+        properties:
+          $ref: '#/components/schemas/BrokerAuthorizationProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocationProperty'
+          description: Extended Location
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    ResourceInfoDefinitionMethods:
+      type: string
+      description: ResourceInfoDefinition methods allowed
+      enum:
+      - Connect
+      - Publish
+      - Subscribe
+      x-ms-enum:
+        name: ResourceInfoDefinitionMethods
+        modelAsString: true
+        values:
+        - name: Connect
+          value: Connect
+          description: Allowed Connecting to Broker
+        - name: Publish
+          value: Publish
+          description: Allowed Publishing to Broker
+        - name: Subscribe
+          value: Subscribe
+          description: Allowed Subscribing to Broker
+    ExtendedLocationType:
+      type: string
+      description: The enum defining type of ExtendedLocation accepted.
+      enum:
+      - CustomLocation
+      x-ms-enum:
+        name: ExtendedLocationType
+        modelAsString: true
+        values:
+        - name: CustomLocation
+          value: CustomLocation
+          description: CustomLocation type
+    BrokerAuthorizationResourceUpdateProperties:
+      type: object
+      description: The updatable properties of the BrokerAuthorizationResource.
+      properties:
+        authorizationPolicies:
+          $ref: '#/components/schemas/AuthorizationConfig'
+          description: The list of authorization policies supported by the Authorization Resource.
+        listenerRef:
           type: array
-          description: Authorization Rules to be used. If no rule is set, but Authorization Resource is used that would mean DenyAll.
+          description: The array of listener Resources it supports.
           items:
-            $ref: '#/components/schemas/AuthorizationBasicRule'
-          x-ms-identifiers: []
+            type: string
     PrincipalDefinition:
       type: object
       description: PrincipalDefinition properties of Basic Rule
@@ -421,30 +481,20 @@ components:
           description: A list of usernames that match the clients. The usernames are case-sensitive and must match the usernames provided by the clients during authentication.
           items:
             type: string
-    BrokerAuthorizationResourceUpdateProperties:
+    ResourceInfoDefinition:
       type: object
-      description: The updatable properties of the BrokerAuthorizationResource.
+      description: ResourceInfoDefinition properties of Basic Rule. This defines the objects that represent the actions or topics, such as - method.Connect, method.Publish, etc.
       properties:
-        authorizationPolicies:
-          $ref: '#/components/schemas/AuthorizationConfig'
-          description: The list of authorization policies supported by the Authorization Resource.
-        listenerRef:
+        method:
+          $ref: '#/components/schemas/ResourceInfoDefinitionMethods'
+          description: 'The type of action that the clients can perform on the broker: Connect, Publish or Subscribe.'
+        topics:
           type: array
-          description: The array of listener Resources it supports.
+          description: A list of topics or topic patterns that match the topics that the clients can publish or subscribe to. This subfield is required if the method is Publish or Subscribe.
           items:
             type: string
-    ExtendedLocationType:
-      type: string
-      description: The enum defining type of ExtendedLocation accepted.
-      enum:
-      - CustomLocation
-      x-ms-enum:
-        name: ExtendedLocationType
-        modelAsString: true
-        values:
-        - name: CustomLocation
-          value: CustomLocation
-          description: CustomLocation type
+      required:
+      - method
     BrokerAuthorizationProperties:
       type: object
       description: Broker Resource properties
@@ -464,56 +514,6 @@ components:
       required:
       - authorizationPolicies
       - listenerRef
-    AuthorizationBasicRule:
-      type: object
-      description: BasicRules of AuthorizationConfig Polar rules are not supported
-      properties:
-        brokerResources:
-          type: array
-          description: This subfield defines the broker resources that the Basic Rule is applied on.
-          items:
-            $ref: '#/components/schemas/ResourceInfoDefinition'
-          x-ms-identifiers: []
-        principals:
-          $ref: '#/components/schemas/PrincipalDefinition'
-          description: This subfield defines the identities that represent the clients.
-      required:
-      - brokerResources
-      - principals
-    BrokerAuthorizationResource:
-      type: object
-      description: MQ broker/authorization resource
-      properties:
-        properties:
-          $ref: '#/components/schemas/BrokerAuthorizationProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocationProperty'
-          description: Extended Location
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    ExtendedLocationProperty:
-      type: object
-      description: ExtendedLocation properties
-      properties:
-        name:
-          type: string
-          description: The name of the extended location.
-        type:
-          $ref: '#/components/schemas/ExtendedLocationType'
-          description: Type of ExtendedLocation.
-      required:
-      - name
-      - type
   securitySchemes:
     azure_auth:
       type: oauth2

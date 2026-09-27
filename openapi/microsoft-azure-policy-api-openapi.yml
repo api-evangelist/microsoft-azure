@@ -105,7 +105,7 @@ paths:
       - Policy
       summary: Microsoft Azure Gets The Policy
       description: Gets the details of the policy.
-      operationId: microsoftAzurePolicyGet
+      operationId: getSubscriptionsBySubscriptionIdResourceGroupsByResourceGroupNameProvidersMicrosoftDataReplicationReplicationVaultsByVaultNameReplicationPoliciesByPolicyName
       parameters:
       - $ref: ../../../../../common-types/resource-management/v5/types.json#/parameters/SubscriptionIdParameter
       - $ref: ../../../../../common-types/resource-management/v5/types.json#/parameters/ResourceGroupNameParameter
@@ -131,6 +131,8 @@ paths:
       security:
       - azure_auth:
         - user_impersonation
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzurePolicyGet
     put:
       tags:
       - Policy
@@ -291,6 +293,13 @@ paths:
     - url: https://management.azure.com
 components:
   parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client API version. Current version is 2022-09-01-preview
+      schema:
+        type: string
     AttestationType:
       description: Specifies the trusted execution environment to be used to validate the evidence
       name: attestationType
@@ -316,13 +325,6 @@ components:
         - OpenEnclave
         - SevSnpVm
         - Tpm
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client API version. Current version is 2022-09-01-preview
-      schema:
-        type: string
     PolicyNameParameter:
       in: path
       name: policyName
@@ -348,6 +350,13 @@ components:
         error:
           $ref: '#/components/schemas/CloudErrorBody'
       description: An error response from Attestation.
+    JsonWebToken:
+      description: An RFC 7519 Json Web Token
+      type: string
+      pattern: '[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
+      externalDocs:
+        description: JSON Web Token RFC
+        url: https://tools.ietf.org/html/rfc7519
     CloudErrorBody:
       x-ms-external: true
       properties:
@@ -365,13 +374,29 @@ components:
         token:
           description: An RFC7519 JSON Web Token structure whose body is an PolicyResult object.
           $ref: '#/components/schemas/JsonWebToken'
-    JsonWebToken:
-      description: An RFC 7519 Json Web Token
-      type: string
-      pattern: '[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
-      externalDocs:
-        description: JSON Web Token RFC
-        url: https://tools.ietf.org/html/rfc7519
+    PolicyModelProperties:
+      description: Policy model properties.
+      required:
+      - customProperties
+      type: object
+      properties:
+        provisioningState:
+          description: Gets or sets the provisioning state of the policy.
+          enum:
+          - Canceled
+          - Creating
+          - Deleting
+          - Deleted
+          - Failed
+          - Succeeded
+          - Updating
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: ProvisioningState
+            modelAsString: true
+        customProperties:
+          $ref: '#/components/schemas/PolicyModelCustomProperties'
     PolicyModel:
       description: Policy model.
       required:
@@ -397,75 +422,6 @@ components:
           - $ref: '#/components/schemas/SystemDataModel'
           readOnly: true
       x-ms-azure-resource: true
-    OperationStatus:
-      description: Defines the operation status.
-      type: object
-      properties:
-        id:
-          description: Gets or sets the Id.
-          type: string
-        name:
-          description: Gets or sets the operation name.
-          type: string
-        status:
-          description: 'Gets or sets the status of the operation. ARM expects the terminal status to be one of
-
-            Succeeded/ Failed/ Canceled. All other values imply that the operation is still running.'
-          type: string
-        startTime:
-          description: Gets or sets the start time.
-          type: string
-        endTime:
-          description: Gets or sets the end time.
-          type: string
-    PolicyModelCustomProperties:
-      description: Policy model custom properties.
-      required:
-      - instanceType
-      type: object
-      properties:
-        instanceType:
-          description: Gets or sets the instance type.
-          minLength: 1
-          type: string
-      discriminator:
-        propertyName: instanceType
-    PolicyModelProperties:
-      description: Policy model properties.
-      required:
-      - customProperties
-      type: object
-      properties:
-        provisioningState:
-          description: Gets or sets the provisioning state of the policy.
-          enum:
-          - Canceled
-          - Creating
-          - Deleting
-          - Deleted
-          - Failed
-          - Succeeded
-          - Updating
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: ProvisioningState
-            modelAsString: true
-        customProperties:
-          $ref: '#/components/schemas/PolicyModelCustomProperties'
-    PolicyModelCollection:
-      description: Policy model collection.
-      type: object
-      properties:
-        value:
-          description: Gets or sets the list of policies.
-          type: array
-          items:
-            $ref: '#/components/schemas/PolicyModel'
-          x-ms-identifiers: []
-        nextLink:
-          description: Gets or sets the value of next link.
-          type: string
     SystemDataModel:
       description: System data required to be defined for Azure resources.
       type: object
@@ -493,6 +449,52 @@ components:
         lastModifiedAt:
           format: date-time
           description: Gets or sets the timestamp of resource last modification (UTC).
+          type: string
+    PolicyModelCollection:
+      description: Policy model collection.
+      type: object
+      properties:
+        value:
+          description: Gets or sets the list of policies.
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyModel'
+          x-ms-identifiers: []
+        nextLink:
+          description: Gets or sets the value of next link.
+          type: string
+    PolicyModelCustomProperties:
+      description: Policy model custom properties.
+      required:
+      - instanceType
+      type: object
+      properties:
+        instanceType:
+          description: Gets or sets the instance type.
+          minLength: 1
+          type: string
+      discriminator:
+        propertyName: instanceType
+    OperationStatus:
+      description: Defines the operation status.
+      type: object
+      properties:
+        id:
+          description: Gets or sets the Id.
+          type: string
+        name:
+          description: Gets or sets the operation name.
+          type: string
+        status:
+          description: 'Gets or sets the status of the operation. ARM expects the terminal status to be one of
+
+            Succeeded/ Failed/ Canceled. All other values imply that the operation is still running.'
+          type: string
+        startTime:
+          description: Gets or sets the start time.
+          type: string
+        endTime:
+          description: Gets or sets the end time.
           type: string
   securitySchemes:
     azure_auth:

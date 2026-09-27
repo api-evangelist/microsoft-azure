@@ -966,31 +966,41 @@ components:
       - $ref: '#/components/schemas/RedisCommonProperties'
       description: Properties supplied to Create Redis operation.
       x-ms-external: true
-    ImportRDBParameters:
+    ExportRDBParameters:
       properties:
         format:
           type: string
           description: File format.
-        files:
-          type: array
-          description: files to import.
-          items:
-            type: string
-      required:
-      - files
-      description: Parameters for Redis import operation.
-    RedisPatchScheduleListResult:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/RedisPatchSchedule'
-          description: Results of the list patch schedules operation.
-        nextLink:
+        prefix:
           type: string
-          readOnly: true
-          description: Link for next page of results.
-      description: The response of list patch schedules Redis operation.
+          description: Prefix to use for exported files.
+        container:
+          type: string
+          description: Container name to export to.
+      required:
+      - container
+      - prefix
+      description: Parameters for Redis export operation.
+    RedisPatchSchedule:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ScheduleEntries'
+          description: List of patch schedules for a Redis cache.
+      required:
+      - properties
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+      description: Response to put/get patch schedules for Redis cache.
+    RedisUpdateProperties:
+      properties:
+        sku:
+          $ref: '#/components/schemas/Sku'
+          description: The SKU of the Redis cache to deploy.
+      allOf:
+      - $ref: '#/components/schemas/RedisCommonProperties'
+      description: Patchable properties of the redis cache.
+      x-ms-external: true
     RedisCreateParameters:
       properties:
         properties:
@@ -1017,6 +1027,26 @@ components:
       - properties
       - location
       description: Parameters supplied to the Create Redis operation.
+    RedisAccessKeys:
+      properties:
+        primaryKey:
+          readOnly: true
+          type: string
+          description: The current primary key that clients can use to authenticate with Redis cache.
+        secondaryKey:
+          readOnly: true
+          type: string
+          description: The current secondary key that clients can use to authenticate with Redis cache.
+      description: Redis cache access keys.
+    RedisLinkedServerProperties:
+      description: Properties of a linked server to be returned in get/put response
+      properties:
+        provisioningState:
+          readOnly: true
+          type: string
+          description: Terminal state of the link between primary and secondary redis cache.
+      allOf:
+      - $ref: '#/components/schemas/RedisLinkedServerCreateProperties'
     RedisForceRebootResponse:
       properties:
         message:
@@ -1024,6 +1054,150 @@ components:
           type: string
           description: Status message
       description: Response to force reboot for Redis cache.
+    RedisInstanceDetails:
+      properties:
+        sslPort:
+          readOnly: true
+          type: integer
+          format: int32
+          description: Redis instance SSL port.
+        nonSslPort:
+          readOnly: true
+          type: integer
+          format: int32
+          description: If enableNonSslPort is true, provides Redis instance Non-SSL port.
+        zone:
+          readOnly: true
+          type: string
+          description: If the Cache uses availability zones, specifies availability zone where this instance is located.
+        shardId:
+          readOnly: true
+          type: integer
+          format: int32
+          description: If clustering is enabled, the Shard ID of Redis Instance
+        isMaster:
+          readOnly: true
+          type: boolean
+          description: Specifies whether the instance is a master node.
+      description: Details of single instance of redis.
+    TrackedResource:
+      description: The resource model definition for a ARM tracked top level resource
+      properties:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          x-ms-mutability:
+          - read
+          - create
+          - update
+          description: Resource tags.
+        location:
+          type: string
+          x-ms-mutability:
+          - read
+          - create
+          description: The geo-location where the resource lives
+      required:
+      - location
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    RedisListResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RedisResource'
+          description: List of Redis cache instances.
+        nextLink:
+          type: string
+          readOnly: true
+          description: Link for next page of results.
+      description: The response of list Redis operation.
+    Sku:
+      properties:
+        name:
+          type: string
+          description: 'The type of Redis cache to deploy. Valid values: (Basic, Standard, Premium)'
+          enum:
+          - Basic
+          - Standard
+          - Premium
+          x-ms-enum:
+            name: SkuName
+            modelAsString: true
+        family:
+          type: string
+          description: 'The SKU family to use. Valid values: (C, P). (C = Basic/Standard, P = Premium).'
+          enum:
+          - C
+          - P
+          x-ms-enum:
+            name: SkuFamily
+            modelAsString: true
+        capacity:
+          type: integer
+          format: int32
+          description: 'The size of the Redis cache to deploy. Valid values: for C (Basic/Standard) family (0, 1, 2, 3, 4, 5, 6), for P (Premium) family (1, 2, 3, 4, 5).'
+      required:
+      - name
+      - family
+      - capacity
+      description: SKU parameters supplied to the create Redis operation.
+    RedisLinkedServerWithProperties:
+      description: Response to put/get linked server (with properties) for Redis cache.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/RedisLinkedServerProperties'
+          description: Properties of the linked server.
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+    RedisLinkedServerCreateProperties:
+      description: Create properties for a linked server
+      properties:
+        linkedRedisCacheId:
+          type: string
+          description: Fully qualified resourceId of the linked redis cache.
+        linkedRedisCacheLocation:
+          type: string
+          description: Location of the linked redis cache.
+        serverRole:
+          type: string
+          description: Role of the linked server.
+          enum:
+          - Primary
+          - Secondary
+          x-ms-enum:
+            name: ReplicationRole
+            modelAsString: false
+      required:
+      - linkedRedisCacheId
+      - linkedRedisCacheLocation
+      - serverRole
+    RedisFirewallRule:
+      description: A firewall rule on a redis cache has a name, and describes a contiguous range of IP addresses permitted to connect
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/RedisFirewallRuleProperties'
+          description: redis cache firewall rule properties
+      required:
+      - properties
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+    RedisLinkedServerWithPropertiesList:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RedisLinkedServerWithProperties'
+          description: List of linked servers (with properties) of a Redis cache.
+        nextLink:
+          type: string
+          readOnly: true
+          description: Link for next set.
+      description: List of linked servers (with properties) of a Redis cache.
     ScheduleEntry:
       properties:
         dayOfWeek:
@@ -1054,113 +1228,6 @@ components:
       - dayOfWeek
       - startHourUtc
       description: Patch schedule entry for a Premium Redis Cache.
-    RedisRebootParameters:
-      properties:
-        rebootType:
-          type: string
-          description: Which Redis node(s) to reboot. Depending on this value data loss is possible.
-          enum:
-          - PrimaryNode
-          - SecondaryNode
-          - AllNodes
-          x-ms-enum:
-            name: RebootType
-            modelAsString: true
-        shardId:
-          type: integer
-          format: int32
-          description: If clustering is enabled, the ID of the shard to be rebooted.
-        ports:
-          type: array
-          items:
-            type: integer
-          description: A list of redis instances to reboot, specified by per-instance SSL ports or non-SSL ports.
-      description: Specifies which Redis node(s) to reboot.
-    RedisLinkedServerProperties:
-      description: Properties of a linked server to be returned in get/put response
-      properties:
-        provisioningState:
-          readOnly: true
-          type: string
-          description: Terminal state of the link between primary and secondary redis cache.
-      allOf:
-      - $ref: '#/components/schemas/RedisLinkedServerCreateProperties'
-    RedisFirewallRuleProperties:
-      description: Specifies a range of IP addresses permitted to connect to the cache
-      properties:
-        startIP:
-          type: string
-          description: lowest IP address included in the range
-        endIP:
-          type: string
-          description: highest IP address included in the range
-      required:
-      - startIP
-      - endIP
-    ProxyResource:
-      description: The resource model definition for a ARM proxy resource. It will have everything other than required location and tags
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-    RedisLinkedServerCreateProperties:
-      description: Create properties for a linked server
-      properties:
-        linkedRedisCacheId:
-          type: string
-          description: Fully qualified resourceId of the linked redis cache.
-        linkedRedisCacheLocation:
-          type: string
-          description: Location of the linked redis cache.
-        serverRole:
-          type: string
-          description: Role of the linked server.
-          enum:
-          - Primary
-          - Secondary
-          x-ms-enum:
-            name: ReplicationRole
-            modelAsString: false
-      required:
-      - linkedRedisCacheId
-      - linkedRedisCacheLocation
-      - serverRole
-    RedisRegenerateKeyParameters:
-      properties:
-        keyType:
-          type: string
-          description: The Redis access key to regenerate.
-          enum:
-          - Primary
-          - Secondary
-          x-ms-enum:
-            name: RedisKeyType
-            modelAsString: false
-      required:
-      - keyType
-      description: Specifies which Redis access keys to reset.
-    RedisFirewallRuleListResult:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/RedisFirewallRule'
-          description: Results of the list firewall rules operation.
-        nextLink:
-          type: string
-          readOnly: true
-          description: Link for next page of results.
-      description: The response of list firewall rules Redis operation.
-    NotificationListResponse:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpgradeNotification'
-          description: List of all notifications.
-        nextLink:
-          type: string
-          readOnly: true
-          description: Link for next set of notifications.
-      description: The response of listUpgradeNotifications.
     RedisCommonProperties:
       properties:
         redisConfiguration:
@@ -1196,200 +1263,30 @@ components:
             modelAsString: true
       description: Create/Update/Get common properties of the redis cache.
       x-ms-external: true
-    RedisLinkedServer:
-      description: Linked server Id
+    RedisFirewallRuleProperties:
+      description: Specifies a range of IP addresses permitted to connect to the cache
       properties:
-        id:
-          readOnly: true
+        startIP:
           type: string
-          description: Linked server Id.
-    ExportRDBParameters:
-      properties:
-        format:
+          description: lowest IP address included in the range
+        endIP:
           type: string
-          description: File format.
-        prefix:
-          type: string
-          description: Prefix to use for exported files.
-        container:
-          type: string
-          description: Container name to export to.
+          description: highest IP address included in the range
       required:
-      - container
-      - prefix
-      description: Parameters for Redis export operation.
-    RedisUpdateProperties:
-      properties:
-        sku:
-          $ref: '#/components/schemas/Sku'
-          description: The SKU of the Redis cache to deploy.
-      allOf:
-      - $ref: '#/components/schemas/RedisCommonProperties'
-      description: Patchable properties of the redis cache.
-      x-ms-external: true
-    UpgradeNotification:
-      properties:
-        name:
-          readOnly: true
-          type: string
-          description: Name of upgrade notification.
-        timestamp:
-          readOnly: true
-          type: string
-          format: date-time
-          description: Timestamp when upgrade notification occurred.
-        upsellNotification:
-          readOnly: true
-          type: object
-          additionalProperties:
-            type: string
-          description: Details about this upgrade notification
-      description: Properties of upgrade notification.
-    RedisPatchSchedule:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ScheduleEntries'
-          description: List of patch schedules for a Redis cache.
-      required:
-      - properties
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-      description: Response to put/get patch schedules for Redis cache.
-    RedisFirewallRuleCreateParameters:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/RedisFirewallRuleProperties'
-          description: Properties required to create a firewall rule .
-      required:
-      - properties
-      description: Parameters required for creating a firewall rule on redis cache.
-    RedisListResult:
+      - startIP
+      - endIP
+    NotificationListResponse:
       properties:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/RedisResource'
-          description: List of Redis cache instances.
+            $ref: '#/components/schemas/UpgradeNotification'
+          description: List of all notifications.
         nextLink:
           type: string
           readOnly: true
-          description: Link for next page of results.
-      description: The response of list Redis operation.
-    RedisAccessKeys:
-      properties:
-        primaryKey:
-          readOnly: true
-          type: string
-          description: The current primary key that clients can use to authenticate with Redis cache.
-        secondaryKey:
-          readOnly: true
-          type: string
-          description: The current secondary key that clients can use to authenticate with Redis cache.
-      description: Redis cache access keys.
-    Resource:
-      description: The Resource definition.
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Resource ID.
-        name:
-          readOnly: true
-          type: string
-          description: Resource name.
-        type:
-          readOnly: true
-          type: string
-          description: Resource type.
-      x-ms-azure-resource: true
-    RedisLinkedServerCreateParameters:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/RedisLinkedServerCreateProperties'
-          description: Properties required to create a linked server.
-      required:
-      - properties
-      description: Parameter required for creating a linked server to redis cache.
-    RedisLinkedServerWithPropertiesList:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/RedisLinkedServerWithProperties'
-          description: List of linked servers (with properties) of a Redis cache.
-        nextLink:
-          type: string
-          readOnly: true
-          description: Link for next set.
-      description: List of linked servers (with properties) of a Redis cache.
-    RedisResource:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/RedisProperties'
-          description: Redis cache properties.
-        zones:
-          type: array
-          items:
-            type: string
-          description: A list of availability zones denoting where the resource needs to come from.
-      required:
-      - properties
-      allOf:
-      - $ref: '#/components/schemas/TrackedResource'
-      description: A single Redis item in List or Get Operation.
-    RedisFirewallRule:
-      description: A firewall rule on a redis cache has a name, and describes a contiguous range of IP addresses permitted to connect
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/RedisFirewallRuleProperties'
-          description: redis cache firewall rule properties
-      required:
-      - properties
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-    CheckNameAvailabilityParameters:
-      description: Parameters body to pass for resource name availability check.
-      properties:
-        name:
-          type: string
-          description: Resource name.
-        type:
-          type: string
-          description: Resource type. The only legal value of this property for checking redis cache name availability is 'Microsoft.Cache/redis'.
-      required:
-      - name
-      - type
-    RedisInstanceDetails:
-      properties:
-        sslPort:
-          readOnly: true
-          type: integer
-          format: int32
-          description: Redis instance SSL port.
-        nonSslPort:
-          readOnly: true
-          type: integer
-          format: int32
-          description: If enableNonSslPort is true, provides Redis instance Non-SSL port.
-        zone:
-          readOnly: true
-          type: string
-          description: If the Cache uses availability zones, specifies availability zone where this instance is located.
-        shardId:
-          readOnly: true
-          type: integer
-          format: int32
-          description: If clustering is enabled, the Shard ID of Redis Instance
-        isMaster:
-          readOnly: true
-          type: boolean
-          description: Specifies whether the instance is a master node.
-      description: Details of single instance of redis.
+          description: Link for next set of notifications.
+      description: The response of listUpgradeNotifications.
     RedisProperties:
       properties:
         redisVersion:
@@ -1450,15 +1347,10 @@ components:
       - $ref: '#/components/schemas/RedisCreateProperties'
       description: Properties of the redis cache.
       x-ms-external: true
-    RedisLinkedServerWithProperties:
-      description: Response to put/get linked server (with properties) for Redis cache.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/RedisLinkedServerProperties'
-          description: Properties of the linked server.
+    ProxyResource:
+      description: The resource model definition for a ARM proxy resource. It will have everything other than required location and tags
       allOf:
-      - $ref: '#/components/schemas/ProxyResource'
+      - $ref: '#/components/schemas/Resource'
     RedisUpdateParameters:
       properties:
         properties:
@@ -1471,6 +1363,47 @@ components:
             type: string
           description: Resource tags.
       description: Parameters supplied to the Update Redis operation.
+    ImportRDBParameters:
+      properties:
+        format:
+          type: string
+          description: File format.
+        files:
+          type: array
+          description: files to import.
+          items:
+            type: string
+      required:
+      - files
+      description: Parameters for Redis import operation.
+    RedisLinkedServer:
+      description: Linked server Id
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Linked server Id.
+    RedisLinkedServerCreateParameters:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/RedisLinkedServerCreateProperties'
+          description: Properties required to create a linked server.
+      required:
+      - properties
+      description: Parameter required for creating a linked server to redis cache.
+    RedisFirewallRuleListResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RedisFirewallRule'
+          description: Results of the list firewall rules operation.
+        nextLink:
+          type: string
+          readOnly: true
+          description: Link for next page of results.
+      description: The response of list firewall rules Redis operation.
     ScheduleEntries:
       properties:
         scheduleEntries:
@@ -1482,71 +1415,138 @@ components:
       required:
       - scheduleEntries
       description: List of patch schedules for a Redis cache.
-    TrackedResource:
-      description: The resource model definition for a ARM tracked top level resource
+    Resource:
+      description: The Resource definition.
       properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          x-ms-mutability:
-          - read
-          - create
-          - update
-          description: Resource tags.
-        location:
+        id:
+          readOnly: true
           type: string
-          x-ms-mutability:
-          - read
-          - create
-          description: The geo-location where the resource lives
+          description: Resource ID.
+        name:
+          readOnly: true
+          type: string
+          description: Resource name.
+        type:
+          readOnly: true
+          type: string
+          description: Resource type.
+      x-ms-azure-resource: true
+    RedisRegenerateKeyParameters:
+      properties:
+        keyType:
+          type: string
+          description: The Redis access key to regenerate.
+          enum:
+          - Primary
+          - Secondary
+          x-ms-enum:
+            name: RedisKeyType
+            modelAsString: false
       required:
-      - location
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-    Sku:
+      - keyType
+      description: Specifies which Redis access keys to reset.
+    CheckNameAvailabilityParameters:
+      description: Parameters body to pass for resource name availability check.
       properties:
         name:
           type: string
-          description: 'The type of Redis cache to deploy. Valid values: (Basic, Standard, Premium)'
-          enum:
-          - Basic
-          - Standard
-          - Premium
-          x-ms-enum:
-            name: SkuName
-            modelAsString: true
-        family:
+          description: Resource name.
+        type:
           type: string
-          description: 'The SKU family to use. Valid values: (C, P). (C = Basic/Standard, P = Premium).'
-          enum:
-          - C
-          - P
-          x-ms-enum:
-            name: SkuFamily
-            modelAsString: true
-        capacity:
-          type: integer
-          format: int32
-          description: 'The size of the Redis cache to deploy. Valid values: for C (Basic/Standard) family (0, 1, 2, 3, 4, 5, 6), for P (Premium) family (1, 2, 3, 4, 5).'
+          description: Resource type. The only legal value of this property for checking redis cache name availability is 'Microsoft.Cache/redis'.
       required:
       - name
-      - family
-      - capacity
-      description: SKU parameters supplied to the create Redis operation.
+      - type
+    UpgradeNotification:
+      properties:
+        name:
+          readOnly: true
+          type: string
+          description: Name of upgrade notification.
+        timestamp:
+          readOnly: true
+          type: string
+          format: date-time
+          description: Timestamp when upgrade notification occurred.
+        upsellNotification:
+          readOnly: true
+          type: object
+          additionalProperties:
+            type: string
+          description: Details about this upgrade notification
+      description: Properties of upgrade notification.
+    RedisResource:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/RedisProperties'
+          description: Redis cache properties.
+        zones:
+          type: array
+          items:
+            type: string
+          description: A list of availability zones denoting where the resource needs to come from.
+      required:
+      - properties
+      allOf:
+      - $ref: '#/components/schemas/TrackedResource'
+      description: A single Redis item in List or Get Operation.
+    RedisPatchScheduleListResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RedisPatchSchedule'
+          description: Results of the list patch schedules operation.
+        nextLink:
+          type: string
+          readOnly: true
+          description: Link for next page of results.
+      description: The response of list patch schedules Redis operation.
+    RedisRebootParameters:
+      properties:
+        rebootType:
+          type: string
+          description: Which Redis node(s) to reboot. Depending on this value data loss is possible.
+          enum:
+          - PrimaryNode
+          - SecondaryNode
+          - AllNodes
+          x-ms-enum:
+            name: RebootType
+            modelAsString: true
+        shardId:
+          type: integer
+          format: int32
+          description: If clustering is enabled, the ID of the shard to be rebooted.
+        ports:
+          type: array
+          items:
+            type: integer
+          description: A list of redis instances to reboot, specified by per-instance SSL ports or non-SSL ports.
+      description: Specifies which Redis node(s) to reboot.
+    RedisFirewallRuleCreateParameters:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/RedisFirewallRuleProperties'
+          description: Properties required to create a firewall rule .
+      required:
+      - properties
+      description: Parameters required for creating a firewall rule on redis cache.
   parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client Api Version.
-      schema:
-        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
       required: true
       description: Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
       schema:
         type: string
   securitySchemes:

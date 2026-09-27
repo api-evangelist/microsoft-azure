@@ -774,7 +774,7 @@ paths:
   : put:
       tags:
       - Topics
-      operationId: microsoftAzureTopicsCreateorupdate
+      operationId: putSubscriptionsBySubscriptionIdResourceGroupsByResourceGroupNameProvidersMicrosoftServiceBusNamespacesByNamespaceNameTopicsByTopicName
       x-ms-examples:
         TopicCreate:
           $ref: ./examples/Topics/SBTopicCreate.json
@@ -811,10 +811,12 @@ paths:
       security:
       - azure_auth:
         - user_impersonation
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureTopicsCreateorupdate
     delete:
       tags:
       - Topics
-      operationId: microsoftAzureTopicsDelete
+      operationId: deleteSubscriptionsBySubscriptionIdResourceGroupsByResourceGroupNameProvidersMicrosoftServiceBusNamespacesByNamespaceNameTopicsByTopicName
       x-ms-examples:
         TopicDelete:
           $ref: ./examples/Topics/SBTopicDelete.json
@@ -842,10 +844,12 @@ paths:
       security:
       - azure_auth:
         - user_impersonation
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureTopicsDelete
     get:
       tags:
       - Topics
-      operationId: microsoftAzureTopicsGet
+      operationId: getSubscriptionsBySubscriptionIdResourceGroupsByResourceGroupNameProvidersMicrosoftServiceBusNamespacesByNamespaceNameTopicsByTopicName
       x-ms-examples:
         TopicGet:
           $ref: ./examples/Topics/SBTopicGet.json
@@ -875,6 +879,8 @@ paths:
       security:
       - azure_auth:
         - user_impersonation
+      x-operation-id-source: normalized
+      x-operation-id-original: microsoftAzureTopicsGet
     servers:
     - url: https://management.azure.com
 components:
@@ -913,35 +919,6 @@ components:
       required:
       - failedLockTokens
       - succeededLockTokens
-    RenewLockOptions:
-      type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be renewed.
-      properties:
-        lockTokens:
-          type: array
-          description: Array of lock tokens.
-          items:
-            type: string
-      required:
-      - lockTokens
-    AcknowledgeResult:
-      type: object
-      description: The result of the Acknowledge operation.
-      properties:
-        failedLockTokens:
-          type: array
-          description: Array of FailedLockToken for failed cloud events. Each FailedLockToken includes the lock token along with the related error information (namely, the error code and description).
-          items:
-            $ref: '#/components/schemas/FailedLockToken'
-          x-ms-identifiers: []
-        succeededLockTokens:
-          type: array
-          description: Array of lock tokens for the successfully acknowledged cloud events.
-          items:
-            type: string
-      required:
-      - failedLockTokens
-      - succeededLockTokens
     RenewCloudEventLocksResult:
       type: object
       description: The result of the RenewLock operation.
@@ -960,6 +937,98 @@ components:
       required:
       - failedLockTokens
       - succeededLockTokens
+    Azure.Core.Foundations.Error:
+      type: object
+      description: The error object.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          description: The target of the error.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          x-ms-identifiers: []
+        innererror:
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: An object containing more specific information than the current object about the error.
+      required:
+      - code
+      - message
+    AcknowledgeOptions:
+      type: object
+      description: Array of lock tokens for the corresponding received Cloud Events to be acknowledged.
+      properties:
+        lockTokens:
+          type: array
+          description: Array of lock tokens.
+          items:
+            type: string
+      required:
+      - lockTokens
+    BrokerProperties:
+      type: object
+      description: Properties of the Event Broker operation.
+      properties:
+        lockToken:
+          type: string
+          description: The token of the lock on the event.
+        deliveryCount:
+          type: integer
+          format: int32
+          description: The attempt count for delivering the event.
+      required:
+      - lockToken
+      - deliveryCount
+    FailedLockToken:
+      type: object
+      description: Failed LockToken information.
+      properties:
+        lockToken:
+          type: string
+          description: The lock token of an entry in the request.
+        error:
+          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          description: Error information of the failed operation result for the lock token in the request.
+      required:
+      - lockToken
+      - error
+    AcknowledgeResult:
+      type: object
+      description: The result of the Acknowledge operation.
+      properties:
+        failedLockTokens:
+          type: array
+          description: Array of FailedLockToken for failed cloud events. Each FailedLockToken includes the lock token along with the related error information (namely, the error code and description).
+          items:
+            $ref: '#/components/schemas/FailedLockToken'
+          x-ms-identifiers: []
+        succeededLockTokens:
+          type: array
+          description: Array of lock tokens for the successfully acknowledged cloud events.
+          items:
+            type: string
+      required:
+      - failedLockTokens
+      - succeededLockTokens
+    RenewLockOptions:
+      type: object
+      description: Array of lock tokens for the corresponding received Cloud Events to be renewed.
+      properties:
+        lockTokens:
+          type: array
+          description: Array of lock tokens.
+          items:
+            type: string
+      required:
+      - lockTokens
     CloudEvent:
       type: object
       description: Properties of an event published to an Azure Messaging EventGrid Namespace topic using the CloudEvent 1.0 Schema.
@@ -1000,33 +1069,29 @@ components:
       - source
       - type
       - specversion
-    BrokerProperties:
+    ReceiveResult:
       type: object
-      description: Properties of the Event Broker operation.
+      description: Details of the Receive operation response.
       properties:
-        lockToken:
-          type: string
-          description: The token of the lock on the event.
-        deliveryCount:
-          type: integer
-          format: int32
-          description: The attempt count for delivering the event.
+        value:
+          type: array
+          description: Array of receive responses, one per cloud event.
+          items:
+            $ref: '#/components/schemas/ReceiveDetails'
+          x-ms-identifiers: []
       required:
-      - lockToken
-      - deliveryCount
-    FailedLockToken:
+      - value
+    RejectOptions:
       type: object
-      description: Failed LockToken information.
+      description: Array of lock tokens for the corresponding received Cloud Events to be rejected.
       properties:
-        lockToken:
-          type: string
-          description: The lock token of an entry in the request.
-        error:
-          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          description: Error information of the failed operation result for the lock token in the request.
+        lockTokens:
+          type: array
+          description: Array of lock tokens.
+          items:
+            type: string
       required:
-      - lockToken
-      - error
+      - lockTokens
     Azure.Core.Foundations.InnerError:
       type: object
       description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
@@ -1037,6 +1102,26 @@ components:
         innererror:
           $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
           description: Inner error.
+    ReleaseOptions:
+      type: object
+      description: Array of lock tokens for the corresponding received Cloud Events to be released.
+      properties:
+        lockTokens:
+          type: array
+          description: Array of lock tokens.
+          items:
+            type: string
+      required:
+      - lockTokens
+    Azure.Core.Foundations.ErrorResponse:
+      type: object
+      description: A response containing error details.
+      properties:
+        error:
+          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          description: The error object.
+      required:
+      - error
     ReleaseResult:
       type: object
       description: The result of the Release operation.
@@ -1055,154 +1140,28 @@ components:
       required:
       - failedLockTokens
       - succeededLockTokens
-    AcknowledgeOptions:
-      type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be acknowledged.
-      properties:
-        lockTokens:
-          type: array
-          description: Array of lock tokens.
-          items:
-            type: string
+    InputSchemaMapping:
+      description: By default, Event Grid expects events to be in the Event Grid event schema. Specifying an input schema mapping enables publishing to Event Grid using a custom input schema. Currently, the only supported type of InputSchemaMapping is 'JsonInputSchemaMapping'.
       required:
-      - lockTokens
-    ReceiveResult:
+      - inputSchemaMappingType
       type: object
-      description: Details of the Receive operation response.
       properties:
-        value:
-          type: array
-          description: Array of receive responses, one per cloud event.
-          items:
-            $ref: '#/components/schemas/ReceiveDetails'
-          x-ms-identifiers: []
-      required:
-      - value
-    Azure.Core.Foundations.ErrorResponse:
-      type: object
-      description: A response containing error details.
-      properties:
-        error:
-          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          description: The error object.
-      required:
-      - error
-    Azure.Core.Foundations.Error:
-      type: object
-      description: The error object.
-      properties:
-        code:
+        inputSchemaMappingType:
+          description: Type of the custom mapping
+          enum:
+          - Json
           type: string
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          x-ms-identifiers: []
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: An object containing more specific information than the current object about the error.
-      required:
-      - code
-      - message
-    ReleaseOptions:
-      type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be released.
-      properties:
-        lockTokens:
-          type: array
-          description: Array of lock tokens.
-          items:
-            type: string
-      required:
-      - lockTokens
-    RejectOptions:
-      type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be rejected.
-      properties:
-        lockTokens:
-          type: array
-          description: Array of lock tokens.
-          items:
-            type: string
-      required:
-      - lockTokens
+          x-ms-enum:
+            name: InputSchemaMappingType
+            modelAsString: true
+      discriminator:
+        propertyName: inputSchemaMappingType
     PrivateEndpoint:
       description: PrivateEndpoint information.
       type: object
       properties:
         id:
           description: The ARM identifier for Private Endpoint.
-          type: string
-    ConnectionState:
-      description: ConnectionState information.
-      type: object
-      properties:
-        status:
-          description: Status of the connection.
-          enum:
-          - Pending
-          - Approved
-          - Rejected
-          - Disconnected
-          type: string
-          x-ms-enum:
-            name: PersistedConnectionStatus
-            modelAsString: true
-        description:
-          description: Description of the connection state.
-          type: string
-        actionsRequired:
-          description: Actions required (if any).
-          type: string
-    ExtensionTopicProperties:
-      description: Properties of the Extension Topic
-      type: object
-      properties:
-        description:
-          description: Description of the extension topic.
-          type: string
-        systemTopic:
-          description: System topic resource id which is mapped to the source.
-          type: string
-    PrivateEndpointConnection:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
-          description: Properties of the PrivateEndpointConnection.
-          x-ms-client-flatten: true
-    ResourceSku:
-      description: Describes an EventGrid Resource Sku.
-      type: object
-      properties:
-        name:
-          description: 'The Sku name of the resource. The possible values are: Basic or Premium.'
-          default: Basic
-          enum:
-          - Basic
-          - Premium
-          type: string
-          x-ms-enum:
-            name: Sku
-            modelAsString: true
-    TopicRegenerateKeyRequest:
-      description: Topic regenerate share access key request
-      required:
-      - keyName
-      type: object
-      properties:
-        keyName:
-          description: Key name to regenerate key1 or key2
           type: string
     UserIdentityProperties:
       description: The information about the user identity.
@@ -1214,78 +1173,6 @@ components:
         clientId:
           description: The client id of user assigned identity.
           type: string
-    TopicUpdateParameters:
-      description: Properties of the Topic update
-      type: object
-      properties:
-        tags:
-          description: Tags of the Topic resource.
-          type: object
-          additionalProperties:
-            type: string
-        identity:
-          $ref: '#/components/schemas/IdentityInfo'
-          description: Topic resource identity information.
-        properties:
-          $ref: '#/components/schemas/TopicUpdateParameterProperties'
-          description: Properties of the Topic resource.
-          x-ms-client-flatten: true
-        sku:
-          $ref: '#/components/schemas/ResourceSku'
-          description: The Sku pricing tier for the topic.
-    PrivateEndpointConnectionProperties:
-      description: Properties of the private endpoint connection resource.
-      type: object
-      properties:
-        privateEndpoint:
-          $ref: '#/components/schemas/PrivateEndpoint'
-          description: The Private Endpoint resource for this Connection.
-        groupIds:
-          description: GroupIds from the private link service resource.
-          type: array
-          items:
-            type: string
-        privateLinkServiceConnectionState:
-          $ref: '#/components/schemas/ConnectionState'
-          description: Details about the state of the connection.
-        provisioningState:
-          description: Provisioning state of the Private Endpoint Connection.
-          enum:
-          - Creating
-          - Updating
-          - Deleting
-          - Succeeded
-          - Canceled
-          - Failed
-          type: string
-          x-ms-enum:
-            name: ResourceProvisioningState
-            modelAsString: true
-    EventTypeProperties:
-      description: Properties of the event type
-      type: object
-      properties:
-        displayName:
-          description: Display name of the event type.
-          type: string
-        description:
-          description: Description of the event type.
-          type: string
-        schemaUrl:
-          description: Url of the schema for this event type.
-          type: string
-        isInDefaultSet:
-          description: IsInDefaultSet flag of the event type.
-          type: boolean
-    EventTypesListResult:
-      description: Result of the List Event Types operation
-      type: object
-      properties:
-        value:
-          description: A collection of event types
-          type: array
-          items:
-            $ref: '#/components/schemas/EventType'
     TopicSharedAccessKeys:
       description: Shared access keys of the Topic
       type: object
@@ -1296,6 +1183,43 @@ components:
         key2:
           description: Shared access key2 for the topic.
           type: string
+    TopicRegenerateKeyRequest:
+      description: Topic regenerate share access key request
+      required:
+      - keyName
+      type: object
+      properties:
+        keyName:
+          description: Key name to regenerate key1 or key2
+          type: string
+    EventTypesListResult:
+      description: Result of the List Event Types operation
+      type: object
+      properties:
+        value:
+          description: A collection of event types
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+    TrackedResource:
+      description: Definition of a Tracked Resource.
+      required:
+      - location
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        location:
+          description: Location of the resource.
+          type: string
+          x-ms-mutability:
+          - read
+          - create
+        tags:
+          description: Tags of the resource.
+          type: object
+          additionalProperties:
+            type: string
     IdentityInfo:
       description: The identity information for the resource.
       type: object
@@ -1326,46 +1250,25 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/UserIdentityProperties'
-    InputSchemaMapping:
-      description: By default, Event Grid expects events to be in the Event Grid event schema. Specifying an input schema mapping enables publishing to Event Grid using a custom input schema. Currently, the only supported type of InputSchemaMapping is 'JsonInputSchemaMapping'.
-      required:
-      - inputSchemaMappingType
+    TopicUpdateParameters:
+      description: Properties of the Topic update
       type: object
       properties:
-        inputSchemaMappingType:
-          description: Type of the custom mapping
-          enum:
-          - Json
-          type: string
-          x-ms-enum:
-            name: InputSchemaMappingType
-            modelAsString: true
-      discriminator:
-        propertyName: inputSchemaMappingType
-    InboundIpRule:
-      type: object
-      properties:
-        ipMask:
-          description: IP Address in CIDR notation e.g., 10.0.0.0/8.
-          type: string
-        action:
-          description: Action to perform based on the match or no match of the IpMask.
-          enum:
-          - Allow
-          type: string
-          x-ms-enum:
-            name: IpActionType
-            modelAsString: true
-    EventType:
-      description: Event Type for a subject under a topic
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
+        tags:
+          description: Tags of the Topic resource.
+          type: object
+          additionalProperties:
+            type: string
+        identity:
+          $ref: '#/components/schemas/IdentityInfo'
+          description: Topic resource identity information.
         properties:
-          $ref: '#/components/schemas/EventTypeProperties'
-          description: Properties of the event type.
+          $ref: '#/components/schemas/TopicUpdateParameterProperties'
+          description: Properties of the Topic resource.
           x-ms-client-flatten: true
+        sku:
+          $ref: '#/components/schemas/ResourceSku'
+          description: The Sku pricing tier for the topic.
     TopicProperties:
       description: Properties of the Topic.
       type: object
@@ -1440,6 +1343,134 @@ components:
           x-ms-enum:
             name: DataResidencyBoundary
             modelAsString: true
+    ConnectionState:
+      description: ConnectionState information.
+      type: object
+      properties:
+        status:
+          description: Status of the connection.
+          enum:
+          - Pending
+          - Approved
+          - Rejected
+          - Disconnected
+          type: string
+          x-ms-enum:
+            name: PersistedConnectionStatus
+            modelAsString: true
+        description:
+          description: Description of the connection state.
+          type: string
+        actionsRequired:
+          description: Actions required (if any).
+          type: string
+    PrivateEndpointConnection:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
+          description: Properties of the PrivateEndpointConnection.
+          x-ms-client-flatten: true
+    PrivateEndpointConnectionProperties:
+      description: Properties of the private endpoint connection resource.
+      type: object
+      properties:
+        privateEndpoint:
+          $ref: '#/components/schemas/PrivateEndpoint'
+          description: The Private Endpoint resource for this Connection.
+        groupIds:
+          description: GroupIds from the private link service resource.
+          type: array
+          items:
+            type: string
+        privateLinkServiceConnectionState:
+          $ref: '#/components/schemas/ConnectionState'
+          description: Details about the state of the connection.
+        provisioningState:
+          description: Provisioning state of the Private Endpoint Connection.
+          enum:
+          - Creating
+          - Updating
+          - Deleting
+          - Succeeded
+          - Canceled
+          - Failed
+          type: string
+          x-ms-enum:
+            name: ResourceProvisioningState
+            modelAsString: true
+    EventType:
+      description: Event Type for a subject under a topic
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/EventTypeProperties'
+          description: Properties of the event type.
+          x-ms-client-flatten: true
+    InboundIpRule:
+      type: object
+      properties:
+        ipMask:
+          description: IP Address in CIDR notation e.g., 10.0.0.0/8.
+          type: string
+        action:
+          description: Action to perform based on the match or no match of the IpMask.
+          enum:
+          - Allow
+          type: string
+          x-ms-enum:
+            name: IpActionType
+            modelAsString: true
+    TopicsListResult:
+      description: Result of the List Topics operation
+      type: object
+      properties:
+        value:
+          description: A collection of Topics
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+        nextLink:
+          description: A link for the next page of topics
+          type: string
+    ExtendedLocation:
+      description: Definition of an Extended Location
+      type: object
+      properties:
+        name:
+          description: Fully qualified name of the extended location.
+          type: string
+        type:
+          description: Type of the extended location.
+          type: string
+    ExtensionTopicProperties:
+      description: Properties of the Extension Topic
+      type: object
+      properties:
+        description:
+          description: Description of the extension topic.
+          type: string
+        systemTopic:
+          description: System topic resource id which is mapped to the source.
+          type: string
+    ResourceSku:
+      description: Describes an EventGrid Resource Sku.
+      type: object
+      properties:
+        name:
+          description: 'The Sku name of the resource. The possible values are: Basic or Premium.'
+          default: Basic
+          enum:
+          - Basic
+          - Premium
+          type: string
+          x-ms-enum:
+            name: Sku
+            modelAsString: true
     ExtensionTopic:
       description: Event grid Extension Topic. This is used for getting Event Grid related metrics for Azure resources.
       type: object
@@ -1455,6 +1486,22 @@ components:
           type: object
           readOnly: true
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+    EventTypeProperties:
+      description: Properties of the event type
+      type: object
+      properties:
+        displayName:
+          description: Display name of the event type.
+          type: string
+        description:
+          description: Description of the event type.
+          type: string
+        schemaUrl:
+          description: Url of the schema for this event type.
+          type: string
+        isInDefaultSet:
+          description: IsInDefaultSet flag of the event type.
+          type: boolean
     Resource:
       description: Definition of a Resource
       type: object
@@ -1472,18 +1519,6 @@ components:
           type: string
           readOnly: true
       x-ms-azure-resource: true
-    TopicsListResult:
-      description: Result of the List Topics operation
-      type: object
-      properties:
-        value:
-          description: A collection of Topics
-          type: array
-          items:
-            $ref: '#/components/schemas/Topic'
-        nextLink:
-          description: A link for the next page of topics
-          type: string
     Topic:
       description: EventGrid Topic
       type: object
@@ -1518,35 +1553,6 @@ components:
           type: object
           readOnly: true
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-    ExtendedLocation:
-      description: Definition of an Extended Location
-      type: object
-      properties:
-        name:
-          description: Fully qualified name of the extended location.
-          type: string
-        type:
-          description: Type of the extended location.
-          type: string
-    TrackedResource:
-      description: Definition of a Tracked Resource.
-      required:
-      - location
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        location:
-          description: Location of the resource.
-          type: string
-          x-ms-mutability:
-          - read
-          - create
-        tags:
-          description: Tags of the resource.
-          type: object
-          additionalProperties:
-            type: string
     TopicUpdateParameterProperties:
       description: Information of topic update parameter properties.
       type: object
@@ -1579,6 +1585,32 @@ components:
           x-ms-enum:
             name: DataResidencyBoundary
             modelAsString: true
+    SBTopic:
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/SBTopicProperties'
+          description: Properties of topic resource.
+        systemData:
+          readOnly: true
+          description: The system meta data relating to this resource.
+          $ref: ../../../common/v1/definitions.json#/definitions/systemData
+      allOf:
+      - $ref: ../../../common/v2/definitions.json#/definitions/ProxyResource
+      description: Description of topic resource.
+    SBTopicListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SBTopic'
+          description: Result of the List Topics operation.
+        nextLink:
+          type: string
+          description: Link to the next set of results. Not empty if Value contains incomplete list of topics.
+      description: The response to the List Topics operation.
     SBTopicProperties:
       type: object
       properties:
@@ -1650,32 +1682,6 @@ components:
           type: boolean
           description: Value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.
       description: The Topic Properties definition.
-    SBTopic:
-      type: object
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/SBTopicProperties'
-          description: Properties of topic resource.
-        systemData:
-          readOnly: true
-          description: The system meta data relating to this resource.
-          $ref: ../../../common/v1/definitions.json#/definitions/systemData
-      allOf:
-      - $ref: ../../../common/v2/definitions.json#/definitions/ProxyResource
-      description: Description of topic resource.
-    SBTopicListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SBTopic'
-          description: Result of the List Topics operation.
-        nextLink:
-          type: string
-          description: Link to the next set of results. Not empty if Value contains incomplete list of topics.
-      description: The response to the List Topics operation.
   parameters:
     Azure.Core.Foundations.ApiVersionParameter:
       name: api-version
@@ -1687,17 +1693,25 @@ components:
       schema:
         type: string
         minLength: 1
-    ApiVersionParameter:
-      name: api-version
+    FilterParameter:
+      name: $filter
       in: query
-      description: Version of the API to be used with the client request.
-      required: true
+      description: 'The query used to filter the search results using OData syntax. Filtering is permitted on the ''name'' property only and with limited number of OData operations. These operations are: the ''contains'' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, ''PATTERN'') and name ne ''PATTERN-1''. The following is not a valid filter example: $filter=location eq ''westus''.'
+      required: false
+      x-ms-parameter-location: method
       schema:
         type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
       description: Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+      required: true
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      description: Version of the API to be used with the client request.
       required: true
       schema:
         type: string
@@ -1710,14 +1724,6 @@ components:
       schema:
         type: integer
         format: int32
-    FilterParameter:
-      name: $filter
-      in: query
-      description: 'The query used to filter the search results using OData syntax. Filtering is permitted on the ''name'' property only and with limited number of OData operations. These operations are: the ''contains'' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, ''PATTERN'') and name ne ''PATTERN-1''. The following is not a valid filter example: $filter=location eq ''westus''.'
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
   securitySchemes:
     OAuth2Auth:
       type: oauth2

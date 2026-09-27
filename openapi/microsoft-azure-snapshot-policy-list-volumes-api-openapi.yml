@@ -44,6 +44,22 @@ paths:
           $ref: examples/SnapshotPolicies_ListVolumes.json
 components:
   schemas:
+    smbNonBrowsable:
+      title: smbNonBrowsable
+      type: string
+      description: Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume
+      enum:
+      - Disabled
+      - Enabled
+      x-ms-enum:
+        name: smbNonBrowsable
+        modelAsString: true
+        values:
+        - value: Disabled
+          description: smbNonBrowsable share setting is disabled
+        - value: Enabled
+          description: smbNonBrowsable share setting is enabled
+      example: Enabled
     smbAccessBasedEnumeration:
       title: smbAccessBasedEnumeration
       type:
@@ -62,151 +78,49 @@ components:
         - value: Enabled
           description: smbAccessBasedEnumeration share setting is enabled
       example: Enabled
-    networkFeatures:
-      title: Network features
-      description: Network features available to the volume, or current state of update.
-      type: string
-      enum:
-      - Basic
-      - Standard
-      - Basic_Standard
-      - Standard_Basic
-      x-ms-enum:
-        name: NetworkFeatures
-        modelAsString: true
-        values:
-        - value: Basic
-          description: Basic network features.
-        - value: Standard
-          description: Standard network features.
-        - value: Basic_Standard
-          description: Updating from Basic to Standard network features.
-        - value: Standard_Basic
-          description: Updating from Standard to Basic network features.
-      example: Standard
-      default: Basic
-    volumeSnapshotProperties:
-      description: Volume Snapshot Properties
-      type: object
-      properties:
-        snapshotPolicyId:
-          type: string
-          description: Snapshot Policy ResourceId
-    replicationObject:
-      description: Replication properties
+    volume:
+      description: Volume resource
       type: object
       required:
-      - remoteVolumeResourceId
+      - location
+      - properties
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/TrackedResource
       properties:
-        replicationId:
-          type: string
-          description: Id
+        etag:
           readOnly: true
-        endpointType:
           type: string
-          description: Indicates whether the local volume is the source or destination for the Volume Replication
-          enum:
-          - src
-          - dst
-          x-ms-enum:
-            name: EndpointType
-            modelAsString: true
-        replicationSchedule:
-          type: string
-          description: Schedule
-          enum:
-          - _10minutely
-          - hourly
-          - daily
-          x-ms-enum:
-            name: ReplicationSchedule
-            modelAsString: true
-        remoteVolumeResourceId:
-          type: string
-          description: The resource ID of the remote volume. Required for cross region and cross zone replication
-          x-ms-mutability:
-          - read
-          - create
-        remotePath:
-          description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
-          type: object
-          $ref: '#/components/schemas/remotePath'
-          x-ms-mutability:
-          - read
-          - create
-        remoteVolumeRegion:
-          type: string
-          description: The remote region for the other end of the Volume Replication.
-    volumeRelocationProperties:
-      description: Volume relocation properties
-      type: object
-      properties:
-        relocationRequested:
-          type: boolean
-          description: Has relocation been requested for this volume
-        readyToBeFinalized:
-          type: boolean
-          readOnly: true
-          description: Has relocation finished and is ready to be cleaned up
-    smbNonBrowsable:
-      title: smbNonBrowsable
-      type: string
-      description: Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume
-      enum:
-      - Disabled
-      - Enabled
-      x-ms-enum:
-        name: smbNonBrowsable
-        modelAsString: true
-        values:
-        - value: Disabled
-          description: smbNonBrowsable share setting is disabled
-        - value: Enabled
-          description: smbNonBrowsable share setting is enabled
-      example: Enabled
-    snapshotPolicyVolumeList:
-      description: Volumes associated with snapshot policy
-      type: object
-      properties:
-        value:
-          description: List of volumes
+          description: A unique read-only string that changes whenever the resource is updated.
+        zones:
           type: array
+          description: Availability Zone
+          x-ms-mutability:
+          - read
+          - create
           items:
-            $ref: '#/components/schemas/volume'
-    mountTargetProperties:
-      description: Mount target properties
+            type: string
+            maxLength: 255
+            minLength: 1
+            example: '1'
+        properties:
+          description: Volume properties
+          $ref: '#/components/schemas/volumeProperties'
+          x-ms-client-flatten: true
+    placementKeyValuePairs:
+      description: Application specific parameters for the placement of volumes in the volume group
       type: object
       required:
-      - fileSystemId
+      - key
+      - value
       properties:
-        mountTargetId:
-          title: mountTargetId
+        key:
           type: string
-          readOnly: true
-          description: UUID v4 used to identify the MountTarget
-          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
-          maxLength: 36
-          minLength: 36
-          example: 9760acf5-4638-11e7-9bdb-020073ca3333
-        fileSystemId:
-          title: fileSystemId
+          description: Key for an application specific parameter for the placement of volumes in the volume group
+          example: key1
+        value:
           type: string
-          description: UUID v4 used to identify the MountTarget
-          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
-          maxLength: 36
-          minLength: 36
-          example: 9760acf5-4638-11e7-9bdb-020073ca3333
-        ipAddress:
-          title: ipAddress
-          description: The mount target's IPv4 address
-          type: string
-          readOnly: true
-          example: 1.2.3.4
-        smbServerFqdn:
-          title: smbServerFQDN
-          description: The SMB server's Fully Qualified Domain Name, FQDN
-          type: string
-          example: fullyqualified.domainname.com
+          description: Value for an application specific parameter for the placement of volumes in the volume group
+          example: value1
     volumeBackupProperties:
       description: Volume Backup Properties
       type: object
@@ -223,6 +137,45 @@ components:
         backupVaultId:
           type: string
           description: Backup Vault Resource ID
+    serviceLevel:
+      title: serviceLevel
+      type: string
+      description: The service level of the file system
+      enum:
+      - Standard
+      - Premium
+      - Ultra
+      - StandardZRS
+      default: Premium
+      x-ms-enum:
+        name: ServiceLevel
+        modelAsString: true
+        values:
+        - value: Standard
+          description: Standard service level
+        - value: Premium
+          description: Premium service level
+        - value: Ultra
+          description: Ultra service level
+        - value: StandardZRS
+          description: Zone redundant storage service level
+    remotePath:
+      description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
+      type: object
+      required:
+      - externalHostName
+      - serverName
+      - volumeName
+      properties:
+        externalHostName:
+          type: string
+          description: The Path to a ONTAP Host
+        serverName:
+          type: string
+          description: The name of a server on the ONTAP Host
+        volumeName:
+          type: string
+          description: The name of a volume on the server
     exportPolicyRule:
       description: Volume Export Policy Rule
       type: object
@@ -294,23 +247,83 @@ components:
           x-ms-enum:
             name: ChownMode
             modelAsString: true
-    remotePath:
-      description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
+    replicationObject:
+      description: Replication properties
       type: object
       required:
-      - externalHostName
-      - serverName
-      - volumeName
+      - remoteVolumeResourceId
       properties:
-        externalHostName:
+        replicationId:
           type: string
-          description: The Path to a ONTAP Host
-        serverName:
+          description: Id
+          readOnly: true
+        endpointType:
           type: string
-          description: The name of a server on the ONTAP Host
-        volumeName:
+          description: Indicates whether the local volume is the source or destination for the Volume Replication
+          enum:
+          - src
+          - dst
+          x-ms-enum:
+            name: EndpointType
+            modelAsString: true
+        replicationSchedule:
           type: string
-          description: The name of a volume on the server
+          description: Schedule
+          enum:
+          - _10minutely
+          - hourly
+          - daily
+          x-ms-enum:
+            name: ReplicationSchedule
+            modelAsString: true
+        remoteVolumeResourceId:
+          type: string
+          description: The resource ID of the remote volume. Required for cross region and cross zone replication
+          x-ms-mutability:
+          - read
+          - create
+        remotePath:
+          description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
+          type: object
+          $ref: '#/components/schemas/remotePath'
+          x-ms-mutability:
+          - read
+          - create
+        remoteVolumeRegion:
+          type: string
+          description: The remote region for the other end of the Volume Replication.
+    networkFeatures:
+      title: Network features
+      description: Network features available to the volume, or current state of update.
+      type: string
+      enum:
+      - Basic
+      - Standard
+      - Basic_Standard
+      - Standard_Basic
+      x-ms-enum:
+        name: NetworkFeatures
+        modelAsString: true
+        values:
+        - value: Basic
+          description: Basic network features.
+        - value: Standard
+          description: Standard network features.
+        - value: Basic_Standard
+          description: Updating from Basic to Standard network features.
+        - value: Standard_Basic
+          description: Updating from Standard to Basic network features.
+      example: Standard
+      default: Basic
+    snapshotPolicyVolumeList:
+      description: Volumes associated with snapshot policy
+      type: object
+      properties:
+        value:
+          description: List of volumes
+          type: array
+          items:
+            $ref: '#/components/schemas/volume'
     coolAccessRetrievalPolicy:
       type: string
       description: "coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are: \n Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.\n OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.\n Never - No client-driven data is pulled from cool tier to standard storage."
@@ -321,49 +334,40 @@ components:
       x-ms-enum:
         name: coolAccessRetrievalPolicy
         modelAsString: true
-    volume:
-      description: Volume resource
+    mountTargetProperties:
+      description: Mount target properties
       type: object
       required:
-      - location
-      - properties
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/TrackedResource
+      - fileSystemId
       properties:
-        etag:
+        mountTargetId:
+          title: mountTargetId
+          type: string
           readOnly: true
+          description: UUID v4 used to identify the MountTarget
+          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
+          maxLength: 36
+          minLength: 36
+          example: 9760acf5-4638-11e7-9bdb-020073ca3333
+        fileSystemId:
+          title: fileSystemId
           type: string
-          description: A unique read-only string that changes whenever the resource is updated.
-        zones:
-          type: array
-          description: Availability Zone
-          x-ms-mutability:
-          - read
-          - create
-          items:
-            type: string
-            maxLength: 255
-            minLength: 1
-            example: '1'
-        properties:
-          description: Volume properties
-          $ref: '#/components/schemas/volumeProperties'
-          x-ms-client-flatten: true
-    placementKeyValuePairs:
-      description: Application specific parameters for the placement of volumes in the volume group
-      type: object
-      required:
-      - key
-      - value
-      properties:
-        key:
+          description: UUID v4 used to identify the MountTarget
+          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
+          maxLength: 36
+          minLength: 36
+          example: 9760acf5-4638-11e7-9bdb-020073ca3333
+        ipAddress:
+          title: ipAddress
+          description: The mount target's IPv4 address
           type: string
-          description: Key for an application specific parameter for the placement of volumes in the volume group
-          example: key1
-        value:
+          readOnly: true
+          example: 1.2.3.4
+        smbServerFqdn:
+          title: smbServerFQDN
+          description: The SMB server's Fully Qualified Domain Name, FQDN
           type: string
-          description: Value for an application specific parameter for the placement of volumes in the volume group
-          example: value1
+          example: fullyqualified.domainname.com
     volumeProperties:
       description: Volume properties
       type: object
@@ -772,29 +776,33 @@ components:
           format: int64
           description: Space shared by short term clone volume with parent volume in bytes.
           readOnly: true
-    serviceLevel:
-      title: serviceLevel
-      type: string
-      description: The service level of the file system
-      enum:
-      - Standard
-      - Premium
-      - Ultra
-      - StandardZRS
-      default: Premium
-      x-ms-enum:
-        name: ServiceLevel
-        modelAsString: true
-        values:
-        - value: Standard
-          description: Standard service level
-        - value: Premium
-          description: Premium service level
-        - value: Ultra
-          description: Ultra service level
-        - value: StandardZRS
-          description: Zone redundant storage service level
+    volumeSnapshotProperties:
+      description: Volume Snapshot Properties
+      type: object
+      properties:
+        snapshotPolicyId:
+          type: string
+          description: Snapshot Policy ResourceId
+    volumeRelocationProperties:
+      description: Volume relocation properties
+      type: object
+      properties:
+        relocationRequested:
+          type: boolean
+          description: Has relocation been requested for this volume
+        readyToBeFinalized:
+          type: boolean
+          readOnly: true
+          description: Has relocation finished and is ready to be cleaned up
   parameters:
+    SnapshotPolicyName:
+      name: snapshotPolicyName
+      in: path
+      required: true
+      description: The name of the snapshot policy
+      x-ms-parameter-location: method
+      schema:
+        type: string
     AccountName:
       name: accountName
       in: path
@@ -804,14 +812,6 @@ components:
       schema:
         type: string
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
-    SnapshotPolicyName:
-      name: snapshotPolicyName
-      in: path
-      required: true
-      description: The name of the snapshot policy
-      x-ms-parameter-location: method
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

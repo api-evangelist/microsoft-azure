@@ -411,27 +411,26 @@ paths:
         required: true
 components:
   schemas:
-    RecoveryPlanCollection:
-      description: Recovery plan collection details.
-      type: object
-      properties:
-        value:
-          description: The list of recovery plans.
-          type: array
-          items:
-            $ref: '#/components/schemas/RecoveryPlan'
-        nextLink:
-          description: The value of next link.
-          type: string
-    RecoveryPlanPlannedFailoverInput:
-      description: Recovery plan planned failover input.
+    RecoveryPlanTestFailoverInput:
+      description: Recovery plan test failover input.
       required:
       - properties
       type: object
       properties:
         properties:
-          $ref: '#/components/schemas/RecoveryPlanPlannedFailoverInputProperties'
-          description: The recovery plan planned failover input properties.
+          $ref: '#/components/schemas/RecoveryPlanTestFailoverInputProperties'
+          description: The recovery plan test failover input properties.
+    RecoveryPlanProviderSpecificDetails:
+      description: Recovery plan provider specific details.
+      required:
+      - instanceType
+      type: object
+      properties:
+        instanceType:
+          description: Gets the Instance type.
+          type: string
+      discriminator:
+        propertyName: instanceType
     RecoveryPlanUnplannedFailoverInput:
       description: Recovery plan unplanned failover input.
       required:
@@ -441,13 +440,27 @@ components:
         properties:
           $ref: '#/components/schemas/RecoveryPlanUnplannedFailoverInputProperties'
           description: The recovery plan unplanned failover input properties.
-    UpdateRecoveryPlanInput:
-      description: Update recovery plan input class.
+    RecoveryPlanProviderSpecificFailoverInput:
+      description: Recovery plan provider specific failover input.
+      required:
+      - instanceType
       type: object
       properties:
-        properties:
-          $ref: '#/components/schemas/UpdateRecoveryPlanInputProperties'
-          description: Recovery plan update properties.
+        instanceType:
+          description: The class type.
+          type: string
+      discriminator:
+        propertyName: instanceType
+    RecoveryPlanProtectedItem:
+      description: Recovery plan protected item.
+      type: object
+      properties:
+        id:
+          description: The ARM Id of the recovery plan protected item.
+          type: string
+        virtualMachineId:
+          description: The virtual machine Id.
+          type: string
     RecoveryPlanTestFailoverInputProperties:
       description: Recovery plan test failover input properties.
       required:
@@ -476,15 +489,147 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RecoveryPlanProviderSpecificFailoverInput'
-    CreateRecoveryPlanInput:
-      description: Create recovery plan input class.
+    RecoveryPlanCollection:
+      description: Recovery plan collection details.
+      type: object
+      properties:
+        value:
+          description: The list of recovery plans.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryPlan'
+        nextLink:
+          description: The value of next link.
+          type: string
+    CreateRecoveryPlanInputProperties:
+      description: Recovery plan creation properties.
       required:
-      - properties
+      - primaryFabricId
+      - recoveryFabricId
+      - groups
+      type: object
+      properties:
+        primaryFabricId:
+          description: The primary fabric Id.
+          type: string
+        recoveryFabricId:
+          description: The recovery fabric Id.
+          type: string
+        failoverDeploymentModel:
+          description: The failover deployment model.
+          enum:
+          - NotApplicable
+          - Classic
+          - ResourceManager
+          type: string
+          x-ms-enum:
+            name: FailoverDeploymentModel
+            modelAsString: true
+        groups:
+          description: The recovery plan groups.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryPlanGroup'
+        providerSpecificInput:
+          description: The provider specific input.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryPlanProviderSpecificInput'
+    RecoveryPlanTestFailoverCleanupInputProperties:
+      description: Recovery plan test failover cleanup input properties.
+      type: object
+      properties:
+        comments:
+          description: The test failover cleanup comments.
+          maxLength: 1024
+          type: string
+    UpdateRecoveryPlanInput:
+      description: Update recovery plan input class.
       type: object
       properties:
         properties:
-          $ref: '#/components/schemas/CreateRecoveryPlanInputProperties'
-          description: Recovery plan creation properties.
+          $ref: '#/components/schemas/UpdateRecoveryPlanInputProperties'
+          description: Recovery plan update properties.
+    RecoveryPlanGroup:
+      description: Recovery plan group details.
+      required:
+      - groupType
+      type: object
+      properties:
+        groupType:
+          description: The group type.
+          enum:
+          - Shutdown
+          - Boot
+          - Failover
+          type: string
+          x-ms-enum:
+            name: RecoveryPlanGroupType
+            modelAsString: true
+        replicationProtectedItems:
+          description: The list of protected items.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryPlanProtectedItem'
+        startGroupActions:
+          description: The start group actions.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryPlanAction'
+        endGroupActions:
+          description: The end group actions.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryPlanAction'
+    RecoveryPlanAction:
+      description: Recovery plan action details.
+      required:
+      - actionName
+      - failoverTypes
+      - failoverDirections
+      - customDetails
+      type: object
+      properties:
+        actionName:
+          description: The action name.
+          type: string
+        failoverTypes:
+          description: The list of failover types.
+          type: array
+          items:
+            enum:
+            - ReverseReplicate
+            - Commit
+            - PlannedFailover
+            - UnplannedFailover
+            - DisableProtection
+            - TestFailover
+            - TestFailoverCleanup
+            - Failback
+            - FinalizeFailback
+            - CancelFailover
+            - ChangePit
+            - RepairReplication
+            - SwitchProtection
+            - CompleteMigration
+            type: string
+            x-ms-enum:
+              name: ReplicationProtectedItemOperation
+              modelAsString: true
+        failoverDirections:
+          description: The list of failover directions.
+          type: array
+          items:
+            enum:
+            - PrimaryToRecovery
+            - RecoveryToPrimary
+            type: string
+            x-ms-enum:
+              name: PossibleOperationsDirections
+              modelAsString: true
+        customDetails:
+          $ref: '#/components/schemas/RecoveryPlanActionDetails'
+          description: The custom details.
     UpdateRecoveryPlanInputProperties:
       description: Recovery plan update properties.
       type: object
@@ -494,6 +639,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RecoveryPlanGroup'
+    RecoveryPlanPlannedFailoverInputProperties:
+      description: Recovery plan planned failover input properties.
+      required:
+      - failoverDirection
+      type: object
+      properties:
+        failoverDirection:
+          description: The failover direction.
+          enum:
+          - PrimaryToRecovery
+          - RecoveryToPrimary
+          type: string
+          x-ms-enum:
+            name: PossibleOperationsDirections
+            modelAsString: true
+        providerSpecificDetails:
+          description: The provider specific properties.
+          type: array
+          items:
+            $ref: '#/components/schemas/RecoveryPlanProviderSpecificFailoverInput'
     RecoveryPlanTestFailoverCleanupInput:
       description: Recovery plan test failover cleanup input.
       required:
@@ -503,15 +668,6 @@ components:
         properties:
           $ref: '#/components/schemas/RecoveryPlanTestFailoverCleanupInputProperties'
           description: The recovery plan test failover cleanup input properties.
-    RecoveryPlan:
-      description: Recovery plan details.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/RecoveryPlanProperties'
-          description: The custom details.
     RecoveryPlanActionDetails:
       description: Recovery plan action custom details.
       required:
@@ -523,60 +679,6 @@ components:
           type: string
       discriminator:
         propertyName: instanceType
-    CurrentScenarioDetails:
-      description: Current scenario details of the protected entity.
-      type: object
-      properties:
-        scenarioName:
-          description: Scenario name.
-          type: string
-        jobId:
-          description: ARM Id of the job being executed.
-          type: string
-        startTime:
-          format: date-time
-          description: Start time of the workflow.
-          type: string
-    RecoveryPlanTestFailoverCleanupInputProperties:
-      description: Recovery plan test failover cleanup input properties.
-      type: object
-      properties:
-        comments:
-          description: The test failover cleanup comments.
-          maxLength: 1024
-          type: string
-    RecoveryPlanProviderSpecificInput:
-      description: Recovery plan provider specific input base class.
-      required:
-      - instanceType
-      type: object
-      properties:
-        instanceType:
-          description: Gets the Instance type.
-          type: string
-      discriminator:
-        propertyName: instanceType
-    RecoveryPlanProviderSpecificDetails:
-      description: Recovery plan provider specific details.
-      required:
-      - instanceType
-      type: object
-      properties:
-        instanceType:
-          description: Gets the Instance type.
-          type: string
-      discriminator:
-        propertyName: instanceType
-    RecoveryPlanProtectedItem:
-      description: Recovery plan protected item.
-      type: object
-      properties:
-        id:
-          description: The ARM Id of the recovery plan protected item.
-          type: string
-        virtualMachineId:
-          description: The virtual machine Id.
-          type: string
     RecoveryPlanProperties:
       description: Recovery plan properties.
       type: object
@@ -640,37 +742,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RecoveryPlanProviderSpecificDetails'
-    RecoveryPlanProviderSpecificFailoverInput:
-      description: Recovery plan provider specific failover input.
+    RecoveryPlanPlannedFailoverInput:
+      description: Recovery plan planned failover input.
+      required:
+      - properties
+      type: object
+      properties:
+        properties:
+          $ref: '#/components/schemas/RecoveryPlanPlannedFailoverInputProperties'
+          description: The recovery plan planned failover input properties.
+    CreateRecoveryPlanInput:
+      description: Create recovery plan input class.
+      required:
+      - properties
+      type: object
+      properties:
+        properties:
+          $ref: '#/components/schemas/CreateRecoveryPlanInputProperties'
+          description: Recovery plan creation properties.
+    RecoveryPlanProviderSpecificInput:
+      description: Recovery plan provider specific input base class.
       required:
       - instanceType
       type: object
       properties:
         instanceType:
-          description: The class type.
+          description: Gets the Instance type.
           type: string
       discriminator:
         propertyName: instanceType
-    RecoveryPlanPlannedFailoverInputProperties:
-      description: Recovery plan planned failover input properties.
-      required:
-      - failoverDirection
-      type: object
-      properties:
-        failoverDirection:
-          description: The failover direction.
-          enum:
-          - PrimaryToRecovery
-          - RecoveryToPrimary
-          type: string
-          x-ms-enum:
-            name: PossibleOperationsDirections
-            modelAsString: true
-        providerSpecificDetails:
-          description: The provider specific properties.
-          type: array
-          items:
-            $ref: '#/components/schemas/RecoveryPlanProviderSpecificFailoverInput'
     Resource:
       description: Azure resource.
       type: object
@@ -691,46 +791,6 @@ components:
           description: Resource Location
           type: string
       x-ms-azure-resource: true
-    RecoveryPlanGroup:
-      description: Recovery plan group details.
-      required:
-      - groupType
-      type: object
-      properties:
-        groupType:
-          description: The group type.
-          enum:
-          - Shutdown
-          - Boot
-          - Failover
-          type: string
-          x-ms-enum:
-            name: RecoveryPlanGroupType
-            modelAsString: true
-        replicationProtectedItems:
-          description: The list of protected items.
-          type: array
-          items:
-            $ref: '#/components/schemas/RecoveryPlanProtectedItem'
-        startGroupActions:
-          description: The start group actions.
-          type: array
-          items:
-            $ref: '#/components/schemas/RecoveryPlanAction'
-        endGroupActions:
-          description: The end group actions.
-          type: array
-          items:
-            $ref: '#/components/schemas/RecoveryPlanAction'
-    RecoveryPlanTestFailoverInput:
-      description: Recovery plan test failover input.
-      required:
-      - properties
-      type: object
-      properties:
-        properties:
-          $ref: '#/components/schemas/RecoveryPlanTestFailoverInputProperties'
-          description: The recovery plan test failover input properties.
     RecoveryPlanUnplannedFailoverInputProperties:
       description: Recovery plan unplanned failover input properties.
       required:
@@ -762,98 +822,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RecoveryPlanProviderSpecificFailoverInput'
-    RecoveryPlanAction:
-      description: Recovery plan action details.
-      required:
-      - actionName
-      - failoverTypes
-      - failoverDirections
-      - customDetails
+    CurrentScenarioDetails:
+      description: Current scenario details of the protected entity.
       type: object
       properties:
-        actionName:
-          description: The action name.
+        scenarioName:
+          description: Scenario name.
           type: string
-        failoverTypes:
-          description: The list of failover types.
-          type: array
-          items:
-            enum:
-            - ReverseReplicate
-            - Commit
-            - PlannedFailover
-            - UnplannedFailover
-            - DisableProtection
-            - TestFailover
-            - TestFailoverCleanup
-            - Failback
-            - FinalizeFailback
-            - CancelFailover
-            - ChangePit
-            - RepairReplication
-            - SwitchProtection
-            - CompleteMigration
-            type: string
-            x-ms-enum:
-              name: ReplicationProtectedItemOperation
-              modelAsString: true
-        failoverDirections:
-          description: The list of failover directions.
-          type: array
-          items:
-            enum:
-            - PrimaryToRecovery
-            - RecoveryToPrimary
-            type: string
-            x-ms-enum:
-              name: PossibleOperationsDirections
-              modelAsString: true
-        customDetails:
-          $ref: '#/components/schemas/RecoveryPlanActionDetails'
+        jobId:
+          description: ARM Id of the job being executed.
+          type: string
+        startTime:
+          format: date-time
+          description: Start time of the workflow.
+          type: string
+    RecoveryPlan:
+      description: Recovery plan details.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/RecoveryPlanProperties'
           description: The custom details.
-    CreateRecoveryPlanInputProperties:
-      description: Recovery plan creation properties.
-      required:
-      - primaryFabricId
-      - recoveryFabricId
-      - groups
-      type: object
-      properties:
-        primaryFabricId:
-          description: The primary fabric Id.
-          type: string
-        recoveryFabricId:
-          description: The recovery fabric Id.
-          type: string
-        failoverDeploymentModel:
-          description: The failover deployment model.
-          enum:
-          - NotApplicable
-          - Classic
-          - ResourceManager
-          type: string
-          x-ms-enum:
-            name: FailoverDeploymentModel
-            modelAsString: true
-        groups:
-          description: The recovery plan groups.
-          type: array
-          items:
-            $ref: '#/components/schemas/RecoveryPlanGroup'
-        providerSpecificInput:
-          description: The provider specific input.
-          type: array
-          items:
-            $ref: '#/components/schemas/RecoveryPlanProviderSpecificInput'
   parameters:
-    ResourceName:
-      name: resourceName
-      in: path
-      description: The name of the recovery services vault.
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
     ResourceGroupName:
       name: resourceGroupName
       in: path
@@ -862,17 +854,25 @@ components:
       x-ms-parameter-location: client
       schema:
         type: string
-    SubscriptionId:
-      name: subscriptionId
-      in: path
-      description: The subscription Id.
-      required: true
-      schema:
-        type: string
     ApiVersion:
       name: api-version
       in: query
       description: Client Api Version.
+      required: true
+      schema:
+        type: string
+    ResourceName:
+      name: resourceName
+      in: path
+      description: The name of the recovery services vault.
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    SubscriptionId:
+      name: subscriptionId
+      in: path
+      description: The subscription Id.
       required: true
       schema:
         type: string

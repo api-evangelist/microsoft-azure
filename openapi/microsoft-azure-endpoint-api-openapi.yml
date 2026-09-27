@@ -668,6 +668,115 @@ paths:
       - subscription_key: []
         AADToken: []
 components:
+  parameters:
+    EndpointTypeParameter:
+      in: query
+      name: endpointType
+      description: Endpoint type filter
+      x-ms-enum:
+        name: endpointType
+        modelAsString: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        enum:
+        - Azure.OpenAI
+        - Azure.Speech
+        - Azure.ContentSafety
+        - Azure.Llama
+        - managedOnlineEndpoint
+    EndpointNameParameter:
+      in: path
+      name: endpointName
+      description: Name of the endpoint resource.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,32}$
+    WorkspaceNameParameter:
+      in: path
+      name: workspaceName
+      description: Azure Machine Learning Workspace Name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9_-]{2,32}$
+    DeploymentNameParameter:
+      in: path
+      name: deploymentName
+      description: Name of the deployment resource
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9_-]{2,32}$
+    PaginationParameter:
+      in: query
+      name: $skip
+      description: Continuation token for pagination.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    PathUuid:
+      name: id
+      in: path
+      description: The resource ID, which should be UUID.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    QuerySkip:
+      name: skip
+      in: query
+      description: The number of result items to skip.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    QueryMaxPageSize:
+      name: maxpagesize
+      in: query
+      description: The maximum number of items to include in a single response.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+        default: 100
+    HeaderOperationId:
+      name: Operation-Id
+      in: header
+      description: ID of the status monitor for the operation. If the Operation-Id header matches an existing operation and the request is not identical to the prior request, it will fail with a 400 Bad Request.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
+    QueryFilter:
+      name: filter
+      in: query
+      description: "Filter condition.\n  - **Supported properties:** projectId, createdDateTime, locale, kind\n  - **Operators:**\n    - eq, ne are supported for all properties.\n    - gt, ge, lt, le are supported for createdDateTime.\n  - **Example:**\n    - ```filter=projectId eq 'Jessica'``` (filter by project ID)\n    - ```filter=kind eq 'ProfessionalVoice'``` (filter project by kind)\n    - ```filter=locale eq 'en-US'``` (filter training set and model by locale)\n    - ```filter=createdDateTime gt 2022-12-30T23:59:59.99Z``` (filter resource created time after 2023-11-01)"
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    QueryApiVersion:
+      name: api-version
+      in: query
+      description: The API version to use for this operation.
+      required: true
+      x-ms-parameter-location: method
+      x-ms-client-name: apiVersion
+      schema:
+        type: string
+        minLength: 1
   schemas:
     DefaultResourceProvisioningState:
       enum:
@@ -685,14 +794,7 @@ components:
       x-ms-enum:
         name: DefaultResourceProvisioningState
         modelAsString: true
-    EndpointKeys:
-      type: object
-      properties:
-        keys:
-          description: Dictionary of Keys for the endpoint.
-          $ref: '#/components/schemas/AccountApiKeys'
-          x-ms-secret: true
-    EndpointDeploymentResourcePropertiesBasicResourceArmPaginatedResult:
+    EndpointResourcePropertiesBasicResourceArmPaginatedResult:
       type: object
       properties:
         nextLink:
@@ -700,74 +802,73 @@ components:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/EndpointDeploymentResourcePropertiesBasicResource'
-    EndpointResourcePropertiesBasicResource:
+            $ref: '#/components/schemas/EndpointResourcePropertiesBasicResource'
+    EndpointDeploymentResourceProperties:
       required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
-      properties:
-        properties:
-          $ref: '#/components/schemas/EndpointResourceProperties'
-    DeploymentModel:
+      - type
       type: object
       properties:
-        format:
+        failureReason:
+          description: The failure reason if the creation failed.
           type: string
-          description: Deployment model format.
-        name:
+        provisioningState:
+          description: Read-only provision state status property.
+          $ref: '#/components/schemas/DefaultResourceProvisioningState'
+        type:
+          description: Kind of the deployment.
+          minLength: 1
+          pattern: '[a-zA-Z0-9._]'
           type: string
-          description: Deployment model name.
-        version:
-          type: string
-          description: Optional. Deployment model version. If version is not specified, a default version will be assigned. The default version is different for different models and might change when there is new version available for a model. Default version for a model could be found from list models API.
-        source:
-          type: string
-          description: Optional. Deployment model source ARM resource ID.
-        callRateLimit:
-          readOnly: true
-          $ref: '#/components/schemas/CallRateLimit'
-      description: Properties of Cognitive Services account deployment model.
-    EndpointDeploymentResourcePropertiesBasicResource:
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
-      properties:
-        properties:
-          $ref: '#/components/schemas/EndpointDeploymentResourceProperties'
-    ModelDeprecationInfo:
-      description: Cognitive Services account ModelDeprecationInfo.
+      discriminator:
+        propertyName: type
+    AccountModel:
+      description: Cognitive Services account Model.
       type: object
       properties:
-        fineTune:
-          type: string
-          description: The datetime of deprecation of the fineTune Model.
-        inference:
-          type: string
-          description: The datetime of deprecation of the inference Model.
-    AccountApiKeys:
-      type: object
-      properties:
-        key1:
-          type: string
-          x-ms-secret: true
-        key2:
-          type: string
-          x-ms-secret: true
-    EndpointModels:
-      type: object
-      properties:
-        nextLink:
-          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
-          type: string
-        value:
-          description: List of models.
+        baseModel:
+          type: object
+          description: Base Model Identifier.
+          $ref: '#/components/schemas/DeploymentModel'
+        isDefaultVersion:
+          type: boolean
+          description: If the model is default version.
+        skus:
           type: array
           items:
-            $ref: '#/components/schemas/AccountModel'
+            $ref: '#/components/schemas/ModelSku'
+          x-ms-identifiers:
+          - name
+          description: The list of Model Sku.
+        maxCapacity:
+          type: integer
+          format: int32
+          description: The max capacity.
+        capabilities:
+          type: object
+          additionalProperties:
+            type: string
+          description: The capabilities.
+        finetuneCapabilities:
+          type: object
+          additionalProperties:
+            type: string
+          description: The capabilities for finetune models.
+        deprecation:
+          type: object
+          $ref: '#/components/schemas/ModelDeprecationInfo'
+        lifecycleStatus:
+          type: string
+          enum:
+          - GenerallyAvailable
+          - Preview
+          x-ms-enum:
+            name: ModelLifecycleStatus
+            modelAsString: true
+          description: Model lifecycle status.
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+      allOf:
+      - $ref: '#/components/schemas/DeploymentModel'
     ModelSku:
       type: object
       properties:
@@ -792,6 +893,40 @@ components:
           x-ms-identifiers: []
           description: The list of rateLimit.
       description: Describes an available Cognitive Services Model SKU.
+    EndpointDeploymentResourcePropertiesBasicResourceArmPaginatedResult:
+      type: object
+      properties:
+        nextLink:
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointDeploymentResourcePropertiesBasicResource'
+    EndpointKeys:
+      type: object
+      properties:
+        keys:
+          description: Dictionary of Keys for the endpoint.
+          $ref: '#/components/schemas/AccountApiKeys'
+          x-ms-secret: true
+    AccountApiKeys:
+      type: object
+      properties:
+        key1:
+          type: string
+          x-ms-secret: true
+        key2:
+          type: string
+          x-ms-secret: true
+    EndpointDeploymentResourcePropertiesBasicResource:
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
+      properties:
+        properties:
+          $ref: '#/components/schemas/EndpointDeploymentResourceProperties'
     CapacityConfig:
       type: object
       properties:
@@ -854,84 +989,6 @@ components:
           $ref: '#/components/schemas/DefaultResourceProvisioningState'
       discriminator:
         propertyName: endpointType
-    RequestMatchPattern:
-      type: object
-      properties:
-        path:
-          type: string
-        method:
-          type: string
-    AccountModel:
-      description: Cognitive Services account Model.
-      type: object
-      properties:
-        baseModel:
-          type: object
-          description: Base Model Identifier.
-          $ref: '#/components/schemas/DeploymentModel'
-        isDefaultVersion:
-          type: boolean
-          description: If the model is default version.
-        skus:
-          type: array
-          items:
-            $ref: '#/components/schemas/ModelSku'
-          x-ms-identifiers:
-          - name
-          description: The list of Model Sku.
-        maxCapacity:
-          type: integer
-          format: int32
-          description: The max capacity.
-        capabilities:
-          type: object
-          additionalProperties:
-            type: string
-          description: The capabilities.
-        finetuneCapabilities:
-          type: object
-          additionalProperties:
-            type: string
-          description: The capabilities for finetune models.
-        deprecation:
-          type: object
-          $ref: '#/components/schemas/ModelDeprecationInfo'
-        lifecycleStatus:
-          type: string
-          enum:
-          - GenerallyAvailable
-          - Preview
-          x-ms-enum:
-            name: ModelLifecycleStatus
-            modelAsString: true
-          description: Model lifecycle status.
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-      allOf:
-      - $ref: '#/components/schemas/DeploymentModel'
-    RegenerateServiceAccountKeyContent:
-      type: object
-      properties:
-        keyName:
-          $ref: '#/components/schemas/ServiceAccountKeyName'
-    EndpointDeploymentResourceProperties:
-      required:
-      - type
-      type: object
-      properties:
-        failureReason:
-          description: The failure reason if the creation failed.
-          type: string
-        provisioningState:
-          description: Read-only provision state status property.
-          $ref: '#/components/schemas/DefaultResourceProvisioningState'
-        type:
-          description: Kind of the deployment.
-          minLength: 1
-          pattern: '[a-zA-Z0-9._]'
-          type: string
-      discriminator:
-        propertyName: type
     ServiceAccountKeyName:
       enum:
       - Key1
@@ -940,15 +997,57 @@ components:
       x-ms-enum:
         name: ServiceAccountKeyName
         modelAsString: true
-    EndpointResourcePropertiesBasicResourceArmPaginatedResult:
+    RegenerateServiceAccountKeyContent:
+      type: object
+      properties:
+        keyName:
+          $ref: '#/components/schemas/ServiceAccountKeyName'
+    EndpointModels:
       type: object
       properties:
         nextLink:
+          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
         value:
+          description: List of models.
           type: array
           items:
-            $ref: '#/components/schemas/EndpointResourcePropertiesBasicResource'
+            $ref: '#/components/schemas/AccountModel'
+    EndpointResourcePropertiesBasicResource:
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
+      properties:
+        properties:
+          $ref: '#/components/schemas/EndpointResourceProperties'
+    DeploymentModel:
+      type: object
+      properties:
+        format:
+          type: string
+          description: Deployment model format.
+        name:
+          type: string
+          description: Deployment model name.
+        version:
+          type: string
+          description: Optional. Deployment model version. If version is not specified, a default version will be assigned. The default version is different for different models and might change when there is new version available for a model. Default version for a model could be found from list models API.
+        source:
+          type: string
+          description: Optional. Deployment model source ARM resource ID.
+        callRateLimit:
+          readOnly: true
+          $ref: '#/components/schemas/CallRateLimit'
+      description: Properties of Cognitive Services account deployment model.
+    RequestMatchPattern:
+      type: object
+      properties:
+        path:
+          type: string
+        method:
+          type: string
     ThrottlingRule:
       type: object
       properties:
@@ -969,6 +1068,16 @@ components:
           x-ms-identifiers:
           - path
           - method
+    ModelDeprecationInfo:
+      description: Cognitive Services account ModelDeprecationInfo.
+      type: object
+      properties:
+        fineTune:
+          type: string
+          description: The datetime of deprecation of the fineTune Model.
+        inference:
+          type: string
+          description: The datetime of deprecation of the inference Model.
     CallRateLimit:
       type: object
       properties:
@@ -985,50 +1094,35 @@ components:
           x-ms-identifiers:
           - key
       description: The call rate limit Cognitive Services account.
-    Status:
-      description: Status of a resource.
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      - Disabling
-      - Disabled
-      type: string
-      x-ms-enum:
-        name: Status
-        modelAsString: true
+    ErrorResponse:
+      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    InnerError:
+      description: Inner error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains required properties error code, message and optional properties target, inner error(this can be nested).
+      type: object
+      properties:
+        code:
+          description: Detailed error code to help diagnostic.
+          type: string
+        target:
+          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
+          type: string
+        message:
+          description: Detailed error message.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     EndpointProperties:
       description: Endpoint properties
       type: object
       properties:
         kind:
           $ref: '#/components/schemas/EndpointKind'
-    ErrorCode:
-      description: Top-level error code
-      enum:
-      - BadRequest
-      - BadArgument
-      - Unauthorized
-      - Forbidden
-      - NotFound
-      - UnsupportedMediaType
-      - TooManyRequests
-      - InternalServerError
-      - ServiceUnavailable
-      type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
-    EndpointKind:
-      description: Endpoint kind
-      enum:
-      - HighPerformance
-      - FastResume
-      type: string
-      x-ms-enum:
-        name: EndpointKind
-        modelAsString: true
     PaginatedEndpoints:
       description: Paginated endpoint list
       required:
@@ -1044,12 +1138,6 @@ components:
           description: Link to next page.
           format: uri
           type: string
-    ResourceId:
-      description: Resource id
-      type: string
-      pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-      minLength: 3
-      maxLength: 64
     Error:
       description: Top-level error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains an top-level error with error code, message, details, target and an inner error with more descriptive details.
       required:
@@ -1072,6 +1160,41 @@ components:
             $ref: '#/components/schemas/Error'
         innererror:
           $ref: '#/components/schemas/InnerError'
+    ResourceId:
+      description: Resource id
+      type: string
+      pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
+      minLength: 3
+      maxLength: 64
+    Status:
+      description: Status of a resource.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      - Disabling
+      - Disabled
+      type: string
+      x-ms-enum:
+        name: Status
+        modelAsString: true
+    ErrorCode:
+      description: Top-level error code
+      enum:
+      - BadRequest
+      - BadArgument
+      - Unauthorized
+      - Forbidden
+      - NotFound
+      - UnsupportedMediaType
+      - TooManyRequests
+      - InternalServerError
+      - ServiceUnavailable
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
     Endpoint:
       description: Endpoint object
       required:
@@ -1108,138 +1231,15 @@ components:
           format: date-time
           type: string
           readOnly: true
-    InnerError:
-      description: Inner error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains required properties error code, message and optional properties target, inner error(this can be nested).
-      type: object
-      properties:
-        code:
-          description: Detailed error code to help diagnostic.
-          type: string
-        target:
-          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
-          type: string
-        message:
-          description: Detailed error message.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    ErrorResponse:
-      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-  parameters:
-    EndpointNameParameter:
-      in: path
-      name: endpointName
-      description: Name of the endpoint resource.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,32}$
-    PaginationParameter:
-      in: query
-      name: $skip
-      description: Continuation token for pagination.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    WorkspaceNameParameter:
-      in: path
-      name: workspaceName
-      description: Azure Machine Learning Workspace Name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9_-]{2,32}$
-    DeploymentNameParameter:
-      in: path
-      name: deploymentName
-      description: Name of the deployment resource
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9_-]{2,32}$
-    EndpointTypeParameter:
-      in: query
-      name: endpointType
-      description: Endpoint type filter
+    EndpointKind:
+      description: Endpoint kind
+      enum:
+      - HighPerformance
+      - FastResume
+      type: string
       x-ms-enum:
-        name: endpointType
+        name: EndpointKind
         modelAsString: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        enum:
-        - Azure.OpenAI
-        - Azure.Speech
-        - Azure.ContentSafety
-        - Azure.Llama
-        - managedOnlineEndpoint
-    QueryMaxPageSize:
-      name: maxpagesize
-      in: query
-      description: The maximum number of items to include in a single response.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-        default: 100
-    HeaderOperationId:
-      name: Operation-Id
-      in: header
-      description: ID of the status monitor for the operation. If the Operation-Id header matches an existing operation and the request is not identical to the prior request, it will fail with a 400 Bad Request.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-    QueryApiVersion:
-      name: api-version
-      in: query
-      description: The API version to use for this operation.
-      required: true
-      x-ms-parameter-location: method
-      x-ms-client-name: apiVersion
-      schema:
-        type: string
-        minLength: 1
-    QuerySkip:
-      name: skip
-      in: query
-      description: The number of result items to skip.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-        default: 0
-    QueryFilter:
-      name: filter
-      in: query
-      description: "Filter condition.\n  - **Supported properties:** projectId, createdDateTime, locale, kind\n  - **Operators:**\n    - eq, ne are supported for all properties.\n    - gt, ge, lt, le are supported for createdDateTime.\n  - **Example:**\n    - ```filter=projectId eq 'Jessica'``` (filter by project ID)\n    - ```filter=kind eq 'ProfessionalVoice'``` (filter project by kind)\n    - ```filter=locale eq 'en-US'``` (filter training set and model by locale)\n    - ```filter=createdDateTime gt 2022-12-30T23:59:59.99Z``` (filter resource created time after 2023-11-01)"
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    PathUuid:
-      name: id
-      in: path
-      description: The resource ID, which should be UUID.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
   securitySchemes:
     azure_auth:
       type: oauth2

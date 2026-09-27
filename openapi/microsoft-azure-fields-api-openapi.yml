@@ -572,6 +572,66 @@ paths:
         required: true
 components:
   schemas:
+    ErrorResponse:
+      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+        traceId:
+          description: Unique trace Id.
+          type: string
+    InnerError:
+      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
+      type: object
+      properties:
+        code:
+          description: Specific error code than was provided by the containing error.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    Error:
+      description: An error from the Azure AgPlatform service.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: Server-defined set of error codes.
+          minLength: 1
+          type: string
+        message:
+          description: Human-readable representation of the error.
+          minLength: 1
+          type: string
+        target:
+          description: Target of the error.
+          type: string
+        details:
+          description: Array of details about specific errors that led to this reported error.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    FieldListResponse:
+      description: Paged response contains list of requested objects and a URL link to get the next set of results.
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: List of requested objects.
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+        skipToken:
+          description: Token used in retrieving the next page. If null, there are no additional pages.
+          type: string
+        nextLink:
+          description: Continuation link (absolute URI) to the next page of results in the list.
+          type: string
     Field:
       description: Schema of field resource.
       type: object
@@ -718,83 +778,16 @@ components:
           description: 'Job end time when available. Sample format: yyyy-MM-ddTHH:mm:ssZ.'
           type: string
           readOnly: true
-    Error:
-      description: An error from the Azure AgPlatform service.
+    GeoJsonObject:
+      description: 'GeoJSON (For more details: https://geojson.org/). Note: Coordinates are expected in [Longitude, Latitude] format.'
       required:
-      - code
-      - message
+      - type
       type: object
       properties:
-        code:
-          description: Server-defined set of error codes.
-          minLength: 1
-          type: string
-        message:
-          description: Human-readable representation of the error.
-          minLength: 1
-          type: string
-        target:
-          description: Target of the error.
-          type: string
-        details:
-          description: Array of details about specific errors that led to this reported error.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    InnerError:
-      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
-      type: object
-      properties:
-        code:
-          description: Specific error code than was provided by the containing error.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    ErrorResponse:
-      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-        traceId:
-          description: Unique trace Id.
-          type: string
-    FieldListResponse:
-      description: Paged response contains list of requested objects and a URL link to get the next set of results.
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: List of requested objects.
-          type: array
-          items:
-            $ref: '#/components/schemas/Field'
-        skipToken:
-          description: Token used in retrieving the next page. If null, there are no additional pages.
-          type: string
-        nextLink:
-          description: Continuation link (absolute URI) to the next page of results in the list.
-          type: string
-    FieldMetaDataListResponse:
-      description: Paged response contains list of requested objects and a skipToken to get the next set of results.
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: List of requested objects.
-          type: array
-          items:
-            $ref: '#/components/schemas/FieldMetaData'
-        skipToken:
-          description: Token used in retrieving the next page. If null, there are no additional pages.
-          type: string
-        nextLink:
-          description: Continuation link (absolute URI) to the next page of results in the list.
-          type: string
+        type:
+          $ref: '#/components/schemas/GeoJsonObjectType'
+      discriminator:
+        propertyName: type
     Field_2:
       description: Schema of field resource.
       type: object
@@ -871,16 +864,58 @@ components:
           example:
             key1: value1
             key2: 123.45
-    GeoJsonObjectType:
-      description: GeoJSON object type.
-      enum:
-      - Point
-      - Polygon
-      - MultiPolygon
-      type: string
-      x-ms-enum:
-        name: GeoJsonObjectType
-        modelAsString: true
+    SearchFieldQuery:
+      description: SearchAllBoundaries and SearchBoundaries parameters.
+      type: object
+      properties:
+        farmIds:
+          description: FarmIds of the resource.
+          type: array
+          items:
+            type: string
+        ids:
+          description: Ids of the resource.
+          type: array
+          items:
+            type: string
+        names:
+          description: Names of the resource.
+          type: array
+          items:
+            type: string
+        propertyFilters:
+          description: 'Filters on key-value pairs within the Properties object.
+
+            e.g. "{testKey} eq {testValue}".'
+          type: array
+          items:
+            type: string
+        statuses:
+          description: Statuses of the resource.
+          type: array
+          items:
+            type: string
+        minCreatedDateTime:
+          format: date-time
+          description: Minimum creation date of resource (inclusive).
+          type: string
+        maxCreatedDateTime:
+          format: date-time
+          description: Maximum creation date of resource (inclusive).
+          type: string
+        minLastModifiedDateTime:
+          format: date-time
+          description: Minimum last modified date of resource (inclusive).
+          type: string
+        maxLastModifiedDateTime:
+          format: date-time
+          description: Maximum last modified date of resource (inclusive).
+          type: string
+        intersectsWithGeometry:
+          $ref: '#/components/schemas/GeoJsonObject'
+        partyId:
+          description: Party ID which belongs to the operation data.
+          type: string
     FieldMetaData:
       description: Schema of field resource.
       type: object
@@ -955,67 +990,32 @@ components:
           example:
             key1: value1
             key2: 123.45
-    GeoJsonObject:
-      description: 'GeoJSON (For more details: https://geojson.org/). Note: Coordinates are expected in [Longitude, Latitude] format.'
+    GeoJsonObjectType:
+      description: GeoJSON object type.
+      enum:
+      - Point
+      - Polygon
+      - MultiPolygon
+      type: string
+      x-ms-enum:
+        name: GeoJsonObjectType
+        modelAsString: true
+    FieldMetaDataListResponse:
+      description: Paged response contains list of requested objects and a skipToken to get the next set of results.
       required:
-      - type
+      - value
       type: object
       properties:
-        type:
-          $ref: '#/components/schemas/GeoJsonObjectType'
-      discriminator:
-        propertyName: type
-    SearchFieldQuery:
-      description: SearchAllBoundaries and SearchBoundaries parameters.
-      type: object
-      properties:
-        farmIds:
-          description: FarmIds of the resource.
+        value:
+          description: List of requested objects.
           type: array
           items:
-            type: string
-        ids:
-          description: Ids of the resource.
-          type: array
-          items:
-            type: string
-        names:
-          description: Names of the resource.
-          type: array
-          items:
-            type: string
-        propertyFilters:
-          description: 'Filters on key-value pairs within the Properties object.
-
-            e.g. "{testKey} eq {testValue}".'
-          type: array
-          items:
-            type: string
-        statuses:
-          description: Statuses of the resource.
-          type: array
-          items:
-            type: string
-        minCreatedDateTime:
-          format: date-time
-          description: Minimum creation date of resource (inclusive).
+            $ref: '#/components/schemas/FieldMetaData'
+        skipToken:
+          description: Token used in retrieving the next page. If null, there are no additional pages.
           type: string
-        maxCreatedDateTime:
-          format: date-time
-          description: Maximum creation date of resource (inclusive).
-          type: string
-        minLastModifiedDateTime:
-          format: date-time
-          description: Minimum last modified date of resource (inclusive).
-          type: string
-        maxLastModifiedDateTime:
-          format: date-time
-          description: Maximum last modified date of resource (inclusive).
-          type: string
-        intersectsWithGeometry:
-          $ref: '#/components/schemas/GeoJsonObject'
-        partyId:
-          description: Party ID which belongs to the operation data.
+        nextLink:
+          description: Continuation link (absolute URI) to the next page of results in the list.
           type: string
   securitySchemes:
     Bearer:

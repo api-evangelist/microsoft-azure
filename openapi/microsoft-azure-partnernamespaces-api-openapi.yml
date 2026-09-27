@@ -294,7 +294,96 @@ paths:
         description: Request body to regenerate key.
         required: true
 components:
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      description: Version of the API to be used with the client request.
+      required: true
+      schema:
+        type: string
+    FilterParameter:
+      name: $filter
+      in: query
+      description: 'The query used to filter the search results using OData syntax. Filtering is permitted on the ''name'' property only and with limited number of OData operations. These operations are: the ''contains'' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, ''PATTERN'') and name ne ''PATTERN-1''. The following is not a valid filter example: $filter=location eq ''westus''.'
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    TopParameter:
+      name: $top
+      in: query
+      description: The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+      required: true
+      schema:
+        type: string
   schemas:
+    PartnerNamespaceSharedAccessKeys:
+      description: Shared access keys of the partner namespace.
+      type: object
+      properties:
+        key1:
+          description: Shared access key1 for the partner namespace.
+          type: string
+        key2:
+          description: Shared access key2 for the partner namespace.
+          type: string
+    PrivateEndpointConnectionProperties:
+      description: Properties of the private endpoint connection resource.
+      type: object
+      properties:
+        privateEndpoint:
+          $ref: '#/components/schemas/PrivateEndpoint'
+          description: The Private Endpoint resource for this Connection.
+        groupIds:
+          description: GroupIds from the private link service resource.
+          type: array
+          items:
+            type: string
+        privateLinkServiceConnectionState:
+          $ref: '#/components/schemas/ConnectionState'
+          description: Details about the state of the connection.
+        provisioningState:
+          description: Provisioning state of the Private Endpoint Connection.
+          enum:
+          - Creating
+          - Updating
+          - Deleting
+          - Succeeded
+          - Canceled
+          - Failed
+          type: string
+          x-ms-enum:
+            name: ResourceProvisioningState
+            modelAsString: true
+    TrackedResource:
+      description: Definition of a Tracked Resource.
+      required:
+      - location
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        location:
+          description: Location of the resource.
+          type: string
+          x-ms-mutability:
+          - read
+          - create
+        tags:
+          description: Tags of the resource.
+          type: object
+          additionalProperties:
+            type: string
     PartnerNamespaceUpdateParameters:
       description: Properties of the Partner Namespace update.
       type: object
@@ -308,101 +397,6 @@ components:
           $ref: '#/components/schemas/PartnerNamespaceUpdateParameterProperties'
           description: Properties of the Partner Namespace.
           x-ms-client-flatten: true
-    InboundIpRule:
-      type: object
-      properties:
-        ipMask:
-          description: IP Address in CIDR notation e.g., 10.0.0.0/8.
-          type: string
-        action:
-          description: Action to perform based on the match or no match of the IpMask.
-          enum:
-          - Allow
-          type: string
-          x-ms-enum:
-            name: IpActionType
-            modelAsString: true
-    PrivateEndpoint:
-      description: PrivateEndpoint information.
-      type: object
-      properties:
-        id:
-          description: The ARM identifier for Private Endpoint.
-          type: string
-    PartnerNamespaceRegenerateKeyRequest:
-      description: PartnerNamespace regenerate shared access key request.
-      required:
-      - keyName
-      type: object
-      properties:
-        keyName:
-          description: Key name to regenerate (key1 or key2).
-          type: string
-    ConnectionState:
-      description: ConnectionState information.
-      type: object
-      properties:
-        status:
-          description: Status of the connection.
-          enum:
-          - Pending
-          - Approved
-          - Rejected
-          - Disconnected
-          type: string
-          x-ms-enum:
-            name: PersistedConnectionStatus
-            modelAsString: true
-        description:
-          description: Description of the connection state.
-          type: string
-        actionsRequired:
-          description: Actions required (if any).
-          type: string
-    PartnerNamespaceUpdateParameterProperties:
-      description: Information of Partner Namespace update parameter properties.
-      type: object
-      properties:
-        publicNetworkAccess:
-          description: "This determines if traffic is allowed over public network. By default it is enabled. \nYou can further restrict to specific IPs by configuring <seealso cref=\"P:Microsoft.Azure.Events.ResourceProvider.Common.Contracts.PartnerNamespaceUpdateParameterProperties.InboundIpRules\" />"
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: PublicNetworkAccess
-            modelAsString: true
-          default: Enabled
-        inboundIpRules:
-          description: 'This can be used to restrict traffic from specific IPs instead of all IPs. Note: These are considered only if PublicNetworkAccess is enabled.'
-          type: array
-          items:
-            $ref: '#/components/schemas/InboundIpRule'
-          x-ms-identifiers: []
-        disableLocalAuth:
-          description: This boolean is used to enable or disable local auth. Default value is false. When the property is set to true, only AAD token will be used to authenticate if user is allowed to publish to the partner namespace.
-          type: boolean
-    PrivateEndpointConnection:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
-          description: Properties of the PrivateEndpointConnection.
-          x-ms-client-flatten: true
-    PartnerNamespacesListResult:
-      description: Result of the List Partner Namespaces operation
-      type: object
-      properties:
-        value:
-          description: A collection of partner namespaces.
-          type: array
-          items:
-            $ref: '#/components/schemas/PartnerNamespace'
-        nextLink:
-          description: A link for the next page of partner namespaces.
-          type: string
     PartnerNamespaceProperties:
       description: Properties of the partner namespace.
       type: object
@@ -486,53 +480,92 @@ components:
           type: string
           readOnly: true
       x-ms-azure-resource: true
-    TrackedResource:
-      description: Definition of a Tracked Resource.
-      required:
-      - location
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        location:
-          description: Location of the resource.
-          type: string
-          x-ms-mutability:
-          - read
-          - create
-        tags:
-          description: Tags of the resource.
-          type: object
-          additionalProperties:
-            type: string
-    PrivateEndpointConnectionProperties:
-      description: Properties of the private endpoint connection resource.
+    PartnerNamespacesListResult:
+      description: Result of the List Partner Namespaces operation
       type: object
       properties:
-        privateEndpoint:
-          $ref: '#/components/schemas/PrivateEndpoint'
-          description: The Private Endpoint resource for this Connection.
-        groupIds:
-          description: GroupIds from the private link service resource.
+        value:
+          description: A collection of partner namespaces.
           type: array
           items:
-            type: string
-        privateLinkServiceConnectionState:
-          $ref: '#/components/schemas/ConnectionState'
-          description: Details about the state of the connection.
-        provisioningState:
-          description: Provisioning state of the Private Endpoint Connection.
+            $ref: '#/components/schemas/PartnerNamespace'
+        nextLink:
+          description: A link for the next page of partner namespaces.
+          type: string
+    InboundIpRule:
+      type: object
+      properties:
+        ipMask:
+          description: IP Address in CIDR notation e.g., 10.0.0.0/8.
+          type: string
+        action:
+          description: Action to perform based on the match or no match of the IpMask.
           enum:
-          - Creating
-          - Updating
-          - Deleting
-          - Succeeded
-          - Canceled
-          - Failed
+          - Allow
           type: string
           x-ms-enum:
-            name: ResourceProvisioningState
+            name: IpActionType
             modelAsString: true
+    PartnerNamespaceUpdateParameterProperties:
+      description: Information of Partner Namespace update parameter properties.
+      type: object
+      properties:
+        publicNetworkAccess:
+          description: "This determines if traffic is allowed over public network. By default it is enabled. \nYou can further restrict to specific IPs by configuring <seealso cref=\"P:Microsoft.Azure.Events.ResourceProvider.Common.Contracts.PartnerNamespaceUpdateParameterProperties.InboundIpRules\" />"
+          enum:
+          - Enabled
+          - Disabled
+          type: string
+          x-ms-enum:
+            name: PublicNetworkAccess
+            modelAsString: true
+          default: Enabled
+        inboundIpRules:
+          description: 'This can be used to restrict traffic from specific IPs instead of all IPs. Note: These are considered only if PublicNetworkAccess is enabled.'
+          type: array
+          items:
+            $ref: '#/components/schemas/InboundIpRule'
+          x-ms-identifiers: []
+        disableLocalAuth:
+          description: This boolean is used to enable or disable local auth. Default value is false. When the property is set to true, only AAD token will be used to authenticate if user is allowed to publish to the partner namespace.
+          type: boolean
+    PrivateEndpoint:
+      description: PrivateEndpoint information.
+      type: object
+      properties:
+        id:
+          description: The ARM identifier for Private Endpoint.
+          type: string
+    PartnerNamespaceRegenerateKeyRequest:
+      description: PartnerNamespace regenerate shared access key request.
+      required:
+      - keyName
+      type: object
+      properties:
+        keyName:
+          description: Key name to regenerate (key1 or key2).
+          type: string
+    ConnectionState:
+      description: ConnectionState information.
+      type: object
+      properties:
+        status:
+          description: Status of the connection.
+          enum:
+          - Pending
+          - Approved
+          - Rejected
+          - Disconnected
+          type: string
+          x-ms-enum:
+            name: PersistedConnectionStatus
+            modelAsString: true
+        description:
+          description: Description of the connection state.
+          type: string
+        actionsRequired:
+          description: Actions required (if any).
+          type: string
     PartnerNamespace:
       description: EventGrid Partner Namespace.
       type: object
@@ -548,48 +581,15 @@ components:
           type: object
           readOnly: true
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-    PartnerNamespaceSharedAccessKeys:
-      description: Shared access keys of the partner namespace.
+    PrivateEndpointConnection:
       type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
       properties:
-        key1:
-          description: Shared access key1 for the partner namespace.
-          type: string
-        key2:
-          description: Shared access key2 for the partner namespace.
-          type: string
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      description: Version of the API to be used with the client request.
-      required: true
-      schema:
-        type: string
-    TopParameter:
-      name: $top
-      in: query
-      description: The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-      required: true
-      schema:
-        type: string
-    FilterParameter:
-      name: $filter
-      in: query
-      description: 'The query used to filter the search results using OData syntax. Filtering is permitted on the ''name'' property only and with limited number of OData operations. These operations are: the ''contains'' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, ''PATTERN'') and name ne ''PATTERN-1''. The following is not a valid filter example: $filter=location eq ''westus''.'
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
+        properties:
+          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
+          description: Properties of the PrivateEndpointConnection.
+          x-ms-client-flatten: true
   securitySchemes:
     azure_auth:
       type: oauth2

@@ -281,21 +281,73 @@ components:
         certPasswordReference:
           type: string
           description: Secret Reference Name (Pfx or Pem password).
-    AssetEndpointProfileListResult:
+    X509Credentials:
       type: object
-      description: The response of a AssetEndpointProfile list operation.
+      description: The x509 certificate for authentication mode Certificate.
       properties:
-        value:
-          type: array
-          description: The AssetEndpointProfile items on this page
-          items:
-            $ref: '#/components/schemas/AssetEndpointProfile'
-        nextLink:
+        certificateReference:
           type: string
-          format: uri
-          description: The link to the next page of items
+          description: A reference to secret containing the certificate and private key (e.g. stored as .der/.pem or .der/.pfx).
       required:
-      - value
+      - certificateReference
+    AssetEndpointProfile:
+      type: object
+      description: Asset Endpoint Profile definition.
+      properties:
+        properties:
+          $ref: '#/components/schemas/AssetEndpointProfileProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocation'
+          description: The extended location.
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    TransportAuthentication:
+      type: object
+      description: Definition of the authentication mechanism for the southbound connector.
+      properties:
+        ownCertificates:
+          type: array
+          description: Defines a reference to a secret which contains all certificates and private keys that can be used by the southbound connector connecting to the shop floor/OT device. The accepted extensions are .der for certificates and .pfx/.pem for private keys.
+          items:
+            $ref: '#/components/schemas/OwnCertificate'
+          x-ms-identifiers: []
+      required:
+      - ownCertificates
+    ProvisioningState:
+      type: string
+      description: The provisioning status of the resource.
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Accepted
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+        values:
+        - name: Succeeded
+          value: Succeeded
+          description: Resource has been created.
+        - name: Failed
+          value: Failed
+          description: Resource creation failed.
+        - name: Canceled
+          value: Canceled
+          description: Resource creation was canceled.
+        - name: Accepted
+          value: Accepted
+          description: Resource has been accepted by the server.
+      readOnly: true
     UserAuthentication:
       type: object
       description: Definition of the client authentication mechanism to the server.
@@ -329,31 +381,6 @@ components:
           description: Defines the certificate reference when Certificate user authentication mode is selected.
       required:
       - mode
-    ProvisioningState:
-      type: string
-      description: The provisioning status of the resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Accepted
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-        values:
-        - name: Succeeded
-          value: Succeeded
-          description: Resource has been created.
-        - name: Failed
-          value: Failed
-          description: Resource creation failed.
-        - name: Canceled
-          value: Canceled
-          description: Resource creation was canceled.
-        - name: Accepted
-          value: Accepted
-          description: Resource has been accepted by the server.
-      readOnly: true
     AssetEndpointProfileUpdateProperties:
       type: object
       description: The updatable properties of the AssetEndpointProfile.
@@ -371,16 +398,6 @@ components:
         additionalConfiguration:
           type: string
           description: Contains connectivity type specific further configuration (e.g. OPC UA, Modbus, ONVIF).
-    TransportAuthenticationUpdate:
-      type: object
-      description: Definition of the authentication mechanism for the southbound connector.
-      properties:
-        ownCertificates:
-          type: array
-          description: Defines a reference to a secret which contains all certificates and private keys that can be used by the southbound connector connecting to the shop floor/OT device. The accepted extensions are .der for certificates and .pfx/.pem for private keys.
-          items:
-            $ref: '#/components/schemas/OwnCertificate'
-          x-ms-identifiers: []
     UserAuthenticationUpdate:
       type: object
       description: Definition of the client authentication mechanism to the server.
@@ -412,6 +429,46 @@ components:
         x509Credentials:
           $ref: '#/components/schemas/X509CredentialsUpdate'
           description: Defines the certificate reference when Certificate user authentication mode is selected.
+    UsernamePasswordCredentialsUpdate:
+      type: object
+      description: The credentials for authentication mode UsernamePassword.
+      properties:
+        usernameReference:
+          type: string
+          description: A reference to secret containing the username.
+        passwordReference:
+          type: string
+          description: A reference to secret containing the password.
+    X509CredentialsUpdate:
+      type: object
+      description: The x509 certificate for authentication mode Certificate.
+      properties:
+        certificateReference:
+          type: string
+          description: A reference to secret containing the certificate and private key (e.g. stored as .der/.pem or .der/.pfx).
+    UsernamePasswordCredentials:
+      type: object
+      description: The credentials for authentication mode UsernamePassword.
+      properties:
+        usernameReference:
+          type: string
+          description: A reference to secret containing the username.
+        passwordReference:
+          type: string
+          description: A reference to secret containing the password.
+      required:
+      - usernameReference
+      - passwordReference
+    TransportAuthenticationUpdate:
+      type: object
+      description: Definition of the authentication mechanism for the southbound connector.
+      properties:
+        ownCertificates:
+          type: array
+          description: Defines a reference to a secret which contains all certificates and private keys that can be used by the southbound connector connecting to the shop floor/OT device. The accepted extensions are .der for certificates and .pfx/.pem for private keys.
+          items:
+            $ref: '#/components/schemas/OwnCertificate'
+          x-ms-identifiers: []
     ExtendedLocation:
       type: object
       description: The extended location.
@@ -425,16 +482,18 @@ components:
       required:
       - type
       - name
-    UsernamePasswordCredentialsUpdate:
+    AssetEndpointProfileUpdate:
       type: object
-      description: The credentials for authentication mode UsernamePassword.
+      description: The type used for update operations of the AssetEndpointProfile.
       properties:
-        usernameReference:
-          type: string
-          description: A reference to secret containing the username.
-        passwordReference:
-          type: string
-          description: A reference to secret containing the password.
+        tags:
+          type: object
+          description: Resource tags.
+          additionalProperties:
+            type: string
+        properties:
+          $ref: '#/components/schemas/AssetEndpointProfileUpdateProperties'
+          x-ms-client-flatten: true
     AssetEndpointProfileProperties:
       type: object
       description: Defines the Asset Endpoint Profile properties.
@@ -462,80 +521,21 @@ components:
           readOnly: true
       required:
       - targetAddress
-    X509CredentialsUpdate:
+    AssetEndpointProfileListResult:
       type: object
-      description: The x509 certificate for authentication mode Certificate.
+      description: The response of a AssetEndpointProfile list operation.
       properties:
-        certificateReference:
-          type: string
-          description: A reference to secret containing the certificate and private key (e.g. stored as .der/.pem or .der/.pfx).
-    X509Credentials:
-      type: object
-      description: The x509 certificate for authentication mode Certificate.
-      properties:
-        certificateReference:
-          type: string
-          description: A reference to secret containing the certificate and private key (e.g. stored as .der/.pem or .der/.pfx).
-      required:
-      - certificateReference
-    UsernamePasswordCredentials:
-      type: object
-      description: The credentials for authentication mode UsernamePassword.
-      properties:
-        usernameReference:
-          type: string
-          description: A reference to secret containing the username.
-        passwordReference:
-          type: string
-          description: A reference to secret containing the password.
-      required:
-      - usernameReference
-      - passwordReference
-    AssetEndpointProfileUpdate:
-      type: object
-      description: The type used for update operations of the AssetEndpointProfile.
-      properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-        properties:
-          $ref: '#/components/schemas/AssetEndpointProfileUpdateProperties'
-          x-ms-client-flatten: true
-    TransportAuthentication:
-      type: object
-      description: Definition of the authentication mechanism for the southbound connector.
-      properties:
-        ownCertificates:
+        value:
           type: array
-          description: Defines a reference to a secret which contains all certificates and private keys that can be used by the southbound connector connecting to the shop floor/OT device. The accepted extensions are .der for certificates and .pfx/.pem for private keys.
+          description: The AssetEndpointProfile items on this page
           items:
-            $ref: '#/components/schemas/OwnCertificate'
-          x-ms-identifiers: []
+            $ref: '#/components/schemas/AssetEndpointProfile'
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
       required:
-      - ownCertificates
-    AssetEndpointProfile:
-      type: object
-      description: Asset Endpoint Profile definition.
-      properties:
-        properties:
-          $ref: '#/components/schemas/AssetEndpointProfileProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocation'
-          description: The extended location.
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+      - value
   securitySchemes:
     azure_auth:
       type: oauth2

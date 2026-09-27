@@ -282,23 +282,6 @@ paths:
         description: The required parameters to perform encryption migration.
 components:
   schemas:
-    encryptionMigrationRequest:
-      description: Encryption migration request
-      type: object
-      required:
-      - virtualNetworkId
-      - privateEndpointId
-      properties:
-        virtualNetworkId:
-          title: virtualNetworkId
-          type: string
-          description: Identifier for the virtual network
-          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/vnet1
-        privateEndpointId:
-          title: privateEndpointId
-          type: string
-          description: Identifier of the private endpoint to reach the Azure Key Vault
-          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/privateEndpoints/privateIP1
     netAppAccountPatch:
       description: NetApp account patch resource
       type: object
@@ -348,67 +331,72 @@ components:
         identity:
           description: The identity used for the resource.
           $ref: ../../../../../common-types/resource-management/v5/managedidentity.json#/definitions/ManagedServiceIdentity
-    accountEncryption:
+    encryptionMigrationRequest:
+      description: Encryption migration request
       type: object
-      description: Encryption settings
+      required:
+      - virtualNetworkId
+      - privateEndpointId
       properties:
-        keySource:
+        virtualNetworkId:
+          title: virtualNetworkId
           type: string
-          description: 'The encryption keySource (provider). Possible values (case-insensitive):  Microsoft.NetApp, Microsoft.KeyVault'
-          enum:
-          - Microsoft.NetApp
-          - Microsoft.KeyVault
-          x-ms-enum:
-            name: KeySource
-            modelAsString: true
-            values:
-            - value: Microsoft.NetApp
-              description: Microsoft-managed key encryption
-            - value: Microsoft.KeyVault
-              description: Customer-managed key encryption
-          default: Microsoft.NetApp
-        keyVaultProperties:
-          $ref: '#/components/schemas/KeyVaultProperties'
-          description: Properties provided by KeVault. Applicable if keySource is 'Microsoft.KeyVault'.
-        identity:
-          $ref: '#/components/schemas/EncryptionIdentity'
-          description: Identity used to authenticate to KeyVault. Applicable if keySource is 'Microsoft.KeyVault'.
-    resourceTags:
-      type: object
-      additionalProperties:
-        type: string
-      description: Tags are a list of key-value pairs that describe the resource
-    netAppAccountList:
-      description: List of NetApp account resources
+          description: Identifier for the virtual network
+          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/virtualNetworks/vnet1
+        privateEndpointId:
+          title: privateEndpointId
+          type: string
+          description: Identifier of the private endpoint to reach the Azure Key Vault
+          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.Network/privateEndpoints/privateIP1
+    accountProperties:
+      description: NetApp account properties
       type: object
       properties:
-        value:
+        provisioningState:
+          type: string
+          readOnly: true
+          description: Azure lifecycle management
+        activeDirectories:
+          description: Active Directories
           type: array
-          description: Multiple NetApp accounts
           items:
-            $ref: '#/components/schemas/netAppAccount'
-        nextLink:
-          type: string
-          description: URL to get the next set of results.
-    ldapSearchScopeOpt:
+            $ref: '#/components/schemas/activeDirectory'
+          x-ms-identifiers:
+          - activeDirectoryId
+        encryption:
+          description: Encryption settings
+          $ref: '#/components/schemas/accountEncryption'
+        disableShowmount:
+          type:
+          - boolean
+          - 'null'
+          readOnly: true
+          description: Shows the status of disableShowmount for all volumes under the subscription, null equals false
+        nfsV4IDDomain:
+          type:
+          - string
+          - 'null'
+          description: Domain for NFSv4 user ID mapping. This property will be set for all NetApp accounts in the subscription and region and only affect non ldap NFSv4 volumes.
+          maxLength: 255
+          pattern: ^[a-zA-Z0-9][a-zA-Z0-9.-]{0,253}[a-zA-Z0-9]$
+          example: defaultv4IDDomain.com
+        isMultiAdEnabled:
+          type:
+          - boolean
+          - 'null'
+          readOnly: true
+          description: This will have true value only if account is Multiple AD enabled.
+    EncryptionIdentity:
+      description: Identity used to authenticate with key vault.
       type: object
-      description: 'LDAP search scope '
       properties:
-        userDN:
+        principalId:
           type: string
-          description: This specifies the user DN, which overrides the base DN for user lookups.
-          maxLength: 255
-          example: OU=fin,OU=hr,dc=domain,dc=com
-        groupDN:
+          description: The principal ID (object ID) of the identity used to authenticate with key vault. Read-only.
+          readOnly: true
+        userAssignedIdentity:
           type: string
-          description: This specifies the group DN, which overrides the base DN for group lookups.
-          maxLength: 255
-          example: OU=fin,OU=hr,dc=domain,dc=com
-        groupMembershipFilter:
-          type: string
-          description: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server.
-          maxLength: 255
-          example: cn=*99
+          description: The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has 'UserAssigned'. It should match key of identity.userAssignedIdentities.
     activeDirectory:
       description: Active Directory
       type: object
@@ -593,55 +581,67 @@ components:
               description: Error with the KeyVault connection
             - value: Updating
               description: KeyVault connection Updating
-    EncryptionIdentity:
-      description: Identity used to authenticate with key vault.
+    accountEncryption:
+      type: object
+      description: Encryption settings
+      properties:
+        keySource:
+          type: string
+          description: 'The encryption keySource (provider). Possible values (case-insensitive):  Microsoft.NetApp, Microsoft.KeyVault'
+          enum:
+          - Microsoft.NetApp
+          - Microsoft.KeyVault
+          x-ms-enum:
+            name: KeySource
+            modelAsString: true
+            values:
+            - value: Microsoft.NetApp
+              description: Microsoft-managed key encryption
+            - value: Microsoft.KeyVault
+              description: Customer-managed key encryption
+          default: Microsoft.NetApp
+        keyVaultProperties:
+          $ref: '#/components/schemas/KeyVaultProperties'
+          description: Properties provided by KeVault. Applicable if keySource is 'Microsoft.KeyVault'.
+        identity:
+          $ref: '#/components/schemas/EncryptionIdentity'
+          description: Identity used to authenticate to KeyVault. Applicable if keySource is 'Microsoft.KeyVault'.
+    netAppAccountList:
+      description: List of NetApp account resources
       type: object
       properties:
-        principalId:
-          type: string
-          description: The principal ID (object ID) of the identity used to authenticate with key vault. Read-only.
-          readOnly: true
-        userAssignedIdentity:
-          type: string
-          description: The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has 'UserAssigned'. It should match key of identity.userAssignedIdentities.
-    accountProperties:
-      description: NetApp account properties
-      type: object
-      properties:
-        provisioningState:
-          type: string
-          readOnly: true
-          description: Azure lifecycle management
-        activeDirectories:
-          description: Active Directories
+        value:
           type: array
+          description: Multiple NetApp accounts
           items:
-            $ref: '#/components/schemas/activeDirectory'
-          x-ms-identifiers:
-          - activeDirectoryId
-        encryption:
-          description: Encryption settings
-          $ref: '#/components/schemas/accountEncryption'
-        disableShowmount:
-          type:
-          - boolean
-          - 'null'
-          readOnly: true
-          description: Shows the status of disableShowmount for all volumes under the subscription, null equals false
-        nfsV4IDDomain:
-          type:
-          - string
-          - 'null'
-          description: Domain for NFSv4 user ID mapping. This property will be set for all NetApp accounts in the subscription and region and only affect non ldap NFSv4 volumes.
+            $ref: '#/components/schemas/netAppAccount'
+        nextLink:
+          type: string
+          description: URL to get the next set of results.
+    ldapSearchScopeOpt:
+      type: object
+      description: 'LDAP search scope '
+      properties:
+        userDN:
+          type: string
+          description: This specifies the user DN, which overrides the base DN for user lookups.
           maxLength: 255
-          pattern: ^[a-zA-Z0-9][a-zA-Z0-9.-]{0,253}[a-zA-Z0-9]$
-          example: defaultv4IDDomain.com
-        isMultiAdEnabled:
-          type:
-          - boolean
-          - 'null'
-          readOnly: true
-          description: This will have true value only if account is Multiple AD enabled.
+          example: OU=fin,OU=hr,dc=domain,dc=com
+        groupDN:
+          type: string
+          description: This specifies the group DN, which overrides the base DN for group lookups.
+          maxLength: 255
+          example: OU=fin,OU=hr,dc=domain,dc=com
+        groupMembershipFilter:
+          type: string
+          description: This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server.
+          maxLength: 255
+          example: cn=*99
+    resourceTags:
+      type: object
+      additionalProperties:
+        type: string
+      description: Tags are a list of key-value pairs that describe the resource
   parameters:
     AccountName:
       name: accountName

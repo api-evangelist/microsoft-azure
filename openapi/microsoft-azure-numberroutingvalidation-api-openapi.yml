@@ -52,36 +52,97 @@ paths:
               $ref: '#/components/schemas/SipConfiguration'
         description: Sip configuration object to test with targetPhoneNumber.
 components:
+  parameters:
+    ApiVersionParameter:
+      in: query
+      name: api-version
+      description: Version of API to invoke
+      required: true
+      schema:
+        type: string
   schemas:
-    TrunkRoute:
-      description: Represents a trunk route for routing calls.
+    Tls:
+      type: object
+      description: The status of the TLS connections of the Trunk.
       required:
-      - name
-      - numberPattern
+      - status
+      properties:
+        status:
+          type: string
+          description: The status of the TLS connections of the Trunk.
+          enum:
+          - unknown
+          - ok
+          - certExpiring
+          - certExpired
+          x-ms-enum:
+            modelAsString: true
+            name: tlsStatus
+            values:
+            - value: unknown
+              description: Indicates an unknown status.
+            - value: ok
+              description: Indicates the status is okay.
+            - value: certExpiring
+              description: Indicates the Trunk certificate is expiring.
+            - value: certExpired
+              description: Indicates the Trunk certificate is expired.
+    Trunk:
+      description: Represents a SIP trunk for routing calls. See RFC 4904. Can be expanded with additional data.
+      required:
+      - sipSignalingPort
+      - enabled
       type: object
       properties:
-        description:
-          description: Gets or sets description of the route.
-          maxLength: 1024
+        sipSignalingPort:
+          format: int32
+          description: Gets or sets SIP signaling port of the trunk.
+          type: integer
+        enabled:
+          description: Enabled flag
+          $ref: '#/components/schemas/Enabled'
+        health:
+          description: Represents health state of a SIP trunk for routing calls.
+          type: object
+          readOnly: true
+          $ref: '#/components/schemas/Health'
+    Ping:
+      type: object
+      description: The status of SIP OPTIONS message sent by Trunk.
+      required:
+      - status
+      properties:
+        status:
           type: string
-        name:
-          description: Gets or sets name of the route.
-          maxLength: 256
-          type: string
-        numberPattern:
-          description: 'Gets or sets regex number pattern for routing calls. .NET regex format is supported.
+          description: The status of SIP OPTIONS message sent by Trunk.
+          enum:
+          - unknown
+          - ok
+          - expired
+          - error
+          x-ms-enum:
+            name: pingStatus
+            modelAsString: true
+            values:
+            - value: unknown
+              description: Indicates an unknown status.
+            - value: ok
+              description: Indicates the status is okay.
+            - value: expired
+              description: Indicates the status is expired.
+            - value: error
+              description: Indicates the status is at an error level.
+    Domain:
+      description: 'Represents Domain object as response of validation api.
 
-            The regex should match only digits with an optional ''+'' prefix without spaces.
-
-            I.e. "^\+[1-9][0-9]{3,23}$".'
-          maxLength: 1024
-          type: string
-        trunks:
-          description: Gets or sets list of SIP trunks for routing calls. Trunks are represented as FQDN.
-          maxItems: 250
-          type: array
-          items:
-            type: string
+        Map key is domain.'
+      required:
+      - enabled
+      type: object
+      properties:
+        enabled:
+          description: Enabled flag
+          $ref: '#/components/schemas/Enabled'
     OverallHealth:
       type: object
       description: The overall health status of Trunk.
@@ -122,93 +183,35 @@ components:
               description: Indicates ping status is expired.
             - value: noRecentCallsAndPings
               description: Indicates no recent calls and ping status is expired.
-    Tls:
-      type: object
-      description: The status of the TLS connections of the Trunk.
+    TrunkRoute:
+      description: Represents a trunk route for routing calls.
       required:
-      - status
+      - name
+      - numberPattern
+      type: object
       properties:
-        status:
+        description:
+          description: Gets or sets description of the route.
+          maxLength: 1024
           type: string
-          description: The status of the TLS connections of the Trunk.
-          enum:
-          - unknown
-          - ok
-          - certExpiring
-          - certExpired
-          x-ms-enum:
-            modelAsString: true
-            name: tlsStatus
-            values:
-            - value: unknown
-              description: Indicates an unknown status.
-            - value: ok
-              description: Indicates the status is okay.
-            - value: certExpiring
-              description: Indicates the Trunk certificate is expiring.
-            - value: certExpired
-              description: Indicates the Trunk certificate is expired.
-    Domain:
-      description: 'Represents Domain object as response of validation api.
+        name:
+          description: Gets or sets name of the route.
+          maxLength: 256
+          type: string
+        numberPattern:
+          description: 'Gets or sets regex number pattern for routing calls. .NET regex format is supported.
 
-        Map key is domain.'
-      required:
-      - enabled
-      type: object
-      properties:
-        enabled:
-          description: Enabled flag
-          $ref: '#/components/schemas/Enabled'
-    Health:
-      description: Represents health state of a SIP trunk for routing calls.
-      type: object
-      required:
-      - tls
-      - ping
-      - overall
-      properties:
-        tls:
-          $ref: '#/components/schemas/Tls'
-        ping:
-          $ref: '#/components/schemas/Ping'
-        overall:
-          $ref: '#/components/schemas/OverallHealth'
-    Ping:
-      type: object
-      description: The status of SIP OPTIONS message sent by Trunk.
-      required:
-      - status
-      properties:
-        status:
+            The regex should match only digits with an optional ''+'' prefix without spaces.
+
+            I.e. "^\+[1-9][0-9]{3,23}$".'
+          maxLength: 1024
           type: string
-          description: The status of SIP OPTIONS message sent by Trunk.
-          enum:
-          - unknown
-          - ok
-          - expired
-          - error
-          x-ms-enum:
-            name: pingStatus
-            modelAsString: true
-            values:
-            - value: unknown
-              description: Indicates an unknown status.
-            - value: ok
-              description: Indicates the status is okay.
-            - value: expired
-              description: Indicates the status is expired.
-            - value: error
-              description: Indicates the status is at an error level.
-    RoutesForNumber:
-      description: Represents number routing validation details.
-      type: object
-      properties:
-        matchingRoutes:
-          description: The list of routes whose number patterns are matched by the target number. The routes are displayed and apply in the same order as in SipConfiguration.
+        trunks:
+          description: Gets or sets list of SIP trunks for routing calls. Trunks are represented as FQDN.
           maxItems: 250
           type: array
           items:
-            $ref: '#/components/schemas/TrunkRoute'
+            type: string
     SipConfiguration:
       description: 'Represents a SIP configuration.
 
@@ -241,38 +244,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TrunkRoute'
-    Trunk:
-      description: Represents a SIP trunk for routing calls. See RFC 4904. Can be expanded with additional data.
-      required:
-      - sipSignalingPort
-      - enabled
+    RoutesForNumber:
+      description: Represents number routing validation details.
       type: object
       properties:
-        sipSignalingPort:
-          format: int32
-          description: Gets or sets SIP signaling port of the trunk.
-          type: integer
-        enabled:
-          description: Enabled flag
-          $ref: '#/components/schemas/Enabled'
-        health:
-          description: Represents health state of a SIP trunk for routing calls.
-          type: object
-          readOnly: true
-          $ref: '#/components/schemas/Health'
+        matchingRoutes:
+          description: The list of routes whose number patterns are matched by the target number. The routes are displayed and apply in the same order as in SipConfiguration.
+          maxItems: 250
+          type: array
+          items:
+            $ref: '#/components/schemas/TrunkRoute'
+    Health:
+      description: Represents health state of a SIP trunk for routing calls.
+      type: object
+      required:
+      - tls
+      - ping
+      - overall
+      properties:
+        tls:
+          $ref: '#/components/schemas/Tls'
+        ping:
+          $ref: '#/components/schemas/Ping'
+        overall:
+          $ref: '#/components/schemas/OverallHealth'
     Enabled:
       type: boolean
       description: 'Flag if domain is enabled or not.
 
         If enabled it''s used in configuration, if not enabled it''s not used.'
-  parameters:
-    ApiVersionParameter:
-      in: query
-      name: api-version
-      description: Version of API to invoke
-      required: true
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2
