@@ -40,6 +40,25 @@ paths:
       - Query Knowledgebases
 components:
   schemas:
+    AnswersResult:
+      type: object
+      description: Represents List of Question Answers.
+      additionalProperties: false
+      properties:
+        answers:
+          type: array
+          description: Represents Answer Result list.
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseAnswer'
+    LogicalOperationKind:
+      type: string
+      description: Set to 'OR' or 'AND' for using corresponding logical operation.
+      x-ms-enum:
+        name: LogicalOperationKind
+        modelAsString: true
+      enum:
+      - AND
+      - OR
     ShortAnswerOptions:
       type: object
       description: To configure Answer span prediction feature.
@@ -69,52 +88,34 @@ components:
           format: int32
           maximum: 10
           minimum: 1
-    SourceFilter:
-      type: array
-      description: Find QnAs that are associated with any of the given list of sources in knowledge base.
-      items:
-        type: string
-    KnowledgeBaseAnswer:
+    KnowledgeBaseAnswerDialog:
       type: object
-      description: Represents knowledge base answer.
-      additionalProperties: false
+      description: Dialog associated with Answer.
       properties:
-        questions:
+        isContextOnly:
+          type: boolean
+          description: To mark if a prompt is relevant only with a previous question or not. If true, do not include this QnA as search result for queries without context; otherwise, if false, ignores context and includes this QnA in search result.
+        prompts:
           type: array
-          description: List of questions associated with the answer.
+          description: List of prompts associated with the answer.
+          maxItems: 20
           items:
-            type: string
-        answer:
-          type: string
-          description: Answer text.
-        confidenceScore:
-          type: number
-          format: double
-          x-ms-client-name: confidence
-          description: Answer confidence score, value ranges from 0 to 1.
-          maximum: 1
-          minimum: 0
-        id:
+            $ref: '#/components/schemas/KnowledgeBaseAnswerPrompt'
+    KnowledgeBaseAnswerContext:
+      type: object
+      description: Context object with previous QnA's information.
+      additionalProperties: false
+      required:
+      - previousQnaId
+      properties:
+        previousQnaId:
           type: integer
-          x-ms-client-name: qnaId
-          description: ID of the QnA result.
+          description: Previous turn top answer result QnA ID.
           format: int32
-        source:
+        previousUserQuery:
           type: string
-          description: Source of QnA result.
-        metadata:
-          type: object
-          description: Metadata associated with the answer, useful to categorize or filter question answers.
-          additionalProperties:
-            type: string
-        dialog:
-          type: object
-          $ref: '#/components/schemas/KnowledgeBaseAnswerDialog'
-        answerSpan:
-          type: object
-          x-ms-client-name: shortAnswer
-          description: Answer span object of QnA with respect to user's question.
-          $ref: '#/components/schemas/AnswerSpan'
+          x-ms-client-name: previousQuestion
+          description: Previous user query.
     KnowledgeBaseAnswerPrompt:
       type: object
       description: Prompt for an answer.
@@ -131,50 +132,6 @@ components:
           type: string
           description: Text displayed to represent a follow up question prompt.
           maxLength: 200
-    QueryFilters:
-      type: object
-      description: filters over knowledge base.
-      additionalProperties: false
-      properties:
-        metadataFilter:
-          type: object
-          $ref: '#/components/schemas/MetadataFilter'
-        sourceFilter:
-          type: object
-          $ref: '#/components/schemas/SourceFilter'
-        logicalOperation:
-          type: string
-          description: Logical operation used to join metadata filter with source filter.
-          $ref: '#/components/schemas/LogicalOperationKind'
-          default: AND
-    MetadataFilter:
-      type: object
-      description: Find QnAs that are associated with the given list of metadata.
-      additionalProperties: false
-      properties:
-        metadata:
-          type: array
-          items:
-            $ref: '#/components/schemas/MetadataRecord'
-        logicalOperation:
-          type: string
-          description: Operation used to join metadata filters.
-          $ref: '#/components/schemas/LogicalOperationKind'
-          default: AND
-    MetadataRecord:
-      type: object
-      description: Object to provide the key value pair for each metadata.
-      additionalProperties: false
-      required:
-      - key
-      - value
-      properties:
-        key:
-          type: string
-          description: Metadata Key from Metadata dictionary used in the QnA.
-        value:
-          type: string
-          description: Metadata Value from Metadata dictionary used in the QnA.
     AnswersOptions:
       type: object
       description: Parameters to query a knowledge base.
@@ -230,44 +187,36 @@ components:
         includeUnstructuredSources:
           type: boolean
           description: (Optional) Flag to enable Query over Unstructured Sources.
-    AnswersResult:
+    QueryFilters:
       type: object
-      description: Represents List of Question Answers.
+      description: filters over knowledge base.
       additionalProperties: false
       properties:
-        answers:
-          type: array
-          description: Represents Answer Result list.
-          items:
-            $ref: '#/components/schemas/KnowledgeBaseAnswer'
-    KnowledgeBaseAnswerContext:
+        metadataFilter:
+          type: object
+          $ref: '#/components/schemas/MetadataFilter'
+        sourceFilter:
+          type: object
+          $ref: '#/components/schemas/SourceFilter'
+        logicalOperation:
+          type: string
+          description: Logical operation used to join metadata filter with source filter.
+          $ref: '#/components/schemas/LogicalOperationKind'
+          default: AND
+    MetadataRecord:
       type: object
-      description: Context object with previous QnA's information.
+      description: Object to provide the key value pair for each metadata.
       additionalProperties: false
       required:
-      - previousQnaId
+      - key
+      - value
       properties:
-        previousQnaId:
-          type: integer
-          description: Previous turn top answer result QnA ID.
-          format: int32
-        previousUserQuery:
+        key:
           type: string
-          x-ms-client-name: previousQuestion
-          description: Previous user query.
-    KnowledgeBaseAnswerDialog:
-      type: object
-      description: Dialog associated with Answer.
-      properties:
-        isContextOnly:
-          type: boolean
-          description: To mark if a prompt is relevant only with a previous question or not. If true, do not include this QnA as search result for queries without context; otherwise, if false, ignores context and includes this QnA in search result.
-        prompts:
-          type: array
-          description: List of prompts associated with the answer.
-          maxItems: 20
-          items:
-            $ref: '#/components/schemas/KnowledgeBaseAnswerPrompt'
+          description: Metadata Key from Metadata dictionary used in the QnA.
+        value:
+          type: string
+          description: Metadata Value from Metadata dictionary used in the QnA.
     AnswerSpan:
       type: object
       description: Answer span object of QnA.
@@ -291,15 +240,66 @@ components:
           type: integer
           description: The length of the answer span.
           format: int32
-    LogicalOperationKind:
-      type: string
-      description: Set to 'OR' or 'AND' for using corresponding logical operation.
-      x-ms-enum:
-        name: LogicalOperationKind
-        modelAsString: true
-      enum:
-      - AND
-      - OR
+    MetadataFilter:
+      type: object
+      description: Find QnAs that are associated with the given list of metadata.
+      additionalProperties: false
+      properties:
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetadataRecord'
+        logicalOperation:
+          type: string
+          description: Operation used to join metadata filters.
+          $ref: '#/components/schemas/LogicalOperationKind'
+          default: AND
+    SourceFilter:
+      type: array
+      description: Find QnAs that are associated with any of the given list of sources in knowledge base.
+      items:
+        type: string
+    KnowledgeBaseAnswer:
+      type: object
+      description: Represents knowledge base answer.
+      additionalProperties: false
+      properties:
+        questions:
+          type: array
+          description: List of questions associated with the answer.
+          items:
+            type: string
+        answer:
+          type: string
+          description: Answer text.
+        confidenceScore:
+          type: number
+          format: double
+          x-ms-client-name: confidence
+          description: Answer confidence score, value ranges from 0 to 1.
+          maximum: 1
+          minimum: 0
+        id:
+          type: integer
+          x-ms-client-name: qnaId
+          description: ID of the QnA result.
+          format: int32
+        source:
+          type: string
+          description: Source of QnA result.
+        metadata:
+          type: object
+          description: Metadata associated with the answer, useful to categorize or filter question answers.
+          additionalProperties:
+            type: string
+        dialog:
+          type: object
+          $ref: '#/components/schemas/KnowledgeBaseAnswerDialog'
+        answerSpan:
+          type: object
+          x-ms-client-name: shortAnswer
+          description: Answer span object of QnA with respect to user's question.
+          $ref: '#/components/schemas/AnswerSpan'
   parameters:
     AnswersOptions:
       name: knowledgeBaseQueryOptions

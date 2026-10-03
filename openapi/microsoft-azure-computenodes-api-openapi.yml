@@ -1364,42 +1364,111 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    AutoUserSpecification:
+    EnvironmentSetting:
       properties:
-        scope:
+        name:
           type: string
-          title: The scope for the auto user
-          description: The default value is pool. If the pool is running Windows a value of Task should be specified if stricter isolation between tasks is required. For example, if the task mutates the registry in a way which could impact other tasks, or if certificates have been specified on the pool which should not be accessible by normal tasks but should be accessible by StartTasks.
+          title: The name of the environment variable.
+        value:
+          type: string
+          title: The value of the environment variable.
+      required:
+      - name
+      title: An environment variable to be set on a Task process.
+    UploadBatchServiceLogsConfiguration:
+      properties:
+        containerUrl:
+          type: string
+          title: The URL of the container within Azure Blob Storage to which to upload the Batch Service log file(s).
+          description: The URL must include a Shared Access Signature (SAS) granting write permissions to the container. The SAS duration must allow enough time for the upload to finish. The start time for SAS is optional and recommended to not be specified.
+        startTime:
+          type: string
+          format: date-time
+          title: The start of the time range from which to upload Batch Service log file(s).
+          description: Any log file containing a log message in the time range will be uploaded. This means that the operation might retrieve more logs than have been requested since the entire log file is always uploaded, but the operation should not retrieve fewer logs than have been requested.
+        endTime:
+          type: string
+          format: date-time
+          title: The end of the time range from which to upload Batch Service log file(s).
+          description: Any log file containing a log message in the time range will be uploaded. This means that the operation might retrieve more logs than have been requested since the entire log file is always uploaded, but the operation should not retrieve fewer logs than have been requested. If omitted, the default is to upload all logs available after the startTime.
+      required:
+      - containerUrl
+      - startTime
+      title: The Azure Batch service log files upload configuration for a Compute Node.
+    NodeDisableSchedulingParameter:
+      properties:
+        nodeDisableSchedulingOption:
+          type: string
+          title: What to do with currently running Tasks when disabling Task scheduling on the Compute Node.
+          description: The default value is requeue.
           enum:
-          - task
-          - pool
+          - requeue
+          - terminate
+          - taskcompletion
           x-ms-enum:
-            name: AutoUserScope
+            name: DisableComputeNodeSchedulingOption
             modelAsString: false
             values:
-            - value: task
-              description: Specifies that the service should create a new user for the Task.
-            - value: pool
-              description: Specifies that the Task runs as the common auto user Account which is created on every Compute Node in a Pool.
-        elevationLevel:
-          title: The elevation level of the auto user.
-          description: The default value is nonAdmin.
-          $ref: '#/components/schemas/ElevationLevel'
-      title: Specifies the parameters for the auto user that runs a Task on the Batch service.
-    UploadBatchServiceLogsResult:
+            - value: requeue
+              description: Terminate running Task processes and requeue the Tasks. The Tasks may run again on other Compute Nodes, or when Task scheduling is re-enabled on this Compute Node. Enter offline state as soon as Tasks have been terminated.
+            - value: terminate
+              description: Terminate running Tasks. The Tasks will be completed with failureInfo indicating that they were terminated, and will not run again. Enter offline state as soon as Tasks have been terminated.
+            - value: taskcompletion
+              description: Allow currently running Tasks to complete. Schedule no new Tasks while waiting. Enter offline state when all Tasks have completed.
+              name: taskCompletion
+      title: Options for disabling scheduling on a Compute Node.
+    NameValuePair:
       properties:
-        virtualDirectoryName:
+        name:
           type: string
-          title: The virtual directory within Azure Blob Storage container to which the Batch Service log file(s) will be uploaded.
-          description: The virtual directory name is part of the blob name for each log file uploaded, and it is built based poolId, nodeId and a unique identifier.
-        numberOfFilesUploaded:
-          type: integer
-          format: int32
-          title: The number of log files which will be uploaded.
+          title: The name in the name-value pair.
+        value:
+          type: string
+          title: The value in the name-value pair.
+      title: Represents a name-value pair.
+    ComputeNodeEndpointConfiguration:
+      properties:
+        inboundEndpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/InboundEndpoint'
+          title: The list of inbound endpoints that are accessible on the Compute Node.
       required:
-      - virtualDirectoryName
-      - numberOfFilesUploaded
-      title: The result of uploading Batch service log files from a specific Compute Node.
+      - inboundEndpoints
+      title: The endpoint configuration for the Compute Node.
+    NodeAgentInformation:
+      properties:
+        version:
+          type: string
+          title: The version of the Batch Compute Node agent running on the Compute Node.
+          description: This version number can be checked against the Compute Node agent release notes located at https://github.com/Azure/Batch/blob/master/changelogs/nodeagent/CHANGELOG.md.
+        lastUpdateTime:
+          type: string
+          format: date-time
+          title: The time when the Compute Node agent was updated on the Compute Node.
+          description: This is the most recent time that the Compute Node agent was updated to a new version.
+      required:
+      - version
+      - lastUpdateTime
+      title: Information about the Compute Node agent.
+      description: The Batch Compute Node agent is a program that runs on each Compute Node in the Pool and provides Batch capability on the Compute Node.
+    ContainerRegistry:
+      properties:
+        registryServer:
+          type: string
+          title: The registry URL.
+          description: If omitted, the default is "docker.io".
+        username:
+          type: string
+          x-ms-client-name: userName
+          title: The user name to log into the registry server.
+        password:
+          type: string
+          title: The password to log into the registry server.
+      required:
+      - username
+      - password
+      title: A private container registry.
     ComputeNodeUser:
       properties:
         name:
@@ -1425,30 +1494,6 @@ components:
       required:
       - name
       title: A user Account for RDP or SSH access on a Compute Node.
-    TaskInformation:
-      properties:
-        taskUrl:
-          type: string
-          title: The URL of the Task.
-        jobId:
-          type: string
-          title: The ID of the Job to which the Task belongs.
-        taskId:
-          type: string
-          title: The ID of the Task.
-        subtaskId:
-          type: integer
-          format: int32
-          title: The ID of the subtask if the Task is a multi-instance Task.
-        taskState:
-          title: The current state of the Task.
-          $ref: '#/components/schemas/TaskState'
-        executionInfo:
-          $ref: '#/components/schemas/TaskExecutionInformation'
-          title: Information about the execution of the Task.
-      required:
-      - taskState
-      title: Information about a Task running on a Compute Node.
     NodeRemoveParameter:
       properties:
         nodeList:
@@ -1470,6 +1515,166 @@ components:
       required:
       - nodeList
       title: Options for removing Compute Nodes from a Pool.
+    ComputeNodeDeallocationOption:
+      type: string
+      title: Determines what to do with a Compute Node and its running task(s) after it has been selected for deallocation.
+      description: The default value is requeue.
+      enum:
+      - requeue
+      - terminate
+      - taskcompletion
+      - retaineddata
+      x-ms-enum:
+        name: ComputeNodeDeallocationOption
+        modelAsString: false
+        values:
+        - value: requeue
+          description: Terminate running Task processes and requeue the Tasks. The Tasks will run again when a Compute Node is available. Remove Compute Nodes as soon as Tasks have been terminated.
+        - value: terminate
+          description: Terminate running Tasks. The Tasks will be completed with failureInfo indicating that they were terminated, and will not run again. Remove Compute Nodes as soon as Tasks have been terminated.
+        - value: taskcompletion
+          description: Allow currently running Tasks to complete. Schedule no new Tasks while waiting. Remove Compute Nodes when all Tasks have completed.
+          name: taskCompletion
+        - value: retaineddata
+          description: Allow currently running Tasks to complete, then wait for all Task data retention periods to expire. Schedule no new Tasks while waiting. Remove Compute Nodes when all Task retention periods have expired.
+          name: retainedData
+    ComputeNodeError:
+      properties:
+        code:
+          type: string
+          title: An identifier for the Compute Node error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          type: string
+          title: A message describing the Compute Node error, intended to be suitable for display in a user interface.
+        errorDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/NameValuePair'
+          title: The list of additional error details related to the Compute Node error.
+      title: An error encountered by a Compute Node.
+    ComputeNodeGetRemoteLoginSettingsResult:
+      properties:
+        remoteLoginIPAddress:
+          type: string
+          title: The IP address used for remote login to the Compute Node.
+        remoteLoginPort:
+          type: integer
+          format: int32
+          title: The port used for remote login to the Compute Node.
+      required:
+      - remoteLoginIPAddress
+      - remoteLoginPort
+      title: The remote login settings for a Compute Node.
+    InboundEndpoint:
+      properties:
+        name:
+          type: string
+          title: The name of the endpoint.
+        protocol:
+          $ref: '#/components/schemas/InboundEndpointProtocol'
+          title: The protocol of the endpoint.
+        publicIPAddress:
+          type: string
+          title: The public IP address of the Compute Node.
+        publicFQDN:
+          type: string
+          title: The public fully qualified domain name for the Compute Node.
+        frontendPort:
+          type: integer
+          format: int32
+          title: The public port number of the endpoint.
+        backendPort:
+          type: integer
+          format: int32
+          title: The backend port number of the endpoint.
+      required:
+      - name
+      - protocol
+      - publicIPAddress
+      - publicFQDN
+      - frontendPort
+      - backendPort
+      title: An inbound endpoint on a Compute Node.
+    BatchErrorDetail:
+      properties:
+        key:
+          type: string
+          title: An identifier specifying the meaning of the Value property.
+        value:
+          type: string
+          title: The additional information included with the error response.
+      title: An item of additional information included in an Azure Batch error response.
+    NodeUpdateUserParameter:
+      properties:
+        password:
+          type: string
+          title: The password of the Account.
+          description: The password is required for Windows Compute Nodes (those created with 'cloudServiceConfiguration', or created with 'virtualMachineConfiguration' using a Windows Image reference). For Linux Compute Nodes, the password can optionally be specified along with the sshPublicKey property. If omitted, any existing password is removed.
+        expiryTime:
+          type: string
+          format: date-time
+          title: The time at which the Account should expire.
+          description: If omitted, the default is 1 day from the current time. For Linux Compute Nodes, the expiryTime has a precision up to a day.
+        sshPublicKey:
+          type: string
+          title: The SSH public key that can be used for remote login to the Compute Node.
+          description: The public key should be compatible with OpenSSH encoding and should be base 64 encoded. This property can be specified only for Linux Compute Nodes. If this is specified for a Windows Compute Node, then the Batch service rejects the request; if you are calling the REST API directly, the HTTP status code is 400 (Bad Request). If omitted, any existing SSH public key is removed.
+      title: The set of changes to be made to a user Account on a Compute Node.
+    TaskFailureInformation:
+      properties:
+        category:
+          title: The category of the Task error.
+          $ref: '#/components/schemas/ErrorCategory'
+        code:
+          type: string
+          title: An identifier for the Task error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          type: string
+          title: A message describing the Task error, intended to be suitable for display in a user interface.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/NameValuePair'
+          title: A list of additional details related to the error.
+      required:
+      - category
+      title: Information about a Task failure.
+    ResourceFile:
+      properties:
+        autoStorageContainerName:
+          type: string
+          title: The storage container name in the auto storage Account.
+          description: The autoStorageContainerName, storageContainerUrl and httpUrl properties are mutually exclusive and one of them must be specified.
+        storageContainerUrl:
+          type: string
+          title: The URL of the blob container within Azure Blob Storage.
+          description: 'The autoStorageContainerName, storageContainerUrl and httpUrl properties are mutually exclusive and one of them must be specified. This URL must be readable and listable using anonymous access; that is, the Batch service does not present any credentials when downloading blobs from the container. There are two ways to get such a URL for a container in Azure storage: include a Shared Access Signature (SAS) granting read and list permissions on the container, or set the ACL for the container to allow public access.'
+        httpUrl:
+          type: string
+          title: The URL of the file to download.
+          description: 'The autoStorageContainerName, storageContainerUrl and httpUrl properties are mutually exclusive and one of them must be specified. If the URL points to Azure Blob Storage, it must be readable using anonymous access; that is, the Batch service does not present any credentials when downloading the blob. There are two ways to get such a URL for a blob in Azure storage: include a Shared Access Signature (SAS) granting read permissions on the blob, or set the ACL for the blob or its container to allow public access.'
+        blobPrefix:
+          type: string
+          title: The blob prefix to use when downloading blobs from an Azure Storage container. Only the blobs whose names begin with the specified prefix will be downloaded.
+          description: The property is valid only when autoStorageContainerName or storageContainerUrl is used. This prefix can be a partial filename or a subdirectory. If a prefix is not specified, all the files in the container will be downloaded.
+        filePath:
+          type: string
+          title: The location on the Compute Node to which to download the file(s), relative to the Task's working directory.
+          description: If the httpUrl property is specified, the filePath is required and describes the path which the file will be downloaded to, including the filename. Otherwise, if the autoStorageContainerName or storageContainerUrl property is specified, filePath is optional and is the directory to download the files to. In the case where filePath is used as a directory, any directory structure already associated with the input data will be retained in full and appended to the specified filePath directory. The specified relative path cannot break out of the Task's working directory (for example by using '..').
+        fileMode:
+          type: string
+          title: The file permission mode attribute in octal format.
+          description: This property applies only to files being downloaded to Linux Compute Nodes. It will be ignored if it is specified for a resourceFile which will be downloaded to a Windows Compute Node. If this property is not specified for a Linux Compute Node, then a default value of 0770 is applied to the file.
+      title: A single file or multiple files to be downloaded to a Compute Node.
+    ErrorMessage:
+      properties:
+        lang:
+          type: string
+          title: The language code of the error message
+        value:
+          type: string
+          title: The text of the message.
+      title: An error message received in an Azure Batch error response.
     TaskExecutionResult:
       type: string
       title: The result of Task execution.
@@ -1486,15 +1691,44 @@ components:
         - value: failure
           description: There was an error during processing of the Task. The failure may have occurred before the Task process was launched, while the Task process was executing, or after the Task process exited.
           name: failure
-    BatchErrorDetail:
+    InboundEndpointProtocol:
+      type: string
+      title: The protocol of the endpoint.
+      enum:
+      - tcp
+      - udp
+      x-ms-enum:
+        name: InboundEndpointProtocol
+        modelAsString: false
+        values:
+        - value: tcp
+          description: Use TCP for the endpoint.
+          name: tcp
+        - value: udp
+          description: Use UDP for the endpoint.
+          name: udp
+    AutoUserSpecification:
       properties:
-        key:
+        scope:
           type: string
-          title: An identifier specifying the meaning of the Value property.
-        value:
-          type: string
-          title: The additional information included with the error response.
-      title: An item of additional information included in an Azure Batch error response.
+          title: The scope for the auto user
+          description: The default value is pool. If the pool is running Windows a value of Task should be specified if stricter isolation between tasks is required. For example, if the task mutates the registry in a way which could impact other tasks, or if certificates have been specified on the pool which should not be accessible by normal tasks but should be accessible by StartTasks.
+          enum:
+          - task
+          - pool
+          x-ms-enum:
+            name: AutoUserScope
+            modelAsString: false
+            values:
+            - value: task
+              description: Specifies that the service should create a new user for the Task.
+            - value: pool
+              description: Specifies that the Task runs as the common auto user Account which is created on every Compute Node in a Pool.
+        elevationLevel:
+          title: The elevation level of the auto user.
+          description: The default value is nonAdmin.
+          $ref: '#/components/schemas/ElevationLevel'
+      title: Specifies the parameters for the auto user that runs a Task on the Batch service.
     CertificateReference:
       properties:
         thumbprint:
@@ -1550,74 +1784,59 @@ components:
       - thumbprint
       - thumbprintAlgorithm
       title: A reference to a Certificate to be installed on Compute Nodes in a Pool.
-    StartTask:
+    TaskExecutionInformation:
       properties:
-        commandLine:
+        startTime:
           type: string
-          title: The command line of the StartTask.
-          description: The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux. If the command line refers to file paths, it should use a relative path (relative to the Task working directory), or use the Batch provided environment variable (https://docs.microsoft.com/en-us/azure/batch/batch-compute-node-environment-variables).
-        containerSettings:
-          $ref: '#/components/schemas/TaskContainerSettings'
-          title: The settings for the container under which the StartTask runs.
-          description: When this is specified, all directories recursively below the AZ_BATCH_NODE_ROOT_DIR (the root of Azure Batch directories on the node) are mapped into the container, all Task environment variables are mapped into the container, and the Task command line is executed in the container. Files produced in the container outside of AZ_BATCH_NODE_ROOT_DIR might not be reflected to the host disk, meaning that Batch file APIs will not be able to access those files.
-        resourceFiles:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceFile'
-          title: A list of files that the Batch service will download to the Compute Node before running the command line.  There is a maximum size for the list of resource files. When the max size is exceeded, the request will fail and the response error code will be RequestEntityTooLarge. If this occurs, the collection of ResourceFiles must be reduced in size. This can be achieved using .zip files, Application Packages, or Docker Containers.
-          description: Files listed under this element are located in the Task's working directory.
-        environmentSettings:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnvironmentSetting'
-          title: A list of environment variable settings for the StartTask.
-        userIdentity:
-          $ref: '#/components/schemas/UserIdentity'
-          title: The user identity under which the StartTask runs.
-          description: If omitted, the Task runs as a non-administrative user unique to the Task.
-        maxTaskRetryCount:
+          format: date-time
+          title: The time at which the Task started running.
+          description: '''Running'' corresponds to the running state, so if the Task specifies resource files or Packages, then the start time reflects the time at which the Task started downloading or deploying these. If the Task has been restarted or retried, this is the most recent time at which the Task started running. This property is present only for Tasks that are in the running or completed state.'
+        endTime:
+          type: string
+          format: date-time
+          title: The time at which the Task completed.
+          description: This property is set only if the Task is in the Completed state.
+        exitCode:
           type: integer
           format: int32
-          title: The maximum number of times the Task may be retried.
-          description: The Batch service retries a Task if its exit code is nonzero. Note that this value specifically controls the number of retries. The Batch service will try the Task once, and may then retry up to this limit. For example, if the maximum retry count is 3, Batch tries the Task up to 4 times (one initial try and 3 retries). If the maximum retry count is 0, the Batch service does not retry the Task. If the maximum retry count is -1, the Batch service retries the Task without limit.
-        waitForSuccess:
-          type: boolean
-          title: Whether the Batch service should wait for the StartTask to complete successfully (that is, to exit with exit code 0) before scheduling any Tasks on the Compute Node.
-          description: If true and the StartTask fails on a Node, the Batch service retries the StartTask up to its maximum retry count (maxTaskRetryCount). If the Task has still not completed successfully after all retries, then the Batch service marks the Node unusable, and will not schedule Tasks to it. This condition can be detected via the Compute Node state and failure info details. If false, the Batch service will not wait for the StartTask to complete. In this case, other Tasks can start executing on the Compute Node while the StartTask is still running; and even if the StartTask fails, new Tasks will continue to be scheduled on the Compute Node. The default is true.
+          title: The exit code of the program specified on the Task command line.
+          description: This property is set only if the Task is in the completed state. In general, the exit code for a process reflects the specific convention implemented by the application developer for that process. If you use the exit code value to make decisions in your code, be sure that you know the exit code convention used by the application process. However, if the Batch service terminates the Task (due to timeout, or user termination via the API) you may see an operating system-defined exit code.
+        containerInfo:
+          $ref: '#/components/schemas/TaskContainerExecutionInformation'
+          title: Information about the container under which the Task is executing.
+          description: This property is set only if the Task runs in a container context.
+        failureInfo:
+          $ref: '#/components/schemas/TaskFailureInformation'
+          title: Information describing the Task failure, if any.
+          description: This property is set only if the Task is in the completed state and encountered a failure.
+        retryCount:
+          type: integer
+          format: int32
+          title: The number of times the Task has been retried by the Batch service.
+          description: Task application failures (non-zero exit code) are retried, pre-processing errors (the Task could not be run) and file upload errors are not retried. The Batch service will retry the Task up to the limit specified by the constraints.
+        lastRetryTime:
+          type: string
+          format: date-time
+          title: The most recent time at which a retry of the Task started running.
+          description: This element is present only if the Task was retried (i.e. retryCount is nonzero). If present, this is typically the same as startTime, but may be different if the Task has been restarted for reasons other than retry; for example, if the Compute Node was rebooted during a retry, then the startTime is updated but the lastRetryTime is not.
+        requeueCount:
+          type: integer
+          format: int32
+          title: The number of times the Task has been requeued by the Batch service as the result of a user request.
+          description: When the user removes Compute Nodes from a Pool (by resizing/shrinking the pool) or when the Job is being disabled, the user can specify that running Tasks on the Compute Nodes be requeued for execution. This count tracks how many times the Task has been requeued for these reasons.
+        lastRequeueTime:
+          type: string
+          format: date-time
+          title: The most recent time at which the Task has been requeued by the Batch service as the result of a user request.
+          description: This property is set only if the requeueCount is nonzero.
+        result:
+          $ref: '#/components/schemas/TaskExecutionResult'
+          title: The result of the Task execution.
+          description: If the value is 'failed', then the details of the failure can be found in the failureInfo property.
       required:
-      - commandLine
-      title: A Task which is run when a Node joins a Pool in the Azure Batch service, or when the Compute Node is rebooted or reimaged.
-      description: Batch will retry Tasks when a recovery operation is triggered on a Node. Examples of recovery operations include (but are not limited to) when an unhealthy Node is rebooted or a Compute Node disappeared due to host failure. Retries due to recovery operations are independent of and are not counted against the maxTaskRetryCount. Even if the maxTaskRetryCount is 0, an internal retry due to a recovery operation may occur. Because of this, all Tasks should be idempotent. This means Tasks need to tolerate being interrupted and restarted without causing any corruption or duplicate data. The best practice for long running Tasks is to use some form of checkpointing. In some cases the StartTask may be re-run even though the Compute Node was not rebooted. Special care should be taken to avoid StartTasks which create breakaway process or install/launch services from the StartTask working directory, as this will block Batch from being able to re-run the StartTask.
-    ErrorCategory:
-      type: string
-      title: The category of the error.
-      enum:
-      - usererror
-      - servererror
-      x-ms-enum:
-        name: ErrorCategory
-        modelAsString: false
-        values:
-        - value: usererror
-          description: The error is due to a user issue, such as misconfiguration.
-          name: userError
-        - value: servererror
-          description: The error is due to an internal server issue.
-          name: serverError
-    ComputeNodeError:
-      properties:
-        code:
-          type: string
-          title: An identifier for the Compute Node error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          type: string
-          title: A message describing the Compute Node error, intended to be suitable for display in a user interface.
-        errorDetails:
-          type: array
-          items:
-            $ref: '#/components/schemas/NameValuePair'
-          title: The list of additional error details related to the Compute Node error.
-      title: An error encountered by a Compute Node.
+      - requeueCount
+      - retryCount
+      title: Information about the execution of a Task.
     NodeRebootParameter:
       properties:
         nodeRebootOption:
@@ -1644,89 +1863,22 @@ components:
               description: Allow currently running Tasks to complete, then wait for all Task data retention periods to expire. Schedule no new Tasks while waiting. Restart the Compute Node when all Task retention periods have expired.
               name: retainedData
       title: Options for rebooting a Compute Node.
-    InboundEndpoint:
-      properties:
-        name:
-          type: string
-          title: The name of the endpoint.
-        protocol:
-          $ref: '#/components/schemas/InboundEndpointProtocol'
-          title: The protocol of the endpoint.
-        publicIPAddress:
-          type: string
-          title: The public IP address of the Compute Node.
-        publicFQDN:
-          type: string
-          title: The public fully qualified domain name for the Compute Node.
-        frontendPort:
-          type: integer
-          format: int32
-          title: The public port number of the endpoint.
-        backendPort:
-          type: integer
-          format: int32
-          title: The backend port number of the endpoint.
-      required:
-      - name
-      - protocol
-      - publicIPAddress
-      - publicFQDN
-      - frontendPort
-      - backendPort
-      title: An inbound endpoint on a Compute Node.
-    ErrorMessage:
-      properties:
-        lang:
-          type: string
-          title: The language code of the error message
-        value:
-          type: string
-          title: The text of the message.
-      title: An error message received in an Azure Batch error response.
-    TaskFailureInformation:
-      properties:
-        category:
-          title: The category of the Task error.
-          $ref: '#/components/schemas/ErrorCategory'
-        code:
-          type: string
-          title: An identifier for the Task error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          type: string
-          title: A message describing the Task error, intended to be suitable for display in a user interface.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/NameValuePair'
-          title: A list of additional details related to the error.
-      required:
-      - category
-      title: Information about a Task failure.
-    BatchError:
-      properties:
-        code:
-          type: string
-          title: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          $ref: '#/components/schemas/ErrorMessage'
-          title: A message describing the error, intended to be suitable for display in a user interface.
+    ErrorCategory:
+      type: string
+      title: The category of the error.
+      enum:
+      - usererror
+      - servererror
+      x-ms-enum:
+        name: ErrorCategory
+        modelAsString: false
         values:
-          type: array
-          items:
-            $ref: '#/components/schemas/BatchErrorDetail'
-          title: A collection of key-value pairs containing additional details about the error.
-      title: An error response received from the Azure Batch service.
-    ComputeNodeListResult:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/ComputeNode'
-          title: The list of Compute Nodes.
-        odata.nextLink:
-          type: string
-          title: The URL to get the next set of results.
-      title: The result of listing the Compute Nodes in a Pool.
+        - value: usererror
+          description: The error is due to a user issue, such as misconfiguration.
+          name: userError
+        - value: servererror
+          description: The error is due to an internal server issue.
+          name: serverError
     TaskContainerExecutionInformation:
       properties:
         containerId:
@@ -1741,37 +1893,17 @@ components:
           title: Detailed error information about the container.
           description: This is the detailed error string from the Docker service, if available. It is equivalent to the error field returned by "docker inspect".
       title: Contains information about the container which a Task is executing.
-    ElevationLevel:
-      type: string
-      title: The elevation level of the user.
-      enum:
-      - nonadmin
-      - admin
-      x-ms-enum:
-        name: ElevationLevel
-        modelAsString: false
-        values:
-        - value: nonadmin
-          description: The user is a standard user without elevated access.
-          name: nonAdmin
-        - value: admin
-          description: The user is a user with elevated access and operates with full Administrator permissions.
-    NodeUpdateUserParameter:
+    ComputeNodeListResult:
       properties:
-        password:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComputeNode'
+          title: The list of Compute Nodes.
+        odata.nextLink:
           type: string
-          title: The password of the Account.
-          description: The password is required for Windows Compute Nodes (those created with 'cloudServiceConfiguration', or created with 'virtualMachineConfiguration' using a Windows Image reference). For Linux Compute Nodes, the password can optionally be specified along with the sshPublicKey property. If omitted, any existing password is removed.
-        expiryTime:
-          type: string
-          format: date-time
-          title: The time at which the Account should expire.
-          description: If omitted, the default is 1 day from the current time. For Linux Compute Nodes, the expiryTime has a precision up to a day.
-        sshPublicKey:
-          type: string
-          title: The SSH public key that can be used for remote login to the Compute Node.
-          description: The public key should be compatible with OpenSSH encoding and should be base 64 encoded. This property can be specified only for Linux Compute Nodes. If this is specified for a Windows Compute Node, then the Batch service rejects the request; if you are calling the REST API directly, the HTTP status code is 400 (Bad Request). If omitted, any existing SSH public key is removed.
-      title: The set of changes to be made to a user Account on a Compute Node.
+          title: The URL to get the next set of results.
+      title: The result of listing the Compute Nodes in a Pool.
     StartTaskInformation:
       properties:
         state:
@@ -1830,42 +1962,26 @@ components:
       - startTime
       - retryCount
       title: Information about a StartTask running on a Compute Node.
-    ComputeNodeDeallocationOption:
+    TaskState:
       type: string
-      title: Determines what to do with a Compute Node and its running task(s) after it has been selected for deallocation.
-      description: The default value is requeue.
+      title: The state of the Task.
       enum:
-      - requeue
-      - terminate
-      - taskcompletion
-      - retaineddata
+      - active
+      - preparing
+      - running
+      - completed
       x-ms-enum:
-        name: ComputeNodeDeallocationOption
+        name: TaskState
         modelAsString: false
         values:
-        - value: requeue
-          description: Terminate running Task processes and requeue the Tasks. The Tasks will run again when a Compute Node is available. Remove Compute Nodes as soon as Tasks have been terminated.
-        - value: terminate
-          description: Terminate running Tasks. The Tasks will be completed with failureInfo indicating that they were terminated, and will not run again. Remove Compute Nodes as soon as Tasks have been terminated.
-        - value: taskcompletion
-          description: Allow currently running Tasks to complete. Schedule no new Tasks while waiting. Remove Compute Nodes when all Tasks have completed.
-          name: taskCompletion
-        - value: retaineddata
-          description: Allow currently running Tasks to complete, then wait for all Task data retention periods to expire. Schedule no new Tasks while waiting. Remove Compute Nodes when all Task retention periods have expired.
-          name: retainedData
-    ComputeNodeGetRemoteLoginSettingsResult:
-      properties:
-        remoteLoginIPAddress:
-          type: string
-          title: The IP address used for remote login to the Compute Node.
-        remoteLoginPort:
-          type: integer
-          format: int32
-          title: The port used for remote login to the Compute Node.
-      required:
-      - remoteLoginIPAddress
-      - remoteLoginPort
-      title: The remote login settings for a Compute Node.
+        - value: active
+          description: The Task is queued and able to run, but is not currently assigned to a Compute Node. A Task enters this state when it is created, when it is enabled after being disabled, or when it is awaiting a retry after a failed run.
+        - value: preparing
+          description: The Task has been assigned to a Compute Node, but is waiting for a required Job Preparation Task to complete on the Compute Node. If the Job Preparation Task succeeds, the Task will move to running. If the Job Preparation Task fails, the Task will return to active and will be eligible to be assigned to a different Compute Node.
+        - value: running
+          description: The Task is running on a Compute Node. This includes task-level preparation such as downloading resource files or deploying Packages specified on the Task - it does not necessarily mean that the Task command line has started executing.
+        - value: completed
+          description: The Task is no longer eligible to run, usually because the Task has finished successfully, or the Task has finished unsuccessfully and has exhausted its retry limit. A Task is also marked as completed if an error occurred launching the Task, or when the Task has been terminated.
     TaskContainerSettings:
       properties:
         containerRunOptions:
@@ -1898,157 +2014,6 @@ components:
       required:
       - imageName
       title: The container settings for a Task.
-    TaskExecutionInformation:
-      properties:
-        startTime:
-          type: string
-          format: date-time
-          title: The time at which the Task started running.
-          description: '''Running'' corresponds to the running state, so if the Task specifies resource files or Packages, then the start time reflects the time at which the Task started downloading or deploying these. If the Task has been restarted or retried, this is the most recent time at which the Task started running. This property is present only for Tasks that are in the running or completed state.'
-        endTime:
-          type: string
-          format: date-time
-          title: The time at which the Task completed.
-          description: This property is set only if the Task is in the Completed state.
-        exitCode:
-          type: integer
-          format: int32
-          title: The exit code of the program specified on the Task command line.
-          description: This property is set only if the Task is in the completed state. In general, the exit code for a process reflects the specific convention implemented by the application developer for that process. If you use the exit code value to make decisions in your code, be sure that you know the exit code convention used by the application process. However, if the Batch service terminates the Task (due to timeout, or user termination via the API) you may see an operating system-defined exit code.
-        containerInfo:
-          $ref: '#/components/schemas/TaskContainerExecutionInformation'
-          title: Information about the container under which the Task is executing.
-          description: This property is set only if the Task runs in a container context.
-        failureInfo:
-          $ref: '#/components/schemas/TaskFailureInformation'
-          title: Information describing the Task failure, if any.
-          description: This property is set only if the Task is in the completed state and encountered a failure.
-        retryCount:
-          type: integer
-          format: int32
-          title: The number of times the Task has been retried by the Batch service.
-          description: Task application failures (non-zero exit code) are retried, pre-processing errors (the Task could not be run) and file upload errors are not retried. The Batch service will retry the Task up to the limit specified by the constraints.
-        lastRetryTime:
-          type: string
-          format: date-time
-          title: The most recent time at which a retry of the Task started running.
-          description: This element is present only if the Task was retried (i.e. retryCount is nonzero). If present, this is typically the same as startTime, but may be different if the Task has been restarted for reasons other than retry; for example, if the Compute Node was rebooted during a retry, then the startTime is updated but the lastRetryTime is not.
-        requeueCount:
-          type: integer
-          format: int32
-          title: The number of times the Task has been requeued by the Batch service as the result of a user request.
-          description: When the user removes Compute Nodes from a Pool (by resizing/shrinking the pool) or when the Job is being disabled, the user can specify that running Tasks on the Compute Nodes be requeued for execution. This count tracks how many times the Task has been requeued for these reasons.
-        lastRequeueTime:
-          type: string
-          format: date-time
-          title: The most recent time at which the Task has been requeued by the Batch service as the result of a user request.
-          description: This property is set only if the requeueCount is nonzero.
-        result:
-          $ref: '#/components/schemas/TaskExecutionResult'
-          title: The result of the Task execution.
-          description: If the value is 'failed', then the details of the failure can be found in the failureInfo property.
-      required:
-      - requeueCount
-      - retryCount
-      title: Information about the execution of a Task.
-    EnvironmentSetting:
-      properties:
-        name:
-          type: string
-          title: The name of the environment variable.
-        value:
-          type: string
-          title: The value of the environment variable.
-      required:
-      - name
-      title: An environment variable to be set on a Task process.
-    NodeReimageParameter:
-      properties:
-        nodeReimageOption:
-          type: string
-          title: When to reimage the Compute Node and what to do with currently running Tasks.
-          description: The default value is requeue.
-          enum:
-          - requeue
-          - terminate
-          - taskcompletion
-          - retaineddata
-          x-ms-enum:
-            name: ComputeNodeReimageOption
-            modelAsString: false
-            values:
-            - value: requeue
-              description: Terminate running Task processes and requeue the Tasks. The Tasks will run again when a Compute Node is available. Reimage the Compute Node as soon as Tasks have been terminated.
-            - value: terminate
-              description: Terminate running Tasks. The Tasks will be completed with failureInfo indicating that they were terminated, and will not run again. Reimage the Compute Node as soon as Tasks have been terminated.
-            - value: taskcompletion
-              description: Allow currently running Tasks to complete. Schedule no new Tasks while waiting. Reimage the Compute Node when all Tasks have completed.
-              name: taskCompletion
-            - value: retaineddata
-              description: Allow currently running Tasks to complete, then wait for all Task data retention periods to expire. Schedule no new Tasks while waiting. Reimage the Compute Node when all Task retention periods have expired.
-              name: retainedData
-      title: Options for reimaging a Compute Node.
-    NodeDisableSchedulingParameter:
-      properties:
-        nodeDisableSchedulingOption:
-          type: string
-          title: What to do with currently running Tasks when disabling Task scheduling on the Compute Node.
-          description: The default value is requeue.
-          enum:
-          - requeue
-          - terminate
-          - taskcompletion
-          x-ms-enum:
-            name: DisableComputeNodeSchedulingOption
-            modelAsString: false
-            values:
-            - value: requeue
-              description: Terminate running Task processes and requeue the Tasks. The Tasks may run again on other Compute Nodes, or when Task scheduling is re-enabled on this Compute Node. Enter offline state as soon as Tasks have been terminated.
-            - value: terminate
-              description: Terminate running Tasks. The Tasks will be completed with failureInfo indicating that they were terminated, and will not run again. Enter offline state as soon as Tasks have been terminated.
-            - value: taskcompletion
-              description: Allow currently running Tasks to complete. Schedule no new Tasks while waiting. Enter offline state when all Tasks have completed.
-              name: taskCompletion
-      title: Options for disabling scheduling on a Compute Node.
-    UserIdentity:
-      properties:
-        username:
-          type: string
-          x-ms-client-name: userName
-          title: The name of the user identity under which the Task is run.
-          description: The userName and autoUser properties are mutually exclusive; you must specify one but not both.
-        autoUser:
-          $ref: '#/components/schemas/AutoUserSpecification'
-          title: The auto user under which the Task is run.
-          description: The userName and autoUser properties are mutually exclusive; you must specify one but not both.
-      title: The definition of the user identity under which the Task is run.
-      description: Specify either the userName or autoUser property, but not both.
-    ComputeNodeEndpointConfiguration:
-      properties:
-        inboundEndpoints:
-          type: array
-          items:
-            $ref: '#/components/schemas/InboundEndpoint'
-          title: The list of inbound endpoints that are accessible on the Compute Node.
-      required:
-      - inboundEndpoints
-      title: The endpoint configuration for the Compute Node.
-    NodeAgentInformation:
-      properties:
-        version:
-          type: string
-          title: The version of the Batch Compute Node agent running on the Compute Node.
-          description: This version number can be checked against the Compute Node agent release notes located at https://github.com/Azure/Batch/blob/master/changelogs/nodeagent/CHANGELOG.md.
-        lastUpdateTime:
-          type: string
-          format: date-time
-          title: The time when the Compute Node agent was updated on the Compute Node.
-          description: This is the most recent time that the Compute Node agent was updated to a new version.
-      required:
-      - version
-      - lastUpdateTime
-      title: Information about the Compute Node agent.
-      description: The Batch Compute Node agent is a program that runs on each Compute Node in the Pool and provides Batch capability on the Compute Node.
     ComputeNode:
       properties:
         id:
@@ -2198,115 +2163,150 @@ components:
           $ref: '#/components/schemas/NodeAgentInformation'
           title: Information about the Compute Node agent version and the time the Compute Node upgraded to a new version.
       title: A Compute Node in the Batch service.
-    InboundEndpointProtocol:
+    ElevationLevel:
       type: string
-      title: The protocol of the endpoint.
+      title: The elevation level of the user.
       enum:
-      - tcp
-      - udp
+      - nonadmin
+      - admin
       x-ms-enum:
-        name: InboundEndpointProtocol
+        name: ElevationLevel
         modelAsString: false
         values:
-        - value: tcp
-          description: Use TCP for the endpoint.
-          name: tcp
-        - value: udp
-          description: Use UDP for the endpoint.
-          name: udp
-    NameValuePair:
+        - value: nonadmin
+          description: The user is a standard user without elevated access.
+          name: nonAdmin
+        - value: admin
+          description: The user is a user with elevated access and operates with full Administrator permissions.
+    UserIdentity:
       properties:
-        name:
-          type: string
-          title: The name in the name-value pair.
-        value:
-          type: string
-          title: The value in the name-value pair.
-      title: Represents a name-value pair.
-    ContainerRegistry:
-      properties:
-        registryServer:
-          type: string
-          title: The registry URL.
-          description: If omitted, the default is "docker.io".
         username:
           type: string
           x-ms-client-name: userName
-          title: The user name to log into the registry server.
-        password:
-          type: string
-          title: The password to log into the registry server.
-      required:
-      - username
-      - password
-      title: A private container registry.
-    ResourceFile:
+          title: The name of the user identity under which the Task is run.
+          description: The userName and autoUser properties are mutually exclusive; you must specify one but not both.
+        autoUser:
+          $ref: '#/components/schemas/AutoUserSpecification'
+          title: The auto user under which the Task is run.
+          description: The userName and autoUser properties are mutually exclusive; you must specify one but not both.
+      title: The definition of the user identity under which the Task is run.
+      description: Specify either the userName or autoUser property, but not both.
+    UploadBatchServiceLogsResult:
       properties:
-        autoStorageContainerName:
+        virtualDirectoryName:
           type: string
-          title: The storage container name in the auto storage Account.
-          description: The autoStorageContainerName, storageContainerUrl and httpUrl properties are mutually exclusive and one of them must be specified.
-        storageContainerUrl:
-          type: string
-          title: The URL of the blob container within Azure Blob Storage.
-          description: 'The autoStorageContainerName, storageContainerUrl and httpUrl properties are mutually exclusive and one of them must be specified. This URL must be readable and listable using anonymous access; that is, the Batch service does not present any credentials when downloading blobs from the container. There are two ways to get such a URL for a container in Azure storage: include a Shared Access Signature (SAS) granting read and list permissions on the container, or set the ACL for the container to allow public access.'
-        httpUrl:
-          type: string
-          title: The URL of the file to download.
-          description: 'The autoStorageContainerName, storageContainerUrl and httpUrl properties are mutually exclusive and one of them must be specified. If the URL points to Azure Blob Storage, it must be readable using anonymous access; that is, the Batch service does not present any credentials when downloading the blob. There are two ways to get such a URL for a blob in Azure storage: include a Shared Access Signature (SAS) granting read permissions on the blob, or set the ACL for the blob or its container to allow public access.'
-        blobPrefix:
-          type: string
-          title: The blob prefix to use when downloading blobs from an Azure Storage container. Only the blobs whose names begin with the specified prefix will be downloaded.
-          description: The property is valid only when autoStorageContainerName or storageContainerUrl is used. This prefix can be a partial filename or a subdirectory. If a prefix is not specified, all the files in the container will be downloaded.
-        filePath:
-          type: string
-          title: The location on the Compute Node to which to download the file(s), relative to the Task's working directory.
-          description: If the httpUrl property is specified, the filePath is required and describes the path which the file will be downloaded to, including the filename. Otherwise, if the autoStorageContainerName or storageContainerUrl property is specified, filePath is optional and is the directory to download the files to. In the case where filePath is used as a directory, any directory structure already associated with the input data will be retained in full and appended to the specified filePath directory. The specified relative path cannot break out of the Task's working directory (for example by using '..').
-        fileMode:
-          type: string
-          title: The file permission mode attribute in octal format.
-          description: This property applies only to files being downloaded to Linux Compute Nodes. It will be ignored if it is specified for a resourceFile which will be downloaded to a Windows Compute Node. If this property is not specified for a Linux Compute Node, then a default value of 0770 is applied to the file.
-      title: A single file or multiple files to be downloaded to a Compute Node.
-    UploadBatchServiceLogsConfiguration:
-      properties:
-        containerUrl:
-          type: string
-          title: The URL of the container within Azure Blob Storage to which to upload the Batch Service log file(s).
-          description: The URL must include a Shared Access Signature (SAS) granting write permissions to the container. The SAS duration must allow enough time for the upload to finish. The start time for SAS is optional and recommended to not be specified.
-        startTime:
-          type: string
-          format: date-time
-          title: The start of the time range from which to upload Batch Service log file(s).
-          description: Any log file containing a log message in the time range will be uploaded. This means that the operation might retrieve more logs than have been requested since the entire log file is always uploaded, but the operation should not retrieve fewer logs than have been requested.
-        endTime:
-          type: string
-          format: date-time
-          title: The end of the time range from which to upload Batch Service log file(s).
-          description: Any log file containing a log message in the time range will be uploaded. This means that the operation might retrieve more logs than have been requested since the entire log file is always uploaded, but the operation should not retrieve fewer logs than have been requested. If omitted, the default is to upload all logs available after the startTime.
+          title: The virtual directory within Azure Blob Storage container to which the Batch Service log file(s) will be uploaded.
+          description: The virtual directory name is part of the blob name for each log file uploaded, and it is built based poolId, nodeId and a unique identifier.
+        numberOfFilesUploaded:
+          type: integer
+          format: int32
+          title: The number of log files which will be uploaded.
       required:
-      - containerUrl
-      - startTime
-      title: The Azure Batch service log files upload configuration for a Compute Node.
-    TaskState:
-      type: string
-      title: The state of the Task.
-      enum:
-      - active
-      - preparing
-      - running
-      - completed
-      x-ms-enum:
-        name: TaskState
-        modelAsString: false
+      - virtualDirectoryName
+      - numberOfFilesUploaded
+      title: The result of uploading Batch service log files from a specific Compute Node.
+    StartTask:
+      properties:
+        commandLine:
+          type: string
+          title: The command line of the StartTask.
+          description: The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux. If the command line refers to file paths, it should use a relative path (relative to the Task working directory), or use the Batch provided environment variable (https://docs.microsoft.com/en-us/azure/batch/batch-compute-node-environment-variables).
+        containerSettings:
+          $ref: '#/components/schemas/TaskContainerSettings'
+          title: The settings for the container under which the StartTask runs.
+          description: When this is specified, all directories recursively below the AZ_BATCH_NODE_ROOT_DIR (the root of Azure Batch directories on the node) are mapped into the container, all Task environment variables are mapped into the container, and the Task command line is executed in the container. Files produced in the container outside of AZ_BATCH_NODE_ROOT_DIR might not be reflected to the host disk, meaning that Batch file APIs will not be able to access those files.
+        resourceFiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceFile'
+          title: A list of files that the Batch service will download to the Compute Node before running the command line.  There is a maximum size for the list of resource files. When the max size is exceeded, the request will fail and the response error code will be RequestEntityTooLarge. If this occurs, the collection of ResourceFiles must be reduced in size. This can be achieved using .zip files, Application Packages, or Docker Containers.
+          description: Files listed under this element are located in the Task's working directory.
+        environmentSettings:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentSetting'
+          title: A list of environment variable settings for the StartTask.
+        userIdentity:
+          $ref: '#/components/schemas/UserIdentity'
+          title: The user identity under which the StartTask runs.
+          description: If omitted, the Task runs as a non-administrative user unique to the Task.
+        maxTaskRetryCount:
+          type: integer
+          format: int32
+          title: The maximum number of times the Task may be retried.
+          description: The Batch service retries a Task if its exit code is nonzero. Note that this value specifically controls the number of retries. The Batch service will try the Task once, and may then retry up to this limit. For example, if the maximum retry count is 3, Batch tries the Task up to 4 times (one initial try and 3 retries). If the maximum retry count is 0, the Batch service does not retry the Task. If the maximum retry count is -1, the Batch service retries the Task without limit.
+        waitForSuccess:
+          type: boolean
+          title: Whether the Batch service should wait for the StartTask to complete successfully (that is, to exit with exit code 0) before scheduling any Tasks on the Compute Node.
+          description: If true and the StartTask fails on a Node, the Batch service retries the StartTask up to its maximum retry count (maxTaskRetryCount). If the Task has still not completed successfully after all retries, then the Batch service marks the Node unusable, and will not schedule Tasks to it. This condition can be detected via the Compute Node state and failure info details. If false, the Batch service will not wait for the StartTask to complete. In this case, other Tasks can start executing on the Compute Node while the StartTask is still running; and even if the StartTask fails, new Tasks will continue to be scheduled on the Compute Node. The default is true.
+      required:
+      - commandLine
+      title: A Task which is run when a Node joins a Pool in the Azure Batch service, or when the Compute Node is rebooted or reimaged.
+      description: Batch will retry Tasks when a recovery operation is triggered on a Node. Examples of recovery operations include (but are not limited to) when an unhealthy Node is rebooted or a Compute Node disappeared due to host failure. Retries due to recovery operations are independent of and are not counted against the maxTaskRetryCount. Even if the maxTaskRetryCount is 0, an internal retry due to a recovery operation may occur. Because of this, all Tasks should be idempotent. This means Tasks need to tolerate being interrupted and restarted without causing any corruption or duplicate data. The best practice for long running Tasks is to use some form of checkpointing. In some cases the StartTask may be re-run even though the Compute Node was not rebooted. Special care should be taken to avoid StartTasks which create breakaway process or install/launch services from the StartTask working directory, as this will block Batch from being able to re-run the StartTask.
+    BatchError:
+      properties:
+        code:
+          type: string
+          title: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          $ref: '#/components/schemas/ErrorMessage'
+          title: A message describing the error, intended to be suitable for display in a user interface.
         values:
-        - value: active
-          description: The Task is queued and able to run, but is not currently assigned to a Compute Node. A Task enters this state when it is created, when it is enabled after being disabled, or when it is awaiting a retry after a failed run.
-        - value: preparing
-          description: The Task has been assigned to a Compute Node, but is waiting for a required Job Preparation Task to complete on the Compute Node. If the Job Preparation Task succeeds, the Task will move to running. If the Job Preparation Task fails, the Task will return to active and will be eligible to be assigned to a different Compute Node.
-        - value: running
-          description: The Task is running on a Compute Node. This includes task-level preparation such as downloading resource files or deploying Packages specified on the Task - it does not necessarily mean that the Task command line has started executing.
-        - value: completed
-          description: The Task is no longer eligible to run, usually because the Task has finished successfully, or the Task has finished unsuccessfully and has exhausted its retry limit. A Task is also marked as completed if an error occurred launching the Task, or when the Task has been terminated.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchErrorDetail'
+          title: A collection of key-value pairs containing additional details about the error.
+      title: An error response received from the Azure Batch service.
+    TaskInformation:
+      properties:
+        taskUrl:
+          type: string
+          title: The URL of the Task.
+        jobId:
+          type: string
+          title: The ID of the Job to which the Task belongs.
+        taskId:
+          type: string
+          title: The ID of the Task.
+        subtaskId:
+          type: integer
+          format: int32
+          title: The ID of the subtask if the Task is a multi-instance Task.
+        taskState:
+          title: The current state of the Task.
+          $ref: '#/components/schemas/TaskState'
+        executionInfo:
+          $ref: '#/components/schemas/TaskExecutionInformation'
+          title: Information about the execution of the Task.
+      required:
+      - taskState
+      title: Information about a Task running on a Compute Node.
+    NodeReimageParameter:
+      properties:
+        nodeReimageOption:
+          type: string
+          title: When to reimage the Compute Node and what to do with currently running Tasks.
+          description: The default value is requeue.
+          enum:
+          - requeue
+          - terminate
+          - taskcompletion
+          - retaineddata
+          x-ms-enum:
+            name: ComputeNodeReimageOption
+            modelAsString: false
+            values:
+            - value: requeue
+              description: Terminate running Task processes and requeue the Tasks. The Tasks will run again when a Compute Node is available. Reimage the Compute Node as soon as Tasks have been terminated.
+            - value: terminate
+              description: Terminate running Tasks. The Tasks will be completed with failureInfo indicating that they were terminated, and will not run again. Reimage the Compute Node as soon as Tasks have been terminated.
+            - value: taskcompletion
+              description: Allow currently running Tasks to complete. Schedule no new Tasks while waiting. Reimage the Compute Node when all Tasks have completed.
+              name: taskCompletion
+            - value: retaineddata
+              description: Allow currently running Tasks to complete, then wait for all Task data retention periods to expire. Schedule no new Tasks while waiting. Reimage the Compute Node when all Task retention periods have expired.
+              name: retainedData
+      title: Options for reimaging a Compute Node.
   parameters:
     ApiVersionParameter:
       name: api-version

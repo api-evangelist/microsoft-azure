@@ -246,36 +246,51 @@ paths:
                 $ref: '#/components/schemas/FabricError'
 components:
   schemas:
-    PropertyMetadata:
-      description: The metadata associated with a property, including the property's name.
+    PropertyBatchInfoKind:
+      type: string
+      description: The kind of property batch info, determined by the results of a property batch. The following are the possible values.
+      enum:
+      - Invalid
+      - Successful
+      - Failed
+      x-ms-enum:
+        name: PropertyBatchInfoKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the property batch info is invalid. All Service Fabric enumerations have the invalid type.
+        - value: Successful
+          description: The property batch succeeded.
+        - value: Failed
+          description: The property batch failed.
+    PropertyName:
+      type: string
+      description: The name of the Service Fabric property.
+    PropertyDescription:
+      description: Description of a Service Fabric property.
       properties:
-        TypeId:
-          $ref: '#/components/schemas/PropertyValueKind'
-          description: The kind of property, determined by the type of data. Following are the possible values.
+        PropertyName:
+          $ref: '#/components/schemas/PropertyName'
+          description: The name of the Service Fabric property.
         CustomTypeId:
           $ref: '#/components/schemas/PropertyCustomTypeId'
-          description: The property's custom type ID.
-        Parent:
-          $ref: '#/components/schemas/FabricName'
-          description: The name of the parent Service Fabric Name for the property. It could be thought of as the name-space/table under which the property exists.
-        SizeInBytes:
-          type: integer
-          description: The length of the serialized property value.
-        LastModifiedUtcTimestamp:
-          type: string
-          format: date-time
-          description: Represents when the Property was last modified. Only write operations will cause this field to be updated.
-        SequenceNumber:
-          type: string
-          description: The version of the property. Every time a property is modified, its sequence number is increased.
-    NameDescription:
-      description: Describes a Service Fabric name.
-      properties:
-        Name:
-          $ref: '#/components/schemas/FabricName'
-          description: The Service Fabric name, including the 'fabric:' URI scheme.
+          description: The property's custom type ID. Using this property, the user is able to tag the type of the value of the property.
+        Value:
+          $ref: '#/components/schemas/PropertyValue'
+          description: Describes a Service Fabric property value.
       required:
-      - Name
+      - PropertyName
+      - Value
+    SuccessfulPropertyBatchInfo:
+      description: Derived from PropertyBatchInfo. Represents the property batch succeeding. Contains the results of any "Get" operations in the batch.
+      allOf:
+      - $ref: '#/components/schemas/PropertyBatchInfo'
+      x-ms-discriminator-value: Successful
+      properties:
+        Properties:
+          additionalProperties:
+            $ref: '#/components/schemas/PropertyInfo'
+          description: A map containing the properties that were requested through any "Get" property batch operations. The key represents the index of the "Get" operation in the original request, in string form. The value is the property. If a property is not found, it will not be in the map.
     PropertyValueKind:
       type: string
       description: The kind of property, determined by the type of data. Following are the possible values.
@@ -302,28 +317,47 @@ components:
           description: The data inside the property is a string. The value is 4.
         - value: Guid
           description: The data inside the property is a guid. The value is 5.
-    PagedSubNameInfoList:
-      description: A paged list of Service Fabric names. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+    FabricName:
+      type: string
+      description: The Service Fabric name, including the 'fabric:' URI scheme.
+    PropertyValue:
+      discriminator:
+        propertyName: Kind
+      description: Describes a Service Fabric property value.
       properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        IsConsistent:
-          type: boolean
-          description: Indicates whether any name under the given name has been modified during the enumeration. If there was a modification, this property value is false.
-        SubNames:
-          type: array
-          description: List of the child names.
-          items:
-            $ref: '#/components/schemas/FabricName'
-    PropertyBatchDescriptionList:
-      description: Describes a list of property batch operations to be executed. Either all or none of the operations will be committed.
+        Kind:
+          $ref: '#/components/schemas/PropertyValueKind'
+          description: The kind of property, determined by the type of data. Following are the possible values.
+      required:
+      - Kind
+    PropertyMetadata:
+      description: The metadata associated with a property, including the property's name.
       properties:
-        Operations:
-          type: array
-          items:
-            $ref: '#/components/schemas/PropertyBatchOperation'
-          description: A list of the property batch operations to be executed.
+        TypeId:
+          $ref: '#/components/schemas/PropertyValueKind'
+          description: The kind of property, determined by the type of data. Following are the possible values.
+        CustomTypeId:
+          $ref: '#/components/schemas/PropertyCustomTypeId'
+          description: The property's custom type ID.
+        Parent:
+          $ref: '#/components/schemas/FabricName'
+          description: The name of the parent Service Fabric Name for the property. It could be thought of as the name-space/table under which the property exists.
+        SizeInBytes:
+          type: integer
+          description: The length of the serialized property value.
+        LastModifiedUtcTimestamp:
+          type: string
+          format: date-time
+          description: Represents when the Property was last modified. Only write operations will cause this field to be updated.
+        SequenceNumber:
+          type: string
+          description: The version of the property. Every time a property is modified, its sequence number is increased.
+    PropertyCustomTypeId:
+      type: string
+      description: The property's custom type ID. Using this property, the user is able to tag the type of the value of the property.
+    ContinuationToken:
+      type: string
+      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
     FabricError:
       description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
       properties:
@@ -332,21 +366,53 @@ components:
           description: Error object containing error code and error message.
       required:
       - Error
-    PropertyDescription:
-      description: Description of a Service Fabric property.
+    PropertyBatchOperationKind:
+      type: string
+      description: The kind of property batch operation, determined by the operation to be performed. The following are the possible values.
+      enum:
+      - Invalid
+      - Put
+      - Get
+      - CheckExists
+      - CheckSequence
+      - Delete
+      - CheckValue
+      x-ms-enum:
+        name: PropertyBatchOperationKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates the property operation is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Put
+          description: The operation will create or edit a property. The value is 1.
+        - value: Get
+          description: The operation will get a property. The value is 2.
+        - value: CheckExists
+          description: The operation will check that a property exists or doesn't exists, depending on the provided value. The value is 3.
+        - value: CheckSequence
+          description: The operation will ensure that the sequence number is equal to the provided value. The value is 4.
+        - value: Delete
+          description: The operation will delete a property. The value is 5.
+        - value: CheckValue
+          description: The operation will ensure that the value of a property is equal to the provided value. The value is 7.
+    PropertyBatchInfo:
+      discriminator:
+        propertyName: Kind
+      description: Information about the results of a property batch.
       properties:
-        PropertyName:
-          $ref: '#/components/schemas/PropertyName'
-          description: The name of the Service Fabric property.
-        CustomTypeId:
-          $ref: '#/components/schemas/PropertyCustomTypeId'
-          description: The property's custom type ID. Using this property, the user is able to tag the type of the value of the property.
-        Value:
-          $ref: '#/components/schemas/PropertyValue'
-          description: Describes a Service Fabric property value.
+        Kind:
+          $ref: '#/components/schemas/PropertyBatchInfoKind'
+          description: The kind of property batch info, determined by the results of a property batch. The following are the possible values.
       required:
-      - PropertyName
-      - Value
+      - Kind
+    NameDescription:
+      description: Describes a Service Fabric name.
+      properties:
+        Name:
+          $ref: '#/components/schemas/FabricName'
+          description: The Service Fabric name, including the 'fabric:' URI scheme.
+      required:
+      - Name
     FabricErrorCodes:
       type: string
       description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
@@ -523,49 +589,6 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
-    ContinuationToken:
-      type: string
-      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-    PropertyCustomTypeId:
-      type: string
-      description: The property's custom type ID. Using this property, the user is able to tag the type of the value of the property.
-    SuccessfulPropertyBatchInfo:
-      description: Derived from PropertyBatchInfo. Represents the property batch succeeding. Contains the results of any "Get" operations in the batch.
-      allOf:
-      - $ref: '#/components/schemas/PropertyBatchInfo'
-      x-ms-discriminator-value: Successful
-      properties:
-        Properties:
-          additionalProperties:
-            $ref: '#/components/schemas/PropertyInfo'
-          description: A map containing the properties that were requested through any "Get" property batch operations. The key represents the index of the "Get" operation in the original request, in string form. The value is the property. If a property is not found, it will not be in the map.
-    PropertyName:
-      type: string
-      description: The name of the Service Fabric property.
-    FabricName:
-      type: string
-      description: The Service Fabric name, including the 'fabric:' URI scheme.
-    FabricErrorError:
-      description: Error object containing error code and error message.
-      properties:
-        Code:
-          $ref: '#/components/schemas/FabricErrorCodes'
-          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
-        Message:
-          type: string
-          description: Error message.
-      required:
-      - Code
-    PropertyBatchInfo:
-      discriminator:
-        propertyName: Kind
-      description: Information about the results of a property batch.
-      properties:
-        Kind:
-          $ref: '#/components/schemas/PropertyBatchInfoKind'
-          description: The kind of property batch info, determined by the results of a property batch. The following are the possible values.
-      required:
-      - Kind
     PropertyBatchOperation:
       discriminator:
         propertyName: Kind
@@ -594,57 +617,20 @@ components:
           description: List of property information.
           items:
             $ref: '#/components/schemas/PropertyInfo'
-    PropertyValue:
-      discriminator:
-        propertyName: Kind
-      description: Describes a Service Fabric property value.
+    PagedSubNameInfoList:
+      description: A paged list of Service Fabric names. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
       properties:
-        Kind:
-          $ref: '#/components/schemas/PropertyValueKind'
-          description: The kind of property, determined by the type of data. Following are the possible values.
-      required:
-      - Kind
-    FailedPropertyBatchInfo:
-      description: Derived from PropertyBatchInfo. Represents the property batch failing. Contains information about the specific batch failure.
-      allOf:
-      - $ref: '#/components/schemas/PropertyBatchInfo'
-      x-ms-discriminator-value: Failed
-      properties:
-        ErrorMessage:
-          type: string
-          description: The error message of the failed operation. Describes the exception thrown due to the first unsuccessful operation in the property batch.
-        OperationIndex:
-          type: integer
-          description: The index of the unsuccessful operation in the property batch.
-    PropertyBatchOperationKind:
-      type: string
-      description: The kind of property batch operation, determined by the operation to be performed. The following are the possible values.
-      enum:
-      - Invalid
-      - Put
-      - Get
-      - CheckExists
-      - CheckSequence
-      - Delete
-      - CheckValue
-      x-ms-enum:
-        name: PropertyBatchOperationKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the property operation is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Put
-          description: The operation will create or edit a property. The value is 1.
-        - value: Get
-          description: The operation will get a property. The value is 2.
-        - value: CheckExists
-          description: The operation will check that a property exists or doesn't exists, depending on the provided value. The value is 3.
-        - value: CheckSequence
-          description: The operation will ensure that the sequence number is equal to the provided value. The value is 4.
-        - value: Delete
-          description: The operation will delete a property. The value is 5.
-        - value: CheckValue
-          description: The operation will ensure that the value of a property is equal to the provided value. The value is 7.
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        IsConsistent:
+          type: boolean
+          description: Indicates whether any name under the given name has been modified during the enumeration. If there was a modification, this property value is false.
+        SubNames:
+          type: array
+          description: List of the child names.
+          items:
+            $ref: '#/components/schemas/FabricName'
     PropertyInfo:
       description: Information about a Service Fabric property.
       properties:
@@ -660,33 +646,38 @@ components:
       required:
       - Name
       - Metadata
-    PropertyBatchInfoKind:
-      type: string
-      description: The kind of property batch info, determined by the results of a property batch. The following are the possible values.
-      enum:
-      - Invalid
-      - Successful
-      - Failed
-      x-ms-enum:
-        name: PropertyBatchInfoKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the property batch info is invalid. All Service Fabric enumerations have the invalid type.
-        - value: Successful
-          description: The property batch succeeded.
-        - value: Failed
-          description: The property batch failed.
+    FabricErrorError:
+      description: Error object containing error code and error message.
+      properties:
+        Code:
+          $ref: '#/components/schemas/FabricErrorCodes'
+          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
+        Message:
+          type: string
+          description: Error message.
+      required:
+      - Code
+    FailedPropertyBatchInfo:
+      description: Derived from PropertyBatchInfo. Represents the property batch failing. Contains information about the specific batch failure.
+      allOf:
+      - $ref: '#/components/schemas/PropertyBatchInfo'
+      x-ms-discriminator-value: Failed
+      properties:
+        ErrorMessage:
+          type: string
+          description: The error message of the failed operation. Describes the exception thrown due to the first unsuccessful operation in the property batch.
+        OperationIndex:
+          type: integer
+          description: The index of the unsuccessful operation in the property batch.
+    PropertyBatchDescriptionList:
+      description: Describes a list of property batch operations to be executed. Either all or none of the operations will be committed.
+      properties:
+        Operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PropertyBatchOperation'
+          description: A list of the property batch operations to be executed.
   parameters:
-    RecursiveOptionalQueryParam:
-      name: Recursive
-      description: Allows specifying that the search performed should be recursive.
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      schema:
-        type: boolean
-        default: false
     ApiVersion_6-0_RequiredQueryParam:
       name: api-version
       in: query
@@ -727,6 +718,31 @@ components:
       required: true
       schema:
         type: string
+    PropertyBatchDescriptionListRequiredBodyParam:
+      name: PropertyBatchDescriptionList
+      in: body
+      description: Describes the property batch operations to be submitted.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/PropertyBatchDescriptionList'
+    RecursiveOptionalQueryParam:
+      name: Recursive
+      description: Allows specifying that the search performed should be recursive.
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      schema:
+        type: boolean
+        default: false
+    PropertyDescriptionRequiredBodyParam:
+      name: PropertyDescription
+      in: body
+      description: Describes the Service Fabric property to be created.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/PropertyDescription'
     NameDescriptionRequiredBodyParam:
       name: NameDescription
       in: body
@@ -744,6 +760,15 @@ components:
       description: The Service Fabric name, without the 'fabric:' URI scheme.
       schema:
         type: string
+    IncludeValuesOptionalQueryParam:
+      name: IncludeValues
+      description: Allows specifying whether to include the values of the properties returned. True if values should be returned with the metadata; False to return only property metadata.
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      schema:
+        type: boolean
+        default: false
     TimeoutOptionalQueryParam:
       name: timeout
       in: query
@@ -756,28 +781,3 @@ components:
         default: 60
         maximum: 4294967295
         minimum: 1
-    IncludeValuesOptionalQueryParam:
-      name: IncludeValues
-      description: Allows specifying whether to include the values of the properties returned. True if values should be returned with the metadata; False to return only property metadata.
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      schema:
-        type: boolean
-        default: false
-    PropertyDescriptionRequiredBodyParam:
-      name: PropertyDescription
-      in: body
-      description: Describes the Service Fabric property to be created.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/PropertyDescription'
-    PropertyBatchDescriptionListRequiredBodyParam:
-      name: PropertyBatchDescriptionList
-      in: body
-      description: Describes the property batch operations to be submitted.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/PropertyBatchDescriptionList'

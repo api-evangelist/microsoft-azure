@@ -585,13 +585,18 @@ paths:
         - user_impersonation
 components:
   schemas:
-    Key:
+    KeyListResult:
+      description: The result of a list request.
       type: object
       properties:
-        name:
+        items:
+          description: The collection value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Key'
+        '@nextLink':
+          description: The URI that can be used to request the next set of paged results.
           type: string
-          readOnly: true
-          description: The name of the key.
     Error:
       description: Azure App Configuration error object.
       type: object
@@ -612,18 +617,108 @@ components:
           description: The HTTP status code that the error maps to.
           type: integer
       readOnly: true
-    KeyListResult:
-      description: The result of a list request.
+    Key:
       type: object
       properties:
-        items:
-          description: The collection value.
-          type: array
-          items:
-            $ref: '#/components/schemas/Key'
-        '@nextLink':
-          description: The URI that can be used to request the next set of paged results.
+        name:
           type: string
+          readOnly: true
+          description: The name of the key.
+    KeyListResult_2:
+      type: object
+      description: The key list result.
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/KeyItem'
+          description: A list of keys.
+          example: []
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of keys.
+          example: example_value
+    KeyVaultError:
+      type: object
+      description: The key vault error exception.
+      properties:
+        error:
+          type: object
+          readOnly: true
+          description: The key vault server error.
+          properties:
+            code:
+              type: string
+              readOnly: true
+              description: The error code.
+            message:
+              type: string
+              readOnly: true
+              description: The error message.
+            innererror:
+              type: object
+              readOnly: true
+              description: Inner error details.
+              properties:
+                code:
+                  type: string
+                  readOnly: true
+                innererror:
+                  type: object
+                  readOnly: true
+          example: example_value
+    KeyAttributes:
+      type: object
+      description: The attributes of a key.
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the key is enabled.
+          example: true
+        nbf:
+          type: integer
+          description: Not before date in UTC (Unix time).
+          example: 10
+        exp:
+          type: integer
+          description: Expiry date in UTC (Unix time).
+          example: 10
+        created:
+          type: integer
+          readOnly: true
+          description: Creation time in UTC (Unix time).
+          example: 10
+        updated:
+          type: integer
+          readOnly: true
+          description: Last updated time in UTC (Unix time).
+          example: 10
+        recoveryLevel:
+          type: string
+          readOnly: true
+          description: The recovery level currently in effect.
+          enum:
+          - Purgeable
+          - Recoverable+Purgeable
+          - Recoverable
+          - Recoverable+ProtectedSubscription
+          example: Purgeable
+        recoverableDays:
+          type: integer
+          readOnly: true
+          description: The soft-delete data retention days.
+          example: 10
+        exportable:
+          type: boolean
+          description: Whether the private key can be exported.
+          example: true
+        hsmPlatform:
+          type: string
+          readOnly: true
+          description: The underlying HSM platform.
+          example: example_value
     KeyReleasePolicy:
       type: object
       description: The policy rules under which the key can be exported.
@@ -641,27 +736,6 @@ components:
           type: string
           description: Blob encoding the policy rules (base64url-encoded).
           example: example_value
-    KeyBundle:
-      type: object
-      description: A key bundle containing the key and its attributes.
-      properties:
-        key:
-          $ref: '#/components/schemas/JsonWebKey'
-        attributes:
-          $ref: '#/components/schemas/KeyAttributes'
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Application-specific metadata in the form of key-value pairs.
-          example: example_value
-        managed:
-          type: boolean
-          readOnly: true
-          description: Whether the key's lifetime is managed by Key Vault.
-          example: true
-        release_policy:
-          $ref: '#/components/schemas/KeyReleasePolicy'
     JsonWebKey:
       type: object
       description: JSON Web Key (JWK) representation of a key.
@@ -749,24 +823,6 @@ components:
           type: string
           description: Y component of an EC public key.
           example: example_value
-    DeletedKeyBundle:
-      type: object
-      description: A deleted key bundle.
-      allOf:
-      - $ref: '#/components/schemas/KeyBundle'
-      properties:
-        recoveryId:
-          type: string
-          description: The URL of the recovery object.
-          example: '500123'
-        scheduledPurgeDate:
-          type: integer
-          description: The time when the key is scheduled to be purged (Unix time).
-          example: 10
-        deletedDate:
-          type: integer
-          description: The time when the key was deleted (Unix time).
-          example: 10
     KeyUpdateParameters:
       type: object
       description: The key update parameters.
@@ -787,6 +843,64 @@ components:
           example: example_value
         release_policy:
           $ref: '#/components/schemas/KeyReleasePolicy'
+    DeletedKeyBundle:
+      type: object
+      description: A deleted key bundle.
+      allOf:
+      - $ref: '#/components/schemas/KeyBundle'
+      properties:
+        recoveryId:
+          type: string
+          description: The URL of the recovery object.
+          example: '500123'
+        scheduledPurgeDate:
+          type: integer
+          description: The time when the key is scheduled to be purged (Unix time).
+          example: 10
+        deletedDate:
+          type: integer
+          description: The time when the key was deleted (Unix time).
+          example: 10
+    KeyBundle:
+      type: object
+      description: A key bundle containing the key and its attributes.
+      properties:
+        key:
+          $ref: '#/components/schemas/JsonWebKey'
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Application-specific metadata in the form of key-value pairs.
+          example: example_value
+        managed:
+          type: boolean
+          readOnly: true
+          description: Whether the key's lifetime is managed by Key Vault.
+          example: true
+        release_policy:
+          $ref: '#/components/schemas/KeyReleasePolicy'
+    KeyItem:
+      type: object
+      description: The key item containing key metadata.
+      properties:
+        kid:
+          type: string
+          description: Key identifier.
+          example: '500123'
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          example: example_value
+        managed:
+          type: boolean
+          readOnly: true
+          example: true
     KeyCreateParameters:
       type: object
       description: The key create parameters.
@@ -846,128 +960,18 @@ components:
           example: true
       required:
       - kty
-    KeyItem:
-      type: object
-      description: The key item containing key metadata.
-      properties:
-        kid:
-          type: string
-          description: Key identifier.
-          example: '500123'
-        attributes:
-          $ref: '#/components/schemas/KeyAttributes'
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          example: example_value
-        managed:
-          type: boolean
-          readOnly: true
-          example: true
-    KeyListResult_2:
-      type: object
-      description: The key list result.
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/KeyItem'
-          description: A list of keys.
-          example: []
-        nextLink:
-          type: string
-          readOnly: true
-          description: The URL to get the next set of keys.
-          example: example_value
-    KeyAttributes:
-      type: object
-      description: The attributes of a key.
-      properties:
-        enabled:
-          type: boolean
-          description: Whether the key is enabled.
-          example: true
-        nbf:
-          type: integer
-          description: Not before date in UTC (Unix time).
-          example: 10
-        exp:
-          type: integer
-          description: Expiry date in UTC (Unix time).
-          example: 10
-        created:
-          type: integer
-          readOnly: true
-          description: Creation time in UTC (Unix time).
-          example: 10
-        updated:
-          type: integer
-          readOnly: true
-          description: Last updated time in UTC (Unix time).
-          example: 10
-        recoveryLevel:
-          type: string
-          readOnly: true
-          description: The recovery level currently in effect.
-          enum:
-          - Purgeable
-          - Recoverable+Purgeable
-          - Recoverable
-          - Recoverable+ProtectedSubscription
-          example: Purgeable
-        recoverableDays:
-          type: integer
-          readOnly: true
-          description: The soft-delete data retention days.
-          example: 10
-        exportable:
-          type: boolean
-          description: Whether the private key can be exported.
-          example: true
-        hsmPlatform:
-          type: string
-          readOnly: true
-          description: The underlying HSM platform.
-          example: example_value
-    KeyVaultError:
-      type: object
-      description: The key vault error exception.
-      properties:
-        error:
-          type: object
-          readOnly: true
-          description: The key vault server error.
-          properties:
-            code:
-              type: string
-              readOnly: true
-              description: The error code.
-            message:
-              type: string
-              readOnly: true
-              description: The error message.
-            innererror:
-              type: object
-              readOnly: true
-              description: Inner error details.
-              properties:
-                code:
-                  type: string
-                  readOnly: true
-                innererror:
-                  type: object
-                  readOnly: true
-          example: example_value
-    AuthKeys:
+    ErrorDetails:
+      description: The error details.
       type: object
       properties:
-        primaryKey:
-          description: The primary key.
+        code:
+          description: The error code.
           type: string
-        secondaryKey:
-          description: The secondary key.
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
           type: string
     ModelErrorResponse:
       description: The Model Management Service Error object.
@@ -989,18 +993,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ErrorDetails'
-    ErrorDetails:
-      description: The error details.
+    AuthKeys:
       type: object
       properties:
-        code:
-          description: The error code.
+        primaryKey:
+          description: The primary key.
           type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
+        secondaryKey:
+          description: The secondary key.
           type: string
     RegenerateServiceKeysRequest:
       type: object

@@ -352,40 +352,68 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
+  parameters:
+    Azure.ResourceManager.ResourceUriParameter:
+      name: resourceUri
+      in: path
+      description: The fully qualified Azure Resource manager identifier of the resource.
+      required: true
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
+      schema:
+        type: string
   schemas:
-    AdvertiseMode:
+    ProvisioningState:
       type: string
-      description: Enum of advertise mode
+      description: The status of the current operation.
       enum:
-      - ARP
-      - BGP
-      - Both
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Updating
+      - Deleting
+      - Accepted
       x-ms-enum:
-        name: AdvertiseMode
+        name: ProvisioningState
         modelAsString: true
         values:
-        - name: ARP
-          value: ARP
-          description: ARP advertise mode
-        - name: BGP
-          value: BGP
-          description: BGP advertise mode
-        - name: Both
-          value: Both
-          description: both ARP and BGP advertise mode
-    LoadBalancer:
-      type: object
-      description: A LoadBalancer resource for an Arc connected cluster (Microsoft.Kubernetes/connectedClusters)
-      properties:
-        properties:
-          $ref: '#/components/schemas/LoadBalancerProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+        - name: Succeeded
+          value: Succeeded
+          description: Resource has been created.
+        - name: Failed
+          value: Failed
+          description: Resource creation failed.
+        - name: Canceled
+          value: Canceled
+          description: Resource creation was canceled.
+        - name: Provisioning
+          value: Provisioning
+          description: Initial provisioning in progress
+        - name: Updating
+          value: Updating
+          description: Update in progress
+        - name: Deleting
+          value: Deleting
+          description: Deletion in progress
+        - name: Accepted
+          value: Accepted
+          description: Change accepted for processing
+      readOnly: true
     LoadBalancerListResult:
       type: object
       description: The response of a LoadBalancer list operation.
@@ -425,43 +453,53 @@ components:
       required:
       - addresses
       - advertiseMode
-    ProvisioningState:
+    AdvertiseMode:
       type: string
-      description: The status of the current operation.
+      description: Enum of advertise mode
       enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Updating
-      - Deleting
-      - Accepted
+      - ARP
+      - BGP
+      - Both
       x-ms-enum:
-        name: ProvisioningState
+        name: AdvertiseMode
         modelAsString: true
         values:
-        - name: Succeeded
-          value: Succeeded
-          description: Resource has been created.
-        - name: Failed
-          value: Failed
-          description: Resource creation failed.
-        - name: Canceled
-          value: Canceled
-          description: Resource creation was canceled.
-        - name: Provisioning
-          value: Provisioning
-          description: Initial provisioning in progress
-        - name: Updating
-          value: Updating
-          description: Update in progress
-        - name: Deleting
-          value: Deleting
-          description: Deletion in progress
-        - name: Accepted
-          value: Accepted
-          description: Change accepted for processing
-      readOnly: true
+        - name: ARP
+          value: ARP
+          description: ARP advertise mode
+        - name: BGP
+          value: BGP
+          description: BGP advertise mode
+        - name: Both
+          value: Both
+          description: both ARP and BGP advertise mode
+    LoadBalancer:
+      type: object
+      description: A LoadBalancer resource for an Arc connected cluster (Microsoft.Kubernetes/connectedClusters)
+      properties:
+        properties:
+          $ref: '#/components/schemas/LoadBalancerProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+    InboundNatRule:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/InboundNatRulePropertiesFormat'
+        name:
+          type: string
+          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
+        etag:
+          type: string
+          description: A unique read-only string that changes whenever the resource is updated
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
+      description: Inbound NAT rule of the loadbalancer
     LoadBalancerPropertiesFormat:
       properties:
         frontendIPConfigurations:
@@ -506,6 +544,75 @@ components:
           type: string
           description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
       description: Properties of Load Balancer
+    FrontendIpConfigurationPropertiesFormat:
+      properties:
+        privateIPAddress:
+          type: string
+          description: Gets or sets the IP address of the Load Balancer.This is only specified if a specific private IP address shall be allocated from the subnet specified in subnetRef
+        privateIPAllocationMethod:
+          type: string
+          description: Gets or sets PrivateIP allocation method (Static/Dynamic)
+          enum:
+          - Static
+          - Dynamic
+          x-ms-enum:
+            name: IpAllocationMethod
+            modelAsString: true
+        subnet:
+          $ref: '#/components/schemas/SubResource'
+          description: 'Gets or sets the reference of the subnet resource.A subnet from where the load balancer gets its private frontend address '
+        publicIPAddress:
+          $ref: '#/components/schemas/SubResource'
+          description: Gets or sets the reference of the PublicIP resource
+        inboundNatRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Read only.Inbound rules URIs that use this frontend IP
+        inboundNatPools:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Read only.Inbound pools URIs that use this frontend IP
+        outboundNatRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Read only.Outbound rules URIs that use this frontend IP
+        loadBalancingRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Gets Load Balancing rules URIs that use this frontend IP
+        provisioningState:
+          type: string
+          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
+      description: Properties of Frontend IP Configuration of the load balancer
+    LoadBalancerListResult_2:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoadBalancer_2'
+          description: Gets a list of LoadBalancers in a resource group
+        nextLink:
+          type: string
+          description: Gets the URL to get the next set of results.
+      description: Response for ListLoadBalancers Api service call
+    FrontendIpConfiguration:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/FrontendIpConfigurationPropertiesFormat'
+        name:
+          type: string
+          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
+        etag:
+          type: string
+          description: A unique read-only string that changes whenever the resource is updated
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
+      description: Frontend IP address of the load balancer
     OutboundNatRule:
       properties:
         properties:
@@ -520,6 +627,231 @@ components:
       allOf:
       - $ref: '#/components/schemas/SubResource'
       description: Outbound NAT pool of the loadbalancer
+    BackendAddressPoolPropertiesFormat:
+      properties:
+        backendIPConfigurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Gets collection of references to IPs defined in NICs
+        loadBalancingRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Gets Load Balancing rules that use this Backend Address Pool
+        outboundNatRule:
+          $ref: '#/components/schemas/SubResource'
+          description: Gets outbound rules that use this Backend Address Pool
+        provisioningState:
+          type: string
+          description: Provisioning state of the PublicIP resource Updating/Deleting/Failed
+      description: Properties of BackendAddressPool
+    InboundNatRulePropertiesFormat:
+      properties:
+        frontendIPConfiguration:
+          $ref: '#/components/schemas/SubResource'
+          description: Gets or sets a reference to frontend IP Addresses
+        backendIPConfiguration:
+          $ref: '#/components/schemas/SubResource'
+          description: Gets or sets a reference to a private ip address defined on a NetworkInterface of a VM. Traffic sent to frontendPort of each of the frontendIPConfigurations is forwarded to the backed IP
+        protocol:
+          type: string
+          description: Gets or sets the transport protocol for the external endpoint. Possible values are Udp or Tcp
+          enum:
+          - Udp
+          - Tcp
+          x-ms-enum:
+            name: TransportProtocol
+            modelAsString: true
+        frontendPort:
+          type: integer
+          format: int32
+          description: Gets or sets the port for the external endpoint. You can specify any port number you choose, but the port numbers specified for each role in the service must be unique. Possible values range between 1 and 65535, inclusive
+        backendPort:
+          type: integer
+          format: int32
+          description: Gets or sets a port used for internal connections on the endpoint. The localPort attribute maps the eternal port of the endpoint to an internal port on a role. This is useful in scenarios where a role must communicate to an internal component on a port that is different from the one that is exposed externally. If not specified, the value of localPort is the same as the port attribute. Set the value of localPort to '*' to automatically assign an unallocated port that is discoverable using the runtime API
+        idleTimeoutInMinutes:
+          type: integer
+          format: int32
+          description: Gets or sets the timeout for the Tcp idle connection. The value can be set between 4 and 30 minutes. The default value is 4 minutes. This element is only used when the protocol is set to Tcp
+        enableFloatingIP:
+          type: boolean
+          description: Configures a virtual machine's endpoint for the floating IP capability required to configure a SQL AlwaysOn availability Group. This setting is required when using the SQL Always ON availability Groups in SQL server. This setting can't be changed after you create the endpoint
+        provisioningState:
+          type: string
+          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
+      required:
+      - protocol
+      - frontendPort
+      - enableFloatingIP
+      description: Properties of Inbound NAT rule
+    ProbePropertiesFormat:
+      properties:
+        loadBalancingRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Gets Load balancer rules that use this probe
+        protocol:
+          type: string
+          description: Gets or sets the protocol of the end point. Possible values are http pr Tcp. If Tcp is specified, a received ACK is required for the probe to be successful. If http is specified,a 200 OK response from the specifies URI is required for the probe to be successful
+          enum:
+          - Http
+          - Tcp
+          x-ms-enum:
+            name: ProbeProtocol
+            modelAsString: true
+        port:
+          type: integer
+          format: int32
+          description: Gets or sets Port for communicating the probe. Possible values range from 1 to 65535, inclusive.
+        intervalInSeconds:
+          type: integer
+          format: int32
+          description: Gets or sets the interval, in seconds, for how frequently to probe the endpoint for health status. Typically, the interval is slightly less than half the allocated timeout period (in seconds) which allows two full probes before taking the instance out of rotation. The default value is 15, the minimum value is 5
+        numberOfProbes:
+          type: integer
+          format: int32
+          description: 'Gets or sets the number of probes where if no response, will result in stopping further traffic from being delivered to the endpoint. This values allows endpoints to be taken out of rotation faster or slower than the typical times used in Azure. '
+        requestPath:
+          type: string
+          description: Gets or sets the URI used for requesting health status from the VM. Path is required if a protocol is set to http. Otherwise, it is not allowed. There is no default value
+        provisioningState:
+          type: string
+          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
+      required:
+      - protocol
+      - port
+    LoadBalancer_2:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/LoadBalancerPropertiesFormat'
+        etag:
+          type: string
+          description: Gets a unique read-only string that changes whenever the resource is updated
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      description: LoadBalancer resource
+    LoadBalancingRule:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/LoadBalancingRulePropertiesFormat'
+        name:
+          type: string
+          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
+        etag:
+          type: string
+          description: A unique read-only string that changes whenever the resource is updated
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
+      description: Rules of the load balancer
+    SubResource:
+      properties:
+        id:
+          type: string
+          description: Resource Id
+      x-ms-azure-resource: true
+    InboundNatPoolPropertiesFormat:
+      properties:
+        frontendIPConfiguration:
+          $ref: '#/components/schemas/SubResource'
+          description: Gets or sets a reference to frontend IP Addresses
+        protocol:
+          type: string
+          description: Gets or sets the transport protocol for the external endpoint. Possible values are Udp or Tcp
+          enum:
+          - Udp
+          - Tcp
+          x-ms-enum:
+            name: TransportProtocol
+            modelAsString: true
+        frontendPortRangeStart:
+          type: integer
+          format: int32
+          description: Gets or sets the starting port range for the NAT pool. You can specify any port number you choose, but the port numbers specified for each role in the service must be unique. Possible values range between 1 and 65535, inclusive
+        frontendPortRangeEnd:
+          type: integer
+          format: int32
+          description: Gets or sets the ending port range for the NAT pool. You can specify any port number you choose, but the port numbers specified for each role in the service must be unique. Possible values range between 1 and 65535, inclusive
+        backendPort:
+          type: integer
+          format: int32
+          description: Gets or sets a port used for internal connections on the endpoint. The localPort attribute maps the eternal port of the endpoint to an internal port on a role. This is useful in scenarios where a role must communicate to an internal component on a port that is different from the one that is exposed externally. If not specified, the value of localPort is the same as the port attribute. Set the value of localPort to '*' to automatically assign an unallocated port that is discoverable using the runtime API
+        provisioningState:
+          type: string
+          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
+      required:
+      - protocol
+      - frontendPortRangeStart
+      - frontendPortRangeEnd
+      - backendPort
+      description: Properties of Inbound NAT pool
+    OutboundNatRulePropertiesFormat:
+      properties:
+        allocatedOutboundPorts:
+          type: integer
+          format: int32
+          description: Gets or sets the number of outbound ports to be used for SNAT
+        frontendIPConfigurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubResource'
+          description: Gets or sets Frontend IP addresses of the load balancer
+        backendAddressPool:
+          $ref: '#/components/schemas/SubResource'
+          description: Gets or sets a reference to a pool of DIPs. Outbound traffic is randomly load balanced across IPs in the backend IPs
+        provisioningState:
+          type: string
+          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
+      required:
+      - allocatedOutboundPorts
+      - backendAddressPool
+      description: Outbound NAT pool of the loadbalancer
+    InboundNatPool:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/InboundNatPoolPropertiesFormat'
+        name:
+          type: string
+          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
+        etag:
+          type: string
+          description: A unique read-only string that changes whenever the resource is updated
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
+      description: Inbound NAT pool of the loadbalancer
+    BackendAddressPool:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BackendAddressPoolPropertiesFormat'
+        name:
+          type: string
+          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
+        etag:
+          type: string
+          description: A unique read-only string that changes whenever the resource is updated
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
+      description: Pool of backend IP addresses
+    Probe:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ProbePropertiesFormat'
+        name:
+          type: string
+          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
+        etag:
+          type: string
+          description: A unique read-only string that changes whenever the resource is updated
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
+      description: Load balancer Probe
     LoadBalancingRulePropertiesFormat:
       properties:
         frontendIPConfiguration:
@@ -574,265 +906,6 @@ components:
       - frontendPort
       - enableFloatingIP
       description: Properties of the load balancer
-    InboundNatRulePropertiesFormat:
-      properties:
-        frontendIPConfiguration:
-          $ref: '#/components/schemas/SubResource'
-          description: Gets or sets a reference to frontend IP Addresses
-        backendIPConfiguration:
-          $ref: '#/components/schemas/SubResource'
-          description: Gets or sets a reference to a private ip address defined on a NetworkInterface of a VM. Traffic sent to frontendPort of each of the frontendIPConfigurations is forwarded to the backed IP
-        protocol:
-          type: string
-          description: Gets or sets the transport protocol for the external endpoint. Possible values are Udp or Tcp
-          enum:
-          - Udp
-          - Tcp
-          x-ms-enum:
-            name: TransportProtocol
-            modelAsString: true
-        frontendPort:
-          type: integer
-          format: int32
-          description: Gets or sets the port for the external endpoint. You can specify any port number you choose, but the port numbers specified for each role in the service must be unique. Possible values range between 1 and 65535, inclusive
-        backendPort:
-          type: integer
-          format: int32
-          description: Gets or sets a port used for internal connections on the endpoint. The localPort attribute maps the eternal port of the endpoint to an internal port on a role. This is useful in scenarios where a role must communicate to an internal component on a port that is different from the one that is exposed externally. If not specified, the value of localPort is the same as the port attribute. Set the value of localPort to '*' to automatically assign an unallocated port that is discoverable using the runtime API
-        idleTimeoutInMinutes:
-          type: integer
-          format: int32
-          description: Gets or sets the timeout for the Tcp idle connection. The value can be set between 4 and 30 minutes. The default value is 4 minutes. This element is only used when the protocol is set to Tcp
-        enableFloatingIP:
-          type: boolean
-          description: Configures a virtual machine's endpoint for the floating IP capability required to configure a SQL AlwaysOn availability Group. This setting is required when using the SQL Always ON availability Groups in SQL server. This setting can't be changed after you create the endpoint
-        provisioningState:
-          type: string
-          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
-      required:
-      - protocol
-      - frontendPort
-      - enableFloatingIP
-      description: Properties of Inbound NAT rule
-    SubResource:
-      properties:
-        id:
-          type: string
-          description: Resource Id
-      x-ms-azure-resource: true
-    FrontendIpConfiguration:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/FrontendIpConfigurationPropertiesFormat'
-        name:
-          type: string
-          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
-        etag:
-          type: string
-          description: A unique read-only string that changes whenever the resource is updated
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
-      description: Frontend IP address of the load balancer
-    ProbePropertiesFormat:
-      properties:
-        loadBalancingRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Gets Load balancer rules that use this probe
-        protocol:
-          type: string
-          description: Gets or sets the protocol of the end point. Possible values are http pr Tcp. If Tcp is specified, a received ACK is required for the probe to be successful. If http is specified,a 200 OK response from the specifies URI is required for the probe to be successful
-          enum:
-          - Http
-          - Tcp
-          x-ms-enum:
-            name: ProbeProtocol
-            modelAsString: true
-        port:
-          type: integer
-          format: int32
-          description: Gets or sets Port for communicating the probe. Possible values range from 1 to 65535, inclusive.
-        intervalInSeconds:
-          type: integer
-          format: int32
-          description: Gets or sets the interval, in seconds, for how frequently to probe the endpoint for health status. Typically, the interval is slightly less than half the allocated timeout period (in seconds) which allows two full probes before taking the instance out of rotation. The default value is 15, the minimum value is 5
-        numberOfProbes:
-          type: integer
-          format: int32
-          description: 'Gets or sets the number of probes where if no response, will result in stopping further traffic from being delivered to the endpoint. This values allows endpoints to be taken out of rotation faster or slower than the typical times used in Azure. '
-        requestPath:
-          type: string
-          description: Gets or sets the URI used for requesting health status from the VM. Path is required if a protocol is set to http. Otherwise, it is not allowed. There is no default value
-        provisioningState:
-          type: string
-          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
-      required:
-      - protocol
-      - port
-    InboundNatPool:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/InboundNatPoolPropertiesFormat'
-        name:
-          type: string
-          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
-        etag:
-          type: string
-          description: A unique read-only string that changes whenever the resource is updated
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
-      description: Inbound NAT pool of the loadbalancer
-    LoadBalancingRule:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/LoadBalancingRulePropertiesFormat'
-        name:
-          type: string
-          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
-        etag:
-          type: string
-          description: A unique read-only string that changes whenever the resource is updated
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
-      description: Rules of the load balancer
-    OutboundNatRulePropertiesFormat:
-      properties:
-        allocatedOutboundPorts:
-          type: integer
-          format: int32
-          description: Gets or sets the number of outbound ports to be used for SNAT
-        frontendIPConfigurations:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Gets or sets Frontend IP addresses of the load balancer
-        backendAddressPool:
-          $ref: '#/components/schemas/SubResource'
-          description: Gets or sets a reference to a pool of DIPs. Outbound traffic is randomly load balanced across IPs in the backend IPs
-        provisioningState:
-          type: string
-          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
-      required:
-      - allocatedOutboundPorts
-      - backendAddressPool
-      description: Outbound NAT pool of the loadbalancer
-    Probe:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ProbePropertiesFormat'
-        name:
-          type: string
-          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
-        etag:
-          type: string
-          description: A unique read-only string that changes whenever the resource is updated
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
-      description: Load balancer Probe
-    FrontendIpConfigurationPropertiesFormat:
-      properties:
-        privateIPAddress:
-          type: string
-          description: Gets or sets the IP address of the Load Balancer.This is only specified if a specific private IP address shall be allocated from the subnet specified in subnetRef
-        privateIPAllocationMethod:
-          type: string
-          description: Gets or sets PrivateIP allocation method (Static/Dynamic)
-          enum:
-          - Static
-          - Dynamic
-          x-ms-enum:
-            name: IpAllocationMethod
-            modelAsString: true
-        subnet:
-          $ref: '#/components/schemas/SubResource'
-          description: 'Gets or sets the reference of the subnet resource.A subnet from where the load balancer gets its private frontend address '
-        publicIPAddress:
-          $ref: '#/components/schemas/SubResource'
-          description: Gets or sets the reference of the PublicIP resource
-        inboundNatRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Read only.Inbound rules URIs that use this frontend IP
-        inboundNatPools:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Read only.Inbound pools URIs that use this frontend IP
-        outboundNatRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Read only.Outbound rules URIs that use this frontend IP
-        loadBalancingRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Gets Load Balancing rules URIs that use this frontend IP
-        provisioningState:
-          type: string
-          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
-      description: Properties of Frontend IP Configuration of the load balancer
-    BackendAddressPoolPropertiesFormat:
-      properties:
-        backendIPConfigurations:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Gets collection of references to IPs defined in NICs
-        loadBalancingRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubResource'
-          description: Gets Load Balancing rules that use this Backend Address Pool
-        outboundNatRule:
-          $ref: '#/components/schemas/SubResource'
-          description: Gets outbound rules that use this Backend Address Pool
-        provisioningState:
-          type: string
-          description: Provisioning state of the PublicIP resource Updating/Deleting/Failed
-      description: Properties of BackendAddressPool
-    InboundNatRule:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/InboundNatRulePropertiesFormat'
-        name:
-          type: string
-          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
-        etag:
-          type: string
-          description: A unique read-only string that changes whenever the resource is updated
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
-      description: Inbound NAT rule of the loadbalancer
-    LoadBalancer_2:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/LoadBalancerPropertiesFormat'
-        etag:
-          type: string
-          description: Gets a unique read-only string that changes whenever the resource is updated
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      description: LoadBalancer resource
-    LoadBalancerListResult_2:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/LoadBalancer_2'
-          description: Gets a list of LoadBalancers in a resource group
-        nextLink:
-          type: string
-          description: Gets the URL to get the next set of results.
-      description: Response for ListLoadBalancers Api service call
     Resource:
       properties:
         id:
@@ -858,79 +931,6 @@ components:
       required:
       - location
       x-ms-azure-resource: true
-    BackendAddressPool:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BackendAddressPoolPropertiesFormat'
-        name:
-          type: string
-          description: Gets name of the resource that is unique within a resource group. This name can be used to access the resource
-        etag:
-          type: string
-          description: A unique read-only string that changes whenever the resource is updated
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
-      description: Pool of backend IP addresses
-    InboundNatPoolPropertiesFormat:
-      properties:
-        frontendIPConfiguration:
-          $ref: '#/components/schemas/SubResource'
-          description: Gets or sets a reference to frontend IP Addresses
-        protocol:
-          type: string
-          description: Gets or sets the transport protocol for the external endpoint. Possible values are Udp or Tcp
-          enum:
-          - Udp
-          - Tcp
-          x-ms-enum:
-            name: TransportProtocol
-            modelAsString: true
-        frontendPortRangeStart:
-          type: integer
-          format: int32
-          description: Gets or sets the starting port range for the NAT pool. You can specify any port number you choose, but the port numbers specified for each role in the service must be unique. Possible values range between 1 and 65535, inclusive
-        frontendPortRangeEnd:
-          type: integer
-          format: int32
-          description: Gets or sets the ending port range for the NAT pool. You can specify any port number you choose, but the port numbers specified for each role in the service must be unique. Possible values range between 1 and 65535, inclusive
-        backendPort:
-          type: integer
-          format: int32
-          description: Gets or sets a port used for internal connections on the endpoint. The localPort attribute maps the eternal port of the endpoint to an internal port on a role. This is useful in scenarios where a role must communicate to an internal component on a port that is different from the one that is exposed externally. If not specified, the value of localPort is the same as the port attribute. Set the value of localPort to '*' to automatically assign an unallocated port that is discoverable using the runtime API
-        provisioningState:
-          type: string
-          description: Gets or sets Provisioning state of the PublicIP resource Updating/Deleting/Failed
-      required:
-      - protocol
-      - frontendPortRangeStart
-      - frontendPortRangeEnd
-      - backendPort
-      description: Properties of Inbound NAT pool
-  parameters:
-    Azure.ResourceManager.ResourceUriParameter:
-      name: resourceUri
-      in: path
-      description: The fully qualified Azure Resource manager identifier of the resource.
-      required: true
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-      schema:
-        type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client Api Version.
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

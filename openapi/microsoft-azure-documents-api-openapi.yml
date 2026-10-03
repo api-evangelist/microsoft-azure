@@ -589,18 +589,144 @@ paths:
         description: The definition of the Autocomplete request.
         required: true
 components:
+  parameters:
+    ClientRequestIdParameter:
+      name: client-request-id
+      in: header
+      required: false
+      description: The tracking ID sent with the request to help with debugging.
+      x-ms-client-request-id: true
+      x-ms-parameter-grouping:
+        name: search-request-options
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
+      schema:
+        type: string
   schemas:
-    IndexBatch:
+    AutocompleteMode:
+      type: string
+      enum:
+      - oneTerm
+      - twoTerms
+      - oneTermWithContext
+      x-ms-enum:
+        name: AutocompleteMode
+        modelAsString: false
+      description: Specifies the mode for Autocomplete. The default is 'oneTerm'. Use 'twoTerms' to get shingles and 'oneTermWithContext' to use the current context in producing autocomplete terms.
+    AutocompleteRequest:
+      properties:
+        search:
+          type: string
+          description: The search text on which to base autocomplete results.
+          x-ms-client-name: SearchText
+        autocompleteMode:
+          $ref: '#/components/schemas/AutocompleteMode'
+          description: Specifies the mode for Autocomplete. The default is 'oneTerm'. Use 'twoTerms' to get shingles and 'oneTermWithContext' to use the current context while producing auto-completed terms.
+        filter:
+          externalDocs:
+            url: https://docs.microsoft.com/rest/api/searchservice/OData-Expression-Syntax-for-Azure-Search
+          type: string
+          description: An OData expression that filters the documents used to produce completed terms for the Autocomplete result.
+        fuzzy:
+          type: boolean
+          description: A value indicating whether to use fuzzy matching for the autocomplete query. Default is false. When set to true, the query will autocomplete terms even if there's a substituted or missing character in the search text. While this provides a better experience in some scenarios, it comes at a performance cost as fuzzy autocomplete queries are slower and consume more resources.
+          x-ms-client-name: UseFuzzyMatching
+        highlightPostTag:
+          type: string
+          description: A string tag that is appended to hit highlights. Must be set with highlightPreTag. If omitted, hit highlighting is disabled.
+        highlightPreTag:
+          type: string
+          description: A string tag that is prepended to hit highlights. Must be set with highlightPostTag. If omitted, hit highlighting is disabled.
+        minimumCoverage:
+          type: number
+          format: double
+          description: A number between 0 and 100 indicating the percentage of the index that must be covered by an autocomplete query in order for the query to be reported as a success. This parameter can be useful for ensuring search availability even for services with only one replica. The default is 80.
+        searchFields:
+          type: string
+          description: The comma-separated list of field names to consider when querying for auto-completed terms. Target fields must be included in the specified suggester.
+        suggesterName:
+          type: string
+          description: The name of the suggester as specified in the suggesters collection that's part of the index definition.
+        top:
+          type: integer
+          format: int32
+          description: The number of auto-completed terms to retrieve. This must be a value between 1 and 100. The default is 5.
+      description: Parameters for fuzzy matching, and other autocomplete query behaviors.
+    SearchResult:
+      properties:
+        '@search.score':
+          type: number
+          format: double
+          readOnly: true
+          x-ms-client-name: Score
+          description: The relevance score of the document compared to other documents returned by the query.
+        '@search.highlights':
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          readOnly: true
+          x-ms-client-name: Highlights
+          description: Text fragments from the document that indicate the matching search terms, organized by each applicable field; null if hit highlighting was not enabled for the query.
+      additionalProperties: true
+      description: Contains a document found by a search query, plus associated metadata.
+    SearchMode:
+      type: string
+      enum:
+      - any
+      - all
+      x-ms-enum:
+        name: SearchMode
+        modelAsString: false
+      description: Specifies whether any or all of the search terms must be matched in order to count the document as a match.
+    SuggestResult:
+      properties:
+        '@search.text':
+          type: string
+          readOnly: true
+          description: The text of the suggestion result.
+          x-ms-client-name: Text
+      additionalProperties: true
+      description: A result containing a document found by a suggestion query, plus associated metadata.
+    DocumentIndexResult:
+      properties:
+        value:
+          x-ms-client-name: Results
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/IndexingResult'
+          description: The list of status information for each document in the indexing request.
+      description: Response containing the status of operations for all documents in the indexing request.
+    AutocompleteResult:
       properties:
         value:
           type: array
+          readOnly: true
           items:
-            $ref: '#/components/schemas/IndexAction'
-          description: The actions in the batch.
-          x-ms-client-name: Actions
-      required:
-      - value
-      description: Contains a batch of document write actions to send to the Azure Search index.
+            $ref: '#/components/schemas/AutocompleteItem'
+          description: The list of returned Autocompleted items.
+          x-ms-client-name: Results
+      description: The result of Autocomplete query.
+    AutocompleteItem:
+      properties:
+        text:
+          type: string
+          readOnly: true
+          description: The completed term.
+        queryPlusText:
+          type: string
+          readOnly: true
+          description: The query along with the completed term.
+      description: The result of Autocomplete requests.
     SearchRequest:
       properties:
         count:
@@ -670,15 +796,6 @@ components:
           format: int32
           description: The number of search results to retrieve. This can be used in conjunction with $skip to implement client-side paging of search results. If results are truncated due to server-side paging, the response will include a continuation token that can be used to issue another Search request for the next page of results.
       description: Parameters for filtering, sorting, faceting, paging, and other search query behaviors.
-    SuggestResult:
-      properties:
-        '@search.text':
-          type: string
-          readOnly: true
-          description: The text of the suggestion result.
-          x-ms-client-name: Text
-      additionalProperties: true
-      description: A result containing a document found by a suggestion query, plus associated metadata.
     SuggestRequest:
       properties:
         filter:
@@ -722,95 +839,6 @@ components:
           format: int32
           description: The number of suggestions to retrieve. This must be a value between 1 and 100. The default is 5.
       description: Parameters for filtering, sorting, fuzzy matching, and other suggestions query behaviors.
-    DocumentSuggestResult:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SuggestResult'
-          readOnly: true
-          x-ms-client-name: Results
-          description: The sequence of results returned by the query.
-        '@search.coverage':
-          type: number
-          readOnly: true
-          format: double
-          x-ms-client-name: Coverage
-          description: A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not set in the request.
-      description: Response containing suggestion query results from an Azure Search index.
-    AutocompleteMode:
-      type: string
-      enum:
-      - oneTerm
-      - twoTerms
-      - oneTermWithContext
-      x-ms-enum:
-        name: AutocompleteMode
-        modelAsString: false
-      description: Specifies the mode for Autocomplete. The default is 'oneTerm'. Use 'twoTerms' to get shingles and 'oneTermWithContext' to use the current context in producing autocomplete terms.
-    QueryType:
-      type: string
-      enum:
-      - simple
-      - full
-      x-ms-enum:
-        name: QueryType
-        modelAsString: false
-      description: Specifies the syntax of the search query. The default is 'simple'. Use 'full' if your query uses the Lucene query syntax.
-    AutocompleteRequest:
-      properties:
-        search:
-          type: string
-          description: The search text on which to base autocomplete results.
-          x-ms-client-name: SearchText
-        autocompleteMode:
-          $ref: '#/components/schemas/AutocompleteMode'
-          description: Specifies the mode for Autocomplete. The default is 'oneTerm'. Use 'twoTerms' to get shingles and 'oneTermWithContext' to use the current context while producing auto-completed terms.
-        filter:
-          externalDocs:
-            url: https://docs.microsoft.com/rest/api/searchservice/OData-Expression-Syntax-for-Azure-Search
-          type: string
-          description: An OData expression that filters the documents used to produce completed terms for the Autocomplete result.
-        fuzzy:
-          type: boolean
-          description: A value indicating whether to use fuzzy matching for the autocomplete query. Default is false. When set to true, the query will autocomplete terms even if there's a substituted or missing character in the search text. While this provides a better experience in some scenarios, it comes at a performance cost as fuzzy autocomplete queries are slower and consume more resources.
-          x-ms-client-name: UseFuzzyMatching
-        highlightPostTag:
-          type: string
-          description: A string tag that is appended to hit highlights. Must be set with highlightPreTag. If omitted, hit highlighting is disabled.
-        highlightPreTag:
-          type: string
-          description: A string tag that is prepended to hit highlights. Must be set with highlightPostTag. If omitted, hit highlighting is disabled.
-        minimumCoverage:
-          type: number
-          format: double
-          description: A number between 0 and 100 indicating the percentage of the index that must be covered by an autocomplete query in order for the query to be reported as a success. This parameter can be useful for ensuring search availability even for services with only one replica. The default is 80.
-        searchFields:
-          type: string
-          description: The comma-separated list of field names to consider when querying for auto-completed terms. Target fields must be included in the specified suggester.
-        suggesterName:
-          type: string
-          description: The name of the suggester as specified in the suggesters collection that's part of the index definition.
-        top:
-          type: integer
-          format: int32
-          description: The number of auto-completed terms to retrieve. This must be a value between 1 and 100. The default is 5.
-      description: Parameters for fuzzy matching, and other autocomplete query behaviors.
-    IndexAction:
-      properties:
-        '@search.action':
-          type: string
-          enum:
-          - upload
-          - merge
-          - mergeOrUpload
-          - delete
-          x-ms-enum:
-            name: IndexActionType
-          x-ms-client-name: ActionType
-          description: The operation to perform on a document in an indexing batch.
-      additionalProperties: true
-      description: Represents an index action that operates on a document.
     IndexingResult:
       properties:
         key:
@@ -832,55 +860,6 @@ components:
           readOnly: true
           description: 'The status code of the indexing operation. Possible values include: 200 for a successful update or delete, 201 for successful document creation, 400 for a malformed input document, 404 for document not found, 409 for a version conflict, 422 when the index is temporarily unavailable, or 503 for when the service is too busy.'
       description: Status of an indexing operation for a single document.
-    SearchMode:
-      type: string
-      enum:
-      - any
-      - all
-      x-ms-enum:
-        name: SearchMode
-        modelAsString: false
-      description: Specifies whether any or all of the search terms must be matched in order to count the document as a match.
-    AutocompleteItem:
-      properties:
-        text:
-          type: string
-          readOnly: true
-          description: The completed term.
-        queryPlusText:
-          type: string
-          readOnly: true
-          description: The query along with the completed term.
-      description: The result of Autocomplete requests.
-    SearchResult:
-      properties:
-        '@search.score':
-          type: number
-          format: double
-          readOnly: true
-          x-ms-client-name: Score
-          description: The relevance score of the document compared to other documents returned by the query.
-        '@search.highlights':
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          readOnly: true
-          x-ms-client-name: Highlights
-          description: Text fragments from the document that indicate the matching search terms, organized by each applicable field; null if hit highlighting was not enabled for the query.
-      additionalProperties: true
-      description: Contains a document found by a search query, plus associated metadata.
-    DocumentIndexResult:
-      properties:
-        value:
-          x-ms-client-name: Results
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/IndexingResult'
-          description: The list of status information for each document in the indexing request.
-      description: Response containing the status of operations for all documents in the indexing request.
     FacetResult:
       properties:
         count:
@@ -890,16 +869,48 @@ components:
           description: The approximate count of documents falling within the bucket described by this facet.
       additionalProperties: true
       description: A single bucket of a facet query result. Reports the number of documents with a field value falling within a particular range or having a particular value or interval.
-    AutocompleteResult:
+    IndexBatch:
       properties:
         value:
           type: array
-          readOnly: true
           items:
-            $ref: '#/components/schemas/AutocompleteItem'
-          description: The list of returned Autocompleted items.
+            $ref: '#/components/schemas/IndexAction'
+          description: The actions in the batch.
+          x-ms-client-name: Actions
+      required:
+      - value
+      description: Contains a batch of document write actions to send to the Azure Search index.
+    DocumentSuggestResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SuggestResult'
+          readOnly: true
           x-ms-client-name: Results
-      description: The result of Autocomplete query.
+          description: The sequence of results returned by the query.
+        '@search.coverage':
+          type: number
+          readOnly: true
+          format: double
+          x-ms-client-name: Coverage
+          description: A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not set in the request.
+      description: Response containing suggestion query results from an Azure Search index.
+    IndexAction:
+      properties:
+        '@search.action':
+          type: string
+          enum:
+          - upload
+          - merge
+          - mergeOrUpload
+          - delete
+          x-ms-enum:
+            name: IndexActionType
+          x-ms-client-name: ActionType
+          description: The operation to perform on a document in an indexing batch.
+      additionalProperties: true
+      description: Represents an index action that operates on a document.
     DocumentSearchResult:
       properties:
         '@odata.count':
@@ -941,26 +952,15 @@ components:
           x-ms-client-name: NextLink
           description: Continuation URL returned when Azure Search can't return all the requested results in a single Search response. You can use this URL to formulate another GET or POST Search request to get the next part of the search response. Make sure to use the same verb (GET or POST) as the request that produced this response.
       description: Response containing search results from an Azure Search index.
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client Api Version.
-      schema:
-        type: string
-    ClientRequestIdParameter:
-      name: client-request-id
-      in: header
-      required: false
-      description: The tracking ID sent with the request to help with debugging.
-      x-ms-client-request-id: true
-      x-ms-parameter-grouping:
-        name: search-request-options
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
+    QueryType:
+      type: string
+      enum:
+      - simple
+      - full
+      x-ms-enum:
+        name: QueryType
+        modelAsString: false
+      description: Specifies the syntax of the search query. The default is 'simple'. Use 'full' if your query uses the Lucene query syntax.
 x-ms-parameterized-host:
   hostTemplate: https://{searchServiceName}.{searchDnsSuffix}/indexes('{indexName}')
   useSchemePrefix: false

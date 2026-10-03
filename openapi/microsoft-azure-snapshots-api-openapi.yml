@@ -1258,13 +1258,17 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
-  schemas:
-    SnapshotUpdateParameters:
-      description: Parameters used to update a snapshot.
-      type: object
-      properties:
-        status:
-          description: The desired status of the snapshot.
+  parameters:
+    Status:
+      name: Status
+      in: query
+      description: Used to filter returned snapshots by their status property.
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
           type: string
           enum:
           - provisioning
@@ -1274,38 +1278,117 @@ components:
           x-ms-enum:
             name: SnapshotStatus
             modelAsString: true
-    Error:
-      description: Azure App Configuration error object.
-      type: object
-      properties:
-        type:
-          description: The type of the error.
-          type: string
-        title:
-          description: A brief summary of the error.
-          type: string
-        name:
-          description: The name of the parameter that resulted in the error.
-          type: string
-        detail:
-          description: A detailed description of the error.
-          type: string
-        status:
-          description: The HTTP status code that the error maps to.
-          type: integer
-      readOnly: true
-    SnapshotListResult:
-      description: The result of a snapshot list request.
-      type: object
-      properties:
+    SyncTokens:
+      name: Sync-Token
+      in: header
+      description: Used to guarantee real-time consistency between requests.
+      schema:
+        type: string
+    SnapshotFields:
+      name: $Select
+      in: query
+      description: Used to select what fields are present in the returned resource(s).
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
         items:
-          description: The collection value.
-          type: array
-          items:
-            $ref: '#/components/schemas/Snapshot'
-        '@nextLink':
-          description: The URI that can be used to request the next set of paged results.
           type: string
+          enum:
+          - name
+          - status
+          - filters
+          - composition_type
+          - created
+          - expires
+          - retention_period
+          - size
+          - items_count
+          - tags
+          - etag
+          x-ms-enum:
+            name: SnapshotFields
+            modelAsString: true
+    ApiVersion:
+      name: api-version
+      in: query
+      description: The API version to be used with the HTTP request.
+      required: true
+      schema:
+        type: string
+    SnapshotNameParameter:
+      name: snapshotName
+      in: path
+      required: true
+      description: The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9, _ and -. The max name length is 80 characters.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    applyScope:
+      name: applyScope
+      description: User specified snapshot apply scopes as a search filter. ApplyScope is an array of the target Azure subscription ids for the snapshot, specified by the user who created the snapshot by Snapshot - Take.
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+          format: uuid
+    snapshotId:
+      name: snapshotId
+      in: path
+      description: Id referencing a particular snapshot.
+      required: true
+      x-ms-parameter-location: method
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    SnapshotName:
+      name: snapshotName
+      in: path
+      required: true
+      description: The name of the snapshot
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    AccountName:
+      name: accountName
+      in: path
+      required: true
+      description: The name of the NetApp account
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
+    PoolName:
+      name: poolName
+      in: path
+      required: true
+      description: The name of the capacity pool
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
+    VolumeName:
+      name: volumeName
+      in: path
+      required: true
+      description: The name of the volume
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+        pattern: ^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$
+  schemas:
     Snapshot:
       type: object
       required:
@@ -1380,6 +1463,53 @@ components:
           description: A value representing the current state of the snapshot.
           type: string
           readOnly: true
+    Error:
+      description: Azure App Configuration error object.
+      type: object
+      properties:
+        type:
+          description: The type of the error.
+          type: string
+        title:
+          description: A brief summary of the error.
+          type: string
+        name:
+          description: The name of the parameter that resulted in the error.
+          type: string
+        detail:
+          description: A detailed description of the error.
+          type: string
+        status:
+          description: The HTTP status code that the error maps to.
+          type: integer
+      readOnly: true
+    SnapshotListResult:
+      description: The result of a snapshot list request.
+      type: object
+      properties:
+        items:
+          description: The collection value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Snapshot'
+        '@nextLink':
+          description: The URI that can be used to request the next set of paged results.
+          type: string
+    SnapshotUpdateParameters:
+      description: Parameters used to update a snapshot.
+      type: object
+      properties:
+        status:
+          description: The desired status of the snapshot.
+          type: string
+          enum:
+          - provisioning
+          - ready
+          - archived
+          - failed
+          x-ms-enum:
+            name: SnapshotStatus
+            modelAsString: true
     KeyValueFilter:
       description: Enables filtering of key-values.
       type: object
@@ -1392,6 +1522,54 @@ components:
         label:
           description: Filters key-values by their label field.
           type: string
+    SnapshotProperties:
+      type: object
+      description: Volume Snapshot Properties
+      properties:
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/ResourceOperationalStatus'
+          description: The status of the resource.
+          readOnly: true
+        source:
+          type: string
+          description: Reference to the source volume
+          minLength: 3
+          maxLength: 253
+          pattern: ^[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - source
+    Snapshot_2:
+      type: object
+      description: Concrete proxy resource types can be created by aliasing this type using a specific property type.
+      properties:
+        properties:
+          $ref: '#/components/schemas/SnapshotProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
+    ResourceOperationalStatus:
+      type: object
+      description: Status of the resource
+      properties:
+        state:
+          $ref: '#/components/schemas/ResourceOperationStatusState'
+          description: state of the resource
+        message:
+          type: string
+          description: Reason for state.
+      required:
+      - state
     SnapshotListResult_2:
       type: object
       description: The response of a Snapshot list operation.
@@ -1443,54 +1621,6 @@ components:
         - name: Accepted
           value: Accepted
           description: The resource create request has been accepted
-    SnapshotProperties:
-      type: object
-      description: Volume Snapshot Properties
-      properties:
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
-        status:
-          $ref: '#/components/schemas/ResourceOperationalStatus'
-          description: The status of the resource.
-          readOnly: true
-        source:
-          type: string
-          description: Reference to the source volume
-          minLength: 3
-          maxLength: 253
-          pattern: ^[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - source
-    Snapshot_2:
-      type: object
-      description: Concrete proxy resource types can be created by aliasing this type using a specific property type.
-      properties:
-        properties:
-          $ref: '#/components/schemas/SnapshotProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
-    ResourceOperationalStatus:
-      type: object
-      description: Status of the resource
-      properties:
-        state:
-          $ref: '#/components/schemas/ResourceOperationStatusState'
-          description: state of the resource
-        message:
-          type: string
-          description: Reason for state.
-      required:
-      - state
     ResourceOperationStatusState:
       type: string
       description: State of the resource.
@@ -1511,56 +1641,6 @@ components:
         - name: Unavailable
           value: Unavailable
           description: The resource is unavailable.
-    SnapshotList:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Snapshot_3'
-          description: A list of snapshots.
-        nextLink:
-          type: string
-          description: The uri to fetch the next page of snapshots. Call ListNext() with this to fetch the next page of snapshots.
-      required:
-      - value
-      description: The List Snapshots operation response.
-    SnapshotSku:
-      properties:
-        name:
-          type: string
-          enum:
-          - Standard_LRS
-          - Premium_LRS
-          - Standard_ZRS
-          x-ms-enum:
-            name: SnapshotStorageAccountTypes
-            modelAsString: true
-            values:
-            - value: Standard_LRS
-              description: Standard HDD locally redundant storage
-            - value: Premium_LRS
-              description: Premium SSD locally redundant storage
-            - value: Standard_ZRS
-              description: Standard zone redundant storage
-          description: The sku name.
-        tier:
-          type: string
-          readOnly: true
-          description: The sku tier.
-      description: The snapshots sku name. Can be Standard_LRS, Premium_LRS, or Standard_ZRS. This is an optional parameter for incremental snapshot and the default behavior is the SKU will be set to the same sku as the previous snapshot
-    SnapshotUpdate:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/SnapshotUpdateProperties'
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags
-        sku:
-          $ref: '#/components/schemas/SnapshotSku'
-      description: Snapshot update resource.
     SnapshotProperties_2:
       properties:
         timeCreated:
@@ -1669,6 +1749,19 @@ components:
       allOf:
       - $ref: ../../../common-types/v1/common.json#/definitions/Resource
       description: Snapshot resource.
+    SnapshotUpdate:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/SnapshotUpdateProperties'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags
+        sku:
+          $ref: '#/components/schemas/SnapshotSku'
+      description: Snapshot update resource.
     SnapshotUpdateProperties:
       properties:
         osType:
@@ -1706,17 +1799,43 @@ components:
           $ref: ./diskRPCommon.json#/definitions/SupportedCapabilities
           description: List of supported capabilities for the image from which the OS disk was created.
       description: Snapshot resource update properties.
-    ApplyScope:
-      type: array
-      description: Array of the target Face subscription ids for the snapshot, specified by the user who created the snapshot when calling Snapshot - Take. For each snapshot, only subscriptions included in the applyScope of Snapshot - Take can apply it.
-      items:
-        type: string
-        format: uuid
-    Snapshots:
-      type: array
-      description: An array of snapshots.
-      items:
-        $ref: '#/components/schemas/Snapshot_4'
+    SnapshotList:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Snapshot_3'
+          description: A list of snapshots.
+        nextLink:
+          type: string
+          description: The uri to fetch the next page of snapshots. Call ListNext() with this to fetch the next page of snapshots.
+      required:
+      - value
+      description: The List Snapshots operation response.
+    SnapshotSku:
+      properties:
+        name:
+          type: string
+          enum:
+          - Standard_LRS
+          - Premium_LRS
+          - Standard_ZRS
+          x-ms-enum:
+            name: SnapshotStorageAccountTypes
+            modelAsString: true
+            values:
+            - value: Standard_LRS
+              description: Standard HDD locally redundant storage
+            - value: Premium_LRS
+              description: Premium SSD locally redundant storage
+            - value: Standard_ZRS
+              description: Standard zone redundant storage
+          description: The sku name.
+        tier:
+          type: string
+          readOnly: true
+          description: The sku tier.
+      description: The snapshots sku name. Can be Standard_LRS, Premium_LRS, or Standard_ZRS. This is an optional parameter for incremental snapshot and the default behavior is the SKU will be set to the same sku as the previous snapshot
     Error_2:
       type: object
       description: Error body.
@@ -1725,37 +1844,6 @@ components:
           type: string
         message:
           type: string
-    TakeSnapshotRequest:
-      type: object
-      required:
-      - type
-      - objectId
-      - applyScope
-      description: Request body for taking snapshot operation.
-      properties:
-        type:
-          type: string
-          description: User specified type for the source object to take snapshot from. Currently FaceList, PersonGroup, LargeFaceList and LargePersonGroup are supported.
-          x-ms-enum:
-            name: SnapshotObjectType
-            modelAsString: false
-          enum:
-          - FaceList
-          - LargeFaceList
-          - LargePersonGroup
-          - PersonGroup
-        objectId:
-          type: string
-          description: User specified source object id to take snapshot from.
-          maxLength: 64
-          pattern: ^[a-z0-9-_]+$
-        applyScope:
-          description: User specified array of target Face subscription ids for the snapshot. For each snapshot, only subscriptions included in the applyScope of Snapshot - Take can apply it.
-          $ref: '#/components/schemas/ApplyScope'
-        userData:
-          type: string
-          description: User specified data about the snapshot for any purpose. Length should not exceed 16KB.
-          maxLength: 16384
     Snapshot_4:
       type: object
       required:
@@ -1800,6 +1888,17 @@ components:
           type: string
           format: date-time
           description: A combined UTC date and time string that describes the last time when the snapshot was created or updated by Snapshot - Update. E.g. 2018-12-25T11:51:27.8705696Z.
+    Snapshots:
+      type: array
+      description: An array of snapshots.
+      items:
+        $ref: '#/components/schemas/Snapshot_4'
+    APIError:
+      type: object
+      description: Error information returned by the API
+      properties:
+        error:
+          $ref: '#/components/schemas/Error_2'
     ApplySnapshotRequest:
       type: object
       required:
@@ -1831,58 +1930,43 @@ components:
           type: string
           description: User specified data about the snapshot for any purpose. Length should not exceed 16KB.
           maxLength: 16384
-    APIError:
-      type: object
-      description: Error information returned by the API
-      properties:
-        error:
-          $ref: '#/components/schemas/Error_2'
-    snapshot:
-      description: Snapshot of a Volume
+    ApplyScope:
+      type: array
+      description: Array of the target Face subscription ids for the snapshot, specified by the user who created the snapshot when calling Snapshot - Take. For each snapshot, only subscriptions included in the applyScope of Snapshot - Take can apply it.
+      items:
+        type: string
+        format: uuid
+    TakeSnapshotRequest:
       type: object
       required:
-      - location
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      - type
+      - objectId
+      - applyScope
+      description: Request body for taking snapshot operation.
       properties:
-        location:
+        type:
           type: string
-          description: Resource location
-          x-ms-mutability:
-          - read
-          - create
-        properties:
-          description: Snapshot Properties
-          $ref: '#/components/schemas/snapshotProperties'
-          x-ms-client-flatten: true
-    snapshotPatch:
-      description: Snapshot patch
-      type: object
-      properties: {}
-    snapshotProperties:
-      description: Snapshot properties
-      type: object
-      properties:
-        snapshotId:
-          title: snapshotId
+          description: User specified type for the source object to take snapshot from. Currently FaceList, PersonGroup, LargeFaceList and LargePersonGroup are supported.
+          x-ms-enum:
+            name: SnapshotObjectType
+            modelAsString: false
+          enum:
+          - FaceList
+          - LargeFaceList
+          - LargePersonGroup
+          - PersonGroup
+        objectId:
           type: string
-          readOnly: true
-          description: UUID v4 used to identify the Snapshot
-          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
-          maxLength: 36
-          minLength: 36
-          example: 9760acf5-4638-11e7-9bdb-020073ca3333
-        created:
-          title: name
+          description: User specified source object id to take snapshot from.
+          maxLength: 64
+          pattern: ^[a-z0-9-_]+$
+        applyScope:
+          description: User specified array of target Face subscription ids for the snapshot. For each snapshot, only subscriptions included in the applyScope of Snapshot - Take can apply it.
+          $ref: '#/components/schemas/ApplyScope'
+        userData:
           type: string
-          format: date-time
-          readOnly: true
-          description: The creation date of the snapshot
-          example: '2017-08-15 13:23:33'
-        provisioningState:
-          type: string
-          readOnly: true
-          description: Azure lifecycle management
+          description: User specified data about the snapshot for any purpose. Length should not exceed 16KB.
+          maxLength: 16384
     snapshotRestoreFiles:
       description: Restore payload for Single File Snapshot Restore
       type: object
@@ -1915,136 +1999,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/snapshot'
-  parameters:
-    SyncTokens:
-      name: Sync-Token
-      in: header
-      description: Used to guarantee real-time consistency between requests.
-      schema:
-        type: string
-    SnapshotFields:
-      name: $Select
-      in: query
-      description: Used to select what fields are present in the returned resource(s).
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
+    snapshot:
+      description: Snapshot of a Volume
+      type: object
+      required:
+      - location
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      properties:
+        location:
           type: string
-          enum:
-          - name
-          - status
-          - filters
-          - composition_type
-          - created
-          - expires
-          - retention_period
-          - size
-          - items_count
-          - tags
-          - etag
-          x-ms-enum:
-            name: SnapshotFields
-            modelAsString: true
-    ApiVersion:
-      name: api-version
-      in: query
-      description: The API version to be used with the HTTP request.
-      required: true
-      schema:
-        type: string
-    Status:
-      name: Status
-      in: query
-      description: Used to filter returned snapshots by their status property.
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
+          description: Resource location
+          x-ms-mutability:
+          - read
+          - create
+        properties:
+          description: Snapshot Properties
+          $ref: '#/components/schemas/snapshotProperties'
+          x-ms-client-flatten: true
+    snapshotProperties:
+      description: Snapshot properties
+      type: object
+      properties:
+        snapshotId:
+          title: snapshotId
           type: string
-          enum:
-          - provisioning
-          - ready
-          - archived
-          - failed
-          x-ms-enum:
-            name: SnapshotStatus
-            modelAsString: true
-    SnapshotNameParameter:
-      name: snapshotName
-      in: path
-      required: true
-      description: The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9, _ and -. The max name length is 80 characters.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    snapshotId:
-      name: snapshotId
-      in: path
-      description: Id referencing a particular snapshot.
-      required: true
-      x-ms-parameter-location: method
-      style: simple
-      explode: false
-      schema:
-        type: string
-        format: uuid
-    applyScope:
-      name: applyScope
-      description: User specified snapshot apply scopes as a search filter. ApplyScope is an array of the target Azure subscription ids for the snapshot, specified by the user who created the snapshot by Snapshot - Take.
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
+          readOnly: true
+          description: UUID v4 used to identify the Snapshot
+          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
+          maxLength: 36
+          minLength: 36
+          example: 9760acf5-4638-11e7-9bdb-020073ca3333
+        created:
+          title: name
           type: string
-          format: uuid
-    VolumeName:
-      name: volumeName
-      in: path
-      required: true
-      description: The name of the volume
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-        pattern: ^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$
-    PoolName:
-      name: poolName
-      in: path
-      required: true
-      description: The name of the capacity pool
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
-    AccountName:
-      name: accountName
-      in: path
-      required: true
-      description: The name of the NetApp account
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
-    SnapshotName:
-      name: snapshotName
-      in: path
-      required: true
-      description: The name of the snapshot
-      x-ms-parameter-location: method
-      schema:
-        type: string
+          format: date-time
+          readOnly: true
+          description: The creation date of the snapshot
+          example: '2017-08-15 13:23:33'
+        provisioningState:
+          type: string
+          readOnly: true
+          description: Azure lifecycle management
+    snapshotPatch:
+      description: Snapshot patch
+      type: object
+      properties: {}
   securitySchemes:
     azure_auth:
       type: oauth2

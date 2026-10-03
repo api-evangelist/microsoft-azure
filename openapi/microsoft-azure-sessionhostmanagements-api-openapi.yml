@@ -162,58 +162,77 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    CloudError:
-      description: Cloud error object.
+    CloudErrorProperties:
+      description: Cloud error object properties.
       type: object
-      x-ms-external: true
       properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorProperties'
-    SessionHostManagementProperties:
-      description: Session host Managements of HostPool.
-      type: object
-      required:
-      - scheduledDateTimeZone
-      - update
-      properties:
-        scheduledDateTimeZone:
+        code:
+          description: Error code
           type: string
-          description: Time zone for sessionHostManagement operations as defined in https://docs.microsoft.com/dotnet/api/system.timezoneinfo.findsystemtimezonebyid. Must be set if useLocalTime is true.
-        update:
-          $ref: '#/components/schemas/HostPoolUpdateConfigurationProperties'
-          description: Parameters for a hostpool update.
-    SessionHostManagementOperationType:
-      enum:
-      - InitiateSessionHostUpdate
-      - ValidateSessionHostUpdate
-      type: string
-      x-ms-enum:
-        name: OperationTypeSHM
-        modelAsString: true
-    HostPoolUpdateConfigurationProperties:
-      description: The configurations of a hostpool update.
+        message:
+          description: Error message indicating why the operation failed.
+          type: string
+    SessionHostManagementOperationStatusProperties:
+      description: Properties bag to hold custom RP properties for sessionHostManagement Operation Statuses.
       type: object
-      required:
-      - maxVmsRemoved
-      - logOffDelayMinutes
       properties:
-        deleteOriginalVm:
-          type: boolean
-          description: Whether not to save original disk. False by default.
-        maxVmsRemoved:
+        correlationId:
+          type: string
+          description: The Log Analytics.
+        type:
+          description: Type of sessionHostManagement operation.
+          $ref: '#/components/schemas/SessionHostManagementOperationType'
+        action:
+          description: Action type of the current sessionHostManagement operation.
+          enum:
+          - Start
+          - Retry
+          - Pause
+          - Resume
+          - Cancel
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: OperationActionSHM
+            modelAsString: true
+        progress:
+          description: Progress information on the sessionHostManagement operation.
+          $ref: '#/components/schemas/SessionHostManagementOperationProgress'
+        scheduledDateTime:
+          format: date-time
+          type: string
+          description: The timestamp that the update is scheduled for.
+        sessionHostManagement:
+          description: SessionHostManagement properties used for the operation.
+          $ref: '#/components/schemas/SessionHostManagement'
+        parentId:
+          type: string
+          format: arm-id
+          description: The resource ID of the operation that started this process.
+    SessionHostManagementOperationProgress:
+      type: object
+      description: SessionHostManagement Operation Progress information.
+      properties:
+        executionStartTime:
+          format: date-time
+          type: string
+          description: Time that the sessionHostManagement operation was created.
+        totalSessionHosts:
           type: integer
           format: int32
-          description: The maximum number of virtual machines to be removed during hostpool update.
-          minimum: 1
-        logOffDelayMinutes:
+          description: The number of sessionHosts to be started in the sessionHostManagement operation.
+        sessionHostsInProgress:
           type: integer
           format: int32
-          description: Grace period before logging off users in minutes.
-        logOffMessage:
-          type: string
-          description: Log off message sent to user for logoff. Default value is an empty string.
-          maxLength: 260
-          default: ''
+          description: The number of sessionHosts in progress in the sessionHostManagement operation.
+        sessionHostsCompleted:
+          type: integer
+          format: int32
+          description: The number of sessionHosts completed in the sessionHostManagement operation.
+        sessionHostsRollbackFailed:
+          type: integer
+          format: int32
+          description: The number of sessionHosts rollback failed in the sessionHostManagement operation.
     SessionHostManagementList:
       type: object
       title: SessionHostManagementList
@@ -228,6 +247,19 @@ components:
           type: string
           readOnly: true
           description: Link to the next page of results.
+    SessionHostManagementProperties:
+      description: Session host Managements of HostPool.
+      type: object
+      required:
+      - scheduledDateTimeZone
+      - update
+      properties:
+        scheduledDateTimeZone:
+          type: string
+          description: Time zone for sessionHostManagement operations as defined in https://docs.microsoft.com/dotnet/api/system.timezoneinfo.findsystemtimezonebyid. Must be set if useLocalTime is true.
+        update:
+          $ref: '#/components/schemas/HostPoolUpdateConfigurationProperties'
+          description: Parameters for a hostpool update.
     SessionHostManagementOperationStatus:
       description: The current status of an async operation.
       type: object
@@ -269,20 +301,6 @@ components:
           type: object
           description: The custom properties of the OperationStatus.
           $ref: '#/components/schemas/SessionHostManagementOperationStatusProperties'
-    SessionHostManagementOperationStatusList:
-      type: object
-      title: SessionHostManagementOperationStatusList
-      description: List of SessionHostManagementOperationStatus definitions.
-      properties:
-        value:
-          type: array
-          description: List of SessionHostManagementOperationStatus definitions.
-          items:
-            $ref: '#/components/schemas/SessionHostManagementOperationStatus'
-        nextLink:
-          type: string
-          readOnly: true
-          description: Link to the next page of results.
     SessionHostManagement:
       type: object
       description: Represents a SessionHostManagement definition.
@@ -298,88 +316,60 @@ components:
           description: Detailed properties for SessionHostManagement
           x-ms-client-flatten: true
           $ref: '#/components/schemas/SessionHostManagementProperties'
-    SessionHostManagementOperationStatusProperties:
-      description: Properties bag to hold custom RP properties for sessionHostManagement Operation Statuses.
+    HostPoolUpdateConfigurationProperties:
+      description: The configurations of a hostpool update.
       type: object
+      required:
+      - maxVmsRemoved
+      - logOffDelayMinutes
       properties:
-        correlationId:
+        deleteOriginalVm:
+          type: boolean
+          description: Whether not to save original disk. False by default.
+        maxVmsRemoved:
+          type: integer
+          format: int32
+          description: The maximum number of virtual machines to be removed during hostpool update.
+          minimum: 1
+        logOffDelayMinutes:
+          type: integer
+          format: int32
+          description: Grace period before logging off users in minutes.
+        logOffMessage:
           type: string
-          description: The Log Analytics.
-        type:
-          description: Type of sessionHostManagement operation.
-          $ref: '#/components/schemas/SessionHostManagementOperationType'
-        action:
-          description: Action type of the current sessionHostManagement operation.
-          enum:
-          - Start
-          - Retry
-          - Pause
-          - Resume
-          - Cancel
+          description: Log off message sent to user for logoff. Default value is an empty string.
+          maxLength: 260
+          default: ''
+    SessionHostManagementOperationStatusList:
+      type: object
+      title: SessionHostManagementOperationStatusList
+      description: List of SessionHostManagementOperationStatus definitions.
+      properties:
+        value:
+          type: array
+          description: List of SessionHostManagementOperationStatus definitions.
+          items:
+            $ref: '#/components/schemas/SessionHostManagementOperationStatus'
+        nextLink:
           type: string
           readOnly: true
-          x-ms-enum:
-            name: OperationActionSHM
-            modelAsString: true
-        progress:
-          description: Progress information on the sessionHostManagement operation.
-          $ref: '#/components/schemas/SessionHostManagementOperationProgress'
-        scheduledDateTime:
-          format: date-time
-          type: string
-          description: The timestamp that the update is scheduled for.
-        sessionHostManagement:
-          description: SessionHostManagement properties used for the operation.
-          $ref: '#/components/schemas/SessionHostManagement'
-        parentId:
-          type: string
-          format: arm-id
-          description: The resource ID of the operation that started this process.
-    CloudErrorProperties:
-      description: Cloud error object properties.
+          description: Link to the next page of results.
+    CloudError:
+      description: Cloud error object.
       type: object
+      x-ms-external: true
       properties:
-        code:
-          description: Error code
-          type: string
-        message:
-          description: Error message indicating why the operation failed.
-          type: string
-    SessionHostManagementOperationProgress:
-      type: object
-      description: SessionHostManagement Operation Progress information.
-      properties:
-        executionStartTime:
-          format: date-time
-          type: string
-          description: Time that the sessionHostManagement operation was created.
-        totalSessionHosts:
-          type: integer
-          format: int32
-          description: The number of sessionHosts to be started in the sessionHostManagement operation.
-        sessionHostsInProgress:
-          type: integer
-          format: int32
-          description: The number of sessionHosts in progress in the sessionHostManagement operation.
-        sessionHostsCompleted:
-          type: integer
-          format: int32
-          description: The number of sessionHosts completed in the sessionHostManagement operation.
-        sessionHostsRollbackFailed:
-          type: integer
-          format: int32
-          description: The number of sessionHosts rollback failed in the sessionHostManagement operation.
+        error:
+          $ref: '#/components/schemas/CloudErrorProperties'
+    SessionHostManagementOperationType:
+      enum:
+      - InitiateSessionHostUpdate
+      - ValidateSessionHostUpdate
+      type: string
+      x-ms-enum:
+        name: OperationTypeSHM
+        modelAsString: true
   parameters:
-    HostPoolNameParameter:
-      name: hostPoolName
-      in: path
-      required: true
-      description: The name of the host pool within the specified resource group
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
     OperationIdParameter:
       name: operationId
       in: path
@@ -390,6 +380,16 @@ components:
         type: string
         maxLength: 36
         minLength: 36
+    HostPoolNameParameter:
+      name: hostPoolName
+      in: path
+      required: true
+      description: The name of the host pool within the specified resource group
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
   securitySchemes:
     azure_auth:
       type: oauth2

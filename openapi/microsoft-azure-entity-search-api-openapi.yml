@@ -157,24 +157,118 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    CreativeWork:
+    ResponseBase:
+      discriminator:
+        propertyName: _type
+      type: object
+      required:
+      - _type
+      properties:
+        _type:
+          type: string
+    MediaObject:
       allOf:
-      - $ref: '#/components/schemas/Thing'
+      - $ref: '#/components/schemas/CreativeWork'
       type: object
       properties:
-        thumbnailUrl:
-          description: The URL to a thumbnail of the item.
+        contentUrl:
+          description: Original URL to retrieve the source (file) for the media object (e.g the source URL for the image).
           readOnly: true
           type: string
-        provider:
-          description: The source of the creative work.
+        hostPageUrl:
+          description: URL of the page that hosts the media object.
           readOnly: true
+          type: string
+        width:
+          description: The width of the source media object, in pixels.
+          readOnly: true
+          type: integer
+          format: int32
+        height:
+          description: The height of the source media object, in pixels.
+          readOnly: true
+          type: integer
+          format: int32
+    Thing:
+      allOf:
+      - $ref: '#/components/schemas/Response'
+      type: object
+      properties:
+        name:
+          description: The name of the thing represented by this object.
+          readOnly: true
+          type: string
+        url:
+          description: The URL to get more information about the thing represented by this object.
+          readOnly: true
+          type: string
+        image:
+          $ref: '#/components/schemas/ImageObject'
+          readOnly: true
+        description:
+          description: A short description of the item.
+          readOnly: true
+          type: string
+        entityPresentationInfo:
+          description: Additional information about the entity such as hints that you can use to determine the entity's type. To determine the entity's type, use the entityScenario and entityTypeHint fields.
+          $ref: '#/components/schemas/EntitiesEntityPresentationInfo'
+          readOnly: true
+        bingId:
+          description: An ID that uniquely identifies this item.
+          readOnly: true
+          type: string
+    Entities:
+      description: Defines an entity answer.
+      allOf:
+      - $ref: '#/components/schemas/SearchResultsAnswer'
+      type: object
+      required:
+      - value
+      properties:
+        queryScenario:
+          description: The supported query scenario. This field is set to DominantEntity or DisambiguationItem. The field is set to DominantEntity if Bing determines that only a single entity satisfies the request. For example, a book, movie, person, or attraction. If multiple entities could satisfy the request, the field is set to DisambiguationItem. For example, if the request uses the generic title of a movie franchise, the entity's type would likely be DisambiguationItem. But, if the request specifies a specific title from the franchise, the entity's type would likely be DominantEntity.
+          readOnly: true
+          type: string
+          default: DominantEntity
+          enum:
+          - DominantEntity
+          - DominantEntityWithDisambiguation
+          - Disambiguation
+          - List
+          - ListWithPivot
+          x-ms-enum:
+            name: EntityQueryScenario
+            modelAsString: true
+        value:
+          description: A list of entities.
           type: array
           items:
             $ref: '#/components/schemas/Thing'
-        text:
+    QueryContext:
+      description: Defines the query context that Bing used for the request.
+      type: object
+      required:
+      - originalQuery
+      properties:
+        originalQuery:
+          description: The query string as specified in the request.
+          type: string
+        alteredQuery:
+          description: The query string used by Bing to perform the query. Bing uses the altered query string if the original query string contained spelling mistakes. For example, if the query string is "saling downwind", the altered query string will be "sailing downwind". This field is included only if the original query string contains a spelling mistake.
           readOnly: true
           type: string
+        alterationOverrideQuery:
+          description: The query string to use to force Bing to use the original string. For example, if the query string is "saling downwind", the override query string will be "+saling downwind". Remember to encode the query string which results in "%2Bsaling+downwind". This field is included only if the original query string contains a spelling mistake.
+          readOnly: true
+          type: string
+        adultIntent:
+          description: A Boolean value that indicates whether the specified query has adult intent. The value is true if the query has adult intent; otherwise, false.
+          readOnly: true
+          type: boolean
+        askUserForLocation:
+          description: A Boolean value that indicates whether Bing requires the user's location to provide accurate results. If you specified the user's location by using the X-MSEdge-ClientIP and X-Search-Location headers, you can ignore this field. For location aware queries, such as "today's weather" or "restaurants near me" that need the user's location to provide accurate results, this field is set to true. For location aware queries that include the location (for example, "Seattle weather"), this field is set to false. This field is also set to false for queries that are not location aware, such as "best sellers".
+          readOnly: true
+          type: boolean
     ErrorResponse:
       description: The top-level response that represents a failed request.
       allOf:
@@ -188,32 +282,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Error'
-    Response:
-      description: Defines a response. All schemas that could be returned at the root of a response should inherit from this
-      allOf:
-      - $ref: '#/components/schemas/Identifiable'
-      type: object
-      properties:
-        contractualRules:
-          description: A list of rules that you must adhere to if you display the item.
-          readOnly: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ContractualRulesContractualRule'
-        webSearchUrl:
-          description: The URL To Bing's search result for this item.
-          readOnly: true
-          type: string
-    Identifiable:
-      description: Defines the identity of a resource.
-      allOf:
-      - $ref: '#/components/schemas/ResponseBase'
-      type: object
-      properties:
-        id:
-          description: A String identifier.
-          readOnly: true
-          type: string
     Error:
       description: Defines the error that occurred.
       type: object
@@ -269,14 +337,33 @@ components:
           description: The parameter's value in the request that was not valid.
           readOnly: true
           type: string
-    ResponseBase:
-      discriminator:
-        propertyName: _type
+    Identifiable:
+      description: Defines the identity of a resource.
+      allOf:
+      - $ref: '#/components/schemas/ResponseBase'
       type: object
-      required:
-      - _type
       properties:
-        _type:
+        id:
+          description: A String identifier.
+          readOnly: true
+          type: string
+    CreativeWork:
+      allOf:
+      - $ref: '#/components/schemas/Thing'
+      type: object
+      properties:
+        thumbnailUrl:
+          description: The URL to a thumbnail of the item.
+          readOnly: true
+          type: string
+        provider:
+          description: The source of the creative work.
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Thing'
+        text:
+          readOnly: true
           type: string
     EntitiesEntityPresentationInfo:
       description: Defines additional information about an entity such as type hints.
@@ -359,14 +446,20 @@ components:
           description: A display version of the entity hint. For example, if entityTypeHints is Artist, this field may be set to American Singer.
           readOnly: true
           type: string
-    SearchResultsAnswer:
-      allOf:
-      - $ref: '#/components/schemas/Answer'
+    ContractualRulesContractualRule:
+      x-ms-discriminator-value: ContractualRules/ContractualRule
+      discriminator:
+        propertyName: _type
       type: object
+      required:
+      - _type
       properties:
-        queryContext:
-          $ref: '#/components/schemas/QueryContext'
+        targetPropertyName:
+          description: The name of the field that the rule applies to.
           readOnly: true
+          type: string
+        _type:
+          type: string
     SearchResponse:
       description: Defines the top-level object that the response includes when the request succeeds.
       allOf:
@@ -385,6 +478,45 @@ components:
           description: A list of local entities such as restaurants or hotels that are relevant to the query.
           $ref: '#/components/schemas/Places'
           readOnly: true
+    SearchResultsAnswer:
+      allOf:
+      - $ref: '#/components/schemas/Answer'
+      type: object
+      properties:
+        queryContext:
+          $ref: '#/components/schemas/QueryContext'
+          readOnly: true
+    Answer:
+      allOf:
+      - $ref: '#/components/schemas/Response'
+      type: object
+      properties: {}
+    ImageObject:
+      description: Defines an image
+      allOf:
+      - $ref: '#/components/schemas/MediaObject'
+      type: object
+      properties:
+        thumbnail:
+          description: The URL to a thumbnail of the image
+          $ref: '#/components/schemas/ImageObject'
+          readOnly: true
+    Response:
+      description: Defines a response. All schemas that could be returned at the root of a response should inherit from this
+      allOf:
+      - $ref: '#/components/schemas/Identifiable'
+      type: object
+      properties:
+        contractualRules:
+          description: A list of rules that you must adhere to if you display the item.
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractualRulesContractualRule'
+        webSearchUrl:
+          description: The URL To Bing's search result for this item.
+          readOnly: true
+          type: string
     Places:
       description: Defines a local entity answer.
       allOf:
@@ -398,138 +530,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Thing'
-    Entities:
-      description: Defines an entity answer.
-      allOf:
-      - $ref: '#/components/schemas/SearchResultsAnswer'
-      type: object
-      required:
-      - value
-      properties:
-        queryScenario:
-          description: The supported query scenario. This field is set to DominantEntity or DisambiguationItem. The field is set to DominantEntity if Bing determines that only a single entity satisfies the request. For example, a book, movie, person, or attraction. If multiple entities could satisfy the request, the field is set to DisambiguationItem. For example, if the request uses the generic title of a movie franchise, the entity's type would likely be DisambiguationItem. But, if the request specifies a specific title from the franchise, the entity's type would likely be DominantEntity.
-          readOnly: true
-          type: string
-          default: DominantEntity
-          enum:
-          - DominantEntity
-          - DominantEntityWithDisambiguation
-          - Disambiguation
-          - List
-          - ListWithPivot
-          x-ms-enum:
-            name: EntityQueryScenario
-            modelAsString: true
-        value:
-          description: A list of entities.
-          type: array
-          items:
-            $ref: '#/components/schemas/Thing'
-    Thing:
-      allOf:
-      - $ref: '#/components/schemas/Response'
-      type: object
-      properties:
-        name:
-          description: The name of the thing represented by this object.
-          readOnly: true
-          type: string
-        url:
-          description: The URL to get more information about the thing represented by this object.
-          readOnly: true
-          type: string
-        image:
-          $ref: '#/components/schemas/ImageObject'
-          readOnly: true
-        description:
-          description: A short description of the item.
-          readOnly: true
-          type: string
-        entityPresentationInfo:
-          description: Additional information about the entity such as hints that you can use to determine the entity's type. To determine the entity's type, use the entityScenario and entityTypeHint fields.
-          $ref: '#/components/schemas/EntitiesEntityPresentationInfo'
-          readOnly: true
-        bingId:
-          description: An ID that uniquely identifies this item.
-          readOnly: true
-          type: string
-    MediaObject:
-      allOf:
-      - $ref: '#/components/schemas/CreativeWork'
-      type: object
-      properties:
-        contentUrl:
-          description: Original URL to retrieve the source (file) for the media object (e.g the source URL for the image).
-          readOnly: true
-          type: string
-        hostPageUrl:
-          description: URL of the page that hosts the media object.
-          readOnly: true
-          type: string
-        width:
-          description: The width of the source media object, in pixels.
-          readOnly: true
-          type: integer
-          format: int32
-        height:
-          description: The height of the source media object, in pixels.
-          readOnly: true
-          type: integer
-          format: int32
-    ImageObject:
-      description: Defines an image
-      allOf:
-      - $ref: '#/components/schemas/MediaObject'
-      type: object
-      properties:
-        thumbnail:
-          description: The URL to a thumbnail of the image
-          $ref: '#/components/schemas/ImageObject'
-          readOnly: true
-    QueryContext:
-      description: Defines the query context that Bing used for the request.
-      type: object
-      required:
-      - originalQuery
-      properties:
-        originalQuery:
-          description: The query string as specified in the request.
-          type: string
-        alteredQuery:
-          description: The query string used by Bing to perform the query. Bing uses the altered query string if the original query string contained spelling mistakes. For example, if the query string is "saling downwind", the altered query string will be "sailing downwind". This field is included only if the original query string contains a spelling mistake.
-          readOnly: true
-          type: string
-        alterationOverrideQuery:
-          description: The query string to use to force Bing to use the original string. For example, if the query string is "saling downwind", the override query string will be "+saling downwind". Remember to encode the query string which results in "%2Bsaling+downwind". This field is included only if the original query string contains a spelling mistake.
-          readOnly: true
-          type: string
-        adultIntent:
-          description: A Boolean value that indicates whether the specified query has adult intent. The value is true if the query has adult intent; otherwise, false.
-          readOnly: true
-          type: boolean
-        askUserForLocation:
-          description: A Boolean value that indicates whether Bing requires the user's location to provide accurate results. If you specified the user's location by using the X-MSEdge-ClientIP and X-Search-Location headers, you can ignore this field. For location aware queries, such as "today's weather" or "restaurants near me" that need the user's location to provide accurate results, this field is set to true. For location aware queries that include the location (for example, "Seattle weather"), this field is set to false. This field is also set to false for queries that are not location aware, such as "best sellers".
-          readOnly: true
-          type: boolean
-    Answer:
-      allOf:
-      - $ref: '#/components/schemas/Response'
-      type: object
-      properties: {}
-    ContractualRulesContractualRule:
-      x-ms-discriminator-value: ContractualRules/ContractualRule
-      discriminator:
-        propertyName: _type
-      type: object
-      required:
-      - _type
-      properties:
-        targetPropertyName:
-          description: The name of the field that the rule applies to.
-          readOnly: true
-          type: string
-        _type:
-          type: string
   parameters:
     x-bingapis-sdk:
       name: X-BingApis-SDK

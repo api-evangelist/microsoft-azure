@@ -282,16 +282,27 @@ paths:
         final-state-via: location
 components:
   schemas:
-    VirtualMachineInstanceUpdateProperties:
-      description: Describes the properties of a Virtual Machine.
+    DiskType:
+      description: Defines the different types of disks.
+      enum:
+      - flat
+      - pmem
+      - rawphysical
+      - rawvirtual
+      - sparse
+      - sesparse
+      - unknown
+      type: string
+      x-ms-enum:
+        modelAsString: true
+        name: DiskType
+    UefiSettings:
       type: object
       properties:
-        hardwareProfile:
-          $ref: '#/components/schemas/HardwareProfile'
-        storageProfile:
-          $ref: '#/components/schemas/StorageProfileUpdate'
-        networkProfile:
-          $ref: '#/components/schemas/NetworkProfileUpdate'
+        secureBootEnabled:
+          type: boolean
+          description: Specifies whether secure boot should be enabled on the virtual machine.
+      description: Specifies the security settings like secure boot used while creating the virtual machine.
     NicIPSettings:
       description: Defines the network interface ip settings.
       type: object
@@ -329,57 +340,169 @@ components:
           items:
             $ref: '#/components/schemas/NicIPAddressSettings'
           readOnly: true
-    IPAddressAllocationMethod:
-      description: IP address allocation method.
+    VirtualSCSIController:
+      description: This data object type contains the properties of a SCSI controller device attached to a virtual machine that is reported by the controller.
+      type: object
+      properties:
+        type:
+          description: Gets or sets the controller type.
+          $ref: '#/components/schemas/SCSIControllerType'
+        controllerKey:
+          format: int32
+          description: Gets or sets the key of the controller.
+          type: integer
+        busNumber:
+          format: int32
+          description: Gets or sets the bus number of the controller.
+          type: integer
+        scsiCtlrUnitNumber:
+          format: int32
+          description: Gets or sets the SCSI controller unit number.
+          type: integer
+        sharing:
+          description: Gets or sets the sharing mode.
+          $ref: '#/components/schemas/VirtualSCSISharing'
+    ResourceProvisioningState:
+      type: string
+      description: The current deployment state of resource.
       enum:
-      - unset
-      - dynamic
-      - static
-      - linklayer
-      - random
-      - other
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Updating
+      - Deleting
+      - Accepted
+      - Created
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    NetworkInterfaceUpdate:
+      description: Defines the network interface update.
+      type: object
+      properties:
+        name:
+          description: Gets or sets the name of the network interface.
+          type: string
+        networkId:
+          description: Gets or sets the ARM Id of the network resource to connect the virtual machine.
+          type: string
+        nicType:
+          description: NIC type
+          $ref: '#/components/schemas/NICType'
+        powerOnBoot:
+          description: Gets or sets the power on boot.
+          $ref: '#/components/schemas/PowerOnBootOption'
+        deviceKey:
+          format: int32
+          description: Gets or sets the device key value.
+          type: integer
+    OsProfileForVMInstance:
+      description: Specifies the operating system settings for the virtual machine.
+      type: object
+      properties:
+        computerName:
+          description: Gets or sets computer name.
+          type: string
+        adminUsername:
+          description: Gets or sets administrator username.
+          type: string
+        adminPassword:
+          description: Sets administrator password.
+          type: string
+          x-ms-mutability:
+          - create
+          - update
+          x-ms-secret: true
+        guestId:
+          description: Gets or sets the guestId.
+          type: string
+        osType:
+          description: Gets or sets the type of the os.
+          $ref: '#/components/schemas/OsType'
+        osSku:
+          description: Gets or sets os sku.
+          type: string
+          readOnly: true
+        toolsRunningStatus:
+          description: Gets or sets the current running status of VMware Tools running in the guest operating system.
+          type: string
+          readOnly: true
+        toolsVersionStatus:
+          description: Gets or sets the current version status of VMware Tools installed in the guest operating system.
+          type: string
+          readOnly: true
+        toolsVersion:
+          description: Gets or sets the current version of VMware Tools.
+          type: string
+          readOnly: true
+    StorageProfileUpdate:
+      description: Specifies the storage settings for the virtual machine disks.
+      type: object
+      properties:
+        disks:
+          description: Gets or sets the list of virtual disks associated with the virtual machine.
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualDiskUpdate'
+    DiskMode:
+      description: Defines the different types of disk modes.
+      enum:
+      - persistent
+      - independent_persistent
+      - independent_nonpersistent
       type: string
       x-ms-enum:
         modelAsString: true
-        name: IPAddressAllocationMethod
-    StopVirtualMachineOptions:
-      description: Defines the stop action properties.
+        name: DiskMode
+    InfrastructureProfile:
       type: object
       properties:
-        skipShutdown:
-          description: Gets or sets a value indicating whether to request non-graceful VM shutdown. True value for this flag indicates non-graceful shutdown whereas false indicates otherwise. Defaults to false.
-          type: boolean
-          default: false
-    SecurityProfile:
-      type: object
-      properties:
-        uefiSettings:
-          $ref: '#/components/schemas/UefiSettings'
-          description: Specifies the security settings like secure boot used while creating the virtual machine.
-      description: Specifies the Security profile settings for the virtual machine.
-    VirtualMachineInstancesList:
-      description: List of VirtualMachineInstances.
-      type: object
-      properties:
-        nextLink:
-          description: Url to follow for getting next page of VirtualMachines.
+        templateId:
+          description: Gets or sets the ARM Id of the template resource to deploy the virtual machine.
           type: string
-        value:
-          description: Array of VirtualMachines
-          type: array
-          items:
-            $ref: '#/components/schemas/VirtualMachineInstance'
-      required:
-      - value
-    NetworkProfile:
-      description: Specifies the network interfaces of the virtual machine.
-      type: object
-      properties:
-        networkInterfaces:
-          description: Gets or sets the list of network interfaces associated with the virtual machine.
-          type: array
-          items:
-            $ref: '#/components/schemas/NetworkInterface'
+        vCenterId:
+          description: Gets or sets the ARM Id of the vCenter resource in which this resource pool resides.
+          type: string
+        moRefId:
+          description: Gets or sets the vCenter MoRef (Managed Object Reference) ID for the virtual machine.
+          type: string
+          readOnly: true
+        inventoryItemId:
+          description: Gets or sets the inventory Item ID for the virtual machine.
+          type: string
+        moName:
+          description: Gets or sets the vCenter Managed Object name for the virtual machine.
+          type: string
+          readOnly: true
+        folderPath:
+          description: Gets or sets the folder path of the vm.
+          type: string
+          readOnly: true
+        instanceUuid:
+          description: Gets or sets the instance uuid of the vm.
+          type: string
+          readOnly: true
+        smbiosUuid:
+          type: string
+          description: Gets or sets the SMBIOS UUID of the vm.
+        firmwareType:
+          description: Firmware type
+          $ref: '#/components/schemas/FirmwareType'
+        customResourceName:
+          description: Gets the name of the corresponding resource in Kubernetes.
+          type: string
+          readOnly: true
+      description: Specifies the vCenter infrastructure specific settings for the virtual machine.
+    PowerOnBootOption:
+      description: Defines the options for power on boot.
+      enum:
+      - enabled
+      - disabled
+      type: string
+      x-ms-enum:
+        modelAsString: true
+        name: PowerOnBootOption
     VirtualMachineInstance:
       description: Define the virtualMachineInstance.
       required:
@@ -397,46 +520,77 @@ components:
         extendedLocation:
           $ref: '#/components/schemas/ExtendedLocation'
           description: Gets or sets the extended location.
-    StorageProfile:
-      description: Specifies the storage settings for the virtual machine disks.
-      type: object
-      properties:
-        disks:
-          description: Gets or sets the list of virtual disks associated with the virtual machine.
-          type: array
-          items:
-            $ref: '#/components/schemas/VirtualDisk'
-        scsiControllers:
-          description: Gets or sets the list of virtual SCSI controllers associated with the virtual machine.
-          type: array
-          items:
-            $ref: '#/components/schemas/VirtualSCSIController'
-          readOnly: true
-    NicIPAddressSettings:
-      description: IP address information for a virtual network adapter reported by the fabric.
-      type: object
-      properties:
-        allocationMethod:
-          description: Gets the ip address allocation method.
-          type: string
-          readOnly: true
-        ipAddress:
-          description: Gets the ip address for the nic.
-          type: string
-          readOnly: true
-        subnetMask:
-          description: Gets the mask.
-          type: string
-          readOnly: true
-    PowerOnBootOption:
-      description: Defines the options for power on boot.
+    OsType:
+      description: Defines the different types of VM guest operating systems.
       enum:
-      - enabled
-      - disabled
+      - Windows
+      - Linux
+      - Other
       type: string
       x-ms-enum:
         modelAsString: true
-        name: PowerOnBootOption
+        name: OsType
+    ResourceStatus:
+      description: The resource status information.
+      type: object
+      properties:
+        type:
+          description: The type of the condition.
+          type: string
+          readOnly: true
+        status:
+          description: Status of the condition.
+          type: string
+          readOnly: true
+        reason:
+          description: The reason for the condition's status.
+          type: string
+          readOnly: true
+        message:
+          description: A human readable message indicating details about the status.
+          type: string
+          readOnly: true
+        severity:
+          description: Severity with which to treat failures of this type of condition.
+          type: string
+          readOnly: true
+        lastUpdatedAt:
+          description: The last update time for this condition.
+          type: string
+          format: date-time
+          readOnly: true
+    VirtualDiskUpdate:
+      description: Defines the virtual disk update.
+      type: object
+      properties:
+        name:
+          description: Gets or sets the name of the virtual disk.
+          type: string
+        diskSizeGB:
+          format: int32
+          description: Gets or sets the disk total size.
+          type: integer
+        deviceKey:
+          format: int32
+          description: Gets or sets the device key value.
+          type: integer
+        diskMode:
+          description: Gets or sets the disk mode.
+          $ref: '#/components/schemas/DiskMode'
+        controllerKey:
+          description: Gets or sets the controller id.
+          format: int32
+          type: integer
+        unitNumber:
+          description: Gets or sets the unit number of the disk on the controller.
+          format: int32
+          type: integer
+        deviceName:
+          description: Gets or sets the device name.
+          type: string
+        diskType:
+          description: Gets or sets the disk backing type.
+          $ref: '#/components/schemas/DiskType'
     VirtualDisk:
       description: Virtual disk model
       type: object
@@ -477,199 +631,56 @@ components:
         diskType:
           description: Gets or sets the disk backing type.
           $ref: '#/components/schemas/DiskType'
-    InfrastructureProfile:
-      type: object
-      properties:
-        templateId:
-          description: Gets or sets the ARM Id of the template resource to deploy the virtual machine.
-          type: string
-        vCenterId:
-          description: Gets or sets the ARM Id of the vCenter resource in which this resource pool resides.
-          type: string
-        moRefId:
-          description: Gets or sets the vCenter MoRef (Managed Object Reference) ID for the virtual machine.
-          type: string
-          readOnly: true
-        inventoryItemId:
-          description: Gets or sets the inventory Item ID for the virtual machine.
-          type: string
-        moName:
-          description: Gets or sets the vCenter Managed Object name for the virtual machine.
-          type: string
-          readOnly: true
-        folderPath:
-          description: Gets or sets the folder path of the vm.
-          type: string
-          readOnly: true
-        instanceUuid:
-          description: Gets or sets the instance uuid of the vm.
-          type: string
-          readOnly: true
-        smbiosUuid:
-          type: string
-          description: Gets or sets the SMBIOS UUID of the vm.
-        firmwareType:
-          description: Firmware type
-          $ref: '#/components/schemas/FirmwareType'
-        customResourceName:
-          description: Gets the name of the corresponding resource in Kubernetes.
-          type: string
-          readOnly: true
-      description: Specifies the vCenter infrastructure specific settings for the virtual machine.
-    OsProfileForVMInstance:
-      description: Specifies the operating system settings for the virtual machine.
-      type: object
-      properties:
-        computerName:
-          description: Gets or sets computer name.
-          type: string
-        adminUsername:
-          description: Gets or sets administrator username.
-          type: string
-        adminPassword:
-          description: Sets administrator password.
-          type: string
-          x-ms-mutability:
-          - create
-          - update
-          x-ms-secret: true
-        guestId:
-          description: Gets or sets the guestId.
-          type: string
-        osType:
-          description: Gets or sets the type of the os.
-          $ref: '#/components/schemas/OsType'
-        osSku:
-          description: Gets or sets os sku.
-          type: string
-          readOnly: true
-        toolsRunningStatus:
-          description: Gets or sets the current running status of VMware Tools running in the guest operating system.
-          type: string
-          readOnly: true
-        toolsVersionStatus:
-          description: Gets or sets the current version status of VMware Tools installed in the guest operating system.
-          type: string
-          readOnly: true
-        toolsVersion:
-          description: Gets or sets the current version of VMware Tools.
-          type: string
-          readOnly: true
-    VirtualMachineInstanceUpdate:
-      description: Defines the virtualMachineInstanceUpdate.
-      type: object
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Resource properties.
-          $ref: '#/components/schemas/VirtualMachineInstanceUpdateProperties'
-    VirtualSCSIController:
-      description: This data object type contains the properties of a SCSI controller device attached to a virtual machine that is reported by the controller.
-      type: object
-      properties:
-        type:
-          description: Gets or sets the controller type.
-          $ref: '#/components/schemas/SCSIControllerType'
-        controllerKey:
-          format: int32
-          description: Gets or sets the key of the controller.
-          type: integer
-        busNumber:
-          format: int32
-          description: Gets or sets the bus number of the controller.
-          type: integer
-        scsiCtlrUnitNumber:
-          format: int32
-          description: Gets or sets the SCSI controller unit number.
-          type: integer
-        sharing:
-          description: Gets or sets the sharing mode.
-          $ref: '#/components/schemas/VirtualSCSISharing'
-    ResourceStatus:
-      description: The resource status information.
-      type: object
-      properties:
-        type:
-          description: The type of the condition.
-          type: string
-          readOnly: true
-        status:
-          description: Status of the condition.
-          type: string
-          readOnly: true
-        reason:
-          description: The reason for the condition's status.
-          type: string
-          readOnly: true
-        message:
-          description: A human readable message indicating details about the status.
-          type: string
-          readOnly: true
-        severity:
-          description: Severity with which to treat failures of this type of condition.
-          type: string
-          readOnly: true
-        lastUpdatedAt:
-          description: The last update time for this condition.
-          type: string
-          format: date-time
-          readOnly: true
-    DiskMode:
-      description: Defines the different types of disk modes.
+    VirtualSCSISharing:
+      description: Defines the sharing mode for sharing the SCSI bus.
       enum:
-      - persistent
-      - independent_persistent
-      - independent_nonpersistent
+      - noSharing
+      - physicalSharing
+      - virtualSharing
       type: string
       x-ms-enum:
         modelAsString: true
-        name: DiskMode
-    VirtualDiskUpdate:
-      description: Defines the virtual disk update.
-      type: object
-      properties:
-        name:
-          description: Gets or sets the name of the virtual disk.
-          type: string
-        diskSizeGB:
-          format: int32
-          description: Gets or sets the disk total size.
-          type: integer
-        deviceKey:
-          format: int32
-          description: Gets or sets the device key value.
-          type: integer
-        diskMode:
-          description: Gets or sets the disk mode.
-          $ref: '#/components/schemas/DiskMode'
-        controllerKey:
-          description: Gets or sets the controller id.
-          format: int32
-          type: integer
-        unitNumber:
-          description: Gets or sets the unit number of the disk on the controller.
-          format: int32
-          type: integer
-        deviceName:
-          description: Gets or sets the device name.
-          type: string
-        diskType:
-          description: Gets or sets the disk backing type.
-          $ref: '#/components/schemas/DiskType'
-    DiskType:
-      description: Defines the different types of disks.
+        name: VirtualSCSISharing
+    IPAddressAllocationMethod:
+      description: IP address allocation method.
       enum:
-      - flat
-      - pmem
-      - rawphysical
-      - rawvirtual
-      - sparse
-      - sesparse
-      - unknown
+      - unset
+      - dynamic
+      - static
+      - linklayer
+      - random
+      - other
       type: string
       x-ms-enum:
         modelAsString: true
-        name: DiskType
+        name: IPAddressAllocationMethod
+    NicIPAddressSettings:
+      description: IP address information for a virtual network adapter reported by the fabric.
+      type: object
+      properties:
+        allocationMethod:
+          description: Gets the ip address allocation method.
+          type: string
+          readOnly: true
+        ipAddress:
+          description: Gets the ip address for the nic.
+          type: string
+          readOnly: true
+        subnetMask:
+          description: Gets the mask.
+          type: string
+          readOnly: true
+    SCSIControllerType:
+      description: Defines the different types of SCSI controllers.
+      enum:
+      - lsilogic
+      - buslogic
+      - pvscsi
+      - lsilogicsas
+      type: string
+      x-ms-enum:
+        modelAsString: true
+        name: SCSIControllerType
     PlacementProfile:
       description: Specifies the compute and storage placement settings for the virtual machine.
       type: object
@@ -686,22 +697,6 @@ components:
         datastoreId:
           type: string
           description: Gets or sets the ARM Id of the datastore resource on which the data for the virtual machine will be kept.
-    UefiSettings:
-      type: object
-      properties:
-        secureBootEnabled:
-          type: boolean
-          description: Specifies whether secure boot should be enabled on the virtual machine.
-      description: Specifies the security settings like secure boot used while creating the virtual machine.
-    FirmwareType:
-      description: Firmware type
-      type: string
-      enum:
-      - bios
-      - efi
-      x-ms-enum:
-        modelAsString: true
-        name: FirmwareType
     ExtendedLocation:
       type: object
       description: The extended location.
@@ -712,28 +707,6 @@ components:
         name:
           type: string
           description: The extended location name.
-    NICType:
-      description: NIC type
-      type: string
-      enum:
-      - vmxnet3
-      - vmxnet2
-      - vmxnet
-      - e1000
-      - e1000e
-      - pcnet32
-      x-ms-enum:
-        modelAsString: true
-        name: NICType
-    StorageProfileUpdate:
-      description: Specifies the storage settings for the virtual machine disks.
-      type: object
-      properties:
-        disks:
-          description: Gets or sets the list of virtual disks associated with the virtual machine.
-          type: array
-          items:
-            $ref: '#/components/schemas/VirtualDiskUpdate'
     NetworkInterface:
       description: Network Interface model
       type: object
@@ -781,41 +754,15 @@ components:
         ipSettings:
           description: Gets or sets the ipsettings.
           $ref: '#/components/schemas/NicIPSettings'
-    NetworkInterfaceUpdate:
-      description: Defines the network interface update.
+    NetworkProfileUpdate:
+      description: Specifies the network interfaces of the virtual machine.
       type: object
       properties:
-        name:
-          description: Gets or sets the name of the network interface.
-          type: string
-        networkId:
-          description: Gets or sets the ARM Id of the network resource to connect the virtual machine.
-          type: string
-        nicType:
-          description: NIC type
-          $ref: '#/components/schemas/NICType'
-        powerOnBoot:
-          description: Gets or sets the power on boot.
-          $ref: '#/components/schemas/PowerOnBootOption'
-        deviceKey:
-          format: int32
-          description: Gets or sets the device key value.
-          type: integer
-    ResourceProvisioningState:
-      type: string
-      description: The current deployment state of resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Updating
-      - Deleting
-      - Accepted
-      - Created
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
+        networkInterfaces:
+          description: Gets or sets the list of network interfaces associated with the virtual machine.
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkInterfaceUpdate'
     HardwareProfile:
       description: Specifies the hardware settings for the virtual machine.
       type: object
@@ -844,16 +791,26 @@ components:
           description: Gets or sets a value indicating whether memory can be added while this virtual machine is running.
           type: boolean
           readOnly: true
-    VirtualSCSISharing:
-      description: Defines the sharing mode for sharing the SCSI bus.
-      enum:
-      - noSharing
-      - physicalSharing
-      - virtualSharing
+    NICType:
+      description: NIC type
       type: string
+      enum:
+      - vmxnet3
+      - vmxnet2
+      - vmxnet
+      - e1000
+      - e1000e
+      - pcnet32
       x-ms-enum:
         modelAsString: true
-        name: VirtualSCSISharing
+        name: NICType
+    SecurityProfile:
+      type: object
+      properties:
+        uefiSettings:
+          $ref: '#/components/schemas/UefiSettings'
+          description: Specifies the security settings like secure boot used while creating the virtual machine.
+      description: Specifies the Security profile settings for the virtual machine.
     VirtualMachineInstanceProperties:
       description: Describes the properties of a Virtual Machine Instance.
       type: object
@@ -899,28 +856,22 @@ components:
           description: Gets or sets a unique identifier for the vm resource.
           type: string
           readOnly: true
-    OsType:
-      description: Defines the different types of VM guest operating systems.
-      enum:
-      - Windows
-      - Linux
-      - Other
-      type: string
-      x-ms-enum:
-        modelAsString: true
-        name: OsType
-    SCSIControllerType:
-      description: Defines the different types of SCSI controllers.
-      enum:
-      - lsilogic
-      - buslogic
-      - pvscsi
-      - lsilogicsas
-      type: string
-      x-ms-enum:
-        modelAsString: true
-        name: SCSIControllerType
-    NetworkProfileUpdate:
+    StorageProfile:
+      description: Specifies the storage settings for the virtual machine disks.
+      type: object
+      properties:
+        disks:
+          description: Gets or sets the list of virtual disks associated with the virtual machine.
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualDisk'
+        scsiControllers:
+          description: Gets or sets the list of virtual SCSI controllers associated with the virtual machine.
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualSCSIController'
+          readOnly: true
+    NetworkProfile:
       description: Specifies the network interfaces of the virtual machine.
       type: object
       properties:
@@ -928,7 +879,56 @@ components:
           description: Gets or sets the list of network interfaces associated with the virtual machine.
           type: array
           items:
-            $ref: '#/components/schemas/NetworkInterfaceUpdate'
+            $ref: '#/components/schemas/NetworkInterface'
+    VirtualMachineInstancesList:
+      description: List of VirtualMachineInstances.
+      type: object
+      properties:
+        nextLink:
+          description: Url to follow for getting next page of VirtualMachines.
+          type: string
+        value:
+          description: Array of VirtualMachines
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualMachineInstance'
+      required:
+      - value
+    VirtualMachineInstanceUpdateProperties:
+      description: Describes the properties of a Virtual Machine.
+      type: object
+      properties:
+        hardwareProfile:
+          $ref: '#/components/schemas/HardwareProfile'
+        storageProfile:
+          $ref: '#/components/schemas/StorageProfileUpdate'
+        networkProfile:
+          $ref: '#/components/schemas/NetworkProfileUpdate'
+    FirmwareType:
+      description: Firmware type
+      type: string
+      enum:
+      - bios
+      - efi
+      x-ms-enum:
+        modelAsString: true
+        name: FirmwareType
+    StopVirtualMachineOptions:
+      description: Defines the stop action properties.
+      type: object
+      properties:
+        skipShutdown:
+          description: Gets or sets a value indicating whether to request non-graceful VM shutdown. True value for this flag indicates non-graceful shutdown whereas false indicates otherwise. Defaults to false.
+          type: boolean
+          default: false
+    VirtualMachineInstanceUpdate:
+      description: Defines the virtualMachineInstanceUpdate.
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Resource properties.
+          $ref: '#/components/schemas/VirtualMachineInstanceUpdateProperties'
   parameters:
     resourceUriParameter:
       in: path

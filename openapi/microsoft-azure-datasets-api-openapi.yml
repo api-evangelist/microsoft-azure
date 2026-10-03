@@ -1135,87 +1135,145 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
-  schemas:
-    ODataError:
-      type: object
-      description: This object is returned when an error occurs in the Azure Maps API.
-      properties:
-        code:
-          type: string
-          readOnly: true
-          description: The ODataError code.
-        message:
-          type: string
-          readOnly: true
-          description: If available, a human-readable description of the error.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ODataError'
-        target:
-          type: string
-          readOnly: true
-          description: If available, the target causing the error.
-    DatasetListResponse:
-      description: The response model for the Dataset List API. The response body will contain a list of all the previously created datasets.
-      type: object
-      properties:
-        datasets:
-          description: A list of all the previously created datasets.
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/DatasetDetailInfo'
-        nextLink:
-          description: If present, the location of the next page of data.
-          type: string
-          readOnly: true
-    ODataErrorResponse:
-      type: object
-      description: This response object is returned when an error occurs in the Azure Maps API.
-      properties:
-        error:
-          $ref: '#/components/schemas/ODataError'
-    DatasetSources:
-      description: Information about the details of the create request for the dataset.
-      type: object
-      properties:
-        conversionIds:
-          description: The list of `conversionId` that were used to create the dataset.
-          type: array
-          readOnly: true
-          items:
+  responses:
+    '401':
+      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
+      headers:
+        WWW-Authenticate:
+          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
+          schema:
             type: string
-        appendDatasetId:
-          description: The dataset that was appended to to create the current dataset.
-          type: string
-          readOnly: true
-    DatasetDetailInfo:
-      description: Detail information for the dataset.
-      type: object
-      properties:
-        created:
-          description: The created timestamp for the dataset.
-          type: string
-          readOnly: true
-        datasetId:
-          description: The id for the dataset.
-          type: string
-          readOnly: true
-        ontology:
-          description: The ontology version of this dataset.
-          type: string
-          readOnly: true
-        description:
-          description: The description for the dataset.
-          type: string
-          readOnly: true
-        datasetSources:
-          $ref: '#/components/schemas/DatasetSources'
-        featureCounts:
-          description: The feature counts for the dataset.
-          type: object
-          readOnly: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    202Accepted:
+      description: 'Request Accepted: The request has been accepted for processing. Please use the URL in the Operation-Location Header to obtain status.'
+      headers:
+        Operation-Location:
+          description: New URL to check for the results of the [long-running operation](https://aka.ms/am-creator-lrt-v2).
+          schema:
+            type: string
+    200Async:
+      description: The operation is running or complete.  If the operation was successful, use the Resource-Location header to obtain the path to the result.
+      headers:
+        Resource-Location:
+          description: If successful, a URI where details on the newly created resource can be found.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LongRunningOperationResult'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/LongRunningOperationResult'
+    '500':
+      description: An error occurred while processing the request. Please try again later.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '400':
+      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '403':
+      description: Permission, capacity, or authentication issues.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '404':
+      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+  parameters:
+    DatasetOperationId:
+      name: operationId
+      in: path
+      description: The ID to query the status for the dataset create/import request.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    DescriptionDataset:
+      name: description
+      description: The description to be given to the dataset.
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    DatasetId:
+      name: datasetId
+      in: path
+      description: The identifier for the dataset to query from.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ConversionIdQuery:
+      name: conversionId
+      description: The unique ID used to create the dataset. The `conversionId` must have been obtained from a successful call to the Conversion Service [Convert API](https://docs.microsoft.com/en-us/rest/api/maps/v2/conversion/convert) and may be provided with multiple query parameters with same name (if more than one is provided).
+      in: query
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    AppendDatasetId:
+      name: datasetId
+      in: query
+      description: The ID for the dataset to append with. The dataset must originate from a previous dataset creation call that matches the datasetId
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ApiVersion:
+      name: api-version
+      description: Version number of Azure Maps API. Current version is 2.0
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+        default: '2.0'
+    SubscriptionKey:
+      name: subscription-key
+      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](https://docs.microsoft.com/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
+      in: query
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    ApiVersion_2:
+      in: query
+      name: api-version
+      description: Requested API version.
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+  schemas:
     LongRunningOperationResult:
       description: The response model for a Long-Running Operations API.
       type: object
@@ -1252,47 +1310,86 @@ components:
           $ref: '#/components/schemas/ODataError'
         warning:
           $ref: '#/components/schemas/ODataError'
-    ErrorResponse:
-      description: Response returned when an error occurs.
-      required:
-      - error
+    DatasetListResponse:
+      description: The response model for the Dataset List API. The response body will contain a list of all the previously created datasets.
       type: object
+      properties:
+        datasets:
+          description: A list of all the previously created datasets.
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/DatasetDetailInfo'
+        nextLink:
+          description: If present, the location of the next page of data.
+          type: string
+          readOnly: true
+    ODataErrorResponse:
+      type: object
+      description: This response object is returned when an error occurs in the Azure Maps API.
       properties:
         error:
-          $ref: '#/components/schemas/ErrorResponseDetails'
-    StorageAuthenticationSettingsApiModel:
-      description: Describes the storage authentication settings.
-      required:
-      - kind
+          $ref: '#/components/schemas/ODataError'
+    ODataError:
       type: object
+      description: This object is returned when an error occurs in the Azure Maps API.
       properties:
-        kind:
-          description: The storage authentication kind.
-          enum:
-          - none
-          - managedIdentity
-          - sas
+        code:
           type: string
-          x-ms-enum:
-            name: StorageAuthenticationKind
-            modelAsString: true
-        sasToken:
-          description: Optional. The sas token to access container. Only needed when Kind = Sas.
+          readOnly: true
+          description: The ODataError code.
+        message:
           type: string
-    DatasetApiModelCollectionApiModel:
-      description: Contains an array of results that may be paginated.
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: The array of results.
+          readOnly: true
+          description: If available, a human-readable description of the error.
+        details:
           type: array
           items:
-            $ref: '#/components/schemas/Dataset'
-        nextLink:
-          description: A link to the next set of paginated results, if there are more results available; not present otherwise.
+            $ref: '#/components/schemas/ODataError'
+        target:
           type: string
+          readOnly: true
+          description: If available, the target causing the error.
+    DatasetDetailInfo:
+      description: Detail information for the dataset.
+      type: object
+      properties:
+        created:
+          description: The created timestamp for the dataset.
+          type: string
+          readOnly: true
+        datasetId:
+          description: The id for the dataset.
+          type: string
+          readOnly: true
+        ontology:
+          description: The ontology version of this dataset.
+          type: string
+          readOnly: true
+        description:
+          description: The description for the dataset.
+          type: string
+          readOnly: true
+        datasetSources:
+          $ref: '#/components/schemas/DatasetSources'
+        featureCounts:
+          description: The feature counts for the dataset.
+          type: object
+          readOnly: true
+    DatasetSources:
+      description: Information about the details of the create request for the dataset.
+      type: object
+      properties:
+        conversionIds:
+          description: The list of `conversionId` that were used to create the dataset.
+          type: array
+          readOnly: true
+          items:
+            type: string
+        appendDatasetId:
+          description: The dataset that was appended to to create the current dataset.
+          type: string
+          readOnly: true
     Dataset:
       description: Describes a dataset, which represents a set of images and annotations that can be used for training or testing a model.
       type: object
@@ -1345,6 +1442,35 @@ components:
           type: string
         authentication:
           $ref: '#/components/schemas/StorageAuthenticationSettingsApiModel'
+    DatasetApiModelCollectionApiModel:
+      description: Contains an array of results that may be paginated.
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The array of results.
+          type: array
+          items:
+            $ref: '#/components/schemas/Dataset'
+        nextLink:
+          description: A link to the next set of paginated results, if there are more results available; not present otherwise.
+          type: string
+    ErrorResponseInnerError:
+      description: Detailed error.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: Error code.
+          type: string
+        message:
+          description: Error message.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/ErrorResponseInnerError'
     ErrorResponseDetails:
       description: Error info.
       required:
@@ -1368,132 +1494,33 @@ components:
             $ref: '#/components/schemas/ErrorResponseDetails'
         innererror:
           $ref: '#/components/schemas/ErrorResponseInnerError'
-    ErrorResponseInnerError:
-      description: Detailed error.
+    ErrorResponse:
+      description: Response returned when an error occurs.
       required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          description: Error code.
-          type: string
-        message:
-          description: Error message.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/ErrorResponseInnerError'
-    ErrorResponse_2:
-      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
+      - error
       type: object
       properties:
         error:
-          $ref: '#/components/schemas/Error'
-        traceId:
-          description: Unique trace Id.
-          type: string
-    DatasetListResponse_2:
-      description: Paged response contains list of requested objects and a skipToken to get the next set of results.
+          $ref: '#/components/schemas/ErrorResponseDetails'
+    StorageAuthenticationSettingsApiModel:
+      description: Describes the storage authentication settings.
       required:
-      - value
+      - kind
       type: object
       properties:
-        value:
-          description: List of requested objects.
-          type: array
-          items:
-            $ref: '#/components/schemas/Dataset_2'
-        skipToken:
-          description: Token used in retrieving the next page. If null, there are no additional pages.
+        kind:
+          description: The storage authentication kind.
+          enum:
+          - none
+          - managedIdentity
+          - sas
           type: string
-        nextLink:
-          description: Continuation link (absolute URI) to the next page of results in the list.
+          x-ms-enum:
+            name: StorageAuthenticationKind
+            modelAsString: true
+        sasToken:
+          description: Optional. The sas token to access container. Only needed when Kind = Sas.
           type: string
-    InnerError:
-      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
-      type: object
-      properties:
-        code:
-          description: Specific error code than was provided by the containing error.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    Error:
-      description: An error from the Azure AgPlatform service.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          description: Server-defined set of error codes.
-          minLength: 1
-          type: string
-        message:
-          description: Human-readable representation of the error.
-          minLength: 1
-          type: string
-        target:
-          description: Target of the error.
-          type: string
-        details:
-          description: Array of details about specific errors that led to this reported error.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    DatasetAccessListResponse:
-      description: Paged response contains list of requested objects and a skipToken to get the next set of results.
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: List of requested objects.
-          type: array
-          items:
-            $ref: '#/components/schemas/DatasetAccess'
-        skipToken:
-          description: Token used in retrieving the next page. If null, there are no additional pages.
-          type: string
-        nextLink:
-          description: Continuation link (absolute URI) to the next page of results in the list.
-          type: string
-    DatasetAccess:
-      description: DatasetAccess object.
-      type: object
-      properties:
-        subscriptionId:
-          description: Subscription Id.
-          maxLength: 100
-          minLength: 2
-          type: string
-        resourceId:
-          description: Azure Data Manager for Agriculture resource Id.
-          maxLength: 200
-          minLength: 2
-          type: string
-        createdDateTime:
-          format: date-time
-          description: 'Date-time when resource was created, sample format: yyyy-MM-ddTHH:mm:ssZ.'
-          type: string
-          readOnly: true
-          example: '2020-12-31T11:10:21Z'
-        modifiedDateTime:
-          format: date-time
-          description: 'Date-time when resource was last modified, sample format: yyyy-MM-ddTHH:mm:ssZ.'
-          type: string
-          readOnly: true
-          example: '2020-12-31T11:10:21Z'
-        createdBy:
-          description: Created by user/tenant id.
-          type: string
-          readOnly: true
-        modifiedBy:
-          description: Modified by user/tenant id.
-          type: string
-          readOnly: true
     Dataset_2:
       description: Schema of dataset resource.
       type: object
@@ -1580,21 +1607,183 @@ components:
           example:
             key1: value1
             key2: 123.45
-    DatasetListResult:
-      type: object
-      description: The response of a Dataset list operation.
-      properties:
-        value:
-          type: array
-          description: The Dataset items on this page
-          items:
-            $ref: '#/components/schemas/Dataset_3'
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
+    DatasetAccessListResponse:
+      description: Paged response contains list of requested objects and a skipToken to get the next set of results.
       required:
       - value
+      type: object
+      properties:
+        value:
+          description: List of requested objects.
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetAccess'
+        skipToken:
+          description: Token used in retrieving the next page. If null, there are no additional pages.
+          type: string
+        nextLink:
+          description: Continuation link (absolute URI) to the next page of results in the list.
+          type: string
+    Error:
+      description: An error from the Azure AgPlatform service.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: Server-defined set of error codes.
+          minLength: 1
+          type: string
+        message:
+          description: Human-readable representation of the error.
+          minLength: 1
+          type: string
+        target:
+          description: Target of the error.
+          type: string
+        details:
+          description: Array of details about specific errors that led to this reported error.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    InnerError:
+      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
+      type: object
+      properties:
+        code:
+          description: Specific error code than was provided by the containing error.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    DatasetAccess:
+      description: DatasetAccess object.
+      type: object
+      properties:
+        subscriptionId:
+          description: Subscription Id.
+          maxLength: 100
+          minLength: 2
+          type: string
+        resourceId:
+          description: Azure Data Manager for Agriculture resource Id.
+          maxLength: 200
+          minLength: 2
+          type: string
+        createdDateTime:
+          format: date-time
+          description: 'Date-time when resource was created, sample format: yyyy-MM-ddTHH:mm:ssZ.'
+          type: string
+          readOnly: true
+          example: '2020-12-31T11:10:21Z'
+        modifiedDateTime:
+          format: date-time
+          description: 'Date-time when resource was last modified, sample format: yyyy-MM-ddTHH:mm:ssZ.'
+          type: string
+          readOnly: true
+          example: '2020-12-31T11:10:21Z'
+        createdBy:
+          description: Created by user/tenant id.
+          type: string
+          readOnly: true
+        modifiedBy:
+          description: Modified by user/tenant id.
+          type: string
+          readOnly: true
+    DatasetListResponse_2:
+      description: Paged response contains list of requested objects and a skipToken to get the next set of results.
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: List of requested objects.
+          type: array
+          items:
+            $ref: '#/components/schemas/Dataset_2'
+        skipToken:
+          description: Token used in retrieving the next page. If null, there are no additional pages.
+          type: string
+        nextLink:
+          description: Continuation link (absolute URI) to the next page of results in the list.
+          type: string
+    ErrorResponse_2:
+      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+        traceId:
+          description: Unique trace Id.
+          type: string
+    Dataset_3:
+      type: object
+      description: A Dataset resource belonging to an Instance resource.
+      properties:
+        properties:
+          $ref: '#/components/schemas/DatasetProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocation'
+          description: Edge location of the resource.
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    ProvisioningState:
+      type: string
+      description: The provisioning status of the resource.
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Updating
+      - Deleting
+      - Accepted
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+        values:
+        - name: Succeeded
+          value: Succeeded
+          description: Resource has been created.
+        - name: Failed
+          value: Failed
+          description: Resource creation failed.
+        - name: Canceled
+          value: Canceled
+          description: Resource creation was canceled.
+        - name: Provisioning
+          value: Provisioning
+          description: The resource is being created.
+        - name: Updating
+          value: Updating
+          description: The resource is being updated.
+        - name: Deleting
+          value: Deleting
+          description: The resource is being deleted.
+        - name: Accepted
+          value: Accepted
+          description: The resource was accepted by the server.
+    DatasetTagsUpdate:
+      type: object
+      description: The type used for updating tags in Dataset resources.
+      properties:
+        tags:
+          type: object
+          description: Resource tags.
+          additionalProperties:
+            type: string
     DatasetProperties:
       type: object
       description: The properties of a Dataset resource.
@@ -1632,63 +1821,21 @@ components:
           description: If true the property will be used as a primary key. At most one primary key can exists.
       required:
       - path
-    ProvisioningState:
-      type: string
-      description: The provisioning status of the resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Updating
-      - Deleting
-      - Accepted
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-        values:
-        - name: Succeeded
-          value: Succeeded
-          description: Resource has been created.
-        - name: Failed
-          value: Failed
-          description: Resource creation failed.
-        - name: Canceled
-          value: Canceled
-          description: Resource creation was canceled.
-        - name: Provisioning
-          value: Provisioning
-          description: The resource is being created.
-        - name: Updating
-          value: Updating
-          description: The resource is being updated.
-        - name: Deleting
-          value: Deleting
-          description: The resource is being deleted.
-        - name: Accepted
-          value: Accepted
-          description: The resource was accepted by the server.
-    Dataset_3:
+    DatasetListResult:
       type: object
-      description: A Dataset resource belonging to an Instance resource.
+      description: The response of a Dataset list operation.
       properties:
-        properties:
-          $ref: '#/components/schemas/DatasetProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocation'
-          description: Edge location of the resource.
-          x-ms-mutability:
-          - read
-          - create
+        value:
+          type: array
+          description: The Dataset items on this page
+          items:
+            $ref: '#/components/schemas/Dataset_3'
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
       required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+      - value
     ExtendedLocation:
       type: object
       description: Extended location is an extension of Azure locations. They provide a way to use their Azure ARC enabled Kubernetes clusters as target locations for deploying Azure services instances.
@@ -1702,153 +1849,6 @@ components:
       required:
       - name
       - type
-    DatasetTagsUpdate:
-      type: object
-      description: The type used for updating tags in Dataset resources.
-      properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-  responses:
-    202Accepted:
-      description: 'Request Accepted: The request has been accepted for processing. Please use the URL in the Operation-Location Header to obtain status.'
-      headers:
-        Operation-Location:
-          description: New URL to check for the results of the [long-running operation](https://aka.ms/am-creator-lrt-v2).
-          schema:
-            type: string
-    '400':
-      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '403':
-      description: Permission, capacity, or authentication issues.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    200Async:
-      description: The operation is running or complete.  If the operation was successful, use the Resource-Location header to obtain the path to the result.
-      headers:
-        Resource-Location:
-          description: If successful, a URI where details on the newly created resource can be found.
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LongRunningOperationResult'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/LongRunningOperationResult'
-    '401':
-      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
-      headers:
-        WWW-Authenticate:
-          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '404':
-      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '500':
-      description: An error occurred while processing the request. Please try again later.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-  parameters:
-    ApiVersion:
-      name: api-version
-      description: Version number of Azure Maps API. Current version is 2.0
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-        default: '2.0'
-    DatasetId:
-      name: datasetId
-      in: path
-      description: The identifier for the dataset to query from.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    SubscriptionKey:
-      name: subscription-key
-      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](https://docs.microsoft.com/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
-      in: query
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    DescriptionDataset:
-      name: description
-      description: The description to be given to the dataset.
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ConversionIdQuery:
-      name: conversionId
-      description: The unique ID used to create the dataset. The `conversionId` must have been obtained from a successful call to the Conversion Service [Convert API](https://docs.microsoft.com/en-us/rest/api/maps/v2/conversion/convert) and may be provided with multiple query parameters with same name (if more than one is provided).
-      in: query
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    DatasetOperationId:
-      name: operationId
-      in: path
-      description: The ID to query the status for the dataset create/import request.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    AppendDatasetId:
-      name: datasetId
-      in: query
-      description: The ID for the dataset to append with. The dataset must originate from a previous dataset creation call that matches the datasetId
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ApiVersion_2:
-      in: query
-      name: api-version
-      description: Requested API version.
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
   securitySchemes:
     AADToken:
       type: oauth2

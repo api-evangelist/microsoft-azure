@@ -296,53 +296,61 @@ paths:
       summary: Microsoft Azure Get Indexers Indexername Search Status
 components:
   schemas:
-    SearchIndexerStatus:
+    SearchIndexer:
       properties:
-        status:
-          $ref: '#/components/schemas/IndexerStatus'
-          readOnly: true
-          description: Overall indexer status.
-        lastResult:
-          $ref: '#/components/schemas/IndexerExecutionResult'
-          readOnly: true
-          description: The result of the most recent or an in-progress indexer execution.
-        executionHistory:
+        name:
+          externalDocs:
+            url: https://docs.microsoft.com/rest/api/searchservice/Naming-rules
+          type: string
+          description: The name of the indexer.
+        description:
+          type: string
+          description: The description of the indexer.
+        dataSourceName:
+          type: string
+          description: The name of the datasource from which this indexer reads data.
+        skillsetName:
+          type: string
+          description: The name of the skillset executing with this indexer.
+        targetIndexName:
+          type: string
+          description: The name of the index to which this indexer writes data.
+        schedule:
+          $ref: '#/components/schemas/IndexingSchedule'
+          description: The schedule for this indexer.
+        parameters:
+          $ref: '#/components/schemas/IndexingParameters'
+          description: Parameters for indexer execution.
+        fieldMappings:
           type: array
-          readOnly: true
           items:
-            $ref: '#/components/schemas/IndexerExecutionResult'
-          description: History of the recent indexer executions, sorted in reverse chronological order.
-        limits:
-          $ref: '#/components/schemas/SearchIndexerLimits'
-          readOnly: true
-          description: The execution limits for the indexer.
+            $ref: '#/components/schemas/FieldMapping'
+          description: Defines mappings between fields in the data source and corresponding target fields in the index.
+          externalDocs:
+            url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
+        outputFieldMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldMapping'
+          description: Output field mappings are applied after enrichment and immediately before indexing.
+          externalDocs:
+            url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
+        disabled:
+          x-ms-client-name: IsDisabled
+          type: boolean
+          default: false
+          description: A value indicating whether the indexer is disabled. Default is false.
+        '@odata.etag':
+          x-ms-client-name: ETag
+          type: string
+          description: The ETag of the indexer.
       required:
-      - status
-      - executionHistory
-      - limits
-      description: Represents the current status and execution history of an indexer.
-    IndexingParameters:
-      properties:
-        batchSize:
-          type: integer
-          format: int32
-          description: The number of items that are read from the data source and indexed as a single batch in order to improve performance. The default depends on the data source type.
-        maxFailedItems:
-          type: integer
-          format: int32
-          default: 0
-          description: The maximum number of items that can fail indexing for indexer execution to still be considered successful. -1 means no limit. Default is 0.
-        maxFailedItemsPerBatch:
-          type: integer
-          format: int32
-          default: 0
-          description: The maximum number of items in a single batch that can fail indexing for the batch to still be considered successful. -1 means no limit. Default is 0.
-        configuration:
-          type: object
-          additionalProperties:
-            type: object
-          description: A dictionary of indexer-specific configuration properties. Each name is the name of a specific property. Each value must be of a primitive type.
-      description: Represents parameters for indexer execution.
+      - name
+      - dataSourceName
+      - targetIndexName
+      externalDocs:
+        url: https://docs.microsoft.com/rest/api/searchservice/Indexer-operations
+      description: Represents an indexer.
     IndexerExecutionResult:
       properties:
         status:
@@ -402,6 +410,28 @@ components:
       - itemsProcessed
       - itemsFailed
       description: Represents the result of an individual indexer execution.
+    IndexingParameters:
+      properties:
+        batchSize:
+          type: integer
+          format: int32
+          description: The number of items that are read from the data source and indexed as a single batch in order to improve performance. The default depends on the data source type.
+        maxFailedItems:
+          type: integer
+          format: int32
+          default: 0
+          description: The maximum number of items that can fail indexing for indexer execution to still be considered successful. -1 means no limit. Default is 0.
+        maxFailedItemsPerBatch:
+          type: integer
+          format: int32
+          default: 0
+          description: The maximum number of items in a single batch that can fail indexing for the batch to still be considered successful. -1 means no limit. Default is 0.
+        configuration:
+          type: object
+          additionalProperties:
+            type: object
+          description: A dictionary of indexer-specific configuration properties. Each name is the name of a specific property. Each value must be of a primitive type.
+      description: Represents parameters for indexer execution.
     SearchIndexerError:
       properties:
         key:
@@ -433,36 +463,49 @@ components:
       - errorMessage
       - statusCode
       description: Represents an item- or document-level indexing error.
-    IndexingSchedule:
+    ListIndexersResult:
       properties:
-        interval:
-          type: string
-          format: duration
-          description: The interval of time between indexer executions.
-        startTime:
-          type: string
-          format: date-time
-          description: The time when an indexer should start running.
+        value:
+          x-ms-client-name: Indexers
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/SearchIndexer'
+          description: The indexers in the Search service.
       required:
-      - interval
-      description: Represents a schedule for indexer execution.
-    SearchIndexerLimits:
+      - value
+      description: Response from a List Indexers request. If successful, it includes the full definitions of all indexers.
+    FieldMapping:
       properties:
-        maxRunTime:
+        sourceFieldName:
           type: string
-          format: duration
-          readOnly: true
-          description: The maximum duration that the indexer is permitted to run for one execution.
-        maxDocumentExtractionSize:
-          type: number
-          format: int64
-          readOnly: true
-          description: The maximum size of a document, in bytes, which will be considered valid for indexing.
-        maxDocumentContentCharactersToExtract:
-          type: number
-          format: int64
-          readOnly: true
-          description: The maximum number of characters that will be extracted from a document picked up for indexing.
+          description: The name of the field in the data source.
+        targetFieldName:
+          type: string
+          description: The name of the target field in the index. Same as the source field name by default.
+        mappingFunction:
+          $ref: '#/components/schemas/FieldMappingFunction'
+          description: A function to apply to each source field value before indexing.
+      required:
+      - sourceFieldName
+      description: Defines a mapping between a field in a data source and a target field in an index.
+      externalDocs:
+        url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
+    FieldMappingFunction:
+      properties:
+        name:
+          type: string
+          description: The name of the field mapping function.
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+          description: A dictionary of parameter name/value pairs to pass to the function. Each value must be of a primitive type.
+      required:
+      - name
+      description: Represents a function that transforms a value from a data source before indexing.
+      externalDocs:
+        url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
     SearchIndexerWarning:
       properties:
         key:
@@ -488,22 +531,6 @@ components:
       required:
       - message
       description: Represents an item-level warning.
-    FieldMapping:
-      properties:
-        sourceFieldName:
-          type: string
-          description: The name of the field in the data source.
-        targetFieldName:
-          type: string
-          description: The name of the target field in the index. Same as the source field name by default.
-        mappingFunction:
-          $ref: '#/components/schemas/FieldMappingFunction'
-          description: A function to apply to each source field value before indexing.
-      required:
-      - sourceFieldName
-      description: Defines a mapping between a field in a data source and a target field in an index.
-      externalDocs:
-        url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
     SearchError:
       properties:
         code:
@@ -523,6 +550,31 @@ components:
       required:
       - message
       description: Describes an error condition for the Azure Cognitive Search API.
+    SearchIndexerStatus:
+      properties:
+        status:
+          $ref: '#/components/schemas/IndexerStatus'
+          readOnly: true
+          description: Overall indexer status.
+        lastResult:
+          $ref: '#/components/schemas/IndexerExecutionResult'
+          readOnly: true
+          description: The result of the most recent or an in-progress indexer execution.
+        executionHistory:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/IndexerExecutionResult'
+          description: History of the recent indexer executions, sorted in reverse chronological order.
+        limits:
+          $ref: '#/components/schemas/SearchIndexerLimits'
+          readOnly: true
+          description: The execution limits for the indexer.
+      required:
+      - status
+      - executionHistory
+      - limits
+      description: Represents the current status and execution history of an indexer.
     IndexerExecutionStatus:
       type: string
       enum:
@@ -567,97 +619,49 @@ components:
           name: Running
           description: Indicates that the indexer is running normally.
       description: Represents the overall indexer status.
-    ListIndexersResult:
+    SearchIndexerLimits:
       properties:
-        value:
-          x-ms-client-name: Indexers
-          type: array
+        maxRunTime:
+          type: string
+          format: duration
           readOnly: true
-          items:
-            $ref: '#/components/schemas/SearchIndexer'
-          description: The indexers in the Search service.
-      required:
-      - value
-      description: Response from a List Indexers request. If successful, it includes the full definitions of all indexers.
-    FieldMappingFunction:
+          description: The maximum duration that the indexer is permitted to run for one execution.
+        maxDocumentExtractionSize:
+          type: number
+          format: int64
+          readOnly: true
+          description: The maximum size of a document, in bytes, which will be considered valid for indexing.
+        maxDocumentContentCharactersToExtract:
+          type: number
+          format: int64
+          readOnly: true
+          description: The maximum number of characters that will be extracted from a document picked up for indexing.
+    IndexingSchedule:
       properties:
-        name:
+        interval:
           type: string
-          description: The name of the field mapping function.
-        parameters:
-          type: object
-          additionalProperties:
-            type: object
-          description: A dictionary of parameter name/value pairs to pass to the function. Each value must be of a primitive type.
+          format: duration
+          description: The interval of time between indexer executions.
+        startTime:
+          type: string
+          format: date-time
+          description: The time when an indexer should start running.
       required:
-      - name
-      description: Represents a function that transforms a value from a data source before indexing.
-      externalDocs:
-        url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
-    SearchIndexer:
-      properties:
-        name:
-          externalDocs:
-            url: https://docs.microsoft.com/rest/api/searchservice/Naming-rules
-          type: string
-          description: The name of the indexer.
-        description:
-          type: string
-          description: The description of the indexer.
-        dataSourceName:
-          type: string
-          description: The name of the datasource from which this indexer reads data.
-        skillsetName:
-          type: string
-          description: The name of the skillset executing with this indexer.
-        targetIndexName:
-          type: string
-          description: The name of the index to which this indexer writes data.
-        schedule:
-          $ref: '#/components/schemas/IndexingSchedule'
-          description: The schedule for this indexer.
-        parameters:
-          $ref: '#/components/schemas/IndexingParameters'
-          description: Parameters for indexer execution.
-        fieldMappings:
-          type: array
-          items:
-            $ref: '#/components/schemas/FieldMapping'
-          description: Defines mappings between fields in the data source and corresponding target fields in the index.
-          externalDocs:
-            url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
-        outputFieldMappings:
-          type: array
-          items:
-            $ref: '#/components/schemas/FieldMapping'
-          description: Output field mappings are applied after enrichment and immediately before indexing.
-          externalDocs:
-            url: https://docs.microsoft.com/azure/search/search-indexer-field-mappings
-        disabled:
-          x-ms-client-name: IsDisabled
-          type: boolean
-          default: false
-          description: A value indicating whether the indexer is disabled. Default is false.
-        '@odata.etag':
-          x-ms-client-name: ETag
-          type: string
-          description: The ETag of the indexer.
-      required:
-      - name
-      - dataSourceName
-      - targetIndexName
-      externalDocs:
-        url: https://docs.microsoft.com/rest/api/searchservice/Indexer-operations
-      description: Represents an indexer.
+      - interval
+      description: Represents a schedule for indexer execution.
   parameters:
-    IfMatchParameter:
-      name: If-Match
+    ClientRequestIdParameter:
+      name: x-ms-client-request-id
       in: header
       required: false
-      description: Defines the If-Match condition. The operation will be performed only if the ETag on the server matches this value.
+      description: The tracking ID sent with the request to help with debugging.
+      x-ms-client-request-id: true
+      x-ms-parameter-grouping:
+        name: request-options
       x-ms-parameter-location: method
       schema:
         type: string
+        format: uuid
     IfNoneMatchParameter:
       name: If-None-Match
       in: header
@@ -673,18 +677,14 @@ components:
       description: Client Api Version.
       schema:
         type: string
-    ClientRequestIdParameter:
-      name: x-ms-client-request-id
+    IfMatchParameter:
+      name: If-Match
       in: header
       required: false
-      description: The tracking ID sent with the request to help with debugging.
-      x-ms-client-request-id: true
-      x-ms-parameter-grouping:
-        name: request-options
+      description: Defines the If-Match condition. The operation will be performed only if the ETag on the server matches this value.
       x-ms-parameter-location: method
       schema:
         type: string
-        format: uuid
     PreferHeaderParameter:
       name: Prefer
       in: header

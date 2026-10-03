@@ -273,59 +273,32 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    CloudError:
-      x-ms-external: true
+    GalleryApplicationVersionProperties:
       properties:
-        error:
-          $ref: '#/components/schemas/ApiError'
-      description: An error response from the Compute service.
-    InnerError:
-      properties:
-        exceptiontype:
+        publishingProfile:
+          $ref: '#/components/schemas/GalleryApplicationVersionPublishingProfile'
+        provisioningState:
+          readOnly: true
           type: string
-          description: The exception type.
-        errordetail:
-          type: string
-          description: The internal error message or exception dump.
-      description: Inner error details.
-    UserArtifactManage:
-      properties:
-        install:
-          type: string
-          description: Required. The path and arguments to install the gallery application. This is limited to 4096 characters.
-        remove:
-          type: string
-          description: Required. The path and arguments to remove the gallery application. This is limited to 4096 characters.
-        update:
-          type: string
-          description: Optional. The path and arguments to update the gallery application. If not present, then update operation will invoke remove command on the previous version and install command on the current version of the gallery application. This is limited to 4096 characters.
-      required:
-      - install
-      - remove
-    TargetRegion:
-      properties:
-        name:
-          type: string
-          description: The name of the region.
-        regionalReplicaCount:
-          type: integer
-          format: int32
-          description: The number of replicas of the Image Version to be created per region. This property is updatable.
-        storageAccountType:
-          type: string
-          description: Specifies the storage account type to be used to store the image. This property is not updatable.
+          title: The current state of the gallery Application Version.
+          description: The provisioning state, which only appears in the response.
           enum:
-          - Standard_LRS
-          - Standard_ZRS
-          - Premium_LRS
-          x-ms-enum:
-            name: StorageAccountType
-            modelAsString: true
-        encryption:
-          $ref: '#/components/schemas/EncryptionImages'
+          - Creating
+          - Updating
+          - Failed
+          - Succeeded
+          - Deleting
+          - Migrating
+        replicationStatus:
+          readOnly: true
+          $ref: '#/components/schemas/ReplicationStatus'
       required:
-      - name
-      description: Describes the target region information.
+      - publishingProfile
+      description: Describes the properties of a gallery image version.
+    OSDiskImageEncryption:
+      allOf:
+      - $ref: '#/components/schemas/DiskImageEncryption'
+      description: Contains encryption settings for an OS disk image.
     ApiErrorBase:
       properties:
         code:
@@ -338,43 +311,6 @@ components:
           type: string
           description: The error message.
       description: Api error base.
-    ApiError:
-      properties:
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ApiErrorBase'
-          description: The Api error details
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: The Api inner error
-        code:
-          type: string
-          description: The error code.
-        target:
-          type: string
-          description: The target of the particular error.
-        message:
-          type: string
-          description: The error message.
-      description: Api error.
-    DataDiskImageEncryption:
-      properties:
-        lun:
-          type: integer
-          format: int32
-          description: This property specifies the logical unit number of the data disk. This value is used to identify data disks within the Virtual Machine and therefore must be unique for each data disk attached to the Virtual Machine.
-      allOf:
-      - $ref: '#/components/schemas/DiskImageEncryption'
-      required:
-      - lun
-      description: Contains encryption settings for a data disk image.
-    DiskImageEncryption:
-      properties:
-        diskEncryptionSetId:
-          type: string
-          description: A relative URI containing the resource ID of the disk encryption set.
-      description: This is the disk image encryption base class.
     GalleryArtifactPublishingProfileBase:
       properties:
         targetRegions:
@@ -409,6 +345,66 @@ components:
             name: StorageAccountType
             modelAsString: true
       description: Describes the basic gallery artifact publishing profile.
+    TargetRegion:
+      properties:
+        name:
+          type: string
+          description: The name of the region.
+        regionalReplicaCount:
+          type: integer
+          format: int32
+          description: The number of replicas of the Image Version to be created per region. This property is updatable.
+        storageAccountType:
+          type: string
+          description: Specifies the storage account type to be used to store the image. This property is not updatable.
+          enum:
+          - Standard_LRS
+          - Standard_ZRS
+          - Premium_LRS
+          x-ms-enum:
+            name: StorageAccountType
+            modelAsString: true
+        encryption:
+          $ref: '#/components/schemas/EncryptionImages'
+      required:
+      - name
+      description: Describes the target region information.
+    DiskImageEncryption:
+      properties:
+        diskEncryptionSetId:
+          type: string
+          description: A relative URI containing the resource ID of the disk encryption set.
+      description: This is the disk image encryption base class.
+    EncryptionImages:
+      properties:
+        osDiskImage:
+          $ref: '#/components/schemas/OSDiskImageEncryption'
+        dataDiskImages:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataDiskImageEncryption'
+          description: A list of encryption specifications for data disk images.
+      description: Optional. Allows users to provide customer managed keys for encrypting the OS and data disks in the gallery artifact.
+    ApiError:
+      properties:
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiErrorBase'
+          description: The Api error details
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: The Api inner error
+        code:
+          type: string
+          description: The error code.
+        target:
+          type: string
+          description: The target of the particular error.
+        message:
+          type: string
+          description: The error message.
+      description: Api error.
     ReplicationStatus:
       properties:
         aggregatedState:
@@ -430,6 +426,33 @@ components:
             $ref: '#/components/schemas/RegionalReplicationStatus'
           description: This is a summary of replication status for each region.
       description: This is the replication status of the gallery image version.
+    GalleryApplicationVersionList:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GalleryApplicationVersion'
+          description: A list of gallery Application Versions.
+        nextLink:
+          type: string
+          description: The uri to fetch the next page of gallery Application Versions. Call ListNext() with this to fetch the next page of gallery Application Versions.
+      required:
+      - value
+      description: The List Gallery Application version operation response.
+    UserArtifactManage:
+      properties:
+        install:
+          type: string
+          description: Required. The path and arguments to install the gallery application. This is limited to 4096 characters.
+        remove:
+          type: string
+          description: Required. The path and arguments to remove the gallery application. This is limited to 4096 characters.
+        update:
+          type: string
+          description: Optional. The path and arguments to update the gallery application. If not present, then update operation will invoke remove command on the previous version and install command on the current version of the gallery application. This is limited to 4096 characters.
+      required:
+      - install
+      - remove
     UpdateResourceDefinition:
       description: The Update Resource model definition.
       properties:
@@ -451,28 +474,12 @@ components:
             type: string
           description: Resource tags
       x-ms-azure-resource: true
-    GalleryApplicationVersionProperties:
+    CloudError:
+      x-ms-external: true
       properties:
-        publishingProfile:
-          $ref: '#/components/schemas/GalleryApplicationVersionPublishingProfile'
-        provisioningState:
-          readOnly: true
-          type: string
-          title: The current state of the gallery Application Version.
-          description: The provisioning state, which only appears in the response.
-          enum:
-          - Creating
-          - Updating
-          - Failed
-          - Succeeded
-          - Deleting
-          - Migrating
-        replicationStatus:
-          readOnly: true
-          $ref: '#/components/schemas/ReplicationStatus'
-      required:
-      - publishingProfile
-      description: Describes the properties of a gallery image version.
+        error:
+          $ref: '#/components/schemas/ApiError'
+      description: An error response from the Compute service.
     GalleryApplicationVersionUpdate:
       properties:
         properties:
@@ -481,6 +488,17 @@ components:
       allOf:
       - $ref: '#/components/schemas/UpdateResourceDefinition'
       description: Specifies information about the gallery Application Version that you want to update.
+    DataDiskImageEncryption:
+      properties:
+        lun:
+          type: integer
+          format: int32
+          description: This property specifies the logical unit number of the data disk. This value is used to identify data disks within the Virtual Machine and therefore must be unique for each data disk attached to the Virtual Machine.
+      allOf:
+      - $ref: '#/components/schemas/DiskImageEncryption'
+      required:
+      - lun
+      description: Contains encryption settings for a data disk image.
     GalleryApplicationVersionPublishingProfile:
       properties:
         source:
@@ -495,67 +513,26 @@ components:
       required:
       - source
       description: The publishing profile of a gallery image version.
-    GalleryApplicationVersion:
+    UserArtifactSource:
       properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/GalleryApplicationVersionProperties'
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      description: Specifies information about the gallery Application Version that you want to create or update.
-    GalleryApplicationVersionList:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/GalleryApplicationVersion'
-          description: A list of gallery Application Versions.
-        nextLink:
+        mediaLink:
           type: string
-          description: The uri to fetch the next page of gallery Application Versions. Call ListNext() with this to fetch the next page of gallery Application Versions.
+          description: Required. The mediaLink of the artifact, must be a readable storage page blob.
+        defaultConfigurationLink:
+          type: string
+          description: Optional. The defaultConfigurationLink of the artifact, must be a readable storage page blob.
       required:
-      - value
-      description: The List Gallery Application version operation response.
-    OSDiskImageEncryption:
-      allOf:
-      - $ref: '#/components/schemas/DiskImageEncryption'
-      description: Contains encryption settings for an OS disk image.
-    Resource:
-      description: The Resource model definition.
+      - mediaLink
+      description: The source image from which the Image Version is going to be created.
+    InnerError:
       properties:
-        id:
-          readOnly: true
+        exceptiontype:
           type: string
-          description: Resource Id
-        name:
-          readOnly: true
+          description: The exception type.
+        errordetail:
           type: string
-          description: Resource name
-        type:
-          readOnly: true
-          type: string
-          description: Resource type
-        location:
-          type: string
-          description: Resource location
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags
-      required:
-      - location
-      x-ms-azure-resource: true
-    EncryptionImages:
-      properties:
-        osDiskImage:
-          $ref: '#/components/schemas/OSDiskImageEncryption'
-        dataDiskImages:
-          type: array
-          items:
-            $ref: '#/components/schemas/DataDiskImageEncryption'
-          description: A list of encryption specifications for data disk images.
-      description: Optional. Allows users to provide customer managed keys for encrypting the OS and data disks in the gallery artifact.
+          description: The internal error message or exception dump.
+      description: Inner error details.
     RegionalReplicationStatus:
       properties:
         region:
@@ -584,26 +561,41 @@ components:
           format: int32
           description: It indicates progress of the replication job.
       description: This is the regional replication status.
-    UserArtifactSource:
+    Resource:
+      description: The Resource model definition.
       properties:
-        mediaLink:
+        id:
+          readOnly: true
           type: string
-          description: Required. The mediaLink of the artifact, must be a readable storage page blob.
-        defaultConfigurationLink:
+          description: Resource Id
+        name:
+          readOnly: true
           type: string
-          description: Optional. The defaultConfigurationLink of the artifact, must be a readable storage page blob.
+          description: Resource name
+        type:
+          readOnly: true
+          type: string
+          description: Resource type
+        location:
+          type: string
+          description: Resource location
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags
       required:
-      - mediaLink
-      description: The source image from which the Image Version is going to be created.
+      - location
+      x-ms-azure-resource: true
+    GalleryApplicationVersion:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/GalleryApplicationVersionProperties'
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      description: Specifies information about the gallery Application Version that you want to create or update.
   parameters:
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: The name of the resource group.
-      schema:
-        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -616,6 +608,14 @@ components:
       in: query
       required: true
       description: Client Api Version.
+      schema:
+        type: string
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: The name of the resource group.
       schema:
         type: string
   securitySchemes:

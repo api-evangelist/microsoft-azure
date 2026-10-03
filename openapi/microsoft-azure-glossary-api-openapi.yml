@@ -1316,6 +1316,43 @@ paths:
     - url: /catalog/api
 components:
   schemas:
+    Status_AtlasRelationship:
+      type: string
+      title: Status
+      description: The enum of relationship status.
+      enum:
+      - ACTIVE
+      - DELETED
+      x-ms-enum:
+        name: Status_AtlasRelationship
+        modelAsString: true
+    AtlasObjectId:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: The GUID of the object.
+        typeName:
+          type: string
+          description: The name of the type.
+        uniqueAttributes:
+          type: object
+          description: The unique attributes of the object.
+          additionalProperties: {}
+      title: AtlasObjectId
+      description: Reference to an object-instance of an Atlas type - like entity.
+    TermStatus:
+      type: string
+      title: Status
+      description: Status of the AtlasGlossaryTerm
+      enum:
+      - Draft
+      - Approved
+      - Alert
+      - Expired
+      x-ms-enum:
+        name: TermStatus
+        modelAsString: true
     ContactBasic:
       title: ContactBasic
       type: object
@@ -1326,29 +1363,6 @@ components:
         info:
           type: string
           description: additional information to describe this contact.
-    AtlasGlossary:
-      type: object
-      title: AtlasGlossary
-      allOf:
-      - $ref: '#/components/schemas/AtlasGlossaryBaseObject'
-      - properties:
-          categories:
-            type: array
-            description: An array of categories.
-            items:
-              $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
-          language:
-            type: string
-            description: The language of the glossary.
-          terms:
-            type: array
-            description: An array of related term headers.
-            items:
-              $ref: '#/components/schemas/AtlasRelatedTermHeader'
-          usage:
-            type: string
-            description: The usage of the glossary.
-      description: The glossary object.
     AsyncOperationError:
       type: object
       properties:
@@ -1358,99 +1372,6 @@ components:
         message:
           type: string
           description: Message from async job if fail
-    AtlasStruct:
-      type: object
-      properties:
-        attributes:
-          type: object
-          description: The attributes of the struct.
-          additionalProperties: {}
-        typeName:
-          type: string
-          description: The name of the type.
-        lastModifiedTS:
-          $ref: '#/components/schemas/LastModifiedTS'
-      title: AtlasStruct
-      description: Captures details of struct contents. Not instantiated directly, used only via AtlasEntity, AtlasClassification.
-    AtlasGlossaryHeader:
-      type: object
-      properties:
-        displayText:
-          type: string
-          description: The display text.
-        glossaryGuid:
-          type: string
-          description: The GUID of the glossary.
-        relationGuid:
-          type: string
-          description: The GUID of the relationship.
-      title: AtlasGlossaryHeader
-      description: The glossary header with basic information.
-    PurviewObjectId:
-      type: object
-      properties:
-        name:
-          type: string
-        displayText:
-          type: string
-        itemPath:
-          type: string
-        resourceId:
-          type: string
-        properties:
-          type: object
-          additionalProperties: {}
-      allOf:
-      - $ref: '#/components/schemas/AtlasObjectId'
-      title: PurviewObjectId
-    AtlasGlossaryCategory:
-      type: object
-      title: AtlasGlossaryCategory
-      allOf:
-      - $ref: '#/components/schemas/AtlasGlossaryBaseObject'
-      - properties:
-          anchor:
-            $ref: '#/components/schemas/AtlasGlossaryHeader'
-          childrenCategories:
-            type: array
-            description: An array of children categories.
-            items:
-              $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
-          parentCategory:
-            $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
-          terms:
-            type: array
-            description: An array of related term headers.
-            items:
-              $ref: '#/components/schemas/AtlasRelatedTermHeader'
-      description: The glossary category.
-    TermCustomAttributesExtraProperties:
-      type: object
-      description: The term attribute name and attribute value, which is map<string,object>
-      additionalProperties:
-        description: The value of custom term attribute
-    ImportCSVOperationStatus:
-      type: string
-      enum:
-      - NotStarted
-      - Succeeded
-      - Failed
-      - Running
-      x-ms-enum:
-        name: ImportCSVOperationStatus
-        modelAsString: true
-      title: ImportCSVOperationStatus
-      description: Enum of the status of import csv operation.
-    Status:
-      type: string
-      title: Status
-      description: Status of the entity - can be active or deleted. Deleted entities are not removed from Atlas store.
-      enum:
-      - ACTIVE
-      - DELETED
-      x-ms-enum:
-        name: Status
-        modelAsString: true
     AtlasRelatedTermHeader:
       type: object
       properties:
@@ -1479,26 +1400,30 @@ components:
           description: The GUID of the term.
       title: AtlasRelatedTermHeader
       description: The header of the related term.
-    TermCustomAttributes:
-      title: attributes
-      description: 'The custom attributes of the term, which is map<string,map<string,object>>.
-
-        The key of the first layer map is term template name.'
+    BulkDeleteOperation:
       type: object
-      additionalProperties:
-        $ref: '#/components/schemas/TermCustomAttributesExtraProperties'
-    BulkDeleteOperationStatus:
-      type: string
-      enum:
-      - NotStarted
-      - Succeeded
-      - Failed
-      - Running
-      x-ms-enum:
-        name: BulkDeleteOperationStatus
-        modelAsString: true
-      title: BulkDeleteOperationStatus
-      description: Enum of the status of bulk delete operation.
+      title: Status of bulk delete operation
+      description: The status of bulk delete operation
+      required:
+      - id
+      - status
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/BulkDeleteOperationStatus'
+        createTime:
+          type: string
+          description: The created time of the record.
+        lastUpdateTime:
+          type: string
+          description: The last updated time of the record.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BulkDeleteOperationProperties'
+        error:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/AsyncOperationError'
     AtlasGlossaryExtInfo:
       type: object
       title: AtlasGlossaryExtInfo
@@ -1516,73 +1441,76 @@ components:
             additionalProperties:
               $ref: '#/components/schemas/AtlasGlossaryTerm'
       description: The extended information of glossary.
-    ImportCSVOperation:
+    AtlasTermRelationshipStatus:
+      type: string
+      title: AtlasTermRelationshipStatus
+      description: The status of term relationship.
+      enum:
+      - DRAFT
+      - ACTIVE
+      - DEPRECATED
+      - OBSOLETE
+      - OTHER
+      x-ms-enum:
+        name: AtlasTermRelationshipStatus
+        modelAsString: true
+    AtlasTermCategorizationHeader:
       type: object
-      title: Status of import csv operation
-      description: The status of import csv operation
-      required:
-      - id
-      - status
       properties:
-        id:
+        categoryGuid:
           type: string
+          description: The GUID of the category.
+        description:
+          type: string
+          description: The description of the record.
+        displayText:
+          type: string
+          description: The display text.
+        relationGuid:
+          type: string
+          description: The GUID of the relationship.
         status:
-          $ref: '#/components/schemas/ImportCSVOperationStatus'
-        createTime:
-          type: string
-          description: The created time of the record.
-        lastUpdateTime:
-          type: string
-          description: The last updated time of the record.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ImportCSVOperationProperties'
-        error:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/AsyncOperationError'
-    ImportCSVOperationProperties:
+          $ref: '#/components/schemas/AtlasTermRelationshipStatus'
+      title: AtlasTermCategorizationHeader
+      description: The basic information for term categorization.
+    AtlasRelatedCategoryHeader:
       type: object
       properties:
-        importedTerms:
+        categoryGuid:
           type: string
-          description: Term numbers that already imported successfully
+          description: The GUID of the category.
+        description:
+          type: string
+          description: The description of the category header.
+        displayText:
+          type: string
+          description: The display text.
+        parentCategoryGuid:
+          type: string
+          description: The GUID of the parent category.
+        relationGuid:
+          type: string
+          description: The GUID of the relationship.
+      title: AtlasRelatedCategoryHeader
+      description: The header of the related category.
+    TermCustomAttributesExtraProperties:
+      type: object
+      description: The term attribute name and attribute value, which is map<string,object>
+      additionalProperties:
+        description: The value of custom term attribute
+    TermGuid:
+      type: string
+      title: termGuid
+      description: The globally unique identifier for glossary term.
+    BulkDeleteOperationProperties:
+      type: object
+      properties:
+        deletedTerms:
+          type: string
+          description: Term numbers that already deleted successfully
         totalTermsDetected:
           type: string
-          description: Total term numbers that detected in csv
-    ErrorResponse:
-      description: An error response from the service
-      type: object
-      properties:
-        requestId:
-          type: string
-          description: The request ID.
-        errorCode:
-          type: string
-          description: The error code.
-        errorMessage:
-          type: string
-          description: The error message.
-    AtlasRelatedObjectId:
-      type: object
-      title: AtlasRelatedObjectId
-      allOf:
-      - $ref: '#/components/schemas/AtlasObjectId'
-      - properties:
-          displayText:
-            type: string
-            description: The display text.
-          entityStatus:
-            $ref: '#/components/schemas/Status'
-          relationshipType:
-            type: string
-          relationshipAttributes:
-            $ref: '#/components/schemas/AtlasStruct'
-          relationshipGuid:
-            type: string
-            description: The GUID of the relationship.
-          relationshipStatus:
-            $ref: '#/components/schemas/Status_AtlasRelationship'
-      description: Reference to an object-instance of AtlasEntity type used in relationship attribute values
+          description: Total term numbers that detected in a bulk delete job
     AtlasClassification:
       type: object
       title: AtlasClassification
@@ -1612,92 +1540,46 @@ components:
               properties: {}
             description: more detail on source information
       description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
-    TermStatus:
+    Status:
       type: string
       title: Status
-      description: Status of the AtlasGlossaryTerm
+      description: Status of the entity - can be active or deleted. Deleted entities are not removed from Atlas store.
       enum:
-      - Draft
-      - Approved
-      - Alert
-      - Expired
-      x-ms-enum:
-        name: TermStatus
-        modelAsString: true
-    AtlasTermRelationshipStatus:
-      type: string
-      title: AtlasTermRelationshipStatus
-      description: The status of term relationship.
-      enum:
-      - DRAFT
       - ACTIVE
-      - DEPRECATED
-      - OBSOLETE
-      - OTHER
+      - DELETED
       x-ms-enum:
-        name: AtlasTermRelationshipStatus
+        name: Status
         modelAsString: true
-    BulkDeleteOperationProperties:
+    AtlasRelatedObjectId:
+      type: object
+      title: AtlasRelatedObjectId
+      allOf:
+      - $ref: '#/components/schemas/AtlasObjectId'
+      - properties:
+          displayText:
+            type: string
+            description: The display text.
+          entityStatus:
+            $ref: '#/components/schemas/Status'
+          relationshipType:
+            type: string
+          relationshipAttributes:
+            $ref: '#/components/schemas/AtlasStruct'
+          relationshipGuid:
+            type: string
+            description: The GUID of the relationship.
+          relationshipStatus:
+            $ref: '#/components/schemas/Status_AtlasRelationship'
+      description: Reference to an object-instance of AtlasEntity type used in relationship attribute values
+    ImportCSVOperationProperties:
       type: object
       properties:
-        deletedTerms:
+        importedTerms:
           type: string
-          description: Term numbers that already deleted successfully
+          description: Term numbers that already imported successfully
         totalTermsDetected:
           type: string
-          description: Total term numbers that detected in a bulk delete job
-    AtlasBaseModelObject:
-      type: object
-      properties:
-        guid:
-          type: string
-          description: The GUID of the object.
-      title: AtlasBaseModelObject
-      description: The base model object.
-    LastModifiedTS:
-      type: string
-      title: lastModifiedTS
-      description: ETag for concurrency control.
-    AtlasGlossaryBaseObject:
-      type: object
-      title: AtlasGlossaryBaseObject
-      allOf:
-      - $ref: '#/components/schemas/AtlasBaseModelObject'
-      - properties:
-          classifications:
-            type: array
-            description: An array of classifications.
-            items:
-              $ref: '#/components/schemas/AtlasClassification'
-          longDescription:
-            type: string
-            description: The long version description.
-          name:
-            type: string
-            description: The name of the glossary object.
-          qualifiedName:
-            type: string
-            description: The qualified name of the glossary object.
-          shortDescription:
-            type: string
-            description: The short version of description.
-          lastModifiedTS:
-            $ref: '#/components/schemas/LastModifiedTS'
-          createTime:
-            type: integer
-            format: int64
-            description: The created time of the record.
-          createdBy:
-            type: string
-            description: The user who created the record.
-          updateTime:
-            type: integer
-            format: int64
-            description: The update time of the record.
-          updatedBy:
-            type: string
-            description: The user who updated the record.
-      description: The glossary base object.
+          description: Total term numbers that detected in csv
     AtlasGlossaryTerm:
       type: object
       title: AtlasGlossaryTerm
@@ -1821,44 +1703,209 @@ components:
             items:
               $ref: '#/components/schemas/AtlasRelatedTermHeader'
       description: The glossary term.
-    AtlasObjectId:
+    AtlasGlossaryBaseObject:
+      type: object
+      title: AtlasGlossaryBaseObject
+      allOf:
+      - $ref: '#/components/schemas/AtlasBaseModelObject'
+      - properties:
+          classifications:
+            type: array
+            description: An array of classifications.
+            items:
+              $ref: '#/components/schemas/AtlasClassification'
+          longDescription:
+            type: string
+            description: The long version description.
+          name:
+            type: string
+            description: The name of the glossary object.
+          qualifiedName:
+            type: string
+            description: The qualified name of the glossary object.
+          shortDescription:
+            type: string
+            description: The short version of description.
+          lastModifiedTS:
+            $ref: '#/components/schemas/LastModifiedTS'
+          createTime:
+            type: integer
+            format: int64
+            description: The created time of the record.
+          createdBy:
+            type: string
+            description: The user who created the record.
+          updateTime:
+            type: integer
+            format: int64
+            description: The update time of the record.
+          updatedBy:
+            type: string
+            description: The user who updated the record.
+      description: The glossary base object.
+    LastModifiedTS:
+      type: string
+      title: lastModifiedTS
+      description: ETag for concurrency control.
+    AtlasBaseModelObject:
       type: object
       properties:
         guid:
           type: string
           description: The GUID of the object.
+      title: AtlasBaseModelObject
+      description: The base model object.
+    AtlasStruct:
+      type: object
+      properties:
+        attributes:
+          type: object
+          description: The attributes of the struct.
+          additionalProperties: {}
         typeName:
           type: string
           description: The name of the type.
-        uniqueAttributes:
-          type: object
-          description: The unique attributes of the object.
-          additionalProperties: {}
-      title: AtlasObjectId
-      description: Reference to an object-instance of an Atlas type - like entity.
-    AtlasTermCategorizationHeader:
+        lastModifiedTS:
+          $ref: '#/components/schemas/LastModifiedTS'
+      title: AtlasStruct
+      description: Captures details of struct contents. Not instantiated directly, used only via AtlasEntity, AtlasClassification.
+    ImportCSVOperationStatus:
+      type: string
+      enum:
+      - NotStarted
+      - Succeeded
+      - Failed
+      - Running
+      x-ms-enum:
+        name: ImportCSVOperationStatus
+        modelAsString: true
+      title: ImportCSVOperationStatus
+      description: Enum of the status of import csv operation.
+    ImportCSVOperation:
+      type: object
+      title: Status of import csv operation
+      description: The status of import csv operation
+      required:
+      - id
+      - status
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/ImportCSVOperationStatus'
+        createTime:
+          type: string
+          description: The created time of the record.
+        lastUpdateTime:
+          type: string
+          description: The last updated time of the record.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ImportCSVOperationProperties'
+        error:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/AsyncOperationError'
+    TermCustomAttributes:
+      title: attributes
+      description: 'The custom attributes of the term, which is map<string,map<string,object>>.
+
+        The key of the first layer map is term template name.'
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/TermCustomAttributesExtraProperties'
+    ResourceLink:
+      title: ResourceLink
       type: object
       properties:
-        categoryGuid:
+        displayName:
           type: string
-          description: The GUID of the category.
-        description:
+          description: Display name for url.
+        url:
           type: string
-          description: The description of the record.
+          description: web url. http or https
+    AtlasGlossaryHeader:
+      type: object
+      properties:
         displayText:
           type: string
           description: The display text.
+        glossaryGuid:
+          type: string
+          description: The GUID of the glossary.
         relationGuid:
           type: string
           description: The GUID of the relationship.
-        status:
-          $ref: '#/components/schemas/AtlasTermRelationshipStatus'
-      title: AtlasTermCategorizationHeader
-      description: The basic information for term categorization.
-    TermGuid:
+      title: AtlasGlossaryHeader
+      description: The glossary header with basic information.
+    AtlasGlossary:
+      type: object
+      title: AtlasGlossary
+      allOf:
+      - $ref: '#/components/schemas/AtlasGlossaryBaseObject'
+      - properties:
+          categories:
+            type: array
+            description: An array of categories.
+            items:
+              $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
+          language:
+            type: string
+            description: The language of the glossary.
+          terms:
+            type: array
+            description: An array of related term headers.
+            items:
+              $ref: '#/components/schemas/AtlasRelatedTermHeader'
+          usage:
+            type: string
+            description: The usage of the glossary.
+      description: The glossary object.
+    BulkDeleteOperationStatus:
       type: string
-      title: termGuid
-      description: The globally unique identifier for glossary term.
+      enum:
+      - NotStarted
+      - Succeeded
+      - Failed
+      - Running
+      x-ms-enum:
+        name: BulkDeleteOperationStatus
+        modelAsString: true
+      title: BulkDeleteOperationStatus
+      description: Enum of the status of bulk delete operation.
+    AtlasGlossaryCategory:
+      type: object
+      title: AtlasGlossaryCategory
+      allOf:
+      - $ref: '#/components/schemas/AtlasGlossaryBaseObject'
+      - properties:
+          anchor:
+            $ref: '#/components/schemas/AtlasGlossaryHeader'
+          childrenCategories:
+            type: array
+            description: An array of children categories.
+            items:
+              $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
+          parentCategory:
+            $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
+          terms:
+            type: array
+            description: An array of related term headers.
+            items:
+              $ref: '#/components/schemas/AtlasRelatedTermHeader'
+      description: The glossary category.
+    ErrorResponse:
+      description: An error response from the service
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The request ID.
+        errorCode:
+          type: string
+          description: The error code.
+        errorMessage:
+          type: string
+          description: The error message.
     TimeBoundary:
       type: object
       properties:
@@ -1873,131 +1920,38 @@ components:
           description: The timezone of the time boundary.
       title: TimeBoundary
       description: Captures time-boundary details
-    AtlasRelatedCategoryHeader:
+    PurviewObjectId:
       type: object
       properties:
-        categoryGuid:
+        name:
           type: string
-          description: The GUID of the category.
-        description:
-          type: string
-          description: The description of the category header.
         displayText:
           type: string
-          description: The display text.
-        parentCategoryGuid:
+        itemPath:
           type: string
-          description: The GUID of the parent category.
-        relationGuid:
+        resourceId:
           type: string
-          description: The GUID of the relationship.
-      title: AtlasRelatedCategoryHeader
-      description: The header of the related category.
-    BulkDeleteOperation:
-      type: object
-      title: Status of bulk delete operation
-      description: The status of bulk delete operation
-      required:
-      - id
-      - status
-      properties:
-        id:
-          type: string
-        status:
-          $ref: '#/components/schemas/BulkDeleteOperationStatus'
-        createTime:
-          type: string
-          description: The created time of the record.
-        lastUpdateTime:
-          type: string
-          description: The last updated time of the record.
         properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BulkDeleteOperationProperties'
-        error:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/AsyncOperationError'
-    ResourceLink:
-      title: ResourceLink
-      type: object
-      properties:
-        displayName:
-          type: string
-          description: Display name for url.
-        url:
-          type: string
-          description: web url. http or https
-    Status_AtlasRelationship:
-      type: string
-      title: Status
-      description: The enum of relationship status.
-      enum:
-      - ACTIVE
-      - DELETED
-      x-ms-enum:
-        name: Status_AtlasRelationship
-        modelAsString: true
-    AtlasGlossary_2:
-      type: object
-      title: AtlasGlossary
-      properties:
-        categories:
-          type: array
-          description: An array of categories.
-          items:
-            $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
-        language:
-          type: string
-          description: The language of the glossary.
-        terms:
-          type: array
-          description: An array of related term headers.
-          items:
-            $ref: '#/components/schemas/AtlasRelatedTermHeader_2'
-        usage:
-          type: string
-          description: The usage of the glossary.
+          type: object
+          additionalProperties: {}
       allOf:
-      - $ref: '#/components/schemas/AtlasGlossaryBaseObject_2'
-      description: The glossary object.
-    RelatedCategoryHeaders:
+      - $ref: '#/components/schemas/AtlasObjectId'
+      title: PurviewObjectId
+    AtlasObjectId_2:
       type: object
-      description: An array of related categories.
-      additionalProperties:
-        type: array
-        items:
-          $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
-    AtlasGlossaryCategory_2:
-      type: object
-      title: AtlasGlossaryCategory
       properties:
-        anchor:
-          $ref: '#/components/schemas/AtlasGlossaryHeader'
-        childrenCategories:
-          type: array
-          description: An array of children categories.
-          items:
-            $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
-        parentCategory:
-          $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
-        terms:
-          type: array
-          description: An array of related term headers.
-          items:
-            $ref: '#/components/schemas/AtlasRelatedTermHeader_2'
-      allOf:
-      - $ref: '#/components/schemas/AtlasGlossaryBaseObject_2'
-      description: The glossary category.
-    Status_2:
-      type: string
-      title: Status
-      description: Status of the entity - can be active or deleted. Deleted entities are not removed.
-      enum:
-      - ACTIVE
-      - DELETED
-      x-ms-enum:
-        name: Status
-        modelAsString: true
+        guid:
+          type: string
+          description: The GUID of the object.
+        typeName:
+          type: string
+          description: The name of the type.
+        uniqueAttributes:
+          type: object
+          description: The unique attributes of the object.
+          additionalProperties: {}
+      title: AtlasObjectId
+      description: Reference to an object-instance of a type - like entity.
     AtlasRelatedTermHeader_2:
       type: object
       properties:
@@ -2023,6 +1977,13 @@ components:
           description: The GUID of the term.
       title: AtlasRelatedTermHeader
       description: The header of the related term.
+    RelatedTermHeaders:
+      type: object
+      description: An array of related glossary terms for the given glossary or an empty list.
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/AtlasRelatedTermHeader_2'
     AtlasGlossaryExtInfo_2:
       type: object
       title: AtlasGlossaryExtInfo
@@ -2040,6 +2001,36 @@ components:
       allOf:
       - $ref: '#/components/schemas/AtlasGlossary_2'
       description: The extended information of glossary.
+    AtlasClassification_2:
+      type: object
+      title: AtlasClassification
+      properties:
+        entityGuid:
+          type: string
+          description: The GUID of the entity.
+        entityStatus:
+          $ref: '#/components/schemas/Status_2'
+        removePropagationsOnEntityDelete:
+          type: boolean
+          description: Determines if propagations will be removed on entity deletion.
+        validityPeriods:
+          type: array
+          description: An array of time boundaries indicating validity periods.
+          items:
+            $ref: '#/components/schemas/TimeBoundary'
+      allOf:
+      - $ref: '#/components/schemas/AtlasStruct'
+      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
+    Status_2:
+      type: string
+      title: Status
+      description: Status of the entity - can be active or deleted. Deleted entities are not removed.
+      enum:
+      - ACTIVE
+      - DELETED
+      x-ms-enum:
+        name: Status
+        modelAsString: true
     AtlasRelatedObjectId_2:
       type: object
       title: AtlasRelatedObjectId
@@ -2061,66 +2052,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/AtlasObjectId_2'
       description: Reference to an object-instance of AtlasEntity type used in relationship attribute values
-    AtlasClassification_2:
-      type: object
-      title: AtlasClassification
-      properties:
-        entityGuid:
-          type: string
-          description: The GUID of the entity.
-        entityStatus:
-          $ref: '#/components/schemas/Status_2'
-        removePropagationsOnEntityDelete:
-          type: boolean
-          description: Determines if propagations will be removed on entity deletion.
-        validityPeriods:
-          type: array
-          description: An array of time boundaries indicating validity periods.
-          items:
-            $ref: '#/components/schemas/TimeBoundary'
-      allOf:
-      - $ref: '#/components/schemas/AtlasStruct'
-      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
-    AtlasGlossaryBaseObject_2:
-      type: object
-      title: AtlasGlossaryBaseObject
-      properties:
-        classifications:
-          type: array
-          description: An array of classifications.
-          items:
-            $ref: '#/components/schemas/AtlasClassification_2'
-        longDescription:
-          type: string
-          description: The long version description.
-        name:
-          type: string
-          description: The name of the glossary object.
-        qualifiedName:
-          type: string
-          description: The qualified name of the glossary object.
-        shortDescription:
-          type: string
-          description: The short version of description.
-        lastModifiedTS:
-          $ref: '#/components/schemas/LastModifiedTS'
-        createTime:
-          type: integer
-          format: int64
-          description: The created time of the record.
-        createdBy:
-          type: string
-          description: The user who created the record.
-        updateTime:
-          type: integer
-          format: int64
-          description: The update time of the record.
-        updatedBy:
-          type: string
-          description: The user who updated the record.
-      allOf:
-      - $ref: '#/components/schemas/AtlasBaseModelObject'
-      description: The glossary base object.
     AtlasGlossaryTerm_2:
       type: object
       title: AtlasGlossaryTerm
@@ -2244,46 +2175,98 @@ components:
       allOf:
       - $ref: '#/components/schemas/AtlasGlossaryBaseObject_2'
       description: The glossary term.
-    AtlasObjectId_2:
+    AtlasGlossaryBaseObject_2:
       type: object
+      title: AtlasGlossaryBaseObject
       properties:
-        guid:
+        classifications:
+          type: array
+          description: An array of classifications.
+          items:
+            $ref: '#/components/schemas/AtlasClassification_2'
+        longDescription:
           type: string
-          description: The GUID of the object.
-        typeName:
+          description: The long version description.
+        name:
           type: string
-          description: The name of the type.
-        uniqueAttributes:
-          type: object
-          description: The unique attributes of the object.
-          additionalProperties: {}
-      title: AtlasObjectId
-      description: Reference to an object-instance of a type - like entity.
-    RelatedTermHeaders:
+          description: The name of the glossary object.
+        qualifiedName:
+          type: string
+          description: The qualified name of the glossary object.
+        shortDescription:
+          type: string
+          description: The short version of description.
+        lastModifiedTS:
+          $ref: '#/components/schemas/LastModifiedTS'
+        createTime:
+          type: integer
+          format: int64
+          description: The created time of the record.
+        createdBy:
+          type: string
+          description: The user who created the record.
+        updateTime:
+          type: integer
+          format: int64
+          description: The update time of the record.
+        updatedBy:
+          type: string
+          description: The user who updated the record.
+      allOf:
+      - $ref: '#/components/schemas/AtlasBaseModelObject'
+      description: The glossary base object.
+    RelatedCategoryHeaders:
       type: object
-      description: An array of related glossary terms for the given glossary or an empty list.
+      description: An array of related categories.
       additionalProperties:
         type: array
         items:
-          $ref: '#/components/schemas/AtlasRelatedTermHeader_2'
+          $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
+    AtlasGlossary_2:
+      type: object
+      title: AtlasGlossary
+      properties:
+        categories:
+          type: array
+          description: An array of categories.
+          items:
+            $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
+        language:
+          type: string
+          description: The language of the glossary.
+        terms:
+          type: array
+          description: An array of related term headers.
+          items:
+            $ref: '#/components/schemas/AtlasRelatedTermHeader_2'
+        usage:
+          type: string
+          description: The usage of the glossary.
+      allOf:
+      - $ref: '#/components/schemas/AtlasGlossaryBaseObject_2'
+      description: The glossary object.
+    AtlasGlossaryCategory_2:
+      type: object
+      title: AtlasGlossaryCategory
+      properties:
+        anchor:
+          $ref: '#/components/schemas/AtlasGlossaryHeader'
+        childrenCategories:
+          type: array
+          description: An array of children categories.
+          items:
+            $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
+        parentCategory:
+          $ref: '#/components/schemas/AtlasRelatedCategoryHeader'
+        terms:
+          type: array
+          description: An array of related term headers.
+          items:
+            $ref: '#/components/schemas/AtlasRelatedTermHeader_2'
+      allOf:
+      - $ref: '#/components/schemas/AtlasGlossaryBaseObject_2'
+      description: The glossary category.
   parameters:
-    purviewAPIVersion:
-      name: api-version
-      description: Version of Purview APIs
-      in: query
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ignoreTermsAndCategories:
-      name: ignoreTermsAndCategories
-      description: Whether ignore terms and categories
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
-        default: false
     operationGuid:
       name: operationGuid
       in: path
@@ -2294,9 +2277,120 @@ components:
         type: string
         maxLength: 4096
         minLength: 1
+    includeRichTextFlag:
+      name: includeRichTextFlag
+      description: Whether include rich text for term export
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
+        default: false
+    termGuid:
+      name: termGuid
+      in: path
+      description: The globally unique identifier for glossary term.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    extInfo:
+      name: extInfo
+      description: Whether include extended information like contact display name and attribute values
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
+        default: false
+    categoryGuid:
+      name: categoryGuid
+      description: The globally unique identifier of the category.
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    purviewAPIVersion:
+      name: api-version
+      description: Version of Purview APIs
+      in: query
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    glossaryGuid:
+      name: glossaryGuid
+      in: path
+      description: The globally unique identifier for glossary.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    sort:
+      name: sort
+      description: The sort order, ASC (default) or DESC.
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        default: ASC
+    ignoreTermsAndCategories:
+      name: ignoreTermsAndCategories
+      description: Whether ignore terms and categories
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
+        default: false
+    forceDeleteChild:
+      name: forceDeleteChild
+      description: Whether delete child terms together with the parent term
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
+        default: false
     limit:
       name: limit
       description: The page size - by default there is no paging.
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+    glossaryName:
+      name: glossaryName
+      in: path
+      description: The name of the glossary.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    includeTermHierarchy:
+      name: includeTermHierarchy
+      description: Whether include term hierarchy
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
+        default: false
+    offset:
+      name: offset
+      description: The offset for pagination purpose.
       in: query
       required: false
       x-ms-parameter-location: method
@@ -2315,44 +2409,6 @@ components:
         type: array
         items:
           type: string
-    sort:
-      name: sort
-      description: The sort order, ASC (default) or DESC.
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        default: ASC
-    offset:
-      name: offset
-      description: The offset for pagination purpose.
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-    categoryGuid:
-      name: categoryGuid
-      description: The globally unique identifier of the category.
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 4096
-        minLength: 1
-    glossaryGuid:
-      name: glossaryGuid
-      in: path
-      description: The globally unique identifier for glossary.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 4096
-        minLength: 1
     includeMultiTemplates:
       name: includeMultiTemplates
       description: Whether include multi term templates for term import/export
@@ -2362,65 +2418,9 @@ components:
       schema:
         type: boolean
         default: false
-    glossaryName:
-      name: glossaryName
-      in: path
-      description: The name of the glossary.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 4096
-        minLength: 1
     forceDeleteEntityAssignment:
       name: forceDeleteEntityAssignment
       description: Whether delete entity assignment
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
-        default: false
-    forceDeleteChild:
-      name: forceDeleteChild
-      description: Whether delete child terms together with the parent term
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
-        default: false
-    extInfo:
-      name: extInfo
-      description: Whether include extended information like contact display name and attribute values
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
-        default: false
-    termGuid:
-      name: termGuid
-      in: path
-      description: The globally unique identifier for glossary term.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 4096
-        minLength: 1
-    includeRichTextFlag:
-      name: includeRichTextFlag
-      description: Whether include rich text for term export
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
-        default: false
-    includeTermHierarchy:
-      name: includeTermHierarchy
-      description: Whether include term hierarchy
       in: query
       required: false
       x-ms-parameter-location: method

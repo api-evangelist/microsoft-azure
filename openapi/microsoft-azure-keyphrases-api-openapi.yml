@@ -59,21 +59,6 @@ paths:
       - keyPhrases
 components:
   schemas:
-    DocumentStatistics:
-      type: object
-      required:
-      - charactersCount
-      - transactionsCount
-      properties:
-        charactersCount:
-          type: integer
-          format: int32
-          description: Number of text elements recognized in the document.
-        transactionsCount:
-          type: integer
-          format: int32
-          description: Number of transactions for the document.
-      description: if showStats=true was specified in the request this field will contain information about the document payload.
     ErrorResponse:
       type: object
       required:
@@ -106,6 +91,42 @@ components:
         statistics:
           description: if showStats=true was specified in the request this field will contain information about the document payload.
           $ref: '#/components/schemas/DocumentStatistics'
+    DocumentStatistics:
+      type: object
+      required:
+      - charactersCount
+      - transactionsCount
+      properties:
+        charactersCount:
+          type: integer
+          format: int32
+          description: Number of text elements recognized in the document.
+        transactionsCount:
+          type: integer
+          format: int32
+          description: Number of transactions for the document.
+      description: if showStats=true was specified in the request this field will contain information about the document payload.
+    TextAnalyticsWarning:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          enum:
+          - LongWordsInDocument
+          - DocumentTruncated
+          x-ms-enum:
+            name: WarningCodeValue
+            modelAsString: true
+          description: Error code.
+        message:
+          type: string
+          description: Warning message.
+        targetRef:
+          type: string
+          description: A JSON pointer reference indicating the target object.
     InnerError:
       type: object
       required:
@@ -142,51 +163,28 @@ components:
         innererror:
           $ref: '#/components/schemas/InnerError'
           description: Inner error contains more specific information.
-    TextAnalyticsWarning:
-      type: object
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: string
-          enum:
-          - LongWordsInDocument
-          - DocumentTruncated
-          x-ms-enum:
-            name: WarningCodeValue
-            modelAsString: true
-          description: Error code.
-        message:
-          type: string
-          description: Warning message.
-        targetRef:
-          type: string
-          description: A JSON pointer reference indicating the target object.
-    DocumentError:
-      type: object
-      required:
-      - id
-      - error
-      properties:
-        id:
-          type: string
-          description: Document Id.
-        error:
-          type: object
-          description: Document Error.
-          $ref: '#/components/schemas/TextAnalyticsError'
-    MultiLanguageBatchInput:
+    KeyPhraseResult:
       type: object
       required:
       - documents
+      - errors
+      - modelVersion
       properties:
         documents:
           type: array
-          description: The set of documents to process as part of this batch.
+          description: Response by document
           items:
-            $ref: '#/components/schemas/MultiLanguageInput'
-      description: Contains a set of input documents to be analyzed by the service.
+            $ref: '#/components/schemas/DocumentKeyPhrases'
+        errors:
+          type: array
+          description: Errors by document id.
+          items:
+            $ref: '#/components/schemas/DocumentError'
+        statistics:
+          $ref: '#/components/schemas/RequestStatistics'
+        modelVersion:
+          type: string
+          description: This field indicates which model is used for scoring.
     RequestStatistics:
       type: object
       required:
@@ -212,6 +210,33 @@ components:
           format: int64
           description: Number of transactions for the request.
       description: if showStats=true was specified in the request this field will contain information about the request payload.
+    MultiLanguageInput:
+      type: object
+      required:
+      - id
+      - text
+      properties:
+        id:
+          type: string
+          description: A unique, non-empty document identifier.
+        text:
+          type: string
+          description: The input text to process.
+        language:
+          type: string
+          description: (Optional) This is the 2 letter ISO 639-1 representation of a language. For example, use "en" for English; "es" for Spanish etc. If not set, use "en" for English as default.
+      description: Contains an input document to be analyzed by the service.
+    MultiLanguageBatchInput:
+      type: object
+      required:
+      - documents
+      properties:
+        documents:
+          type: array
+          description: The set of documents to process as part of this batch.
+          items:
+            $ref: '#/components/schemas/MultiLanguageInput'
+      description: Contains a set of input documents to be analyzed by the service.
     TextAnalyticsError:
       type: object
       required:
@@ -244,44 +269,19 @@ components:
           description: Details about specific errors that led to this reported error.
           items:
             $ref: '#/components/schemas/TextAnalyticsError'
-    KeyPhraseResult:
-      type: object
-      required:
-      - documents
-      - errors
-      - modelVersion
-      properties:
-        documents:
-          type: array
-          description: Response by document
-          items:
-            $ref: '#/components/schemas/DocumentKeyPhrases'
-        errors:
-          type: array
-          description: Errors by document id.
-          items:
-            $ref: '#/components/schemas/DocumentError'
-        statistics:
-          $ref: '#/components/schemas/RequestStatistics'
-        modelVersion:
-          type: string
-          description: This field indicates which model is used for scoring.
-    MultiLanguageInput:
+    DocumentError:
       type: object
       required:
       - id
-      - text
+      - error
       properties:
         id:
           type: string
-          description: A unique, non-empty document identifier.
-        text:
-          type: string
-          description: The input text to process.
-        language:
-          type: string
-          description: (Optional) This is the 2 letter ISO 639-1 representation of a language. For example, use "en" for English; "es" for Spanish etc. If not set, use "en" for English as default.
-      description: Contains an input document to be analyzed by the service.
+          description: Document Id.
+        error:
+          type: object
+          description: Document Error.
+          $ref: '#/components/schemas/TextAnalyticsError'
   parameters:
     ModelVersion:
       name: model-version

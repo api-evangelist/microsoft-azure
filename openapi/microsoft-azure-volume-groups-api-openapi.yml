@@ -329,39 +329,51 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    smbNonBrowsable:
-      title: smbNonBrowsable
-      type: string
-      description: Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume
-      enum:
-      - Disabled
-      - Enabled
-      x-ms-enum:
-        name: smbNonBrowsable
-        modelAsString: true
-        values:
-        - value: Disabled
-          description: smbNonBrowsable share setting is disabled
-        - value: Enabled
-          description: smbNonBrowsable share setting is enabled
-      example: Enabled
-    remotePath:
-      description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
+    replicationObject:
+      description: Replication properties
       type: object
       required:
-      - externalHostName
-      - serverName
-      - volumeName
+      - remoteVolumeResourceId
       properties:
-        externalHostName:
+        replicationId:
           type: string
-          description: The Path to a ONTAP Host
-        serverName:
+          description: Id
+          readOnly: true
+        endpointType:
           type: string
-          description: The name of a server on the ONTAP Host
-        volumeName:
+          description: Indicates whether the local volume is the source or destination for the Volume Replication
+          enum:
+          - src
+          - dst
+          x-ms-enum:
+            name: EndpointType
+            modelAsString: true
+        replicationSchedule:
           type: string
-          description: The name of a volume on the server
+          description: Schedule
+          enum:
+          - _10minutely
+          - hourly
+          - daily
+          x-ms-enum:
+            name: ReplicationSchedule
+            modelAsString: true
+        remoteVolumeResourceId:
+          type: string
+          description: The resource ID of the remote volume. Required for cross region and cross zone replication
+          x-ms-mutability:
+          - read
+          - create
+        remotePath:
+          description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
+          type: object
+          $ref: '#/components/schemas/remotePath'
+          x-ms-mutability:
+          - read
+          - create
+        remoteVolumeRegion:
+          type: string
+          description: The remote region for the other end of the Volume Replication.
     volumeProperties:
       description: Volume properties
       type: object
@@ -770,147 +782,66 @@ components:
           format: int64
           description: Space shared by short term clone volume with parent volume in bytes.
           readOnly: true
-    volumeRelocationProperties:
-      description: Volume relocation properties
-      type: object
-      properties:
-        relocationRequested:
-          type: boolean
-          description: Has relocation been requested for this volume
-        readyToBeFinalized:
-          type: boolean
-          readOnly: true
-          description: Has relocation finished and is ready to be cleaned up
-    volumeGroupListProperties:
+    volumeGroupMetaData:
       description: Volume group properties
       type: object
       properties:
-        provisioningState:
+        groupDescription:
           type: string
-          description: Azure lifecycle management
-          example: Available
-          readOnly: true
-        groupMetaData:
-          title: groupMetaData
-          description: Volume group details
-          type: object
-          $ref: '#/components/schemas/volumeGroupMetaData'
-    volumeGroupDetails:
-      description: Volume group resource for create
-      type: object
-      properties:
-        location:
+          description: Group Description
+          example: group description
+        applicationType:
           type: string
-          description: Resource location
-          x-ms-mutability:
-          - read
-          - create
-        id:
-          type: string
-          readOnly: true
-          description: Resource Id
-        name:
-          type: string
-          readOnly: true
-          description: Resource name
-        type:
-          type: string
-          readOnly: true
-          description: Resource type
-        properties:
-          description: Volume group properties
-          $ref: '#/components/schemas/volumeGroupProperties'
-          x-ms-client-flatten: true
-    volumeGroup:
-      description: Volume group resource
-      type: object
-      properties:
-        location:
-          type: string
-          description: Resource location
-          x-ms-mutability:
-          - read
-          - create
-        id:
-          type: string
-          readOnly: true
-          description: Resource Id
-        name:
-          type: string
-          readOnly: true
-          description: Resource name
-        type:
-          type: string
-          readOnly: true
-          description: Resource type
-        properties:
-          description: Volume group properties
-          $ref: '#/components/schemas/volumeGroupListProperties'
-          x-ms-client-flatten: true
-    replicationObject:
-      description: Replication properties
-      type: object
-      required:
-      - remoteVolumeResourceId
-      properties:
-        replicationId:
-          type: string
-          description: Id
-          readOnly: true
-        endpointType:
-          type: string
-          description: Indicates whether the local volume is the source or destination for the Volume Replication
+          description: Application Type
           enum:
-          - src
-          - dst
+          - SAP-HANA
+          - ORACLE
           x-ms-enum:
-            name: EndpointType
+            name: ApplicationType
             modelAsString: true
-        replicationSchedule:
+          example: SAP-HANA
+        applicationIdentifier:
           type: string
-          description: Schedule
-          enum:
-          - _10minutely
-          - hourly
-          - daily
-          x-ms-enum:
-            name: ReplicationSchedule
-            modelAsString: true
-        remoteVolumeResourceId:
-          type: string
-          description: The resource ID of the remote volume. Required for cross region and cross zone replication
-          x-ms-mutability:
-          - read
-          - create
-        remotePath:
-          description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
-          type: object
-          $ref: '#/components/schemas/remotePath'
-          x-ms-mutability:
-          - read
-          - create
-        remoteVolumeRegion:
-          type: string
-          description: The remote region for the other end of the Volume Replication.
-    volumeGroupProperties:
-      description: Volume group properties
-      type: object
-      properties:
-        provisioningState:
-          type: string
-          description: Azure lifecycle management
-          example: Available
-          readOnly: true
-        groupMetaData:
-          title: groupMetaData
-          description: Volume group details
-          type: object
-          $ref: '#/components/schemas/volumeGroupMetaData'
-        volumes:
-          description: List of volumes from group
+          description: Application specific identifier
+          example: SH1
+        globalPlacementRules:
+          title: Global volume placement rules
+          description: Application specific placement rules for the volume group
           type: array
           items:
-            $ref: '#/components/schemas/volumeGroupVolumeProperties'
+            $ref: '#/components/schemas/placementKeyValuePairs'
+          x-ms-identifiers:
+          - key
+        volumesCount:
+          type: integer
+          format: int64
+          description: Number of volumes in volume group
+          example: 5
+          readOnly: true
+    volumeGroupList:
+      description: List of volume group resources
+      type: object
+      properties:
+        value:
+          description: List of volume Groups
+          type: array
+          items:
+            $ref: '#/components/schemas/volumeGroup'
+    placementKeyValuePairs:
+      description: Application specific parameters for the placement of volumes in the volume group
+      type: object
+      required:
+      - key
+      - value
+      properties:
+        key:
+          type: string
+          description: Key for an application specific parameter for the placement of volumes in the volume group
+          example: key1
+        value:
+          type: string
+          description: Value for an application specific parameter for the placement of volumes in the volume group
+          example: value1
     exportPolicyRule:
       description: Volume Export Policy Rule
       type: object
@@ -982,67 +913,23 @@ components:
           x-ms-enum:
             name: ChownMode
             modelAsString: true
-    coolAccessRetrievalPolicy:
-      type: string
-      description: "coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are: \n Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.\n OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.\n Never - No client-driven data is pulled from cool tier to standard storage."
-      enum:
-      - Default
-      - OnRead
-      - Never
-      x-ms-enum:
-        name: coolAccessRetrievalPolicy
-        modelAsString: true
-    volumeGroupMetaData:
-      description: Volume group properties
-      type: object
-      properties:
-        groupDescription:
-          type: string
-          description: Group Description
-          example: group description
-        applicationType:
-          type: string
-          description: Application Type
-          enum:
-          - SAP-HANA
-          - ORACLE
-          x-ms-enum:
-            name: ApplicationType
-            modelAsString: true
-          example: SAP-HANA
-        applicationIdentifier:
-          type: string
-          description: Application specific identifier
-          example: SH1
-        globalPlacementRules:
-          title: Global volume placement rules
-          description: Application specific placement rules for the volume group
-          type: array
-          items:
-            $ref: '#/components/schemas/placementKeyValuePairs'
-          x-ms-identifiers:
-          - key
-        volumesCount:
-          type: integer
-          format: int64
-          description: Number of volumes in volume group
-          example: 5
-          readOnly: true
-    placementKeyValuePairs:
-      description: Application specific parameters for the placement of volumes in the volume group
+    remotePath:
+      description: The full path to a volume that is to be migrated into ANF. Required for Migration volumes
       type: object
       required:
-      - key
-      - value
+      - externalHostName
+      - serverName
+      - volumeName
       properties:
-        key:
+        externalHostName:
           type: string
-          description: Key for an application specific parameter for the placement of volumes in the volume group
-          example: key1
-        value:
+          description: The Path to a ONTAP Host
+        serverName:
           type: string
-          description: Value for an application specific parameter for the placement of volumes in the volume group
-          example: value1
+          description: The name of a server on the ONTAP Host
+        volumeName:
+          type: string
+          description: The name of a volume on the server
     volumeBackupProperties:
       description: Volume Backup Properties
       type: object
@@ -1059,49 +946,31 @@ components:
         backupVaultId:
           type: string
           description: Backup Vault Resource ID
-    volumeGroupList:
-      description: List of volume group resources
+    volumeGroupListProperties:
+      description: Volume group properties
       type: object
       properties:
-        value:
-          description: List of volume Groups
-          type: array
-          items:
-            $ref: '#/components/schemas/volumeGroup'
-    mountTargetProperties:
-      description: Mount target properties
+        provisioningState:
+          type: string
+          description: Azure lifecycle management
+          example: Available
+          readOnly: true
+        groupMetaData:
+          title: groupMetaData
+          description: Volume group details
+          type: object
+          $ref: '#/components/schemas/volumeGroupMetaData'
+    volumeRelocationProperties:
+      description: Volume relocation properties
       type: object
-      required:
-      - fileSystemId
       properties:
-        mountTargetId:
-          title: mountTargetId
-          type: string
+        relocationRequested:
+          type: boolean
+          description: Has relocation been requested for this volume
+        readyToBeFinalized:
+          type: boolean
           readOnly: true
-          description: UUID v4 used to identify the MountTarget
-          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
-          maxLength: 36
-          minLength: 36
-          example: 9760acf5-4638-11e7-9bdb-020073ca3333
-        fileSystemId:
-          title: fileSystemId
-          type: string
-          description: UUID v4 used to identify the MountTarget
-          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
-          maxLength: 36
-          minLength: 36
-          example: 9760acf5-4638-11e7-9bdb-020073ca3333
-        ipAddress:
-          title: ipAddress
-          description: The mount target's IPv4 address
-          type: string
-          readOnly: true
-          example: 1.2.3.4
-        smbServerFqdn:
-          title: smbServerFQDN
-          description: The SMB server's Fully Qualified Domain Name, FQDN
-          type: string
-          example: fullyqualified.domainname.com
+          description: Has relocation finished and is ready to be cleaned up
     volumeSnapshotProperties:
       description: Volume Snapshot Properties
       type: object
@@ -1109,6 +978,32 @@ components:
         snapshotPolicyId:
           type: string
           description: Snapshot Policy ResourceId
+    volumeGroupDetails:
+      description: Volume group resource for create
+      type: object
+      properties:
+        location:
+          type: string
+          description: Resource location
+          x-ms-mutability:
+          - read
+          - create
+        id:
+          type: string
+          readOnly: true
+          description: Resource Id
+        name:
+          type: string
+          readOnly: true
+          description: Resource name
+        type:
+          type: string
+          readOnly: true
+          description: Resource type
+        properties:
+          description: Volume group properties
+          $ref: '#/components/schemas/volumeGroupProperties'
+          x-ms-client-flatten: true
     volumeGroupVolumeProperties:
       description: Volume resource
       type: object
@@ -1145,24 +1040,74 @@ components:
           description: Volume properties
           $ref: '#/components/schemas/volumeProperties'
           x-ms-client-flatten: true
-    smbAccessBasedEnumeration:
-      title: smbAccessBasedEnumeration
-      type:
-      - string
-      - 'null'
-      description: Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume
+    coolAccessRetrievalPolicy:
+      type: string
+      description: "coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are: \n Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.\n OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.\n Never - No client-driven data is pulled from cool tier to standard storage."
       enum:
-      - Disabled
-      - Enabled
+      - Default
+      - OnRead
+      - Never
       x-ms-enum:
-        name: smbAccessBasedEnumeration
+        name: coolAccessRetrievalPolicy
         modelAsString: true
-        values:
-        - value: Disabled
-          description: smbAccessBasedEnumeration share setting is disabled
-        - value: Enabled
-          description: smbAccessBasedEnumeration share setting is enabled
-      example: Enabled
+    volumeGroupProperties:
+      description: Volume group properties
+      type: object
+      properties:
+        provisioningState:
+          type: string
+          description: Azure lifecycle management
+          example: Available
+          readOnly: true
+        groupMetaData:
+          title: groupMetaData
+          description: Volume group details
+          type: object
+          $ref: '#/components/schemas/volumeGroupMetaData'
+        volumes:
+          description: List of volumes from group
+          type: array
+          items:
+            $ref: '#/components/schemas/volumeGroupVolumeProperties'
+    mountTargetProperties:
+      description: Mount target properties
+      type: object
+      required:
+      - fileSystemId
+      properties:
+        mountTargetId:
+          title: mountTargetId
+          type: string
+          readOnly: true
+          description: UUID v4 used to identify the MountTarget
+          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
+          maxLength: 36
+          minLength: 36
+          example: 9760acf5-4638-11e7-9bdb-020073ca3333
+        fileSystemId:
+          title: fileSystemId
+          type: string
+          description: UUID v4 used to identify the MountTarget
+          pattern: ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$
+          maxLength: 36
+          minLength: 36
+          example: 9760acf5-4638-11e7-9bdb-020073ca3333
+        ipAddress:
+          title: ipAddress
+          description: The mount target's IPv4 address
+          type: string
+          readOnly: true
+          example: 1.2.3.4
+        smbServerFqdn:
+          title: smbServerFQDN
+          description: The SMB server's Fully Qualified Domain Name, FQDN
+          type: string
+          example: fullyqualified.domainname.com
+    resourceTags:
+      type: object
+      additionalProperties:
+        type: string
+      description: Tags are a list of key-value pairs that describe the resource
     serviceLevel:
       title: serviceLevel
       type: string
@@ -1185,6 +1130,50 @@ components:
           description: Ultra service level
         - value: StandardZRS
           description: Zone redundant storage service level
+    volumeGroup:
+      description: Volume group resource
+      type: object
+      properties:
+        location:
+          type: string
+          description: Resource location
+          x-ms-mutability:
+          - read
+          - create
+        id:
+          type: string
+          readOnly: true
+          description: Resource Id
+        name:
+          type: string
+          readOnly: true
+          description: Resource name
+        type:
+          type: string
+          readOnly: true
+          description: Resource type
+        properties:
+          description: Volume group properties
+          $ref: '#/components/schemas/volumeGroupListProperties'
+          x-ms-client-flatten: true
+    smbAccessBasedEnumeration:
+      title: smbAccessBasedEnumeration
+      type:
+      - string
+      - 'null'
+      description: Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume
+      enum:
+      - Disabled
+      - Enabled
+      x-ms-enum:
+        name: smbAccessBasedEnumeration
+        modelAsString: true
+        values:
+        - value: Disabled
+          description: smbAccessBasedEnumeration share setting is disabled
+        - value: Enabled
+          description: smbAccessBasedEnumeration share setting is enabled
+      example: Enabled
     networkFeatures:
       title: Network features
       description: Network features available to the volume, or current state of update.
@@ -1208,56 +1197,38 @@ components:
           description: Updating from Standard to Basic network features.
       example: Standard
       default: Basic
-    resourceTags:
-      type: object
-      additionalProperties:
-        type: string
-      description: Tags are a list of key-value pairs that describe the resource
-    EncryptionType:
+    smbNonBrowsable:
+      title: smbNonBrowsable
       type: string
-      description: The type of key used to encrypt the data of the disk.
+      description: Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume
       enum:
-      - EncryptionAtRestWithPlatformKey
+      - Disabled
+      - Enabled
       x-ms-enum:
-        name: EncryptionType
+        name: smbNonBrowsable
         modelAsString: true
         values:
-        - value: EncryptionAtRestWithPlatformKey
-          description: Volume is encrypted at rest with Platform managed key. It is the default encryption type.
-    ErrorResponse:
+        - value: Disabled
+          description: smbNonBrowsable share setting is disabled
+        - value: Enabled
+          description: smbNonBrowsable share setting is enabled
+      example: Enabled
+    NetworkRuleSet:
       type: object
       properties:
-        code:
-          readOnly: true
-          type: string
-          description: The error code.
-        message:
-          readOnly: true
-          type: string
-          description: The error message.
-        target:
-          readOnly: true
-          type: string
-          description: The error target.
-        details:
-          readOnly: true
+        virtualNetworkRules:
           type: array
           items:
-            $ref: '#/components/schemas/ErrorResponse'
-          x-ms-identifiers: []
-          description: The error details.
-        additionalInfo:
-          readOnly: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorAdditionalInfo'
-          x-ms-identifiers: []
-          description: The error additional info.
-      description: The resource management error response.
-    VolumeGroupUpdateProperties:
+            $ref: '#/components/schemas/VirtualNetworkRule'
+          description: The list of virtual network rules.
+      description: A set of rules governing the network accessibility.
+    VolumeGroupProperties:
       type: object
       description: VolumeGroup response properties.
       properties:
+        provisioningState:
+          description: State of the operation on the resource.
+          $ref: '#/components/schemas/ProvisioningState'
         protocolType:
           description: Type of storage target
           $ref: '#/components/schemas/StorageTargetType'
@@ -1277,6 +1248,60 @@ components:
         error:
           description: RP error response.
           $ref: '#/components/schemas/ErrorResponse'
+    ErrorAdditionalInfo:
+      description: The resource management error additional info.
+      type: object
+      x-ms-identifiers: []
+      properties:
+        type:
+          readOnly: true
+          type: string
+          description: The additional info type.
+        info:
+          readOnly: true
+          type: object
+          description: The additional info.
+    VolumeGroupList:
+      type: object
+      required:
+      - value
+      description: List of Volume Groups
+      additionalProperties: false
+      properties:
+        value:
+          description: An array of Volume Groups objects.
+          type: array
+          items:
+            $ref: '#/components/schemas/VolumeGroup'
+        nextLink:
+          description: URI to fetch the next section of the paginated response.
+          type: string
+          readOnly: true
+    StorageTargetType:
+      type: string
+      enum:
+      - Iscsi
+      - None
+      x-ms-enum:
+        name: StorageTargetType
+        modelAsString: true
+      description: Storage Target type.
+    ProvisioningState:
+      type: string
+      enum:
+      - Invalid
+      - Succeeded
+      - Failed
+      - Canceled
+      - Pending
+      - Creating
+      - Updating
+      - Deleting
+      x-ms-enum:
+        name: ProvisioningStates
+        modelAsString: true
+      description: Provisioning state of the iSCSI Target.
+      readOnly: true
     VirtualNetworkRule:
       type: object
       properties:
@@ -1309,28 +1334,60 @@ components:
       required:
       - id
       description: Virtual Network rule.
-    ErrorAdditionalInfo:
-      description: The resource management error additional info.
+    VolumeGroupUpdate:
       type: object
-      x-ms-identifiers: []
+      description: Volume Group request.
       properties:
-        type:
+        properties:
+          x-ms-client-flatten: true
+          description: Properties of VolumeGroup.
+          $ref: '#/components/schemas/VolumeGroupUpdateProperties'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags.
+    ErrorResponse:
+      type: object
+      properties:
+        code:
           readOnly: true
           type: string
-          description: The additional info type.
-        info:
+          description: The error code.
+        message:
           readOnly: true
-          type: object
-          description: The additional info.
-    NetworkRuleSet:
-      type: object
-      properties:
-        virtualNetworkRules:
+          type: string
+          description: The error message.
+        target:
+          readOnly: true
+          type: string
+          description: The error target.
+        details:
+          readOnly: true
           type: array
           items:
-            $ref: '#/components/schemas/VirtualNetworkRule'
-          description: The list of virtual network rules.
-      description: A set of rules governing the network accessibility.
+            $ref: '#/components/schemas/ErrorResponse'
+          x-ms-identifiers: []
+          description: The error details.
+        additionalInfo:
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorAdditionalInfo'
+          x-ms-identifiers: []
+          description: The error additional info.
+      description: The resource management error response.
+    EncryptionType:
+      type: string
+      description: The type of key used to encrypt the data of the disk.
+      enum:
+      - EncryptionAtRestWithPlatformKey
+      x-ms-enum:
+        name: EncryptionType
+        modelAsString: true
+        values:
+        - value: EncryptionAtRestWithPlatformKey
+          description: Volume is encrypted at rest with Platform managed key. It is the default encryption type.
     Resource:
       type: object
       properties:
@@ -1353,6 +1410,22 @@ components:
             type: string
       description: The resource model definition.
       x-ms-azure-resource: true
+    VolumeGroupUpdateProperties:
+      type: object
+      description: VolumeGroup response properties.
+      properties:
+        protocolType:
+          description: Type of storage target
+          $ref: '#/components/schemas/StorageTargetType'
+        encryption:
+          description: Type of encryption
+          $ref: '#/components/schemas/EncryptionType'
+        networkAcls:
+          $ref: '#/components/schemas/NetworkRuleSet'
+          description: A collection of rules governing the accessibility from specific network locations.
+          x-ms-mutability:
+          - create
+          - read
     VolumeGroup:
       type: object
       description: Response for Volume Group request.
@@ -1367,79 +1440,6 @@ components:
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
       allOf:
       - $ref: '#/components/schemas/Resource'
-    ProvisioningState:
-      type: string
-      enum:
-      - Invalid
-      - Succeeded
-      - Failed
-      - Canceled
-      - Pending
-      - Creating
-      - Updating
-      - Deleting
-      x-ms-enum:
-        name: ProvisioningStates
-        modelAsString: true
-      description: Provisioning state of the iSCSI Target.
-      readOnly: true
-    VolumeGroupList:
-      type: object
-      required:
-      - value
-      description: List of Volume Groups
-      additionalProperties: false
-      properties:
-        value:
-          description: An array of Volume Groups objects.
-          type: array
-          items:
-            $ref: '#/components/schemas/VolumeGroup'
-        nextLink:
-          description: URI to fetch the next section of the paginated response.
-          type: string
-          readOnly: true
-    VolumeGroupProperties:
-      type: object
-      description: VolumeGroup response properties.
-      properties:
-        provisioningState:
-          description: State of the operation on the resource.
-          $ref: '#/components/schemas/ProvisioningState'
-        protocolType:
-          description: Type of storage target
-          $ref: '#/components/schemas/StorageTargetType'
-        encryption:
-          description: Type of encryption
-          $ref: '#/components/schemas/EncryptionType'
-        networkAcls:
-          $ref: '#/components/schemas/NetworkRuleSet'
-          description: A collection of rules governing the accessibility from specific network locations.
-          x-ms-mutability:
-          - create
-          - read
-    VolumeGroupUpdate:
-      type: object
-      description: Volume Group request.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Properties of VolumeGroup.
-          $ref: '#/components/schemas/VolumeGroupUpdateProperties'
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags.
-    StorageTargetType:
-      type: string
-      enum:
-      - Iscsi
-      - None
-      x-ms-enum:
-        name: StorageTargetType
-        modelAsString: true
-      description: Storage Target type.
   parameters:
     VolumeGroupName:
       name: volumeGroupName
@@ -1461,17 +1461,6 @@ components:
       schema:
         type: string
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
-    VolumeGroupNameParameter:
-      name: volumeGroupName
-      required: true
-      in: path
-      description: The name of the VolumeGroup.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 63
-        minLength: 3
-        pattern: ^[A-Za-z0-9]+((-|_)[a-z0-9A-Z]+)*$
     ElasticSanNameParameter:
       name: elasticSanName
       in: path
@@ -1494,6 +1483,17 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._]*[0-9A-Za-z]$
+    VolumeGroupNameParameter:
+      name: volumeGroupName
+      required: true
+      in: path
+      description: The name of the VolumeGroup.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 63
+        minLength: 3
+        pattern: ^[A-Za-z0-9]+((-|_)[a-z0-9A-Z]+)*$
   securitySchemes:
     azure_auth:
       type: oauth2

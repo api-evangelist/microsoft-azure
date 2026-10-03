@@ -453,22 +453,84 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
-    ExtendedProduct:
-      description: Extended description about the product required for installing it into Azure Stack.
+    ComputeRole:
+      description: Compute role type (IaaS or PaaS).
+      type: string
+      enum:
+      - None
+      - IaaS
+      - PaaS
+      x-ms-enum:
+        name: ComputeRole
+        modelAsString: true
+    IconUris:
+      description: Links to product icons.
       type: object
       properties:
-        galleryPackageBlobSasUri:
-          description: The URI to the .azpkg file that provides information required for showing product in the gallery.
+        large:
+          description: URI to large icon.
+          type: string
+        wide:
+          description: URI to wide icon.
+          type: string
+        medium:
+          description: URI to medium icon.
+          type: string
+        small:
+          description: URI to small icon.
+          type: string
+        hero:
+          description: URI to hero icon.
+          type: string
+    CompatibilityIssue:
+      description: Compatibility issue
+      type: string
+      enum:
+      - HigherDeviceVersionRequired
+      - LowerDeviceVersionRequired
+      - CapacityBillingModelRequired
+      - PayAsYouGoBillingModelRequired
+      - DevelopmentBillingModelRequired
+      - AzureADIdentitySystemRequired
+      - ADFSIdentitySystemRequired
+      - ConnectionToInternetRequired
+      - ConnectionToAzureRequired
+      - DisconnectedEnvironmentRequired
+      x-ms-enum:
+        name: CompatibilityIssue
+        modelAsString: true
+    ExtendedProductProperties:
+      description: Product information.
+      type: object
+      properties: {}
+      allOf:
+      - $ref: '#/components/schemas/VirtualMachineExtensionProductProperties'
+      - $ref: '#/components/schemas/VirtualMachineProductProperties'
+    VirtualMachineProductProperties:
+      description: Product information.
+      type: object
+      properties:
+        version:
+          description: Specifies product version.
           type: string
           readOnly: true
-        productKind:
-          description: Specifies the kind of the product (virtualMachine or virtualMachineExtension).
-          type: string
+        osDiskImage:
+          description: OS disk image used by product.
+          $ref: '#/components/schemas/OsDiskImage'
           readOnly: true
-        properties:
-          description: Specifies additional properties describing the product.
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ExtendedProductProperties'
+        dataDiskImages:
+          description: List of attached data disks.
+          type: array
+          items:
+            $ref: '#/components/schemas/DataDiskImage'
+          readOnly: true
+    Uri:
+      description: The URI.
+      type: object
+      properties:
+        uri:
+          description: The URI.
+          type: string
           readOnly: true
     ProductLog:
       description: Product action log.
@@ -517,52 +579,18 @@ components:
           description: Operation error details.
           type: string
           readOnly: true
-    Product:
-      description: Product information.
+    ProductList:
+      description: Pageable list of products.
       type: object
       properties:
-        properties:
-          description: Properties of the product resource.
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ProductNestedProperties'
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-      allOf:
-      - $ref: AzureStack.json#/definitions/Resource
-    DeviceConfiguration:
-      description: Device Configuration.
-      properties:
-        deviceVersion:
-          description: Version of the device.
+        nextLink:
+          description: URI to the next page.
           type: string
-          readOnly: true
-        identitySystem:
-          description: Identity system of the device.
-          enum:
-          - AzureAD
-          - ADFS
-          type: string
-          x-ms-enum:
-            name: category
-            modelAsString: true
-          readOnly: true
-    ComputeRole:
-      description: Compute role type (IaaS or PaaS).
-      type: string
-      enum:
-      - None
-      - IaaS
-      - PaaS
-      x-ms-enum:
-        name: ComputeRole
-        modelAsString: true
-    ProductProperties:
-      description: Additional properties of the product
-      type: object
-      properties:
-        version:
-          description: The version.
-          type: string
+        value:
+          description: List of products.
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
     MarketplaceProductLogUpdate:
       description: Update details for product log.
       properties:
@@ -582,16 +610,43 @@ components:
           description: Error details related to operation.
           type: string
           readOnly: true
-    ProductLink:
-      description: Link with additional information about a product.
+    DataDiskImage:
+      description: Data disk image.
       type: object
       properties:
-        displayName:
-          description: The description of the link.
+        lun:
+          description: The LUN.
+          type: integer
+          format: int32
+          readOnly: true
+        sourceBlobSasUri:
+          description: SAS key for source blob.
           type: string
-        uri:
-          description: The URI corresponding to the link.
+          readOnly: true
+    Product:
+      description: Product information.
+      type: object
+      properties:
+        properties:
+          description: Properties of the product resource.
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ProductNestedProperties'
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+      allOf:
+      - $ref: AzureStack.json#/definitions/Resource
+    OsDiskImage:
+      description: OS disk image.
+      type: object
+      properties:
+        operatingSystem:
+          description: OS operating system type.
+          $ref: '#/components/schemas/OperatingSystem'
+          readOnly: true
+        sourceBlobSasUri:
+          description: SAS key for source blob.
           type: string
+          readOnly: true
     VirtualMachineExtensionProductProperties:
       description: Product information.
       type: object
@@ -625,21 +680,33 @@ components:
           description: Indicates if virtual machine Scale Set is enabled in the specified product.
           type: boolean
           readOnly: true
-    ExtendedProductProperties:
-      description: Product information.
-      type: object
-      properties: {}
-      allOf:
-      - $ref: '#/components/schemas/VirtualMachineExtensionProductProperties'
-      - $ref: '#/components/schemas/VirtualMachineProductProperties'
-    Uri:
-      description: The URI.
+    ExtendedProduct:
+      description: Extended description about the product required for installing it into Azure Stack.
       type: object
       properties:
-        uri:
-          description: The URI.
+        galleryPackageBlobSasUri:
+          description: The URI to the .azpkg file that provides information required for showing product in the gallery.
           type: string
           readOnly: true
+        productKind:
+          description: Specifies the kind of the product (virtualMachine or virtualMachineExtension).
+          type: string
+          readOnly: true
+        properties:
+          description: Specifies additional properties describing the product.
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ExtendedProductProperties'
+          readOnly: true
+    OperatingSystem:
+      description: Operating system type (Windows or Linux).
+      type: string
+      enum:
+      - None
+      - Windows
+      - Linux
+      x-ms-enum:
+        name: OperatingSystem
+        modelAsString: true
     ProductNestedProperties:
       description: Properties portion of the product resource.
       type: object
@@ -701,18 +768,39 @@ components:
         compatibility:
           description: Product compatibility with current device.
           $ref: '#/components/schemas/Compatibility'
-    DataDiskImage:
-      description: Data disk image.
+    ProductLink:
+      description: Link with additional information about a product.
       type: object
       properties:
-        lun:
-          description: The LUN.
-          type: integer
-          format: int32
-          readOnly: true
-        sourceBlobSasUri:
-          description: SAS key for source blob.
+        displayName:
+          description: The description of the link.
           type: string
+        uri:
+          description: The URI corresponding to the link.
+          type: string
+    ProductProperties:
+      description: Additional properties of the product
+      type: object
+      properties:
+        version:
+          description: The version.
+          type: string
+    DeviceConfiguration:
+      description: Device Configuration.
+      properties:
+        deviceVersion:
+          description: Version of the device.
+          type: string
+          readOnly: true
+        identitySystem:
+          description: Identity system of the device.
+          enum:
+          - AzureAD
+          - ADFS
+          type: string
+          x-ms-enum:
+            name: category
+            modelAsString: true
           readOnly: true
     Compatibility:
       description: Product compatibility
@@ -732,94 +820,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompatibilityIssue'
-    VirtualMachineProductProperties:
-      description: Product information.
-      type: object
-      properties:
-        version:
-          description: Specifies product version.
-          type: string
-          readOnly: true
-        osDiskImage:
-          description: OS disk image used by product.
-          $ref: '#/components/schemas/OsDiskImage'
-          readOnly: true
-        dataDiskImages:
-          description: List of attached data disks.
-          type: array
-          items:
-            $ref: '#/components/schemas/DataDiskImage'
-          readOnly: true
-    ProductList:
-      description: Pageable list of products.
-      type: object
-      properties:
-        nextLink:
-          description: URI to the next page.
-          type: string
-        value:
-          description: List of products.
-          type: array
-          items:
-            $ref: '#/components/schemas/Product'
-    CompatibilityIssue:
-      description: Compatibility issue
-      type: string
-      enum:
-      - HigherDeviceVersionRequired
-      - LowerDeviceVersionRequired
-      - CapacityBillingModelRequired
-      - PayAsYouGoBillingModelRequired
-      - DevelopmentBillingModelRequired
-      - AzureADIdentitySystemRequired
-      - ADFSIdentitySystemRequired
-      - ConnectionToInternetRequired
-      - ConnectionToAzureRequired
-      - DisconnectedEnvironmentRequired
-      x-ms-enum:
-        name: CompatibilityIssue
-        modelAsString: true
-    IconUris:
-      description: Links to product icons.
-      type: object
-      properties:
-        large:
-          description: URI to large icon.
-          type: string
-        wide:
-          description: URI to wide icon.
-          type: string
-        medium:
-          description: URI to medium icon.
-          type: string
-        small:
-          description: URI to small icon.
-          type: string
-        hero:
-          description: URI to hero icon.
-          type: string
-    OsDiskImage:
-      description: OS disk image.
-      type: object
-      properties:
-        operatingSystem:
-          description: OS operating system type.
-          $ref: '#/components/schemas/OperatingSystem'
-          readOnly: true
-        sourceBlobSasUri:
-          description: SAS key for source blob.
-          type: string
-          readOnly: true
-    OperatingSystem:
-      description: Operating system type (Windows or Linux).
-      type: string
-      enum:
-      - None
-      - Windows
-      - Linux
-      x-ms-enum:
-        name: OperatingSystem
-        modelAsString: true
   parameters:
     MarketplaceProductLogUpdateParameter:
       description: Update details for product log.
@@ -829,14 +829,6 @@ components:
       x-ms-parameter-location: method
       schema:
         $ref: '#/components/schemas/MarketplaceProductLogUpdate'
-    DeviceConfigurationParameter:
-      description: Device configuration.
-      name: deviceConfiguration
-      in: body
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/DeviceConfiguration'
     ProductNameParameter:
       description: Name of the product.
       name: productName
@@ -845,6 +837,14 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
+    DeviceConfigurationParameter:
+      description: Device configuration.
+      name: deviceConfiguration
+      in: body
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/DeviceConfiguration'
   securitySchemes:
     azure_auth:
       type: oauth2

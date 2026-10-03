@@ -681,33 +681,6 @@ paths:
     - url: https://graph.windows.net
 components:
   schemas:
-    Error:
-      type: object
-      description: Error body.
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-    GroupRequest:
-      type: object
-      required:
-      - faceIds
-      description: Request body for group request.
-      properties:
-        faceIds:
-          type: array
-          description: Array of candidate faceId created by Face - Detect. The maximum is 1000 faces
-          maxItems: 1000
-          items:
-            type: string
-            format: uuid
-    APIError:
-      type: object
-      description: Error information returned by the API
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
     GroupResult:
       type: object
       required:
@@ -728,41 +701,48 @@ components:
           items:
             type: string
             format: uuid
-    DirectoryObject:
+    Error:
       type: object
-      discriminator:
-        propertyName: objectType
+      description: Error body.
       properties:
-        objectId:
+        code:
           type: string
-          description: The object ID.
-          readOnly: true
-        objectType:
+        message:
           type: string
-          description: The object type.
-        deletionTimestamp:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: The time at which the directory object was deleted.
-          readOnly: true
+    APIError:
+      type: object
+      description: Error information returned by the API
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    GroupRequest:
+      type: object
       required:
-      - objectType
+      - faceIds
+      description: Request body for group request.
+      properties:
+        faceIds:
+          type: array
+          description: Array of candidate faceId created by Face - Detect. The maximum is 1000 faces
+          maxItems: 1000
+          items:
+            type: string
+            format: uuid
+    CheckGroupMembershipParameters:
+      type: object
+      properties:
+        groupId:
+          type: string
+          description: The object ID of the group to check.
+        memberId:
+          type: string
+          description: The object ID of the contact, group, user, or service principal to check for membership in the specified group.
       additionalProperties:
         type: object
-      description: Represents an Azure Active Directory object.
-    GroupGetMemberGroupsParameters:
-      type: object
-      properties:
-        securityEnabledOnly:
-          type: boolean
-          description: If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.
-      additionalProperties:
-        type: object
       required:
-      - securityEnabledOnly
-      description: Request parameters for GetMemberGroups API call.
+      - groupId
+      - memberId
+      description: Request parameters for IsMemberOf API call.
     GroupCreateParameters:
       type: object
       properties:
@@ -790,6 +770,49 @@ components:
       additionalProperties:
         type: object
       description: Request parameters for creating a new group.
+    GraphError:
+      type: object
+      properties:
+        odata.error:
+          type: object
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/OdataError'
+          description: A Graph API error.
+      description: Active Directory error information.
+    GroupGetMemberGroupsParameters:
+      type: object
+      properties:
+        securityEnabledOnly:
+          type: boolean
+          description: If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.
+      additionalProperties:
+        type: object
+      required:
+      - securityEnabledOnly
+      description: Request parameters for GetMemberGroups API call.
+    OdataError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code.
+        message:
+          type: object
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ErrorMessage'
+          description: Error Message.
+      description: Active Directory OData error information.
+    GroupAddMemberParameters:
+      type: object
+      properties:
+        url:
+          type: string
+          description: A member object URL, such as "https://graph.windows.net/0b1f9851-1bf0-433f-aec3-cb9272f093dc/directoryObjects/f260bbc4-c254-447b-94cf-293b5ec434dd", where "0b1f9851-1bf0-433f-aec3-cb9272f093dc" is the tenantId and "f260bbc4-c254-447b-94cf-293b5ec434dd" is the objectId of the member (user, application, servicePrincipal, group) to be added.
+      required:
+      - url
+      additionalProperties:
+        type: object
+      description: Request parameters for adding a member to a group.
     ErrorMessage:
       type: object
       properties:
@@ -798,6 +821,30 @@ components:
           x-ms-client-name: message
           description: Error message value.
       description: Active Directory error message.
+    DirectoryObjectListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/DirectoryObject'
+          description: A collection of DirectoryObject.
+        odata.nextLink:
+          type: string
+          description: The URL to get the next set of results.
+      description: DirectoryObject list operation result.
+    GroupListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ADGroup'
+          description: A collection of Active Directory groups.
+        odata.nextLink:
+          type: string
+          description: The URL to get the next set of results.
+      description: Server response for Get tenant groups API call
     ADGroup:
       type: object
       allOf:
@@ -820,39 +867,6 @@ components:
           description: The primary email address of the group.
       x-ms-discriminator-value: Group
       description: Active Directory group information.
-    GroupGetMemberGroupsResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            type: string
-          description: A collection of group IDs of which the group is a member.
-      description: Server response for GetMemberGroups API call.
-    OdataError:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Error code.
-        message:
-          type: object
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ErrorMessage'
-          description: Error Message.
-      description: Active Directory OData error information.
-    GroupListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/ADGroup'
-          description: A collection of Active Directory groups.
-        odata.nextLink:
-          type: string
-          description: The URL to get the next set of results.
-      description: Server response for Get tenant groups API call
     CheckGroupMembershipResult:
       type: object
       properties:
@@ -862,53 +876,39 @@ components:
       additionalProperties:
         type: object
       description: Server response for IsMemberOf API call
-    CheckGroupMembershipParameters:
+    DirectoryObject:
       type: object
+      discriminator:
+        propertyName: objectType
       properties:
-        groupId:
+        objectId:
           type: string
-          description: The object ID of the group to check.
-        memberId:
+          description: The object ID.
+          readOnly: true
+        objectType:
           type: string
-          description: The object ID of the contact, group, user, or service principal to check for membership in the specified group.
+          description: The object type.
+        deletionTimestamp:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The time at which the directory object was deleted.
+          readOnly: true
+      required:
+      - objectType
       additionalProperties:
         type: object
-      required:
-      - groupId
-      - memberId
-      description: Request parameters for IsMemberOf API call.
-    GraphError:
-      type: object
-      properties:
-        odata.error:
-          type: object
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/OdataError'
-          description: A Graph API error.
-      description: Active Directory error information.
-    DirectoryObjectListResult:
+      description: Represents an Azure Active Directory object.
+    GroupGetMemberGroupsResult:
       type: object
       properties:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/DirectoryObject'
-          description: A collection of DirectoryObject.
-        odata.nextLink:
-          type: string
-          description: The URL to get the next set of results.
-      description: DirectoryObject list operation result.
-    GroupAddMemberParameters:
-      type: object
-      properties:
-        url:
-          type: string
-          description: A member object URL, such as "https://graph.windows.net/0b1f9851-1bf0-433f-aec3-cb9272f093dc/directoryObjects/f260bbc4-c254-447b-94cf-293b5ec434dd", where "0b1f9851-1bf0-433f-aec3-cb9272f093dc" is the tenantId and "f260bbc4-c254-447b-94cf-293b5ec434dd" is the objectId of the member (user, application, servicePrincipal, group) to be added.
-      required:
-      - url
-      additionalProperties:
-        type: object
-      description: Request parameters for adding a member to a group.
+            type: string
+          description: A collection of group IDs of which the group is a member.
+      description: Server response for GetMemberGroups API call.
   parameters:
     ApiVersionParameter:
       name: api-version

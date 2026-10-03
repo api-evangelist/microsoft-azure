@@ -726,6 +726,73 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    CanMigrateResult:
+      type: object
+      description: Result for canMigrate operation.
+      properties:
+        id:
+          description: Resource ID.
+          readOnly: true
+          type: string
+        type:
+          description: Resource type.
+          readOnly: true
+          type: string
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/CanMigrateProperties'
+      x-ms-azure-resource: true
+    TrackedResource:
+      description: The resource model definition for a ARM tracked top level resource.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        location:
+          type: string
+          description: Resource location.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          x-ms-mutability:
+          - read
+          - create
+          - update
+          description: Resource tags.
+      required:
+      - location
+    CanMigrateProperties:
+      type: object
+      properties:
+        canMigrate:
+          readOnly: true
+          description: Flag that says if the profile can be migrated
+          type: boolean
+        defaultSku:
+          readOnly: true
+          description: Recommended sku for the migration
+          type: string
+          enum:
+          - Standard_AzureFrontDoor
+          - Premium_AzureFrontDoor
+          x-ms-enum:
+            name: CanMigrateDefaultSku
+            modelAsString: true
+        errors:
+          items:
+            description: List of migration errors
+            $ref: '#/components/schemas/MigrationErrorType'
+          type: array
+          x-ms-identifiers: []
+    ProfilePropertiesUpdateParameters:
+      type: object
+      description: The JSON object containing profile update parameters.
+      properties:
+        originResponseTimeoutSeconds:
+          description: Send and receive timeout on forwarding request to the origin. When timeout is reached, the request fails and returns.
+          type: integer
+          format: int32
+          minimum: 16
     SupportedOptimizationTypesListResult:
       description: The result of the GetSupportedOptimizationTypes API
       type: object
@@ -748,6 +815,28 @@ components:
       x-ms-enum:
         name: OptimizationType
         modelAsString: true
+    Profile:
+      description: A profile is a logical grouping of endpoints that share the same settings.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TrackedResource'
+      properties:
+        sku:
+          description: The pricing tier (defines Azure Front Door Standard or Premium or a CDN provider, feature list and rate) of the profile.
+          $ref: '#/components/schemas/Sku'
+        kind:
+          readOnly: true
+          type: string
+          description: Kind of the profile. Used by portal to differentiate traditional CDN profile and new AFD profile.
+        identity:
+          description: Managed service identity (system assigned and/or user assigned identities).
+          type: object
+          $ref: ../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ProfileProperties'
+      required:
+      - sku
     ResourceUsageListResult:
       description: Output of check resource usage API.
       properties:
@@ -762,42 +851,58 @@ components:
         nextLink:
           type: string
           description: URL to get the next set of custom domain objects if there are any.
-    MigrationWebApplicationFirewallMapping:
-      description: 'Web Application Firewall Mapping '
+    MigrationParameters:
+      type: object
+      description: Request body for Migrate operation.
+      required:
+      - classicResourceReference
+      - sku
+      - profileName
+      properties:
+        sku:
+          description: Sku for the migration
+          $ref: '#/components/schemas/Sku'
+        classicResourceReference:
+          description: Resource reference of the classic cdn profile or classic frontdoor that need to be migrated.
+          $ref: '#/components/schemas/ResourceReference'
+        profileName:
+          description: Name of the new profile that need to be created.
+          type: string
+        migrationWebApplicationFirewallMappings:
+          description: Waf mapping for the migrated profile
+          type: array
+          items:
+            description: List of waf mappings
+            $ref: '#/components/schemas/MigrationWebApplicationFirewallMapping'
+          x-ms-identifiers: []
+      x-ms-azure-resource: true
+    ResourceUsage:
+      description: Output of check resource usage API.
       type: object
       properties:
-        migratedFrom:
-          description: Migration From Waf policy
-          $ref: '#/components/schemas/ResourceReference'
-        migratedTo:
-          description: Migration to Waf policy
-          $ref: '#/components/schemas/ResourceReference'
-    ResourceReference:
-      properties:
-        id:
+        resourceType:
           type: string
-          description: Resource ID.
-      description: Reference to another resource.
-      x-ms-azure-resource: true
-    TrackedResource:
-      description: The resource model definition for a ARM tracked top level resource.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        location:
+          readOnly: true
+          description: Resource type for which the usage is provided.
+        unit:
           type: string
-          description: Resource location.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          x-ms-mutability:
-          - read
-          - create
-          - update
-          description: Resource tags.
-      required:
-      - location
+          readOnly: true
+          description: Unit of the usage. e.g. count.
+          enum:
+          - count
+          x-ms-enum:
+            name: ResourceUsageUnit
+            modelAsString: true
+        currentValue:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Actual value of usage on the specified resource type.
+        limit:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Quota of the specified resource type.
     Sku:
       description: 'Standard_Verizon = The SKU name for a Standard Verizon CDN profile.
 
@@ -848,69 +953,43 @@ components:
             name: SkuName
             modelAsString: true
       type: object
-    MigrationParameters:
+    MigrationWebApplicationFirewallMapping:
+      description: 'Web Application Firewall Mapping '
       type: object
-      description: Request body for Migrate operation.
-      required:
-      - classicResourceReference
-      - sku
-      - profileName
       properties:
-        sku:
-          description: Sku for the migration
-          $ref: '#/components/schemas/Sku'
-        classicResourceReference:
-          description: Resource reference of the classic cdn profile or classic frontdoor that need to be migrated.
+        migratedFrom:
+          description: Migration From Waf policy
           $ref: '#/components/schemas/ResourceReference'
-        profileName:
-          description: Name of the new profile that need to be created.
-          type: string
-        migrationWebApplicationFirewallMappings:
-          description: Waf mapping for the migrated profile
-          type: array
-          items:
-            description: List of waf mappings
-            $ref: '#/components/schemas/MigrationWebApplicationFirewallMapping'
-          x-ms-identifiers: []
-      x-ms-azure-resource: true
-    ErrorResponse:
-      title: Error response
-      description: Error response indicates Azure Front Door Standard or Azure Front Door Premium or CDN service is not able to process the incoming request. The reason is provided in the error message.
+        migratedTo:
+          description: Migration to Waf policy
+          $ref: '#/components/schemas/ResourceReference'
+    MigrationErrorType:
+      description: Error response indicates CDN service is not able to process the incoming request. The reason is provided in the error message.
       type: object
       properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ErrorDetail
-    Profile:
-      description: A profile is a logical grouping of endpoints that share the same settings.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/TrackedResource'
-      properties:
-        sku:
-          description: The pricing tier (defines Azure Front Door Standard or Premium or a CDN provider, feature list and rate) of the profile.
-          $ref: '#/components/schemas/Sku'
-        kind:
+        code:
+          description: Error code.
           readOnly: true
           type: string
-          description: Kind of the profile. Used by portal to differentiate traditional CDN profile and new AFD profile.
-        identity:
-          description: Managed service identity (system assigned and/or user assigned identities).
-          type: object
-          $ref: ../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ProfileProperties'
-      required:
-      - sku
-    ProfilePropertiesUpdateParameters:
-      type: object
-      description: The JSON object containing profile update parameters.
+        resourceName:
+          description: Resource which has the problem.
+          readOnly: true
+          type: string
+        errorMessage:
+          description: Error message indicating why the operation failed.
+          readOnly: true
+          type: string
+        nextSteps:
+          description: Describes what needs to be done to fix the problem
+          readOnly: true
+          type: string
+    ResourceReference:
       properties:
-        originResponseTimeoutSeconds:
-          description: Send and receive timeout on forwarding request to the origin. When timeout is reached, the request fails and returns.
-          type: integer
-          format: int32
-          minimum: 16
+        id:
+          type: string
+          description: Resource ID.
+      description: Reference to another resource.
+      x-ms-azure-resource: true
     SsoUri:
       description: The URI required to login to the supplemental portal from the Azure portal.
       type: object
@@ -919,51 +998,6 @@ components:
           description: The URI used to login to the supplemental portal.
           readOnly: true
           type: string
-    ProfileListResult:
-      description: Result of the request to list profiles. It contains a list of profile objects and a URL link to get the next set of results.
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/Profile'
-          description: List of CDN profiles within a resource group.
-        nextLink:
-          type: string
-          description: URL to get the next set of profile objects if there are any.
-    ProfileUpdateParameters:
-      type: object
-      description: Properties required to update a profile.
-      properties:
-        tags:
-          description: Profile tags
-          type: object
-          additionalProperties:
-            type: string
-        identity:
-          description: Managed service identity (system assigned and/or user assigned identities).
-          type: object
-          $ref: ../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ProfilePropertiesUpdateParameters'
-      x-ms-azure-resource: true
-    MigrateResult:
-      type: object
-      description: Result for migrate operation.
-      properties:
-        id:
-          description: Resource ID.
-          readOnly: true
-          type: string
-        type:
-          description: Resource type.
-          readOnly: true
-          type: string
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/MigrateResultProperties'
-      x-ms-azure-resource: true
     IdentityType:
       description: The type of identity that creates/modifies resources
       type: string
@@ -975,39 +1009,6 @@ components:
       x-ms-enum:
         name: IdentityType
         modelAsString: true
-    CanMigrateParameters:
-      type: object
-      description: Request body for CanMigrate operation.
-      required:
-      - classicResourceReference
-      properties:
-        classicResourceReference:
-          description: Resource reference of the classic cdn profile or classic frontdoor that need to be migrated.
-          $ref: '#/components/schemas/ResourceReference'
-      x-ms-azure-resource: true
-    CanMigrateProperties:
-      type: object
-      properties:
-        canMigrate:
-          readOnly: true
-          description: Flag that says if the profile can be migrated
-          type: boolean
-        defaultSku:
-          readOnly: true
-          description: Recommended sku for the migration
-          type: string
-          enum:
-          - Standard_AzureFrontDoor
-          - Premium_AzureFrontDoor
-          x-ms-enum:
-            name: CanMigrateDefaultSku
-            modelAsString: true
-        errors:
-          items:
-            description: List of migration errors
-            $ref: '#/components/schemas/MigrationErrorType'
-          type: array
-          x-ms-identifiers: []
     ProfileProperties:
       description: The JSON object that contains the properties required to create a profile.
       properties:
@@ -1056,44 +1057,67 @@ components:
           type: integer
           format: int32
           minimum: 16
-    MigrationErrorType:
-      description: Error response indicates CDN service is not able to process the incoming request. The reason is provided in the error message.
+    CanMigrateParameters:
+      type: object
+      description: Request body for CanMigrate operation.
+      required:
+      - classicResourceReference
+      properties:
+        classicResourceReference:
+          description: Resource reference of the classic cdn profile or classic frontdoor that need to be migrated.
+          $ref: '#/components/schemas/ResourceReference'
+      x-ms-azure-resource: true
+    ProfileUpdateParameters:
+      type: object
+      description: Properties required to update a profile.
+      properties:
+        tags:
+          description: Profile tags
+          type: object
+          additionalProperties:
+            type: string
+        identity:
+          description: Managed service identity (system assigned and/or user assigned identities).
+          type: object
+          $ref: ../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ProfilePropertiesUpdateParameters'
+      x-ms-azure-resource: true
+    ProfileListResult:
+      description: Result of the request to list profiles. It contains a list of profile objects and a URL link to get the next set of results.
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/Profile'
+          description: List of CDN profiles within a resource group.
+        nextLink:
+          type: string
+          description: URL to get the next set of profile objects if there are any.
+    MigrateResultProperties:
       type: object
       properties:
-        code:
-          description: Error code.
+        migratedProfileResourceId:
           readOnly: true
-          type: string
-        resourceName:
-          description: Resource which has the problem.
-          readOnly: true
-          type: string
-        errorMessage:
-          description: Error message indicating why the operation failed.
-          readOnly: true
-          type: string
-        nextSteps:
-          description: Describes what needs to be done to fix the problem
-          readOnly: true
-          type: string
-    Resource:
-      description: The core properties of ARM resources
+          description: Arm resource id of the migrated profile
+          $ref: '#/components/schemas/ResourceReference'
+    MigrateResult:
+      type: object
+      description: Result for migrate operation.
       properties:
         id:
           description: Resource ID.
-          readOnly: true
-          type: string
-        name:
-          description: Resource name.
           readOnly: true
           type: string
         type:
           description: Resource type.
           readOnly: true
           type: string
-        systemData:
-          $ref: '#/components/schemas/SystemData'
-          readOnly: true
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/MigrateResultProperties'
       x-ms-azure-resource: true
     SystemData:
       description: Read only system data
@@ -1120,99 +1144,32 @@ components:
           type: string
           format: date-time
           description: The timestamp of resource last modification (UTC)
-    MigrateResultProperties:
+    ErrorResponse:
+      title: Error response
+      description: Error response indicates Azure Front Door Standard or Azure Front Door Premium or CDN service is not able to process the incoming request. The reason is provided in the error message.
       type: object
       properties:
-        migratedProfileResourceId:
-          readOnly: true
-          description: Arm resource id of the migrated profile
-          $ref: '#/components/schemas/ResourceReference'
-    ResourceUsage:
-      description: Output of check resource usage API.
-      type: object
-      properties:
-        resourceType:
-          type: string
-          readOnly: true
-          description: Resource type for which the usage is provided.
-        unit:
-          type: string
-          readOnly: true
-          description: Unit of the usage. e.g. count.
-          enum:
-          - count
-          x-ms-enum:
-            name: ResourceUsageUnit
-            modelAsString: true
-        currentValue:
-          type: integer
-          format: int32
-          readOnly: true
-          description: Actual value of usage on the specified resource type.
-        limit:
-          type: integer
-          format: int32
-          readOnly: true
-          description: Quota of the specified resource type.
-    CanMigrateResult:
-      type: object
-      description: Result for canMigrate operation.
+        error:
+          $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ErrorDetail
+    Resource:
+      description: The core properties of ARM resources
       properties:
         id:
           description: Resource ID.
+          readOnly: true
+          type: string
+        name:
+          description: Resource name.
           readOnly: true
           type: string
         type:
           description: Resource type.
           readOnly: true
           type: string
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/CanMigrateProperties'
+        systemData:
+          $ref: '#/components/schemas/SystemData'
+          readOnly: true
       x-ms-azure-resource: true
-    ProfileTypeDefinition:
-      description: The profile type definition.
-      properties:
-        strongIds:
-          type: array
-          items:
-            $ref: '#/components/schemas/StrongId'
-          description: The strong IDs.
-      allOf:
-      - $ref: '#/components/schemas/EntityTypeDefinition'
-    DataSourcePrecedence:
-      properties:
-        dataSource:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/DataSource'
-        precedence:
-          type: integer
-          description: the precedence value.
-      description: The data source precedence is a way to know the precedence of each data source.
-    KpiExtract:
-      required:
-      - extractName
-      - expression
-      properties:
-        extractName:
-          type: string
-          description: KPI extract name.
-        expression:
-          type: string
-          description: The expression.
-      description: The KPI extract.
-    KpiAlias:
-      required:
-      - aliasName
-      - expression
-      properties:
-        aliasName:
-          type: string
-          description: KPI alias name.
-        expression:
-          type: string
-          description: The expression.
-      description: The KPI alias.
     KpiParticipantProfilesMetadata:
       required:
       - typeName
@@ -1221,73 +1178,24 @@ components:
           type: string
           description: Name of the type.
       description: The KPI participant profile metadata.
-    ProfileResourceFormat:
-      description: The profile resource format.
+    KpiThresholds:
       properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ProfileTypeDefinition'
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-    PropertyDefinition:
+        lowerLimit:
+          type: number
+          format: decimal
+          description: The lower threshold limit.
+        upperLimit:
+          type: number
+          format: decimal
+          description: The upper threshold limit.
+        increasingKpi:
+          type: boolean
+          description: Whether or not the KPI is an increasing KPI.
       required:
-      - fieldName
-      - fieldType
-      properties:
-        arrayValueSeparator:
-          type: string
-          description: Array value separator for properties with isArray set.
-        enumValidValues:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProfileEnumValidValuesFormat'
-          description: Describes valid values for an enum property.
-        fieldName:
-          type: string
-          description: Name of the property.
-        fieldType:
-          type: string
-          description: Type of the property.
-        isArray:
-          type: boolean
-          description: Indicates if the property is actually an array of the fieldType above on the data api.
-        isEnum:
-          type: boolean
-          description: Indicates if the property is an enum.
-        isFlagEnum:
-          type: boolean
-          description: Indicates if the property is an flag enum.
-        isImage:
-          type: boolean
-          description: Whether the property is an Image.
-        isLocalizedString:
-          type: boolean
-          description: Whether the property is a localized string.
-        isName:
-          type: boolean
-          description: Whether the property is a name or a part of name.
-        isRequired:
-          type: boolean
-          description: Whether property value is required on instances, IsRequired field only for Interaction. Profile Instance will not check for required field.
-        propertyId:
-          type: string
-          description: The ID associated with the property.
-        schemaItemPropLink:
-          type: string
-          description: URL encoded schema.org item prop link for the property.
-        maxLength:
-          type: integer
-          description: Max length of string. Used only if type is string.
-        isAvailableInGraph:
-          type: boolean
-          description: Whether property is available in graph or not.
-        dataSourcePrecedenceRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/DataSourcePrecedence'
-          readOnly: true
-          description: This is specific to interactions modeled as activities. Data sources are used to determine where data is stored and also in precedence rules.
-      description: Property definition.
+      - lowerLimit
+      - upperLimit
+      - increasingKpi
+      description: Defines the KPI Threshold limits.
     DataSource:
       properties:
         name:
@@ -1325,103 +1233,6 @@ components:
           readOnly: true
           description: The data source reference id.
       description: Data Source is a way for us to know the source of instances. A single type can have data coming in from multiple places. In activities we use this to determine precedence rules.
-    ProxyResource:
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Resource ID.
-        name:
-          readOnly: true
-          type: string
-          description: Resource name.
-        type:
-          readOnly: true
-          type: string
-          description: Resource type.
-      x-ms-azure-resource: true
-      description: Common properties of proxy resource.
-    KpiThresholds:
-      properties:
-        lowerLimit:
-          type: number
-          format: decimal
-          description: The lower threshold limit.
-        upperLimit:
-          type: number
-          format: decimal
-          description: The upper threshold limit.
-        increasingKpi:
-          type: boolean
-          description: Whether or not the KPI is an increasing KPI.
-      required:
-      - lowerLimit
-      - upperLimit
-      - increasingKpi
-      description: Defines the KPI Threshold limits.
-    KpiGroupByMetadata:
-      properties:
-        displayName:
-          type: object
-          additionalProperties:
-            type: string
-          description: The display name.
-        fieldName:
-          type: string
-          description: The name of the field.
-        fieldType:
-          type: string
-          description: The type of the field.
-      description: The KPI GroupBy field metadata.
-    EntityTypeDefinition:
-      properties:
-        apiEntitySetName:
-          type: string
-          description: The api entity set name. This becomes the odata entity set name for the entity Type being referred in this object.
-        entityType:
-          type: string
-          enum:
-          - None
-          - Profile
-          - Interaction
-          - Relationship
-          x-ms-enum:
-            name: EntityTypes
-            modelAsString: false
-          description: Type of entity.
-        fields:
-          type: array
-          items:
-            $ref: '#/components/schemas/PropertyDefinition'
-          description: The properties of the Profile.
-        instancesCount:
-          type: integer
-          description: The instance count.
-        lastChangedUtc:
-          type: string
-          readOnly: true
-          format: date-time
-          description: The last changed time for the type definition.
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          readOnly: true
-          description: Provisioning state.
-        schemaItemTypeLink:
-          type: string
-          description: The schema org link. This helps ACI identify and suggest semantic models.
-        tenantId:
-          type: string
-          readOnly: true
-          description: The hub name.
-        timestampFieldName:
-          type: string
-          description: The timestamp property name. Represents the time when the interaction or profile update happened.
-        typeName:
-          type: string
-          description: The name of the entity.
-      allOf:
-      - $ref: '#/components/schemas/MetadataDefinitionBase'
-      description: Describes an entity.
     KpiDefinition:
       required:
       - entityType
@@ -1536,65 +1347,108 @@ components:
             $ref: '#/components/schemas/KpiExtract'
           description: The KPI extracts.
       description: Defines the KPI Threshold limits.
-    StrongId:
+    KpiExtract:
       required:
-      - keyPropertyNames
-      - strongIdName
+      - extractName
+      - expression
       properties:
-        keyPropertyNames:
-          type: array
-          items:
-            type: string
-          description: The properties which make up the unique ID.
-        strongIdName:
+        extractName:
           type: string
-          description: The Name identifying the strong ID.
+          description: KPI extract name.
+        expression:
+          type: string
+          description: The expression.
+      description: The KPI extract.
+    KpiGroupByMetadata:
+      properties:
         displayName:
           type: object
           additionalProperties:
             type: string
-          description: Localized display name.
-        description:
-          type: object
-          additionalProperties:
-            type: string
-          description: Localized descriptions.
-      description: Property/Properties which represent a unique ID.
-    ProfileListResult_2:
+          description: The display name.
+        fieldName:
+          type: string
+          description: The name of the field.
+        fieldType:
+          type: string
+          description: The type of the field.
+      description: The KPI GroupBy field metadata.
+    DataSourcePrecedence:
       properties:
-        value:
+        dataSource:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/DataSource'
+        precedence:
+          type: integer
+          description: the precedence value.
+      description: The data source precedence is a way to know the precedence of each data source.
+    PropertyDefinition:
+      required:
+      - fieldName
+      - fieldType
+      properties:
+        arrayValueSeparator:
+          type: string
+          description: Array value separator for properties with isArray set.
+        enumValidValues:
           type: array
           items:
-            $ref: '#/components/schemas/ProfileResourceFormat'
-          description: Results of the list operation.
-        nextLink:
+            $ref: '#/components/schemas/ProfileEnumValidValuesFormat'
+          description: Describes valid values for an enum property.
+        fieldName:
           type: string
-          description: Link to the next set of results.
-      description: The response of list profile operation.
-    ProfileEnumValidValuesFormat:
-      properties:
-        value:
+          description: Name of the property.
+        fieldType:
+          type: string
+          description: Type of the property.
+        isArray:
+          type: boolean
+          description: Indicates if the property is actually an array of the fieldType above on the data api.
+        isEnum:
+          type: boolean
+          description: Indicates if the property is an enum.
+        isFlagEnum:
+          type: boolean
+          description: Indicates if the property is an flag enum.
+        isImage:
+          type: boolean
+          description: Whether the property is an Image.
+        isLocalizedString:
+          type: boolean
+          description: Whether the property is a localized string.
+        isName:
+          type: boolean
+          description: Whether the property is a name or a part of name.
+        isRequired:
+          type: boolean
+          description: Whether property value is required on instances, IsRequired field only for Interaction. Profile Instance will not check for required field.
+        propertyId:
+          type: string
+          description: The ID associated with the property.
+        schemaItemPropLink:
+          type: string
+          description: URL encoded schema.org item prop link for the property.
+        maxLength:
           type: integer
-          description: The integer value of the enum member.
-        localizedValueNames:
-          type: object
-          additionalProperties:
-            type: string
-          description: Localized names of the enum member.
-      description: Valid enum values in case of an enum property.
-    ProvisioningState:
-      type: string
-      enum:
-      - Provisioning
-      - Succeeded
-      - Expiring
-      - Deleting
-      - HumanIntervention
-      - Failed
-      x-ms-enum:
-        name: ProvisioningStates
-        modelAsString: true
-      description: Provisioning state.
+          description: Max length of string. Used only if type is string.
+        isAvailableInGraph:
+          type: boolean
+          description: Whether property is available in graph or not.
+        dataSourcePrecedenceRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSourcePrecedence'
+          readOnly: true
+          description: This is specific to interactions modeled as activities. Data sources are used to determine where data is stored and also in precedence rules.
+      description: Property definition.
+    ProfileResourceFormat:
+      description: The profile resource format.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ProfileTypeDefinition'
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
     MetadataDefinitionBase:
       properties:
         attributes:
@@ -1631,6 +1485,152 @@ components:
           type: string
           description: Large Image associated with the Property or EntityType.
       description: The Metadata definition base.
+    KpiAlias:
+      required:
+      - aliasName
+      - expression
+      properties:
+        aliasName:
+          type: string
+          description: KPI alias name.
+        expression:
+          type: string
+          description: The expression.
+      description: The KPI alias.
+    ProfileEnumValidValuesFormat:
+      properties:
+        value:
+          type: integer
+          description: The integer value of the enum member.
+        localizedValueNames:
+          type: object
+          additionalProperties:
+            type: string
+          description: Localized names of the enum member.
+      description: Valid enum values in case of an enum property.
+    ProvisioningState:
+      type: string
+      enum:
+      - Provisioning
+      - Succeeded
+      - Expiring
+      - Deleting
+      - HumanIntervention
+      - Failed
+      x-ms-enum:
+        name: ProvisioningStates
+        modelAsString: true
+      description: Provisioning state.
+    ProfileTypeDefinition:
+      description: The profile type definition.
+      properties:
+        strongIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/StrongId'
+          description: The strong IDs.
+      allOf:
+      - $ref: '#/components/schemas/EntityTypeDefinition'
+    StrongId:
+      required:
+      - keyPropertyNames
+      - strongIdName
+      properties:
+        keyPropertyNames:
+          type: array
+          items:
+            type: string
+          description: The properties which make up the unique ID.
+        strongIdName:
+          type: string
+          description: The Name identifying the strong ID.
+        displayName:
+          type: object
+          additionalProperties:
+            type: string
+          description: Localized display name.
+        description:
+          type: object
+          additionalProperties:
+            type: string
+          description: Localized descriptions.
+      description: Property/Properties which represent a unique ID.
+    ProxyResource:
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Resource ID.
+        name:
+          readOnly: true
+          type: string
+          description: Resource name.
+        type:
+          readOnly: true
+          type: string
+          description: Resource type.
+      x-ms-azure-resource: true
+      description: Common properties of proxy resource.
+    EntityTypeDefinition:
+      properties:
+        apiEntitySetName:
+          type: string
+          description: The api entity set name. This becomes the odata entity set name for the entity Type being referred in this object.
+        entityType:
+          type: string
+          enum:
+          - None
+          - Profile
+          - Interaction
+          - Relationship
+          x-ms-enum:
+            name: EntityTypes
+            modelAsString: false
+          description: Type of entity.
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/PropertyDefinition'
+          description: The properties of the Profile.
+        instancesCount:
+          type: integer
+          description: The instance count.
+        lastChangedUtc:
+          type: string
+          readOnly: true
+          format: date-time
+          description: The last changed time for the type definition.
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          readOnly: true
+          description: Provisioning state.
+        schemaItemTypeLink:
+          type: string
+          description: The schema org link. This helps ACI identify and suggest semantic models.
+        tenantId:
+          type: string
+          readOnly: true
+          description: The hub name.
+        timestampFieldName:
+          type: string
+          description: The timestamp property name. Represents the time when the interaction or profile update happened.
+        typeName:
+          type: string
+          description: The name of the entity.
+      allOf:
+      - $ref: '#/components/schemas/MetadataDefinitionBase'
+      description: Describes an entity.
+    ProfileListResult_2:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileResourceFormat'
+          description: Results of the list operation.
+        nextLink:
+          type: string
+          description: Link to the next set of results.
+      description: The response of list profile operation.
   parameters:
     resourceGroupNameParameter:
       name: resourceGroupName

@@ -613,17 +613,43 @@ paths:
         required: true
 components:
   schemas:
-    ExportClusterParameters:
-      title: Export an RDB file into a target database
+    DatabaseUpdate:
+      description: A partial update to the RedisEnterprise database
       type: object
       properties:
-        sasUri:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/DatabaseProperties'
+          description: Properties of the database.
+    DatabaseList:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Database'
+          description: List of databases
+        nextLink:
           type: string
-          description: SAS URI for the target directory to export to
-          x-ms-secret: true
+          readOnly: true
+          description: The URI to fetch the next page of results.
+      description: The response of a list-all operation.
+    ForceUnlinkParameters:
+      title: Forcibly unlink another database from this database.
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: arm-id
+            x-ms-arm-id-details:
+              allowedResources:
+              - type: Microsoft.Cache/redisEnterprise/databases
+          description: The resource IDs of the database resources to be unlinked.
       required:
-      - sasUri
-      description: Parameters for a Redis Enterprise export operation.
+      - ids
+      description: Parameters for a Redis Enterprise Active Geo Replication Force Unlink operation.
     Database:
       description: Describes a database on the RedisEnterprise cluster
       type: object
@@ -634,56 +660,6 @@ components:
           description: Other properties of the database.
       allOf:
       - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ProxyResource
-    Persistence:
-      title: Persistence settings
-      description: Persistence-related configuration for the RedisEnterprise database
-      type: object
-      properties:
-        aofEnabled:
-          type: boolean
-          description: Sets whether AOF is enabled.
-        rdbEnabled:
-          type: boolean
-          description: Sets whether RDB is enabled.
-        aofFrequency:
-          type: string
-          description: Sets the frequency at which data is written to disk.
-          enum:
-          - 1s
-          - always
-          x-ms-enum:
-            name: AofFrequency
-            modelAsString: true
-        rdbFrequency:
-          type: string
-          description: Sets the frequency at which a snapshot of the database is created.
-          enum:
-          - 1h
-          - 6h
-          - 12h
-          x-ms-enum:
-            name: RdbFrequency
-            modelAsString: true
-    Cluster:
-      description: Describes the RedisEnterprise cluster
-      type: object
-      properties:
-        sku:
-          $ref: '#/components/schemas/Sku'
-          description: The SKU to create, which affects price, performance, and features.
-        zones:
-          type: array
-          items:
-            type: string
-          description: The Availability Zones where this cluster will be deployed.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ClusterProperties'
-          description: Other properties of the cluster.
-      required:
-      - sku
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
     ClusterProperties:
       title: RedisEnterprise cluster properties
       description: Properties of RedisEnterprise clusters, as opposed to general resource properties like location, tags
@@ -721,6 +697,34 @@ components:
           description: List of private endpoint connections associated with the specified RedisEnterprise cluster
           items:
             $ref: ../../../../../common-types/resource-management/v2/privatelinks.json#/definitions/PrivateEndpointConnection
+    LinkedDatabase:
+      title: Linked Database
+      description: Specifies details of a linked database resource.
+      type: object
+      properties:
+        id:
+          type: string
+          format: arm-id
+          x-ms-arm-id-details:
+            allowedResources:
+            - type: Microsoft.Cache/redisEnterprise/databases
+          x-ms-mutability:
+          - read
+          - create
+          description: Resource ID of a database resource to link with this database.
+        state:
+          type: string
+          description: State of the link between the database resources.
+          enum:
+          - Linked
+          - Linking
+          - Unlinking
+          - LinkFailed
+          - UnlinkFailed
+          x-ms-enum:
+            name: LinkState
+            modelAsString: true
+          readOnly: true
     Sku:
       description: SKU parameters supplied to the create RedisEnterprise operation.
       type: object
@@ -745,6 +749,144 @@ components:
           description: The size of the RedisEnterprise cluster. Defaults to 2 or 3 depending on SKU. Valid values are (2, 4, 6, ...) for Enterprise SKUs and (3, 9, 15, ...) for Flash SKUs.
       required:
       - name
+    ClusterUpdate:
+      description: A partial update to the RedisEnterprise cluster
+      type: object
+      properties:
+        sku:
+          $ref: '#/components/schemas/Sku'
+          description: The SKU to create, which affects price, performance, and features.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ClusterProperties'
+          description: Other properties of the cluster.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          x-ms-mutability:
+          - read
+          - create
+          - update
+          description: Resource tags.
+    RegenerateKeyParameters:
+      title: Regenerate access keys request
+      type: object
+      properties:
+        keyType:
+          type: string
+          description: Which access key to regenerate.
+          enum:
+          - Primary
+          - Secondary
+          x-ms-enum:
+            name: AccessKeyType
+            modelAsString: false
+      required:
+      - keyType
+      description: Specifies which access keys to reset to a new random value.
+    ExportClusterParameters:
+      title: Export an RDB file into a target database
+      type: object
+      properties:
+        sasUri:
+          type: string
+          description: SAS URI for the target directory to export to
+          x-ms-secret: true
+      required:
+      - sasUri
+      description: Parameters for a Redis Enterprise export operation.
+    Persistence:
+      title: Persistence settings
+      description: Persistence-related configuration for the RedisEnterprise database
+      type: object
+      properties:
+        aofEnabled:
+          type: boolean
+          description: Sets whether AOF is enabled.
+        rdbEnabled:
+          type: boolean
+          description: Sets whether RDB is enabled.
+        aofFrequency:
+          type: string
+          description: Sets the frequency at which data is written to disk.
+          enum:
+          - 1s
+          - always
+          x-ms-enum:
+            name: AofFrequency
+            modelAsString: true
+        rdbFrequency:
+          type: string
+          description: Sets the frequency at which a snapshot of the database is created.
+          enum:
+          - 1h
+          - 6h
+          - 12h
+          x-ms-enum:
+            name: RdbFrequency
+            modelAsString: true
+    ProvisioningState:
+      type: string
+      readOnly: true
+      description: Current provisioning status
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Creating
+      - Updating
+      - Deleting
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    ImportClusterParameters:
+      title: Import RDB files into a target database
+      type: object
+      properties:
+        sasUris:
+          type: array
+          items:
+            type: string
+          description: SAS URIs for the target blobs to import from
+          x-ms-secret: true
+      required:
+      - sasUris
+      description: Parameters for a Redis Enterprise import operation.
+    FlushParameters:
+      title: Flush all the keys from the current and all its linked databases.
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: arm-id
+            x-ms-arm-id-details:
+              allowedResources:
+              - type: Microsoft.Cache/redisEnterprise/databases
+          description: The identifiers of all the other database resources in the georeplication group to be flushed.
+      description: Parameters for a Redis Enterprise active geo-replication flush operation
+    Cluster:
+      description: Describes the RedisEnterprise cluster
+      type: object
+      properties:
+        sku:
+          $ref: '#/components/schemas/Sku'
+          description: The SKU to create, which affects price, performance, and features.
+        zones:
+          type: array
+          items:
+            type: string
+          description: The Availability Zones where this cluster will be deployed.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ClusterProperties'
+          description: Other properties of the cluster.
+      required:
+      - sku
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
     ResourceState:
       type: string
       readOnly: true
@@ -765,41 +907,6 @@ components:
       x-ms-enum:
         name: ResourceState
         modelAsString: true
-    FlushParameters:
-      title: Flush all the keys from the current and all its linked databases.
-      type: object
-      properties:
-        ids:
-          type: array
-          items:
-            type: string
-            format: arm-id
-            x-ms-arm-id-details:
-              allowedResources:
-              - type: Microsoft.Cache/redisEnterprise/databases
-          description: The identifiers of all the other database resources in the georeplication group to be flushed.
-      description: Parameters for a Redis Enterprise active geo-replication flush operation
-    DatabaseUpdate:
-      description: A partial update to the RedisEnterprise database
-      type: object
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/DatabaseProperties'
-          description: Properties of the database.
-    ClusterList:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Cluster'
-          description: List of clusters.
-        nextLink:
-          type: string
-          readOnly: true
-          description: The URI to fetch the next page of results.
-      description: The response of a list-all operation.
     Module:
       title: Module settings
       description: Specifies configuration of a redis module
@@ -823,48 +930,6 @@ components:
           description: The version of the module, e.g. '1.0'.
       required:
       - name
-    AccessKeys:
-      title: Access keys
-      description: The secret access keys used for authenticating connections to redis
-      type: object
-      properties:
-        primaryKey:
-          readOnly: true
-          type: string
-          description: The current primary key that clients can use to authenticate
-        secondaryKey:
-          readOnly: true
-          type: string
-          description: The current secondary key that clients can use to authenticate
-    DatabaseList:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Database'
-          description: List of databases
-        nextLink:
-          type: string
-          readOnly: true
-          description: The URI to fetch the next page of results.
-      description: The response of a list-all operation.
-    RegenerateKeyParameters:
-      title: Regenerate access keys request
-      type: object
-      properties:
-        keyType:
-          type: string
-          description: Which access key to regenerate.
-          enum:
-          - Primary
-          - Secondary
-          x-ms-enum:
-            name: AccessKeyType
-            modelAsString: false
-      required:
-      - keyType
-      description: Specifies which access keys to reset to a new random value.
     DatabaseProperties:
       title: RedisEnterprise database properties
       description: Properties of RedisEnterprise databases, as opposed to general resource properties like location, tags
@@ -951,97 +1016,32 @@ components:
               description: List of database resources to link with this database
               items:
                 $ref: '#/components/schemas/LinkedDatabase'
-    ImportClusterParameters:
-      title: Import RDB files into a target database
+    ClusterList:
       type: object
       properties:
-        sasUris:
+        value:
           type: array
           items:
-            type: string
-          description: SAS URIs for the target blobs to import from
-          x-ms-secret: true
-      required:
-      - sasUris
-      description: Parameters for a Redis Enterprise import operation.
-    ProvisioningState:
-      type: string
-      readOnly: true
-      description: Current provisioning status
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Creating
-      - Updating
-      - Deleting
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    LinkedDatabase:
-      title: Linked Database
-      description: Specifies details of a linked database resource.
-      type: object
-      properties:
-        id:
+            $ref: '#/components/schemas/Cluster'
+          description: List of clusters.
+        nextLink:
           type: string
-          format: arm-id
-          x-ms-arm-id-details:
-            allowedResources:
-            - type: Microsoft.Cache/redisEnterprise/databases
-          x-ms-mutability:
-          - read
-          - create
-          description: Resource ID of a database resource to link with this database.
-        state:
-          type: string
-          description: State of the link between the database resources.
-          enum:
-          - Linked
-          - Linking
-          - Unlinking
-          - LinkFailed
-          - UnlinkFailed
-          x-ms-enum:
-            name: LinkState
-            modelAsString: true
           readOnly: true
-    ForceUnlinkParameters:
-      title: Forcibly unlink another database from this database.
+          description: The URI to fetch the next page of results.
+      description: The response of a list-all operation.
+    AccessKeys:
+      title: Access keys
+      description: The secret access keys used for authenticating connections to redis
       type: object
       properties:
-        ids:
-          type: array
-          items:
-            type: string
-            format: arm-id
-            x-ms-arm-id-details:
-              allowedResources:
-              - type: Microsoft.Cache/redisEnterprise/databases
-          description: The resource IDs of the database resources to be unlinked.
-      required:
-      - ids
-      description: Parameters for a Redis Enterprise Active Geo Replication Force Unlink operation.
-    ClusterUpdate:
-      description: A partial update to the RedisEnterprise cluster
-      type: object
-      properties:
-        sku:
-          $ref: '#/components/schemas/Sku'
-          description: The SKU to create, which affects price, performance, and features.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ClusterProperties'
-          description: Other properties of the cluster.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          x-ms-mutability:
-          - read
-          - create
-          - update
-          description: Resource tags.
+        primaryKey:
+          readOnly: true
+          type: string
+          description: The current primary key that clients can use to authenticate
+        secondaryKey:
+          readOnly: true
+          type: string
+          description: The current secondary key that clients can use to authenticate
   parameters:
     DatabaseNameParameter:
       name: databaseName

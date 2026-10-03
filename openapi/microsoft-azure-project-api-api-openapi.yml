@@ -1202,31 +1202,6 @@ paths:
     - url: https://southcentralus.api.cognitive.microsoft.com/customvision/v3.3/training
 components:
   schemas:
-    TrainingParameters:
-      description: Parameters used for training.
-      type: object
-      properties:
-        selectedTags:
-          description: List of tags selected for this training session, other tags in the project will be ignored.
-          type: array
-          items:
-            format: uuid
-            type: string
-          readOnly: false
-    ImageTag:
-      type: object
-      properties:
-        tagId:
-          format: uuid
-          type: string
-          readOnly: true
-        tagName:
-          type: string
-          readOnly: true
-        created:
-          format: date-time
-          type: string
-          readOnly: true
     CustomVisionError:
       required:
       - code
@@ -1373,6 +1348,57 @@ components:
         message:
           description: A message explaining the error reported by the service.
           type: string
+    ImageProcessingSettings:
+      description: Represents image preprocessing settings used by image augmentation.
+      type: object
+      properties:
+        augmentationMethods:
+          description: 'Gets or sets enabled image transforms. The key corresponds to the transform name. If value is set to true, then correspondent transform is enabled. Otherwise this transform will not be used.
+
+            Augmentation will be uniformly distributed among enabled transforms.'
+          type:
+          - object
+          - 'null'
+          additionalProperties:
+            type: boolean
+          readOnly: false
+    Prediction:
+      description: Prediction result.
+      type: object
+      properties:
+        probability:
+          format: float
+          description: Probability of the tag.
+          type: number
+          readOnly: true
+        tagId:
+          format: uuid
+          description: Id of the predicted tag.
+          type: string
+          readOnly: true
+        tagName:
+          description: Name of the predicted tag.
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        boundingBox:
+          $ref: '#/components/schemas/BoundingBox'
+          description: Bounding box of the prediction.
+          readOnly: true
+        tagType:
+          description: Type of the predicted tag.
+          enum:
+          - Regular
+          - Negative
+          - GeneralProduct
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          x-ms-enum:
+            name: TagType
+            modelAsString: true
     ProjectSettings:
       description: Represents settings associated with a project.
       type: object
@@ -1420,43 +1446,134 @@ components:
           $ref: '#/components/schemas/ImageProcessingSettings'
           description: Gets or sets image preprocessing settings.
           readOnly: false
-    Prediction:
-      description: Prediction result.
+    TagPerformance:
+      description: Represents performance data for a particular tag in a trained iteration.
       type: object
       properties:
-        probability:
+        id:
+          format: uuid
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        precision:
           format: float
-          description: Probability of the tag.
+          description: Gets the precision.
           type: number
           readOnly: true
+        precisionStdDeviation:
+          format: float
+          description: Gets the standard deviation for the precision.
+          type: number
+          readOnly: true
+        recall:
+          format: float
+          description: Gets the recall.
+          type: number
+          readOnly: true
+        recallStdDeviation:
+          format: float
+          description: Gets the standard deviation for the recall.
+          type: number
+          readOnly: true
+        averagePrecision:
+          format: float
+          description: Gets the average precision when applicable.
+          type:
+          - number
+          - 'null'
+          readOnly: true
+    ImagePerformance:
+      description: Image performance model.
+      type: object
+      properties:
+        predictions:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/Prediction'
+          readOnly: true
+        id:
+          format: uuid
+          type: string
+          readOnly: true
+        created:
+          format: date-time
+          type: string
+          readOnly: true
+        width:
+          format: int32
+          type: integer
+          readOnly: true
+        height:
+          format: int32
+          type: integer
+          readOnly: true
+        imageUri:
+          type: string
+          readOnly: true
+        thumbnailUri:
+          type: string
+          readOnly: true
+        tags:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTag'
+          readOnly: true
+        regions:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageRegion'
+          readOnly: true
+    ImageTag:
+      type: object
+      properties:
         tagId:
           format: uuid
-          description: Id of the predicted tag.
           type: string
           readOnly: true
         tagName:
-          description: Name of the predicted tag.
-          type:
-          - string
-          - 'null'
+          type: string
           readOnly: true
-        boundingBox:
-          $ref: '#/components/schemas/BoundingBox'
-          description: Bounding box of the prediction.
+        created:
+          format: date-time
+          type: string
           readOnly: true
-        tagType:
-          description: Type of the predicted tag.
-          enum:
-          - Regular
-          - Negative
-          - GeneralProduct
-          type:
-          - string
-          - 'null'
-          readOnly: true
-          x-ms-enum:
-            name: TagType
-            modelAsString: true
+    BoundingBox:
+      description: Bounding box that defines a region of an image.
+      required:
+      - left
+      - top
+      - width
+      - height
+      type: object
+      properties:
+        left:
+          format: float
+          description: Coordinate of the left boundary.
+          type: number
+          readOnly: false
+        top:
+          format: float
+          description: Coordinate of the top boundary.
+          type: number
+          readOnly: false
+        width:
+          format: float
+          description: Width.
+          type: number
+          readOnly: false
+        height:
+          format: float
+          description: Height.
+          type: number
+          readOnly: false
     ProjectExport:
       description: Represents information about a project export.
       type: object
@@ -1494,100 +1611,74 @@ components:
             project to all that have the token.'
           type: string
           readOnly: true
-    Project:
-      description: Represents a project.
-      required:
-      - name
-      - description
-      - settings
+    TrainingParameters:
+      description: Parameters used for training.
       type: object
       properties:
-        id:
-          format: uuid
-          description: Gets the project id.
+        selectedTags:
+          description: List of tags selected for this training session, other tags in the project will be ignored.
+          type: array
+          items:
+            format: uuid
+            type: string
+          readOnly: false
+    Export:
+      type: object
+      properties:
+        platform:
+          description: Platform of the export.
+          enum:
+          - CoreML
+          - TensorFlow
+          - DockerFile
+          - ONNX
+          - VAIDK
           type: string
           readOnly: true
-        name:
-          description: Gets or sets the name of the project.
+          x-ms-enum:
+            name: ExportPlatform
+            modelAsString: true
+        status:
+          description: Status of the export.
+          enum:
+          - Exporting
+          - Failed
+          - Done
           type: string
-          readOnly: false
-        description:
-          description: Gets or sets the description of the project.
+          readOnly: true
+          x-ms-enum:
+            name: ExportStatus
+            modelAsString: true
+        downloadUri:
+          description: URI used to download the model. If VNET feature is enabled this will be a relative path to be used with GetArtifact, otherwise this will be an absolute URI to the resource.
+          type: string
+          readOnly: true
+        flavor:
+          description: 'Flavor of the export. These are specializations of the export platform.
+
+            Docker platform has valid flavors: Linux, Windows, ARM.
+
+            Tensorflow platform has valid flavors: TensorFlowNormal, TensorFlowLite.
+
+            ONNX platform has valid flavors: ONNX10, ONNX12.'
+          enum:
+          - Linux
+          - Windows
+          - ONNX10
+          - ONNX12
+          - ARM
+          - TensorFlowNormal
+          - TensorFlowLite
           type:
           - string
           - 'null'
-          readOnly: false
-        settings:
-          $ref: '#/components/schemas/ProjectSettings'
-          description: Gets or sets the project settings.
-          readOnly: false
-        created:
-          format: date-time
-          description: Gets the date this project was created.
-          type: string
           readOnly: true
-        lastModified:
-          format: date-time
-          description: Gets the date this project was last modified.
-          type: string
-          readOnly: true
-        thumbnailUri:
-          description: Gets the thumbnail url representing the image. If VNET feature is enabled this will be a relative path to be used with GetArtifact, otherwise this will be an absolute URI to the resource.
-          type: string
-          readOnly: true
-        drModeEnabled:
-          description: Gets if the Disaster Recovery (DR) mode is on, indicating the project is temporarily read-only.
-          type:
-          - boolean
-          - 'null'
-          readOnly: true
-        status:
-          description: Gets the status of the project.
-          enum:
-          - Succeeded
-          - Importing
-          - Failed
-          type: string
-          readOnly: false
           x-ms-enum:
-            name: ProjectStatus
+            name: ExportFlavor
             modelAsString: true
-    IterationPerformance:
-      description: Represents the detailed performance data for a trained iteration.
-      type: object
-      properties:
-        perTagPerformance:
-          description: Gets the per-tag performance details for this iteration.
-          type: array
-          items:
-            $ref: '#/components/schemas/TagPerformance'
-          readOnly: true
-        precision:
-          format: float
-          description: Gets the precision.
-          type: number
-          readOnly: true
-        precisionStdDeviation:
-          format: float
-          description: Gets the standard deviation for the precision.
-          type: number
-          readOnly: true
-        recall:
-          format: float
-          description: Gets the recall.
-          type: number
-          readOnly: true
-        recallStdDeviation:
-          format: float
-          description: Gets the standard deviation for the recall.
-          type: number
-          readOnly: true
-        averagePrecision:
-          format: float
-          description: Gets the average precision when applicable.
-          type:
-          - number
-          - 'null'
+        newerVersionAvailable:
+          description: Indicates an updated version of the export package is available and should be re-exported for the latest changes.
+          type: boolean
           readOnly: true
     Iteration:
       description: Iteration model to be sent over JSON.
@@ -1693,140 +1784,101 @@ components:
           description: Resource Provider Id this iteration was originally published to.
           type: string
           readOnly: true
-    BoundingBox:
-      description: Bounding box that defines a region of an image.
+    IterationPerformance:
+      description: Represents the detailed performance data for a trained iteration.
+      type: object
+      properties:
+        perTagPerformance:
+          description: Gets the per-tag performance details for this iteration.
+          type: array
+          items:
+            $ref: '#/components/schemas/TagPerformance'
+          readOnly: true
+        precision:
+          format: float
+          description: Gets the precision.
+          type: number
+          readOnly: true
+        precisionStdDeviation:
+          format: float
+          description: Gets the standard deviation for the precision.
+          type: number
+          readOnly: true
+        recall:
+          format: float
+          description: Gets the recall.
+          type: number
+          readOnly: true
+        recallStdDeviation:
+          format: float
+          description: Gets the standard deviation for the recall.
+          type: number
+          readOnly: true
+        averagePrecision:
+          format: float
+          description: Gets the average precision when applicable.
+          type:
+          - number
+          - 'null'
+          readOnly: true
+    Project:
+      description: Represents a project.
       required:
-      - left
-      - top
-      - width
-      - height
+      - name
+      - description
+      - settings
       type: object
       properties:
-        left:
-          format: float
-          description: Coordinate of the left boundary.
-          type: number
-          readOnly: false
-        top:
-          format: float
-          description: Coordinate of the top boundary.
-          type: number
-          readOnly: false
-        width:
-          format: float
-          description: Width.
-          type: number
-          readOnly: false
-        height:
-          format: float
-          description: Height.
-          type: number
-          readOnly: false
-    Export:
-      type: object
-      properties:
-        platform:
-          description: Platform of the export.
-          enum:
-          - CoreML
-          - TensorFlow
-          - DockerFile
-          - ONNX
-          - VAIDK
+        id:
+          format: uuid
+          description: Gets the project id.
           type: string
           readOnly: true
-          x-ms-enum:
-            name: ExportPlatform
-            modelAsString: true
-        status:
-          description: Status of the export.
-          enum:
-          - Exporting
-          - Failed
-          - Done
+        name:
+          description: Gets or sets the name of the project.
           type: string
-          readOnly: true
-          x-ms-enum:
-            name: ExportStatus
-            modelAsString: true
-        downloadUri:
-          description: URI used to download the model. If VNET feature is enabled this will be a relative path to be used with GetArtifact, otherwise this will be an absolute URI to the resource.
-          type: string
-          readOnly: true
-        flavor:
-          description: 'Flavor of the export. These are specializations of the export platform.
-
-            Docker platform has valid flavors: Linux, Windows, ARM.
-
-            Tensorflow platform has valid flavors: TensorFlowNormal, TensorFlowLite.
-
-            ONNX platform has valid flavors: ONNX10, ONNX12.'
-          enum:
-          - Linux
-          - Windows
-          - ONNX10
-          - ONNX12
-          - ARM
-          - TensorFlowNormal
-          - TensorFlowLite
+          readOnly: false
+        description:
+          description: Gets or sets the description of the project.
           type:
           - string
           - 'null'
-          readOnly: true
-          x-ms-enum:
-            name: ExportFlavor
-            modelAsString: true
-        newerVersionAvailable:
-          description: Indicates an updated version of the export package is available and should be re-exported for the latest changes.
-          type: boolean
-          readOnly: true
-    ImagePerformance:
-      description: Image performance model.
-      type: object
-      properties:
-        predictions:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/Prediction'
-          readOnly: true
-        id:
-          format: uuid
-          type: string
-          readOnly: true
+          readOnly: false
+        settings:
+          $ref: '#/components/schemas/ProjectSettings'
+          description: Gets or sets the project settings.
+          readOnly: false
         created:
           format: date-time
+          description: Gets the date this project was created.
           type: string
           readOnly: true
-        width:
-          format: int32
-          type: integer
-          readOnly: true
-        height:
-          format: int32
-          type: integer
-          readOnly: true
-        imageUri:
+        lastModified:
+          format: date-time
+          description: Gets the date this project was last modified.
           type: string
           readOnly: true
         thumbnailUri:
+          description: Gets the thumbnail url representing the image. If VNET feature is enabled this will be a relative path to be used with GetArtifact, otherwise this will be an absolute URI to the resource.
           type: string
           readOnly: true
-        tags:
+        drModeEnabled:
+          description: Gets if the Disaster Recovery (DR) mode is on, indicating the project is temporarily read-only.
           type:
-          - array
+          - boolean
           - 'null'
-          items:
-            $ref: '#/components/schemas/ImageTag'
           readOnly: true
-        regions:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageRegion'
-          readOnly: true
+        status:
+          description: Gets the status of the project.
+          enum:
+          - Succeeded
+          - Importing
+          - Failed
+          type: string
+          readOnly: false
+          x-ms-enum:
+            name: ProjectStatus
+            modelAsString: true
     ImageRegion:
       required:
       - tagId
@@ -1872,63 +1924,15 @@ components:
           description: Height.
           type: number
           readOnly: false
-    ImageProcessingSettings:
-      description: Represents image preprocessing settings used by image augmentation.
-      type: object
-      properties:
-        augmentationMethods:
-          description: 'Gets or sets enabled image transforms. The key corresponds to the transform name. If value is set to true, then correspondent transform is enabled. Otherwise this transform will not be used.
-
-            Augmentation will be uniformly distributed among enabled transforms.'
-          type:
-          - object
-          - 'null'
-          additionalProperties:
-            type: boolean
-          readOnly: false
-    TagPerformance:
-      description: Represents performance data for a particular tag in a trained iteration.
-      type: object
-      properties:
-        id:
-          format: uuid
-          type: string
-          readOnly: true
-        name:
-          type: string
-          readOnly: true
-        precision:
-          format: float
-          description: Gets the precision.
-          type: number
-          readOnly: true
-        precisionStdDeviation:
-          format: float
-          description: Gets the standard deviation for the precision.
-          type: number
-          readOnly: true
-        recall:
-          format: float
-          description: Gets the recall.
-          type: number
-          readOnly: true
-        recallStdDeviation:
-          format: float
-          description: Gets the standard deviation for the recall.
-          type: number
-          readOnly: true
-        averagePrecision:
-          format: float
-          description: Gets the average precision when applicable.
-          type:
-          - number
-          - 'null'
-          readOnly: true
-    ImageTag_2:
+    Prediction_2:
       type:
       - object
       - 'null'
       properties:
+        probability:
+          format: float
+          type: number
+          readOnly: true
         tagId:
           format: uuid
           type: string
@@ -1938,9 +1942,8 @@ components:
           - string
           - 'null'
           readOnly: true
-        created:
-          format: date-time
-          type: string
+        boundingBox:
+          $ref: '#/components/schemas/BoundingBox_2'
           readOnly: true
     ProjectSettings_2:
       description: Represents settings associated with a project
@@ -1963,80 +1966,20 @@ components:
           x-ms-enum:
             name: Classifier
             modelAsString: true
-    Prediction_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        probability:
-          format: float
-          type: number
-          readOnly: true
-        tagId:
-          format: uuid
-          type: string
-          readOnly: true
-        tagName:
-          type:
-          - string
-          - 'null'
-          readOnly: true
-        boundingBox:
-          $ref: '#/components/schemas/BoundingBox_2'
-          readOnly: true
-    Project_2:
-      description: Represents a project
+    TagPerformance_2:
+      description: Represents performance data for a particular tag in a trained iteration
       type:
       - object
       - 'null'
       properties:
         id:
           format: uuid
-          description: Gets the project id
           type: string
           readOnly: true
         name:
-          description: Gets or sets the name of the project
           type:
           - string
           - 'null'
-        description:
-          description: Gets or sets the description of the project
-          type:
-          - string
-          - 'null'
-        settings:
-          $ref: '#/components/schemas/ProjectSettings_2'
-          description: Gets or sets the project settings
-        created:
-          format: date-time
-          description: Gets the date this project was created
-          type: string
-          readOnly: true
-        lastModified:
-          format: date-time
-          description: Gets the date this project was last modified
-          type: string
-          readOnly: true
-        thumbnailUri:
-          description: Gets the thumbnail url representing the project
-          type:
-          - string
-          - 'null'
-          readOnly: true
-    IterationPerformance_2:
-      description: Represents the detailed performance data for a trained iteration
-      type:
-      - object
-      - 'null'
-      properties:
-        perTagPerformance:
-          description: Gets the per-tag performance details for this iteration
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/TagPerformance_2'
           readOnly: true
         precision:
           format: float
@@ -2064,6 +2007,139 @@ components:
           type:
           - number
           - 'null'
+          readOnly: true
+    ImagePerformance_2:
+      description: Image performance model
+      type:
+      - object
+      - 'null'
+      properties:
+        predictions:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/Prediction_2'
+          readOnly: true
+        id:
+          format: uuid
+          type: string
+          readOnly: true
+        created:
+          format: date-time
+          type: string
+          readOnly: true
+        width:
+          format: int32
+          type: integer
+          readOnly: true
+        height:
+          format: int32
+          type: integer
+          readOnly: true
+        imageUri:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        thumbnailUri:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        tags:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTag_2'
+          readOnly: true
+        regions:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageRegion_2'
+          readOnly: true
+    ImageTag_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        tagId:
+          format: uuid
+          type: string
+          readOnly: true
+        tagName:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        created:
+          format: date-time
+          type: string
+          readOnly: true
+    BoundingBox_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        left:
+          format: float
+          type: number
+        top:
+          format: float
+          type: number
+        width:
+          format: float
+          type: number
+        height:
+          format: float
+          type: number
+    Export_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        platform:
+          enum:
+          - CoreML
+          - TensorFlow
+          - DockerFile
+          - ONNX
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: ExportPlatform
+            modelAsString: true
+        status:
+          enum:
+          - Exporting
+          - Failed
+          - Done
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: ExportStatusModel
+            modelAsString: true
+        downloadUri:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        flavor:
+          enum:
+          - Linux
+          - Windows
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          x-ms-enum:
+            name: ExportFlavor
+            modelAsString: true
+        newerVersionAvailable:
+          type: boolean
           readOnly: true
     Iteration_2:
       description: Iteration model to be sent over JSON
@@ -2135,120 +2211,86 @@ components:
           x-ms-enum:
             name: Classifier
             modelAsString: true
-    BoundingBox_2:
+    IterationPerformance_2:
+      description: Represents the detailed performance data for a trained iteration
       type:
       - object
       - 'null'
       properties:
-        left:
-          format: float
-          type: number
-        top:
-          format: float
-          type: number
-        width:
-          format: float
-          type: number
-        height:
-          format: float
-          type: number
-    Export_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        platform:
-          enum:
-          - CoreML
-          - TensorFlow
-          - DockerFile
-          - ONNX
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: ExportPlatform
-            modelAsString: true
-        status:
-          enum:
-          - Exporting
-          - Failed
-          - Done
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: ExportStatusModel
-            modelAsString: true
-        downloadUri:
-          type:
-          - string
-          - 'null'
-          readOnly: true
-        flavor:
-          enum:
-          - Linux
-          - Windows
-          type:
-          - string
-          - 'null'
-          readOnly: true
-          x-ms-enum:
-            name: ExportFlavor
-            modelAsString: true
-        newerVersionAvailable:
-          type: boolean
-          readOnly: true
-    ImagePerformance_2:
-      description: Image performance model
-      type:
-      - object
-      - 'null'
-      properties:
-        predictions:
+        perTagPerformance:
+          description: Gets the per-tag performance details for this iteration
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/Prediction_2'
+            $ref: '#/components/schemas/TagPerformance_2'
           readOnly: true
+        precision:
+          format: float
+          description: Gets the precision
+          type: number
+          readOnly: true
+        precisionStdDeviation:
+          format: float
+          description: Gets the standard deviation for the precision
+          type: number
+          readOnly: true
+        recall:
+          format: float
+          description: Gets the recall
+          type: number
+          readOnly: true
+        recallStdDeviation:
+          format: float
+          description: Gets the standard deviation for the recall
+          type: number
+          readOnly: true
+        averagePrecision:
+          format: float
+          description: Gets the average precision when applicable
+          type:
+          - number
+          - 'null'
+          readOnly: true
+    Project_2:
+      description: Represents a project
+      type:
+      - object
+      - 'null'
+      properties:
         id:
           format: uuid
+          description: Gets the project id
           type: string
           readOnly: true
+        name:
+          description: Gets or sets the name of the project
+          type:
+          - string
+          - 'null'
+        description:
+          description: Gets or sets the description of the project
+          type:
+          - string
+          - 'null'
+        settings:
+          $ref: '#/components/schemas/ProjectSettings_2'
+          description: Gets or sets the project settings
         created:
           format: date-time
+          description: Gets the date this project was created
           type: string
           readOnly: true
-        width:
-          format: int32
-          type: integer
-          readOnly: true
-        height:
-          format: int32
-          type: integer
-          readOnly: true
-        imageUri:
-          type:
-          - string
-          - 'null'
+        lastModified:
+          format: date-time
+          description: Gets the date this project was last modified
+          type: string
           readOnly: true
         thumbnailUri:
+          description: Gets the thumbnail url representing the project
           type:
           - string
           - 'null'
-          readOnly: true
-        tags:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageTag_2'
-          readOnly: true
-        regions:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageRegion_2'
           readOnly: true
     ImageRegion_2:
       type:
@@ -2283,48 +2325,6 @@ components:
         height:
           format: float
           type: number
-    TagPerformance_2:
-      description: Represents performance data for a particular tag in a trained iteration
-      type:
-      - object
-      - 'null'
-      properties:
-        id:
-          format: uuid
-          type: string
-          readOnly: true
-        name:
-          type:
-          - string
-          - 'null'
-          readOnly: true
-        precision:
-          format: float
-          description: Gets the precision
-          type: number
-          readOnly: true
-        precisionStdDeviation:
-          format: float
-          description: Gets the standard deviation for the precision
-          type: number
-          readOnly: true
-        recall:
-          format: float
-          description: Gets the recall
-          type: number
-          readOnly: true
-        recallStdDeviation:
-          format: float
-          description: Gets the standard deviation for the recall
-          type: number
-          readOnly: true
-        averagePrecision:
-          format: float
-          description: Gets the average precision when applicable
-          type:
-          - number
-          - 'null'
-          readOnly: true
   parameters:
     ApiKey:
       name: Training-Key

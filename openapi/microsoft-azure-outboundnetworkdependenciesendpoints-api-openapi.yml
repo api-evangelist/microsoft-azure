@@ -73,12 +73,27 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    ExternalFQDNResponse:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/FQDNEndpointsPropertyBag'
+          x-ms-identifiers:
+          - /properties/category
     FQDNEndpointsPropertyBag:
       description: Property bag for FQDN endpoints result
       type: object
       properties:
         properties:
           $ref: '#/components/schemas/FQDNEndpoints'
+    FQDNEndpointDetail:
+      type: object
+      properties:
+        port:
+          format: int32
+          type: integer
     FQDNEndpoints:
       type: object
       properties:
@@ -90,21 +105,6 @@ components:
             $ref: '#/components/schemas/FQDNEndpoint'
           x-ms-identifiers:
           - domainName
-    ExternalFQDNResponse:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/FQDNEndpointsPropertyBag'
-          x-ms-identifiers:
-          - /properties/category
-    FQDNEndpointDetail:
-      type: object
-      properties:
-        port:
-          format: int32
-          type: integer
     FQDNEndpoint:
       type: object
       properties:
@@ -126,30 +126,32 @@ components:
           $ref: '#/components/schemas/ErrorInfo'
       required:
       - error
-    EndpointDetail:
-      description: Connect information from the Workspace to a single endpoint.
+    OutboundEnvironmentEndpoint:
+      description: Egress endpoints which Workspace connects to for common purposes.
       type: object
       properties:
-        ipAddress:
-          description: An IP Address that Domain Name currently resolves to.
+        category:
+          description: The category of endpoints accessed by the Workspace, e.g. azure-storage, azure-mysql, etc.
           type: string
-        port:
-          format: int32
-          description: The port an endpoint is connected to.
-          type: integer
-        latency:
-          format: double
-          description: The time in milliseconds it takes for the connection to be created from the Workspace to this IpAddress at this Port.
-          type: number
-        isAccessible:
-          description: Whether it is possible to create a connection from the Workspace to this IpAddress at this Port.
-          type: boolean
-    OutboundEnvironmentEndpointCollection:
-      description: Collection of outbound network dependency endpoints
-      type: array
-      x-ms-identifiers: []
-      items:
-        $ref: '#/components/schemas/OutboundEnvironmentEndpoint'
+        endpoints:
+          description: The endpoints that Workspace connect to
+          type: array
+          x-ms-identifiers: []
+          items:
+            $ref: '#/components/schemas/EndpointDependency'
+    EndpointDependency:
+      description: A domain name or IP address the Workspace is reaching at.
+      type: object
+      properties:
+        domainName:
+          description: The domain name of the dependency.
+          type: string
+        endpointDetails:
+          description: The Ports used when connecting to domainName.
+          type: array
+          x-ms-identifiers: []
+          items:
+            $ref: '#/components/schemas/EndpointDetail'
     ErrorInfo:
       title: The code and message for an error.
       type: object
@@ -187,32 +189,30 @@ components:
       required:
       - code
       - message
-    EndpointDependency:
-      description: A domain name or IP address the Workspace is reaching at.
+    OutboundEnvironmentEndpointCollection:
+      description: Collection of outbound network dependency endpoints
+      type: array
+      x-ms-identifiers: []
+      items:
+        $ref: '#/components/schemas/OutboundEnvironmentEndpoint'
+    EndpointDetail:
+      description: Connect information from the Workspace to a single endpoint.
       type: object
       properties:
-        domainName:
-          description: The domain name of the dependency.
+        ipAddress:
+          description: An IP Address that Domain Name currently resolves to.
           type: string
-        endpointDetails:
-          description: The Ports used when connecting to domainName.
-          type: array
-          x-ms-identifiers: []
-          items:
-            $ref: '#/components/schemas/EndpointDetail'
-    OutboundEnvironmentEndpoint:
-      description: Egress endpoints which Workspace connects to for common purposes.
-      type: object
-      properties:
-        category:
-          description: The category of endpoints accessed by the Workspace, e.g. azure-storage, azure-mysql, etc.
-          type: string
-        endpoints:
-          description: The endpoints that Workspace connect to
-          type: array
-          x-ms-identifiers: []
-          items:
-            $ref: '#/components/schemas/EndpointDependency'
+        port:
+          format: int32
+          description: The port an endpoint is connected to.
+          type: integer
+        latency:
+          format: double
+          description: The time in milliseconds it takes for the connection to be created from the Workspace to this IpAddress at this Port.
+          type: number
+        isAccessible:
+          description: Whether it is possible to create a connection from the Workspace to this IpAddress at this Port.
+          type: boolean
   parameters:
     WorkspaceNameParameter:
       in: path
@@ -230,16 +230,6 @@ components:
       description: The API version to use for this operation.
       schema:
         type: string
-    WorkspaceName:
-      name: workspaceName
-      in: path
-      required: true
-      description: The name of the workspace.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
     ResourceGroupName:
       name: resourceGroupName
       in: path
@@ -251,6 +241,16 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+$
+    WorkspaceName:
+      name: workspaceName
+      in: path
+      required: true
+      description: The name of the workspace.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
     SubscriptionIdParameter:
       name: subscriptionId
       in: path

@@ -287,19 +287,48 @@ paths:
       summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ExtendedLocationProperty:
+    DataLakeConnectorMap:
       type: object
-      description: ExtendedLocation properties
+      description: DataLake connector map route properties
       properties:
-        name:
+        allowedLatencySecs:
+          type: integer
+          format: int32
+          description: Allowed latency for transferring data.
+          minimum: 0
+          maximum: 65535
+        clientId:
           type: string
-          description: The name of the extended location.
-        type:
-          $ref: '#/components/schemas/ExtendedLocationType'
-          description: Type of ExtendedLocation.
+          description: Client Id to use.
+        maxMessagesPerBatch:
+          type: integer
+          format: int64
+          description: Maximum messages to send per Batch.
+          minimum: 0
+          maximum: 4294967295
+        messagePayloadType:
+          type: string
+          description: Message payload type.
+        mqttSourceTopic:
+          type: string
+          description: Mqtt source topic.
+        qos:
+          type: integer
+          format: int32
+          description: Quality of Service.
+          default: 1
+          minimum: 0
+          maximum: 2
+        table:
+          $ref: '#/components/schemas/DeltaTable'
+          description: Delta table properties to use.
       required:
-      - name
-      - type
+      - allowedLatencySecs
+      - clientId
+      - maxMessagesPerBatch
+      - messagePayloadType
+      - mqttSourceTopic
+      - table
     DataLakeTopicMapResourceUpdate:
       type: object
       description: The type used for update operations of the DataLakeTopicMapResource.
@@ -312,6 +341,75 @@ components:
         properties:
           $ref: '#/components/schemas/DataLakeTopicMapResourceUpdateProperties'
           x-ms-client-flatten: true
+    ExtendedLocationType:
+      type: string
+      description: The enum defining type of ExtendedLocation accepted.
+      enum:
+      - CustomLocation
+      x-ms-enum:
+        name: ExtendedLocationType
+        modelAsString: true
+        values:
+        - name: CustomLocation
+          value: CustomLocation
+          description: CustomLocation type
+    ProvisioningState:
+      type: string
+      description: The enum defining status of resource.
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Updating
+      - Deleting
+      - Accepted
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+        values:
+        - name: Succeeded
+          value: Succeeded
+          description: Resource has been created.
+        - name: Failed
+          value: Failed
+          description: Resource creation failed.
+        - name: Canceled
+          value: Canceled
+          description: Resource creation was canceled.
+        - name: Provisioning
+          value: Provisioning
+          description: Resource is getting provisioned.
+        - name: Updating
+          value: Updating
+          description: Resource is Updating.
+        - name: Deleting
+          value: Deleting
+          description: Resource is Deleting.
+        - name: Accepted
+          value: Accepted
+          description: Resource has been Accepted.
+    DeltaTableSchema:
+      type: object
+      description: Delta table schema properties
+      properties:
+        format:
+          $ref: '#/components/schemas/DeltaTableFormatEnum'
+          description: Delta table format supported.
+        mapping:
+          type: string
+          description: Delta table schema mapping.
+        name:
+          type: string
+          description: Delta table schema name.
+        optional:
+          type: boolean
+          description: Delta table schema optional.
+      required:
+      - format
+      - mapping
+      - name
+      - optional
     DeltaTableFormatEnum:
       type: string
       description: Delta table format properties
@@ -380,21 +478,27 @@ components:
         - name: utf8
           value: utf8
           description: UTF8 format
-    DataLakeTopicMapResourceListResult:
+    DataLakeTopicMapResource:
       type: object
-      description: The response of a DataLakeTopicMapResource list operation.
+      description: MQ dataLakeConnector/topicMap resource
       properties:
-        value:
-          type: array
-          description: The DataLakeTopicMapResource items on this page
-          items:
-            $ref: '#/components/schemas/DataLakeTopicMapResource'
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
+        properties:
+          $ref: '#/components/schemas/DataLakeConnectorTopicMapProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocationProperty'
+          description: Extended Location
+          x-ms-mutability:
+          - read
+          - create
       required:
-      - value
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
     DataLakeTopicMapResourceUpdateProperties:
       type: object
       description: The updatable properties of the DataLakeTopicMapResource.
@@ -405,6 +509,39 @@ components:
         mapping:
           $ref: '#/components/schemas/DataLakeConnectorMapUpdate'
           description: TopicMap for DataLake connector.
+    DataLakeConnectorTopicMapProperties:
+      type: object
+      description: MQ DataLakeConnector TopicMap Resource properties
+      properties:
+        dataLakeConnectorRef:
+          type: string
+          description: DataLake Connector CRD to use.
+        mapping:
+          $ref: '#/components/schemas/DataLakeConnectorMap'
+          description: TopicMap for DataLake connector.
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
+      required:
+      - dataLakeConnectorRef
+      - mapping
+    DeltaTableUpdate:
+      type: object
+      description: Delta table properties
+      properties:
+        schema:
+          type: array
+          description: Schema list supported.
+          items:
+            $ref: '#/components/schemas/DeltaTableSchema'
+          x-ms-identifiers: []
+        tableName:
+          type: string
+          description: Delta table name.
+        tablePath:
+          type: string
+          description: Delta table path.
     DataLakeConnectorMapUpdate:
       type: object
       description: DataLake connector map route properties
@@ -440,105 +577,34 @@ components:
         table:
           $ref: '#/components/schemas/DeltaTableUpdate'
           description: Delta table properties to use.
-    DataLakeConnectorMap:
+    ExtendedLocationProperty:
       type: object
-      description: DataLake connector map route properties
+      description: ExtendedLocation properties
       properties:
-        allowedLatencySecs:
-          type: integer
-          format: int32
-          description: Allowed latency for transferring data.
-          minimum: 0
-          maximum: 65535
-        clientId:
+        name:
           type: string
-          description: Client Id to use.
-        maxMessagesPerBatch:
-          type: integer
-          format: int64
-          description: Maximum messages to send per Batch.
-          minimum: 0
-          maximum: 4294967295
-        messagePayloadType:
-          type: string
-          description: Message payload type.
-        mqttSourceTopic:
-          type: string
-          description: Mqtt source topic.
-        qos:
-          type: integer
-          format: int32
-          description: Quality of Service.
-          default: 1
-          minimum: 0
-          maximum: 2
-        table:
-          $ref: '#/components/schemas/DeltaTable'
-          description: Delta table properties to use.
+          description: The name of the extended location.
+        type:
+          $ref: '#/components/schemas/ExtendedLocationType'
+          description: Type of ExtendedLocation.
       required:
-      - allowedLatencySecs
-      - clientId
-      - maxMessagesPerBatch
-      - messagePayloadType
-      - mqttSourceTopic
-      - table
-    DataLakeTopicMapResource:
+      - name
+      - type
+    DataLakeTopicMapResourceListResult:
       type: object
-      description: MQ dataLakeConnector/topicMap resource
+      description: The response of a DataLakeTopicMapResource list operation.
       properties:
-        properties:
-          $ref: '#/components/schemas/DataLakeConnectorTopicMapProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocationProperty'
-          description: Extended Location
-          x-ms-mutability:
-          - read
-          - create
+        value:
+          type: array
+          description: The DataLakeTopicMapResource items on this page
+          items:
+            $ref: '#/components/schemas/DataLakeTopicMapResource'
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
       required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    ProvisioningState:
-      type: string
-      description: The enum defining status of resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Updating
-      - Deleting
-      - Accepted
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-        values:
-        - name: Succeeded
-          value: Succeeded
-          description: Resource has been created.
-        - name: Failed
-          value: Failed
-          description: Resource creation failed.
-        - name: Canceled
-          value: Canceled
-          description: Resource creation was canceled.
-        - name: Provisioning
-          value: Provisioning
-          description: Resource is getting provisioned.
-        - name: Updating
-          value: Updating
-          description: Resource is Updating.
-        - name: Deleting
-          value: Deleting
-          description: Resource is Deleting.
-        - name: Accepted
-          value: Accepted
-          description: Resource has been Accepted.
+      - value
     DeltaTable:
       type: object
       description: Delta table properties
@@ -558,72 +624,6 @@ components:
       required:
       - schema
       - tableName
-    ExtendedLocationType:
-      type: string
-      description: The enum defining type of ExtendedLocation accepted.
-      enum:
-      - CustomLocation
-      x-ms-enum:
-        name: ExtendedLocationType
-        modelAsString: true
-        values:
-        - name: CustomLocation
-          value: CustomLocation
-          description: CustomLocation type
-    DataLakeConnectorTopicMapProperties:
-      type: object
-      description: MQ DataLakeConnector TopicMap Resource properties
-      properties:
-        dataLakeConnectorRef:
-          type: string
-          description: DataLake Connector CRD to use.
-        mapping:
-          $ref: '#/components/schemas/DataLakeConnectorMap'
-          description: TopicMap for DataLake connector.
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
-      required:
-      - dataLakeConnectorRef
-      - mapping
-    DeltaTableSchema:
-      type: object
-      description: Delta table schema properties
-      properties:
-        format:
-          $ref: '#/components/schemas/DeltaTableFormatEnum'
-          description: Delta table format supported.
-        mapping:
-          type: string
-          description: Delta table schema mapping.
-        name:
-          type: string
-          description: Delta table schema name.
-        optional:
-          type: boolean
-          description: Delta table schema optional.
-      required:
-      - format
-      - mapping
-      - name
-      - optional
-    DeltaTableUpdate:
-      type: object
-      description: Delta table properties
-      properties:
-        schema:
-          type: array
-          description: Schema list supported.
-          items:
-            $ref: '#/components/schemas/DeltaTableSchema'
-          x-ms-identifiers: []
-        tableName:
-          type: string
-          description: Delta table name.
-        tablePath:
-          type: string
-          description: Delta table path.
   securitySchemes:
     azure_auth:
       type: oauth2

@@ -356,21 +356,227 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    CloudError:
+    KeyVaultReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: arm-id
+          x-ms-arm-id-details:
+            allowedResources:
+            - type: Microsoft.KeyVault/vaults
+          description: The resource ID of the Azure key vault associated with the Batch account.
+        url:
+          type: string
+          description: The URL of the Azure key vault associated with the Batch account.
+      required:
+      - id
+      - url
+      description: Identifies the Azure key vault associated with a Batch account.
+    CloudErrorBody:
       type: object
       x-ms-external: true
       properties:
-        error:
-          description: The body of the error response.
-          $ref: '#/components/schemas/CloudErrorBody'
+        code:
+          type: string
+          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          type: string
+          description: A message describing the error, intended to be suitable for display in a user interface.
+        target:
+          type: string
+          description: The target of the particular error. For example, the name of the property in error.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody'
+          x-ms-identifiers:
+          - message
+          - target
+          description: A list of additional details about the error.
       description: An error response from the Batch service.
-    ComputeNodeIdentityReference:
+    AutoStorageBaseProperties:
       type: object
       properties:
-        resourceId:
+        storageAccountId:
           type: string
-          description: The ARM resource id of the user assigned identity.
-      description: The reference to a user assigned identity associated with the Batch pool which a compute node will use.
+          format: arm-id
+          x-ms-arm-id-details:
+            allowedResources:
+            - type: Microsoft.Storage/storageAccounts
+          description: The resource ID of the storage account to be used for auto-storage account.
+        authenticationMode:
+          type: string
+          description: The authentication mode which the Batch service will use to manage the auto-storage account.
+          default: StorageKeys
+          enum:
+          - StorageKeys
+          - BatchAccountManagedIdentity
+          x-ms-enum:
+            name: AutoStorageAuthenticationMode
+            modelAsString: false
+            values:
+            - value: StorageKeys
+              description: The Batch service will authenticate requests to auto-storage using storage account keys.
+            - value: BatchAccountManagedIdentity
+              description: The Batch service will authenticate requests to auto-storage using the managed identity assigned to the Batch account.
+        nodeIdentityReference:
+          title: The reference to the user assigned identity which compute nodes will use to access auto-storage.
+          description: The identity referenced here must be assigned to pools which have compute nodes that need access to auto-storage.
+          $ref: '#/components/schemas/ComputeNodeIdentityReference'
+      required:
+      - storageAccountId
+      description: The properties related to the auto-storage account.
+    UserAssignedIdentities:
+      type: object
+      description: The list of associated user identities.
+      properties:
+        principalId:
+          readOnly: true
+          type: string
+          description: The principal id of user assigned identity.
+        clientId:
+          readOnly: true
+          type: string
+          description: The client id of user assigned identity.
+    BatchAccountRegenerateKeyParameters:
+      type: object
+      properties:
+        keyName:
+          type: string
+          description: The type of account key to regenerate.
+          enum:
+          - Primary
+          - Secondary
+          x-ms-enum:
+            name: AccountKeyType
+            modelAsString: false
+            values:
+            - value: Primary
+              description: The primary account key.
+            - value: Secondary
+              description: The secondary account key.
+      required:
+      - keyName
+      description: Parameters supplied to the RegenerateKey operation.
+    AutoStorageProperties:
+      type: object
+      properties:
+        lastKeySync:
+          type: string
+          format: date-time
+          description: The UTC time at which storage keys were last synchronized with the Batch account.
+      required:
+      - lastKeySync
+      allOf:
+      - $ref: '#/components/schemas/AutoStorageBaseProperties'
+      description: Contains information about the auto-storage account associated with a Batch account.
+    BatchAccountUpdateProperties:
+      type: object
+      properties:
+        autoStorage:
+          $ref: '#/components/schemas/AutoStorageBaseProperties'
+          description: The properties related to the auto-storage account.
+        encryption:
+          title: The encryption configuration for the Batch account.
+          description: Configures how customer data is encrypted inside the Batch account. By default, accounts are encrypted using a Microsoft managed key. For additional control, a customer-managed key can be used instead.
+          $ref: '#/components/schemas/EncryptionProperties'
+        allowedAuthenticationModes:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AuthenticationMode'
+          description: List of allowed authentication modes for the Batch account that can be used to authenticate with the data plane. This does not affect authentication with the control plane.
+        publicNetworkAccess:
+          title: The network access type for accessing Azure Batch account.
+          description: If not specified, the default value is 'enabled'.
+          $ref: '#/components/schemas/PublicNetworkAccessType'
+        networkProfile:
+          title: Network profile for Batch account, which contains network rule settings for each endpoint.
+          description: The network profile only takes effect when publicNetworkAccess is enabled.
+          $ref: '#/components/schemas/NetworkProfile'
+      description: The properties of a Batch account.
+    PublicNetworkAccessType:
+      type: string
+      description: The network access type for operating on the resources in the Batch account.
+      default: Enabled
+      enum:
+      - Enabled
+      - Disabled
+      x-ms-enum:
+        name: PublicNetworkAccessType
+        modelAsString: false
+        values:
+        - value: Enabled
+          description: Enables connectivity to Azure Batch through public DNS.
+        - value: Disabled
+          description: Disables public connectivity and enables private connectivity to Azure Batch Service through private endpoint resource.
+    EncryptionProperties:
+      type: object
+      properties:
+        keySource:
+          type: string
+          description: Type of the key source.
+          enum:
+          - Microsoft.Batch
+          - Microsoft.KeyVault
+          x-ms-enum:
+            name: KeySource
+            modelAsString: false
+            values:
+            - value: Microsoft.Batch
+              description: Batch creates and manages the encryption keys used to protect the account data.
+            - value: Microsoft.KeyVault
+              description: The encryption keys used to protect the account data are stored in an external key vault. If this is set then the Batch Account identity must be set to `SystemAssigned` and a valid Key Identifier must also be supplied under the keyVaultProperties.
+        keyVaultProperties:
+          $ref: '#/components/schemas/KeyVaultProperties'
+          description: Additional details when using Microsoft.KeyVault
+      description: Configures how customer data is encrypted inside the Batch account. By default, accounts are encrypted using a Microsoft managed key. For additional control, a customer-managed key can be used instead.
+    EndpointDetail:
+      type: object
+      properties:
+        port:
+          type: integer
+          format: int32
+          readOnly: true
+          description: The port an endpoint is connected to.
+      description: Details about the connection between the Batch service and the endpoint.
+    EndpointAccessProfile:
+      type: object
+      properties:
+        defaultAction:
+          type: string
+          title: The default action when there is no IPRule matched.
+          description: Default action for endpoint access. It is only applicable when publicNetworkAccess is enabled.
+          enum:
+          - Allow
+          - Deny
+          x-ms-enum:
+            name: EndpointAccessDefaultAction
+            modelAsString: false
+            values:
+            - value: Allow
+              description: Allow client access.
+            - value: Deny
+              description: Deny client access.
+        ipRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/IPRule'
+          x-ms-identifiers:
+          - action
+          description: Array of IP ranges to filter client IP address.
+      description: Network access profile for Batch endpoint.
+      required:
+      - defaultAction
+    KeyVaultProperties:
+      type: object
+      properties:
+        keyIdentifier:
+          type: string
+          description: "Full path to the secret with or without version. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053. or https://mykeyvault.vault.azure.net/keys/testkey. To be usable the following prerequisites must be met:\n\n The Batch Account has a System Assigned identity\n The account identity has been granted Key/Get, Key/Unwrap and Key/Wrap permissions\n The KeyVault has soft-delete and purge protection enabled"
+      description: KeyVault configuration when using an encryption KeySource of Microsoft.KeyVault.
     PoolAllocationMode:
       type: string
       description: The allocation mode for creating pools in the Batch account.
@@ -385,20 +591,121 @@ components:
           description: Pools will be allocated in subscriptions owned by the Batch service.
         - value: UserSubscription
           description: Pools will be allocated in a subscription owned by the user.
-    BatchAccountListResult:
+    OutboundEnvironmentEndpoint:
       type: object
       properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/BatchAccount'
-          x-ms-identifiers:
-          - /properties/accountEndpoint
-          description: The collection of Batch accounts returned by the listing operation.
-        nextLink:
+        category:
           type: string
-          description: The continuation token.
-      description: Values returned by the List operation.
+          readOnly: true
+          description: The type of service that the Batch service connects to.
+        endpoints:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/EndpointDependency'
+          x-ms-identifiers:
+          - domainName
+          description: The endpoints for this service to which the Batch service makes outbound calls.
+      description: A collection of related endpoints from the same service for which the Batch service requires outbound access.
+    BatchAccount:
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BatchAccountProperties'
+          description: The properties associated with the account.
+        identity:
+          $ref: '#/components/schemas/BatchAccountIdentity'
+          description: The identity of the Batch account.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      description: Contains information about an Azure Batch account.
+    BatchAccountCreateProperties:
+      type: object
+      properties:
+        autoStorage:
+          $ref: '#/components/schemas/AutoStorageBaseProperties'
+          description: The properties related to the auto-storage account.
+        poolAllocationMode:
+          title: The allocation mode to use for creating pools in the Batch account.
+          description: The pool allocation mode also affects how clients may authenticate to the Batch Service API. If the mode is BatchService, clients may authenticate using access keys or Microsoft Entra ID. If the mode is UserSubscription, clients must use Microsoft Entra ID. The default is BatchService.
+          $ref: '#/components/schemas/PoolAllocationMode'
+        keyVaultReference:
+          $ref: '#/components/schemas/KeyVaultReference'
+          description: A reference to the Azure key vault associated with the Batch account.
+        publicNetworkAccess:
+          title: The network access type for accessing Azure Batch account.
+          description: If not specified, the default value is 'enabled'.
+          $ref: '#/components/schemas/PublicNetworkAccessType'
+        networkProfile:
+          title: Network profile for Batch account, which contains network rule settings for each endpoint.
+          description: The network profile only takes effect when publicNetworkAccess is enabled.
+          $ref: '#/components/schemas/NetworkProfile'
+        encryption:
+          title: The encryption configuration for the Batch account.
+          description: Configures how customer data is encrypted inside the Batch account. By default, accounts are encrypted using a Microsoft managed key. For additional control, a customer-managed key can be used instead.
+          $ref: '#/components/schemas/EncryptionProperties'
+        allowedAuthenticationModes:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/AuthenticationMode'
+          description: List of allowed authentication modes for the Batch account that can be used to authenticate with the data plane. This does not affect authentication with the control plane.
+      description: The properties of a Batch account.
+    PrivateLinkServiceConnectionState:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/PrivateLinkServiceConnectionStatus'
+          title: The status for the private endpoint connection of Batch account
+        description:
+          type: string
+          title: Description of the private Connection state
+        actionsRequired:
+          type: string
+          title: Action required on the private connection state
+          readOnly: true
+      required:
+      - status
+      description: The private link service connection state of the private endpoint connection
+    BatchAccountKeys:
+      type: object
+      properties:
+        accountName:
+          type: string
+          readOnly: true
+          description: The Batch account name.
+        primary:
+          type: string
+          readOnly: true
+          description: The primary key associated with the account.
+        secondary:
+          type: string
+          readOnly: true
+          description: The secondary key associated with the account.
+      description: A set of Azure Batch account keys.
+    VirtualMachineFamilyCoreQuota:
+      type: object
+      properties:
+        name:
+          readOnly: true
+          type: string
+          description: The Virtual Machine family name.
+        coreQuota:
+          readOnly: true
+          type: integer
+          format: int32
+          description: The core quota for the VM family for the Batch account.
+      description: A VM Family and its associated core quota for the Batch account.
+    CloudError:
+      type: object
+      x-ms-external: true
+      properties:
+        error:
+          description: The body of the error response.
+          $ref: '#/components/schemas/CloudErrorBody'
+      description: An error response from the Batch service.
     PrivateEndpoint:
       type: object
       properties:
@@ -407,6 +714,43 @@ components:
           title: The ARM resource identifier of the private endpoint. This is of the form /subscriptions/{subscription}/resourceGroups/{group}/providers/Microsoft.Network/privateEndpoints/{privateEndpoint}.
           readOnly: true
       description: The private endpoint of the private endpoint connection.
+    PrivateLinkServiceConnectionStatus:
+      type: string
+      title: The status of the Batch private endpoint connection
+      enum:
+      - Approved
+      - Pending
+      - Rejected
+      - Disconnected
+      x-ms-enum:
+        name: PrivateLinkServiceConnectionStatus
+        modelAsString: false
+        values:
+        - value: Approved
+          description: The private endpoint connection is approved and can be used to access Batch account
+        - value: Pending
+          description: The private endpoint connection is pending and cannot be used to access Batch account
+        - value: Rejected
+          description: The private endpoint connection is rejected and cannot be used to access Batch account
+        - value: Disconnected
+          description: The private endpoint connection is disconnected and cannot be used to access Batch account
+    AuthenticationMode:
+      type: string
+      description: The authentication mode for the Batch account.
+      enum:
+      - SharedKey
+      - AAD
+      - TaskAuthenticationToken
+      x-ms-enum:
+        name: AuthenticationMode
+        modelAsString: false
+        values:
+        - value: SharedKey
+          description: The authentication mode using shared keys.
+        - value: AAD
+          description: The authentication mode using Microsoft Entra ID.
+        - value: TaskAuthenticationToken
+          description: The authentication mode using task authentication tokens.
     BatchAccountProperties:
       type: object
       properties:
@@ -528,66 +872,40 @@ components:
             $ref: '#/components/schemas/AuthenticationMode'
           description: List of allowed authentication modes for the Batch account that can be used to authenticate with the data plane. This does not affect authentication with the control plane.
       description: Account specific properties.
-    NetworkProfile:
-      type: object
-      properties:
-        accountAccess:
-          $ref: '#/components/schemas/EndpointAccessProfile'
-          description: Network access profile for batchAccount endpoint (Batch account data plane API).
-        nodeManagementAccess:
-          $ref: '#/components/schemas/EndpointAccessProfile'
-          description: Network access profile for nodeManagement endpoint (Batch service managing compute nodes for Batch pools).
-      description: Network profile for Batch account, which contains network rule settings for each endpoint.
-    PublicNetworkAccessType:
-      type: string
-      description: The network access type for operating on the resources in the Batch account.
-      default: Enabled
-      enum:
-      - Enabled
-      - Disabled
-      x-ms-enum:
-        name: PublicNetworkAccessType
-        modelAsString: false
-        values:
-        - value: Enabled
-          description: Enables connectivity to Azure Batch through public DNS.
-        - value: Disabled
-          description: Disables public connectivity and enables private connectivity to Azure Batch Service through private endpoint resource.
-    BatchAccountCreateParameters:
-      type: object
-      properties:
-        location:
-          type: string
-          description: The region in which to create the account.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: The user-specified tags associated with the account.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BatchAccountCreateProperties'
-          description: The properties of the Batch account.
-        identity:
-          $ref: '#/components/schemas/BatchAccountIdentity'
-          description: The identity of the Batch account.
-      required:
-      - location
-      description: Parameters supplied to the Create operation.
-    OutboundEnvironmentEndpointCollection:
+    BatchAccountListResult:
       type: object
       properties:
         value:
           type: array
-          readOnly: true
           items:
-            $ref: '#/components/schemas/OutboundEnvironmentEndpoint'
-          x-ms-identifiers: []
-          description: The collection of outbound network dependency endpoints returned by the listing operation.
+            $ref: '#/components/schemas/BatchAccount'
+          x-ms-identifiers:
+          - /properties/accountEndpoint
+          description: The collection of Batch accounts returned by the listing operation.
         nextLink:
           type: string
           description: The continuation token.
       description: Values returned by the List operation.
+    EndpointDependency:
+      type: object
+      properties:
+        domainName:
+          type: string
+          readOnly: true
+          description: The domain name of the dependency. Domain names may be fully qualified or may contain a * wildcard.
+        description:
+          type: string
+          readOnly: true
+          description: Human-readable supplemental information about the dependency and when it is applicable.
+        endpointDetails:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/EndpointDetail'
+          x-ms-identifiers:
+          - port
+          description: The list of connection details for this endpoint.
+      description: A domain name and connection details used to access a dependency.
     IPRule:
       type: object
       properties:
@@ -610,155 +928,64 @@ components:
       required:
       - action
       - value
-    BatchAccountUpdateProperties:
+    BatchAccountUpdateParameters:
       type: object
       properties:
-        autoStorage:
-          $ref: '#/components/schemas/AutoStorageBaseProperties'
-          description: The properties related to the auto-storage account.
-        encryption:
-          title: The encryption configuration for the Batch account.
-          description: Configures how customer data is encrypted inside the Batch account. By default, accounts are encrypted using a Microsoft managed key. For additional control, a customer-managed key can be used instead.
-          $ref: '#/components/schemas/EncryptionProperties'
-        allowedAuthenticationModes:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/AuthenticationMode'
-          description: List of allowed authentication modes for the Batch account that can be used to authenticate with the data plane. This does not affect authentication with the control plane.
-        publicNetworkAccess:
-          title: The network access type for accessing Azure Batch account.
-          description: If not specified, the default value is 'enabled'.
-          $ref: '#/components/schemas/PublicNetworkAccessType'
-        networkProfile:
-          title: Network profile for Batch account, which contains network rule settings for each endpoint.
-          description: The network profile only takes effect when publicNetworkAccess is enabled.
-          $ref: '#/components/schemas/NetworkProfile'
-      description: The properties of a Batch account.
-    EndpointDetail:
-      type: object
-      properties:
-        port:
-          type: integer
-          format: int32
-          readOnly: true
-          description: The port an endpoint is connected to.
-      description: Details about the connection between the Batch service and the endpoint.
-    CloudErrorBody:
-      type: object
-      x-ms-external: true
-      properties:
-        code:
-          type: string
-          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          type: string
-          description: A message describing the error, intended to be suitable for display in a user interface.
-        target:
-          type: string
-          description: The target of the particular error. For example, the name of the property in error.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/CloudErrorBody'
-          x-ms-identifiers:
-          - message
-          - target
-          description: A list of additional details about the error.
-      description: An error response from the Batch service.
-    KeyVaultReference:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: The user-specified tags associated with the account.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BatchAccountUpdateProperties'
+          description: The properties of the account.
+        identity:
+          $ref: '#/components/schemas/BatchAccountIdentity'
+          description: The identity of the Batch account.
+      description: Parameters for updating an Azure Batch account.
+    ProxyResource:
       type: object
       properties:
         id:
+          readOnly: true
           type: string
-          format: arm-id
-          x-ms-arm-id-details:
-            allowedResources:
-            - type: Microsoft.KeyVault/vaults
-          description: The resource ID of the Azure key vault associated with the Batch account.
-        url:
-          type: string
-          description: The URL of the Azure key vault associated with the Batch account.
-      required:
-      - id
-      - url
-      description: Identifies the Azure key vault associated with a Batch account.
-    AutoStorageProperties:
-      type: object
-      properties:
-        lastKeySync:
-          type: string
-          format: date-time
-          description: The UTC time at which storage keys were last synchronized with the Batch account.
-      required:
-      - lastKeySync
-      allOf:
-      - $ref: '#/components/schemas/AutoStorageBaseProperties'
-      description: Contains information about the auto-storage account associated with a Batch account.
-    AuthenticationMode:
-      type: string
-      description: The authentication mode for the Batch account.
-      enum:
-      - SharedKey
-      - AAD
-      - TaskAuthenticationToken
-      x-ms-enum:
-        name: AuthenticationMode
-        modelAsString: false
-        values:
-        - value: SharedKey
-          description: The authentication mode using shared keys.
-        - value: AAD
-          description: The authentication mode using Microsoft Entra ID.
-        - value: TaskAuthenticationToken
-          description: The authentication mode using task authentication tokens.
-    BatchAccountCreateProperties:
-      type: object
-      properties:
-        autoStorage:
-          $ref: '#/components/schemas/AutoStorageBaseProperties'
-          description: The properties related to the auto-storage account.
-        poolAllocationMode:
-          title: The allocation mode to use for creating pools in the Batch account.
-          description: The pool allocation mode also affects how clients may authenticate to the Batch Service API. If the mode is BatchService, clients may authenticate using access keys or Microsoft Entra ID. If the mode is UserSubscription, clients must use Microsoft Entra ID. The default is BatchService.
-          $ref: '#/components/schemas/PoolAllocationMode'
-        keyVaultReference:
-          $ref: '#/components/schemas/KeyVaultReference'
-          description: A reference to the Azure key vault associated with the Batch account.
-        publicNetworkAccess:
-          title: The network access type for accessing Azure Batch account.
-          description: If not specified, the default value is 'enabled'.
-          $ref: '#/components/schemas/PublicNetworkAccessType'
-        networkProfile:
-          title: Network profile for Batch account, which contains network rule settings for each endpoint.
-          description: The network profile only takes effect when publicNetworkAccess is enabled.
-          $ref: '#/components/schemas/NetworkProfile'
-        encryption:
-          title: The encryption configuration for the Batch account.
-          description: Configures how customer data is encrypted inside the Batch account. By default, accounts are encrypted using a Microsoft managed key. For additional control, a customer-managed key can be used instead.
-          $ref: '#/components/schemas/EncryptionProperties'
-        allowedAuthenticationModes:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/AuthenticationMode'
-          description: List of allowed authentication modes for the Batch account that can be used to authenticate with the data plane. This does not affect authentication with the control plane.
-      description: The properties of a Batch account.
-    VirtualMachineFamilyCoreQuota:
-      type: object
-      properties:
+          description: The ID of the resource.
         name:
           readOnly: true
           type: string
-          description: The Virtual Machine family name.
-        coreQuota:
+          description: The name of the resource.
+        type:
           readOnly: true
-          type: integer
-          format: int32
-          description: The core quota for the VM family for the Batch account.
-      description: A VM Family and its associated core quota for the Batch account.
+          type: string
+          description: The type of the resource.
+        etag:
+          readOnly: true
+          type: string
+          description: The ETag of the resource, used for concurrency statements.
+      description: A definition of an Azure resource.
+      x-ms-azure-resource: true
+    BatchAccountCreateParameters:
+      type: object
+      properties:
+        location:
+          type: string
+          description: The region in which to create the account.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: The user-specified tags associated with the account.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BatchAccountCreateProperties'
+          description: The properties of the Batch account.
+        identity:
+          $ref: '#/components/schemas/BatchAccountIdentity'
+          description: The identity of the Batch account.
+      required:
+      - location
+      description: Parameters supplied to the Create operation.
     PrivateEndpointConnection:
       type: object
       properties:
@@ -769,6 +996,59 @@ components:
       allOf:
       - $ref: '#/components/schemas/ProxyResource'
       description: Contains information about a private link resource.
+    ComputeNodeIdentityReference:
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: The ARM resource id of the user assigned identity.
+      description: The reference to a user assigned identity associated with the Batch pool which a compute node will use.
+    NetworkProfile:
+      type: object
+      properties:
+        accountAccess:
+          $ref: '#/components/schemas/EndpointAccessProfile'
+          description: Network access profile for batchAccount endpoint (Batch account data plane API).
+        nodeManagementAccess:
+          $ref: '#/components/schemas/EndpointAccessProfile'
+          description: Network access profile for nodeManagement endpoint (Batch service managing compute nodes for Batch pools).
+      description: Network profile for Batch account, which contains network rule settings for each endpoint.
+    BatchAccountIdentity:
+      type: object
+      properties:
+        principalId:
+          readOnly: true
+          type: string
+          description: The principal id of the Batch account. This property will only be provided for a system assigned identity.
+        tenantId:
+          readOnly: true
+          type: string
+          description: The tenant id associated with the Batch account. This property will only be provided for a system assigned identity.
+        type:
+          type: string
+          description: The type of identity used for the Batch account.
+          enum:
+          - SystemAssigned
+          - UserAssigned
+          - None
+          x-ms-enum:
+            name: ResourceIdentityType
+            modelAsString: false
+            values:
+            - value: SystemAssigned
+              description: Batch account has a system assigned identity with it.
+            - value: UserAssigned
+              description: Batch account has user assigned identities with it.
+            - value: None
+              description: Batch account has no identity associated with it. Setting `None` in update account will remove existing identities.
+        userAssignedIdentities:
+          type: object
+          description: The list of user identities associated with the Batch account.
+          additionalProperties:
+            $ref: '#/components/schemas/UserAssignedIdentities'
+      description: The identity of the Batch account, if configured. This is used when the user specifies 'Microsoft.KeyVault' as their Batch account encryption configuration or when `ManagedIdentity` is selected as the auto-storage authentication mode.
+      required:
+      - type
     PrivateEndpointConnectionProperties:
       type: object
       properties:
@@ -814,148 +1094,20 @@ components:
           $ref: '#/components/schemas/PrivateLinkServiceConnectionState'
           title: The private link service connection state of the private endpoint connection.
       description: Private endpoint connection properties.
-    ProxyResource:
+    OutboundEnvironmentEndpointCollection:
       type: object
       properties:
-        id:
-          readOnly: true
-          type: string
-          description: The ID of the resource.
-        name:
-          readOnly: true
-          type: string
-          description: The name of the resource.
-        type:
-          readOnly: true
-          type: string
-          description: The type of the resource.
-        etag:
-          readOnly: true
-          type: string
-          description: The ETag of the resource, used for concurrency statements.
-      description: A definition of an Azure resource.
-      x-ms-azure-resource: true
-    EncryptionProperties:
-      type: object
-      properties:
-        keySource:
-          type: string
-          description: Type of the key source.
-          enum:
-          - Microsoft.Batch
-          - Microsoft.KeyVault
-          x-ms-enum:
-            name: KeySource
-            modelAsString: false
-            values:
-            - value: Microsoft.Batch
-              description: Batch creates and manages the encryption keys used to protect the account data.
-            - value: Microsoft.KeyVault
-              description: The encryption keys used to protect the account data are stored in an external key vault. If this is set then the Batch Account identity must be set to `SystemAssigned` and a valid Key Identifier must also be supplied under the keyVaultProperties.
-        keyVaultProperties:
-          $ref: '#/components/schemas/KeyVaultProperties'
-          description: Additional details when using Microsoft.KeyVault
-      description: Configures how customer data is encrypted inside the Batch account. By default, accounts are encrypted using a Microsoft managed key. For additional control, a customer-managed key can be used instead.
-    OutboundEnvironmentEndpoint:
-      type: object
-      properties:
-        category:
-          type: string
-          readOnly: true
-          description: The type of service that the Batch service connects to.
-        endpoints:
+        value:
           type: array
           readOnly: true
           items:
-            $ref: '#/components/schemas/EndpointDependency'
-          x-ms-identifiers:
-          - domainName
-          description: The endpoints for this service to which the Batch service makes outbound calls.
-      description: A collection of related endpoints from the same service for which the Batch service requires outbound access.
-    BatchAccountIdentity:
-      type: object
-      properties:
-        principalId:
-          readOnly: true
+            $ref: '#/components/schemas/OutboundEnvironmentEndpoint'
+          x-ms-identifiers: []
+          description: The collection of outbound network dependency endpoints returned by the listing operation.
+        nextLink:
           type: string
-          description: The principal id of the Batch account. This property will only be provided for a system assigned identity.
-        tenantId:
-          readOnly: true
-          type: string
-          description: The tenant id associated with the Batch account. This property will only be provided for a system assigned identity.
-        type:
-          type: string
-          description: The type of identity used for the Batch account.
-          enum:
-          - SystemAssigned
-          - UserAssigned
-          - None
-          x-ms-enum:
-            name: ResourceIdentityType
-            modelAsString: false
-            values:
-            - value: SystemAssigned
-              description: Batch account has a system assigned identity with it.
-            - value: UserAssigned
-              description: Batch account has user assigned identities with it.
-            - value: None
-              description: Batch account has no identity associated with it. Setting `None` in update account will remove existing identities.
-        userAssignedIdentities:
-          type: object
-          description: The list of user identities associated with the Batch account.
-          additionalProperties:
-            $ref: '#/components/schemas/UserAssignedIdentities'
-      description: The identity of the Batch account, if configured. This is used when the user specifies 'Microsoft.KeyVault' as their Batch account encryption configuration or when `ManagedIdentity` is selected as the auto-storage authentication mode.
-      required:
-      - type
-    PrivateLinkServiceConnectionStatus:
-      type: string
-      title: The status of the Batch private endpoint connection
-      enum:
-      - Approved
-      - Pending
-      - Rejected
-      - Disconnected
-      x-ms-enum:
-        name: PrivateLinkServiceConnectionStatus
-        modelAsString: false
-        values:
-        - value: Approved
-          description: The private endpoint connection is approved and can be used to access Batch account
-        - value: Pending
-          description: The private endpoint connection is pending and cannot be used to access Batch account
-        - value: Rejected
-          description: The private endpoint connection is rejected and cannot be used to access Batch account
-        - value: Disconnected
-          description: The private endpoint connection is disconnected and cannot be used to access Batch account
-    UserAssignedIdentities:
-      type: object
-      description: The list of associated user identities.
-      properties:
-        principalId:
-          readOnly: true
-          type: string
-          description: The principal id of user assigned identity.
-        clientId:
-          readOnly: true
-          type: string
-          description: The client id of user assigned identity.
-    BatchAccountUpdateParameters:
-      type: object
-      properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: The user-specified tags associated with the account.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BatchAccountUpdateProperties'
-          description: The properties of the account.
-        identity:
-          $ref: '#/components/schemas/BatchAccountIdentity'
-          description: The identity of the Batch account.
-      description: Parameters for updating an Azure Batch account.
+          description: The continuation token.
+      description: Values returned by the List operation.
     Resource:
       type: object
       properties:
@@ -983,167 +1135,7 @@ components:
           description: The tags of the resource.
       description: A definition of an Azure resource.
       x-ms-azure-resource: true
-    BatchAccountRegenerateKeyParameters:
-      type: object
-      properties:
-        keyName:
-          type: string
-          description: The type of account key to regenerate.
-          enum:
-          - Primary
-          - Secondary
-          x-ms-enum:
-            name: AccountKeyType
-            modelAsString: false
-            values:
-            - value: Primary
-              description: The primary account key.
-            - value: Secondary
-              description: The secondary account key.
-      required:
-      - keyName
-      description: Parameters supplied to the RegenerateKey operation.
-    EndpointAccessProfile:
-      type: object
-      properties:
-        defaultAction:
-          type: string
-          title: The default action when there is no IPRule matched.
-          description: Default action for endpoint access. It is only applicable when publicNetworkAccess is enabled.
-          enum:
-          - Allow
-          - Deny
-          x-ms-enum:
-            name: EndpointAccessDefaultAction
-            modelAsString: false
-            values:
-            - value: Allow
-              description: Allow client access.
-            - value: Deny
-              description: Deny client access.
-        ipRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/IPRule'
-          x-ms-identifiers:
-          - action
-          description: Array of IP ranges to filter client IP address.
-      description: Network access profile for Batch endpoint.
-      required:
-      - defaultAction
-    PrivateLinkServiceConnectionState:
-      type: object
-      properties:
-        status:
-          $ref: '#/components/schemas/PrivateLinkServiceConnectionStatus'
-          title: The status for the private endpoint connection of Batch account
-        description:
-          type: string
-          title: Description of the private Connection state
-        actionsRequired:
-          type: string
-          title: Action required on the private connection state
-          readOnly: true
-      required:
-      - status
-      description: The private link service connection state of the private endpoint connection
-    BatchAccountKeys:
-      type: object
-      properties:
-        accountName:
-          type: string
-          readOnly: true
-          description: The Batch account name.
-        primary:
-          type: string
-          readOnly: true
-          description: The primary key associated with the account.
-        secondary:
-          type: string
-          readOnly: true
-          description: The secondary key associated with the account.
-      description: A set of Azure Batch account keys.
-    KeyVaultProperties:
-      type: object
-      properties:
-        keyIdentifier:
-          type: string
-          description: "Full path to the secret with or without version. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053. or https://mykeyvault.vault.azure.net/keys/testkey. To be usable the following prerequisites must be met:\n\n The Batch Account has a System Assigned identity\n The account identity has been granted Key/Get, Key/Unwrap and Key/Wrap permissions\n The KeyVault has soft-delete and purge protection enabled"
-      description: KeyVault configuration when using an encryption KeySource of Microsoft.KeyVault.
-    BatchAccount:
-      type: object
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BatchAccountProperties'
-          description: The properties associated with the account.
-        identity:
-          $ref: '#/components/schemas/BatchAccountIdentity'
-          description: The identity of the Batch account.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      description: Contains information about an Azure Batch account.
-    EndpointDependency:
-      type: object
-      properties:
-        domainName:
-          type: string
-          readOnly: true
-          description: The domain name of the dependency. Domain names may be fully qualified or may contain a * wildcard.
-        description:
-          type: string
-          readOnly: true
-          description: Human-readable supplemental information about the dependency and when it is applicable.
-        endpointDetails:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/EndpointDetail'
-          x-ms-identifiers:
-          - port
-          description: The list of connection details for this endpoint.
-      description: A domain name and connection details used to access a dependency.
-    AutoStorageBaseProperties:
-      type: object
-      properties:
-        storageAccountId:
-          type: string
-          format: arm-id
-          x-ms-arm-id-details:
-            allowedResources:
-            - type: Microsoft.Storage/storageAccounts
-          description: The resource ID of the storage account to be used for auto-storage account.
-        authenticationMode:
-          type: string
-          description: The authentication mode which the Batch service will use to manage the auto-storage account.
-          default: StorageKeys
-          enum:
-          - StorageKeys
-          - BatchAccountManagedIdentity
-          x-ms-enum:
-            name: AutoStorageAuthenticationMode
-            modelAsString: false
-            values:
-            - value: StorageKeys
-              description: The Batch service will authenticate requests to auto-storage using storage account keys.
-            - value: BatchAccountManagedIdentity
-              description: The Batch service will authenticate requests to auto-storage using the managed identity assigned to the Batch account.
-        nodeIdentityReference:
-          title: The reference to the user assigned identity which compute nodes will use to access auto-storage.
-          description: The identity referenced here must be assigned to pools which have compute nodes that need access to auto-storage.
-          $ref: '#/components/schemas/ComputeNodeIdentityReference'
-      required:
-      - storageAccountId
-      description: The properties related to the auto-storage account.
   parameters:
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      description: The name of the resource group that contains the Batch account.
-      x-ms-parameter-location: method
-      schema:
-        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -1169,6 +1161,14 @@ components:
         maxLength: 24
         minLength: 3
         pattern: ^[a-zA-Z0-9]+$
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: The name of the resource group that contains the Batch account.
+      x-ms-parameter-location: method
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

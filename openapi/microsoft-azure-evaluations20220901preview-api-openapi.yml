@@ -228,37 +228,21 @@ paths:
           $ref: ./examples/Evaluations_List.json
 components:
   schemas:
-    ErrorResponse:
-      description: Used to return an error to the client
+    PolicyContract:
+      description: Learning settings specifying how to train the model.
       required:
-      - error
+      - arguments
+      - name
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/PersonalizerError'
-    EvaluationResult:
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: Start time of the time series.
+        name:
+          description: Name of the learning settings.
+          maxLength: 256
           type: string
-          readOnly: true
-        endTime:
-          format: date-time
-          description: End time of the time series.
+        arguments:
+          description: Arguments of the learning settings.
+          maxLength: 1024
           type: string
-          readOnly: true
-        intervalInMinutes:
-          format: int32
-          description: Aggregation window.
-          type: integer
-          readOnly: true
-        value:
-          description: Time series of the learning settings results.
-          type: array
-          items:
-            $ref: '#/components/schemas/PolicyResult'
     PersonalizerError:
       description: The error object.
       required:
@@ -439,53 +423,103 @@ components:
           readOnly: true
         innerError:
           $ref: '#/components/schemas/InternalError'
-    TimeSeries:
+    Data:
       type: object
       properties:
-        data:
-          description: Time series.
+        timeStamp:
+          format: date-time
+          description: Timestamp of the aggregation.
+          type: string
+          readOnly: true
+        expectedReward:
+          format: float
+          description: Average reward.
+          type: number
+          readOnly: true
+        confidenceInterval:
+          description: Confidence interval.
           type: array
           items:
-            $ref: '#/components/schemas/Data'
+            format: float
+            type: number
           readOnly: true
-    EvaluationContract:
-      description: A counterfactual evaluation.
-      required:
-      - endTime
-      - name
-      - policies
-      - startTime
+    EvaluationDetails:
       type: object
       properties:
-        enablePolicyOptimization:
-          description: True if the evaluation should explore for a more optimal learning settings.
-          type: boolean
+        id:
+          description: The ID of the evaluation.
+          maxLength: 256
+          type: string
+          readOnly: true
         name:
           description: The name of the evaluation.
           maxLength: 256
           type: string
+          readOnly: true
         startTime:
           format: date-time
           description: The start time of the evaluation.
           type: string
+          readOnly: true
         endTime:
           format: date-time
           description: The end time of the evaluation.
           type: string
-        policies:
-          description: Additional learning settings to evaluate.
-          type: array
-          items:
-            $ref: '#/components/schemas/PolicyContract'
-    InternalError:
-      description: An object containing more specific information than the parent object about the error.
+          readOnly: true
+        creationTime:
+          format: date-time
+          description: The creation time of the evaluation.
+          type: string
+          readOnly: true
+        status:
+          description: The status of the job processing the evaluation.
+          enum:
+          - Succeeded
+          - Running
+          - Failed
+          - NotSubmitted
+          - Timeout
+          - OptimalPolicyApplied
+          - OnlinePolicyRetained
+          - Canceled
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: EvaluationJobStatus
+            modelAsString: true
+        evaluationType:
+          description: Type of evaluation.
+          enum:
+          - Manual
+          - Auto
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: EvaluationType
+            modelAsString: true
+    EvaluationResult:
       type: object
       properties:
-        code:
-          description: Detailed error code.
+        startTime:
+          format: date-time
+          description: Start time of the time series.
           type: string
-        innererror:
-          $ref: '#/components/schemas/InternalError'
+          readOnly: true
+        endTime:
+          format: date-time
+          description: End time of the time series.
+          type: string
+          readOnly: true
+        intervalInMinutes:
+          format: int32
+          description: Aggregation window.
+          type: integer
+          readOnly: true
+        value:
+          description: Time series of the learning settings results.
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyResult'
     Evaluation:
       description: A counterfactual evaluation.
       type: object
@@ -551,60 +585,16 @@ components:
           description: Description of the evaluation job.
           type: string
           readOnly: true
-    EvaluationDetails:
+    Evaluations:
+      description: Evaluations
       type: object
       properties:
-        id:
-          description: The ID of the evaluation.
-          maxLength: 256
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluationDetails'
+        nextLink:
           type: string
-          readOnly: true
-        name:
-          description: The name of the evaluation.
-          maxLength: 256
-          type: string
-          readOnly: true
-        startTime:
-          format: date-time
-          description: The start time of the evaluation.
-          type: string
-          readOnly: true
-        endTime:
-          format: date-time
-          description: The end time of the evaluation.
-          type: string
-          readOnly: true
-        creationTime:
-          format: date-time
-          description: The creation time of the evaluation.
-          type: string
-          readOnly: true
-        status:
-          description: The status of the job processing the evaluation.
-          enum:
-          - Succeeded
-          - Running
-          - Failed
-          - NotSubmitted
-          - Timeout
-          - OptimalPolicyApplied
-          - OnlinePolicyRetained
-          - Canceled
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: EvaluationJobStatus
-            modelAsString: true
-        evaluationType:
-          description: Type of evaluation.
-          enum:
-          - Manual
-          - Auto
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: EvaluationType
-            modelAsString: true
     Summary:
       type: object
       properties:
@@ -620,6 +610,61 @@ components:
             format: float
             type: number
           readOnly: true
+    EvaluationContract:
+      description: A counterfactual evaluation.
+      required:
+      - endTime
+      - name
+      - policies
+      - startTime
+      type: object
+      properties:
+        enablePolicyOptimization:
+          description: True if the evaluation should explore for a more optimal learning settings.
+          type: boolean
+        name:
+          description: The name of the evaluation.
+          maxLength: 256
+          type: string
+        startTime:
+          format: date-time
+          description: The start time of the evaluation.
+          type: string
+        endTime:
+          format: date-time
+          description: The end time of the evaluation.
+          type: string
+        policies:
+          description: Additional learning settings to evaluate.
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyContract'
+    TimeSeries:
+      type: object
+      properties:
+        data:
+          description: Time series.
+          type: array
+          items:
+            $ref: '#/components/schemas/Data'
+          readOnly: true
+    ErrorResponse:
+      description: Used to return an error to the client
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/PersonalizerError'
+    InternalError:
+      description: An object containing more specific information than the parent object about the error.
+      type: object
+      properties:
+        code:
+          description: Detailed error code.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InternalError'
     PolicyResult:
       type: object
       properties:
@@ -654,51 +699,6 @@ components:
         timeseries:
           $ref: '#/components/schemas/TimeSeries'
           readOnly: true
-    Evaluations:
-      description: Evaluations
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/EvaluationDetails'
-        nextLink:
-          type: string
-    Data:
-      type: object
-      properties:
-        timeStamp:
-          format: date-time
-          description: Timestamp of the aggregation.
-          type: string
-          readOnly: true
-        expectedReward:
-          format: float
-          description: Average reward.
-          type: number
-          readOnly: true
-        confidenceInterval:
-          description: Confidence interval.
-          type: array
-          items:
-            format: float
-            type: number
-          readOnly: true
-    PolicyContract:
-      description: Learning settings specifying how to train the model.
-      required:
-      - arguments
-      - name
-      type: object
-      properties:
-        name:
-          description: Name of the learning settings.
-          maxLength: 256
-          type: string
-        arguments:
-          description: Arguments of the learning settings.
-          maxLength: 1024
-          type: string
   securitySchemes:
     apim_key:
       type: apiKey

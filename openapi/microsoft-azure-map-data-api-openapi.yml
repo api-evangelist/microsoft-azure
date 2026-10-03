@@ -604,70 +604,116 @@ paths:
       tags:
       - Map Data
 components:
+  responses:
+    '401':
+      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
+      headers:
+        WWW-Authenticate:
+          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '500':
+      description: An error occurred while processing the request. Please try again later.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '400':
+      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '403':
+      description: Permission, capacity, or authentication issues.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    201Async:
+      description: The resource has been created successfully.
+      headers:
+        Location:
+          description: A URI where details on the newly created resource can be found.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LongRunningOperationResult'
+    202Async:
+      description: '**Supported only for async request.**
+
+        Request Accepted: The request has been accepted for processing. Please use the URL in the Location Header to retry or access the results.'
+      headers:
+        Location:
+          description: New URL to check for the results of the long-running operation.
+          schema:
+            type: string
+    '404':
+      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+  parameters:
+    UploadDataFormat:
+      name: dataFormat
+      description: Data format of the content being uploaded.
+      in: query
+      required: true
+      x-ms-enum:
+        name: UploadDataFormat
+        modelAsString: true
+        values:
+        - value: geojson
+          description: '[GeoJSON](https://tools.ietf.org/html/rfc7946) is a JSON based geospatial data interchange format.'
+        - value: zip
+          description: Compressed data format.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        enum:
+        - geojson
+        - zip
+    ClientId:
+      name: x-ms-client-id
+      description: Specifies which account is intended for usage in conjunction with the Microsoft Entra ID security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Microsoft Entra ID security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance.
+      in: header
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    Udid:
+      name: udid
+      description: The unique data id for the content. The `udid` must have been obtained from a successful [Data Upload API](/rest/api/maps/data/upload?view=rest-maps-1.0) call.
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ApiVersion:
+      name: api-version
+      description: Version number of Azure Maps API. Current version is 1.0
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+        default: '1.0'
+    SubscriptionKey:
+      name: subscription-key
+      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
+      in: query
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
   schemas:
-    ODataError:
-      type: object
-      description: This object is returned when an error occurs in the Azure Maps API.
-      properties:
-        code:
-          type: string
-          readOnly: true
-          description: The ODataError code.
-        message:
-          type: string
-          readOnly: true
-          description: If available, a human-readable description of the error.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ODataError'
-        target:
-          type: string
-          readOnly: true
-          description: If available, the target causing the error.
-    MapDataListResponse:
-      description: The response model for the Data List API. Returns a list of all the previously uploaded data.
-      type: object
-      properties:
-        mapDataList:
-          description: A list of all the previously uploaded data.
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/MapDataDetailInfo'
-    ODataErrorResponse:
-      type: object
-      description: This response object is returned when an error occurs in the Azure Maps API.
-      properties:
-        error:
-          $ref: '#/components/schemas/ODataError'
-    MapDataDeleteResponse:
-      description: The response model for the Data Delete API. The response body will be empty signifying there's no content available for the `udid` anymore.
-      type: object
-    MapDataDetailInfo:
-      description: Detail information for the data.
-      type: object
-      properties:
-        udid:
-          description: The unique data id for the data.
-          type: string
-          readOnly: true
-        location:
-          description: The location of the data. Execute a HTTP `GET` on this location to download the data.
-          type: string
-          readOnly: true
-        sizeInBytes:
-          description: The size of the content in bytes.
-          type: integer
-          format: int64
-          readOnly: true
-        uploadStatus:
-          description: The current upload status of the content.
-          type: string
-          readOnly: true
-    MapDataDownloadResponse:
-      description: The response model for the Data Download API. The response body will contain the content for the passed in `udid`.
-      type: object
     LongRunningOperationResult:
       description: The response model for a Long-Running Operations API.
       type: object
@@ -708,115 +754,69 @@ components:
           $ref: '#/components/schemas/ODataError'
         warning:
           $ref: '#/components/schemas/ODataError'
-  responses:
-    202Async:
-      description: '**Supported only for async request.**
-
-        Request Accepted: The request has been accepted for processing. Please use the URL in the Location Header to retry or access the results.'
-      headers:
-        Location:
-          description: New URL to check for the results of the long-running operation.
-          schema:
-            type: string
-    '400':
-      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '403':
-      description: Permission, capacity, or authentication issues.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '401':
-      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
-      headers:
-        WWW-Authenticate:
-          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '404':
-      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    201Async:
-      description: The resource has been created successfully.
-      headers:
-        Location:
-          description: A URI where details on the newly created resource can be found.
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LongRunningOperationResult'
-    '500':
-      description: An error occurred while processing the request. Please try again later.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-  parameters:
-    Udid:
-      name: udid
-      description: The unique data id for the content. The `udid` must have been obtained from a successful [Data Upload API](/rest/api/maps/data/upload?view=rest-maps-1.0) call.
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ApiVersion:
-      name: api-version
-      description: Version number of Azure Maps API. Current version is 1.0
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-        default: '1.0'
-    SubscriptionKey:
-      name: subscription-key
-      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
-      in: query
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    UploadDataFormat:
-      name: dataFormat
-      description: Data format of the content being uploaded.
-      in: query
-      required: true
-      x-ms-enum:
-        name: UploadDataFormat
-        modelAsString: true
-        values:
-        - value: geojson
-          description: '[GeoJSON](https://tools.ietf.org/html/rfc7946) is a JSON based geospatial data interchange format.'
-        - value: zip
-          description: Compressed data format.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        enum:
-        - geojson
-        - zip
-    ClientId:
-      name: x-ms-client-id
-      description: Specifies which account is intended for usage in conjunction with the Microsoft Entra ID security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Microsoft Entra ID security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance.
-      in: header
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
+    MapDataDownloadResponse:
+      description: The response model for the Data Download API. The response body will contain the content for the passed in `udid`.
+      type: object
+    ODataErrorResponse:
+      type: object
+      description: This response object is returned when an error occurs in the Azure Maps API.
+      properties:
+        error:
+          $ref: '#/components/schemas/ODataError'
+    ODataError:
+      type: object
+      description: This object is returned when an error occurs in the Azure Maps API.
+      properties:
+        code:
+          type: string
+          readOnly: true
+          description: The ODataError code.
+        message:
+          type: string
+          readOnly: true
+          description: If available, a human-readable description of the error.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ODataError'
+        target:
+          type: string
+          readOnly: true
+          description: If available, the target causing the error.
+    MapDataListResponse:
+      description: The response model for the Data List API. Returns a list of all the previously uploaded data.
+      type: object
+      properties:
+        mapDataList:
+          description: A list of all the previously uploaded data.
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/MapDataDetailInfo'
+    MapDataDetailInfo:
+      description: Detail information for the data.
+      type: object
+      properties:
+        udid:
+          description: The unique data id for the data.
+          type: string
+          readOnly: true
+        location:
+          description: The location of the data. Execute a HTTP `GET` on this location to download the data.
+          type: string
+          readOnly: true
+        sizeInBytes:
+          description: The size of the content in bytes.
+          type: integer
+          format: int64
+          readOnly: true
+        uploadStatus:
+          description: The current upload status of the content.
+          type: string
+          readOnly: true
+    MapDataDeleteResponse:
+      description: The response model for the Data Delete API. The response body will be empty signifying there's no content available for the `udid` anymore.
+      type: object
   securitySchemes:
     AADToken:
       type: oauth2

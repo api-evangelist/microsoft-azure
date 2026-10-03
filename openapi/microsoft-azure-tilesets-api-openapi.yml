@@ -239,81 +239,119 @@ paths:
       tags:
       - Tilesets
 components:
+  responses:
+    '401':
+      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
+      headers:
+        WWW-Authenticate:
+          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    202Accepted:
+      description: 'Request Accepted: The request has been accepted for processing. Please use the URL in the Operation-Location Header to obtain status.'
+      headers:
+        Operation-Location:
+          description: New URL to check for the results of the [long-running operation](https://aka.ms/am-creator-lrt-v2).
+          schema:
+            type: string
+    200Async:
+      description: The operation is running or complete.  If the operation was successful, use the Resource-Location header to obtain the path to the result.
+      headers:
+        Resource-Location:
+          description: If successful, a URI where details on the newly created resource can be found.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LongRunningOperationResult'
+    '500':
+      description: An error occurred while processing the request. Please try again later.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '400':
+      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '403':
+      description: Permission, capacity, or authentication issues.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '404':
+      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+  parameters:
+    ClientId:
+      name: x-ms-client-id
+      description: Specifies which account is intended for usage in conjunction with the Microsoft Entra ID security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Microsoft Entra ID security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance.
+      in: header
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    DatasetIdQuery:
+      name: datasetId
+      description: The unique `datasetId` that the tileset create API uses to retrieve features to generate tiles. The `datasetId` must have been obtained from a successful [Dataset Create API](https://docs.microsoft.com/en-us/rest/api/maps/v2/dataset/create) call.
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    TilesetOperationId:
+      name: operationId
+      in: path
+      description: The ID to query the status for the tileset create/import request.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    DescriptionTileset:
+      name: description
+      description: User provided description of the tileset.
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    TilesetId:
+      name: tilesetId
+      description: The Tileset Id
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ApiVersion:
+      name: api-version
+      description: Version number of Azure Maps API. Current version is 2.0
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+        default: '2.0'
+    SubscriptionKey:
+      name: subscription-key
+      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](https://docs.microsoft.com/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
+      in: query
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
   schemas:
-    ODataError:
-      type: object
-      description: This object is returned when an error occurs in the Azure Maps API.
-      properties:
-        code:
-          type: string
-          readOnly: true
-          description: The ODataError code.
-        message:
-          type: string
-          readOnly: true
-          description: If available, a human-readable description of the error.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ODataError'
-        target:
-          type: string
-          readOnly: true
-          description: If available, the target causing the error.
-    TilesetListResponse:
-      description: The response model for the Tileset List API. Returns a list of all tilesets.
-      type: object
-      properties:
-        tilesets:
-          description: A list of all tilesets.
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/TilesetDetailInfo'
-        nextLink:
-          description: If present, the location of the next page of data.
-          type: string
-          readOnly: true
-    ODataErrorResponse:
-      type: object
-      description: This response object is returned when an error occurs in the Azure Maps API.
-      properties:
-        error:
-          $ref: '#/components/schemas/ODataError'
-    TilesetDetailInfo:
-      description: Detail information for the data.
-      type: object
-      properties:
-        tilesetId:
-          description: The unique tileset id for the tileset.
-          type: string
-          readOnly: true
-        ontology:
-          description: The ontology of the source dataset. Please refer to this [article](https://docs.microsoft.com/en-us/azure/azure-maps/creator-facility-ontology) for more information about Azure Maps Creator ontologies.
-          type: string
-          readOnly: true
-        datasetId:
-          description: The unique dataset Id used to create the tileset.
-          type: string
-          readOnly: true
-        description:
-          description: The description the caller provided when creating the tileset. Maximum length 1024 characters.
-          type: string
-          readOnly: true
-        minZoom:
-          description: The lowest tile zoom level tile generated for the tileset.
-          type: integer
-          readOnly: true
-        maxZoom:
-          description: The highest tile zoom level tile generated for the tileset.
-          type: integer
-          readOnly: true
-        bbox:
-          description: 'Bounding box which all features of the tileset lay within. Projection used - EPSG:3857. Format : ''minLon, minLat, maxLon, maxLat''.'
-          type: array
-          readOnly: true
-          items:
-            type: number
     LongRunningOperationResult:
       description: The response model for a Long-Running Operations API.
       type: object
@@ -350,118 +388,80 @@ components:
           $ref: '#/components/schemas/ODataError'
         warning:
           $ref: '#/components/schemas/ODataError'
-  responses:
-    202Accepted:
-      description: 'Request Accepted: The request has been accepted for processing. Please use the URL in the Operation-Location Header to obtain status.'
-      headers:
-        Operation-Location:
-          description: New URL to check for the results of the [long-running operation](https://aka.ms/am-creator-lrt-v2).
-          schema:
-            type: string
-    '400':
-      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '403':
-      description: Permission, capacity, or authentication issues.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    200Async:
-      description: The operation is running or complete.  If the operation was successful, use the Resource-Location header to obtain the path to the result.
-      headers:
-        Resource-Location:
-          description: If successful, a URI where details on the newly created resource can be found.
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LongRunningOperationResult'
-    '500':
-      description: An error occurred while processing the request. Please try again later.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '401':
-      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
-      headers:
-        WWW-Authenticate:
-          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '404':
-      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-  parameters:
-    ApiVersion:
-      name: api-version
-      description: Version number of Azure Maps API. Current version is 2.0
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-        default: '2.0'
-    SubscriptionKey:
-      name: subscription-key
-      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](https://docs.microsoft.com/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
-      in: query
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    DatasetIdQuery:
-      name: datasetId
-      description: The unique `datasetId` that the tileset create API uses to retrieve features to generate tiles. The `datasetId` must have been obtained from a successful [Dataset Create API](https://docs.microsoft.com/en-us/rest/api/maps/v2/dataset/create) call.
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    TilesetOperationId:
-      name: operationId
-      in: path
-      description: The ID to query the status for the tileset create/import request.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    DescriptionTileset:
-      name: description
-      description: User provided description of the tileset.
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ClientId:
-      name: x-ms-client-id
-      description: Specifies which account is intended for usage in conjunction with the Microsoft Entra ID security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Microsoft Entra ID security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance.
-      in: header
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    TilesetId:
-      name: tilesetId
-      description: The Tileset Id
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
+    TilesetDetailInfo:
+      description: Detail information for the data.
+      type: object
+      properties:
+        tilesetId:
+          description: The unique tileset id for the tileset.
+          type: string
+          readOnly: true
+        ontology:
+          description: The ontology of the source dataset. Please refer to this [article](https://docs.microsoft.com/en-us/azure/azure-maps/creator-facility-ontology) for more information about Azure Maps Creator ontologies.
+          type: string
+          readOnly: true
+        datasetId:
+          description: The unique dataset Id used to create the tileset.
+          type: string
+          readOnly: true
+        description:
+          description: The description the caller provided when creating the tileset. Maximum length 1024 characters.
+          type: string
+          readOnly: true
+        minZoom:
+          description: The lowest tile zoom level tile generated for the tileset.
+          type: integer
+          readOnly: true
+        maxZoom:
+          description: The highest tile zoom level tile generated for the tileset.
+          type: integer
+          readOnly: true
+        bbox:
+          description: 'Bounding box which all features of the tileset lay within. Projection used - EPSG:3857. Format : ''minLon, minLat, maxLon, maxLat''.'
+          type: array
+          readOnly: true
+          items:
+            type: number
+    TilesetListResponse:
+      description: The response model for the Tileset List API. Returns a list of all tilesets.
+      type: object
+      properties:
+        tilesets:
+          description: A list of all tilesets.
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/TilesetDetailInfo'
+        nextLink:
+          description: If present, the location of the next page of data.
+          type: string
+          readOnly: true
+    ODataErrorResponse:
+      type: object
+      description: This response object is returned when an error occurs in the Azure Maps API.
+      properties:
+        error:
+          $ref: '#/components/schemas/ODataError'
+    ODataError:
+      type: object
+      description: This object is returned when an error occurs in the Azure Maps API.
+      properties:
+        code:
+          type: string
+          readOnly: true
+          description: The ODataError code.
+        message:
+          type: string
+          readOnly: true
+          description: If available, a human-readable description of the error.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ODataError'
+        target:
+          type: string
+          readOnly: true
+          description: If available, the target causing the error.
   securitySchemes:
     AADToken:
       type: oauth2

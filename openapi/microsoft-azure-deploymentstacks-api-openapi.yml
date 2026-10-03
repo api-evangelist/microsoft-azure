@@ -496,13 +496,53 @@ paths:
       summary: Microsoft Azure Post Providers Microsoft Management Managementgroups…
 components:
   schemas:
-    DeploymentStacksDebugSetting:
+    DenySettings:
+      description: Defines how resources deployed by the deployment stack are locked.
       type: object
+      required:
+      - mode
       properties:
-        detailLevel:
+        mode:
           type: string
-          description: Specifies the type of information to log for debugging. The permitted values are none, requestContent, responseContent, or both requestContent and responseContent separated by a comma. The default is none. When setting this value, carefully consider the type of information that is being passed in during deployment. By logging information about the request or response, sensitive data that is retrieved through the deployment operations could potentially be exposed.
-      description: The debug setting.
+          description: denySettings Mode.
+          enum:
+          - denyDelete
+          - denyWriteAndDelete
+          - none
+          x-ms-enum:
+            name: DenySettingsMode
+            modelAsString: true
+            values:
+            - value: denyDelete
+              description: Authorized users are able to read and modify the resources, but cannot delete.
+            - value: denyWriteAndDelete
+              description: Authorized users can only read from a resource, but cannot modify or delete it.
+            - value: none
+              description: No denyAssignments have been applied.
+        excludedPrincipals:
+          type: array
+          description: List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.
+          items:
+            type: string
+        excludedActions:
+          type: array
+          description: 'List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted. If the denySetting mode is set to ''denyWriteAndDelete'', then the following actions are automatically appended to ''excludedActions'': ''*/read'' and ''Microsoft.Authorization/locks/delete''. If the denySetting mode is set to ''denyDelete'', then the following actions are automatically appended to ''excludedActions'': ''Microsoft.Authorization/locks/delete''. Duplicate actions will be removed.'
+          items:
+            type: string
+        applyToChildScopes:
+          type: boolean
+          description: DenySettings will be applied to child scopes.
+    DeploymentStackTemplateDefinition:
+      type: object
+      description: Export Template specific properties of the Stack.
+      properties:
+        template:
+          type: object
+          description: The template content. Use this element to pass the template syntax directly in the request rather than link to an existing template. It can be a JObject or well-formed JSON string. Use either the templateLink property or the template property, but not both.
+        templateLink:
+          type: object
+          $ref: '#/components/schemas/DeploymentStacksTemplateLink'
+          description: The URI of the template. Use either the templateLink property or the template property, but not both.
     AzureResourceBase:
       x-ms-azure-resource: true
       type: object
@@ -546,90 +586,6 @@ components:
           description: Deployment stack properties.
           x-ms-client-flatten: true
           $ref: '#/components/schemas/DeploymentStackProperties'
-    DenySettings:
-      description: Defines how resources deployed by the deployment stack are locked.
-      type: object
-      required:
-      - mode
-      properties:
-        mode:
-          type: string
-          description: denySettings Mode.
-          enum:
-          - denyDelete
-          - denyWriteAndDelete
-          - none
-          x-ms-enum:
-            name: DenySettingsMode
-            modelAsString: true
-            values:
-            - value: denyDelete
-              description: Authorized users are able to read and modify the resources, but cannot delete.
-            - value: denyWriteAndDelete
-              description: Authorized users can only read from a resource, but cannot modify or delete it.
-            - value: none
-              description: No denyAssignments have been applied.
-        excludedPrincipals:
-          type: array
-          description: List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.
-          items:
-            type: string
-        excludedActions:
-          type: array
-          description: 'List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted. If the denySetting mode is set to ''denyWriteAndDelete'', then the following actions are automatically appended to ''excludedActions'': ''*/read'' and ''Microsoft.Authorization/locks/delete''. If the denySetting mode is set to ''denyDelete'', then the following actions are automatically appended to ''excludedActions'': ''Microsoft.Authorization/locks/delete''. Duplicate actions will be removed.'
-          items:
-            type: string
-        applyToChildScopes:
-          type: boolean
-          description: DenySettings will be applied to child scopes.
-    DeploymentStacksDeleteDetachEnum:
-      type: string
-      enum:
-      - delete
-      - detach
-      description: Specifies the action that should be taken on the resource when the deployment stack is deleted. Delete will attempt to delete the resource from Azure. Detach will leave the resource in it's current state.
-      x-ms-enum:
-        name: DeploymentStacksDeleteDetachEnum
-        modelAsString: true
-    ResourceReference:
-      type: object
-      description: The resource Id model.
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: The resourceId of a resource managed by the deployment stack.
-    DeploymentStacksError:
-      type: object
-      properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorResponse
-      description: Deployment Stacks error response.
-    DeploymentStacksParametersLink:
-      type: object
-      properties:
-        uri:
-          type: string
-          description: The URI of the parameters file.
-        contentVersion:
-          type: string
-          description: If included, must match the ContentVersion in the template.
-      required:
-      - uri
-      description: Entity representing the reference to the deployment parameters.
-    DeploymentStackListResult:
-      description: List of deployment stacks.
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeploymentStack'
-          description: An array of deployment stacks.
-        nextLink:
-          readOnly: true
-          type: string
-          description: The URL to use for getting the next set of results.
     DeploymentStackProperties:
       type: object
       required:
@@ -744,6 +700,18 @@ components:
           type: string
           readOnly: true
           description: The duration of the deployment stack update.
+    DeploymentStacksParametersLink:
+      type: object
+      properties:
+        uri:
+          type: string
+          description: The URI of the parameters file.
+        contentVersion:
+          type: string
+          description: If included, must match the ContentVersion in the template.
+      required:
+      - uri
+      description: Entity representing the reference to the deployment parameters.
     ManagedResourceReference:
       type: object
       description: The managed resource model.
@@ -798,6 +766,55 @@ components:
               description: Deny assignment has been removed by Azure due to a resource management change (management group move, etc.)
             - value: None
               description: No denyAssignments have been applied.
+    ResourceReference:
+      type: object
+      description: The resource Id model.
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: The resourceId of a resource managed by the deployment stack.
+    ResourceReferenceExtended:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ResourceReference'
+      - $ref: '#/components/schemas/DeploymentStacksError'
+      description: The resource Id extended model.
+    DeploymentStacksDebugSetting:
+      type: object
+      properties:
+        detailLevel:
+          type: string
+          description: Specifies the type of information to log for debugging. The permitted values are none, requestContent, responseContent, or both requestContent and responseContent separated by a comma. The default is none. When setting this value, carefully consider the type of information that is being passed in during deployment. By logging information about the request or response, sensitive data that is retrieved through the deployment operations could potentially be exposed.
+      description: The debug setting.
+    DeploymentStackListResult:
+      description: List of deployment stacks.
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeploymentStack'
+          description: An array of deployment stacks.
+        nextLink:
+          readOnly: true
+          type: string
+          description: The URL to use for getting the next set of results.
+    DeploymentStacksError:
+      type: object
+      properties:
+        error:
+          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorResponse
+      description: Deployment Stacks error response.
+    DeploymentStacksDeleteDetachEnum:
+      type: string
+      enum:
+      - delete
+      - detach
+      description: Specifies the action that should be taken on the resource when the deployment stack is deleted. Delete will attempt to delete the resource from Azure. Detach will leave the resource in it's current state.
+      x-ms-enum:
+        name: DeploymentStacksDeleteDetachEnum
+        modelAsString: true
     DeploymentStacksTemplateLink:
       type: object
       properties:
@@ -817,33 +834,16 @@ components:
           type: string
           description: If included, must match the ContentVersion in the template.
       description: Entity representing the reference to the template.
-    ResourceReferenceExtended:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ResourceReference'
-      - $ref: '#/components/schemas/DeploymentStacksError'
-      description: The resource Id extended model.
-    DeploymentStackTemplateDefinition:
-      type: object
-      description: Export Template specific properties of the Stack.
-      properties:
-        template:
-          type: object
-          description: The template content. Use this element to pass the template syntax directly in the request rather than link to an existing template. It can be a JObject or well-formed JSON string. Use either the templateLink property or the template property, but not both.
-        templateLink:
-          type: object
-          $ref: '#/components/schemas/DeploymentStacksTemplateLink'
-          description: The URI of the template. Use either the templateLink property or the template property, but not both.
   parameters:
-    DeleteManagementGroupParameter:
-      name: unmanageAction.ManagementGroups
+    DeleteResourceParameter:
+      name: unmanageAction.Resources
       in: query
       required: false
       x-ms-enum:
-        name: UnmanageActionManagementGroupMode
+        name: UnmanageActionResourceMode
         modelAsString: true
       x-ms-parameter-location: method
-      description: Flag to indicate delete rather than detach for the management groups.
+      description: Flag to indicate delete rather than detach for the resources.
       schema:
         type: string
         enum:
@@ -863,17 +863,6 @@ components:
         enum:
         - delete
         - detach
-    DeploymentStackNameParameter:
-      name: deploymentStackName
-      in: path
-      required: true
-      description: Name of the deployment stack.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 90
-        minLength: 1
-        pattern: ^[-\w\._\(\)]+$
     ManagementGroupIdParameter:
       name: managementGroupId
       in: path
@@ -885,20 +874,31 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+$
-    DeleteResourceParameter:
-      name: unmanageAction.Resources
+    DeleteManagementGroupParameter:
+      name: unmanageAction.ManagementGroups
       in: query
       required: false
       x-ms-enum:
-        name: UnmanageActionResourceMode
+        name: UnmanageActionManagementGroupMode
         modelAsString: true
       x-ms-parameter-location: method
-      description: Flag to indicate delete rather than detach for the resources.
+      description: Flag to indicate delete rather than detach for the management groups.
       schema:
         type: string
         enum:
         - delete
         - detach
+    DeploymentStackNameParameter:
+      name: deploymentStackName
+      in: path
+      required: true
+      description: Name of the deployment stack.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 90
+        minLength: 1
+        pattern: ^[-\w\._\(\)]+$
   securitySchemes:
     azure_auth:
       type: oauth2

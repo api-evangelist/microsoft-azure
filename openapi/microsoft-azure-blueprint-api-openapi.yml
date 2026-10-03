@@ -138,32 +138,6 @@ paths:
         nextLinkName: nextLink
       summary: Microsoft Azure Get Resourcescope Providers Microsoft Blueprint Blueprints
 components:
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      description: Client API Version.
-      schema:
-        type: string
-    BlueprintNameParameter:
-      name: blueprintName
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: Name of the blueprint definition.
-      schema:
-        type: string
-    ScopeParameter:
-      name: resourceScope
-      in: path
-      required: true
-      description: 'The scope of the resource. Valid scopes are: management group (format: ''/providers/Microsoft.Management/managementGroups/{managementGroup}''), subscription (format: ''/subscriptions/{subscriptionId}'').'
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
   schemas:
     BlueprintProperties:
       description: Schema for blueprint definition properties.
@@ -181,28 +155,33 @@ components:
           description: Layout view of the blueprint definition for UI reference.
       required:
       - targetScope
-    CloudError:
+    BlueprintList:
+      type: object
+      title: BlueprintList
+      description: List of blueprint definitions.
+      properties:
+        value:
+          type: array
+          description: List of blueprint definitions.
+          items:
+            $ref: '#/components/schemas/Blueprint'
+        nextLink:
+          type: string
+          readOnly: true
+          description: Link to the next page of results.
+    BlueprintResourcePropertiesBase:
+      description: Shared properties between all blueprint resources.
+      type: object
       x-ms-external: true
       properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
-    AzureResourceBase:
-      description: Common properties for all Azure resources.
-      type: object
-      x-ms-azure-resource: true
-      properties:
-        id:
-          readOnly: true
+        displayName:
           type: string
-          description: String Id used to locate any resource on Azure.
-        type:
-          readOnly: true
+          description: One-liner string explain this resource.
+          maxLength: 256
+        description:
           type: string
-          description: Type of this resource.
-        name:
-          readOnly: true
-          type: string
-          description: Name of this resource.
+          description: Multi-line explain this resource.
+          maxLength: 500
     ResourceGroupDefinition:
       description: Represents an Azure resource group in a blueprint definition.
       type: object
@@ -228,22 +207,6 @@ components:
           type: object
           additionalProperties:
             type: string
-    ParameterDefinitionMetadata:
-      type: object
-      description: User-friendly properties for this parameter.
-      properties:
-        displayName:
-          type: string
-          description: DisplayName of this parameter/resourceGroup.
-          maxLength: 256
-        description:
-          type: string
-          description: Description of this parameter/resourceGroup.
-          maxLength: 500
-        strongType:
-          type: string
-          description: StrongType for UI to render rich experience during blueprint assignment. Supported strong types are resourceType, principalId and location.
-          maxLength: 64
     ParameterDefinition:
       description: Represent a parameter with constrains and metadata.
       type: object
@@ -275,46 +238,22 @@ components:
             description: Allowed value.
       required:
       - type
-    BlueprintList:
+    ParameterDefinitionMetadata:
       type: object
-      title: BlueprintList
-      description: List of blueprint definitions.
+      description: User-friendly properties for this parameter.
       properties:
-        value:
-          type: array
-          description: List of blueprint definitions.
-          items:
-            $ref: '#/components/schemas/Blueprint'
-        nextLink:
+        displayName:
           type: string
-          readOnly: true
-          description: Link to the next page of results.
-    BlueprintResourceStatusBase:
-      description: Shared status properties between all blueprint resources.
-      type: object
-      properties:
-        timeCreated:
+          description: DisplayName of this parameter/resourceGroup.
+          maxLength: 256
+        description:
           type: string
-          format: date-time
-          readOnly: true
-          description: Creation time of this blueprint definition.
-        lastModified:
+          description: Description of this parameter/resourceGroup.
+          maxLength: 500
+        strongType:
           type: string
-          format: date-time
-          readOnly: true
-          description: Last modified time of this blueprint definition.
-    Blueprint:
-      type: object
-      description: Represents a Blueprint definition.
-      allOf:
-      - $ref: '#/components/schemas/AzureResourceBase'
-      properties:
-        properties:
-          description: Detailed properties for blueprint definition.
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BlueprintProperties'
-      required:
-      - properties
+          description: StrongType for UI to render rich experience during blueprint assignment. Supported strong types are resourceType, principalId and location.
+          maxLength: 64
     SharedBlueprintProperties:
       description: Shared Schema for both blueprintProperties and publishedBlueprintProperties.
       type: object
@@ -352,25 +291,86 @@ components:
             $ref: '#/components/schemas/ResourceGroupDefinition'
       allOf:
       - $ref: '#/components/schemas/BlueprintResourcePropertiesBase'
-    BlueprintResourcePropertiesBase:
-      description: Shared properties between all blueprint resources.
+    AzureResourceBase:
+      description: Common properties for all Azure resources.
       type: object
-      x-ms-external: true
+      x-ms-azure-resource: true
       properties:
-        displayName:
+        id:
+          readOnly: true
           type: string
-          description: One-liner string explain this resource.
-          maxLength: 256
-        description:
+          description: String Id used to locate any resource on Azure.
+        type:
+          readOnly: true
           type: string
-          description: Multi-line explain this resource.
-          maxLength: 500
+          description: Type of this resource.
+        name:
+          readOnly: true
+          type: string
+          description: Name of this resource.
+    BlueprintResourceStatusBase:
+      description: Shared status properties between all blueprint resources.
+      type: object
+      properties:
+        timeCreated:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation time of this blueprint definition.
+        lastModified:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Last modified time of this blueprint definition.
     BlueprintStatus:
       description: The status of the blueprint. This field is readonly.
       type: object
       properties: {}
       allOf:
       - $ref: '#/components/schemas/BlueprintResourceStatusBase'
+    Blueprint:
+      type: object
+      description: Represents a Blueprint definition.
+      allOf:
+      - $ref: '#/components/schemas/AzureResourceBase'
+      properties:
+        properties:
+          description: Detailed properties for blueprint definition.
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BlueprintProperties'
+      required:
+      - properties
+    CloudError:
+      x-ms-external: true
+      properties:
+        error:
+          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      description: Client API Version.
+      schema:
+        type: string
+    ScopeParameter:
+      name: resourceScope
+      in: path
+      required: true
+      description: 'The scope of the resource. Valid scopes are: management group (format: ''/providers/Microsoft.Management/managementGroups/{managementGroup}''), subscription (format: ''/subscriptions/{subscriptionId}'').'
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    BlueprintNameParameter:
+      name: blueprintName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: Name of the blueprint definition.
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

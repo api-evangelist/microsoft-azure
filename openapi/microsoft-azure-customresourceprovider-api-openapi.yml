@@ -202,45 +202,40 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft…
 components:
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: The API version to be used with the HTTP request.
+      schema:
+        type: string
+    ResourceProviderNameParameter:
+      name: resourceProviderName
+      in: path
+      required: true
+      description: The name of the resource provider.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: The name of the resource group.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+      schema:
+        type: string
   schemas:
-    ResourceProvidersUpdate:
-      properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags
-      description: custom resource provider update information.
-    ListByCustomRPManifest:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomRPManifest'
-          description: The array of custom resource provider manifests.
-        nextLink:
-          type: string
-          description: The URL to use for getting the next set of results.
-      description: List of custom resource providers.
-    CustomRPActionRouteDefinition:
-      description: The route definition for an action implemented by the custom resource provider.
-      properties:
-        routingType:
-          type: string
-          description: The routing types that are supported for action requests.
-          x-ms-enum:
-            modelAsString: true
-            name: ActionRouting
-          enum:
-          - Proxy
-      allOf:
-      - $ref: '#/components/schemas/CustomRPRouteDefinition'
-    ErrorResponse:
-      description: Error response.
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDefinition'
-          description: The error details.
     CustomRPManifest:
       properties:
         properties:
@@ -286,6 +281,88 @@ components:
       allOf:
       - $ref: '#/components/schemas/Resource'
       description: A manifest file that defines the custom resource provider resources.
+    CustomRPResourceTypeRouteDefinition:
+      description: The route definition for a resource implemented by the custom resource provider.
+      properties:
+        routingType:
+          type: string
+          description: The routing types that are supported for resource requests.
+          x-ms-enum:
+            modelAsString: true
+            name: ResourceTypeRouting
+          enum:
+          - Proxy
+          - Proxy,Cache
+      allOf:
+      - $ref: '#/components/schemas/CustomRPRouteDefinition'
+    ListByCustomRPManifest:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomRPManifest'
+          description: The array of custom resource provider manifests.
+        nextLink:
+          type: string
+          description: The URL to use for getting the next set of results.
+      description: List of custom resource providers.
+    ResourceProvidersUpdate:
+      properties:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags
+      description: custom resource provider update information.
+    CustomRPValidations:
+      description: A validation to apply on custom resource provider requests.
+      required:
+      - specification
+      properties:
+        validationType:
+          type: string
+          description: The type of validation to run against a matching request.
+          x-ms-enum:
+            modelAsString: true
+            name: ValidationType
+          enum:
+          - Swagger
+        specification:
+          type: string
+          description: A link to the validation specification. The specification must be hosted on raw.githubusercontent.com.
+          pattern: ^https://raw.githubusercontent.com/.+
+    CustomRPActionRouteDefinition:
+      description: The route definition for an action implemented by the custom resource provider.
+      properties:
+        routingType:
+          type: string
+          description: The routing types that are supported for action requests.
+          x-ms-enum:
+            modelAsString: true
+            name: ActionRouting
+          enum:
+          - Proxy
+      allOf:
+      - $ref: '#/components/schemas/CustomRPRouteDefinition'
+    CustomRPRouteDefinition:
+      description: A route definition that defines an action or resource that can be interacted with through the custom resource provider.
+      required:
+      - name
+      - endpoint
+      properties:
+        name:
+          type: string
+          description: The name of the route definition. This becomes the name for the ARM extension (e.g. '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CustomProviders/resourceProviders/{resourceProviderName}/{name}')
+        endpoint:
+          type: string
+          description: The route definition endpoint URI that the custom resource provider will proxy requests to. This can be in the form of a flat URI (e.g. 'https://testendpoint/') or can specify to route via a path (e.g. 'https://testendpoint/{requestPath}')
+          pattern: ^https://.+
+    ErrorResponse:
+      description: Error response.
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDefinition'
+          description: The error details.
     Resource:
       properties:
         id:
@@ -315,23 +392,6 @@ components:
       - location
       description: The resource definition.
       x-ms-azure-resource: true
-    CustomRPValidations:
-      description: A validation to apply on custom resource provider requests.
-      required:
-      - specification
-      properties:
-        validationType:
-          type: string
-          description: The type of validation to run against a matching request.
-          x-ms-enum:
-            modelAsString: true
-            name: ValidationType
-          enum:
-          - Swagger
-        specification:
-          type: string
-          description: A link to the validation specification. The specification must be hosted on raw.githubusercontent.com.
-          pattern: ^https://raw.githubusercontent.com/.+
     ErrorDefinition:
       description: Error definition.
       properties:
@@ -350,66 +410,6 @@ components:
             $ref: '#/components/schemas/ErrorDefinition'
           x-ms-identifiers: []
           readOnly: true
-    CustomRPRouteDefinition:
-      description: A route definition that defines an action or resource that can be interacted with through the custom resource provider.
-      required:
-      - name
-      - endpoint
-      properties:
-        name:
-          type: string
-          description: The name of the route definition. This becomes the name for the ARM extension (e.g. '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CustomProviders/resourceProviders/{resourceProviderName}/{name}')
-        endpoint:
-          type: string
-          description: The route definition endpoint URI that the custom resource provider will proxy requests to. This can be in the form of a flat URI (e.g. 'https://testendpoint/') or can specify to route via a path (e.g. 'https://testendpoint/{requestPath}')
-          pattern: ^https://.+
-    CustomRPResourceTypeRouteDefinition:
-      description: The route definition for a resource implemented by the custom resource provider.
-      properties:
-        routingType:
-          type: string
-          description: The routing types that are supported for resource requests.
-          x-ms-enum:
-            modelAsString: true
-            name: ResourceTypeRouting
-          enum:
-          - Proxy
-          - Proxy,Cache
-      allOf:
-      - $ref: '#/components/schemas/CustomRPRouteDefinition'
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: The API version to be used with the HTTP request.
-      schema:
-        type: string
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      description: The name of the resource group.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ResourceProviderNameParameter:
-      name: resourceProviderName
-      in: path
-      required: true
-      description: The name of the resource provider.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

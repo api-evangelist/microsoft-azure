@@ -2866,26 +2866,59 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
-    ExternalDocumentation:
+    Azure.Core.Foundations.Error:
       type: object
-      description: Api External Documentation Model
+      description: The error object.
       properties:
-        title:
+        code:
           type: string
-          description: Title of the documentation.
-          maxLength: 50
-        description:
+          description: One of a server-defined set of error codes.
+        message:
           type: string
-          description: Description of the documentation.
-          maxLength: 1000
-        url:
+          description: A human-readable representation of the error.
+        target:
           type: string
-          format: uri
-          description: URL pointing to the documentation.
+          description: The target of the error.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          x-ms-identifiers: []
+        innererror:
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: An object containing more specific information than the current object about the error.
       required:
-      - title
-      - description
-      - url
+      - code
+      - message
+    Azure.Core.Foundations.OperationState:
+      type: string
+      description: Enum describing allowed operation states.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      - Canceled
+      x-ms-enum:
+        name: OperationState
+        modelAsString: true
+        values:
+        - name: NotStarted
+          value: NotStarted
+          description: The operation has not started.
+        - name: Running
+          value: Running
+          description: The operation is in progress.
+        - name: Succeeded
+          value: Succeeded
+          description: The operation has completed successfully.
+        - name: Failed
+          value: Failed
+          description: The operation has failed.
+        - name: Canceled
+          value: Canceled
+          description: The operation has been canceled by the user.
     ApiDeployment:
       type: object
       description: API deployment resource model.
@@ -2919,51 +2952,33 @@ components:
       - title
       - environment
       - server
-    ApiSpecExportResultFormat:
-      type: string
-      description: Export specification result format
-      enum:
-      - link
-      x-ms-enum:
-        name: ApiSpecExportResultFormat
-        modelAsString: true
-        values:
-        - name: Link
-          value: link
-          description: Link format
-    EnvironmentKind:
-      type: string
-      description: Environment kind
-      enum:
-      - development
-      - testing
-      - staging
-      - production
-      x-ms-enum:
-        name: EnvironmentKind
-        modelAsString: true
-        values:
-        - name: Development
-          value: development
-          description: Environment is in the development stage
-        - name: Testing
-          value: testing
-          description: Environment is in the testing stage
-        - name: Staging
-          value: staging
-          description: Environment is in the staging stage
-        - name: Production
-          value: production
-          description: Environment is in the production stage
-    PagedApi:
+    ApiVersion:
       type: object
-      description: Paged collection of Api items
+      description: API version resource model.
+      properties:
+        name:
+          type: string
+          description: Version identifier.
+          maxLength: 50
+        title:
+          type: string
+          description: Version title.
+        lifecycleStage:
+          $ref: '#/components/schemas/LifecycleStage'
+          description: Current lifecycle stage of the API version.
+      required:
+      - name
+      - title
+      - lifecycleStage
+    PagedApiVersion:
+      type: object
+      description: Paged collection of ApiVersion items
       properties:
         value:
           type: array
-          description: The Api items on this page
+          description: The ApiVersion items on this page
           items:
-            $ref: '#/components/schemas/Api'
+            $ref: '#/components/schemas/ApiVersion'
           x-ms-identifiers: []
         nextLink:
           type: string
@@ -2971,6 +2986,70 @@ components:
           description: The link to the next page of items
       required:
       - value
+    ApiDefinition:
+      type: object
+      description: API definition resource model.
+      properties:
+        name:
+          type: string
+          description: Definition identifier.
+          maxLength: 50
+        title:
+          type: string
+          description: The name of the API definition.
+          maxLength: 50
+        description:
+          type: string
+          description: The description of the API definition.
+          maxLength: 1000
+        specification:
+          $ref: '#/components/schemas/ApiSpecification'
+          description: The API specification details.
+      required:
+      - name
+      - title
+    Azure.Core.Foundations.InnerError:
+      type: object
+      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        innererror:
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: Inner error.
+    Environment:
+      type: object
+      description: Environment resource model.
+      properties:
+        name:
+          type: string
+          description: Environment identifier.
+          maxLength: 50
+        title:
+          type: string
+          description: The name of the environment.
+          maxLength: 50
+        kind:
+          $ref: '#/components/schemas/EnvironmentKind'
+          description: Kind of deployment environment.
+        description:
+          type: string
+          description: Description of the environment.
+          maxLength: 1000
+        server:
+          $ref: '#/components/schemas/EnvironmentServer'
+          description: Server information of the environment.
+        onboarding:
+          $ref: '#/components/schemas/EnvironmentOnboardingModel'
+          description: Onboarding information for this environment.
+        customProperties:
+          type: object
+          description: The custom metadata defined for environment entities.
+      required:
+      - name
+      - title
+      - kind
     ApiKind:
       type: string
       description: API kind
@@ -3003,6 +3082,22 @@ components:
         - name: Websocket
           value: websocket
           description: Websocket API
+    PagedApiDeployment:
+      type: object
+      description: Paged collection of ApiDeployment items
+      properties:
+        value:
+          type: array
+          description: The ApiDeployment items on this page
+          items:
+            $ref: '#/components/schemas/ApiDeployment'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+      required:
+      - value
     EnvironmentOnboardingModel:
       type: object
       description: Environment Onboarding Model
@@ -3020,6 +3115,18 @@ components:
       required:
       - instructions
       - developerPortalUris
+    ApiSpecExportResultFormat:
+      type: string
+      description: Export specification result format
+      enum:
+      - link
+      x-ms-enum:
+        name: ApiSpecExportResultFormat
+        modelAsString: true
+        values:
+        - name: Link
+          value: link
+          description: Link format
     LifecycleStage:
       type: string
       description: API Lifecycle Stage
@@ -3056,66 +3163,68 @@ components:
         - name: Retired
           value: retired
           description: API is in the retired stage
-    PagedApiDefinition:
+    Azure.Core.Foundations.ErrorResponse:
       type: object
-      description: Paged collection of ApiDefinition items
+      description: A response containing error details.
       properties:
-        value:
-          type: array
-          description: The ApiDefinition items on this page
-          items:
-            $ref: '#/components/schemas/ApiDefinition'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
+        error:
+          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          description: The error object.
       required:
-      - value
-    Azure.Core.Foundations.InnerError:
+      - error
+    ApiSpecification:
       type: object
-      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: Inner error.
-    ApiVersion:
-      type: object
-      description: API version resource model.
+      description: API specification
       properties:
         name:
           type: string
-          description: Version identifier.
-          maxLength: 50
-        title:
+          description: API specification name, e.g. 'swagger' or 'openapi'.
+        version:
           type: string
-          description: Version title.
-        lifecycleStage:
-          $ref: '#/components/schemas/LifecycleStage'
-          description: Current lifecycle stage of the API version.
+          description: API specification version, e.g. '3.0.1'.
       required:
       - name
-      - title
-      - lifecycleStage
-    PagedApiVersion:
+      - version
+    EnvironmentKind:
+      type: string
+      description: Environment kind
+      enum:
+      - development
+      - testing
+      - staging
+      - production
+      x-ms-enum:
+        name: EnvironmentKind
+        modelAsString: true
+        values:
+        - name: Development
+          value: development
+          description: Environment is in the development stage
+        - name: Testing
+          value: testing
+          description: Environment is in the testing stage
+        - name: Staging
+          value: staging
+          description: Environment is in the staging stage
+        - name: Production
+          value: production
+          description: Environment is in the production stage
+    EnvironmentServer:
       type: object
-      description: Paged collection of ApiVersion items
+      description: Environment Server
       properties:
-        value:
-          type: array
-          description: The ApiVersion items on this page
-          items:
-            $ref: '#/components/schemas/ApiVersion'
-          x-ms-identifiers: []
-        nextLink:
+        type:
           type: string
-          format: uri
-          description: The link to the next page of items
+          description: Type of the server that represents the environment.
+        managementPortalUris:
+          type: array
+          description: URIs of the server's management portal.
+          items:
+            type: string
+            format: uri
       required:
-      - value
+      - type
+      - managementPortalUris
     TermsOfService:
       type: object
       description: API Terms of Service
@@ -3126,81 +3235,6 @@ components:
           description: URL pointing to the terms of service.
       required:
       - url
-    PagedEnvironment:
-      type: object
-      description: Paged collection of Environment items
-      properties:
-        value:
-          type: array
-          description: The Environment items on this page
-          items:
-            $ref: '#/components/schemas/Environment'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-      required:
-      - value
-    ApiSpecExportResult:
-      type: object
-      description: Export specification result model.
-      properties:
-        value:
-          type: string
-          description: The result of the specification export.
-        format:
-          $ref: '#/components/schemas/ApiSpecExportResultFormat'
-          description: The format of the specification export result.
-      required:
-      - value
-      - format
-    Azure.Core.Foundations.OperationState:
-      type: string
-      description: Enum describing allowed operation states.
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      - Canceled
-      x-ms-enum:
-        name: OperationState
-        modelAsString: true
-        values:
-        - name: NotStarted
-          value: NotStarted
-          description: The operation has not started.
-        - name: Running
-          value: Running
-          description: The operation is in progress.
-        - name: Succeeded
-          value: Succeeded
-          description: The operation has completed successfully.
-        - name: Failed
-          value: Failed
-          description: The operation has failed.
-        - name: Canceled
-          value: Canceled
-          description: The operation has been canceled by the user.
-    Contact:
-      type: object
-      description: API contact information
-      properties:
-        name:
-          type: string
-          description: Name of the contact.
-          maxLength: 100
-        url:
-          type: string
-          format: uri
-          description: URL for the contact.
-        email:
-          type: string
-          description: Email address for the contact.
-          maxLength: 100
-      required:
-      - name
     License:
       type: object
       description: API License Model
@@ -3219,151 +3253,6 @@ components:
           maxLength: 200
       required:
       - name
-    Azure.Core.Foundations.ErrorResponse:
-      type: object
-      description: A response containing error details.
-      properties:
-        error:
-          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          description: The error object.
-      required:
-      - error
-    PagedApiDeployment:
-      type: object
-      description: Paged collection of ApiDeployment items
-      properties:
-        value:
-          type: array
-          description: The ApiDeployment items on this page
-          items:
-            $ref: '#/components/schemas/ApiDeployment'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-      required:
-      - value
-    EnvironmentServer:
-      type: object
-      description: Environment Server
-      properties:
-        type:
-          type: string
-          description: Type of the server that represents the environment.
-        managementPortalUris:
-          type: array
-          description: URIs of the server's management portal.
-          items:
-            type: string
-            format: uri
-      required:
-      - type
-      - managementPortalUris
-    ApiDefinition:
-      type: object
-      description: API definition resource model.
-      properties:
-        name:
-          type: string
-          description: Definition identifier.
-          maxLength: 50
-        title:
-          type: string
-          description: The name of the API definition.
-          maxLength: 50
-        description:
-          type: string
-          description: The description of the API definition.
-          maxLength: 1000
-        specification:
-          $ref: '#/components/schemas/ApiSpecification'
-          description: The API specification details.
-      required:
-      - name
-      - title
-    Azure.Core.Foundations.Error:
-      type: object
-      description: The error object.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          x-ms-identifiers: []
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: An object containing more specific information than the current object about the error.
-      required:
-      - code
-      - message
-    ApiDeploymentServer:
-      type: object
-      description: Api Deployment Server
-      properties:
-        runtimeUris:
-          type: array
-          description: Base runtime URIs for this deployment.
-          items:
-            type: string
-            format: uri
-      required:
-      - runtimeUris
-    Environment:
-      type: object
-      description: Environment resource model.
-      properties:
-        name:
-          type: string
-          description: Environment identifier.
-          maxLength: 50
-        title:
-          type: string
-          description: The name of the environment.
-          maxLength: 50
-        kind:
-          $ref: '#/components/schemas/EnvironmentKind'
-          description: Kind of deployment environment.
-        description:
-          type: string
-          description: Description of the environment.
-          maxLength: 1000
-        server:
-          $ref: '#/components/schemas/EnvironmentServer'
-          description: Server information of the environment.
-        onboarding:
-          $ref: '#/components/schemas/EnvironmentOnboardingModel'
-          description: Onboarding information for this environment.
-        customProperties:
-          type: object
-          description: The custom metadata defined for environment entities.
-      required:
-      - name
-      - title
-      - kind
-    ApiSpecification:
-      type: object
-      description: API specification
-      properties:
-        name:
-          type: string
-          description: API specification name, e.g. 'swagger' or 'openapi'.
-        version:
-          type: string
-          description: API specification version, e.g. '3.0.1'.
-      required:
-      - name
-      - version
     Api:
       type: object
       description: API resource model.
@@ -3421,6 +3310,128 @@ components:
       - name
       - title
       - kind
+    PagedApi:
+      type: object
+      description: Paged collection of Api items
+      properties:
+        value:
+          type: array
+          description: The Api items on this page
+          items:
+            $ref: '#/components/schemas/Api'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+      required:
+      - value
+    PagedApiDefinition:
+      type: object
+      description: Paged collection of ApiDefinition items
+      properties:
+        value:
+          type: array
+          description: The ApiDefinition items on this page
+          items:
+            $ref: '#/components/schemas/ApiDefinition'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+      required:
+      - value
+    ApiSpecExportResult:
+      type: object
+      description: Export specification result model.
+      properties:
+        value:
+          type: string
+          description: The result of the specification export.
+        format:
+          $ref: '#/components/schemas/ApiSpecExportResultFormat'
+          description: The format of the specification export result.
+      required:
+      - value
+      - format
+    ApiDeploymentServer:
+      type: object
+      description: Api Deployment Server
+      properties:
+        runtimeUris:
+          type: array
+          description: Base runtime URIs for this deployment.
+          items:
+            type: string
+            format: uri
+      required:
+      - runtimeUris
+    PagedEnvironment:
+      type: object
+      description: Paged collection of Environment items
+      properties:
+        value:
+          type: array
+          description: The Environment items on this page
+          items:
+            $ref: '#/components/schemas/Environment'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+      required:
+      - value
+    ExternalDocumentation:
+      type: object
+      description: Api External Documentation Model
+      properties:
+        title:
+          type: string
+          description: Title of the documentation.
+          maxLength: 50
+        description:
+          type: string
+          description: Description of the documentation.
+          maxLength: 1000
+        url:
+          type: string
+          format: uri
+          description: URL pointing to the documentation.
+      required:
+      - title
+      - description
+      - url
+    Contact:
+      type: object
+      description: API contact information
+      properties:
+        name:
+          type: string
+          description: Name of the contact.
+          maxLength: 100
+        url:
+          type: string
+          format: uri
+          description: URL for the contact.
+        email:
+          type: string
+          description: Email address for the contact.
+          maxLength: 100
+      required:
+      - name
+    WorkspaceResponse:
+      properties:
+        displayName:
+          type: string
+        id:
+          type: string
+        mode:
+          $ref: '#/components/schemas/WorkspaceMode'
+        name:
+          type: string
+      type: object
     WorkspaceMode:
       properties:
         freeTrial:
@@ -3429,13 +3440,6 @@ components:
           type: boolean
         setup:
           type: boolean
-      type: object
-    ErrorResponse:
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - error
       type: object
     InnerError:
       description: This is an object containing more specific information than the current object about the error.
@@ -3467,16 +3471,70 @@ components:
       - code
       - message
       type: object
-    WorkspaceResponse:
+    ErrorResponse:
       properties:
-        displayName:
-          type: string
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - error
+      type: object
+    metadataQuery:
+      title: A stored query.
+      description: Queries are stored pieces of KQL, along with a list of relevant metadata items.
+      type: object
+      properties:
         id:
+          description: The ID of the query.
           type: string
-        mode:
-          $ref: '#/components/schemas/WorkspaceMode'
-        name:
+        displayName:
+          description: The display name of the query.
           type: string
+        description:
+          description: The description of the query.
+          type: string
+        body:
+          description: The KQL body of the query.
+          type: string
+        labels:
+          description: The user defined labels associated with the query.
+          type: array
+          items:
+            type: string
+        tags:
+          description: The tags associated with the query.
+          $ref: '#/components/schemas/tags'
+        properties:
+          description: The properties of the query.
+          type: object
+        related:
+          description: The related metadata items for the query.
+          type: object
+          properties:
+            categories:
+              description: The related categories for the query.
+              type: array
+              items:
+                type: string
+            solutions:
+              description: The related Log Analytics solutions for the query.
+              type: array
+              items:
+                type: string
+            resourceTypes:
+              description: The related resource types for the query.
+              type: array
+              items:
+                type: string
+            tables:
+              description: The related tables for the query.
+              type: array
+              items:
+                type: string
+      required:
+      - id
+      - body
+    tags:
+      description: String-based key-value tags
       type: object
     metadataSolution:
       title: A Log Analytics solution.
@@ -3536,6 +3594,482 @@ components:
       - id
       - name
       - related
+    column:
+      title: A table column.
+      description: A column in a table.
+      type: object
+      properties:
+        name:
+          description: The name of this column.
+          type: string
+        type:
+          description: The data type of this column.
+          $ref: '#/components/schemas/logsColumnType'
+    metadataResourceType:
+      title: A type of resource in Azure.
+      description: Metadata about types of Azure resources, containing relevant tables, functions, etc.
+      type: object
+      properties:
+        id:
+          description: The ID of the resource-type
+          type: string
+        type:
+          description: The type of the resource-type
+          type: string
+        displayName:
+          description: The display name of the resource-type
+          type: string
+        description:
+          description: The description of the resource-type
+          type: string
+        labels:
+          description: The user-defined labels of the resource-type
+          type: array
+          items:
+            type: string
+        tags:
+          description: The tags associated with the resource-type
+          $ref: '#/components/schemas/tags'
+        properties:
+          description: The properties of the resource-type
+          type: object
+        related:
+          description: The related metadata items for the resource-type
+          type: object
+          properties:
+            tables:
+              description: The tables related to the resource-type
+              type: array
+              items:
+                type: string
+            functions:
+              description: The functions related to the resource-type
+              type: array
+              items:
+                type: string
+            categories:
+              description: The categories related to the resource-type
+              type: array
+              items:
+                type: string
+            queries:
+              description: The queries related to the resource-type
+              type: array
+              items:
+                type: string
+            workspaces:
+              description: The Log Analytics workspaces related to the resource-type
+              type: array
+              items:
+                type: string
+            resources:
+              description: The Azure resources related to the resource-type
+              type: array
+              items:
+                type: string
+      required:
+      - id
+      - type
+    queryParam:
+      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+      type: string
+    workspacesParam:
+      description: Workspace names to include in cross-workspace queries.
+      type: array
+      items:
+        type: string
+    errorInfo:
+      title: The code and message for an error.
+      type: object
+      properties:
+        code:
+          description: A machine readable error code.
+          type: string
+        message:
+          description: A human readable error message.
+          type: string
+        details:
+          description: error details.
+          type: array
+          items:
+            $ref: '#/components/schemas/errorDetail'
+        innererror:
+          description: Inner error details if they exist.
+          $ref: '#/components/schemas/errorInfo'
+        additionalProperties:
+          description: Additional properties that can be provided on the error info object
+          type: object
+      required:
+      - code
+      - message
+    metadataResults:
+      title: A metadata response.
+      description: The metadata response for the app, including available tables, etc.
+      type: object
+      properties:
+        categories:
+          description: The list of categories that are referenced in this metadata response.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataCategory'
+          uniqueItems: true
+        resourceTypes:
+          description: The list of resource types that are referenced in this metadata response.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataResourceType'
+          uniqueItems: true
+        solutions:
+          description: The list of Log Analytics solutions installed on the workspace.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataSolution'
+          uniqueItems: true
+        tables:
+          description: The list of tables and columns that comprise the schema of the workspace.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataTable'
+          uniqueItems: true
+        functions:
+          description: The list of functions stored on the workspace, or introduced by solutions etc.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataFunction'
+          uniqueItems: true
+        queries:
+          description: The list of saved queries stored on the workspace, or introduced by solutions, resource types, etc.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataQuery'
+          uniqueItems: true
+        applications:
+          description: The list of Application Insights apps that were referenced in the metadata request.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataApplication'
+          uniqueItems: true
+        workspaces:
+          description: The list of Log Analytics workspaces that were referenced in the metadata request.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataWorkspace'
+          uniqueItems: true
+        resources:
+          description: The list of Azure resources that were referenced in the metadata request.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataResource'
+          uniqueItems: true
+        permissions:
+          description: The list of permission rules that affected the metadata request.
+          type: array
+          items:
+            $ref: '#/components/schemas/metadataPermissions'
+          uniqueItems: true
+    metadataApplication:
+      title: An Application Insights application.
+      description: Application Insights apps that were part of the metadata request and that the user has access to.
+      type: object
+      properties:
+        id:
+          description: The ID of the Application Insights app.
+          type: string
+        resourceId:
+          description: The ARM resource ID of the Application Insights app.
+          type: string
+        name:
+          description: The name of the Application Insights app.
+          type: string
+        region:
+          description: The Azure region of the Application Insights app.
+          type: string
+        related:
+          description: The related metadata items for the Application Insights app.
+          type: object
+          properties:
+            tables:
+              description: The related tables for the Application Insights app.
+              type: array
+              items:
+                type: string
+            functions:
+              description: The related functions for the Application Insights app.
+              type: array
+              items:
+                type: string
+      required:
+      - id
+      - resourceId
+      - name
+      - region
+    metadataWorkspace:
+      title: A Log Analytics workspace.
+      description: Log Analytics workspaces that were part of the metadata request and that the user has access to.
+      type: object
+      properties:
+        id:
+          description: The ID of the Log Analytics workspace.
+          type: string
+        resourceId:
+          description: The ARM resource ID of the Log Analytics workspace.
+          type: string
+        name:
+          description: The name of the Log Analytics workspace.
+          type: string
+        region:
+          description: The Azure region of the Log Analytics workspace.
+          type: string
+        related:
+          description: The related metadata items for the Log Analytics workspace.
+          type: object
+          properties:
+            tables:
+              description: The related tables for the Log Analytics workspace.
+              type: array
+              items:
+                type: string
+            solutions:
+              description: The related Log Analytics solutions for the Log Analytics workspace.
+              type: array
+              items:
+                type: string
+            resourceTypes:
+              description: The related resource types for the Log Analytics workspace.
+              type: array
+              items:
+                type: string
+            functions:
+              description: The related functions for the Log Analytics workspace.
+              type: array
+              items:
+                type: string
+            resources:
+              description: The related Azure resources for the Log Analytics workspace.
+              type: array
+              items:
+                type: string
+      required:
+      - id
+      - resourceId
+      - name
+      - region
+    queryResults:
+      title: A query response.
+      description: Contains the tables, columns & rows resulting from a query.
+      type: object
+      properties:
+        tables:
+          description: The list of tables, columns and rows.
+          type: array
+          items:
+            $ref: '#/components/schemas/table'
+        statistics:
+          type: object
+          description: Statistics represented in JSON format.
+          properties: {}
+        render:
+          type: object
+          description: Visualization data in JSON format.
+          properties: {}
+        error:
+          $ref: '#/components/schemas/errorInfo'
+      required:
+      - tables
+    metadataFunction:
+      title: A stored function.
+      description: Functions are stored Kusto queries that can be specified as part of queries by using their name.
+      type: object
+      properties:
+        id:
+          description: The ID of the function.
+          type: string
+        name:
+          description: The name of the function, to be used in queries.
+          type: string
+        parameters:
+          description: The parameters/arguments of the function, if any.
+          type: string
+        displayName:
+          description: The display name of the function.
+          type: string
+        description:
+          description: The description of the function.
+          type: string
+        body:
+          description: The KQL body of the function.
+          type: string
+        tags:
+          description: The tags associated with the function.
+          $ref: '#/components/schemas/tags'
+        properties:
+          description: The properties of the function.
+          type: object
+        related:
+          description: The related metadata items for the function.
+          type: object
+          properties:
+            tables:
+              description: The related tables for the function.
+              type: array
+              items:
+                type: string
+            solutions:
+              description: The related Log Analytics solutions for the function.
+              type: array
+              items:
+                type: string
+            resourceTypes:
+              description: The related resource types for the function.
+              type: array
+              items:
+                type: string
+            categories:
+              description: The related categories for the function.
+              type: array
+              items:
+                type: string
+            workspaces:
+              description: The related workspaces for the function.
+              type: array
+              items:
+                type: string
+      required:
+      - id
+      - name
+      - body
+    queryBody:
+      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+      type: object
+      properties:
+        query:
+          description: The query to execute.
+          $ref: '#/components/schemas/queryParam'
+        timespan:
+          description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+          $ref: '#/components/schemas/timespanParam'
+        workspaces:
+          description: A list of workspaces that are included in the query.
+          $ref: '#/components/schemas/workspacesParam'
+      required:
+      - query
+    metadataPermissions:
+      title: Permission information.
+      description: Permission information for the metadata call, includes apps/workspaces/resource the user didn't have access to.
+      type: object
+      properties:
+        workspaces:
+          description: The permission indication for the workspaces on the metadata request.
+          type: array
+          items:
+            type: object
+            properties:
+              resourceId:
+                description: The resource ID on the permission indication.
+                type: string
+              denyTables:
+                description: The list of tables that were denied access for the resource ID.
+                type: array
+                items:
+                  type: string
+            required:
+            - resourceId
+        resources:
+          description: The permission indication for the Azure resources on the metadata request.
+          type: array
+          items:
+            type: object
+            properties:
+              resourceId:
+                description: The resource ID on the permission indication.
+                type: string
+              denyTables:
+                description: The list of tables that were denied access for the resource ID.
+                type: array
+                items:
+                  type: string
+            required:
+            - resourceId
+        applications:
+          description: The permission indication for the Application Insights apps on the metadata request.
+          type: array
+          items:
+            type: object
+            properties:
+              resourceId:
+                description: The resource ID on the permission indication.
+                type: string
+            required:
+            - resourceId
+      required:
+      - workspaces
+    metadataResource:
+      title: An Azure resource.
+      description: Azure resources that were part of the metadata request and that the user has access to.
+    errorDetail:
+      title: Error details.
+      type: object
+      properties:
+        code:
+          description: The error's code.
+          type: string
+        message:
+          description: A human readable error message.
+          type: string
+        target:
+          description: Indicates which property in the request is responsible for the error.
+          type: string
+        value:
+          description: Indicates which value in 'target' is responsible for the error.
+          type: string
+        resources:
+          description: Indicates resources which were responsible for the error.
+          type: array
+          items:
+            type: string
+        additionalProperties:
+          description: Additional properties that can be provided on the error details object
+          type: object
+      required:
+      - code
+      - message
+    timespanParam:
+      description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+      type: string
+    errorResponse:
+      title: Error details.
+      description: Contains details when the response code indicates an error.
+      type: object
+      properties:
+        error:
+          description: The error details.
+          $ref: '#/components/schemas/errorInfo'
+      required:
+      - error
+    table:
+      title: A query response table.
+      description: Contains the columns and rows for one table in a query response.
+      type: object
+      properties:
+        name:
+          description: The name of the table.
+          type: string
+        columns:
+          description: The list of columns in this table.
+          type: array
+          items:
+            $ref: '#/components/schemas/column'
+        rows:
+          description: The resulting rows from this query.
+          type: array
+          items:
+            type: array
+            items:
+              type: object
+      required:
+      - name
+      - columns
+      - rows
     metadataTable:
       title: A data table that takes part in a workspace schema.
       description: Tables are part of the workspace schema, and contain a list of columns and a reference to other relevant metadata items.
@@ -3638,286 +4172,23 @@ components:
       required:
       - id
       - name
-    tags:
-      description: String-based key-value tags
-      type: object
-    errorDetail:
-      title: Error details.
-      type: object
-      properties:
-        code:
-          description: The error's code.
-          type: string
-        message:
-          description: A human readable error message.
-          type: string
-        target:
-          description: Indicates which property in the request is responsible for the error.
-          type: string
-        value:
-          description: Indicates which value in 'target' is responsible for the error.
-          type: string
-        resources:
-          description: Indicates resources which were responsible for the error.
-          type: array
-          items:
-            type: string
-        additionalProperties:
-          description: Additional properties that can be provided on the error details object
-          type: object
-      required:
-      - code
-      - message
-    timespanParam:
-      description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+    logsColumnType:
       type: string
-    metadataApplication:
-      title: An Application Insights application.
-      description: Application Insights apps that were part of the metadata request and that the user has access to.
-      type: object
-      properties:
-        id:
-          description: The ID of the Application Insights app.
-          type: string
-        resourceId:
-          description: The ARM resource ID of the Application Insights app.
-          type: string
-        name:
-          description: The name of the Application Insights app.
-          type: string
-        region:
-          description: The Azure region of the Application Insights app.
-          type: string
-        related:
-          description: The related metadata items for the Application Insights app.
-          type: object
-          properties:
-            tables:
-              description: The related tables for the Application Insights app.
-              type: array
-              items:
-                type: string
-            functions:
-              description: The related functions for the Application Insights app.
-              type: array
-              items:
-                type: string
-      required:
-      - id
-      - resourceId
-      - name
-      - region
-    queryBody:
-      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
-      type: object
-      properties:
-        query:
-          description: The query to execute.
-          $ref: '#/components/schemas/queryParam'
-        timespan:
-          description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
-          $ref: '#/components/schemas/timespanParam'
-        workspaces:
-          description: A list of workspaces that are included in the query.
-          $ref: '#/components/schemas/workspacesParam'
-      required:
-      - query
-    metadataResults:
-      title: A metadata response.
-      description: The metadata response for the app, including available tables, etc.
-      type: object
-      properties:
-        categories:
-          description: The list of categories that are referenced in this metadata response.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataCategory'
-          uniqueItems: true
-        resourceTypes:
-          description: The list of resource types that are referenced in this metadata response.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataResourceType'
-          uniqueItems: true
-        solutions:
-          description: The list of Log Analytics solutions installed on the workspace.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataSolution'
-          uniqueItems: true
-        tables:
-          description: The list of tables and columns that comprise the schema of the workspace.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataTable'
-          uniqueItems: true
-        functions:
-          description: The list of functions stored on the workspace, or introduced by solutions etc.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataFunction'
-          uniqueItems: true
-        queries:
-          description: The list of saved queries stored on the workspace, or introduced by solutions, resource types, etc.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataQuery'
-          uniqueItems: true
-        applications:
-          description: The list of Application Insights apps that were referenced in the metadata request.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataApplication'
-          uniqueItems: true
-        workspaces:
-          description: The list of Log Analytics workspaces that were referenced in the metadata request.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataWorkspace'
-          uniqueItems: true
-        resources:
-          description: The list of Azure resources that were referenced in the metadata request.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataResource'
-          uniqueItems: true
-        permissions:
-          description: The list of permission rules that affected the metadata request.
-          type: array
-          items:
-            $ref: '#/components/schemas/metadataPermissions'
-          uniqueItems: true
-    workspacesParam:
-      description: Workspace names to include in cross-workspace queries.
-      type: array
-      items:
-        type: string
-    metadataWorkspace:
-      title: A Log Analytics workspace.
-      description: Log Analytics workspaces that were part of the metadata request and that the user has access to.
-      type: object
-      properties:
-        id:
-          description: The ID of the Log Analytics workspace.
-          type: string
-        resourceId:
-          description: The ARM resource ID of the Log Analytics workspace.
-          type: string
-        name:
-          description: The name of the Log Analytics workspace.
-          type: string
-        region:
-          description: The Azure region of the Log Analytics workspace.
-          type: string
-        related:
-          description: The related metadata items for the Log Analytics workspace.
-          type: object
-          properties:
-            tables:
-              description: The related tables for the Log Analytics workspace.
-              type: array
-              items:
-                type: string
-            solutions:
-              description: The related Log Analytics solutions for the Log Analytics workspace.
-              type: array
-              items:
-                type: string
-            resourceTypes:
-              description: The related resource types for the Log Analytics workspace.
-              type: array
-              items:
-                type: string
-            functions:
-              description: The related functions for the Log Analytics workspace.
-              type: array
-              items:
-                type: string
-            resources:
-              description: The related Azure resources for the Log Analytics workspace.
-              type: array
-              items:
-                type: string
-      required:
-      - id
-      - resourceId
-      - name
-      - region
-    metadataResourceType:
-      title: A type of resource in Azure.
-      description: Metadata about types of Azure resources, containing relevant tables, functions, etc.
-      type: object
-      properties:
-        id:
-          description: The ID of the resource-type
-          type: string
-        type:
-          description: The type of the resource-type
-          type: string
-        displayName:
-          description: The display name of the resource-type
-          type: string
-        description:
-          description: The description of the resource-type
-          type: string
-        labels:
-          description: The user-defined labels of the resource-type
-          type: array
-          items:
-            type: string
-        tags:
-          description: The tags associated with the resource-type
-          $ref: '#/components/schemas/tags'
-        properties:
-          description: The properties of the resource-type
-          type: object
-        related:
-          description: The related metadata items for the resource-type
-          type: object
-          properties:
-            tables:
-              description: The tables related to the resource-type
-              type: array
-              items:
-                type: string
-            functions:
-              description: The functions related to the resource-type
-              type: array
-              items:
-                type: string
-            categories:
-              description: The categories related to the resource-type
-              type: array
-              items:
-                type: string
-            queries:
-              description: The queries related to the resource-type
-              type: array
-              items:
-                type: string
-            workspaces:
-              description: The Log Analytics workspaces related to the resource-type
-              type: array
-              items:
-                type: string
-            resources:
-              description: The Azure resources related to the resource-type
-              type: array
-              items:
-                type: string
-      required:
-      - id
-      - type
-    errorResponse:
-      title: Error details.
-      description: Contains details when the response code indicates an error.
-      type: object
-      properties:
-        error:
-          description: The error details.
-          $ref: '#/components/schemas/errorInfo'
-      required:
-      - error
+      description: The data type of this column.
+      enum:
+      - bool
+      - datetime
+      - dynamic
+      - int
+      - long
+      - real
+      - string
+      - guid
+      - decimal
+      - timespan
+      x-ms-enum:
+        name: logsColumnType
+        modelAsString: true
     metadataCategory:
       title: A metadata category.
       description: Categories are used to group other metadata entities.
@@ -3964,337 +4235,121 @@ components:
       required:
       - id
       - displayName
-    metadataResource:
-      title: An Azure resource.
-      description: Azure resources that were part of the metadata request and that the user has access to.
-    metadataQuery:
-      title: A stored query.
-      description: Queries are stored pieces of KQL, along with a list of relevant metadata items.
-      type: object
-      properties:
-        id:
-          description: The ID of the query.
-          type: string
-        displayName:
-          description: The display name of the query.
-          type: string
-        description:
-          description: The description of the query.
-          type: string
-        body:
-          description: The KQL body of the query.
-          type: string
-        labels:
-          description: The user defined labels associated with the query.
-          type: array
-          items:
-            type: string
-        tags:
-          description: The tags associated with the query.
-          $ref: '#/components/schemas/tags'
-        properties:
-          description: The properties of the query.
-          type: object
-        related:
-          description: The related metadata items for the query.
-          type: object
-          properties:
-            categories:
-              description: The related categories for the query.
-              type: array
-              items:
-                type: string
-            solutions:
-              description: The related Log Analytics solutions for the query.
-              type: array
-              items:
-                type: string
-            resourceTypes:
-              description: The related resource types for the query.
-              type: array
-              items:
-                type: string
-            tables:
-              description: The related tables for the query.
-              type: array
-              items:
-                type: string
-      required:
-      - id
-      - body
-    logsColumnType:
-      type: string
-      description: The data type of this column.
-      enum:
-      - bool
-      - datetime
-      - dynamic
-      - int
-      - long
-      - real
-      - string
-      - guid
-      - decimal
-      - timespan
-      x-ms-enum:
-        name: logsColumnType
-        modelAsString: true
-    metadataPermissions:
-      title: Permission information.
-      description: Permission information for the metadata call, includes apps/workspaces/resource the user didn't have access to.
-      type: object
-      properties:
-        workspaces:
-          description: The permission indication for the workspaces on the metadata request.
-          type: array
-          items:
-            type: object
-            properties:
-              resourceId:
-                description: The resource ID on the permission indication.
-                type: string
-              denyTables:
-                description: The list of tables that were denied access for the resource ID.
-                type: array
-                items:
-                  type: string
-            required:
-            - resourceId
-        resources:
-          description: The permission indication for the Azure resources on the metadata request.
-          type: array
-          items:
-            type: object
-            properties:
-              resourceId:
-                description: The resource ID on the permission indication.
-                type: string
-              denyTables:
-                description: The list of tables that were denied access for the resource ID.
-                type: array
-                items:
-                  type: string
-            required:
-            - resourceId
-        applications:
-          description: The permission indication for the Application Insights apps on the metadata request.
-          type: array
-          items:
-            type: object
-            properties:
-              resourceId:
-                description: The resource ID on the permission indication.
-                type: string
-            required:
-            - resourceId
-      required:
-      - workspaces
-    metadataFunction:
-      title: A stored function.
-      description: Functions are stored Kusto queries that can be specified as part of queries by using their name.
-      type: object
-      properties:
-        id:
-          description: The ID of the function.
-          type: string
-        name:
-          description: The name of the function, to be used in queries.
-          type: string
-        parameters:
-          description: The parameters/arguments of the function, if any.
-          type: string
-        displayName:
-          description: The display name of the function.
-          type: string
-        description:
-          description: The description of the function.
-          type: string
-        body:
-          description: The KQL body of the function.
-          type: string
-        tags:
-          description: The tags associated with the function.
-          $ref: '#/components/schemas/tags'
-        properties:
-          description: The properties of the function.
-          type: object
-        related:
-          description: The related metadata items for the function.
-          type: object
-          properties:
-            tables:
-              description: The related tables for the function.
-              type: array
-              items:
-                type: string
-            solutions:
-              description: The related Log Analytics solutions for the function.
-              type: array
-              items:
-                type: string
-            resourceTypes:
-              description: The related resource types for the function.
-              type: array
-              items:
-                type: string
-            categories:
-              description: The related categories for the function.
-              type: array
-              items:
-                type: string
-            workspaces:
-              description: The related workspaces for the function.
-              type: array
-              items:
-                type: string
-      required:
-      - id
-      - name
-      - body
-    column:
-      title: A table column.
-      description: A column in a table.
-      type: object
-      properties:
-        name:
-          description: The name of this column.
-          type: string
-        type:
-          description: The data type of this column.
-          $ref: '#/components/schemas/logsColumnType'
-    queryParam:
-      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
-      type: string
-    table:
-      title: A query response table.
-      description: Contains the columns and rows for one table in a query response.
-      type: object
-      properties:
-        name:
-          description: The name of the table.
-          type: string
-        columns:
-          description: The list of columns in this table.
-          type: array
-          items:
-            $ref: '#/components/schemas/column'
-        rows:
-          description: The resulting rows from this query.
-          type: array
-          items:
-            type: array
-            items:
-              type: object
-      required:
-      - name
-      - columns
-      - rows
-    errorInfo:
-      title: The code and message for an error.
-      type: object
-      properties:
-        code:
-          description: A machine readable error code.
-          type: string
-        message:
-          description: A human readable error message.
-          type: string
-        details:
-          description: error details.
-          type: array
-          items:
-            $ref: '#/components/schemas/errorDetail'
-        innererror:
-          description: Inner error details if they exist.
-          $ref: '#/components/schemas/errorInfo'
-        additionalProperties:
-          description: Additional properties that can be provided on the error info object
-          type: object
-      required:
-      - code
-      - message
-    queryResults:
-      title: A query response.
-      description: Contains the tables, columns & rows resulting from a query.
-      type: object
-      properties:
-        tables:
-          description: The list of tables, columns and rows.
-          type: array
-          items:
-            $ref: '#/components/schemas/table'
-        statistics:
-          type: object
-          description: Statistics represented in JSON format.
-          properties: {}
-        render:
-          type: object
-          description: Visualization data in JSON format.
-          properties: {}
-        error:
-          $ref: '#/components/schemas/errorInfo'
-      required:
-      - tables
-    RuleType:
-      description: Type of a managed network Outbound Rule of a machine learning workspace.
-      enum:
-      - FQDN
-      - PrivateEndpoint
-      - ServiceTag
-      type: string
-      x-ms-enum:
-        name: RuleType
-        modelAsString: true
-    EncryptionProperty:
-      required:
-      - keyVaultProperties
-      - status
-      type: object
-      properties:
-        cosmosDbResourceId:
-          description: 'The byok cosmosdb account that customer brings to store customer''s data
+    PrivateEndpointServiceConnectionStatus:
+      description: 'Connection status of the service consumer with the service provider
 
-            with encryption'
-          type: string
+        Possible state transitions
+
+        Pending -> Approved (Service provider approves the connection request)
+
+        Pending -> Rejected (Service provider rejects the connection request)
+
+        Pending -> Disconnected (Service provider deletes the connection)
+
+        Approved -> Rejected (Service provider rejects the approved connection)
+
+        Approved -> Disconnected (Service provider deletes the connection)
+
+        Rejected -> Pending (Service consumer re-initiates the connection request that was rejected)
+
+        Rejected -> Disconnected (Service provider deletes the connection)'
+      enum:
+      - Approved
+      - Pending
+      - Rejected
+      - Disconnected
+      - Timeout
+      type: string
+      x-ms-enum:
+        name: EndpointServiceConnectionStatus
+        modelAsString: true
+    Workspace:
+      description: An object that represents a machine learning workspace.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
+      properties:
         identity:
-          description: Identity to be used with the keyVault
-          $ref: '#/components/schemas/IdentityForCmk'
-        keyVaultProperties:
-          description: KeyVault details to do the encryption
-          $ref: '#/components/schemas/KeyVaultProperties'
-        searchAccountResourceId:
-          description: 'The byok search account that customer brings to store customer''s data
-
-            with encryption'
+          $ref: ../../../../../common-types/resource-management/v3/managedidentity.json#/definitions/ManagedServiceIdentity
+        kind:
           type: string
+        location:
+          type: string
+        properties:
+          description: Additional attributes of the entity.
+          $ref: '#/components/schemas/WorkspaceProperties'
+          x-ms-client-flatten: true
+        sku:
+          description: Optional. This field is required to be implemented by the RP because AML is supporting more than one tier
+          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Sku
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+    NotebookPreparationError:
+      type: object
+      properties:
+        errorMessage:
+          type: string
+        statusCode:
+          format: int32
+          type: integer
+    WorkspacePrivateEndpointResource:
+      description: The Private Endpoint resource.
+      type: object
+      properties:
+        id:
+          description: e.g. /subscriptions/{networkSubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.Network/privateEndpoints/{privateEndpointName}
+          type: string
+          readOnly: true
+          x-ms-mutability:
+          - read
+        subnetArmId:
+          description: The subnetId that the private endpoint is connected to.
+          type: string
+          readOnly: true
+          x-ms-mutability:
+          - read
+    OutboundRule:
+      description: Outbound Rule for the managed network of a machine learning workspace.
+      required:
+      - type
+      type: object
+      properties:
+        category:
+          description: Category of a managed network Outbound Rule of a machine learning workspace.
+          $ref: '#/components/schemas/RuleCategory'
         status:
-          $ref: '#/components/schemas/EncryptionStatus'
-        storageAccountResourceId:
-          description: 'The byok storage account that customer brings to store customer''s data
-
-            with encryption'
+          description: Type of a managed network Outbound Rule of a machine learning workspace.
+          $ref: '#/components/schemas/RuleStatus'
+        type:
+          description: Type of a managed network Outbound Rule of a machine learning workspace.
+          $ref: '#/components/schemas/RuleType'
+      discriminator:
+        propertyName: type
+    WorkspaceListResult:
+      description: The result of a request to list machine learning workspaces.
+      type: object
+      properties:
+        nextLink:
+          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
-    EncryptionKeyVaultUpdateProperties:
-      required:
-      - keyIdentifier
-      type: object
-      properties:
-        keyIdentifier:
-          minLength: 1
-          pattern: '[a-zA-Z0-9_]'
-          type: string
-    EncryptionUpdateProperties:
-      required:
-      - keyVaultProperties
-      type: object
-      properties:
-        keyVaultProperties:
-          $ref: '#/components/schemas/EncryptionKeyVaultUpdateProperties'
-    ServiceManagedResourcesSettings:
-      type: object
-      properties:
-        cosmosDb:
-          $ref: '#/components/schemas/CosmosDbSettings'
+        value:
+          description: The list of machine learning workspaces. Since this list may be incomplete, the nextLink field should be used to request the next list of machine learning workspaces.
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace'
+    PublicNetworkAccessType:
+      description: The public network access flag.
+      enum:
+      - Enabled
+      - Disabled
+      type: string
+      x-ms-enum:
+        name: PublicNetworkAccessType
+        modelAsString: true
     WorkspaceProperties:
       description: The properties of a machine learning workspace.
       type: object
@@ -4459,6 +4514,28 @@ components:
           readOnly: true
           x-ms-mutability:
           - read
+    KeyVaultProperties:
+      description: Customer Key vault properties.
+      required:
+      - keyIdentifier
+      - keyVaultArmId
+      type: object
+      properties:
+        identityClientId:
+          description: 'Currently, we support only SystemAssigned MSI.
+
+            We need this when we support UserAssignedIdentities'
+          type: string
+        keyIdentifier:
+          description: KeyVault key identifier to encrypt the data
+          minLength: 1
+          pattern: '[a-zA-Z0-9_]'
+          type: string
+        keyVaultArmId:
+          description: KeyVault Arm Id that contains the data encryption key
+          minLength: 1
+          pattern: '[a-zA-Z0-9_]'
+          type: string
     SharedPrivateLinkResourceProperty:
       description: Properties of a shared private link resource.
       type: object
@@ -4474,64 +4551,16 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/PrivateEndpointServiceConnectionStatus'
-    WorkspacePrivateEndpointResource:
-      description: The Private Endpoint resource.
+    ServerlessComputeSettings:
       type: object
       properties:
-        id:
-          description: e.g. /subscriptions/{networkSubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.Network/privateEndpoints/{privateEndpointName}
+        serverlessComputeCustomSubnet:
+          description: The resource ID of an existing virtual network subnet in which serverless compute nodes should be deployed
           type: string
-          readOnly: true
-          x-ms-mutability:
-          - read
-        subnetArmId:
-          description: The subnetId that the private endpoint is connected to.
-          type: string
-          readOnly: true
-          x-ms-mutability:
-          - read
-    Workspace:
-      description: An object that represents a machine learning workspace.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
-      properties:
-        identity:
-          $ref: ../../../../../common-types/resource-management/v3/managedidentity.json#/definitions/ManagedServiceIdentity
-        kind:
-          type: string
-        location:
-          type: string
-        properties:
-          description: Additional attributes of the entity.
-          $ref: '#/components/schemas/WorkspaceProperties'
-          x-ms-client-flatten: true
-        sku:
-          description: Optional. This field is required to be implemented by the RP because AML is supporting more than one tier
-          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Sku
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-    NotebookPreparationError:
-      type: object
-      properties:
-        errorMessage:
-          type: string
-        statusCode:
-          format: int32
-          type: integer
-    PublicNetworkAccessType:
-      description: The public network access flag.
-      enum:
-      - Enabled
-      - Disabled
-      type: string
-      x-ms-enum:
-        name: PublicNetworkAccessType
-        modelAsString: true
+          format: arm-id
+        serverlessComputeNoPublicIP:
+          description: The flag to signal if serverless compute nodes deployed in custom vNet would have no public IP addresses for a workspace with private endpoint
+          type: boolean
     ManagedNetworkSettings:
       description: Managed Network settings for a machine learning workspace.
       type: object
@@ -4557,6 +4586,137 @@ components:
           items:
             $ref: '#/components/schemas/IsolationMode'
           readOnly: true
+    PrivateLinkServiceConnectionState:
+      description: A collection of information about the state of the connection between service consumer and provider.
+      type: object
+      properties:
+        actionsRequired:
+          description: Some RP chose "None". Other RPs use this for region expansion.
+          type: string
+        description:
+          description: User-defined message that, per NRP doc, may be used for approval-related message.
+          type: string
+        status:
+          $ref: '#/components/schemas/PrivateEndpointServiceConnectionStatus'
+    CosmosDbSettings:
+      type: object
+      properties:
+        collectionsThroughput:
+          format: int32
+          type: integer
+    EncryptionKeyVaultUpdateProperties:
+      required:
+      - keyIdentifier
+      type: object
+      properties:
+        keyIdentifier:
+          minLength: 1
+          pattern: '[a-zA-Z0-9_]'
+          type: string
+    ManagedNetworkProvisionStatus:
+      description: Status of the Provisioning for the managed network of a machine learning workspace.
+      type: object
+      properties:
+        sparkReady:
+          type: boolean
+        status:
+          description: Status for the managed network of a machine learning workspace.
+          $ref: '#/components/schemas/ManagedNetworkStatus'
+    IdentityForCmk:
+      description: Identity object used for encryption.
+      type: object
+      properties:
+        userAssignedIdentity:
+          description: UserAssignedIdentity to be used to fetch the encryption key from keyVault
+          type: string
+    ProvisioningState:
+      description: The current deployment state of workspace resource. The provisioningState is to indicate states for resource provisioning.
+      enum:
+      - Unknown
+      - Updating
+      - Creating
+      - Deleting
+      - Succeeded
+      - Failed
+      - Canceled
+      type: string
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    ServiceManagedResourcesSettings:
+      type: object
+      properties:
+        cosmosDb:
+          $ref: '#/components/schemas/CosmosDbSettings'
+    RuleStatus:
+      description: Type of a managed network Outbound Rule of a machine learning workspace.
+      enum:
+      - Inactive
+      - Active
+      type: string
+      x-ms-enum:
+        name: RuleStatus
+        modelAsString: true
+    RuleType:
+      description: Type of a managed network Outbound Rule of a machine learning workspace.
+      enum:
+      - FQDN
+      - PrivateEndpoint
+      - ServiceTag
+      type: string
+      x-ms-enum:
+        name: RuleType
+        modelAsString: true
+    SharedPrivateLinkResource:
+      type: object
+      properties:
+        name:
+          description: Unique name of the private link
+          type: string
+        properties:
+          description: Properties of a shared private link resource.
+          $ref: '#/components/schemas/SharedPrivateLinkResourceProperty'
+          x-ms-client-flatten: true
+    EncryptionProperty:
+      required:
+      - keyVaultProperties
+      - status
+      type: object
+      properties:
+        cosmosDbResourceId:
+          description: 'The byok cosmosdb account that customer brings to store customer''s data
+
+            with encryption'
+          type: string
+        identity:
+          description: Identity to be used with the keyVault
+          $ref: '#/components/schemas/IdentityForCmk'
+        keyVaultProperties:
+          description: KeyVault details to do the encryption
+          $ref: '#/components/schemas/KeyVaultProperties'
+        searchAccountResourceId:
+          description: 'The byok search account that customer brings to store customer''s data
+
+            with encryption'
+          type: string
+        status:
+          $ref: '#/components/schemas/EncryptionStatus'
+        storageAccountResourceId:
+          description: 'The byok storage account that customer brings to store customer''s data
+
+            with encryption'
+          type: string
+    PrivateEndpointConnectionProvisioningState:
+      description: The current provisioning state.
+      enum:
+      - Succeeded
+      - Creating
+      - Deleting
+      - Failed
+      type: string
+      x-ms-enum:
+        name: PrivateEndpointConnectionProvisioningState
+        modelAsString: true
     WorkspacePropertiesUpdateParameters:
       description: The parameters for updating a machine learning workspace.
       type: object
@@ -4612,40 +4772,16 @@ components:
         v1LegacyMode:
           description: Enabling v1_legacy_mode may prevent you from using features provided by the v2 API.
           type: boolean
-    WorkspaceUpdateParameters:
-      description: The parameters for updating a machine learning workspace.
-      type: object
-      properties:
-        identity:
-          $ref: ../../../../../common-types/resource-management/v3/managedidentity.json#/definitions/ManagedServiceIdentity
-        properties:
-          description: The properties that the machine learning workspace will be updated with.
-          $ref: '#/components/schemas/WorkspacePropertiesUpdateParameters'
-          x-ms-client-flatten: true
-        sku:
-          description: Optional. This field is required to be implemented by the RP because AML is supporting more than one tier
-          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Sku
-        tags:
-          description: The resource tags for the machine learning workspace.
-          type: object
-          additionalProperties:
-            type: string
-    EncryptionStatus:
-      description: Indicates whether or not the encryption is enabled for the workspace.
+    IsolationMode:
+      description: Isolation mode for the managed network of a machine learning workspace.
       enum:
-      - Enabled
       - Disabled
+      - AllowInternetOutbound
+      - AllowOnlyApprovedOutbound
       type: string
       x-ms-enum:
-        name: EncryptionStatus
+        name: IsolationMode
         modelAsString: true
-    IdentityForCmk:
-      description: Identity object used for encryption.
-      type: object
-      properties:
-        userAssignedIdentity:
-          description: UserAssignedIdentity to be used to fetch the encryption key from keyVault
-          type: string
     FeatureStoreSettings:
       type: object
       properties:
@@ -4677,103 +4813,30 @@ components:
           type: object
           additionalProperties:
             type: string
-    PrivateEndpointConnectionProperties:
-      description: Private endpoint connection properties.
-      type: object
-      properties:
-        privateEndpoint:
-          $ref: '#/components/schemas/WorkspacePrivateEndpointResource'
-        privateLinkServiceConnectionState:
-          description: The connection state.
-          $ref: '#/components/schemas/PrivateLinkServiceConnectionState'
-        provisioningState:
-          $ref: '#/components/schemas/PrivateEndpointConnectionProvisioningState'
     ComputeRuntimeDto:
       type: object
       properties:
         sparkRuntimeVersion:
           type: string
-    ServerlessComputeSettings:
+    EncryptionStatus:
+      description: Indicates whether or not the encryption is enabled for the workspace.
+      enum:
+      - Enabled
+      - Disabled
+      type: string
+      x-ms-enum:
+        name: EncryptionStatus
+        modelAsString: true
+    WorkspaceHubConfig:
+      description: WorkspaceHub's configuration object.
       type: object
       properties:
-        serverlessComputeCustomSubnet:
-          description: The resource ID of an existing virtual network subnet in which serverless compute nodes should be deployed
+        additionalWorkspaceStorageAccounts:
+          type: array
+          items:
+            type: string
+        defaultWorkspaceResourceGroup:
           type: string
-          format: arm-id
-        serverlessComputeNoPublicIP:
-          description: The flag to signal if serverless compute nodes deployed in custom vNet would have no public IP addresses for a workspace with private endpoint
-          type: boolean
-    PrivateEndpointConnectionProvisioningState:
-      description: The current provisioning state.
-      enum:
-      - Succeeded
-      - Creating
-      - Deleting
-      - Failed
-      type: string
-      x-ms-enum:
-        name: PrivateEndpointConnectionProvisioningState
-        modelAsString: true
-    CosmosDbSettings:
-      type: object
-      properties:
-        collectionsThroughput:
-          format: int32
-          type: integer
-    PrivateEndpointServiceConnectionStatus:
-      description: 'Connection status of the service consumer with the service provider
-
-        Possible state transitions
-
-        Pending -> Approved (Service provider approves the connection request)
-
-        Pending -> Rejected (Service provider rejects the connection request)
-
-        Pending -> Disconnected (Service provider deletes the connection)
-
-        Approved -> Rejected (Service provider rejects the approved connection)
-
-        Approved -> Disconnected (Service provider deletes the connection)
-
-        Rejected -> Pending (Service consumer re-initiates the connection request that was rejected)
-
-        Rejected -> Disconnected (Service provider deletes the connection)'
-      enum:
-      - Approved
-      - Pending
-      - Rejected
-      - Disconnected
-      - Timeout
-      type: string
-      x-ms-enum:
-        name: EndpointServiceConnectionStatus
-        modelAsString: true
-    OutboundRule:
-      description: Outbound Rule for the managed network of a machine learning workspace.
-      required:
-      - type
-      type: object
-      properties:
-        category:
-          description: Category of a managed network Outbound Rule of a machine learning workspace.
-          $ref: '#/components/schemas/RuleCategory'
-        status:
-          description: Type of a managed network Outbound Rule of a machine learning workspace.
-          $ref: '#/components/schemas/RuleStatus'
-        type:
-          description: Type of a managed network Outbound Rule of a machine learning workspace.
-          $ref: '#/components/schemas/RuleType'
-      discriminator:
-        propertyName: type
-    RuleStatus:
-      description: Type of a managed network Outbound Rule of a machine learning workspace.
-      enum:
-      - Inactive
-      - Active
-      type: string
-      x-ms-enum:
-        name: RuleStatus
-        modelAsString: true
     NotebookResourceInfo:
       type: object
       properties:
@@ -4797,15 +4860,24 @@ components:
       x-ms-enum:
         name: RuleCategory
         modelAsString: true
-    ManagedNetworkProvisionStatus:
-      description: Status of the Provisioning for the managed network of a machine learning workspace.
+    WorkspaceUpdateParameters:
+      description: The parameters for updating a machine learning workspace.
       type: object
       properties:
-        sparkReady:
-          type: boolean
-        status:
-          description: Status for the managed network of a machine learning workspace.
-          $ref: '#/components/schemas/ManagedNetworkStatus'
+        identity:
+          $ref: ../../../../../common-types/resource-management/v3/managedidentity.json#/definitions/ManagedServiceIdentity
+        properties:
+          description: The properties that the machine learning workspace will be updated with.
+          $ref: '#/components/schemas/WorkspacePropertiesUpdateParameters'
+          x-ms-client-flatten: true
+        sku:
+          description: Optional. This field is required to be implemented by the RP because AML is supporting more than one tier
+          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Sku
+        tags:
+          description: The resource tags for the machine learning workspace.
+          type: object
+          additionalProperties:
+            type: string
     ManagedNetworkStatus:
       description: Status for the managed network of a machine learning workspace.
       enum:
@@ -4815,109 +4887,24 @@ components:
       x-ms-enum:
         name: ManagedNetworkStatus
         modelAsString: true
-    WorkspaceHubConfig:
-      description: WorkspaceHub's configuration object.
-      type: object
-      properties:
-        additionalWorkspaceStorageAccounts:
-          type: array
-          items:
-            type: string
-        defaultWorkspaceResourceGroup:
-          type: string
-    ProvisioningState:
-      description: The current deployment state of workspace resource. The provisioningState is to indicate states for resource provisioning.
-      enum:
-      - Unknown
-      - Updating
-      - Creating
-      - Deleting
-      - Succeeded
-      - Failed
-      - Canceled
-      type: string
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    PrivateLinkServiceConnectionState:
-      description: A collection of information about the state of the connection between service consumer and provider.
-      type: object
-      properties:
-        actionsRequired:
-          description: Some RP chose "None". Other RPs use this for region expansion.
-          type: string
-        description:
-          description: User-defined message that, per NRP doc, may be used for approval-related message.
-          type: string
-        status:
-          $ref: '#/components/schemas/PrivateEndpointServiceConnectionStatus'
-    IsolationMode:
-      description: Isolation mode for the managed network of a machine learning workspace.
-      enum:
-      - Disabled
-      - AllowInternetOutbound
-      - AllowOnlyApprovedOutbound
-      type: string
-      x-ms-enum:
-        name: IsolationMode
-        modelAsString: true
-    WorkspaceListResult:
-      description: The result of a request to list machine learning workspaces.
-      type: object
-      properties:
-        nextLink:
-          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
-          type: string
-        value:
-          description: The list of machine learning workspaces. Since this list may be incomplete, the nextLink field should be used to request the next list of machine learning workspaces.
-          type: array
-          items:
-            $ref: '#/components/schemas/Workspace'
-    KeyVaultProperties:
-      description: Customer Key vault properties.
+    EncryptionUpdateProperties:
       required:
-      - keyIdentifier
-      - keyVaultArmId
+      - keyVaultProperties
       type: object
       properties:
-        identityClientId:
-          description: 'Currently, we support only SystemAssigned MSI.
-
-            We need this when we support UserAssignedIdentities'
-          type: string
-        keyIdentifier:
-          description: KeyVault key identifier to encrypt the data
-          minLength: 1
-          pattern: '[a-zA-Z0-9_]'
-          type: string
-        keyVaultArmId:
-          description: KeyVault Arm Id that contains the data encryption key
-          minLength: 1
-          pattern: '[a-zA-Z0-9_]'
-          type: string
-    SharedPrivateLinkResource:
+        keyVaultProperties:
+          $ref: '#/components/schemas/EncryptionKeyVaultUpdateProperties'
+    PrivateEndpointConnectionProperties:
+      description: Private endpoint connection properties.
       type: object
       properties:
-        name:
-          description: Unique name of the private link
-          type: string
-        properties:
-          description: Properties of a shared private link resource.
-          $ref: '#/components/schemas/SharedPrivateLinkResourceProperty'
-          x-ms-client-flatten: true
-    AmlUserFeature:
-      description: Features enabled for a workspace
-      type: object
-      properties:
-        id:
-          description: Specifies the feature ID
-          type: string
-        displayName:
-          description: 'Specifies the feature name '
-          type: string
-        description:
-          description: Describes the feature for user experience
-          type: string
+        privateEndpoint:
+          $ref: '#/components/schemas/WorkspacePrivateEndpointResource'
+        privateLinkServiceConnectionState:
+          description: The connection state.
+          $ref: '#/components/schemas/PrivateLinkServiceConnectionState'
+        provisioningState:
+          $ref: '#/components/schemas/PrivateEndpointConnectionProvisioningState'
     ListAmlUserFeatureResult:
       type: object
       properties:
@@ -4932,9 +4919,115 @@ components:
           type: string
           description: The URI to fetch the next page of AML user features information. Call ListNext() with this to fetch the next page of AML user features information.
       description: The List Aml user feature operation response.
-    EnhancedSecurityMonitoringDefinition:
+    AmlUserFeature:
+      description: Features enabled for a workspace
       type: object
-      description: Status of Enhanced Security Monitoring feature.
+      properties:
+        id:
+          description: Specifies the feature ID
+          type: string
+        displayName:
+          description: 'Specifies the feature name '
+          type: string
+        description:
+          description: Describes the feature for user experience
+          type: string
+    Workspace_2:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/WorkspaceProperties_2'
+          description: The workspace properties.
+        sku:
+          $ref: '#/components/schemas/Sku'
+          description: The SKU of the resource.
+        systemData:
+          description: The system metadata relating to this resource
+          type: object
+          readOnly: true
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+      required:
+      - properties
+      allOf:
+      - $ref: '#/components/schemas/TrackedResource'
+      description: Information about workspace.
+    WorkspaceCustomParameters:
+      properties:
+        amlWorkspaceId:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: The ID of a Azure Machine Learning workspace to link with Databricks workspace
+        customVirtualNetworkId:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: The ID of a Virtual Network where this Databricks Cluster should be created
+        customPublicSubnetName:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: The name of a Public Subnet within the Virtual Network
+        customPrivateSubnetName:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: The name of the Private Subnet within the Virtual Network
+        enableNoPublicIp:
+          $ref: '#/components/schemas/WorkspaceCustomBooleanParameter'
+          description: Should the Public IP be Disabled?
+        loadBalancerBackendPoolName:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: Name of the outbound Load Balancer Backend Pool for Secure Cluster Connectivity (No Public IP).
+        loadBalancerId:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: Resource URI of Outbound Load balancer for Secure Cluster Connectivity (No Public IP) workspace.
+        natGatewayName:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: Name of the NAT gateway for Secure Cluster Connectivity (No Public IP) workspace subnets.
+        publicIpName:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: Name of the Public IP for No Public IP workspace with managed vNet.
+        prepareEncryption:
+          $ref: '#/components/schemas/WorkspaceCustomBooleanParameter'
+          description: Prepare the workspace for encryption. Enables the Managed Identity for managed storage account.
+        encryption:
+          $ref: '#/components/schemas/WorkspaceEncryptionParameter'
+          description: Contains the encryption details for Customer-Managed Key (CMK) enabled workspace.
+        requireInfrastructureEncryption:
+          $ref: '#/components/schemas/WorkspaceCustomBooleanParameter'
+          description: A boolean indicating whether or not the DBFS root file system will be enabled with secondary layer of encryption with platform managed keys for data at rest.
+        storageAccountName:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: Default DBFS storage account name.
+        storageAccountSkuName:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: 'Storage account SKU name, ex: Standard_GRS, Standard_LRS. Refer https://aka.ms/storageskus for valid inputs.'
+        vnetAddressPrefix:
+          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
+          description: Address prefix for Managed virtual network. Default value for this input is 10.139.
+        resourceTags:
+          $ref: '#/components/schemas/WorkspaceCustomObjectParameter'
+          readOnly: true
+          description: Tags applied to resources under Managed resource group. These can be updated by updating tags at workspace level.
+      description: Custom Parameters used for Cluster Creation.
+    TrackedResource:
+      description: The resource model definition for a ARM tracked top level resource
+      properties:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          x-ms-mutability:
+          - read
+          - create
+          - update
+          description: Resource tags.
+        location:
+          type: string
+          x-ms-mutability:
+          - read
+          - create
+          description: The geo-location where the resource lives
+      required:
+      - location
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    AutomaticClusterUpdateDefinition:
+      type: object
+      description: Status of automated cluster updates feature.
       properties:
         value:
           type: string
@@ -4943,7 +5036,68 @@ components:
           - Disabled
           x-ms-enum:
             modelAsString: true
-            name: EnhancedSecurityMonitoringValue
+            name: AutomaticClusterUpdateValue
+    ComplianceStandardDefinition:
+      description: Compliance standard that can be associated with a workspace.
+      type: string
+      enum:
+      - NONE
+      - HIPAA
+      - PCI_DSS
+      x-ms-enum:
+        modelAsString: true
+        name: ComplianceStandard
+    CreatedDateTime:
+      type: string
+      format: date-time
+      description: The date and time stamp when the workspace was created.
+      readOnly: true
+    Encryption:
+      properties:
+        keySource:
+          type: string
+          description: 'The encryption keySource (provider). Possible values (case-insensitive):  Default, Microsoft.Keyvault'
+          enum:
+          - Default
+          - Microsoft.Keyvault
+          x-ms-enum:
+            name: KeySource
+            modelAsString: true
+          default: Default
+        KeyName:
+          type: string
+          description: The name of KeyVault key.
+        keyversion:
+          type: string
+          description: The version of KeyVault key.
+          x-ms-client-name: KeyVersion
+        keyvaulturi:
+          type: string
+          description: The Uri of KeyVault.
+          x-ms-client-name: KeyVaultUri
+      description: The object that contains details of encryption used on the workspace.
+    WorkspaceListResult_2:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace_2'
+          description: The array of workspaces.
+        nextLink:
+          type: string
+          description: The URL to use for getting the next set of results.
+      description: List of workspaces.
+    WorkspaceCustomStringParameter:
+      properties:
+        type:
+          $ref: '#/components/schemas/WorkspaceCustomParameterType'
+          description: The type of variable that this is
+        value:
+          type: string
+          description: The value which should be used for this field.
+      required:
+      - value
+      description: The Value.
     WorkspaceUpdate:
       description: An update to a workspace.
       type: object
@@ -5048,468 +5202,6 @@ components:
       required:
       - managedResourceGroupId
       description: The workspace properties.
-    PrivateEndpoint:
-      description: The private endpoint property of a private endpoint connection
-      type: object
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: The resource identifier.
-    Workspace_2:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/WorkspaceProperties_2'
-          description: The workspace properties.
-        sku:
-          $ref: '#/components/schemas/Sku'
-          description: The SKU of the resource.
-        systemData:
-          description: The system metadata relating to this resource
-          type: object
-          readOnly: true
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-      required:
-      - properties
-      allOf:
-      - $ref: '#/components/schemas/TrackedResource'
-      description: Information about workspace.
-    ComplianceSecurityProfileDefinition:
-      type: object
-      description: Status of Compliance Security Profile feature.
-      properties:
-        complianceStandards:
-          description: Compliance standards associated with the workspace.
-          type: array
-          items:
-            $ref: '#/components/schemas/ComplianceStandardDefinition'
-        value:
-          type: string
-          enum:
-          - Enabled
-          - Disabled
-          x-ms-enum:
-            modelAsString: true
-            name: ComplianceSecurityProfileValue
-    CreatedDateTime:
-      type: string
-      format: date-time
-      description: The date and time stamp when the workspace was created.
-      readOnly: true
-    CreatedBy:
-      properties:
-        oid:
-          type: string
-          format: uuid
-          description: The Object ID that created the workspace.
-          readOnly: true
-        puid:
-          type: string
-          description: The Personal Object ID corresponding to the object ID above
-          readOnly: true
-        applicationId:
-          type: string
-          format: uuid
-          description: The application ID of the application that initiated the creation of the workspace. For example, Azure Portal.
-          readOnly: true
-      description: Provides details of the entity that created/updated the workspace.
-    TrackedResource:
-      description: The resource model definition for a ARM tracked top level resource
-      properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          x-ms-mutability:
-          - read
-          - create
-          - update
-          description: Resource tags.
-        location:
-          type: string
-          x-ms-mutability:
-          - read
-          - create
-          description: The geo-location where the resource lives
-      required:
-      - location
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-    WorkspaceCustomBooleanParameter:
-      properties:
-        type:
-          $ref: '#/components/schemas/WorkspaceCustomParameterType'
-          description: The type of variable that this is
-        value:
-          type: boolean
-          description: The value which should be used for this field.
-      required:
-      - value
-      description: The value which should be used for this field.
-    ManagedIdentityConfiguration:
-      description: The Managed Identity details for storage account.
-      properties:
-        principalId:
-          type: string
-          format: uuid
-          description: The objectId of the Managed Identity that is linked to the Managed Storage account.
-          readOnly: true
-        tenantId:
-          type: string
-          format: uuid
-          description: The tenant Id where the Managed Identity is created.
-          readOnly: true
-        type:
-          type: string
-          description: The type of Identity created. It can be either SystemAssigned or UserAssigned.
-          readOnly: true
-    DefaultCatalogProperties:
-      type: object
-      properties:
-        initialType:
-          type: string
-          description: 'Defines the initial type of the default catalog. Possible values (case-insensitive):  HiveMetastore, UnityCatalog'
-          enum:
-          - HiveMetastore
-          - UnityCatalog
-          x-ms-enum:
-            name: initialType
-            modelAsString: true
-          default: HiveMetastore
-        initialName:
-          type: string
-          description: Specifies the initial Name of default catalog. If not specified, the name of the workspace will be used.
-      description: These properties lets user specify default catalog properties during workspace creation.
-    WorkspaceCustomParameters:
-      properties:
-        amlWorkspaceId:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: The ID of a Azure Machine Learning workspace to link with Databricks workspace
-        customVirtualNetworkId:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: The ID of a Virtual Network where this Databricks Cluster should be created
-        customPublicSubnetName:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: The name of a Public Subnet within the Virtual Network
-        customPrivateSubnetName:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: The name of the Private Subnet within the Virtual Network
-        enableNoPublicIp:
-          $ref: '#/components/schemas/WorkspaceCustomBooleanParameter'
-          description: Should the Public IP be Disabled?
-        loadBalancerBackendPoolName:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: Name of the outbound Load Balancer Backend Pool for Secure Cluster Connectivity (No Public IP).
-        loadBalancerId:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: Resource URI of Outbound Load balancer for Secure Cluster Connectivity (No Public IP) workspace.
-        natGatewayName:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: Name of the NAT gateway for Secure Cluster Connectivity (No Public IP) workspace subnets.
-        publicIpName:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: Name of the Public IP for No Public IP workspace with managed vNet.
-        prepareEncryption:
-          $ref: '#/components/schemas/WorkspaceCustomBooleanParameter'
-          description: Prepare the workspace for encryption. Enables the Managed Identity for managed storage account.
-        encryption:
-          $ref: '#/components/schemas/WorkspaceEncryptionParameter'
-          description: Contains the encryption details for Customer-Managed Key (CMK) enabled workspace.
-        requireInfrastructureEncryption:
-          $ref: '#/components/schemas/WorkspaceCustomBooleanParameter'
-          description: A boolean indicating whether or not the DBFS root file system will be enabled with secondary layer of encryption with platform managed keys for data at rest.
-        storageAccountName:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: Default DBFS storage account name.
-        storageAccountSkuName:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: 'Storage account SKU name, ex: Standard_GRS, Standard_LRS. Refer https://aka.ms/storageskus for valid inputs.'
-        vnetAddressPrefix:
-          $ref: '#/components/schemas/WorkspaceCustomStringParameter'
-          description: Address prefix for Managed virtual network. Default value for this input is 10.139.
-        resourceTags:
-          $ref: '#/components/schemas/WorkspaceCustomObjectParameter'
-          readOnly: true
-          description: Tags applied to resources under Managed resource group. These can be updated by updating tags at workspace level.
-      description: Custom Parameters used for Cluster Creation.
-    Sku:
-      properties:
-        name:
-          type: string
-          description: The SKU name.
-        tier:
-          type: string
-          description: The SKU tier.
-      required:
-      - name
-      description: SKU for the resource.
-    EncryptionEntitiesDefinition:
-      properties:
-        managedServices:
-          type: object
-          description: Encryption properties for the databricks managed services.
-          $ref: '#/components/schemas/EncryptionV2'
-        managedDisk:
-          type: object
-          description: Encryption properties for the databricks managed disks.
-          $ref: '#/components/schemas/ManagedDiskEncryption'
-      description: Encryption entities for databricks workspace resource.
-    WorkspaceCustomParameterType:
-      description: Provisioning status of the workspace.
-      readOnly: true
-      enum:
-      - Bool
-      - Object
-      - String
-      type: string
-      x-ms-enum:
-        name: CustomParameterType
-        modelAsString: true
-    WorkspaceEncryptionParameter:
-      properties:
-        type:
-          $ref: '#/components/schemas/WorkspaceCustomParameterType'
-          description: The type of variable that this is
-        value:
-          $ref: '#/components/schemas/Encryption'
-          description: The value which should be used for this field.
-      description: The object that contains details of encryption used on the workspace.
-    PrivateEndpointConnection_2:
-      description: The private endpoint connection of a workspace
-      x-ms-azure-resource: true
-      type: object
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: The resource identifier.
-        name:
-          readOnly: true
-          type: string
-          description: The resource name.
-        type:
-          readOnly: true
-          type: string
-          description: The resource type.
-        properties:
-          type: object
-          description: The private endpoint connection properties.
-          x-ms-client-flatten: false
-          $ref: '#/components/schemas/PrivateEndpointConnectionProperties_2'
-      required:
-      - properties
-    ErrorResponse_2:
-      title: Error response.
-      description: Contains details when the response code indicates an error.
-      type: object
-      properties:
-        error:
-          description: The error details.
-          $ref: '#/components/schemas/ErrorInfo'
-      required:
-      - error
-    PrivateEndpointConnectionProperties_2:
-      description: The properties of a private endpoint connection
-      type: object
-      properties:
-        privateEndpoint:
-          title: Private endpoint
-          description: Private endpoint
-          $ref: '#/components/schemas/PrivateEndpoint'
-        groupIds:
-          type: array
-          description: GroupIds from the private link service resource.
-          items:
-            type: string
-        privateLinkServiceConnectionState:
-          title: Private link service service connection state
-          description: Private endpoint connection state
-          $ref: '#/components/schemas/PrivateLinkServiceConnectionState_2'
-        provisioningState:
-          $ref: '#/components/schemas/PrivateEndpointConnectionProvisioningState_2'
-          description: Provisioning state of the private endpoint connection.
-      required:
-      - privateLinkServiceConnectionState
-    PrivateEndpointConnectionProvisioningState_2:
-      type: string
-      readOnly: true
-      description: The current provisioning state.
-      enum:
-      - Succeeded
-      - Creating
-      - Updating
-      - Deleting
-      - Failed
-      x-ms-enum:
-        name: PrivateEndpointConnectionProvisioningState
-        modelAsString: true
-    WorkspaceCustomStringParameter:
-      properties:
-        type:
-          $ref: '#/components/schemas/WorkspaceCustomParameterType'
-          description: The type of variable that this is
-        value:
-          type: string
-          description: The value which should be used for this field.
-      required:
-      - value
-      description: The Value.
-    EncryptionV2:
-      properties:
-        keySource:
-          type: string
-          description: 'The encryption keySource (provider). Possible values (case-insensitive):  Microsoft.Keyvault'
-          enum:
-          - Microsoft.Keyvault
-          x-ms-enum:
-            name: EncryptionKeySource
-            modelAsString: true
-        keyVaultProperties:
-          properties:
-            keyVaultUri:
-              type: string
-              description: The Uri of KeyVault.
-            keyName:
-              type: string
-              description: The name of KeyVault key.
-            keyVersion:
-              type: string
-              description: The version of KeyVault key.
-          required:
-          - keyVaultUri
-          - keyName
-          - keyVersion
-          description: Key Vault input properties for encryption.
-      required:
-      - keySource
-      description: The object that contains details of encryption used on the workspace.
-    ErrorDetail_2:
-      title: Error details.
-      type: object
-      properties:
-        code:
-          description: The error's code.
-          type: string
-        message:
-          description: A human readable error message.
-          type: string
-        target:
-          description: Indicates which property in the request is responsible for the error.
-          type: string
-      required:
-      - code
-      - message
-    WorkspaceCustomObjectParameter:
-      properties:
-        type:
-          $ref: '#/components/schemas/WorkspaceCustomParameterType'
-          description: The type of variable that this is
-        value:
-          type: object
-          description: The value which should be used for this field.
-      required:
-      - value
-      description: The value which should be used for this field.
-    ComplianceStandardDefinition:
-      description: Compliance standard that can be associated with a workspace.
-      type: string
-      enum:
-      - NONE
-      - HIPAA
-      - PCI_DSS
-      x-ms-enum:
-        modelAsString: true
-        name: ComplianceStandard
-    Encryption:
-      properties:
-        keySource:
-          type: string
-          description: 'The encryption keySource (provider). Possible values (case-insensitive):  Default, Microsoft.Keyvault'
-          enum:
-          - Default
-          - Microsoft.Keyvault
-          x-ms-enum:
-            name: KeySource
-            modelAsString: true
-          default: Default
-        KeyName:
-          type: string
-          description: The name of KeyVault key.
-        keyversion:
-          type: string
-          description: The version of KeyVault key.
-          x-ms-client-name: KeyVersion
-        keyvaulturi:
-          type: string
-          description: The Uri of KeyVault.
-          x-ms-client-name: KeyVaultUri
-      description: The object that contains details of encryption used on the workspace.
-    WorkspaceProviderAuthorization:
-      properties:
-        principalId:
-          type: string
-          format: uuid
-          description: The provider's principal identifier. This is the identity that the provider will use to call ARM to manage the workspace resources.
-        roleDefinitionId:
-          type: string
-          format: uuid
-          description: The provider's role definition identifier. This role will define all the permissions that the provider must have on the workspace's container resource group. This role definition cannot have permission to delete the resource group.
-      required:
-      - principalId
-      - roleDefinitionId
-      description: The workspace provider authorization.
-    EnhancedSecurityComplianceDefinition:
-      type: object
-      description: Status of settings related to the Enhanced Security and Compliance Add-On.
-      properties:
-        automaticClusterUpdate:
-          type: string
-          description: Status of automated cluster updates feature.
-          $ref: '#/components/schemas/AutomaticClusterUpdateDefinition'
-        complianceSecurityProfile:
-          type: object
-          description: Status of Compliance Security Profile feature.
-          $ref: '#/components/schemas/ComplianceSecurityProfileDefinition'
-        enhancedSecurityMonitoring:
-          type: object
-          description: Status of Enhanced Security Monitoring feature.
-          $ref: '#/components/schemas/EnhancedSecurityMonitoringDefinition'
-    Resource:
-      description: The core properties of ARM resources
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Fully qualified resource Id for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}
-        name:
-          readOnly: true
-          type: string
-          description: The name of the resource
-        type:
-          readOnly: true
-          type: string
-          description: The type of the resource. Ex- Microsoft.Compute/virtualMachines or Microsoft.Storage/storageAccounts.
-      x-ms-azure-resource: true
-    ProvisioningState_2:
-      description: Provisioning status of the workspace.
-      readOnly: true
-      enum:
-      - Accepted
-      - Running
-      - Ready
-      - Creating
-      - Created
-      - Deleting
-      - Deleted
-      - Canceled
-      - Failed
-      - Succeeded
-      - Updating
-      type: string
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
     ManagedDiskEncryption:
       type: object
       properties:
@@ -5545,6 +5237,97 @@ components:
       - keySource
       - keyVaultProperties
       description: The object that contains details of encryption used on the workspace.
+    EnhancedSecurityMonitoringDefinition:
+      type: object
+      description: Status of Enhanced Security Monitoring feature.
+      properties:
+        value:
+          type: string
+          enum:
+          - Enabled
+          - Disabled
+          x-ms-enum:
+            modelAsString: true
+            name: EnhancedSecurityMonitoringValue
+    CreatedBy:
+      properties:
+        oid:
+          type: string
+          format: uuid
+          description: The Object ID that created the workspace.
+          readOnly: true
+        puid:
+          type: string
+          description: The Personal Object ID corresponding to the object ID above
+          readOnly: true
+        applicationId:
+          type: string
+          format: uuid
+          description: The application ID of the application that initiated the creation of the workspace. For example, Azure Portal.
+          readOnly: true
+      description: Provides details of the entity that created/updated the workspace.
+    Sku:
+      properties:
+        name:
+          type: string
+          description: The SKU name.
+        tier:
+          type: string
+          description: The SKU tier.
+      required:
+      - name
+      description: SKU for the resource.
+    EncryptionEntitiesDefinition:
+      properties:
+        managedServices:
+          type: object
+          description: Encryption properties for the databricks managed services.
+          $ref: '#/components/schemas/EncryptionV2'
+        managedDisk:
+          type: object
+          description: Encryption properties for the databricks managed disks.
+          $ref: '#/components/schemas/ManagedDiskEncryption'
+      description: Encryption entities for databricks workspace resource.
+    EncryptionV2:
+      properties:
+        keySource:
+          type: string
+          description: 'The encryption keySource (provider). Possible values (case-insensitive):  Microsoft.Keyvault'
+          enum:
+          - Microsoft.Keyvault
+          x-ms-enum:
+            name: EncryptionKeySource
+            modelAsString: true
+        keyVaultProperties:
+          properties:
+            keyVaultUri:
+              type: string
+              description: The Uri of KeyVault.
+            keyName:
+              type: string
+              description: The name of KeyVault key.
+            keyVersion:
+              type: string
+              description: The version of KeyVault key.
+          required:
+          - keyVaultUri
+          - keyName
+          - keyVersion
+          description: Key Vault input properties for encryption.
+      required:
+      - keySource
+      description: The object that contains details of encryption used on the workspace.
+    WorkspaceCustomParameterType:
+      description: Provisioning status of the workspace.
+      readOnly: true
+      enum:
+      - Bool
+      - Object
+      - String
+      type: string
+      x-ms-enum:
+        name: CustomParameterType
+        modelAsString: true
     PrivateLinkServiceConnectionState_2:
       description: The current state of a private endpoint connection
       type: object
@@ -5568,17 +5351,55 @@ components:
           description: Actions required for a private endpoint connection
       required:
       - status
-    WorkspaceListResult_2:
+    WorkspaceCustomBooleanParameter:
       properties:
+        type:
+          $ref: '#/components/schemas/WorkspaceCustomParameterType'
+          description: The type of variable that this is
         value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Workspace_2'
-          description: The array of workspaces.
-        nextLink:
+          type: boolean
+          description: The value which should be used for this field.
+      required:
+      - value
+      description: The value which should be used for this field.
+    WorkspaceCustomObjectParameter:
+      properties:
+        type:
+          $ref: '#/components/schemas/WorkspaceCustomParameterType'
+          description: The type of variable that this is
+        value:
+          type: object
+          description: The value which should be used for this field.
+      required:
+      - value
+      description: The value which should be used for this field.
+    PrivateEndpoint:
+      description: The private endpoint property of a private endpoint connection
+      type: object
+      properties:
+        id:
+          readOnly: true
           type: string
-          description: The URL to use for getting the next set of results.
-      description: List of workspaces.
+          description: The resource identifier.
+    ProvisioningState_2:
+      description: Provisioning status of the workspace.
+      readOnly: true
+      enum:
+      - Accepted
+      - Running
+      - Ready
+      - Creating
+      - Created
+      - Deleting
+      - Deleted
+      - Canceled
+      - Failed
+      - Succeeded
+      - Updating
+      type: string
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
     ErrorInfo:
       title: The code and message for an error.
       type: object
@@ -5600,10 +5421,156 @@ components:
       required:
       - code
       - message
-    AutomaticClusterUpdateDefinition:
-      type: object
-      description: Status of automated cluster updates feature.
+    ManagedIdentityConfiguration:
+      description: The Managed Identity details for storage account.
       properties:
+        principalId:
+          type: string
+          format: uuid
+          description: The objectId of the Managed Identity that is linked to the Managed Storage account.
+          readOnly: true
+        tenantId:
+          type: string
+          format: uuid
+          description: The tenant Id where the Managed Identity is created.
+          readOnly: true
+        type:
+          type: string
+          description: The type of Identity created. It can be either SystemAssigned or UserAssigned.
+          readOnly: true
+    WorkspaceEncryptionParameter:
+      properties:
+        type:
+          $ref: '#/components/schemas/WorkspaceCustomParameterType'
+          description: The type of variable that this is
+        value:
+          $ref: '#/components/schemas/Encryption'
+          description: The value which should be used for this field.
+      description: The object that contains details of encryption used on the workspace.
+    PrivateEndpointConnectionProvisioningState_2:
+      type: string
+      readOnly: true
+      description: The current provisioning state.
+      enum:
+      - Succeeded
+      - Creating
+      - Updating
+      - Deleting
+      - Failed
+      x-ms-enum:
+        name: PrivateEndpointConnectionProvisioningState
+        modelAsString: true
+    EnhancedSecurityComplianceDefinition:
+      type: object
+      description: Status of settings related to the Enhanced Security and Compliance Add-On.
+      properties:
+        automaticClusterUpdate:
+          type: string
+          description: Status of automated cluster updates feature.
+          $ref: '#/components/schemas/AutomaticClusterUpdateDefinition'
+        complianceSecurityProfile:
+          type: object
+          description: Status of Compliance Security Profile feature.
+          $ref: '#/components/schemas/ComplianceSecurityProfileDefinition'
+        enhancedSecurityMonitoring:
+          type: object
+          description: Status of Enhanced Security Monitoring feature.
+          $ref: '#/components/schemas/EnhancedSecurityMonitoringDefinition'
+    PrivateEndpointConnection_2:
+      description: The private endpoint connection of a workspace
+      x-ms-azure-resource: true
+      type: object
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: The resource identifier.
+        name:
+          readOnly: true
+          type: string
+          description: The resource name.
+        type:
+          readOnly: true
+          type: string
+          description: The resource type.
+        properties:
+          type: object
+          description: The private endpoint connection properties.
+          x-ms-client-flatten: false
+          $ref: '#/components/schemas/PrivateEndpointConnectionProperties_2'
+      required:
+      - properties
+    ErrorDetail_2:
+      title: Error details.
+      type: object
+      properties:
+        code:
+          description: The error's code.
+          type: string
+        message:
+          description: A human readable error message.
+          type: string
+        target:
+          description: Indicates which property in the request is responsible for the error.
+          type: string
+      required:
+      - code
+      - message
+    WorkspaceProviderAuthorization:
+      properties:
+        principalId:
+          type: string
+          format: uuid
+          description: The provider's principal identifier. This is the identity that the provider will use to call ARM to manage the workspace resources.
+        roleDefinitionId:
+          type: string
+          format: uuid
+          description: The provider's role definition identifier. This role will define all the permissions that the provider must have on the workspace's container resource group. This role definition cannot have permission to delete the resource group.
+      required:
+      - principalId
+      - roleDefinitionId
+      description: The workspace provider authorization.
+    PrivateEndpointConnectionProperties_2:
+      description: The properties of a private endpoint connection
+      type: object
+      properties:
+        privateEndpoint:
+          title: Private endpoint
+          description: Private endpoint
+          $ref: '#/components/schemas/PrivateEndpoint'
+        groupIds:
+          type: array
+          description: GroupIds from the private link service resource.
+          items:
+            type: string
+        privateLinkServiceConnectionState:
+          title: Private link service service connection state
+          description: Private endpoint connection state
+          $ref: '#/components/schemas/PrivateLinkServiceConnectionState_2'
+        provisioningState:
+          $ref: '#/components/schemas/PrivateEndpointConnectionProvisioningState_2'
+          description: Provisioning state of the private endpoint connection.
+      required:
+      - privateLinkServiceConnectionState
+    ErrorResponse_2:
+      title: Error response.
+      description: Contains details when the response code indicates an error.
+      type: object
+      properties:
+        error:
+          description: The error details.
+          $ref: '#/components/schemas/ErrorInfo'
+      required:
+      - error
+    ComplianceSecurityProfileDefinition:
+      type: object
+      description: Status of Compliance Security Profile feature.
+      properties:
+        complianceStandards:
+          description: Compliance standards associated with the workspace.
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceStandardDefinition'
         value:
           type: string
           enum:
@@ -5611,7 +5578,56 @@ components:
           - Disabled
           x-ms-enum:
             modelAsString: true
-            name: AutomaticClusterUpdateValue
+            name: ComplianceSecurityProfileValue
+    Resource:
+      description: The core properties of ARM resources
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Fully qualified resource Id for the resource. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}
+        name:
+          readOnly: true
+          type: string
+          description: The name of the resource
+        type:
+          readOnly: true
+          type: string
+          description: The type of the resource. Ex- Microsoft.Compute/virtualMachines or Microsoft.Storage/storageAccounts.
+      x-ms-azure-resource: true
+    DefaultCatalogProperties:
+      type: object
+      properties:
+        initialType:
+          type: string
+          description: 'Defines the initial type of the default catalog. Possible values (case-insensitive):  HiveMetastore, UnityCatalog'
+          enum:
+          - HiveMetastore
+          - UnityCatalog
+          x-ms-enum:
+            name: initialType
+            modelAsString: true
+          default: HiveMetastore
+        initialName:
+          type: string
+          description: Specifies the initial Name of default catalog. If not specified, the name of the workspace will be used.
+      description: These properties lets user specify default catalog properties during workspace creation.
+    GenerateUploadUrlRequest:
+      type: object
+      description: Properties for generating an upload URL
+      properties:
+        firmwareId:
+          type: string
+          description: A unique ID for the firmware to be uploaded.
+    Workspace_3:
+      type: object
+      description: Firmware analysis workspace.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/WorkspaceProperties_3'
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
     WorkspaceUpdateDefinition:
       type: object
       description: Firmware analysis workspace.
@@ -5649,22 +5665,26 @@ components:
             modelAsString: true
           readOnly: true
       description: Workspace properties.
-    Workspace_3:
+    Workspace_4:
       type: object
-      description: Firmware analysis workspace.
+      description: An object that represents a machine learning workspace.
+      allOf:
+      - $ref: '#/components/schemas/Resource_2'
       properties:
         properties:
+          $ref: '#/components/schemas/WorkspaceProperties_4'
+          description: The properties of the machine learning workspace.
           x-ms-client-flatten: true
-          $ref: '#/components/schemas/WorkspaceProperties_3'
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    GenerateUploadUrlRequest:
+    Sku_2:
+      description: Sku of the resource
       type: object
-      description: Properties for generating an upload URL
       properties:
-        firmwareId:
+        name:
+          description: Name of the sku
           type: string
-          description: A unique ID for the firmware to be uploaded.
+        tier:
+          description: Tier of the sku like Basic or Enterprise
+          type: string
     WorkspaceUpdateParameters_2:
       description: The parameters for updating a machine learning workspace.
       properties:
@@ -5677,6 +5697,50 @@ components:
           $ref: '#/components/schemas/WorkspacePropertiesUpdateParameters_2'
           description: The properties that the machine learning workspace will be updated with.
           x-ms-client-flatten: true
+    WorkspaceKeysResponse:
+      type: object
+      description: Workspace authorization keys for a workspace.
+      properties:
+        primaryToken:
+          type: string
+          description: Primary authorization key for this workspace.
+        secondaryToken:
+          type: string
+          description: Secondary authorization key for this workspace.
+    WorkspacePropertiesUpdateParameters_2:
+      description: The parameters for updating the properties of a machine learning workspace.
+      properties:
+        workspaceState:
+          type: string
+          enum:
+          - Deleted
+          - Enabled
+          - Disabled
+          - Migrated
+          - Updated
+          - Registered
+          - Unregistered
+          x-ms-enum:
+            name: WorkspaceState
+            modelAsString: false
+          description: The current state of workspace resource.
+        keyVaultIdentifierId:
+          description: The key vault identifier used for encrypted workspaces.
+          type: string
+        sku:
+          $ref: '#/components/schemas/Sku_2'
+          description: The sku of the workspace.
+    WorkspaceListResult_3:
+      description: The result of a request to list machine learning workspace keys.
+      properties:
+        value:
+          description: The list of machine learning workspaces. Since this list may be incomplete, the nextLink field should be used to request the next list of machine learning workspaces.
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace_4'
+        nextLink:
+          description: The URI that can be used to request the next list of machine learning workspaces.
+          type: string
     ErrorResponse_3:
       description: The error response send when an operation fails.
       properties:
@@ -5689,16 +5753,6 @@ components:
       required:
       - code
       - message
-    WorkspaceKeysResponse:
-      type: object
-      description: Workspace authorization keys for a workspace.
-      properties:
-        primaryToken:
-          type: string
-          description: Primary authorization key for this workspace.
-        secondaryToken:
-          type: string
-          description: Secondary authorization key for this workspace.
     Resource_2:
       description: An Azure resource.
       required:
@@ -5728,16 +5782,6 @@ components:
           $ref: '#/components/schemas/Sku_2'
           description: The sku of the workspace.
       x-ms-azure-resource: true
-    Sku_2:
-      description: Sku of the resource
-      type: object
-      properties:
-        name:
-          description: Name of the sku
-          type: string
-        tier:
-          description: Tier of the sku like Basic or Enterprise
-          type: string
     WorkspaceProperties_4:
       type: object
       description: The properties of a machine learning workspace.
@@ -5794,62 +5838,17 @@ components:
         keyVaultIdentifierId:
           description: The key vault identifier used for encrypted workspaces.
           type: string
-    WorkspaceListResult_3:
-      description: The result of a request to list machine learning workspace keys.
-      properties:
-        value:
-          description: The list of machine learning workspaces. Since this list may be incomplete, the nextLink field should be used to request the next list of machine learning workspaces.
-          type: array
-          items:
-            $ref: '#/components/schemas/Workspace_4'
-        nextLink:
-          description: The URI that can be used to request the next list of machine learning workspaces.
-          type: string
-    Workspace_4:
-      type: object
-      description: An object that represents a machine learning workspace.
-      allOf:
-      - $ref: '#/components/schemas/Resource_2'
-      properties:
-        properties:
-          $ref: '#/components/schemas/WorkspaceProperties_4'
-          description: The properties of the machine learning workspace.
-          x-ms-client-flatten: true
-    WorkspacePropertiesUpdateParameters_2:
-      description: The parameters for updating the properties of a machine learning workspace.
-      properties:
-        workspaceState:
-          type: string
-          enum:
-          - Deleted
-          - Enabled
-          - Disabled
-          - Migrated
-          - Updated
-          - Registered
-          - Unregistered
-          x-ms-enum:
-            name: WorkspaceState
-            modelAsString: false
-          description: The current state of workspace resource.
-        keyVaultIdentifierId:
-          description: The key vault identifier used for encrypted workspaces.
-          type: string
-        sku:
-          $ref: '#/components/schemas/Sku_2'
-          description: The sku of the workspace.
-    UploadIndicatorsRequest:
-      description: Schema for request body.
+    ErrorResponseBody:
+      description: The definition of an error object.
+      required:
+      - error
       type: object
       properties:
-        sourcesystem:
-          description: Source of the indicators to be uploaded. Source system name cannot be Microsoft Sentinel.
-          type: string
-        indicators:
-          description: The indicators param is an array of STIX indictors. Indicators need to be in STIX format (STIX Indicator documentation). Indicators need to contain the “ID” field. We only support Stix 2.0 and 2.1 format.
-          type: array
-          items:
-            $ref: '#/components/schemas/JsonPropertyBag'
+        error:
+          $ref: '#/components/schemas/ErrorData'
+    JsonPropertyBag:
+      description: An object that stores a list of JSON properties from a given JObject.
+      type: object
     ErrorData:
       description: Detailed information about the errors from the operation.
       type: object
@@ -5863,23 +5862,6 @@ components:
         message:
           description: Error message
           type: string
-    ErrorResponseBody:
-      description: The definition of an error object.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorData'
-    UploadIndicatorsResponse:
-      description: Response object containing more details about the operation.
-      type: object
-      properties:
-        errors:
-          description: Details of the error. Contains a list of indicator validation errors
-          type: array
-          items:
-            $ref: '#/components/schemas/IndicatorValidationError'
     IndicatorValidationError:
       description: Object that stores a list of errors encountered when executing the Upload Indicators operation.
       type: object
@@ -5893,31 +5875,35 @@ components:
           type: array
           items:
             type: string
-    JsonPropertyBag:
-      description: An object that stores a list of JSON properties from a given JObject.
-      type: object
-    WorkspaceResourceList:
-      description: The list of workspaces.
+    UploadIndicatorsResponse:
+      description: Response object containing more details about the operation.
       type: object
       properties:
-        nextLink:
-          description: The link used to get the next page of Workspace list.
-          type: string
-        value:
-          description: The list of workspaces.
+        errors:
+          description: Details of the error. Contains a list of indicator validation errors
           type: array
           items:
-            $ref: '#/components/schemas/WorkspaceResource'
-    WorkspaceResourceProperties:
-      description: Workspace properties.
+            $ref: '#/components/schemas/IndicatorValidationError'
+    UploadIndicatorsRequest:
+      description: Schema for request body.
       type: object
       properties:
-        dataPlaneEndpoint:
-          description: Data plane endpoint.
+        sourcesystem:
+          description: Source of the indicators to be uploaded. Source system name cannot be Microsoft Sentinel.
           type: string
+        indicators:
+          description: The indicators param is an array of STIX indictors. Indicators need to be in STIX format (STIX Indicator documentation). Indicators need to contain the “ID” field. We only support Stix 2.0 and 2.1 format.
+          type: array
+          items:
+            $ref: '#/components/schemas/JsonPropertyBag'
+    ResourceBaseProperties:
+      description: Resource base properties.
+      type: object
+      properties:
+        provisioningState:
+          description: Resource provisioning state.
+          $ref: '#/components/schemas/ResourceState'
           readOnly: true
-      allOf:
-      - $ref: '#/components/schemas/ResourceBaseProperties'
     ResourceState:
       description: Resources provisioning states.
       enum:
@@ -5938,6 +5924,16 @@ components:
       x-ms-enum:
         name: ResourceState
         modelAsString: true
+    WorkspaceResourceProperties:
+      description: Workspace properties.
+      type: object
+      properties:
+        dataPlaneEndpoint:
+          description: Data plane endpoint.
+          type: string
+          readOnly: true
+      allOf:
+      - $ref: '#/components/schemas/ResourceBaseProperties'
     WorkspacePatchResource:
       type: object
       description: Workspace patch properties.
@@ -5950,6 +5946,18 @@ components:
             type: string
         systemData:
           $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/systemData
+    WorkspaceResourceList:
+      description: The list of workspaces.
+      type: object
+      properties:
+        nextLink:
+          description: The link used to get the next page of Workspace list.
+          type: string
+        value:
+          description: The list of workspaces.
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceResource'
     WorkspaceResource:
       type: object
       description: Workspace details.
@@ -5961,14 +5969,16 @@ components:
       allOf:
       - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
       x-ms-azure-resource: true
-    ResourceBaseProperties:
-      description: Resource base properties.
+    Workspace_5:
       type: object
+      description: An object that represents a machine learning team account workspace.
+      allOf:
+      - $ref: '#/components/schemas/Resource_3'
       properties:
-        provisioningState:
-          description: Resource provisioning state.
-          $ref: '#/components/schemas/ResourceState'
-          readOnly: true
+        properties:
+          $ref: '#/components/schemas/WorkspaceProperties_5'
+          description: The properties of the machine learning team account workspace.
+          x-ms-client-flatten: true
     WorkspaceUpdateParameters_3:
       description: The parameters for updating a machine learning team account workspace.
       properties:
@@ -5981,6 +5991,26 @@ components:
           $ref: '#/components/schemas/WorkspacePropertiesUpdateParameters_3'
           description: The properties that the machine learning workspace will be updated with.
           x-ms-client-flatten: true
+    WorkspacePropertiesUpdateParameters_3:
+      description: The parameters for updating the properties of a machine learning team account workspace.
+      properties:
+        friendlyName:
+          description: Friendly name of this workspace.
+          type: string
+        description:
+          description: Description for this workspace.
+          type: string
+    WorkspaceListResult_4:
+      description: The result of a request to list machine learning team account workspaces.
+      properties:
+        value:
+          description: The list of machine learning team account workspaces. Since this list may be incomplete, the nextLink field should be used to request the next list of machine learning team accounts.
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace_5'
+        nextLink:
+          description: The URI that can be used to request the next list of machine learning workspaces.
+          type: string
     ErrorResponse_4:
       description: The error response send when an operation fails.
       properties:
@@ -6057,36 +6087,6 @@ components:
             modelAsString: false
           readOnly: true
           description: The current deployment state of team account workspace resource. The provisioningState is to indicate states for resource provisioning.
-    WorkspaceListResult_4:
-      description: The result of a request to list machine learning team account workspaces.
-      properties:
-        value:
-          description: The list of machine learning team account workspaces. Since this list may be incomplete, the nextLink field should be used to request the next list of machine learning team accounts.
-          type: array
-          items:
-            $ref: '#/components/schemas/Workspace_5'
-        nextLink:
-          description: The URI that can be used to request the next list of machine learning workspaces.
-          type: string
-    Workspace_5:
-      type: object
-      description: An object that represents a machine learning team account workspace.
-      allOf:
-      - $ref: '#/components/schemas/Resource_3'
-      properties:
-        properties:
-          $ref: '#/components/schemas/WorkspaceProperties_5'
-          description: The properties of the machine learning team account workspace.
-          x-ms-client-flatten: true
-    WorkspacePropertiesUpdateParameters_3:
-      description: The parameters for updating the properties of a machine learning team account workspace.
-      properties:
-        friendlyName:
-          description: Friendly name of this workspace.
-          type: string
-        description:
-          description: Description for this workspace.
-          type: string
     Error:
       type: object
       properties:
@@ -6102,13 +6102,6 @@ components:
             $ref: '#/components/schemas/ErrorDetail_3'
           x-ms-identifiers:
           - code
-    WorkspaceList_2:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Workspace_6'
     Workspace_6:
       type: object
       properties:
@@ -6133,6 +6126,64 @@ components:
           type: string
         target:
           type: string
+    WorkspaceList_2:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace_6'
+    WorkspacePatchInfo:
+      description: Workspace patch details
+      type: object
+      properties:
+        tags:
+          description: Resource tags
+          additionalProperties:
+            type: string
+          type: object
+        identity:
+          description: The identity of the workspace
+          $ref: '#/components/schemas/ManagedIdentity'
+        properties:
+          description: Workspace patch properties
+          $ref: '#/components/schemas/WorkspacePatchProperties'
+          x-ms-client-flatten: true
+    WorkspaceInfoListResult:
+      description: List of workspaces
+      type: object
+      properties:
+        nextLink:
+          description: Link to the next page of results
+          type: string
+        value:
+          description: List of workspaces
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace_7'
+    DataLakeStorageAccountDetails:
+      description: Details of the data lake storage account associated with the workspace
+      type: object
+      properties:
+        accountUrl:
+          description: Account URL
+          type: string
+        filesystem:
+          description: Filesystem name
+          type: string
+    Workspace_7:
+      description: A workspace
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
+      properties:
+        properties:
+          description: Workspace resource properties
+          $ref: '#/components/schemas/WorkspaceProperties_6'
+          x-ms-client-flatten: true
+        identity:
+          description: Identity of the workspace
+          $ref: '#/components/schemas/ManagedIdentity'
     ManagedIdentity:
       description: The workspace managed identity
       type: object
@@ -6155,35 +6206,17 @@ components:
           x-ms-enum:
             name: ResourceIdentityType
             modelAsString: false
-    WorkspaceInfoListResult:
-      description: List of workspaces
-      type: object
-      properties:
-        nextLink:
-          description: Link to the next page of results
-          type: string
-        value:
-          description: List of workspaces
-          type: array
-          items:
-            $ref: '#/components/schemas/Workspace_7'
-    PurviewConfiguration:
-      description: Purview Configuration
-      type: object
-      properties:
-        purviewResourceId:
-          description: Purview Resource ID
-          type: string
-    WorkspaceKeyDetails:
+    CustomerManagedKeyDetails:
       description: Details of the customer managed key associated with the workspace
       type: object
       properties:
-        name:
-          description: Workspace Key sub-resource name
+        status:
+          description: The customer managed key status on the workspace
           type: string
-        keyVaultUrl:
-          description: Workspace Key sub-resource key vault url
-          type: string
+          readOnly: true
+        key:
+          description: The key object of the workspace
+          $ref: '#/components/schemas/WorkspaceKeyDetails'
     WorkspacePatchProperties:
       description: Workspace patch properties
       type: object
@@ -6216,15 +6249,83 @@ components:
           x-ms-enum:
             name: WorkspacePublicNetworkAccess
             modelAsString: true
-    DataLakeStorageAccountDetails:
-      description: Details of the data lake storage account associated with the workspace
+    WorkspaceAadAdminInfo:
+      description: Workspace active directory administrator
+      type: object
+      x-ms-azure-resource: true
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          description: Workspace active directory administrator properties
+          $ref: '#/components/schemas/AadAdminProperties'
+          x-ms-client-flatten: true
+    WorkspaceKeyDetails:
+      description: Details of the customer managed key associated with the workspace
       type: object
       properties:
-        accountUrl:
-          description: Account URL
+        name:
+          description: Workspace Key sub-resource name
           type: string
-        filesystem:
-          description: Filesystem name
+        keyVaultUrl:
+          description: Workspace Key sub-resource key vault url
+          type: string
+    WorkspaceRepositoryConfiguration:
+      description: Git integration settings
+      type: object
+      properties:
+        type:
+          description: Type of workspace repositoryID configuration. Example WorkspaceVSTSConfiguration, WorkspaceGitHubConfiguration
+          type: string
+        hostName:
+          description: 'GitHub Enterprise host name. For example: `https://github.mydomain.com`'
+          type: string
+        accountName:
+          description: Account name
+          type: string
+        projectName:
+          description: VSTS project name
+          type: string
+        repositoryName:
+          description: Repository name
+          type: string
+        collaborationBranch:
+          description: Collaboration branch
+          type: string
+        rootFolder:
+          description: Root folder to use in the repository
+          type: string
+        lastCommitId:
+          description: The last commit ID
+          type: string
+        tenantId:
+          description: The VSTS tenant ID
+          type: string
+          format: uuid
+    PurviewConfiguration:
+      description: Purview Configuration
+      type: object
+      properties:
+        purviewResourceId:
+          description: Purview Resource ID
+          type: string
+    EncryptionDetails:
+      description: Details of the encryption associated with the workspace
+      type: object
+      properties:
+        doubleEncryptionEnabled:
+          description: Double Encryption enabled
+          type: boolean
+          readOnly: true
+        cmk:
+          description: Customer Managed Key Details
+          $ref: '#/components/schemas/CustomerManagedKeyDetails'
+    VirtualNetworkProfile:
+      description: Virtual Network Profile
+      type: object
+      properties:
+        computeSubnetId:
+          description: Subnet ID used for computes in workspace
           type: string
     ManagedVirtualNetworkSettings:
       description: Managed Virtual Network Settings
@@ -6242,28 +6343,22 @@ components:
           items:
             type: string
             description: Tenant Id
-    WorkspaceAadAdminInfo:
-      description: Workspace active directory administrator
-      type: object
-      x-ms-azure-resource: true
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          description: Workspace active directory administrator properties
-          $ref: '#/components/schemas/AadAdminProperties'
-          x-ms-client-flatten: true
-    CustomerManagedKeyDetails:
-      description: Details of the customer managed key associated with the workspace
+    AadAdminProperties:
+      description: Workspace active directory administrator properties
       type: object
       properties:
-        status:
-          description: The customer managed key status on the workspace
+        tenantId:
+          description: Tenant ID of the workspace active directory administrator
           type: string
-          readOnly: true
-        key:
-          description: The key object of the workspace
-          $ref: '#/components/schemas/WorkspaceKeyDetails'
+        login:
+          description: Login of the workspace active directory administrator
+          type: string
+        administratorType:
+          description: Workspace active directory administrator type
+          type: string
+        sid:
+          description: Object ID of the workspace active directory administrator
+          type: string
     WorkspaceProperties_6:
       description: Workspace properties
       type: object
@@ -6336,115 +6431,11 @@ components:
           x-ms-enum:
             name: WorkspacePublicNetworkAccess
             modelAsString: true
-    Workspace_7:
-      description: A workspace
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
-      properties:
-        properties:
-          description: Workspace resource properties
-          $ref: '#/components/schemas/WorkspaceProperties_6'
-          x-ms-client-flatten: true
-        identity:
-          description: Identity of the workspace
-          $ref: '#/components/schemas/ManagedIdentity'
-    WorkspacePatchInfo:
-      description: Workspace patch details
-      type: object
-      properties:
-        tags:
-          description: Resource tags
-          additionalProperties:
-            type: string
-          type: object
-        identity:
-          description: The identity of the workspace
-          $ref: '#/components/schemas/ManagedIdentity'
-        properties:
-          description: Workspace patch properties
-          $ref: '#/components/schemas/WorkspacePatchProperties'
-          x-ms-client-flatten: true
-    VirtualNetworkProfile:
-      description: Virtual Network Profile
-      type: object
-      properties:
-        computeSubnetId:
-          description: Subnet ID used for computes in workspace
-          type: string
-    AadAdminProperties:
-      description: Workspace active directory administrator properties
-      type: object
-      properties:
-        tenantId:
-          description: Tenant ID of the workspace active directory administrator
-          type: string
-        login:
-          description: Login of the workspace active directory administrator
-          type: string
-        administratorType:
-          description: Workspace active directory administrator type
-          type: string
-        sid:
-          description: Object ID of the workspace active directory administrator
-          type: string
-    EncryptionDetails:
-      description: Details of the encryption associated with the workspace
-      type: object
-      properties:
-        doubleEncryptionEnabled:
-          description: Double Encryption enabled
-          type: boolean
-          readOnly: true
-        cmk:
-          description: Customer Managed Key Details
-          $ref: '#/components/schemas/CustomerManagedKeyDetails'
-    WorkspaceRepositoryConfiguration:
-      description: Git integration settings
-      type: object
-      properties:
-        type:
-          description: Type of workspace repositoryID configuration. Example WorkspaceVSTSConfiguration, WorkspaceGitHubConfiguration
-          type: string
-        hostName:
-          description: 'GitHub Enterprise host name. For example: `https://github.mydomain.com`'
-          type: string
-        accountName:
-          description: Account name
-          type: string
-        projectName:
-          description: VSTS project name
-          type: string
-        repositoryName:
-          description: Repository name
-          type: string
-        collaborationBranch:
-          description: Collaboration branch
-          type: string
-        rootFolder:
-          description: Root folder to use in the repository
-          type: string
-        lastCommitId:
-          description: The last commit ID
-          type: string
-        tenantId:
-          description: The VSTS tenant ID
-          type: string
-          format: uuid
   parameters:
     Azure.Core.TopQueryParameter:
       name: top
       in: query
       description: The number of result items to return.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-    Azure.Core.MaxPageSizeQueryParameter:
-      name: maxpagesize
-      in: query
-      description: The maximum number of result items per page.
       required: false
       x-ms-parameter-location: method
       schema:
@@ -6460,6 +6451,15 @@ components:
         type: integer
         format: int32
         default: 0
+    Azure.Core.MaxPageSizeQueryParameter:
+      name: maxpagesize
+      in: query
+      description: The maximum number of result items per page.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
     Azure.Core.Foundations.ApiVersionParameter:
       name: api-version
       in: query
@@ -6478,14 +6478,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    workspaceId:
-      name: workspaceId
-      description: ID of the workspace. This is Workspace ID from the Properties blade in the Azure portal.
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     timespanParam:
       name: timespan
       in: query
@@ -6495,14 +6487,14 @@ components:
       schema:
         type: string
         format: duration
-    queryBody:
-      name: body
-      in: body
-      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+    workspaceId:
+      name: workspaceId
+      description: ID of the workspace. This is Workspace ID from the Properties blade in the Azure portal.
+      in: path
       required: true
-      schema:
-        $ref: '#/components/schemas/queryBody'
       x-ms-parameter-location: method
+      schema:
+        type: string
     queryParam:
       name: query
       in: query
@@ -6511,6 +6503,14 @@ components:
       description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
       schema:
         type: string
+    queryBody:
+      name: body
+      in: body
+      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+      required: true
+      schema:
+        $ref: '#/components/schemas/queryBody'
+      x-ms-parameter-location: method
     PreferHeaderParameter:
       name: Prefer
       in: header
@@ -6519,14 +6519,13 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    WorkspaceForceToPurgeParameter:
+    WorkspaceKindParameter:
       in: query
-      name: forceToPurge
-      description: Flag to indicate delete is a purge request.
+      name: kind
+      description: Kind of workspace.
       x-ms-parameter-location: method
       schema:
-        type: boolean
-        default: false
+        type: string
     WorkspaceNameParameter_2:
       in: path
       name: workspaceName
@@ -6536,13 +6535,14 @@ components:
       schema:
         type: string
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9_-]{2,32}$
-    WorkspaceKindParameter:
+    WorkspaceForceToPurgeParameter:
       in: query
-      name: kind
-      description: Kind of workspace.
+      name: forceToPurge
+      description: Flag to indicate delete is a purge request.
       x-ms-parameter-location: method
       schema:
-        type: string
+        type: boolean
+        default: false
     PaginationParameter:
       in: query
       name: $skip
@@ -6550,27 +6550,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    ResourceGroupName:
-      name: resourceGroupName
-      in: path
-      required: true
-      description: The name of the resource group. The name is case insensitive.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 90
-        minLength: 1
-        pattern: ^[-\w\._\(\)]+$
-    WorkspaceName:
-      name: workspaceName
-      in: path
-      required: true
-      description: The name of the workspace.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -6585,6 +6564,27 @@ components:
       description: The API version to use for this operation.
       schema:
         type: string
+    WorkspaceName:
+      name: workspaceName
+      in: path
+      required: true
+      description: The name of the workspace.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
+    ResourceGroupName:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: The name of the resource group. The name is case insensitive.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 90
+        minLength: 1
+        pattern: ^[-\w\._\(\)]+$
     WorkspaceCreateBodyParameter:
       name: workspace
       in: body
@@ -6624,19 +6624,19 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    SubscriptionIdParameter_2:
-      name: subscriptionId
-      in: path
-      description: The Microsoft Azure subscription ID.
-      required: true
-      schema:
-        type: string
     WorkspaceNameParameter_3:
       name: workspaceName
       in: path
       description: The name of the machine learning workspace.
       required: true
       x-ms-parameter-location: method
+      schema:
+        type: string
+    SubscriptionIdParameter_2:
+      name: subscriptionId
+      in: path
+      description: The Microsoft Azure subscription ID.
+      required: true
       schema:
         type: string
     ApiVersionParameter_3:
@@ -6662,6 +6662,17 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
+    WorkspaceNameParameter_4:
+      name: workspaceName
+      in: path
+      description: The name of the machine learning team account workspace.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 50
+        minLength: 5
+        pattern: ^[a-zA-Z0-9]*$
     AccountNameParameter:
       name: accountName
       in: path
@@ -6680,17 +6691,6 @@ components:
       required: true
       schema:
         type: string
-    WorkspaceNameParameter_4:
-      name: workspaceName
-      in: path
-      description: The name of the machine learning team account workspace.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 50
-        minLength: 5
-        pattern: ^[a-zA-Z0-9]*$
     ApiVersionParameter_5:
       name: api-version
       in: query

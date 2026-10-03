@@ -483,51 +483,7 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: API version to be used with the HTTP request.
-      schema:
-        type: string
-    ResourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      description: Name of the resource group within the Azure subscription.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-      schema:
-        type: string
   schemas:
-    PipelineTemplate:
-      type: object
-      description: Template used to bootstrap the pipeline.
-      properties:
-        id:
-          type: string
-          description: Unique identifier of the pipeline template.
-        parameters:
-          type: object
-          description: Dictionary of input parameters used in the pipeline template.
-          additionalProperties:
-            type: string
-      required:
-      - id
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          description: Details of the error from the Pipelines Resource Provider.
-          $ref: '#/components/schemas/CloudErrorBody'
-      description: An error response from the Pipelines Resource Provider.
     CloudErrorBody:
       x-ms-external: true
       properties:
@@ -546,6 +502,50 @@ components:
             $ref: '#/components/schemas/CloudErrorBody'
           description: A list of additional details about the error.
       description: An error response from the Pipelines Resource Provider.
+    PipelineProperties:
+      type: object
+      description: Custom properties of a Pipeline.
+      discriminator:
+        propertyName: pipelineType
+      properties:
+        pipelineId:
+          type: integer
+          readOnly: true
+          description: Unique identifier of the Pipeline
+        pipelineType:
+          type: string
+          enum:
+          - githubWorkflow
+          - azurePipeline
+          x-ms-enum:
+            name: pipelineTypeEnum
+            modelAsString: true
+          description: Specifies which CI/CD provider to use. Valid options are 'azurePipeline', 'githubWorkflow'.
+        bootstrapConfiguration:
+          $ref: '#/components/schemas/BootstrapConfiguration'
+          description: Configuration used to bootstrap the Pipeline.
+      required:
+      - pipelineType
+      - bootstrapConfiguration
+    Authorization:
+      description: Authorization info used to access a resource (like code repository).
+      type: object
+      properties:
+        authorizationType:
+          description: Type of authorization.
+          type: string
+          enum:
+          - personalAccessToken
+          x-ms-enum:
+            name: AuthorizationType
+            modelAsString: true
+        parameters:
+          description: Authorization parameters corresponding to the authorization type.
+          type: object
+          additionalProperties:
+            type: string
+      required:
+      - authorizationType
     BootstrapConfiguration:
       type: object
       description: Configuration used to bootstrap a Pipeline.
@@ -558,6 +558,26 @@ components:
           description: Template used to bootstrap the pipeline.
       required:
       - template
+    PipelineUpdateParameters:
+      type: object
+      description: Request payload used to update an existing Azure Pipeline.
+      properties:
+        tags:
+          type: object
+          description: Dictionary of key-value pairs to be set as tags on the Azure Pipeline. This will overwrite any existing tags.
+          additionalProperties:
+            type: string
+    PipelineListResult:
+      description: Result of a request to list all Pipelines under a given scope.
+      properties:
+        value:
+          description: List of pipelines.
+          type: array
+          items:
+            $ref: '#/components/schemas/Pipeline'
+        nextLink:
+          type: string
+          description: URL to get the next set of Pipelines, if there are any.
     Pipeline:
       type: object
       description: Pipeline used to configure Continuous Integration (CI) & Continuous Delivery (CD) for Azure resources.
@@ -574,31 +594,6 @@ components:
       - $ref: '#/components/schemas/Resource'
       required:
       - properties
-    Resource:
-      type: object
-      description: An Azure Resource Manager (ARM) resource.
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: Resource Id
-        type:
-          type: string
-          readOnly: true
-          description: Resource Type
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource Tags
-        location:
-          type: string
-          description: Resource Location
-        name:
-          type: string
-          readOnly: true
-          description: Resource Name
-      x-ms-azure-resource: true
     CodeRepository:
       type: object
       description: Repository containing the source code for a pipeline.
@@ -631,68 +626,85 @@ components:
       - repositoryType
       - id
       - defaultBranch
-    Authorization:
-      description: Authorization info used to access a resource (like code repository).
+    PipelineTemplate:
       type: object
+      description: Template used to bootstrap the pipeline.
       properties:
-        authorizationType:
-          description: Type of authorization.
+        id:
           type: string
-          enum:
-          - personalAccessToken
-          x-ms-enum:
-            name: AuthorizationType
-            modelAsString: true
+          description: Unique identifier of the pipeline template.
         parameters:
-          description: Authorization parameters corresponding to the authorization type.
           type: object
+          description: Dictionary of input parameters used in the pipeline template.
           additionalProperties:
             type: string
       required:
-      - authorizationType
-    PipelineProperties:
+      - id
+    Resource:
       type: object
-      description: Custom properties of a Pipeline.
-      discriminator:
-        propertyName: pipelineType
+      description: An Azure Resource Manager (ARM) resource.
       properties:
-        pipelineId:
-          type: integer
+        id:
+          type: string
           readOnly: true
-          description: Unique identifier of the Pipeline
-        pipelineType:
+          description: Resource Id
+        type:
           type: string
-          enum:
-          - githubWorkflow
-          - azurePipeline
-          x-ms-enum:
-            name: pipelineTypeEnum
-            modelAsString: true
-          description: Specifies which CI/CD provider to use. Valid options are 'azurePipeline', 'githubWorkflow'.
-        bootstrapConfiguration:
-          $ref: '#/components/schemas/BootstrapConfiguration'
-          description: Configuration used to bootstrap the Pipeline.
-      required:
-      - pipelineType
-      - bootstrapConfiguration
-    PipelineListResult:
-      description: Result of a request to list all Pipelines under a given scope.
+          readOnly: true
+          description: Resource Type
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource Tags
+        location:
+          type: string
+          description: Resource Location
+        name:
+          type: string
+          readOnly: true
+          description: Resource Name
+      x-ms-azure-resource: true
+    CloudError:
+      x-ms-external: true
       properties:
-        value:
-          description: List of pipelines.
-          type: array
-          items:
-            $ref: '#/components/schemas/Pipeline'
-        nextLink:
-          type: string
-          description: URL to get the next set of Pipelines, if there are any.
-    PipelineUpdateParameters:
+        error:
+          description: Details of the error from the Pipelines Resource Provider.
+          $ref: '#/components/schemas/CloudErrorBody'
+      description: An error response from the Pipelines Resource Provider.
+    PipelineProperties_2:
       type: object
-      description: Request payload used to update an existing Azure Pipeline.
+      description: The properties of a Pipeline resource.
+      properties:
+        description:
+          type: string
+          description: Detailed description of the Pipeline.
+        enabled:
+          type: boolean
+          description: Flag indicating whether the pipeline should be running or not.
+        input:
+          $ref: '#/components/schemas/PipelineInput'
+          description: Information about where to pull input data from.
+        stages:
+          type: object
+          description: Map of stage ids to stage configurations for all pipeline processing and output stages.
+          additionalProperties:
+            $ref: '#/components/schemas/PipelineStage'
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
+      required:
+      - enabled
+      - input
+      - stages
+    PipelineTagsUpdate:
+      type: object
+      description: The type used for updating tags in Pipeline resources.
       properties:
         tags:
           type: object
-          description: Dictionary of key-value pairs to be set as tags on the Azure Pipeline. This will overwrite any existing tags.
+          description: Resource tags.
           additionalProperties:
             type: string
     PipelineInput:
@@ -714,54 +726,6 @@ components:
       - type
       - next
       additionalProperties: {}
-    PipelineStage:
-      type: object
-      description: Stage configurations for all Pipeline processing and output stages.
-      properties:
-        type:
-          type: string
-          description: ARM resource type.
-        description:
-          type: string
-          description: Description for stage.
-        next:
-          type: array
-          description: Next stage in the pipeline. Not required if output stage.
-          items:
-            type: string
-      required:
-      - type
-      additionalProperties: {}
-    PipelineTagsUpdate:
-      type: object
-      description: The type used for updating tags in Pipeline resources.
-      properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-    Pipeline_2:
-      type: object
-      description: A Pipeline resource belonging to an Instance resource.
-      properties:
-        properties:
-          $ref: '#/components/schemas/PipelineProperties_2'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocation'
-          description: Edge location of the resource.
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
     ProvisioningState:
       type: string
       description: The provisioning status of the resource.
@@ -798,32 +762,24 @@ components:
         - name: Accepted
           value: Accepted
           description: The resource was accepted by the server.
-    PipelineProperties_2:
+    PipelineStage:
       type: object
-      description: The properties of a Pipeline resource.
+      description: Stage configurations for all Pipeline processing and output stages.
       properties:
+        type:
+          type: string
+          description: ARM resource type.
         description:
           type: string
-          description: Detailed description of the Pipeline.
-        enabled:
-          type: boolean
-          description: Flag indicating whether the pipeline should be running or not.
-        input:
-          $ref: '#/components/schemas/PipelineInput'
-          description: Information about where to pull input data from.
-        stages:
-          type: object
-          description: Map of stage ids to stage configurations for all pipeline processing and output stages.
-          additionalProperties:
-            $ref: '#/components/schemas/PipelineStage'
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
+          description: Description for stage.
+        next:
+          type: array
+          description: Next stage in the pipeline. Not required if output stage.
+          items:
+            type: string
       required:
-      - enabled
-      - input
-      - stages
+      - type
+      additionalProperties: {}
     PipelineListResult_2:
       type: object
       description: The response of a Pipeline list operation.
@@ -839,6 +795,27 @@ components:
           description: The link to the next page of items
       required:
       - value
+    Pipeline_2:
+      type: object
+      description: A Pipeline resource belonging to an Instance resource.
+      properties:
+        properties:
+          $ref: '#/components/schemas/PipelineProperties_2'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocation'
+          description: Edge location of the resource.
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
     ExtendedLocation:
       type: object
       description: Extended location is an extension of Azure locations. They provide a way to use their Azure ARC enabled Kubernetes clusters as target locations for deploying Azure services instances.
@@ -852,6 +829,29 @@ components:
       required:
       - name
       - type
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: API version to be used with the HTTP request.
+      schema:
+        type: string
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: Name of the resource group within the Azure subscription.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

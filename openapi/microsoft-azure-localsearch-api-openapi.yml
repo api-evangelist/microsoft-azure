@@ -176,62 +176,185 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    PostalAddress:
-      description: Defines a postal address.
+    Place:
+      description: Defines information about a local entity, such as a restaurant or hotel.
       allOf:
-      - $ref: '#/components/schemas/StructuredValue'
+      - $ref: '#/components/schemas/Thing'
       type: object
       properties:
-        streetAddress:
+        geo:
+          $ref: '#/components/schemas/GeoCoordinates'
+          readOnly: true
+        routablePoint:
+          $ref: '#/components/schemas/GeoCoordinates'
+          readOnly: true
+        address:
+          description: The postal address of where the entity is located
+          $ref: '#/components/schemas/PostalAddress'
+          readOnly: true
+        telephone:
+          description: The entity's telephone number
           readOnly: true
           type: string
-        addressLocality:
-          description: The city where the street address is located. For example, Seattle.
+    StructuredValue:
+      allOf:
+      - $ref: '#/components/schemas/Intangible'
+      type: object
+    Response:
+      description: Defines a response. All schemas that return at the root of the response must inherit from this object.
+      allOf:
+      - $ref: '#/components/schemas/Identifiable'
+      type: object
+      properties:
+        readLink:
+          description: The URL that returns this resource.
           readOnly: true
           type: string
-        addressSubregion:
+        webSearchUrl:
+          description: The URL to Bing's search result for this item.
           readOnly: true
           type: string
-        addressRegion:
-          description: The state or province code where the street address is located. This could be the two-letter code. For example, WA, or the full name , Washington.
+        potentialAction:
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+        immediateAction:
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+        preferredClickthroughUrl:
           readOnly: true
           type: string
-        postalCode:
-          description: The zip code or postal code where the street address is located. For example, 98052.
+        adaptiveCard:
           readOnly: true
           type: string
-        postOfficeBoxNumber:
+    QueryContext:
+      description: Defines the query context that Bing used for the request.
+      discriminator:
+        propertyName: _type
+      type: object
+      required:
+      - originalQuery
+      - _type
+      properties:
+        originalQuery:
+          description: The query string as specified in the request.
+          type: string
+        alteredQuery:
+          description: The query string used by Bing to perform the query. Bing uses the altered query string if the original query string contained spelling mistakes. For example, if the query string is "saling downwind", the altered query string will be "sailing downwind". This field is included only if the original query string contains a spelling mistake.
           readOnly: true
           type: string
-        addressCountry:
-          description: The country/region where the street address is located. This could be the two-letter ISO code. For example, US, or the full name, United States.
+        alterationDisplayQuery:
+          description: AlteredQuery that is formatted for display purpose. The query string in the AlterationDisplayQuery can be html-escaped and can contain hit-highlighting characters
           readOnly: true
           type: string
-        countryIso:
-          description: The two letter ISO code of this country. For example, US.
+        alterationOverrideQuery:
+          description: The query string to use to force Bing to use the original string. For example, if the query string is "saling downwind", the override query string will be "+saling downwind". Remember to encode the query string which results in "%2Bsaling+downwind". This field is included only if the original query string contains a spelling mistake.
           readOnly: true
           type: string
-        neighborhood:
-          description: The neighborhood where the street address is located. For example, Westlake.
+        adultIntent:
+          description: A Boolean value that indicates whether the specified query has adult intent. The value is true if the query has adult intent; otherwise, false.
+          readOnly: true
+          type: boolean
+        askUserForLocation:
+          description: A Boolean value that indicates whether Bing requires the user's location to provide accurate results. If you specified the user's location by using the X-MSEdge-ClientIP and X-Search-Location headers, you can ignore this field. For location aware queries, such as "today's weather" or "restaurants near me" that need the user's location to provide accurate results, this field is set to true. For location aware queries that include the location (for example, "Seattle weather"), this field is set to false. This field is also set to false for queries that are not location aware, such as "best sellers".
+          readOnly: true
+          type: boolean
+        isTransactional:
+          readOnly: true
+          type: boolean
+        _type:
+          type: string
+    Intangible:
+      description: A utility class that serves as the umbrella for a number of 'intangible' things such as quantities, structured values, etc.
+      allOf:
+      - $ref: '#/components/schemas/Thing'
+      type: object
+    EntitiesEntityPresentationInfo:
+      description: Defines additional information about an entity such as type hints.
+      x-ms-discriminator-value: Entities/EntityPresentationInfo
+      discriminator:
+        propertyName: _type
+      type: object
+      required:
+      - entityScenario
+      - _type
+      properties:
+        entityScenario:
+          description: The supported scenario.
+          type: string
+          default: DominantEntity
+          enum:
+          - DominantEntity
+          - DisambiguationItem
+          - ListItem
+          x-ms-enum:
+            name: EntityScenario
+            modelAsString: true
+        entityTypeHints:
+          description: A list of hints that indicate the entity's type. The list could contain a single hint such as Movie or a list of hints such as Place, LocalBusiness, Restaurant. Each successive hint in the array narrows the entity's type.
+          readOnly: true
+          type: array
+          items:
+            type: string
+            enum:
+            - Place
+            - LocalBusiness
+            - Restaurant
+            - Hotel
+            x-ms-enum:
+              name: EntityType
+              modelAsString: true
+        entityTypeDisplayHint:
+          description: A display version of the entity hint. For example, if entityTypeHints is Artist, this field may be set to American Singer.
           readOnly: true
           type: string
-        addressRegionAbbreviation:
-          description: Region Abbreviation. For example, WA.
+        query:
           readOnly: true
           type: string
-        text:
-          description: The complete address. For example, 2100 Westlake Ave N, Bellevue, WA 98052.
+        entitySubTypeHints:
           readOnly: true
+          type: array
+          items:
+            type: string
+        _type:
           type: string
-        houseNumber:
+    SearchResponse:
+      description: Defines the top-level object that the response includes when the request succeeds.
+      allOf:
+      - $ref: '#/components/schemas/Response'
+      type: object
+      properties:
+        queryContext:
+          description: An object that contains the query string that Bing used for the request. This object contains the query string as entered by the user. It may also contain an altered query string that Bing used for the query if the query string contained a spelling mistake.
+          $ref: '#/components/schemas/QueryContext'
           readOnly: true
-          type: string
-        streetName:
+        places:
+          description: A list of local entities such as restaurants or hotels that are relevant to the query.
+          $ref: '#/components/schemas/Places'
           readOnly: true
-          type: string
-        formattingRuleId:
+        lottery:
+          $ref: '#/components/schemas/SearchResultsAnswer'
           readOnly: true
-          type: string
+        searchResultsConfidenceScore:
+          readOnly: true
+          type: number
+          format: float
+    Places:
+      description: Defines a local entity answer.
+      allOf:
+      - $ref: '#/components/schemas/SearchResultsAnswer'
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          description: A list of local entities, such as restaurants or hotels.
+          type: array
+          items:
+            $ref: '#/components/schemas/Thing'
     Error:
       description: Defines the error that occurred.
       discriminator:
@@ -290,88 +413,6 @@ components:
           description: The parameter's value in the request that was not valid.
           readOnly: true
           type: string
-        _type:
-          type: string
-    StructuredValue:
-      allOf:
-      - $ref: '#/components/schemas/Intangible'
-      type: object
-    ResponseBase:
-      description: Response base
-      discriminator:
-        propertyName: _type
-      type: object
-      required:
-      - _type
-      properties:
-        _type:
-          type: string
-    Places:
-      description: Defines a local entity answer.
-      allOf:
-      - $ref: '#/components/schemas/SearchResultsAnswer'
-      type: object
-      required:
-      - value
-      properties:
-        value:
-          description: A list of local entities, such as restaurants or hotels.
-          type: array
-          items:
-            $ref: '#/components/schemas/Thing'
-    Thing:
-      description: Defines a thing.
-      allOf:
-      - $ref: '#/components/schemas/Response'
-      type: object
-      properties:
-        name:
-          description: The name of the thing represented by this object.
-          readOnly: true
-          type: string
-        url:
-          description: The URL to get more information about the thing represented by this object.
-          readOnly: true
-          type: string
-        entityPresentationInfo:
-          description: Additional information about the entity such as hints that you can use to determine the entity's type. To determine the entity's type, use the entityScenario and entityTypeHint fields.
-          $ref: '#/components/schemas/EntitiesEntityPresentationInfo'
-          readOnly: true
-    QueryContext:
-      description: Defines the query context that Bing used for the request.
-      discriminator:
-        propertyName: _type
-      type: object
-      required:
-      - originalQuery
-      - _type
-      properties:
-        originalQuery:
-          description: The query string as specified in the request.
-          type: string
-        alteredQuery:
-          description: The query string used by Bing to perform the query. Bing uses the altered query string if the original query string contained spelling mistakes. For example, if the query string is "saling downwind", the altered query string will be "sailing downwind". This field is included only if the original query string contains a spelling mistake.
-          readOnly: true
-          type: string
-        alterationDisplayQuery:
-          description: AlteredQuery that is formatted for display purpose. The query string in the AlterationDisplayQuery can be html-escaped and can contain hit-highlighting characters
-          readOnly: true
-          type: string
-        alterationOverrideQuery:
-          description: The query string to use to force Bing to use the original string. For example, if the query string is "saling downwind", the override query string will be "+saling downwind". Remember to encode the query string which results in "%2Bsaling+downwind". This field is included only if the original query string contains a spelling mistake.
-          readOnly: true
-          type: string
-        adultIntent:
-          description: A Boolean value that indicates whether the specified query has adult intent. The value is true if the query has adult intent; otherwise, false.
-          readOnly: true
-          type: boolean
-        askUserForLocation:
-          description: A Boolean value that indicates whether Bing requires the user's location to provide accurate results. If you specified the user's location by using the X-MSEdge-ClientIP and X-Search-Location headers, you can ignore this field. For location aware queries, such as "today's weather" or "restaurants near me" that need the user's location to provide accurate results, this field is set to true. For location aware queries that include the location (for example, "Seattle weather"), this field is set to false. This field is also set to false for queries that are not location aware, such as "best sellers".
-          readOnly: true
-          type: boolean
-        isTransactional:
-          readOnly: true
-          type: boolean
         _type:
           type: string
     CreativeWork:
@@ -443,85 +484,6 @@ components:
         isFamilyFriendly:
           readOnly: true
           type: boolean
-    Response:
-      description: Defines a response. All schemas that return at the root of the response must inherit from this object.
-      allOf:
-      - $ref: '#/components/schemas/Identifiable'
-      type: object
-      properties:
-        readLink:
-          description: The URL that returns this resource.
-          readOnly: true
-          type: string
-        webSearchUrl:
-          description: The URL to Bing's search result for this item.
-          readOnly: true
-          type: string
-        potentialAction:
-          readOnly: true
-          type: array
-          items:
-            $ref: '#/components/schemas/Action'
-        immediateAction:
-          readOnly: true
-          type: array
-          items:
-            $ref: '#/components/schemas/Action'
-        preferredClickthroughUrl:
-          readOnly: true
-          type: string
-        adaptiveCard:
-          readOnly: true
-          type: string
-    EntitiesEntityPresentationInfo:
-      description: Defines additional information about an entity such as type hints.
-      x-ms-discriminator-value: Entities/EntityPresentationInfo
-      discriminator:
-        propertyName: _type
-      type: object
-      required:
-      - entityScenario
-      - _type
-      properties:
-        entityScenario:
-          description: The supported scenario.
-          type: string
-          default: DominantEntity
-          enum:
-          - DominantEntity
-          - DisambiguationItem
-          - ListItem
-          x-ms-enum:
-            name: EntityScenario
-            modelAsString: true
-        entityTypeHints:
-          description: A list of hints that indicate the entity's type. The list could contain a single hint such as Movie or a list of hints such as Place, LocalBusiness, Restaurant. Each successive hint in the array narrows the entity's type.
-          readOnly: true
-          type: array
-          items:
-            type: string
-            enum:
-            - Place
-            - LocalBusiness
-            - Restaurant
-            - Hotel
-            x-ms-enum:
-              name: EntityType
-              modelAsString: true
-        entityTypeDisplayHint:
-          description: A display version of the entity hint. For example, if entityTypeHints is Artist, this field may be set to American Singer.
-          readOnly: true
-          type: string
-        query:
-          readOnly: true
-          type: string
-        entitySubTypeHints:
-          readOnly: true
-          type: array
-          items:
-            type: string
-        _type:
-          type: string
     Action:
       description: Defines an action.
       allOf:
@@ -551,98 +513,90 @@ components:
           description: Use this URL to get additional data to determine how to take the appropriate action. For example, the serviceUrl might return JSON along with an image URL.
           readOnly: true
           type: string
-    Answer:
-      description: Defines an answer.
-      allOf:
-      - $ref: '#/components/schemas/Response'
-      type: object
-      properties: {}
-    ErrorResponse:
-      description: The top-level response that represents a failed request.
-      allOf:
-      - $ref: '#/components/schemas/Response'
+    ResponseBase:
+      description: Response base
+      discriminator:
+        propertyName: _type
       type: object
       required:
-      - errors
+      - _type
       properties:
-        errors:
-          description: A list of errors that describe the reasons why the request failed.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-    SearchResultsAnswer:
-      description: Defines a search result answer.
-      allOf:
-      - $ref: '#/components/schemas/Answer'
-      type: object
-      properties:
-        queryContext:
-          $ref: '#/components/schemas/QueryContext'
-          readOnly: true
-        totalEstimatedMatches:
-          description: The estimated number of webpages that are relevant to the query. Use this number along with the count and offset query parameters to page the results.
-          readOnly: true
-          type: integer
-          format: int64
-        isFamilyFriendly:
-          readOnly: true
-          type: boolean
-    Intangible:
-      description: A utility class that serves as the umbrella for a number of 'intangible' things such as quantities, structured values, etc.
-      allOf:
-      - $ref: '#/components/schemas/Thing'
-      type: object
-    Place:
-      description: Defines information about a local entity, such as a restaurant or hotel.
-      allOf:
-      - $ref: '#/components/schemas/Thing'
-      type: object
-      properties:
-        geo:
-          $ref: '#/components/schemas/GeoCoordinates'
-          readOnly: true
-        routablePoint:
-          $ref: '#/components/schemas/GeoCoordinates'
-          readOnly: true
-        address:
-          description: The postal address of where the entity is located
-          $ref: '#/components/schemas/PostalAddress'
-          readOnly: true
-        telephone:
-          description: The entity's telephone number
-          readOnly: true
+        _type:
           type: string
-    Identifiable:
-      description: Defines the identity of a resource.
-      allOf:
-      - $ref: '#/components/schemas/ResponseBase'
-      type: object
-      properties:
-        id:
-          description: A String identifier.
-          readOnly: true
-          type: string
-    SearchResponse:
-      description: Defines the top-level object that the response includes when the request succeeds.
+    Thing:
+      description: Defines a thing.
       allOf:
       - $ref: '#/components/schemas/Response'
       type: object
       properties:
-        queryContext:
-          description: An object that contains the query string that Bing used for the request. This object contains the query string as entered by the user. It may also contain an altered query string that Bing used for the query if the query string contained a spelling mistake.
-          $ref: '#/components/schemas/QueryContext'
+        name:
+          description: The name of the thing represented by this object.
           readOnly: true
-        places:
-          description: A list of local entities such as restaurants or hotels that are relevant to the query.
-          $ref: '#/components/schemas/Places'
+          type: string
+        url:
+          description: The URL to get more information about the thing represented by this object.
           readOnly: true
-        lottery:
-          $ref: '#/components/schemas/SearchResultsAnswer'
+          type: string
+        entityPresentationInfo:
+          description: Additional information about the entity such as hints that you can use to determine the entity's type. To determine the entity's type, use the entityScenario and entityTypeHint fields.
+          $ref: '#/components/schemas/EntitiesEntityPresentationInfo'
           readOnly: true
-        searchResultsConfidenceScore:
+    PostalAddress:
+      description: Defines a postal address.
+      allOf:
+      - $ref: '#/components/schemas/StructuredValue'
+      type: object
+      properties:
+        streetAddress:
           readOnly: true
-          type: number
-          format: float
+          type: string
+        addressLocality:
+          description: The city where the street address is located. For example, Seattle.
+          readOnly: true
+          type: string
+        addressSubregion:
+          readOnly: true
+          type: string
+        addressRegion:
+          description: The state or province code where the street address is located. This could be the two-letter code. For example, WA, or the full name , Washington.
+          readOnly: true
+          type: string
+        postalCode:
+          description: The zip code or postal code where the street address is located. For example, 98052.
+          readOnly: true
+          type: string
+        postOfficeBoxNumber:
+          readOnly: true
+          type: string
+        addressCountry:
+          description: The country/region where the street address is located. This could be the two-letter ISO code. For example, US, or the full name, United States.
+          readOnly: true
+          type: string
+        countryIso:
+          description: The two letter ISO code of this country. For example, US.
+          readOnly: true
+          type: string
+        neighborhood:
+          description: The neighborhood where the street address is located. For example, Westlake.
+          readOnly: true
+          type: string
+        addressRegionAbbreviation:
+          description: Region Abbreviation. For example, WA.
+          readOnly: true
+          type: string
+        text:
+          description: The complete address. For example, 2100 Westlake Ave N, Bellevue, WA 98052.
+          readOnly: true
+          type: string
+        houseNumber:
+          readOnly: true
+          type: string
+        streetName:
+          readOnly: true
+          type: string
+        formattingRuleId:
+          readOnly: true
+          type: string
     GeoCoordinates:
       discriminator:
         propertyName: _type
@@ -664,6 +618,52 @@ components:
           format: double
         _type:
           type: string
+    Identifiable:
+      description: Defines the identity of a resource.
+      allOf:
+      - $ref: '#/components/schemas/ResponseBase'
+      type: object
+      properties:
+        id:
+          description: A String identifier.
+          readOnly: true
+          type: string
+    SearchResultsAnswer:
+      description: Defines a search result answer.
+      allOf:
+      - $ref: '#/components/schemas/Answer'
+      type: object
+      properties:
+        queryContext:
+          $ref: '#/components/schemas/QueryContext'
+          readOnly: true
+        totalEstimatedMatches:
+          description: The estimated number of webpages that are relevant to the query. Use this number along with the count and offset query parameters to page the results.
+          readOnly: true
+          type: integer
+          format: int64
+        isFamilyFriendly:
+          readOnly: true
+          type: boolean
+    Answer:
+      description: Defines an answer.
+      allOf:
+      - $ref: '#/components/schemas/Response'
+      type: object
+      properties: {}
+    ErrorResponse:
+      description: The top-level response that represents a failed request.
+      allOf:
+      - $ref: '#/components/schemas/Response'
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          description: A list of errors that describe the reasons why the request failed.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
   parameters:
     x-bingapis-sdk:
       name: X-BingApis-SDK

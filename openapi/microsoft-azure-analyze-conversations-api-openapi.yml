@@ -164,12 +164,6 @@ paths:
       - Analyze Conversations
 components:
   schemas:
-    AnalyzeConversationJobState:
-      description: Contains the status of the analyze conversations job submitted along with related statistics.
-      allOf:
-      - $ref: common.json#/definitions/JobState
-      - $ref: '#/components/schemas/ConversationTasksState'
-      - $ref: '#/components/schemas/AnalyzeConversationJobStatistics'
     AnalyzeConversationTaskResultsKind:
       type: string
       description: Enumeration of supported conversational task results
@@ -178,16 +172,28 @@ components:
       x-ms-enum:
         name: AnalyzeConversationTaskResultsKind
         modelAsString: true
-    ConversationDomain:
-      type: string
-      description: Enumeration of supported conversational domains.
-      enum:
-      - finance
-      - healthcare
-      - generic
-      x-ms-enum:
-        name: ConversationDomain
-        modelAsString: true
+    ConversationRequestStatistics:
+      type: object
+      description: if showStats=true was specified in the request this field will contain information about the request payload.
+      required:
+      - conversationsCount
+      - validConversationsCount
+      - erroneousConversationsCount
+      properties:
+        conversationsCount:
+          type: integer
+          format: int32
+          description: Number of conversations submitted in the request.
+        validConversationsCount:
+          type: integer
+          format: int32
+          description: Number of conversations documents. This excludes empty, over-size limit or non-supported languages documents.
+        erroneousConversationsCount:
+          type: integer
+          format: int32
+          description: Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
+      allOf:
+      - $ref: common.json#/definitions/RequestStatistics
     ConversationTasksState:
       description: Contains the state for the tasks being executed as part of the analyze conversation job submitted.
       properties:
@@ -223,6 +229,75 @@ components:
       required:
       - tasks
       type: object
+    AnalyzeConversationResultsKind:
+      type: string
+      description: Enumeration of supported Conversation Analysis task results.
+      enum:
+      - ConversationalPIIResults
+      - ConversationalSummarizationResults
+      - CustomConversationalSummarizationResults
+      - ConversationalSentimentResults
+      x-ms-enum:
+        name: AnalyzeConversationResultsKind
+        modelAsString: true
+    MultiLanguageConversationAnalysisInput:
+      type: object
+      required:
+      - conversations
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+    AnalyzeConversationJobStatistics:
+      description: Contains the statistics for the job submitted.
+      properties:
+        statistics:
+          $ref: '#/components/schemas/ConversationRequestStatistics'
+      type: object
+    ConversationDomain:
+      type: string
+      description: Enumeration of supported conversational domains.
+      enum:
+      - finance
+      - healthcare
+      - generic
+      x-ms-enum:
+        name: ConversationDomain
+        modelAsString: true
+    AnalyzeConversationTaskResult:
+      type: object
+      description: The base class of a conversation task result.
+      discriminator:
+        propertyName: kind
+      required:
+      - kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/AnalyzeConversationTaskResultsKind'
+    AnalyzeConversationLROTask:
+      type: object
+      description: The base class for an long running conversation input task.
+      discriminator:
+        propertyName: kind
+      required:
+      - kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/AnalyzeConversationLROTaskKind'
+      allOf:
+      - $ref: common.json#/definitions/TaskIdentifier
+    AnalyzeConversationLROTaskKind:
+      type: string
+      description: Enumeration of supported analysis tasks on a collection of conversation.
+      enum:
+      - ConversationalPIITask
+      - ConversationalSummarizationTask
+      - CustomConversationalSummarizationTask
+      - ConversationalSentimentTask
+      x-ms-enum:
+        name: AnalyzeConversationLROTaskKind
+        modelAsString: true
     AnalyzeConversationJobsInput:
       type: object
       properties:
@@ -239,37 +314,6 @@ components:
       required:
       - analysisInput
       - tasks
-    ConversationRequestStatistics:
-      type: object
-      description: if showStats=true was specified in the request this field will contain information about the request payload.
-      required:
-      - conversationsCount
-      - validConversationsCount
-      - erroneousConversationsCount
-      properties:
-        conversationsCount:
-          type: integer
-          format: int32
-          description: Number of conversations submitted in the request.
-        validConversationsCount:
-          type: integer
-          format: int32
-          description: Number of conversations documents. This excludes empty, over-size limit or non-supported languages documents.
-        erroneousConversationsCount:
-          type: integer
-          format: int32
-          description: Number of invalid documents. This includes empty, over-size limit or non-supported languages documents.
-      allOf:
-      - $ref: common.json#/definitions/RequestStatistics
-    MultiLanguageConversationAnalysisInput:
-      type: object
-      required:
-      - conversations
-      properties:
-        conversations:
-          type: array
-          items:
-            $ref: '#/components/schemas/Conversation'
     AnalyzeConversationJobResult:
       type: object
       description: Container for results for all tasks in the conversation job.
@@ -283,55 +327,20 @@ components:
       - $ref: common.json#/definitions/TaskIdentifier
       required:
       - kind
-    AnalyzeConversationLROTask:
-      type: object
-      description: The base class for an long running conversation input task.
-      discriminator:
-        propertyName: kind
-      required:
-      - kind
-      properties:
-        kind:
-          $ref: '#/components/schemas/AnalyzeConversationLROTaskKind'
-      allOf:
-      - $ref: common.json#/definitions/TaskIdentifier
-    AnalyzeConversationJobStatistics:
-      description: Contains the statistics for the job submitted.
-      properties:
-        statistics:
-          $ref: '#/components/schemas/ConversationRequestStatistics'
-      type: object
-    AnalyzeConversationTask:
-      type: object
-      description: The base class of a conversation input task.
-      discriminator:
-        propertyName: kind
-      required:
-      - kind
-      properties:
-        kind:
-          $ref: '#/components/schemas/AnalyzeConversationTaskKind'
-    AnalyzeConversationLROTaskKind:
+    AnalyzeConversationTaskKind:
       type: string
-      description: Enumeration of supported analysis tasks on a collection of conversation.
+      description: Enumeration of supported Conversation tasks.
       enum:
-      - ConversationalPIITask
-      - ConversationalSummarizationTask
-      - CustomConversationalSummarizationTask
-      - ConversationalSentimentTask
+      - Conversation
       x-ms-enum:
-        name: AnalyzeConversationLROTaskKind
+        name: AnalyzeConversationTaskKind
         modelAsString: true
-    AnalyzeConversationTaskResult:
-      type: object
-      description: The base class of a conversation task result.
-      discriminator:
-        propertyName: kind
-      required:
-      - kind
-      properties:
-        kind:
-          $ref: '#/components/schemas/AnalyzeConversationTaskResultsKind'
+    AnalyzeConversationJobState:
+      description: Contains the status of the analyze conversations job submitted along with related statistics.
+      allOf:
+      - $ref: common.json#/definitions/JobState
+      - $ref: '#/components/schemas/ConversationTasksState'
+      - $ref: '#/components/schemas/AnalyzeConversationJobStatistics'
     Conversation:
       type: object
       description: A complete ordered set of utterances (spoken or written), by one or more speakers to be used for analysis.
@@ -352,25 +361,6 @@ components:
           $ref: '#/components/schemas/Modality'
         domain:
           $ref: '#/components/schemas/ConversationDomain'
-    AnalyzeConversationTaskKind:
-      type: string
-      description: Enumeration of supported Conversation tasks.
-      enum:
-      - Conversation
-      x-ms-enum:
-        name: AnalyzeConversationTaskKind
-        modelAsString: true
-    AnalyzeConversationResultsKind:
-      type: string
-      description: Enumeration of supported Conversation Analysis task results.
-      enum:
-      - ConversationalPIIResults
-      - ConversationalSummarizationResults
-      - CustomConversationalSummarizationResults
-      - ConversationalSentimentResults
-      x-ms-enum:
-        name: AnalyzeConversationResultsKind
-        modelAsString: true
     Modality:
       type: string
       description: Enumeration of supported conversational modalities.
@@ -380,6 +370,16 @@ components:
       x-ms-enum:
         name: InputModality
         modelAsString: true
+    AnalyzeConversationTask:
+      type: object
+      description: The base class of a conversation input task.
+      discriminator:
+        propertyName: kind
+      required:
+      - kind
+      properties:
+        kind:
+          $ref: '#/components/schemas/AnalyzeConversationTaskKind'
   securitySchemes:
     AADToken:
       type: oauth2

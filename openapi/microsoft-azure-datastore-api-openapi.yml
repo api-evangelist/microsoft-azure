@@ -226,83 +226,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ErrorResponse:
-      description: The error response.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/RootError'
-          description: The top level error that occurred.
-        correlation:
-          description: Dictionary containing correlation details for the error.
-          type: object
-          additionalProperties:
-            type: string
-        environment:
-          description: The hosting environment.
-          type: string
-        location:
-          description: The Azure region.
-          type: string
-        time:
-          format: date-time
-          description: The time in UTC.
-          type: string
-    AzureStorage:
-      type: object
-      properties:
-        accountName:
-          description: Storage Account Name
-          type: string
-        containerName:
-          description: The storage container name
-          type: string
-        endpoint:
-          description: The host of the container
-          type: string
-        protocol:
-          description: The protocol to use. Defaults to https
-          type: string
-        credentialType:
-          description: The credential type
-          enum:
-          - None
-          - Sas
-          - AccountKey
-          - ClientCredentials
-          type: string
-          x-ms-enum:
-            name: AzureStorageCredentialTypes
-            modelAsString: false
-        credential:
-          description: The credential
-          type: string
-        clientCredentials:
-          $ref: '#/components/schemas/ClientCredentials'
-          description: Service principal credential when credential type is Microsoft.MachineLearning.DataStore.Contracts.AzureStorageCredentialTypes.ClientCredentials
-        blobCacheTimeout:
-          format: int32
-          description: If this is an Microsoft.MachineLearning.DataStore.Contracts.DataStoreType.AzureBlob, the length of time (in seconds) to cache files locally after they are accessed (downloaded).
-          type: integer
-        isSas:
-          description: Indicate if we are using SAS token or Account Key (Deprecated)
-          type: boolean
-        accountKey:
-          description: Storage Account Key (Deprecated)
-          type: string
-        sasToken:
-          description: SAS Token for the container (Deprecated)
-          type: string
-        areWorkspaceManagedIdentitiesAllowed:
-          description: Indicate if we are using Workspace ManagedIdentities/MSI token
-          type: boolean
-        subscriptionId:
-          format: uuid
-          description: Subscription Id
-          type: string
-        resourceGroup:
-          description: Resource Group Name
-          type: string
     AzureDataLake:
       type: object
       properties:
@@ -355,22 +278,28 @@ components:
         target:
           description: The target of the error (e.g., the name of the property in error).
           type: string
-    PaginatedDataStoreList:
-      description: A paginated list of DataStores.
+    RootError:
+      description: The root error.
       type: object
       properties:
-        value:
-          description: An array of objects of type DataStore.
+        code:
+          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
+          type: string
+        message:
+          description: A human-readable representation of the error.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
+        details:
+          description: The related errors that occurred during the request.
           uniqueItems: false
           type: array
           items:
-            $ref: '#/components/schemas/DataStore'
-        continuationToken:
-          description: The token used in retrieving the next page.  If null, there are no additional pages.
-          type: string
-        nextLink:
-          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
-          type: string
+            $ref: '#/components/schemas/ErrorDetails'
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     ClientCredentials:
       type: object
       properties:
@@ -407,62 +336,32 @@ components:
         resourceGroup:
           description: Resource Group Name
           type: string
-    AzureSqlDatabase:
+    PaginatedDataStoreList:
+      description: A paginated list of DataStores.
       type: object
       properties:
-        serverName:
-          description: The Azure SQL server name
+        value:
+          description: An array of objects of type DataStore.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/DataStore'
+        continuationToken:
+          description: The token used in retrieving the next page.  If null, there are no additional pages.
           type: string
-        databaseName:
-          description: The Azure SQL database name
+        nextLink:
+          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
-        endpoint:
-          description: The server host endpoint
-          type: string
-        clientId:
-          format: uuid
-          description: The Client ID/Application ID
-          type: string
-        tenantId:
-          format: uuid
-          description: The ID of the tenant the service principal/app belongs to
-          type: string
-        isCertAuth:
-          description: Is it using certificate to authenticate. If false then use client secret
-          type: boolean
-        certificate:
-          description: The content of the certificate used for authentication
-          type: string
-        thumbprint:
-          description: The thumbprint of the certificate above
-          type: string
-        clientSecret:
-          description: The client secret
-          type: string
-        authorityUrl:
-          description: The authority URL used for authentication
-          type: string
-        resourceUri:
-          description: The resource the service principal/app has access to
-          type: string
-        subscriptionId:
-          format: uuid
-          description: Subscription Id
-          type: string
-        resourceGroup:
-          description: Resource Group Name
-          type: string
-    GlusterFs:
+    InnerErrorResponse:
+      description: A nested structure of errors.
       type: object
       properties:
-        serverAddress:
-          description: 'The server address of one of the servers that hosts the GlusterFS. Can be either the IP address
-
-            or server name.'
+        code:
+          description: The error code.
           type: string
-        volumeName:
-          description: The name of the created GlusterFS volume.
-          type: string
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     AzurePostgreSql:
       type: object
       properties:
@@ -535,38 +434,139 @@ components:
         glusterFsSection:
           $ref: '#/components/schemas/GlusterFs'
           description: Data specific to GlusterFS
-    InnerErrorResponse:
-      description: A nested structure of errors.
+    AzureStorage:
       type: object
       properties:
-        code:
-          description: The error code.
+        accountName:
+          description: Storage Account Name
           type: string
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    RootError:
-      description: The root error.
+        containerName:
+          description: The storage container name
+          type: string
+        endpoint:
+          description: The host of the container
+          type: string
+        protocol:
+          description: The protocol to use. Defaults to https
+          type: string
+        credentialType:
+          description: The credential type
+          enum:
+          - None
+          - Sas
+          - AccountKey
+          - ClientCredentials
+          type: string
+          x-ms-enum:
+            name: AzureStorageCredentialTypes
+            modelAsString: false
+        credential:
+          description: The credential
+          type: string
+        clientCredentials:
+          $ref: '#/components/schemas/ClientCredentials'
+          description: Service principal credential when credential type is Microsoft.MachineLearning.DataStore.Contracts.AzureStorageCredentialTypes.ClientCredentials
+        blobCacheTimeout:
+          format: int32
+          description: If this is an Microsoft.MachineLearning.DataStore.Contracts.DataStoreType.AzureBlob, the length of time (in seconds) to cache files locally after they are accessed (downloaded).
+          type: integer
+        isSas:
+          description: Indicate if we are using SAS token or Account Key (Deprecated)
+          type: boolean
+        accountKey:
+          description: Storage Account Key (Deprecated)
+          type: string
+        sasToken:
+          description: SAS Token for the container (Deprecated)
+          type: string
+        areWorkspaceManagedIdentitiesAllowed:
+          description: Indicate if we are using Workspace ManagedIdentities/MSI token
+          type: boolean
+        subscriptionId:
+          format: uuid
+          description: Subscription Id
+          type: string
+        resourceGroup:
+          description: Resource Group Name
+          type: string
+    AzureSqlDatabase:
       type: object
       properties:
-        code:
-          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
+        serverName:
+          description: The Azure SQL server name
           type: string
-        message:
-          description: A human-readable representation of the error.
+        databaseName:
+          description: The Azure SQL database name
           type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
+        endpoint:
+          description: The server host endpoint
           type: string
-        details:
-          description: The related errors that occurred during the request.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetails'
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
+        clientId:
+          format: uuid
+          description: The Client ID/Application ID
+          type: string
+        tenantId:
+          format: uuid
+          description: The ID of the tenant the service principal/app belongs to
+          type: string
+        isCertAuth:
+          description: Is it using certificate to authenticate. If false then use client secret
+          type: boolean
+        certificate:
+          description: The content of the certificate used for authentication
+          type: string
+        thumbprint:
+          description: The thumbprint of the certificate above
+          type: string
+        clientSecret:
+          description: The client secret
+          type: string
+        authorityUrl:
+          description: The authority URL used for authentication
+          type: string
+        resourceUri:
+          description: The resource the service principal/app has access to
+          type: string
+        subscriptionId:
+          format: uuid
+          description: Subscription Id
+          type: string
+        resourceGroup:
+          description: Resource Group Name
+          type: string
+    ErrorResponse:
+      description: The error response.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/RootError'
+          description: The top level error that occurred.
+        correlation:
+          description: Dictionary containing correlation details for the error.
+          type: object
+          additionalProperties:
+            type: string
+        environment:
+          description: The hosting environment.
+          type: string
+        location:
+          description: The Azure region.
+          type: string
+        time:
+          format: date-time
+          description: The time in UTC.
+          type: string
+    GlusterFs:
+      type: object
+      properties:
+        serverAddress:
+          description: 'The server address of one of the servers that hosts the GlusterFS. Can be either the IP address
+
+            or server name.'
+          type: string
+        volumeName:
+          description: The name of the created GlusterFS volume.
+          type: string
   parameters:
     workspaceNameParameter:
       name: workspaceName

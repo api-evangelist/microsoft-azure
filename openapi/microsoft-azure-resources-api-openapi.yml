@@ -982,53 +982,35 @@ components:
       schema:
         type: string
   schemas:
-    FacetRequest:
-      description: A request to compute additional statistics (facets) over the query results.
+    QueryRequest:
+      description: Describes a query to be executed.
       type: object
       properties:
-        expression:
-          description: The column or list of columns to summarize by
+        subscriptions:
+          description: Azure subscriptions against which to execute the query.
+          type: array
+          items:
+            type: string
+            description: Subscription Id.
+        managementGroups:
+          description: 'Azure management groups against which to execute the query. Example: [ ''mg1'', ''mg2'' ]'
+          type: array
+          items:
+            type: string
+            description: The name of Management group.
+        query:
+          description: The resources query.
           type: string
         options:
-          description: The options for facet evaluation
-          $ref: '#/components/schemas/FacetRequestOptions'
+          description: The query evaluation options
+          $ref: '#/components/schemas/QueryRequestOptions'
+        facets:
+          description: An array of facet requests to be computed against the query result.
+          type: array
+          items:
+            $ref: '#/components/schemas/FacetRequest'
       required:
-      - expression
-    ErrorResponse:
-      title: Error response.
-      type: object
-      description: An error response from the API.
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-          description: Error information.
-      required:
-      - error
-    FacetRequestOptions:
-      description: The options for facet evaluation
-      properties:
-        sortBy:
-          description: The column name or query expression to sort on. Defaults to count if not present.
-          type: string
-        sortOrder:
-          description: The sorting order by the selected column (count by default).
-          type: string
-          default: desc
-          enum:
-          - asc
-          - desc
-          x-ms-enum:
-            name: FacetSortOrder
-            modelAsString: false
-        filter:
-          description: Specifies the filter condition for the 'where' clause which will be run on main query's result, just before the actual faceting.
-          type: string
-        $top:
-          description: The maximum number of facet rows that should be returned.
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 1000
+      - query
     Error:
       title: Error info.
       type: object
@@ -1085,21 +1067,6 @@ components:
       - count
       - resultTruncated
       - data
-    ErrorDetails:
-      title: Error details.
-      type: object
-      properties:
-        code:
-          type: string
-          description: Error code identifying the specific error.
-        message:
-          type: string
-          description: A human readable error message.
-      additionalProperties:
-        type: object
-      required:
-      - code
-      - message
     QueryRequestOptions:
       description: The options for query evaluation
       properties:
@@ -1143,6 +1110,33 @@ components:
           x-ms-enum:
             name: AuthorizationScopeFilter
             modelAsString: false
+    ErrorDetails:
+      title: Error details.
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code identifying the specific error.
+        message:
+          type: string
+          description: A human readable error message.
+      additionalProperties:
+        type: object
+      required:
+      - code
+      - message
+    FacetRequest:
+      description: A request to compute additional statistics (facets) over the query results.
+      type: object
+      properties:
+        expression:
+          description: The column or list of columns to summarize by
+          type: string
+        options:
+          description: The options for facet evaluation
+          $ref: '#/components/schemas/FacetRequestOptions'
+      required:
+      - expression
     Facet:
       description: A facet containing additional statistics on the response of a query. Can be either FacetResult or FacetError.
       type: object
@@ -1158,41 +1152,191 @@ components:
       - resultType
       discriminator:
         propertyName: resultType
-    QueryRequest:
-      description: Describes a query to be executed.
+    ErrorResponse:
+      title: Error response.
       type: object
-      properties:
-        subscriptions:
-          description: Azure subscriptions against which to execute the query.
-          type: array
-          items:
-            type: string
-            description: Subscription Id.
-        managementGroups:
-          description: 'Azure management groups against which to execute the query. Example: [ ''mg1'', ''mg2'' ]'
-          type: array
-          items:
-            type: string
-            description: The name of Management group.
-        query:
-          description: The resources query.
-          type: string
-        options:
-          description: The query evaluation options
-          $ref: '#/components/schemas/QueryRequestOptions'
-        facets:
-          description: An array of facet requests to be computed against the query result.
-          type: array
-          items:
-            $ref: '#/components/schemas/FacetRequest'
-      required:
-      - query
-    CloudError:
-      type: object
-      description: An error response for a resource management request.
+      description: An error response from the API.
       properties:
         error:
-          $ref: '#/components/schemas/ErrorResponse_2'
+          $ref: '#/components/schemas/Error'
+          description: Error information.
+      required:
+      - error
+    FacetRequestOptions:
+      description: The options for facet evaluation
+      properties:
+        sortBy:
+          description: The column name or query expression to sort on. Defaults to count if not present.
+          type: string
+        sortOrder:
+          description: The sorting order by the selected column (count by default).
+          type: string
+          default: desc
+          enum:
+          - asc
+          - desc
+          x-ms-enum:
+            name: FacetSortOrder
+            modelAsString: false
+        filter:
+          description: Specifies the filter condition for the 'where' clause which will be run on main query's result, just before the actual faceting.
+          type: string
+        $top:
+          description: The maximum number of facet rows that should be returned.
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+    Identity:
+      type: object
+      description: Identity for the resource.
+      properties:
+        principalId:
+          type: string
+          readOnly: true
+          description: The principal ID of resource identity.
+          example: '500123'
+        tenantId:
+          type: string
+          readOnly: true
+          description: The tenant ID of resource.
+          example: '500123'
+        type:
+          type: string
+          description: The identity type.
+          enum:
+          - SystemAssigned
+          - UserAssigned
+          - SystemAssigned, UserAssigned
+          - None
+          example: SystemAssigned
+        userAssignedIdentities:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/UserAssignedIdentity'
+          description: The list of user-assigned identities.
+          example: example_value
+    ErrorAdditionalInfo:
+      type: object
+      description: The resource management error additional info.
+      properties:
+        type:
+          type: string
+          readOnly: true
+          description: The additional info type.
+          example: example_value
+        info:
+          type: object
+          readOnly: true
+          description: The additional info.
+          example: example_value
+    ResourceListResult:
+      type: object
+      description: List of resource groups.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericResource'
+          description: An array of resources.
+          example: []
+        nextLink:
+          type: string
+          readOnly: true
+          description: The URL to get the next set of results.
+          example: example_value
+    UserAssignedIdentity:
+      type: object
+      description: User-assigned managed identity.
+      properties:
+        principalId:
+          type: string
+          readOnly: true
+          description: The principal ID of the user-assigned identity.
+          example: '500123'
+        clientId:
+          type: string
+          readOnly: true
+          description: The client ID of the user-assigned identity.
+          example: '500123'
+    Sku:
+      type: object
+      description: SKU for the resource.
+      properties:
+        name:
+          type: string
+          description: The SKU name.
+          example: Example Title
+        tier:
+          type: string
+          description: The SKU tier.
+          example: example_value
+        size:
+          type: string
+          description: The SKU size.
+          example: example_value
+        family:
+          type: string
+          description: The SKU family.
+          example: example_value
+        model:
+          type: string
+          description: The SKU model.
+          example: example_value
+        capacity:
+          type: integer
+          format: int32
+          description: The SKU capacity.
+          example: 10
+    Plan:
+      type: object
+      description: Plan for the resource.
+      properties:
+        name:
+          type: string
+          description: The plan ID.
+          example: Example Title
+        publisher:
+          type: string
+          description: The publisher ID.
+          example: example_value
+        product:
+          type: string
+          description: The offer ID.
+          example: example_value
+        promotionCode:
+          type: string
+          description: The promotion code.
+          example: example_value
+        version:
+          type: string
+          description: The plan's version.
+          example: example_value
+    GenericResource:
+      type: object
+      description: Resource information.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        plan:
+          $ref: '#/components/schemas/Plan'
+        properties:
+          type: object
+          description: The resource properties.
+          example: example_value
+        kind:
+          type: string
+          description: The kind of the resource.
+          pattern: ^[-\w\._,\(\)]+$
+          example: example_value
+        managedBy:
+          type: string
+          description: ID of the resource that manages this resource.
+          example: example_value
+        sku:
+          $ref: '#/components/schemas/Sku'
+        identity:
+          $ref: '#/components/schemas/Identity'
     ErrorResponse_2:
       type: object
       description: Common error response for all Azure Resource Manager APIs.
@@ -1226,64 +1370,6 @@ components:
             $ref: '#/components/schemas/ErrorAdditionalInfo'
           description: The error additional info.
           example: []
-    Identity:
-      type: object
-      description: Identity for the resource.
-      properties:
-        principalId:
-          type: string
-          readOnly: true
-          description: The principal ID of resource identity.
-          example: '500123'
-        tenantId:
-          type: string
-          readOnly: true
-          description: The tenant ID of resource.
-          example: '500123'
-        type:
-          type: string
-          description: The identity type.
-          enum:
-          - SystemAssigned
-          - UserAssigned
-          - SystemAssigned, UserAssigned
-          - None
-          example: SystemAssigned
-        userAssignedIdentities:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/UserAssignedIdentity'
-          description: The list of user-assigned identities.
-          example: example_value
-    ResourceListResult:
-      type: object
-      description: List of resource groups.
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/GenericResource'
-          description: An array of resources.
-          example: []
-        nextLink:
-          type: string
-          readOnly: true
-          description: The URL to get the next set of results.
-          example: example_value
-    ErrorAdditionalInfo:
-      type: object
-      description: The resource management error additional info.
-      properties:
-        type:
-          type: string
-          readOnly: true
-          description: The additional info type.
-          example: example_value
-        info:
-          type: object
-          readOnly: true
-          description: The additional info.
-          example: example_value
     Resource:
       type: object
       description: Specified resource.
@@ -1313,98 +1399,99 @@ components:
             type: string
           description: Resource tags.
           example: example_value
-    Sku:
+    CloudError:
       type: object
-      description: SKU for the resource.
+      description: An error response for a resource management request.
       properties:
-        name:
-          type: string
-          description: The SKU name.
-          example: Example Title
-        tier:
-          type: string
-          description: The SKU tier.
-          example: example_value
-        size:
-          type: string
-          description: The SKU size.
-          example: example_value
-        family:
-          type: string
-          description: The SKU family.
-          example: example_value
-        model:
-          type: string
-          description: The SKU model.
-          example: example_value
-        capacity:
-          type: integer
-          format: int32
-          description: The SKU capacity.
-          example: 10
-    GenericResource:
+        error:
+          $ref: '#/components/schemas/ErrorResponse_2'
+    CrossSubscriptionRestoreSettings:
+      description: CrossSubscriptionRestore Settings
       type: object
-      description: Resource information.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
       properties:
-        plan:
-          $ref: '#/components/schemas/Plan'
-        properties:
+        state:
+          description: CrossSubscriptionRestore state
+          enum:
+          - Disabled
+          - PermanentlyDisabled
+          - Enabled
+          type: string
+          x-ms-enum:
+            name: CrossSubscriptionRestoreState
+            modelAsString: true
+    ErrorAdditionalInfo_2:
+      description: The resource management error additional info.
+      properties:
+        info:
+          description: The additional info.
+          readOnly: true
           type: object
-          description: The resource properties.
-          example: example_value
-        kind:
-          type: string
-          description: The kind of the resource.
-          pattern: ^[-\w\._,\(\)]+$
-          example: example_value
-        managedBy:
-          type: string
-          description: ID of the resource that manages this resource.
-          example: example_value
-        sku:
-          $ref: '#/components/schemas/Sku'
-        identity:
-          $ref: '#/components/schemas/Identity'
-    UserAssignedIdentity:
-      type: object
-      description: User-assigned managed identity.
-      properties:
-        principalId:
-          type: string
+        type:
+          description: The additional info type.
           readOnly: true
-          description: The principal ID of the user-assigned identity.
-          example: '500123'
-        clientId:
           type: string
-          readOnly: true
-          description: The client ID of the user-assigned identity.
-          example: '500123'
-    Plan:
+    CrossRegionRestoreSettings:
       type: object
-      description: Plan for the resource.
       properties:
-        name:
+        state:
+          description: CrossRegionRestore state
+          enum:
+          - Disabled
+          - Enabled
           type: string
-          description: The plan ID.
-          example: Example Title
-        publisher:
+          x-ms-enum:
+            name: CrossRegionRestoreState
+            modelAsString: true
+    encryptionSettings:
+      description: Customer Managed Key details of the resource.
+      type: object
+      properties:
+        state:
+          description: Encryption state of the Backup Vault.
           type: string
-          description: The publisher ID.
-          example: example_value
-        product:
+          enum:
+          - Enabled
+          - Disabled
+          - Inconsistent
+          x-ms-enum:
+            name: EncryptionState
+            modelAsString: true
+            values:
+            - description: CMK encryption is enabled on the Backup Vault
+              value: Enabled
+            - description: CMK encryption is disabled on the Backup Vault. User can not set this state once Encryption State is 'Enabled'.
+              value: Disabled
+            - description: CMK encryption is in inconsistent state on the Backup Vault. This state indicates that user needs to retry the encryption settings operation immediately to correct the state.
+              value: Inconsistent
+        keyVaultProperties:
+          $ref: '#/components/schemas/CmkKeyVaultProperties'
+        kekIdentity:
+          $ref: '#/components/schemas/CmkKekIdentity'
+        infrastructureEncryption:
+          description: Enabling/Disabling the Double Encryption state
           type: string
-          description: The offer ID.
-          example: example_value
-        promotionCode:
-          type: string
-          description: The promotion code.
-          example: example_value
-        version:
-          type: string
-          description: The plan's version.
-          example: example_value
+          enum:
+          - Enabled
+          - Disabled
+          x-ms-enum:
+            name: InfrastructureEncryptionState
+            modelAsString: true
+    MonitoringSettings:
+      type: object
+      description: Monitoring Settings
+      properties:
+        azureMonitorAlertSettings:
+          $ref: '#/components/schemas/AzureMonitorAlertSettings'
+    SecuritySettings:
+      description: Class containing security settings of vault
+      type: object
+      properties:
+        softDeleteSettings:
+          $ref: '#/components/schemas/SoftDeleteSettings'
+        immutabilitySettings:
+          $ref: '#/components/schemas/ImmutabilitySettings'
+        encryptionSettings:
+          $ref: '#/components/schemas/encryptionSettings'
     CloudError_2:
       description: An error response from Azure Backup.
       properties:
@@ -1412,31 +1499,6 @@ components:
           $ref: '#/components/schemas/Error_2'
       title: CloudError
       x-ms-external: true
-    StorageSetting:
-      description: Storage setting
-      properties:
-        datastoreType:
-          description: Gets or sets the type of the datastore.
-          enum:
-          - ArchiveStore
-          - OperationalStore
-          - VaultStore
-          type: string
-          x-ms-enum:
-            modelAsString: true
-            name: StorageSettingStoreTypes
-        type:
-          description: Gets or sets the type.
-          enum:
-          - GeoRedundant
-          - LocallyRedundant
-          - ZoneRedundant
-          type: string
-          x-ms-enum:
-            modelAsString: true
-            name: StorageSettingTypes
-      title: StorageSetting
-      type: object
     Error_2:
       description: The resource management error response.
       properties:
@@ -1466,20 +1528,6 @@ components:
           description: The error target.
           readOnly: true
           type: string
-    CrossSubscriptionRestoreSettings:
-      description: CrossSubscriptionRestore Settings
-      type: object
-      properties:
-        state:
-          description: CrossSubscriptionRestore state
-          enum:
-          - Disabled
-          - PermanentlyDisabled
-          - Enabled
-          type: string
-          x-ms-enum:
-            name: CrossSubscriptionRestoreState
-            modelAsString: true
     DppTrackedResource:
       allOf:
       - $ref: '#/components/schemas/DppBaseTrackedResource'
@@ -1489,18 +1537,35 @@ components:
           description: Input Managed Identity Details
       type: object
       x-ms-azure-resource: true
-    BackupVaultResource:
-      allOf:
-      - $ref: '#/components/schemas/DppTrackedResource'
-      description: Backup Vault Resource
+    DppBaseTrackedResource:
       properties:
-        properties:
-          $ref: '#/components/schemas/BackupVault'
-          description: BackupVaultResource properties
-      required:
-      - location
-      - properties
-      title: BackupVault Resource
+        eTag:
+          description: Optional ETag.
+          type: string
+        id:
+          description: Resource Id represents the complete path to the resource.
+          readOnly: true
+          type: string
+        location:
+          description: Resource location.
+          type: string
+        name:
+          description: Resource name associated with the resource.
+          readOnly: true
+          type: string
+        tags:
+          additionalProperties:
+            type: string
+          description: Resource tags.
+          type: object
+        type:
+          description: Resource type represents the complete path of the form Namespace/ResourceType/ResourceType/...
+          readOnly: true
+          type: string
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v4/types.json#/definitions/systemData
+      type: object
+      x-ms-azure-resource: true
     AzureMonitorAlertSettings:
       type: object
       description: Settings for Azure Monitor based alerts
@@ -1513,17 +1578,96 @@ components:
           x-ms-enum:
             name: AlertsState
             modelAsString: true
-    CrossRegionRestoreSettings:
+    ResourceMoveDetails:
+      description: ResourceMoveDetails will be returned in response to GetResource call from ARM
+      type: object
+      properties:
+        operationId:
+          description: CorrelationId of latest ResourceMove operation attempted
+          type: string
+        startTimeUtc:
+          description: Start time in UTC of latest ResourceMove operation attempted. ISO 8601 format.
+          type: string
+        completionTimeUtc:
+          description: Completion time in UTC of latest ResourceMove operation attempted. ISO 8601 format.
+          type: string
+        sourceResourcePath:
+          description: ARM resource path of source resource
+          type: string
+        targetResourcePath:
+          description: ARM resource path of target resource used in latest ResourceMove operation
+          type: string
+    DppIdentityDetails:
+      description: Identity details
+      properties:
+        principalId:
+          description: The object ID of the service principal object for the managed identity that is used to grant role-based access to an Azure resource.
+          readOnly: true
+          type: string
+        tenantId:
+          description: A Globally Unique Identifier (GUID) that represents the Azure AD tenant where the resource is now a member.
+          readOnly: true
+          type: string
+        type:
+          description: The identityType which can be either SystemAssigned, UserAssigned, 'SystemAssigned,UserAssigned' or None
+          type: string
+        userAssignedIdentities:
+          description: Gets or sets the user assigned identities.
+          type: object
+          additionalProperties:
+            $ref: ../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/UserAssignedIdentity
+      title: DppIdentityDetails
+      type: object
+    StorageSetting:
+      description: Storage setting
+      properties:
+        datastoreType:
+          description: Gets or sets the type of the datastore.
+          enum:
+          - ArchiveStore
+          - OperationalStore
+          - VaultStore
+          type: string
+          x-ms-enum:
+            modelAsString: true
+            name: StorageSettingStoreTypes
+        type:
+          description: Gets or sets the type.
+          enum:
+          - GeoRedundant
+          - LocallyRedundant
+          - ZoneRedundant
+          type: string
+          x-ms-enum:
+            modelAsString: true
+            name: StorageSettingTypes
+      title: StorageSetting
+      type: object
+    BackupVaultResource:
+      allOf:
+      - $ref: '#/components/schemas/DppTrackedResource'
+      description: Backup Vault Resource
+      properties:
+        properties:
+          $ref: '#/components/schemas/BackupVault'
+          description: BackupVaultResource properties
+      required:
+      - location
+      - properties
+      title: BackupVault Resource
+    ImmutabilitySettings:
+      description: Immutability Settings at vault level
       type: object
       properties:
         state:
-          description: CrossRegionRestore state
+          description: Immutability state
           enum:
           - Disabled
-          - Enabled
+          - Unlocked
+          - Locked
           type: string
           x-ms-enum:
-            name: CrossRegionRestoreState
+            name: ImmutabilityState
             modelAsString: true
     BackupVault:
       description: Backup Vault
@@ -1604,40 +1748,30 @@ components:
       - storageSettings
       title: BackupVault
       type: object
-    encryptionSettings:
-      description: Customer Managed Key details of the resource.
+    CmkKekIdentity:
+      type: object
+      description: The details of the managed identity used for CMK
+      properties:
+        identityType:
+          type: string
+          description: The identity type. 'SystemAssigned' and 'UserAssigned' are mutually exclusive. 'SystemAssigned' will use implicitly created managed identity.
+          enum:
+          - SystemAssigned
+          - UserAssigned
+          x-ms-enum:
+            name: IdentityType
+            modelAsString: true
+        identityId:
+          type: string
+          description: 'The managed identity to be used which has access permissions to the Key Vault. Provide a value here in case identity types: ''UserAssigned'' only.'
+    FeatureSettings:
+      description: Class containing feature settings of vault
       type: object
       properties:
-        state:
-          description: Encryption state of the Backup Vault.
-          type: string
-          enum:
-          - Enabled
-          - Disabled
-          - Inconsistent
-          x-ms-enum:
-            name: EncryptionState
-            modelAsString: true
-            values:
-            - description: CMK encryption is enabled on the Backup Vault
-              value: Enabled
-            - description: CMK encryption is disabled on the Backup Vault. User can not set this state once Encryption State is 'Enabled'.
-              value: Disabled
-            - description: CMK encryption is in inconsistent state on the Backup Vault. This state indicates that user needs to retry the encryption settings operation immediately to correct the state.
-              value: Inconsistent
-        keyVaultProperties:
-          $ref: '#/components/schemas/CmkKeyVaultProperties'
-        kekIdentity:
-          $ref: '#/components/schemas/CmkKekIdentity'
-        infrastructureEncryption:
-          description: Enabling/Disabling the Double Encryption state
-          type: string
-          enum:
-          - Enabled
-          - Disabled
-          x-ms-enum:
-            name: InfrastructureEncryptionState
-            modelAsString: true
+        crossSubscriptionRestoreSettings:
+          $ref: '#/components/schemas/CrossSubscriptionRestoreSettings'
+        crossRegionRestoreSettings:
+          $ref: '#/components/schemas/CrossRegionRestoreSettings'
     SoftDeleteSettings:
       description: Soft delete related settings
       type: object
@@ -1663,70 +1797,6 @@ components:
           description: Soft delete retention duration
           format: double
           type: number
-    FeatureSettings:
-      description: Class containing feature settings of vault
-      type: object
-      properties:
-        crossSubscriptionRestoreSettings:
-          $ref: '#/components/schemas/CrossSubscriptionRestoreSettings'
-        crossRegionRestoreSettings:
-          $ref: '#/components/schemas/CrossRegionRestoreSettings'
-    MonitoringSettings:
-      type: object
-      description: Monitoring Settings
-      properties:
-        azureMonitorAlertSettings:
-          $ref: '#/components/schemas/AzureMonitorAlertSettings'
-    ErrorAdditionalInfo_2:
-      description: The resource management error additional info.
-      properties:
-        info:
-          description: The additional info.
-          readOnly: true
-          type: object
-        type:
-          description: The additional info type.
-          readOnly: true
-          type: string
-    DppBaseTrackedResource:
-      properties:
-        eTag:
-          description: Optional ETag.
-          type: string
-        id:
-          description: Resource Id represents the complete path to the resource.
-          readOnly: true
-          type: string
-        location:
-          description: Resource location.
-          type: string
-        name:
-          description: Resource name associated with the resource.
-          readOnly: true
-          type: string
-        tags:
-          additionalProperties:
-            type: string
-          description: Resource tags.
-          type: object
-        type:
-          description: Resource type represents the complete path of the form Namespace/ResourceType/ResourceType/...
-          readOnly: true
-          type: string
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v4/types.json#/definitions/systemData
-      type: object
-      x-ms-azure-resource: true
-    SecuritySettings:
-      description: Class containing security settings of vault
-      type: object
-      properties:
-        softDeleteSettings:
-          $ref: '#/components/schemas/SoftDeleteSettings'
-        immutabilitySettings:
-          $ref: '#/components/schemas/ImmutabilitySettings'
-        encryptionSettings:
-          $ref: '#/components/schemas/encryptionSettings'
     CmkKeyVaultProperties:
       type: object
       description: The properties of the Key Vault which hosts CMK
@@ -1734,82 +1804,6 @@ components:
         keyUri:
           description: The key uri of the Customer Managed Key
           type: string
-    ImmutabilitySettings:
-      description: Immutability Settings at vault level
-      type: object
-      properties:
-        state:
-          description: Immutability state
-          enum:
-          - Disabled
-          - Unlocked
-          - Locked
-          type: string
-          x-ms-enum:
-            name: ImmutabilityState
-            modelAsString: true
-    CmkKekIdentity:
-      type: object
-      description: The details of the managed identity used for CMK
-      properties:
-        identityType:
-          type: string
-          description: The identity type. 'SystemAssigned' and 'UserAssigned' are mutually exclusive. 'SystemAssigned' will use implicitly created managed identity.
-          enum:
-          - SystemAssigned
-          - UserAssigned
-          x-ms-enum:
-            name: IdentityType
-            modelAsString: true
-        identityId:
-          type: string
-          description: 'The managed identity to be used which has access permissions to the Key Vault. Provide a value here in case identity types: ''UserAssigned'' only.'
-    DppIdentityDetails:
-      description: Identity details
-      properties:
-        principalId:
-          description: The object ID of the service principal object for the managed identity that is used to grant role-based access to an Azure resource.
-          readOnly: true
-          type: string
-        tenantId:
-          description: A Globally Unique Identifier (GUID) that represents the Azure AD tenant where the resource is now a member.
-          readOnly: true
-          type: string
-        type:
-          description: The identityType which can be either SystemAssigned, UserAssigned, 'SystemAssigned,UserAssigned' or None
-          type: string
-        userAssignedIdentities:
-          description: Gets or sets the user assigned identities.
-          type: object
-          additionalProperties:
-            $ref: ../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/UserAssignedIdentity
-      title: DppIdentityDetails
-      type: object
-    ResourceMoveDetails:
-      description: ResourceMoveDetails will be returned in response to GetResource call from ARM
-      type: object
-      properties:
-        operationId:
-          description: CorrelationId of latest ResourceMove operation attempted
-          type: string
-        startTimeUtc:
-          description: Start time in UTC of latest ResourceMove operation attempted. ISO 8601 format.
-          type: string
-        completionTimeUtc:
-          description: Completion time in UTC of latest ResourceMove operation attempted. ISO 8601 format.
-          type: string
-        sourceResourcePath:
-          description: ARM resource path of source resource
-          type: string
-        targetResourcePath:
-          description: ARM resource path of target resource used in latest ResourceMove operation
-          type: string
-    CloudError_3:
-      x-ms-external: true
-      properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
-      description: An error response for a resource management request.
     Identity_2:
       properties:
         principalId:
@@ -1847,6 +1841,17 @@ components:
                 description: The client id of user assigned identity.
           description: 'The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form: ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.'
       description: Identity for the resource.
+    ResourcesMoveInfo:
+      properties:
+        resources:
+          type: array
+          items:
+            type: string
+          description: The IDs of the resources.
+        targetResourceGroup:
+          type: string
+          description: The target resource group.
+      description: Parameters of move resources.
     GenericResourceExpanded:
       properties:
         createdTime:
@@ -1866,48 +1871,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/GenericResource_2'
       description: Resource information.
-    ResourceListResult_2:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/GenericResourceExpanded'
-          description: An array of resources.
-        nextLink:
-          readOnly: true
-          type: string
-          description: The URL to use for getting the next set of results.
-      description: List of resource groups.
-    Resource_2:
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Resource ID
-        name:
-          readOnly: true
-          type: string
-          description: Resource name
-        type:
-          readOnly: true
-          type: string
-          description: Resource type
-        location:
-          type: string
-          description: Resource location
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocation'
-          x-ms-mutability:
-          - read
-          - create
-          description: Resource extended location.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags
-      x-ms-azure-resource: true
-      description: Specified resource.
     Sku_2:
       properties:
         name:
@@ -1930,6 +1893,24 @@ components:
           format: int32
           description: The SKU capacity.
       description: SKU for the resource.
+    Plan_2:
+      properties:
+        name:
+          type: string
+          description: The plan ID.
+        publisher:
+          type: string
+          description: The publisher ID.
+        product:
+          type: string
+          description: The offer ID.
+        promotionCode:
+          type: string
+          description: The promotion code.
+        version:
+          type: string
+          description: The plan's version.
+      description: Plan for the resource.
     GenericResource_2:
       properties:
         plan:
@@ -1968,35 +1949,54 @@ components:
           type: string
           description: The extended location name.
       description: Resource extended location.
-    Plan_2:
+    Resource_2:
       properties:
+        id:
+          readOnly: true
+          type: string
+          description: Resource ID
         name:
+          readOnly: true
           type: string
-          description: The plan ID.
-        publisher:
+          description: Resource name
+        type:
+          readOnly: true
           type: string
-          description: The publisher ID.
-        product:
+          description: Resource type
+        location:
           type: string
-          description: The offer ID.
-        promotionCode:
-          type: string
-          description: The promotion code.
-        version:
-          type: string
-          description: The plan's version.
-      description: Plan for the resource.
-    ResourcesMoveInfo:
+          description: Resource location
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocation'
+          x-ms-mutability:
+          - read
+          - create
+          description: Resource extended location.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags
+      x-ms-azure-resource: true
+      description: Specified resource.
+    ResourceListResult_2:
       properties:
-        resources:
+        value:
           type: array
           items:
-            type: string
-          description: The IDs of the resources.
-        targetResourceGroup:
+            $ref: '#/components/schemas/GenericResourceExpanded'
+          description: An array of resources.
+        nextLink:
+          readOnly: true
           type: string
-          description: The target resource group.
-      description: Parameters of move resources.
+          description: The URL to use for getting the next set of results.
+      description: List of resource groups.
+    CloudError_3:
+      x-ms-external: true
+      properties:
+        error:
+          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
+      description: An error response for a resource management request.
   securitySchemes:
     azure_auth:
       type: oauth2

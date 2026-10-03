@@ -293,44 +293,6 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ImageTemplateLastRunStatus:
-      properties:
-        startTime:
-          type: string
-          format: date-time
-          description: Start time of the last run (UTC)
-        endTime:
-          type: string
-          format: date-time
-          description: End time of the last run (UTC)
-        runState:
-          type: string
-          enum:
-          - Running
-          - Succeeded
-          - PartiallySucceeded
-          - Failed
-          description: State of the last run
-        runSubState:
-          type: string
-          enum:
-          - Queued
-          - Building
-          - Customizing
-          - Distributing
-          description: Sub-state of the last run
-        message:
-          type: string
-          description: Verbose information about the last run state
-    InnerError:
-      properties:
-        exceptionType:
-          type: string
-          description: The exception type.
-        errorDetail:
-          type: string
-          description: The internal error message or exception dump.
-      description: Inner error details.
     ApiErrorBase:
       properties:
         code:
@@ -343,18 +305,36 @@ components:
           type: string
           description: The error message.
       description: Api error base.
-    ImageTemplateCustomizer:
+    ImageTemplateDistributor:
+      type: object
+      description: Generic distribution object
       discriminator:
         propertyName: type
       properties:
         type:
           type: string
-          description: The type of customization tool you want to use on the Image. For example, "Shell" can be shell customizer
-        name:
+          description: Type of distribution.
+        runOutputName:
           type: string
-          description: Friendly Name to provide context on what this customization step does
+          description: The name to be used for the associated RunOutput.
+          pattern: ^[A-Za-z0-9-_]{1,64}$
+        artifactTags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Tags that will be applied to the artifact once it has been created/updated by the distributor.
       required:
       - type
+      - runOutputName
+    RunOutputCollection:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunOutput'
+        nextLink:
+          type: string
+          description: The continuation token.
     ApiError:
       properties:
         details:
@@ -383,6 +363,22 @@ components:
             type: string
           description: The user-specified tags associated with the image template.
       description: Parameters for updating an image template.
+    ImageTemplate:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ImageTemplateProperties'
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    ImageTemplateSource:
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: Specifies the type of source image you want to start with.
+      required:
+      - type
     SubResource:
       description: The Sub Resource model definition.
       properties:
@@ -419,6 +415,35 @@ components:
         message:
           type: string
           description: Verbose error message about the provisioning failure
+    ProvisioningState:
+      type: string
+      enum:
+      - Creating
+      - Succeeded
+      - Failed
+      - Deleting
+      description: Provisioning state of the resource
+    ImageTemplateCustomizer:
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          description: The type of customization tool you want to use on the Image. For example, "Shell" can be shell customizer
+        name:
+          type: string
+          description: Friendly Name to provide context on what this customization step does
+      required:
+      - type
+    ImageTemplateListResult:
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageTemplate'
+        nextLink:
+          type: string
+          description: The continuation token.
     ImageTemplateProperties:
       properties:
         source:
@@ -449,27 +474,43 @@ components:
       required:
       - source
       - distribute
-    ImageTemplateDistributor:
-      type: object
-      description: Generic distribution object
-      discriminator:
-        propertyName: type
+    RunOutput:
+      description: Represents an output that was created by running an image template.
+      allOf:
+      - $ref: '#/components/schemas/SubResource'
       properties:
-        type:
+        properties:
+          $ref: '#/components/schemas/RunOutputProperties'
+          x-ms-client-flatten: true
+    ImageTemplateLastRunStatus:
+      properties:
+        startTime:
           type: string
-          description: Type of distribution.
-        runOutputName:
+          format: date-time
+          description: Start time of the last run (UTC)
+        endTime:
           type: string
-          description: The name to be used for the associated RunOutput.
-          pattern: ^[A-Za-z0-9-_]{1,64}$
-        artifactTags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Tags that will be applied to the artifact once it has been created/updated by the distributor.
-      required:
-      - type
-      - runOutputName
+          format: date-time
+          description: End time of the last run (UTC)
+        runState:
+          type: string
+          enum:
+          - Running
+          - Succeeded
+          - PartiallySucceeded
+          - Failed
+          description: State of the last run
+        runSubState:
+          type: string
+          enum:
+          - Queued
+          - Building
+          - Customizing
+          - Distributing
+          description: Sub-state of the last run
+        message:
+          type: string
+          description: Verbose information about the last run state
     RunOutputProperties:
       properties:
         artifactId:
@@ -482,39 +523,15 @@ components:
           $ref: '#/components/schemas/ProvisioningState'
           description: Provisioning state of the resource
           readOnly: true
-    ImageTemplateSource:
-      discriminator:
-        propertyName: type
+    InnerError:
       properties:
-        type:
+        exceptionType:
           type: string
-          description: Specifies the type of source image you want to start with.
-      required:
-      - type
-    ImageTemplate:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ImageTemplateProperties'
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-    RunOutput:
-      description: Represents an output that was created by running an image template.
-      allOf:
-      - $ref: '#/components/schemas/SubResource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/RunOutputProperties'
-          x-ms-client-flatten: true
-    RunOutputCollection:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/RunOutput'
-        nextLink:
+          description: The exception type.
+        errorDetail:
           type: string
-          description: The continuation token.
+          description: The internal error message or exception dump.
+      description: Inner error details.
     Resource:
       description: The Resource model definition.
       properties:
@@ -544,24 +561,21 @@ components:
       required:
       - location
       x-ms-azure-resource: true
-    ProvisioningState:
-      type: string
-      enum:
-      - Creating
-      - Succeeded
-      - Failed
-      - Deleting
-      description: Provisioning state of the resource
-    ImageTemplateListResult:
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageTemplate'
-        nextLink:
-          type: string
-          description: The continuation token.
   parameters:
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Client Api Version.
+      schema:
+        type: string
     RunOutputNameParameter:
       name: runOutputName
       in: path
@@ -579,13 +593,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription Id forms part of the URI for every service call.
-      schema:
-        type: string
     ImageTemplateNameParameter:
       name: imageTemplateName
       in: path
@@ -595,13 +602,6 @@ components:
       schema:
         type: string
         pattern: ^[A-Za-z0-9-_]{1,64}$
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Client Api Version.
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

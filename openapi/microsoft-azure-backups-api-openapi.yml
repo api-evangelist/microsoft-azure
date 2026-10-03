@@ -754,18 +754,6 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
-    RestoreOptions:
-      description: Properties for restore options.
-      properties:
-        roleName:
-          description: The Azure Stack role name for restore, set it to empty for all infrastructure role
-          type: string
-        decryptionCertBase64:
-          description: The certificate file raw data in Base64 string. This should be the .pfx file with the private key.
-          type: string
-        decryptionCertPassword:
-          description: The password for the decryption certificate.
-          type: string
     Backup:
       description: Information related to a backup.
       type: object
@@ -776,6 +764,54 @@ components:
           x-ms-client-flatten: true
       allOf:
       - $ref: Backup.json#/definitions/Resource
+    RoleOperationStatusList:
+      description: object
+      type: array
+      items:
+        $ref: '#/components/schemas/RoleOperationStatus'
+    RoleOperationStatus:
+      description: Backup status for a role.
+      type: object
+      properties:
+        roleName:
+          description: Name of the role.
+          type: string
+        status:
+          description: Status of the role.
+          $ref: '#/components/schemas/OperationStatus'
+    OperationStatus:
+      description: Status of an operation.
+      type: string
+      enum:
+      - Creating
+      - Queued
+      - Running
+      - Deleted
+      - Failed
+      - PartialSucceeded
+      - Succeeded
+      x-ms-enum:
+        name: OperationStatus
+        modelAsString: false
+    BackupList:
+      type: object
+      description: List of backups.
+      properties:
+        value:
+          description: List of backups.
+          type: array
+          items:
+            $ref: '#/components/schemas/Backup'
+        nextLink:
+          description: URI to the next page.
+          type: string
+    BackupModel:
+      description: Properties for a backup.
+      properties:
+        backupInfo:
+          description: Holds information for a backup.
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BackupInfo'
     BackupInfo:
       type: object
       description: Holds information for a backup.
@@ -821,54 +857,18 @@ components:
           description: The thumbprint of the certificate used to encrypt the backup encryption key.
           type: string
           readOnly: true
-    OperationStatus:
-      description: Status of an operation.
-      type: string
-      enum:
-      - Creating
-      - Queued
-      - Running
-      - Deleted
-      - Failed
-      - PartialSucceeded
-      - Succeeded
-      x-ms-enum:
-        name: OperationStatus
-        modelAsString: false
-    BackupList:
-      type: object
-      description: List of backups.
-      properties:
-        value:
-          description: List of backups.
-          type: array
-          items:
-            $ref: '#/components/schemas/Backup'
-        nextLink:
-          description: URI to the next page.
-          type: string
-    RoleOperationStatusList:
-      description: object
-      type: array
-      items:
-        $ref: '#/components/schemas/RoleOperationStatus'
-    RoleOperationStatus:
-      description: Backup status for a role.
-      type: object
+    RestoreOptions:
+      description: Properties for restore options.
       properties:
         roleName:
-          description: Name of the role.
+          description: The Azure Stack role name for restore, set it to empty for all infrastructure role
           type: string
-        status:
-          description: Status of the role.
-          $ref: '#/components/schemas/OperationStatus'
-    BackupModel:
-      description: Properties for a backup.
-      properties:
-        backupInfo:
-          description: Holds information for a backup.
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BackupInfo'
+        decryptionCertBase64:
+          description: The certificate file raw data in Base64 string. This should be the .pfx file with the private key.
+          type: string
+        decryptionCertPassword:
+          description: The password for the decryption certificate.
+          type: string
     backup:
       description: Backup under a Backup Vault
       type: object
@@ -881,24 +881,6 @@ components:
           description: Backup Properties
           $ref: '#/components/schemas/backupProperties'
           x-ms-client-flatten: true
-    backupsMigrationRequest:
-      description: Migrate Backups Request
-      type: object
-      x-ms-azure-resource: true
-      required:
-      - backupVaultId
-      properties:
-        backupVaultId:
-          type: string
-          description: The ResourceId of the Backup Vault
-          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.NetApp/netAppAccounts/account1/backupVaults/backupVault1
-    backupPatchProperties:
-      description: Backup patch properties
-      type: object
-      properties:
-        label:
-          type: string
-          description: Label for backup
     backupRestoreFiles:
       description: Restore payload for Single File Backup Restore
       type: object
@@ -927,6 +909,18 @@ components:
           description: Resource Id of the destination volume on which the files need to be restored
           type: string
           example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.NetApp/netAppAccounts/account1/capacityPools/pool1/volumes/volume1
+    backupsList:
+      description: List of Backups
+      type: object
+      properties:
+        value:
+          description: A list of Backups
+          type: array
+          items:
+            $ref: '#/components/schemas/backup'
+        nextLink:
+          type: string
+          description: URL to get the next set of results.
     backupPatch:
       description: Backup patch
       type: object
@@ -935,6 +929,24 @@ components:
           description: Backup Patch Properties
           $ref: '#/components/schemas/backupPatchProperties'
           x-ms-client-flatten: true
+    backupsMigrationRequest:
+      description: Migrate Backups Request
+      type: object
+      x-ms-azure-resource: true
+      required:
+      - backupVaultId
+      properties:
+        backupVaultId:
+          type: string
+          description: The ResourceId of the Backup Vault
+          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.NetApp/netAppAccounts/account1/backupVaults/backupVault1
+    backupPatchProperties:
+      description: Backup patch properties
+      type: object
+      properties:
+        label:
+          type: string
+          description: Label for backup
     backupStatus:
       description: Backup status
       type: object
@@ -1072,45 +1084,6 @@ components:
           type: string
           readOnly: true
           description: ResourceId used to identify the backup policy
-    backupsList:
-      description: List of Backups
-      type: object
-      properties:
-        value:
-          description: A list of Backups
-          type: array
-          items:
-            $ref: '#/components/schemas/backup'
-        nextLink:
-          type: string
-          description: URL to get the next set of results.
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          type: object
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: The error object.
-      description: An error response from the Container Instance service.
-    BackupRequest:
-      description: Base class for backup request. Workload-specific backup requests are derived from this class.
-      required:
-      - objectType
-      type: object
-      properties:
-        objectType:
-          description: This property will be used as the discriminator for deciding the specific types in the polymorphic chain of types.
-          type: string
-      discriminator:
-        propertyName: objectType
-    BackupRequestResource:
-      description: Base class for backup request. Workload-specific backup requests are derived from this class.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/BackupRequest'
-          description: BackupRequestResource properties
     CloudErrorBody:
       x-ms-external: true
       properties:
@@ -1142,6 +1115,14 @@ components:
           x-ms-identifiers: []
           description: The error additional info.
       description: An error response from the Container Instance service.
+    BackupRequestResource:
+      description: Base class for backup request. Workload-specific backup requests are derived from this class.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/BackupRequest'
+          description: BackupRequestResource properties
     Resource:
       description: ARM Resource.
       type: object
@@ -1170,18 +1151,25 @@ components:
           description: Optional ETag.
           type: string
       x-ms-azure-resource: true
-    Backup_2:
-      description: The backup.
+    BackupRequest:
+      description: Base class for backup request. Workload-specific backup requests are derived from this class.
       required:
-      - properties
+      - objectType
       type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel'
       properties:
-        properties:
-          $ref: '#/components/schemas/BackupProperties'
-          description: The properties of the backup.
-          x-ms-client-flatten: true
+        objectType:
+          description: This property will be used as the discriminator for deciding the specific types in the polymorphic chain of types.
+          type: string
+      discriminator:
+        propertyName: objectType
+    CloudError:
+      x-ms-external: true
+      properties:
+        error:
+          type: object
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: The error object.
+      description: An error response from the Container Instance service.
     BackupElement:
       description: The backup element.
       required:
@@ -1221,6 +1209,79 @@ components:
           type: string
           x-ms-enum:
             name: VolumeType
+            modelAsString: false
+    Backup_2:
+      description: The backup.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      properties:
+        properties:
+          $ref: '#/components/schemas/BackupProperties'
+          description: The properties of the backup.
+          x-ms-client-flatten: true
+    CloneRequest:
+      description: The clone job request.
+      required:
+      - targetDeviceId
+      - targetVolumeName
+      - targetAccessControlRecordIds
+      - backupElement
+      type: object
+      properties:
+        targetDeviceId:
+          description: The path ID of the device which will act as the clone target.
+          type: string
+        targetVolumeName:
+          description: The name of the new volume which will be created and the backup will be cloned into.
+          type: string
+        targetAccessControlRecordIds:
+          description: The list of path IDs of the access control records to be associated to the new cloned volume.
+          type: array
+          items:
+            type: string
+        backupElement:
+          $ref: '#/components/schemas/BackupElement'
+          description: The backup element that is cloned.
+    BackupList_2:
+      description: The collection of backups.
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Backup_2'
+        nextLink:
+          description: The NextLink.
+          type: string
+    BaseModel:
+      description: Represents the base class for all other ARM object models
+      type: object
+      properties:
+        id:
+          description: The path ID that uniquely identifies the object.
+          type: string
+          readOnly: true
+        name:
+          description: The name of the object.
+          type: string
+          readOnly: true
+        type:
+          description: The hierarchical type of the object.
+          type: string
+          readOnly: true
+        kind:
+          description: The Kind of the object. Currently only Series8000 is supported
+          enum:
+          - Series8000
+          type: string
+          x-ms-enum:
+            name: Kind
             modelAsString: false
     BackupProperties:
       description: The properties of the backup.
@@ -1271,83 +1332,6 @@ components:
           x-ms-identifiers:
           - elementId
           - volumeContainerId
-    BaseModel:
-      description: Represents the base class for all other ARM object models
-      type: object
-      properties:
-        id:
-          description: The path ID that uniquely identifies the object.
-          type: string
-          readOnly: true
-        name:
-          description: The name of the object.
-          type: string
-          readOnly: true
-        type:
-          description: The hierarchical type of the object.
-          type: string
-          readOnly: true
-        kind:
-          description: The Kind of the object. Currently only Series8000 is supported
-          enum:
-          - Series8000
-          type: string
-          x-ms-enum:
-            name: Kind
-            modelAsString: false
-    BackupList_2:
-      description: The collection of backups.
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: The value.
-          type: array
-          items:
-            $ref: '#/components/schemas/Backup_2'
-        nextLink:
-          description: The NextLink.
-          type: string
-    CloneRequest:
-      description: The clone job request.
-      required:
-      - targetDeviceId
-      - targetVolumeName
-      - targetAccessControlRecordIds
-      - backupElement
-      type: object
-      properties:
-        targetDeviceId:
-          description: The path ID of the device which will act as the clone target.
-          type: string
-        targetVolumeName:
-          description: The name of the new volume which will be created and the backup will be cloned into.
-          type: string
-        targetAccessControlRecordIds:
-          description: The list of path IDs of the access control records to be associated to the new cloned volume.
-          type: array
-          items:
-            type: string
-        backupElement:
-          $ref: '#/components/schemas/BackupElement'
-          description: The backup element that is cloned.
-    Error:
-      required:
-      - errorCode
-      - message
-      type: object
-      properties:
-        errorCode:
-          type: string
-        message:
-          $ref: '#/components/schemas/Message'
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/Item'
-          x-ms-identifiers:
-          - key
     BackupElementProperties:
       description: The backup element properties
       required:
@@ -1374,100 +1358,6 @@ components:
           x-ms-enum:
             name: DataPolicy
             modelAsString: false
-    ISCSIDisk:
-      description: The iSCSI disk.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel_2'
-      properties:
-        properties:
-          $ref: '#/components/schemas/ISCSIDiskProperties'
-          description: The properties.
-          x-ms-client-flatten: true
-    Item:
-      required:
-      - key
-      - value
-      type: object
-      properties:
-        key:
-          type: string
-        value:
-          type: string
-    BaseModel_2:
-      description: Base class for models
-      type: object
-      properties:
-        id:
-          description: The identifier.
-          type: string
-          readOnly: true
-        name:
-          description: The name.
-          type: string
-          readOnly: true
-        type:
-          description: The type.
-          type: string
-          readOnly: true
-    BackupList_3:
-      description: Collection of backups
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: The value.
-          type: array
-          items:
-            $ref: '#/components/schemas/Backup_3'
-        nextLink:
-          description: The NextLink.
-          type: string
-    Message:
-      type: object
-      properties:
-        language:
-          type: string
-        value:
-          type: string
-    CloneRequestProperties:
-      description: Properties of CloneRequest
-      required:
-      - targetDeviceId
-      - targetAccessPointId
-      - newEndpointName
-      type: object
-      properties:
-        targetDeviceId:
-          description: DeviceId of the device which will act as the Clone target
-          type: string
-        targetAccessPointId:
-          description: Access point Id on which clone job will performed.
-          type: string
-        newEndpointName:
-          description: Name of new endpoint which will created as part of clone job.
-          type: string
-        share:
-          $ref: '#/components/schemas/FileShare'
-          description: Share Object.
-        disk:
-          $ref: '#/components/schemas/ISCSIDisk'
-          description: Disk Object
-    Backup_3:
-      description: The backup.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel_2'
-      properties:
-        properties:
-          $ref: '#/components/schemas/BackupProperties_2'
-          description: Properties of backup
-          x-ms-client-flatten: true
     ISCSIDiskProperties:
       description: The iSCSI disk properties.
       required:
@@ -1529,6 +1419,65 @@ components:
           x-ms-enum:
             name: MonitoringStatus
             modelAsString: false
+    Message:
+      type: object
+      properties:
+        language:
+          type: string
+        value:
+          type: string
+    BackupList_3:
+      description: Collection of backups
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Backup_3'
+        nextLink:
+          description: The NextLink.
+          type: string
+    FileShare:
+      description: The File Share.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel_2'
+      properties:
+        properties:
+          $ref: '#/components/schemas/FileShareProperties'
+          description: The properties.
+          x-ms-client-flatten: true
+    Item:
+      required:
+      - key
+      - value
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+    BaseModel_2:
+      description: Base class for models
+      type: object
+      properties:
+        id:
+          description: The identifier.
+          type: string
+          readOnly: true
+        name:
+          description: The name.
+          type: string
+          readOnly: true
+        type:
+          description: The type.
+          type: string
+          readOnly: true
     BackupProperties_2:
       description: Class represents Backup properties
       required:
@@ -1573,17 +1522,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BackupElement_2'
-    FileShare:
-      description: The File Share.
+    Error:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          $ref: '#/components/schemas/Message'
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+          x-ms-identifiers:
+          - key
+    CloneRequest_2:
+      description: Clone Job Request Model.
       required:
       - properties
       type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel_2'
       properties:
         properties:
-          $ref: '#/components/schemas/FileShareProperties'
-          description: The properties.
+          $ref: '#/components/schemas/CloneRequestProperties'
+          description: CloneJob Properties are encapsulated in this object.
           x-ms-client-flatten: true
     BackupElement_2:
       description: Class represents BackupElement
@@ -1596,6 +1559,30 @@ components:
         properties:
           $ref: '#/components/schemas/BackupElementProperties'
           description: The Properties of backup element
+          x-ms-client-flatten: true
+    Backup_3:
+      description: The backup.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel_2'
+      properties:
+        properties:
+          $ref: '#/components/schemas/BackupProperties_2'
+          description: Properties of backup
+          x-ms-client-flatten: true
+    ISCSIDisk:
+      description: The iSCSI disk.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel_2'
+      properties:
+        properties:
+          $ref: '#/components/schemas/ISCSIDiskProperties'
+          description: The properties.
           x-ms-client-flatten: true
     FileShareProperties:
       description: The File Share.
@@ -1656,16 +1643,29 @@ components:
           x-ms-enum:
             name: MonitoringStatus
             modelAsString: false
-    CloneRequest_2:
-      description: Clone Job Request Model.
+    CloneRequestProperties:
+      description: Properties of CloneRequest
       required:
-      - properties
+      - targetDeviceId
+      - targetAccessPointId
+      - newEndpointName
       type: object
       properties:
-        properties:
-          $ref: '#/components/schemas/CloneRequestProperties'
-          description: CloneJob Properties are encapsulated in this object.
-          x-ms-client-flatten: true
+        targetDeviceId:
+          description: DeviceId of the device which will act as the Clone target
+          type: string
+        targetAccessPointId:
+          description: Access point Id on which clone job will performed.
+          type: string
+        newEndpointName:
+          description: Name of new endpoint which will created as part of clone job.
+          type: string
+        share:
+          $ref: '#/components/schemas/FileShare'
+          description: Share Object.
+        disk:
+          $ref: '#/components/schemas/ISCSIDisk'
+          description: Disk Object
   parameters:
     BackupParameter:
       name: backup
@@ -1683,6 +1683,15 @@ components:
       schema:
         $ref: '#/components/schemas/RestoreOptions'
       x-ms-parameter-location: method
+    BackupName:
+      name: backupName
+      in: path
+      required: true
+      description: The name of the backup
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$
     BackupVaultName:
       name: backupVaultName
       in: path
@@ -1692,17 +1701,6 @@ components:
       schema:
         type: string
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
-    VolumeName:
-      name: volumeName
-      in: path
-      required: true
-      description: The name of the volume
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-        pattern: ^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$
     PoolName:
       name: poolName
       in: path
@@ -1723,15 +1721,17 @@ components:
       schema:
         type: string
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
-    BackupName:
-      name: backupName
+    VolumeName:
+      name: volumeName
       in: path
       required: true
-      description: The name of the backup
+      description: The name of the volume
       x-ms-parameter-location: method
       schema:
         type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$
+        maxLength: 64
+        minLength: 1
+        pattern: ^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$
     SubscriptionId:
       name: subscriptionId
       in: path
@@ -1739,10 +1739,10 @@ components:
       required: true
       schema:
         type: string
-    ResourceGroupName:
-      name: resourceGroupName
+    VaultName:
+      name: vaultName
       in: path
-      description: The name of the resource group where the recovery services vault is present.
+      description: The name of the recovery services vault.
       required: true
       x-ms-parameter-location: method
       schema:
@@ -1754,10 +1754,10 @@ components:
       required: true
       schema:
         type: string
-    VaultName:
-      name: vaultName
+    ResourceGroupName:
+      name: resourceGroupName
       in: path
-      description: The name of the recovery services vault.
+      description: The name of the resource group where the recovery services vault is present.
       required: true
       x-ms-parameter-location: method
       schema:
@@ -1773,11 +1773,12 @@ components:
         type: string
         maxLength: 50
         minLength: 2
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The api version
+    deviceNameParameter:
+      name: deviceName
+      in: path
+      description: The device name
       required: true
+      x-ms-parameter-location: method
       x-ms-skip-url-encoding: true
       schema:
         type: string
@@ -1798,12 +1799,11 @@ components:
       x-ms-skip-url-encoding: true
       schema:
         type: string
-    deviceNameParameter:
-      name: deviceName
-      in: path
-      description: The device name
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The api version
       required: true
-      x-ms-parameter-location: method
       x-ms-skip-url-encoding: true
       schema:
         type: string
@@ -1813,6 +1813,13 @@ components:
       description: The resource group name
       required: true
       x-ms-parameter-location: method
+      schema:
+        type: string
+    apiVersionParameter_2:
+      name: api-version
+      in: query
+      description: The api version
+      required: true
       schema:
         type: string
     managerNameParameter_2:
@@ -1825,13 +1832,6 @@ components:
         type: string
         maxLength: 50
         minLength: 2
-    apiVersionParameter_2:
-      name: api-version
-      in: query
-      description: The api version
-      required: true
-      schema:
-        type: string
     subscriptionIdParameter_2:
       name: subscriptionId
       in: path

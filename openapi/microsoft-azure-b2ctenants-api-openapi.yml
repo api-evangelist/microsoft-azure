@@ -269,6 +269,13 @@ components:
       description: Version of the API to be used with the client request.
       schema:
         type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+      schema:
+        type: string
     ResourceGroupNameParameter:
       name: resourceGroupName
       in: path
@@ -285,13 +292,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-      schema:
-        type: string
     ResourceNameParameter_2:
       name: resourceName
       in: path
@@ -301,9 +301,29 @@ components:
       schema:
         type: string
   schemas:
-    CountryCode:
+    NameAvailabilityReason:
+      description: Describes the reason for the 'nameAvailable' value.
       type: string
-      description: Country code of Azure tenant (e.g. 'US'). Refer to [aka.ms/B2CDataResidency](https://aka.ms/B2CDataResidency) to see valid country codes and corresponding data residency locations. If you do not see a country code in an valid data residency location, choose one from the list.
+      enum:
+      - AlreadyExists
+      - Invalid
+      x-ms-enum:
+        name: NameAvailabilityReasonType
+        modelAsString: false
+        values:
+        - value: AlreadyExists
+          description: The name is already in use and is therefore unavailable.
+        - value: Invalid
+          description: The name provided does not match the resource provider’s naming requirements (incorrect length, unsupported characters, etc.).
+    CreateTenantProperties:
+      type: object
+      description: These properties are used to create the Azure AD B2C tenant. These properties are not part of the Azure resource.
+      properties:
+        displayName:
+          description: The display name of the B2C tenant.
+          type: string
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
     CreateTenantRequestBody:
       type: object
       description: The information needed to create the Azure AD B2C tenant and corresponding Azure resource, which is used for billing purposes.
@@ -329,23 +349,37 @@ components:
           additionalProperties:
             type: string
           description: Resource Tags
-    NameAvailabilityResponse:
-      description: Response of the CheckNameAvailability operation.
+    B2CResourceSKU:
+      description: SKU properties of the Azure AD B2C tenant. Learn more about Azure AD B2C billing at [aka.ms/b2cBilling](https://aka.ms/b2cBilling).
       properties:
-        message:
+        name:
           type: string
-          description: Description of the reason if name is not available.
-        nameAvailable:
-          type: boolean
-          description: True if the name is available and can be used to create a new tenant. Otherwise false.
-        reason:
-          $ref: '#/components/schemas/NameAvailabilityReason'
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
-      description: An error response for a resource management request.
+          description: The name of the SKU for the tenant.
+          enum:
+          - Standard
+          - PremiumP1
+          - PremiumP2
+          x-ms-enum:
+            name: B2CResourceSKUName
+            modelAsString: false
+            values:
+            - value: Standard
+              description: Azure AD B2C usage is billed to a linked Azure subscription and uses a monthly active users (MAU) billing model.
+            - value: PremiumP1
+              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
+            - value: PremiumP2
+              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
+        tier:
+          type: string
+          description: The tier of the tenant.
+          enum:
+          - A0
+          x-ms-enum:
+            name: B2CResourceSKUTier
+            modelAsString: false
+            values:
+            - value: A0
+              description: The SKU tier used for all Azure AD B2C tenants.
     B2CTenantResourceProperties:
       description: Properties of the Azure AD B2C tenant Azure resource.
       type: object
@@ -375,18 +409,29 @@ components:
         tenantId:
           type: string
           description: An identifier of the B2C tenant.
-    CheckNameAvailabilityRequestBody:
-      type: object
-      description: The information required to check the availability of the name for the tenant.
-      required:
-      - name
-      - countryCode
+    NameAvailabilityResponse:
+      description: Response of the CheckNameAvailability operation.
       properties:
-        name:
+        message:
           type: string
-          description: The domain name to check for availability.
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
+          description: Description of the reason if name is not available.
+        nameAvailable:
+          type: boolean
+          description: True if the name is available and can be used to create a new tenant. Otherwise false.
+        reason:
+          $ref: '#/components/schemas/NameAvailabilityReason'
+    CountryCode:
+      type: string
+      description: Country code of Azure tenant (e.g. 'US'). Refer to [aka.ms/B2CDataResidency](https://aka.ms/B2CDataResidency) to see valid country codes and corresponding data residency locations. If you do not see a country code in an valid data residency location, choose one from the list.
+    B2CTenantResourceList:
+      description: The collection of Azure AD B2C tenant resources
+      properties:
+        value:
+          description: List of guest usages resources
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/B2CTenantResource'
     B2CTenantResource:
       type: object
       required:
@@ -431,69 +476,18 @@ components:
           additionalProperties:
             type: string
           description: Resource Tags
-    CreateTenantProperties:
+    CheckNameAvailabilityRequestBody:
       type: object
-      description: These properties are used to create the Azure AD B2C tenant. These properties are not part of the Azure resource.
-      properties:
-        displayName:
-          description: The display name of the B2C tenant.
-          type: string
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-    NameAvailabilityReason:
-      description: Describes the reason for the 'nameAvailable' value.
-      type: string
-      enum:
-      - AlreadyExists
-      - Invalid
-      x-ms-enum:
-        name: NameAvailabilityReasonType
-        modelAsString: false
-        values:
-        - value: AlreadyExists
-          description: The name is already in use and is therefore unavailable.
-        - value: Invalid
-          description: The name provided does not match the resource provider’s naming requirements (incorrect length, unsupported characters, etc.).
-    B2CResourceSKU:
-      description: SKU properties of the Azure AD B2C tenant. Learn more about Azure AD B2C billing at [aka.ms/b2cBilling](https://aka.ms/b2cBilling).
+      description: The information required to check the availability of the name for the tenant.
+      required:
+      - name
+      - countryCode
       properties:
         name:
           type: string
-          description: The name of the SKU for the tenant.
-          enum:
-          - Standard
-          - PremiumP1
-          - PremiumP2
-          x-ms-enum:
-            name: B2CResourceSKUName
-            modelAsString: false
-            values:
-            - value: Standard
-              description: Azure AD B2C usage is billed to a linked Azure subscription and uses a monthly active users (MAU) billing model.
-            - value: PremiumP1
-              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
-            - value: PremiumP2
-              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
-        tier:
-          type: string
-          description: The tier of the tenant.
-          enum:
-          - A0
-          x-ms-enum:
-            name: B2CResourceSKUTier
-            modelAsString: false
-            values:
-            - value: A0
-              description: The SKU tier used for all Azure AD B2C tenants.
-    B2CTenantResourceList:
-      description: The collection of Azure AD B2C tenant resources
-      properties:
-        value:
-          description: List of guest usages resources
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/B2CTenantResource'
+          description: The domain name to check for availability.
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
     B2CTenantUpdateRequest:
       type: object
       description: The request body to update the Azure AD B2C tenant resource.
@@ -509,6 +503,37 @@ components:
           additionalProperties:
             type: string
           description: Resource Tags
+    CloudError:
+      x-ms-external: true
+      properties:
+        error:
+          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
+      description: An error response for a resource management request.
+    NameAvailabilityReason_2:
+      description: Describes the reason for the 'nameAvailable' value.
+      type: string
+      enum:
+      - AlreadyExists
+      - Invalid
+      x-ms-enum:
+        name: NameAvailabilityReasonType
+        modelAsString: true
+        values:
+        - value: AlreadyExists
+          description: The name is already in use and is therefore unavailable.
+        - value: Invalid
+          description: The name provided does not match the resource provider’s naming requirements (incorrect length, unsupported characters, etc.).
+    CreateTenantProperties_2:
+      type: object
+      description: These properties are used to create the Azure AD B2C tenant. These properties are not part of the Azure resource.
+      properties:
+        displayName:
+          description: The display name of the Azure AD B2C tenant.
+          type: string
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        isGoLocalTenant:
+          $ref: '#/components/schemas/GoLocal'
     CreateTenantRequestBody_2:
       type: object
       description: The information needed to create the Azure AD B2C tenant and corresponding Azure resource, which is used for billing purposes.
@@ -535,21 +560,38 @@ components:
           additionalProperties:
             type: string
           description: Resource Tags
-    GoLocal:
-      description: Enable GoLocal add-on to store data at rest in the specific Geo. Refer to [aka.ms/B2CDataResidency](https://aka.ms/B2CDataResidency) to see local data residency options.
-      type: boolean
-    NameAvailabilityResponse_2:
-      description: Response of the CheckNameAvailability operation.
+    B2CResourceSKU_2:
+      description: SKU properties of the Azure AD B2C tenant. Learn more about Azure AD B2C billing at [aka.ms/b2cBilling](https://aka.ms/b2cBilling).
       type: object
       properties:
-        message:
+        name:
           type: string
-          description: Description of the reason if name is not available.
-        nameAvailable:
-          type: boolean
-          description: True if the name is available and can be used to create a new tenant. Otherwise false.
-        reason:
-          $ref: '#/components/schemas/NameAvailabilityReason_2'
+          description: The name of the SKU for the tenant.
+          enum:
+          - Standard
+          - PremiumP1
+          - PremiumP2
+          x-ms-enum:
+            name: B2CResourceSKUName
+            modelAsString: true
+            values:
+            - value: Standard
+              description: Azure AD B2C usage is billed to a linked Azure subscription and uses a monthly active users (MAU) billing model.
+            - value: PremiumP1
+              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
+            - value: PremiumP2
+              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
+        tier:
+          type: string
+          description: The tier of the tenant.
+          enum:
+          - A0
+          x-ms-enum:
+            name: B2CResourceSKUTier
+            modelAsString: true
+            values:
+            - value: A0
+              description: The SKU tier used for all Azure AD B2C tenants.
     B2CTenantResourceProperties_2:
       description: Properties of the Azure AD B2C tenant Azure resource.
       type: object
@@ -581,13 +623,6 @@ components:
           description: An identifier of the Azure AD B2C tenant.
         isGoLocalTenant:
           $ref: '#/components/schemas/GoLocal'
-    CloudError_2:
-      x-ms-external: true
-      type: object
-      properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
-      description: An error response for a resource management request.
     CheckNameAvailabilityRequestBody_2:
       type: object
       description: The information required to check the availability of the sub domain name for the tenant.
@@ -600,6 +635,31 @@ components:
           description: The sub domain name to check for availability.
         countryCode:
           $ref: '#/components/schemas/CountryCode'
+    NameAvailabilityResponse_2:
+      description: Response of the CheckNameAvailability operation.
+      type: object
+      properties:
+        message:
+          type: string
+          description: Description of the reason if name is not available.
+        nameAvailable:
+          type: boolean
+          description: True if the name is available and can be used to create a new tenant. Otherwise false.
+        reason:
+          $ref: '#/components/schemas/NameAvailabilityReason_2'
+    GoLocal:
+      description: Enable GoLocal add-on to store data at rest in the specific Geo. Refer to [aka.ms/B2CDataResidency](https://aka.ms/B2CDataResidency) to see local data residency options.
+      type: boolean
+    B2CTenantResourceList_2:
+      description: The collection of Azure AD B2C tenant resources
+      type: object
+      properties:
+        value:
+          description: List of Azure AD B2C tenant resources
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/B2CTenantResource_2'
     B2CTenantResource_2:
       type: object
       required:
@@ -647,73 +707,13 @@ components:
         systemData:
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
           readOnly: true
-    CreateTenantProperties_2:
-      type: object
-      description: These properties are used to create the Azure AD B2C tenant. These properties are not part of the Azure resource.
-      properties:
-        displayName:
-          description: The display name of the Azure AD B2C tenant.
-          type: string
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-        isGoLocalTenant:
-          $ref: '#/components/schemas/GoLocal'
-    NameAvailabilityReason_2:
-      description: Describes the reason for the 'nameAvailable' value.
-      type: string
-      enum:
-      - AlreadyExists
-      - Invalid
-      x-ms-enum:
-        name: NameAvailabilityReasonType
-        modelAsString: true
-        values:
-        - value: AlreadyExists
-          description: The name is already in use and is therefore unavailable.
-        - value: Invalid
-          description: The name provided does not match the resource provider’s naming requirements (incorrect length, unsupported characters, etc.).
-    B2CResourceSKU_2:
-      description: SKU properties of the Azure AD B2C tenant. Learn more about Azure AD B2C billing at [aka.ms/b2cBilling](https://aka.ms/b2cBilling).
+    CloudError_2:
+      x-ms-external: true
       type: object
       properties:
-        name:
-          type: string
-          description: The name of the SKU for the tenant.
-          enum:
-          - Standard
-          - PremiumP1
-          - PremiumP2
-          x-ms-enum:
-            name: B2CResourceSKUName
-            modelAsString: true
-            values:
-            - value: Standard
-              description: Azure AD B2C usage is billed to a linked Azure subscription and uses a monthly active users (MAU) billing model.
-            - value: PremiumP1
-              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
-            - value: PremiumP2
-              description: Azure AD B2C usage is billed to a linked Azure subscription and uses number of authentications based billing.
-        tier:
-          type: string
-          description: The tier of the tenant.
-          enum:
-          - A0
-          x-ms-enum:
-            name: B2CResourceSKUTier
-            modelAsString: true
-            values:
-            - value: A0
-              description: The SKU tier used for all Azure AD B2C tenants.
-    B2CTenantResourceList_2:
-      description: The collection of Azure AD B2C tenant resources
-      type: object
-      properties:
-        value:
-          description: List of Azure AD B2C tenant resources
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/B2CTenantResource_2'
+        error:
+          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
+      description: An error response for a resource management request.
   securitySchemes:
     azure_auth:
       type: oauth2

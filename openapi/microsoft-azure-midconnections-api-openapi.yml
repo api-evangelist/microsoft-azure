@@ -413,6 +413,21 @@ paths:
           $ref: ./examples/CallConnections_GetParticipant.json
 components:
   schemas:
+    CommunicationError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        target:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunicationError'
+        innererror:
+          $ref: '#/components/schemas/CommunicationError'
     RecognizeRequest:
       required:
       - recognizeInputType
@@ -433,115 +448,59 @@ components:
         operationContext:
           description: The value to identify context of the operation.
           type: string
-    CallConnectionProperties:
-      description: Properties of a call connection
+    PlayRequest:
+      required:
+      - playSourceInfo
       type: object
       properties:
-        callConnectionId:
-          description: The call connection id.
-          type: string
-        serverCallId:
-          description: The server call id.
-          type: string
-        source:
-          $ref: '#/components/schemas/CallSource'
-          description: The source of the call, which is the caller.
-        targets:
-          description: The targets of the call.
+        playSourceInfo:
+          $ref: '#/components/schemas/PlaySource'
+          description: The source of the audio to be played.
+        playTo:
+          description: "The list of call participants play provided audio to. \nPlays to everyone in the call when not provided."
           type: array
           items:
             $ref: '#/components/schemas/CommunicationIdentifierModel'
-        callConnectionState:
-          $ref: '#/components/schemas/CallConnectionStateModel'
-        callbackUri:
-          description: The callback URI.
+        playOptions:
+          $ref: '#/components/schemas/PlayOptions'
+          description: Defines options for playing the audio.
+        operationContext:
+          description: The value to identify context of the operation.
           type: string
-        mediaSubscriptionId:
-          description: SubscriptionId for media streaming
-          type: string
-    AddParticipantsResponse:
-      description: The response payload for adding participants to the call.
+    PlayOptions:
+      required:
+      - loop
       type: object
       properties:
-        participants:
-          description: List of current participants in the call.
+        loop:
+          description: The option to play the provided audio source in loop when set to true
+          type: boolean
+    DtmfOptions:
+      description: Options for DTMF recognition
+      type: object
+      properties:
+        interToneTimeoutInSeconds:
+          format: int32
+          description: Time to wait between DTMF inputs to stop recognizing.
+          maximum: 60
+          minimum: 1
+          type: integer
+        maxTonesToCollect:
+          format: int32
+          description: Maximum number of DTMF tones to be collected.
+          type: integer
+        stopTones:
+          description: List of tones that will stop recognizing.
           type: array
           items:
-            $ref: '#/components/schemas/AcsCallParticipant'
+            $ref: '#/components/schemas/Tone'
+    TransferCallResponse:
+      description: The response payload for transferring the call.
+      type: object
+      properties:
         operationContext:
           description: The operation context provided by client.
           type: string
-    CommunicationIdentifierModelKind:
-      description: Type of CommunicationIdentifierModel.
-      enum:
-      - unknown
-      - communicationUser
-      - phoneNumber
-      - microsoftTeamsUser
-      type: string
-      x-ms-enum:
-        name: CommunicationIdentifierModelKind
-        modelAsString: true
-    CommunicationError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        target:
-          type: string
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/CommunicationError'
-        innererror:
-          $ref: '#/components/schemas/CommunicationError'
-    CallSource:
-      description: The caller.
-      required:
-      - identifier
-      type: object
-      properties:
-        callerId:
-          $ref: '#/components/schemas/PhoneNumberIdentifierModel'
-          description: "The source caller Id, a phone number, that's shown to the PSTN participant being invited. \nRequired only when calling a PSTN callee."
-        displayName:
-          description: Display name of the call if dialing out to a pstn number
-          type: string
-        identifier:
-          $ref: '#/components/schemas/CommunicationIdentifierModel'
-          description: The identifier of the source of the call
-    PlaySourceType:
-      description: Defines the type of the play source
-      enum:
-      - file
-      type: string
-      x-ms-enum:
-        name: PlaySourceType
-        modelAsString: true
-    CommunicationUserIdentifierModel:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-    PhoneNumberIdentifierModel:
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          type: string
-    RecognizeInputType:
-      description: Determines the type of the recognition.
-      enum:
-      - dtmf
-      type: string
-      x-ms-enum:
-        name: RecognizeInputType
-        modelAsString: true
     RecognizeOptions:
       required:
       - targetParticipant
@@ -562,35 +521,6 @@ components:
         dtmfOptions:
           $ref: '#/components/schemas/DtmfOptions'
           description: Defines configurations for DTMF.
-    RemoveParticipantsResponse:
-      description: The response payload for removing participants of the call.
-      type: object
-      properties:
-        operationContext:
-          description: The operation context provided by client.
-          type: string
-    CallConnectionStateModel:
-      description: The state of the call connection.
-      enum:
-      - unknown
-      - connecting
-      - connected
-      - transferring
-      - transferAccepted
-      - disconnecting
-      - disconnected
-      type: string
-      x-ms-enum:
-        name: CallConnectionStateModel
-        modelAsString: true
-    CommunicationErrorResponse:
-      description: The Communication Services error response
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/CommunicationError'
     CommunicationCloudEnvironmentModel:
       enum:
       - public
@@ -625,23 +555,6 @@ components:
         operationContext:
           description: Used by customers when calling mid-call actions to correlate the request to the response event.
           type: string
-    CommunicationIdentifierModel:
-      type: object
-      properties:
-        rawId:
-          description: Full ID of the identifier.
-          type: string
-        kind:
-          $ref: '#/components/schemas/CommunicationIdentifierModelKind'
-        communicationUser:
-          $ref: '#/components/schemas/CommunicationUserIdentifierModel'
-          description: The communication user.
-        phoneNumber:
-          $ref: '#/components/schemas/PhoneNumberIdentifierModel'
-          description: The phone number.
-        microsoftTeamsUser:
-          $ref: '#/components/schemas/MicrosoftTeamsUserIdentifierModel'
-          description: The Microsoft Teams user.
     GetParticipantsResponse:
       description: The response payload for getting participants of the call.
       type: object
@@ -654,14 +567,41 @@ components:
         nextLink:
           description: Continue of the list of participants
           type: string
-    PlayOptions:
+    CommunicationUserIdentifierModel:
       required:
-      - loop
+      - id
       type: object
       properties:
-        loop:
-          description: The option to play the provided audio source in loop when set to true
-          type: boolean
+        id:
+          type: string
+    FileSource:
+      required:
+      - uri
+      type: object
+      properties:
+        uri:
+          description: Uri for the audio file to be played
+          type: string
+    RemoveParticipantsResponse:
+      description: The response payload for removing participants of the call.
+      type: object
+      properties:
+        operationContext:
+          description: The operation context provided by client.
+          type: string
+    PlaySource:
+      required:
+      - sourceType
+      type: object
+      properties:
+        sourceType:
+          $ref: '#/components/schemas/PlaySourceType'
+        playSourceId:
+          description: Defines the identifier to be used for caching related media
+          type: string
+        fileSource:
+          $ref: '#/components/schemas/FileSource'
+          description: Defines the file source info to be used for play
     MicrosoftTeamsUserIdentifierModel:
       required:
       - userId
@@ -673,6 +613,38 @@ components:
           type: boolean
         cloud:
           $ref: '#/components/schemas/CommunicationCloudEnvironmentModel'
+    PhoneNumberIdentifierModel:
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+    CommunicationIdentifierModelKind:
+      description: Type of CommunicationIdentifierModel.
+      enum:
+      - unknown
+      - communicationUser
+      - phoneNumber
+      - microsoftTeamsUser
+      type: string
+      x-ms-enum:
+        name: CommunicationIdentifierModelKind
+        modelAsString: true
+    RemoveParticipantsRequest:
+      description: The remove participant by identifier request.
+      required:
+      - participantsToRemove
+      type: object
+      properties:
+        participantsToRemove:
+          description: The participants to be removed from the call.
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunicationIdentifierModel'
+        operationContext:
+          description: Used by customers when calling mid-call actions to correlate the request to the response event.
+          type: string
     TransferToParticipantRequest:
       description: The request payload for transferring call to a participant.
       required:
@@ -691,6 +663,124 @@ components:
         operationContext:
           description: Used by customers when calling mid-call actions to correlate the request to the response event.
           type: string
+    CallSource:
+      description: The caller.
+      required:
+      - identifier
+      type: object
+      properties:
+        callerId:
+          $ref: '#/components/schemas/PhoneNumberIdentifierModel'
+          description: "The source caller Id, a phone number, that's shown to the PSTN participant being invited. \nRequired only when calling a PSTN callee."
+        displayName:
+          description: Display name of the call if dialing out to a pstn number
+          type: string
+        identifier:
+          $ref: '#/components/schemas/CommunicationIdentifierModel'
+          description: The identifier of the source of the call
+    CallConnectionStateModel:
+      description: The state of the call connection.
+      enum:
+      - unknown
+      - connecting
+      - connected
+      - transferring
+      - transferAccepted
+      - disconnecting
+      - disconnected
+      type: string
+      x-ms-enum:
+        name: CallConnectionStateModel
+        modelAsString: true
+    CommunicationErrorResponse:
+      description: The Communication Services error response
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CommunicationError'
+    AddParticipantsResponse:
+      description: The response payload for adding participants to the call.
+      type: object
+      properties:
+        participants:
+          description: List of current participants in the call.
+          type: array
+          items:
+            $ref: '#/components/schemas/AcsCallParticipant'
+        operationContext:
+          description: The operation context provided by client.
+          type: string
+    AcsCallParticipant:
+      description: Contract model of an ACS call participant
+      type: object
+      properties:
+        identifier:
+          $ref: '#/components/schemas/CommunicationIdentifierModel'
+          description: Communication identifier of the participant
+        isMuted:
+          description: Is participant muted
+          type: boolean
+    PlaySourceType:
+      description: Defines the type of the play source
+      enum:
+      - file
+      type: string
+      x-ms-enum:
+        name: PlaySourceType
+        modelAsString: true
+    RecognizeInputType:
+      description: Determines the type of the recognition.
+      enum:
+      - dtmf
+      type: string
+      x-ms-enum:
+        name: RecognizeInputType
+        modelAsString: true
+    CallConnectionProperties:
+      description: Properties of a call connection
+      type: object
+      properties:
+        callConnectionId:
+          description: The call connection id.
+          type: string
+        serverCallId:
+          description: The server call id.
+          type: string
+        source:
+          $ref: '#/components/schemas/CallSource'
+          description: The source of the call, which is the caller.
+        targets:
+          description: The targets of the call.
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunicationIdentifierModel'
+        callConnectionState:
+          $ref: '#/components/schemas/CallConnectionStateModel'
+        callbackUri:
+          description: The callback URI.
+          type: string
+        mediaSubscriptionId:
+          description: SubscriptionId for media streaming
+          type: string
+    CommunicationIdentifierModel:
+      type: object
+      properties:
+        rawId:
+          description: Full ID of the identifier.
+          type: string
+        kind:
+          $ref: '#/components/schemas/CommunicationIdentifierModelKind'
+        communicationUser:
+          $ref: '#/components/schemas/CommunicationUserIdentifierModel'
+          description: The communication user.
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumberIdentifierModel'
+          description: The phone number.
+        microsoftTeamsUser:
+          $ref: '#/components/schemas/MicrosoftTeamsUserIdentifierModel'
+          description: The Microsoft Teams user.
     Tone:
       enum:
       - zero
@@ -713,96 +803,6 @@ components:
       x-ms-enum:
         name: Tone
         modelAsString: true
-    AcsCallParticipant:
-      description: Contract model of an ACS call participant
-      type: object
-      properties:
-        identifier:
-          $ref: '#/components/schemas/CommunicationIdentifierModel'
-          description: Communication identifier of the participant
-        isMuted:
-          description: Is participant muted
-          type: boolean
-    TransferCallResponse:
-      description: The response payload for transferring the call.
-      type: object
-      properties:
-        operationContext:
-          description: The operation context provided by client.
-          type: string
-    FileSource:
-      required:
-      - uri
-      type: object
-      properties:
-        uri:
-          description: Uri for the audio file to be played
-          type: string
-    RemoveParticipantsRequest:
-      description: The remove participant by identifier request.
-      required:
-      - participantsToRemove
-      type: object
-      properties:
-        participantsToRemove:
-          description: The participants to be removed from the call.
-          type: array
-          items:
-            $ref: '#/components/schemas/CommunicationIdentifierModel'
-        operationContext:
-          description: Used by customers when calling mid-call actions to correlate the request to the response event.
-          type: string
-    PlaySource:
-      required:
-      - sourceType
-      type: object
-      properties:
-        sourceType:
-          $ref: '#/components/schemas/PlaySourceType'
-        playSourceId:
-          description: Defines the identifier to be used for caching related media
-          type: string
-        fileSource:
-          $ref: '#/components/schemas/FileSource'
-          description: Defines the file source info to be used for play
-    DtmfOptions:
-      description: Options for DTMF recognition
-      type: object
-      properties:
-        interToneTimeoutInSeconds:
-          format: int32
-          description: Time to wait between DTMF inputs to stop recognizing.
-          maximum: 60
-          minimum: 1
-          type: integer
-        maxTonesToCollect:
-          format: int32
-          description: Maximum number of DTMF tones to be collected.
-          type: integer
-        stopTones:
-          description: List of tones that will stop recognizing.
-          type: array
-          items:
-            $ref: '#/components/schemas/Tone'
-    PlayRequest:
-      required:
-      - playSourceInfo
-      type: object
-      properties:
-        playSourceInfo:
-          $ref: '#/components/schemas/PlaySource'
-          description: The source of the audio to be played.
-        playTo:
-          description: "The list of call participants play provided audio to. \nPlays to everyone in the call when not provided."
-          type: array
-          items:
-            $ref: '#/components/schemas/CommunicationIdentifierModel'
-        playOptions:
-          $ref: '#/components/schemas/PlayOptions'
-          description: Defines options for playing the audio.
-        operationContext:
-          description: The value to identify context of the operation.
-          type: string
   parameters:
     ApiVersionParameter:
       name: api-version

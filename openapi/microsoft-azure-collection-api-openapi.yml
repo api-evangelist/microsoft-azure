@@ -581,59 +581,6 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
-  parameters:
-    api-version:
-      in: query
-      name: api-version
-      description: The api version to use.
-      required: true
-      x-ms-client-name: ApiVersion
-      schema:
-        type: string
-    api-version_2:
-      name: api-version
-      in: query
-      description: The version of the API.
-      required: true
-      schema:
-        type: string
-        enum:
-        - 2018-08-20-preview
-        minLength: 10
-    subscriptionId:
-      name: subscriptionId
-      in: path
-      description: The subscription identifier.
-      required: true
-      schema:
-        type: string
-    resourceGroupName:
-      name: resourceGroupName
-      in: path
-      description: The name of the resource group that contains the service instance.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 90
-        minLength: 1
-        pattern: ^[-\w\._\(\)]+$
-    collection:
-      name: collection
-      description: the collection unique name
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    purviewAPIVersion:
-      name: api-version
-      description: Version of Purview APIs
-      in: query
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
   schemas:
     CollectionNameResponse:
       description: Collection resource.
@@ -647,6 +594,16 @@ components:
           description: Gets the name.
           type: string
           readOnly: true
+    CollectionReference:
+      description: Reference to a Collection.
+      type: object
+      properties:
+        referenceName:
+          description: Gets or sets the reference name.
+          type: string
+        type:
+          description: Gets or sets the reference type property.
+          type: string
     CollectionPathResponse:
       description: Collection resource.
       type: object
@@ -663,12 +620,24 @@ components:
           items:
             type: string
           readOnly: true
-    ErrorResponseModel:
-      description: Default error response model
+    CollectionList:
+      description: Paged list of collections.
+      required:
+      - value
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/ErrorModel'
+        count:
+          format: int64
+          description: Total item count.
+          type: integer
+        nextLink:
+          description: The Url of next result page.
+          type: string
+        value:
+          description: Collection of items of type results.
+          type: array
+          items:
+            $ref: '#/components/schemas/Collection'
     ErrorModel:
       description: Default error model
       type: object
@@ -691,60 +660,6 @@ components:
           description: Gets or sets the target.
           type: string
           readOnly: true
-    CollectionList:
-      description: Paged list of collections.
-      required:
-      - value
-      type: object
-      properties:
-        count:
-          format: int64
-          description: Total item count.
-          type: integer
-        nextLink:
-          description: The Url of next result page.
-          type: string
-        value:
-          description: Collection of items of type results.
-          type: array
-          items:
-            $ref: '#/components/schemas/Collection'
-    Collection:
-      description: Collection resource.
-      type: object
-      properties:
-        collectionProvisioningState:
-          description: Gets the state of the provisioning.
-          enum:
-          - Unknown
-          - Creating
-          - Moving
-          - Deleting
-          - Failed
-          - Succeeded
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: CollectionProvisioningState
-            modelAsString: true
-        description:
-          description: Gets or sets the description.
-          type: string
-        domain:
-          description: Gets the domain.
-          type: string
-          readOnly: true
-        friendlyName:
-          description: Gets or sets the friendly name of the collection.
-          type: string
-        name:
-          description: Gets the name.
-          type: string
-          readOnly: true
-        parentCollection:
-          $ref: '#/components/schemas/CollectionReference'
-        systemData:
-          $ref: '#/components/schemas/SystemData'
     SystemData:
       description: Metadata pertaining to creation and last modification of the resource.
       type: object
@@ -791,16 +706,48 @@ components:
           x-ms-enum:
             name: IdentityType
             modelAsString: true
-    CollectionReference:
-      description: Reference to a Collection.
+    ErrorResponseModel:
+      description: Default error response model
       type: object
       properties:
-        referenceName:
-          description: Gets or sets the reference name.
+        error:
+          $ref: '#/components/schemas/ErrorModel'
+    Collection:
+      description: Collection resource.
+      type: object
+      properties:
+        collectionProvisioningState:
+          description: Gets the state of the provisioning.
+          enum:
+          - Unknown
+          - Creating
+          - Moving
+          - Deleting
+          - Failed
+          - Succeeded
           type: string
-        type:
-          description: Gets or sets the reference type property.
+          readOnly: true
+          x-ms-enum:
+            name: CollectionProvisioningState
+            modelAsString: true
+        description:
+          description: Gets or sets the description.
           type: string
+        domain:
+          description: Gets the domain.
+          type: string
+          readOnly: true
+        friendlyName:
+          description: Gets or sets the friendly name of the collection.
+          type: string
+        name:
+          description: Gets the name.
+          type: string
+          readOnly: true
+        parentCollection:
+          $ref: '#/components/schemas/CollectionReference'
+        systemData:
+          $ref: '#/components/schemas/SystemData'
     CollectionNameResponseList:
       description: Paged list of collections.
       required:
@@ -819,9 +766,108 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CollectionNameResponse'
+    ServicesDescriptionListResult:
+      description: A list of service description objects with a next link.
+      type: object
+      properties:
+        nextLink:
+          description: The link used to get the next page of service description objects.
+          type: string
+        value:
+          description: A list of service description objects.
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicesDescription'
+    ErrorDetails:
+      description: Error details.
+      type: object
+      properties:
+        error:
+          description: Object containing error details.
+          $ref: '#/components/schemas/ErrorDetailsInternal'
+    ServiceAuthenticationConfigurationInfo:
+      description: Authentication configuration information
+      type: object
+      properties:
+        authority:
+          type: string
+          description: The authority url for the service
+          readOnly: false
+        audience:
+          type: string
+          description: The audience url for the service
+          readOnly: false
+        smartProxyEnabled:
+          type: boolean
+          description: If the SMART on FHIR proxy is enabled
+          readOnly: false
     ServiceCorsConfigurationMethodEntry:
       description: A method for CORS.
       type: string
+    ServiceAccessPoliciesInfo:
+      description: The access policies of the service instance.
+      type: array
+      items:
+        $ref: '#/components/schemas/ServiceAccessPolicyEntry'
+    ServicesDescription:
+      description: The description of the service.
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: false
+          description: The common properties of a service.
+          $ref: '#/components/schemas/ServicesProperties'
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    ErrorDetailsInternal:
+      description: Error details.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+          readOnly: true
+        message:
+          description: The error message.
+          type: string
+          readOnly: true
+        target:
+          description: The target of the particular error.
+          type: string
+          readOnly: true
+    ServicesProperties:
+      description: The properties of a service instance.
+      type: object
+      properties:
+        provisioningState:
+          description: The provisioning state.
+          enum:
+          - Deleting
+          - Succeeded
+          - Creating
+          - Accepted
+          - Verifying
+          - Updating
+          - Failed
+          - Canceled
+          - Deprovisioned
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: provisioningState
+            modelAsString: true
+        accessPolicies:
+          $ref: '#/components/schemas/ServiceAccessPoliciesInfo'
+          description: The access policies of the service instance.
+        cosmosDbConfiguration:
+          $ref: '#/components/schemas/ServiceCosmosDbConfigurationInfo'
+          description: The settings for the Cosmos DB database backing the service.
+        authenticationConfiguration:
+          $ref: '#/components/schemas/ServiceAuthenticationConfigurationInfo'
+          description: The authentication configuration for the service instance.
+        corsConfiguration:
+          $ref: '#/components/schemas/ServiceCorsConfigurationInfo'
+          description: The settings for the CORS configuration of the service instance.
     ServiceCosmosDbConfigurationInfo:
       description: The settings for the Cosmos DB database backing the service.
       type: object
@@ -832,6 +878,10 @@ components:
           readOnly: false
           minimum: 400
           maximum: 10000
+    ServiceCorsConfigurationOriginEntry:
+      description: An origin for CORS.
+      type: string
+      pattern: ^(?:(?:(?:[hH][tT][tT][pP](?:[sS]|))\:\/\/(?:[a-zA-Z0-9-]+[.]?)+(?:\:[0-9]{1,5})?|[*]))$
     ServiceAccessPolicyEntry:
       description: An access policy entry.
       properties:
@@ -841,11 +891,6 @@ components:
           pattern: ^(([0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}){1})+$
       required:
       - objectId
-    ServiceAccessPoliciesInfo:
-      description: The access policies of the service instance.
-      type: array
-      items:
-        $ref: '#/components/schemas/ServiceAccessPolicyEntry'
     Resource:
       description: The common properties of a service.
       properties:
@@ -912,104 +957,6 @@ components:
       required:
       - location
       - kind
-    ServicesProperties:
-      description: The properties of a service instance.
-      type: object
-      properties:
-        provisioningState:
-          description: The provisioning state.
-          enum:
-          - Deleting
-          - Succeeded
-          - Creating
-          - Accepted
-          - Verifying
-          - Updating
-          - Failed
-          - Canceled
-          - Deprovisioned
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: provisioningState
-            modelAsString: true
-        accessPolicies:
-          $ref: '#/components/schemas/ServiceAccessPoliciesInfo'
-          description: The access policies of the service instance.
-        cosmosDbConfiguration:
-          $ref: '#/components/schemas/ServiceCosmosDbConfigurationInfo'
-          description: The settings for the Cosmos DB database backing the service.
-        authenticationConfiguration:
-          $ref: '#/components/schemas/ServiceAuthenticationConfigurationInfo'
-          description: The authentication configuration for the service instance.
-        corsConfiguration:
-          $ref: '#/components/schemas/ServiceCorsConfigurationInfo'
-          description: The settings for the CORS configuration of the service instance.
-    ServiceAuthenticationConfigurationInfo:
-      description: Authentication configuration information
-      type: object
-      properties:
-        authority:
-          type: string
-          description: The authority url for the service
-          readOnly: false
-        audience:
-          type: string
-          description: The audience url for the service
-          readOnly: false
-        smartProxyEnabled:
-          type: boolean
-          description: If the SMART on FHIR proxy is enabled
-          readOnly: false
-    ErrorDetails:
-      description: Error details.
-      type: object
-      properties:
-        error:
-          description: Object containing error details.
-          $ref: '#/components/schemas/ErrorDetailsInternal'
-    ErrorDetailsInternal:
-      description: Error details.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-          readOnly: true
-        message:
-          description: The error message.
-          type: string
-          readOnly: true
-        target:
-          description: The target of the particular error.
-          type: string
-          readOnly: true
-    ServicesDescriptionListResult:
-      description: A list of service description objects with a next link.
-      type: object
-      properties:
-        nextLink:
-          description: The link used to get the next page of service description objects.
-          type: string
-        value:
-          description: A list of service description objects.
-          type: array
-          items:
-            $ref: '#/components/schemas/ServicesDescription'
-    ServicesDescription:
-      description: The description of the service.
-      type: object
-      properties:
-        properties:
-          x-ms-client-flatten: false
-          description: The common properties of a service.
-          $ref: '#/components/schemas/ServicesProperties'
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-    ServiceCorsConfigurationOriginEntry:
-      description: An origin for CORS.
-      type: string
-      pattern: ^(?:(?:(?:[hH][tT][tT][pP](?:[sS]|))\:\/\/(?:[a-zA-Z0-9-]+[.]?)+(?:\:[0-9]{1,5})?|[*]))$
     ServiceCorsConfigurationHeaderEntry:
       description: A header for CORS.
       type: string
@@ -1068,25 +1015,6 @@ components:
           $ref: ./common-types.json#/definitions/ServicesProperties
       allOf:
       - $ref: ./common-types.json#/definitions/ServicesResource
-    ErrorResponseModel_2:
-      type: object
-      properties:
-        error:
-          allOf:
-          - $ref: '#/components/schemas/ErrorModel_2'
-    ErrorModel_2:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        target:
-          type: string
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorModel_2'
     ScanByCollection:
       type: object
       properties:
@@ -1128,6 +1056,25 @@ components:
             modelAsString: true
         scanName:
           type: string
+    ErrorModel_2:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        target:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorModel_2'
+    ErrorResponseModel_2:
+      type: object
+      properties:
+        error:
+          allOf:
+          - $ref: '#/components/schemas/ErrorModel_2'
     ScanByCollectionList:
       required:
       - value
@@ -1142,16 +1089,6 @@ components:
         count:
           format: int64
           type: integer
-    ContactBasic:
-      title: ContactBasic
-      type: object
-      properties:
-        id:
-          type: string
-          description: Azure Active Directory object Id.
-        info:
-          type: string
-          description: additional information to describe this contact.
     AtlasEntitiesWithExtInfo:
       type: object
       title: AtlasEntitiesWithExtInfo
@@ -1164,19 +1101,6 @@ components:
             items:
               $ref: '#/components/schemas/AtlasEntity'
       description: An instance of an entity along with extended info - like hive_table, hive_database.
-    ErrorResponse:
-      description: An error response from the service
-      type: object
-      properties:
-        requestId:
-          type: string
-          description: The request ID.
-        errorCode:
-          type: string
-          description: The error code.
-        errorMessage:
-          type: string
-          description: The error message.
     AtlasTermAssignmentHeader:
       type: object
       properties:
@@ -1212,45 +1136,6 @@ components:
           description: The GUID of the term.
       title: AtlasTermAssignmentHeader
       description: The header for term assignment.
-    AtlasClassification:
-      type: object
-      title: AtlasClassification
-      allOf:
-      - $ref: '#/components/schemas/AtlasStruct'
-      - properties:
-          entityGuid:
-            type: string
-            description: The GUID of the entity.
-          entityStatus:
-            $ref: '#/components/schemas/Status'
-          removePropagationsOnEntityDelete:
-            type: boolean
-            description: Determines if propagations will be removed on entity deletion.
-          validityPeriods:
-            type: array
-            description: An array of time boundaries indicating validity periods.
-            items:
-              $ref: '#/components/schemas/TimeBoundary'
-          source:
-            type: string
-            description: indicate the source who create the classification detail
-          sourceDetails:
-            type: object
-            additionalProperties:
-              type: object
-              properties: {}
-            description: more detail on source information
-      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
-    Status:
-      type: string
-      title: Status
-      description: Status of the entity - can be active or deleted. Deleted entities are not removed from Atlas store.
-      enum:
-      - ACTIVE
-      - DELETED
-      x-ms-enum:
-        name: Status
-        modelAsString: true
     AtlasTermAssignmentStatus:
       type: string
       title: AtlasTermAssignmentStatus
@@ -1266,6 +1151,26 @@ components:
       x-ms-enum:
         name: AtlasTermAssignmentStatus
         modelAsString: true
+    AtlasEntityExtInfo:
+      type: object
+      properties:
+        referredEntities:
+          type: object
+          description: The referred entities.
+          additionalProperties:
+            $ref: '#/components/schemas/AtlasEntity'
+      title: AtlasEntityExtInfo
+      description: An instance of an entity along with extended info - like hive_table, hive_database.
+    ContactBasic:
+      title: ContactBasic
+      type: object
+      properties:
+        id:
+          type: string
+          description: Azure Active Directory object Id.
+        info:
+          type: string
+          description: additional information to describe this contact.
     EntityMutationResponse:
       type: object
       properties:
@@ -1288,51 +1193,10 @@ components:
             $ref: '#/components/schemas/AtlasEntityHeader'
       title: EntityMutationResponse
       description: The mutation response of entity.
-    AtlasEntityWithExtInfo:
-      type: object
-      title: AtlasEntityWithExtInfo
-      allOf:
-      - $ref: '#/components/schemas/AtlasEntityExtInfo'
-      - properties:
-          entity:
-            $ref: '#/components/schemas/AtlasEntity'
-      description: An instance of an entity along with extended info - like hive_table, hive_database.
-    AtlasStruct:
-      type: object
-      properties:
-        attributes:
-          type: object
-          description: The attributes of the struct.
-          additionalProperties: {}
-        typeName:
-          type: string
-          description: The name of the type.
-        lastModifiedTS:
-          $ref: '#/components/schemas/LastModifiedTS'
-      title: AtlasStruct
-      description: Captures details of struct contents. Not instantiated directly, used only via AtlasEntity, AtlasClassification.
-    MoveEntitiesRequest:
-      type: object
-      properties:
-        entityGuids:
-          type: array
-          description: An array of entity guids to be moved to target collection.
-          items:
-            type: string
-    TimeBoundary:
-      type: object
-      properties:
-        endTime:
-          type: string
-          description: The end of the time boundary.
-        startTime:
-          type: string
-          description: The start of the time boundary.
-        timeZone:
-          type: string
-          description: The timezone of the time boundary.
-      title: TimeBoundary
-      description: Captures time-boundary details
+    LastModifiedTS:
+      type: string
+      title: lastModifiedTS
+      description: ETag for concurrency control.
     AtlasEntityHeader:
       type: object
       title: AtlasEntityHeader
@@ -1378,10 +1242,103 @@ components:
           status:
             $ref: '#/components/schemas/Status'
       description: An instance of an entity - like hive_table, hive_database.
-    LastModifiedTS:
+    MoveEntitiesRequest:
+      type: object
+      properties:
+        entityGuids:
+          type: array
+          description: An array of entity guids to be moved to target collection.
+          items:
+            type: string
+    AtlasStruct:
+      type: object
+      properties:
+        attributes:
+          type: object
+          description: The attributes of the struct.
+          additionalProperties: {}
+        typeName:
+          type: string
+          description: The name of the type.
+        lastModifiedTS:
+          $ref: '#/components/schemas/LastModifiedTS'
+      title: AtlasStruct
+      description: Captures details of struct contents. Not instantiated directly, used only via AtlasEntity, AtlasClassification.
+    AtlasClassification:
+      type: object
+      title: AtlasClassification
+      allOf:
+      - $ref: '#/components/schemas/AtlasStruct'
+      - properties:
+          entityGuid:
+            type: string
+            description: The GUID of the entity.
+          entityStatus:
+            $ref: '#/components/schemas/Status'
+          removePropagationsOnEntityDelete:
+            type: boolean
+            description: Determines if propagations will be removed on entity deletion.
+          validityPeriods:
+            type: array
+            description: An array of time boundaries indicating validity periods.
+            items:
+              $ref: '#/components/schemas/TimeBoundary'
+          source:
+            type: string
+            description: indicate the source who create the classification detail
+          sourceDetails:
+            type: object
+            additionalProperties:
+              type: object
+              properties: {}
+            description: more detail on source information
+      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
+    AtlasEntityWithExtInfo:
+      type: object
+      title: AtlasEntityWithExtInfo
+      allOf:
+      - $ref: '#/components/schemas/AtlasEntityExtInfo'
+      - properties:
+          entity:
+            $ref: '#/components/schemas/AtlasEntity'
+      description: An instance of an entity along with extended info - like hive_table, hive_database.
+    ErrorResponse:
+      description: An error response from the service
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The request ID.
+        errorCode:
+          type: string
+          description: The error code.
+        errorMessage:
+          type: string
+          description: The error message.
+    TimeBoundary:
+      type: object
+      properties:
+        endTime:
+          type: string
+          description: The end of the time boundary.
+        startTime:
+          type: string
+          description: The start of the time boundary.
+        timeZone:
+          type: string
+          description: The timezone of the time boundary.
+      title: TimeBoundary
+      description: Captures time-boundary details
+    Status:
       type: string
-      title: lastModifiedTS
-      description: ETag for concurrency control.
+      title: Status
+      description: Status of the entity - can be active or deleted. Deleted entities are not removed from Atlas store.
+      enum:
+      - ACTIVE
+      - DELETED
+      x-ms-enum:
+        name: Status
+        modelAsString: true
     AtlasEntity:
       type: object
       title: AtlasEntity
@@ -1476,16 +1433,59 @@ components:
               items:
                 $ref: '#/components/schemas/ContactBasic'
       description: An instance of an entity - like hive_table, hive_database.
-    AtlasEntityExtInfo:
-      type: object
-      properties:
-        referredEntities:
-          type: object
-          description: The referred entities.
-          additionalProperties:
-            $ref: '#/components/schemas/AtlasEntity'
-      title: AtlasEntityExtInfo
-      description: An instance of an entity along with extended info - like hive_table, hive_database.
+  parameters:
+    api-version:
+      in: query
+      name: api-version
+      description: The api version to use.
+      required: true
+      x-ms-client-name: ApiVersion
+      schema:
+        type: string
+    api-version_2:
+      name: api-version
+      in: query
+      description: The version of the API.
+      required: true
+      schema:
+        type: string
+        enum:
+        - 2018-08-20-preview
+        minLength: 10
+    subscriptionId:
+      name: subscriptionId
+      in: path
+      description: The subscription identifier.
+      required: true
+      schema:
+        type: string
+    resourceGroupName:
+      name: resourceGroupName
+      in: path
+      description: The name of the resource group that contains the service instance.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 90
+        minLength: 1
+        pattern: ^[-\w\._\(\)]+$
+    purviewAPIVersion:
+      name: api-version
+      description: Version of Purview APIs
+      in: query
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    collection:
+      name: collection
+      description: the collection unique name
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

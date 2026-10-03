@@ -414,6 +414,20 @@ paths:
                 $ref: '#/components/schemas/FabricError'
 components:
   schemas:
+    NodeEventList:
+      description: A list of NodeEvent objects.
+      type: array
+      items:
+        $ref: '#/components/schemas/NodeEvent'
+    PartitionId:
+      type: string
+      format: uuid
+      description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
+    ClusterEventList:
+      description: A list of ClusterEvent objects.
+      type: array
+      items:
+        $ref: '#/components/schemas/ClusterEvent'
     FabricEvent:
       discriminator:
         propertyName: Kind
@@ -440,19 +454,6 @@ components:
       - Kind
       - EventInstanceId
       - TimeStamp
-    NodeName:
-      type: string
-      description: The name of a Service Fabric node.
-    ContainerInstanceEventList:
-      description: A list of ContainerInstanceEvent objects.
-      type: array
-      items:
-        $ref: '#/components/schemas/ContainerInstanceEvent'
-    ApplicationEventList:
-      description: A list of ApplicationEvent objects.
-      type: array
-      items:
-        $ref: '#/components/schemas/ApplicationEvent'
     FabricError:
       description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
       properties:
@@ -461,17 +462,78 @@ components:
           description: Error object containing error code and error message.
       required:
       - Error
-    PartitionEvent:
-      description: Represents the base for all Partition Events.
+    ContainerInstanceEventList:
+      description: A list of ContainerInstanceEvent objects.
+      type: array
+      items:
+        $ref: '#/components/schemas/ContainerInstanceEvent'
+    ReplicaEvent:
+      description: Represents the base for all Replica Events.
       allOf:
       - $ref: '#/components/schemas/FabricEvent'
       properties:
         PartitionId:
           $ref: '#/components/schemas/PartitionId'
           description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
+        ReplicaId:
+          $ref: '#/components/schemas/ReplicaId_Integer'
+          description: Id of a stateful service replica. ReplicaId is used by Service Fabric to uniquely identify a replica of a partition. It is unique within a partition and does not change for the lifetime of the replica. If a replica gets dropped and another replica gets created on the same node for the same partition, it will get a different value for the id. Sometimes the id of a stateless service instance is also referred as a replica id.
       required:
       - PartitionId
-      x-ms-discriminator-value: PartitionEvent
+      - ReplicaId
+      x-ms-discriminator-value: ReplicaEvent
+    ReplicaId_Integer:
+      type: integer
+      format: int64
+      description: Id of a stateful service replica. ReplicaId is used by Service Fabric to uniquely identify a replica of a partition. It is unique within a partition and does not change for the lifetime of the replica. If a replica gets dropped and another replica gets created on the same node for the same partition, it will get a different value for the id. Sometimes the id of a stateless service instance is also referred as a replica id.
+    ApplicationEvent:
+      description: Represents the base for all Application Events.
+      allOf:
+      - $ref: '#/components/schemas/FabricEvent'
+      properties:
+        ApplicationId:
+          $ref: '#/components/schemas/ApplicationId'
+          description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
+
+            Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
+
+            the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
+      required:
+      - ApplicationId
+      x-ms-discriminator-value: ApplicationEvent
+    ApplicationId:
+      type: string
+      description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
+
+        Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
+
+        the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
+    EventList:
+      description: A list of FabricEvent objects.
+      type: array
+      items:
+        $ref: '#/components/schemas/FabricEvent'
+    ContainerInstanceEvent:
+      description: Represents the base for all Container Events.
+      allOf:
+      - $ref: '#/components/schemas/FabricEvent'
+      x-ms-discriminator-value: ContainerInstanceEvent
+    ReplicaEventList:
+      description: A list of ReplicaEvent objects.
+      type: array
+      items:
+        $ref: '#/components/schemas/ReplicaEvent'
+    NodeEvent:
+      description: Represents the base for all Node Events.
+      allOf:
+      - $ref: '#/components/schemas/FabricEvent'
+      properties:
+        NodeName:
+          $ref: '#/components/schemas/NodeName'
+          description: The name of a Service Fabric node.
+      required:
+      - NodeName
+      x-ms-discriminator-value: NodeEvent
     FabricErrorCodes:
       type: string
       description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
@@ -648,16 +710,6 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
-    ContainerInstanceEvent:
-      description: Represents the base for all Container Events.
-      allOf:
-      - $ref: '#/components/schemas/FabricEvent'
-      x-ms-discriminator-value: ContainerInstanceEvent
-    NodeEventList:
-      description: A list of NodeEvent objects.
-      type: array
-      items:
-        $ref: '#/components/schemas/NodeEvent'
     FabricEventKind:
       type: string
       description: The kind of FabricEvent.
@@ -790,27 +842,18 @@ components:
         - value: ChaosPartitionPrimaryMoveScheduled
         - value: ChaosReplicaRestartScheduled
         - value: ChaosNodeRestartScheduled
-    EventList:
-      description: A list of FabricEvent objects.
+    ServiceId:
+      type: string
+      description: 'The identity of the service. This ID is an encoded representation of the service name. This is used in the REST APIs to identify the service resource.
+
+        Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the service name is "fabric:/myapp/app1/svc1",
+
+        the service identity would be "myapp~app1\~svc1" in 6.0+ and "myapp/app1/svc1" in previous versions.'
+    ApplicationEventList:
+      description: A list of ApplicationEvent objects.
       type: array
       items:
-        $ref: '#/components/schemas/FabricEvent'
-    ReplicaEventList:
-      description: A list of ReplicaEvent objects.
-      type: array
-      items:
-        $ref: '#/components/schemas/ReplicaEvent'
-    NodeEvent:
-      description: Represents the base for all Node Events.
-      allOf:
-      - $ref: '#/components/schemas/FabricEvent'
-      properties:
-        NodeName:
-          $ref: '#/components/schemas/NodeName'
-          description: The name of a Service Fabric node.
-      required:
-      - NodeName
-      x-ms-discriminator-value: NodeEvent
+        $ref: '#/components/schemas/ApplicationEvent'
     ServiceEvent:
       description: Represents the base for all Service Events.
       allOf:
@@ -826,15 +869,27 @@ components:
       required:
       - ServiceId
       x-ms-discriminator-value: ServiceEvent
-    PartitionId:
-      type: string
-      format: uuid
-      description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
     ClusterEvent:
       description: Represents the base for all Cluster Events.
       allOf:
       - $ref: '#/components/schemas/FabricEvent'
       x-ms-discriminator-value: ClusterEvent
+    PartitionEventList:
+      description: A list of PartitionEvent objects.
+      type: array
+      items:
+        $ref: '#/components/schemas/PartitionEvent'
+    PartitionEvent:
+      description: Represents the base for all Partition Events.
+      allOf:
+      - $ref: '#/components/schemas/FabricEvent'
+      properties:
+        PartitionId:
+          $ref: '#/components/schemas/PartitionId'
+          description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
+      required:
+      - PartitionId
+      x-ms-discriminator-value: PartitionEvent
     FabricErrorError:
       description: Error object containing error code and error message.
       properties:
@@ -846,99 +901,23 @@ components:
           description: Error message.
       required:
       - Code
-    ClusterEventList:
-      description: A list of ClusterEvent objects.
-      type: array
-      items:
-        $ref: '#/components/schemas/ClusterEvent'
-    ServiceId:
+    NodeName:
       type: string
-      description: 'The identity of the service. This ID is an encoded representation of the service name. This is used in the REST APIs to identify the service resource.
-
-        Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the service name is "fabric:/myapp/app1/svc1",
-
-        the service identity would be "myapp~app1\~svc1" in 6.0+ and "myapp/app1/svc1" in previous versions.'
+      description: The name of a Service Fabric node.
     ServiceEventList:
       description: A list of ServiceEvent objects.
       type: array
       items:
         $ref: '#/components/schemas/ServiceEvent'
-    PartitionEventList:
-      description: A list of PartitionEvent objects.
-      type: array
-      items:
-        $ref: '#/components/schemas/PartitionEvent'
-    ReplicaEvent:
-      description: Represents the base for all Replica Events.
-      allOf:
-      - $ref: '#/components/schemas/FabricEvent'
-      properties:
-        PartitionId:
-          $ref: '#/components/schemas/PartitionId'
-          description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
-        ReplicaId:
-          $ref: '#/components/schemas/ReplicaId_Integer'
-          description: Id of a stateful service replica. ReplicaId is used by Service Fabric to uniquely identify a replica of a partition. It is unique within a partition and does not change for the lifetime of the replica. If a replica gets dropped and another replica gets created on the same node for the same partition, it will get a different value for the id. Sometimes the id of a stateless service instance is also referred as a replica id.
-      required:
-      - PartitionId
-      - ReplicaId
-      x-ms-discriminator-value: ReplicaEvent
-    ApplicationId:
-      type: string
-      description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
-
-        Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
-
-        the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
-    ApplicationEvent:
-      description: Represents the base for all Application Events.
-      allOf:
-      - $ref: '#/components/schemas/FabricEvent'
-      properties:
-        ApplicationId:
-          $ref: '#/components/schemas/ApplicationId'
-          description: 'The identity of the application. This is an encoded representation of the application name. This is used in the REST APIs to identify the application resource.
-
-            Starting in version 6.0, hierarchical names are delimited with the "\~" character. For example, if the application name is "fabric:/myapp/app1",
-
-            the application identity would be "myapp\~app1" in 6.0+ and "myapp/app1" in previous versions.'
-      required:
-      - ApplicationId
-      x-ms-discriminator-value: ApplicationEvent
-    ReplicaId_Integer:
-      type: integer
-      format: int64
-      description: Id of a stateful service replica. ReplicaId is used by Service Fabric to uniquely identify a replica of a partition. It is unique within a partition and does not change for the lifetime of the replica. If a replica gets dropped and another replica gets created on the same node for the same partition, it will get a different value for the id. Sometimes the id of a stateless service instance is also referred as a replica id.
   parameters:
-    ApplicationIdRequiredPathParam:
-      name: applicationId
-      in: path
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      required: true
-      description: 'The identity of the application. This is typically the full name of the application without the ''fabric:'' URI scheme.
-
-        Starting from version 6.0, hierarchical names are delimited with the "~" character.
-
-        For example, if the application name is "fabric:/myapp/app1", the application identity would be "myapp~app1" in 6.0+ and "myapp/app1" in previous versions.'
-      schema:
-        type: string
-    EventInstanceIdRequiredPathParam:
-      name: eventInstanceId
-      in: path
-      x-ms-parameter-location: method
-      required: true
-      description: The EventInstanceId.
-      schema:
-        type: string
-    SkipCorrelationLookupOptionalQueryParam:
-      name: SkipCorrelationLookup
+    EndTimeUtcRequiredQueryParam:
+      name: EndTimeUtc
       in: query
       x-ms-parameter-location: method
-      required: false
-      description: This param disables the search of CorrelatedEvents information if true is passed. otherwise the CorrelationEvents get processed and HasCorrelatedEvents field in every FabricEvent gets populated.
+      required: true
+      description: The end time of a lookup query in ISO UTC yyyy-MM-ddTHH:mm:ssZ.
       schema:
-        type: boolean
+        type: string
     PartitionIdRequiredPathParam:
       name: partitionId
       in: path
@@ -966,6 +945,14 @@ components:
         enum:
         - 6.2-preview
         default: 6.2-preview
+    SkipCorrelationLookupOptionalQueryParam:
+      name: SkipCorrelationLookup
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: This param disables the search of CorrelatedEvents information if true is passed. otherwise the CorrelationEvents get processed and HasCorrelatedEvents field in every FabricEvent gets populated.
+      schema:
+        type: boolean
     ReplicaIdRequiredPathParam:
       name: replicaId
       in: path
@@ -975,40 +962,12 @@ components:
       description: The identifier of the replica.
       schema:
         type: string
-    ExcludeAnalysisEventsOptionalQueryParam:
-      name: ExcludeAnalysisEvents
+    EventsTypesFilterOptionalQueryParam:
+      name: EventsTypesFilter
       in: query
       x-ms-parameter-location: method
       required: false
-      description: This param disables the retrieval of AnalysisEvents if true is passed.
-      schema:
-        type: boolean
-    TimeoutOptionalQueryParam:
-      name: timeout
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
-      schema:
-        type: integer
-        format: int64
-        default: 60
-        maximum: 4294967295
-        minimum: 1
-    EndTimeUtcRequiredQueryParam:
-      name: EndTimeUtc
-      in: query
-      x-ms-parameter-location: method
-      required: true
-      description: The end time of a lookup query in ISO UTC yyyy-MM-ddTHH:mm:ssZ.
-      schema:
-        type: string
-    NodeNameRequiredPathParam:
-      name: nodeName
-      in: path
-      x-ms-parameter-location: method
-      required: true
-      description: The name of the node.
+      description: This is a comma separated string specifying the types of FabricEvents that should only be included in the response.
       schema:
         type: string
     StartTimeUtcRequiredQueryParam:
@@ -1017,6 +976,22 @@ components:
       x-ms-parameter-location: method
       required: true
       description: The start time of a lookup query in ISO UTC yyyy-MM-ddTHH:mm:ssZ.
+      schema:
+        type: string
+    EventInstanceIdRequiredPathParam:
+      name: eventInstanceId
+      in: path
+      x-ms-parameter-location: method
+      required: true
+      description: The EventInstanceId.
+      schema:
+        type: string
+    NodeNameRequiredPathParam:
+      name: nodeName
+      in: path
+      x-ms-parameter-location: method
+      required: true
+      description: The name of the node.
       schema:
         type: string
     ApiVersion_6-4_RequiredQueryParam:
@@ -1042,14 +1017,6 @@ components:
         enum:
         - '6.4'
         default: '6.4'
-    EventsTypesFilterOptionalQueryParam:
-      name: EventsTypesFilter
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: This is a comma separated string specifying the types of FabricEvents that should only be included in the response.
-      schema:
-        type: string
     ServiceIdRequiredPathParam:
       name: serviceId
       in: path
@@ -1063,3 +1030,36 @@ components:
         For example, if the service name is "fabric:/myapp/app1/svc1", the service identity would be "myapp~app1~svc1" in 6.0+ and "myapp/app1/svc1" in previous versions.'
       schema:
         type: string
+    ApplicationIdRequiredPathParam:
+      name: applicationId
+      in: path
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      required: true
+      description: 'The identity of the application. This is typically the full name of the application without the ''fabric:'' URI scheme.
+
+        Starting from version 6.0, hierarchical names are delimited with the "~" character.
+
+        For example, if the application name is "fabric:/myapp/app1", the application identity would be "myapp~app1" in 6.0+ and "myapp/app1" in previous versions.'
+      schema:
+        type: string
+    ExcludeAnalysisEventsOptionalQueryParam:
+      name: ExcludeAnalysisEvents
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: This param disables the retrieval of AnalysisEvents if true is passed.
+      schema:
+        type: boolean
+    TimeoutOptionalQueryParam:
+      name: timeout
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
+      schema:
+        type: integer
+        format: int64
+        default: 60
+        maximum: 4294967295
+        minimum: 1
