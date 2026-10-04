@@ -605,72 +605,159 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
+  parameters:
+    FeatureBody:
+      name: feature
+      in: body
+      required: true
+      description: A valid `GeoJSON Feature` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.2) for details.
+      x-ms-parameter-location: client
+      schema:
+        type: object
+        allOf:
+        - $ref: '#/components/schemas/FeatureType'
+        - $ref: '#/components/schemas/FeatureAttributes'
+    ApiVersion:
+      name: api-version
+      description: Version number of Azure Maps API.
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    FeatureId:
+      name: featureId
+      in: path
+      description: Case sensitive identifier of a specific feature.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    CollectionId:
+      name: collectionId
+      in: path
+      required: true
+      description: Identifier (name) of a specific collection.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    Bbox:
+      name: bbox
+      x-ms-client-name: boundingBox
+      in: query
+      description: 'Only features that have a geometry that intersects the supplied bounding box are selected.
+
+        * Lower left corner, coordinate axis 1 * Lower left corner, coordinate axis 2 * Upper right corner, coordinate axis 1 * Upper right corner, coordinate axis 2
+
+        The coordinate reference system of the values is WGS84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in the parameter `bbox-crs`.
+
+        For WGS84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude, maximum longitude and maximum latitude. However, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third value (east-most box edge).'
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: number
+          format: double
+    LimitFeatures:
+      name: limit
+      in: query
+      description: 'The optional limit parameter limits the number of features that are presented in the response document.
+
+        Only features that are on the first level of the collection in the response document are counted. Nested objects contained within the explicitly requested features shall not be counted.
+
+        * Minimum = 1 * Maximum = 500 * Default = 10'
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+        maximum: 5000
+        minimum: 1
+    Filter:
+      name: filter
+      in: query
+      description: 'Filter expression to search for features with specific property values in a given collection. Only feature properties of scalar type and equals operator are supported.
+
+        This is a special parameter where the parameter name is a case sensitive property name. The scheme for this parameter is {property name}={property value}. Unless "filter" is one of the property names in the collection, "filter" should not be used as a parameter name. To search for features with "name" property value "21N13", use "name=21N13".
+
+        Multiple filters are supported and should be represented as multiple query parameters. E.g., <property1>=<value1>&<property2>=<value2> String values are case sensitive.'
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    FeatureAttributesBody:
+      name: featureAttributes
+      in: body
+      required: true
+      description: The geometry and properties of a feature.
+      x-ms-parameter-location: client
+      schema:
+        $ref: '#/components/schemas/FeatureAttributes'
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: The API version to use for this operation.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: The ID of the target subscription.
+      schema:
+        type: string
   schemas:
+    FeatureId:
+      type: object
+      properties:
+        id:
+          description: Case sensitive identifier of a specific feature.
+          type: string
+    FeatureAttributes:
+      description: The geometry and properties of a feature.
+      type: object
+      properties:
+        geometry:
+          $ref: ../../../Common/preview/1.0/common.json#/definitions/GeoJsonGeometry
+        properties:
+          description: Properties can contain any additional metadata about the `Feature` and are defined by the GET Collection Definition API. Value can be any JSON object or a JSON null value, but please note that feature properties not defined in the collection definition will be ignored.
+          type: object
+    ExtendedGeoJsonFeatureCollectionData:
+      type: object
+      properties:
+        ontology:
+          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
+        numberReturned:
+          description: Number of returned features.
+          type: integer
+          format: int32
+        links:
+          description: Links to other Features endpoints.
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturesEndpointLink'
+    FeatureResult:
+      description: Response after a feature is successfully read.
+      type: object
+      required:
+      - feature
+      properties:
+        ontology:
+          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
+        feature:
+          $ref: '#/components/schemas/Feature'
+        links:
+          description: Links to other Features endpoints.
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturesEndpointLink'
     FeatureType:
       type: object
       properties:
         type:
           description: 'Specifies the `GeoJSON` type: Feature'
           type: string
-    CollectionResult:
-      description: Response after a successful request to get a collection.
-      type: object
-      required:
-      - id
-      - title
-      - links
-      properties:
-        id:
-          description: Identifier of the collection used, for example, in URIs.
-          type: string
-          example: buildings
-        title:
-          description: Human readable title of the collection.
-          type: string
-          example: Buildings
-        ontology:
-          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
-        itemType:
-          description: The type of the items in the collection.
-          type: string
-          example: feature
-        description:
-          description: A description of the features in the collection.
-          type: string
-          example: Buildings in the city of Bonn.
-        links:
-          description: Links to other Features endpoints.
-          type: array
-          items:
-            $ref: '#/components/schemas/FeaturesEndpointLink'
-          example:
-          - href: http://data.example.org/collections/buildings/items
-            rel: items
-            title: Buildings
-          - href: http://data.example.org/collections/buildings/definition
-            rel: describedBy
-            title: Metadata catalogue for unit
-          - href: http://data.example.org/collections/buildings
-            rel: self
-            title: Information for unit collection
-    ExtendedGeoJsonFeatureCollection:
-      description: A valid `GeoJSON FeatureCollection` object type extended with numberReturned and links array. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.3) for details.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/FeatureCollectionData'
-      - $ref: '#/components/schemas/ExtendedGeoJsonFeatureCollectionData'
-      properties:
-        type:
-          description: 'Specifies the `GeoJSON` type: FeatureCollection.'
-          type: string
-          enum:
-          - FeatureCollection
-          x-ms-enum:
-            name: GeoJsonObjectType
-            modelAsString: false
-            values:
-            - value: FeatureCollection
-              description: '`GeoJSON FeatureCollection` object.'
     CreateFeatureResult:
       description: Response after a feature is successfully created.
       type: object
@@ -689,15 +776,36 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeaturesEndpointLink'
-    FeatureAttributes:
-      description: The geometry and properties of a feature.
+    LandingPageResult:
+      description: Response after a successful request to the landing page.
+      type: object
+      required:
+      - links
+      properties:
+        ontology:
+          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
+        links:
+          description: Links to other Features endpoints.
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturesEndpointLink'
+    Feature:
+      description: A valid `GeoJSON Feature` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.2) for details.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/FeatureId'
+      - $ref: '#/components/schemas/FeatureType'
+      - $ref: '#/components/schemas/FeatureAttributes'
+    FeatureCollectionData:
       type: object
       properties:
-        geometry:
-          $ref: ../../../Common/preview/1.0/common.json#/definitions/GeoJsonGeometry
-        properties:
-          description: Properties can contain any additional metadata about the `Feature` and are defined by the GET Collection Definition API. Value can be any JSON object or a JSON null value, but please note that feature properties not defined in the collection definition will be ignored.
-          type: object
+        features:
+          description: Contains a list of valid `GeoJSON Feature` objects.
+          type: array
+          items:
+            $ref: '#/components/schemas/Feature'
+      required:
+      - features
     CollectionDefinitionResult:
       description: Response after a successful request to read a collection's definition.
       type: object
@@ -769,102 +877,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FeaturesEndpointLink'
-    DefinitionProperty:
-      description: The definition of a property in a collection.
-      type: object
-      required:
-      - name
-      - required
-      - type
-      properties:
-        name:
-          description: Name of attribute.
-          type: string
-          example: external_id
-        required:
-          description: Is attribute required.
-          type: boolean
-        type:
-          description: Type of attribute.
-          type: object
-    FeatureResult:
-      description: Response after a feature is successfully read.
-      type: object
-      required:
-      - feature
-      properties:
-        ontology:
-          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
-        feature:
-          $ref: '#/components/schemas/Feature'
-        links:
-          description: Links to other Features endpoints.
-          type: array
-          items:
-            $ref: '#/components/schemas/FeaturesEndpointLink'
-    CollectionsResult:
-      description: Response after a successful request to list collections.
-      type: object
-      required:
-      - links
-      - collections
-      properties:
-        ontology:
-          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
-        collections:
-          description: All the collections in a given dataset.
-          type: array
-          items:
-            $ref: '#/components/schemas/CollectionResult'
-        links:
-          description: Links to other Features endpoints.
-          type: array
-          items:
-            $ref: '#/components/schemas/FeaturesEndpointLink'
-          example:
-          - href: http://data.example.org/collections.json
-            rel: self
-            title: this document
-    Feature:
-      description: A valid `GeoJSON Feature` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.2) for details.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/FeatureId'
-      - $ref: '#/components/schemas/FeatureType'
-      - $ref: '#/components/schemas/FeatureAttributes'
-    ExtendedGeoJsonFeatureCollectionData:
-      type: object
-      properties:
-        ontology:
-          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
-        numberReturned:
-          description: Number of returned features.
-          type: integer
-          format: int32
-        links:
-          description: Links to other Features endpoints.
-          type: array
-          items:
-            $ref: '#/components/schemas/FeaturesEndpointLink'
-    FeatureId:
-      type: object
-      properties:
-        id:
-          description: Case sensitive identifier of a specific feature.
-          type: string
-    LandingPageResult:
-      description: Response after a successful request to the landing page.
-      type: object
-      required:
-      - links
-      properties:
-        ontology:
-          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
-        links:
-          description: Links to other Features endpoints.
-          type: array
-          items:
-            $ref: '#/components/schemas/FeaturesEndpointLink'
     FeaturesEndpointLink:
       description: Links to other Features endpoints. For more details about link relations, please visit the [OGC API - Features - Part 1](http://www.opengis.net/doc/IS/ogcapi-features-1/1.0.1#_link_relations) standard.
       type: object
@@ -884,21 +896,6 @@ components:
           description: Used to label the destination of a link such that it can be used as a human-readable identifier (e.g., a menu entry) in the language indicated by the Content-Language header field (if present).
           type: string
           example: Azure Maps Features
-    ConformanceResult:
-      description: Response after a successful request to the conformance page.
-      type: object
-      required:
-      - conformsTo
-      properties:
-        conformsTo:
-          description: List of requirements classes that the server conforms to.
-          type: array
-          items:
-            type: string
-          example:
-          - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core
-          - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas3
-          - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson
     ApiDefinitionResult:
       description: Response after a successful request to get the API definition.
       type: object
@@ -960,16 +957,121 @@ components:
                 description: The description of the tag.
                 type: string
                 example: Access to data (features).
-    FeatureCollectionData:
+    ConformanceResult:
+      description: Response after a successful request to the conformance page.
       type: object
+      required:
+      - conformsTo
       properties:
-        features:
-          description: Contains a list of valid `GeoJSON Feature` objects.
+        conformsTo:
+          description: List of requirements classes that the server conforms to.
           type: array
           items:
-            $ref: '#/components/schemas/Feature'
+            type: string
+          example:
+          - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core
+          - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas3
+          - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson
+    CollectionResult:
+      description: Response after a successful request to get a collection.
+      type: object
       required:
-      - features
+      - id
+      - title
+      - links
+      properties:
+        id:
+          description: Identifier of the collection used, for example, in URIs.
+          type: string
+          example: buildings
+        title:
+          description: Human readable title of the collection.
+          type: string
+          example: Buildings
+        ontology:
+          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
+        itemType:
+          description: The type of the items in the collection.
+          type: string
+          example: feature
+        description:
+          description: A description of the features in the collection.
+          type: string
+          example: Buildings in the city of Bonn.
+        links:
+          description: Links to other Features endpoints.
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturesEndpointLink'
+          example:
+          - href: http://data.example.org/collections/buildings/items
+            rel: items
+            title: Buildings
+          - href: http://data.example.org/collections/buildings/definition
+            rel: describedBy
+            title: Metadata catalogue for unit
+          - href: http://data.example.org/collections/buildings
+            rel: self
+            title: Information for unit collection
+    DefinitionProperty:
+      description: The definition of a property in a collection.
+      type: object
+      required:
+      - name
+      - required
+      - type
+      properties:
+        name:
+          description: Name of attribute.
+          type: string
+          example: external_id
+        required:
+          description: Is attribute required.
+          type: boolean
+        type:
+          description: Type of attribute.
+          type: object
+    CollectionsResult:
+      description: Response after a successful request to list collections.
+      type: object
+      required:
+      - links
+      - collections
+      properties:
+        ontology:
+          $ref: ../../../Common/preview/1.0/common.json#/definitions/Ontology
+        collections:
+          description: All the collections in a given dataset.
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionResult'
+        links:
+          description: Links to other Features endpoints.
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturesEndpointLink'
+          example:
+          - href: http://data.example.org/collections.json
+            rel: self
+            title: this document
+    ExtendedGeoJsonFeatureCollection:
+      description: A valid `GeoJSON FeatureCollection` object type extended with numberReturned and links array. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.3) for details.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/FeatureCollectionData'
+      - $ref: '#/components/schemas/ExtendedGeoJsonFeatureCollectionData'
+      properties:
+        type:
+          description: 'Specifies the `GeoJSON` type: FeatureCollection.'
+          type: string
+          enum:
+          - FeatureCollection
+          x-ms-enum:
+            name: GeoJsonObjectType
+            modelAsString: false
+            values:
+            - value: FeatureCollection
+              description: '`GeoJSON FeatureCollection` object.'
     FeatureResult_2:
       properties:
         name:
@@ -985,6 +1087,12 @@ components:
           type: string
           description: The resource type of the feature.
       description: Previewed feature information.
+    FeatureProperties:
+      properties:
+        state:
+          type: string
+          description: The registration state of the feature for the subscription.
+      description: Information about feature.
     FeatureOperationsListResult:
       properties:
         value:
@@ -996,114 +1104,6 @@ components:
           type: string
           description: The URL to use for getting the next set of results.
       description: List of previewed features.
-    FeatureProperties:
-      properties:
-        state:
-          type: string
-          description: The registration state of the feature for the subscription.
-      description: Information about feature.
-  parameters:
-    LimitFeatures:
-      name: limit
-      in: query
-      description: 'The optional limit parameter limits the number of features that are presented in the response document.
-
-        Only features that are on the first level of the collection in the response document are counted. Nested objects contained within the explicitly requested features shall not be counted.
-
-        * Minimum = 1 * Maximum = 500 * Default = 10'
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-        maximum: 5000
-        minimum: 1
-    FeatureId:
-      name: featureId
-      in: path
-      description: Case sensitive identifier of a specific feature.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    Filter:
-      name: filter
-      in: query
-      description: 'Filter expression to search for features with specific property values in a given collection. Only feature properties of scalar type and equals operator are supported.
-
-        This is a special parameter where the parameter name is a case sensitive property name. The scheme for this parameter is {property name}={property value}. Unless "filter" is one of the property names in the collection, "filter" should not be used as a parameter name. To search for features with "name" property value "21N13", use "name=21N13".
-
-        Multiple filters are supported and should be represented as multiple query parameters. E.g., <property1>=<value1>&<property2>=<value2> String values are case sensitive.'
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    FeatureAttributesBody:
-      name: featureAttributes
-      in: body
-      required: true
-      description: The geometry and properties of a feature.
-      x-ms-parameter-location: client
-      schema:
-        $ref: '#/components/schemas/FeatureAttributes'
-    ApiVersion:
-      name: api-version
-      description: Version number of Azure Maps API.
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    Bbox:
-      name: bbox
-      x-ms-client-name: boundingBox
-      in: query
-      description: 'Only features that have a geometry that intersects the supplied bounding box are selected.
-
-        * Lower left corner, coordinate axis 1 * Lower left corner, coordinate axis 2 * Upper right corner, coordinate axis 1 * Upper right corner, coordinate axis 2
-
-        The coordinate reference system of the values is WGS84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in the parameter `bbox-crs`.
-
-        For WGS84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude, maximum longitude and maximum latitude. However, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third value (east-most box edge).'
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: number
-          format: double
-    FeatureBody:
-      name: feature
-      in: body
-      required: true
-      description: A valid `GeoJSON Feature` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.2) for details.
-      x-ms-parameter-location: client
-      schema:
-        type: object
-        allOf:
-        - $ref: '#/components/schemas/FeatureType'
-        - $ref: '#/components/schemas/FeatureAttributes'
-    CollectionId:
-      name: collectionId
-      in: path
-      required: true
-      description: Identifier (name) of a specific collection.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: The API version to use for this operation.
-      schema:
-        type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: The ID of the target subscription.
-      schema:
-        type: string
   securitySchemes:
     AADToken:
       type: oauth2

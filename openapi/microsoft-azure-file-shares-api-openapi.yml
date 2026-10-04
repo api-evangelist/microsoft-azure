@@ -345,6 +345,16 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
+    Item:
+      required:
+      - key
+      - value
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
     Message:
       type: object
       properties:
@@ -365,6 +375,42 @@ components:
         localizedValue:
           description: Localized name of the metric
           type: string
+    MetricList:
+      description: Collection of metrics
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Metrics'
+          x-ms-identifiers: []
+    MetricAvailablity:
+      description: Metric availability specifies the time grain (aggregation interval or frequency) and the retention period for that time grain
+      required:
+      - timeGrain
+      - retention
+      type: object
+      properties:
+        timeGrain:
+          description: The time grain, specifies the aggregation interval for the metric.
+          type: string
+        retention:
+          description: The retention period for the metric at the specified timegrain
+          type: string
+    FileShareList:
+      description: Collection of file shares
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The value.
+          type: array
+          items:
+            $ref: '#/components/schemas/FileShare'
     MetricDefinitionList:
       description: List of metric definition
       required:
@@ -378,41 +424,106 @@ components:
             $ref: '#/components/schemas/MetricDefinition'
           x-ms-identifiers:
           - name
-    MetricData:
-      description: The metric data.
+    FileShare:
+      description: The File Share.
       required:
-      - timeStamp
-      - sum
-      - count
-      - average
-      - minimum
-      - maximum
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      properties:
+        properties:
+          $ref: '#/components/schemas/FileShareProperties'
+          description: The properties.
+          x-ms-client-flatten: true
+    MetricDimension:
+      description: Metric dimension
+      required:
+      - name
+      - value
       type: object
       properties:
-        timeStamp:
-          format: date-time
-          description: The time when the metric data is fetched
+        name:
+          description: Metric dimension name
           type: string
-        sum:
-          format: double
-          description: The sum of all the samples available in the given instance of time for the specific metric data
-          type: number
-        count:
-          format: int32
-          description: The count of samples of the metric data available for the given instance
+        value:
+          description: Metric dimension values
+          type: string
+    FileShareProperties:
+      description: The File Share.
+      required:
+      - shareStatus
+      - dataPolicy
+      - adminUser
+      - provisionedCapacityInBytes
+      - monitoringStatus
+      type: object
+      properties:
+        description:
+          description: Description for file share
+          type: string
+        shareStatus:
+          description: The Share Status
+          enum:
+          - Online
+          - Offline
+          type: string
+          x-ms-enum:
+            name: ShareStatus
+            modelAsString: false
+        dataPolicy:
+          description: The data policy
+          enum:
+          - Invalid
+          - Local
+          - Tiered
+          - Cloud
+          type: string
+          x-ms-enum:
+            name: DataPolicy
+            modelAsString: false
+        adminUser:
+          description: 'The user/group who will have full permission in this share. Active directory email address. Example: xyz@contoso.com or Contoso\xyz.'
+          type: string
+        provisionedCapacityInBytes:
+          format: int64
+          description: The total provisioned capacity in Bytes
           type: integer
-        average:
-          format: double
-          description: The average of all sample for the given instance
-          type: number
-        minimum:
-          format: double
-          description: The minimum of all samples available
-          type: number
-        maximum:
-          format: double
-          description: The maximum of all samples available
-          type: number
+        usedCapacityInBytes:
+          format: int64
+          description: The used capacity in Bytes.
+          type: integer
+          readOnly: true
+        localUsedCapacityInBytes:
+          format: int64
+          description: The local used capacity in Bytes.
+          type: integer
+          readOnly: true
+        monitoringStatus:
+          description: The monitoring status
+          enum:
+          - Enabled
+          - Disabled
+          type: string
+          x-ms-enum:
+            name: MonitoringStatus
+            modelAsString: false
+    BaseModel:
+      description: Base class for models
+      type: object
+      properties:
+        id:
+          description: The identifier.
+          type: string
+          readOnly: true
+        name:
+          description: The name.
+          type: string
+          readOnly: true
+        type:
+          description: The type.
+          type: string
+          readOnly: true
     Metrics:
       description: Monitoring metric
       required:
@@ -488,73 +599,6 @@ components:
             $ref: '#/components/schemas/MetricData'
           x-ms-identifiers:
           - timeStamp
-    MetricDimension:
-      description: Metric dimension
-      required:
-      - name
-      - value
-      type: object
-      properties:
-        name:
-          description: Metric dimension name
-          type: string
-        value:
-          description: Metric dimension values
-          type: string
-    FileShare:
-      description: The File Share.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel'
-      properties:
-        properties:
-          $ref: '#/components/schemas/FileShareProperties'
-          description: The properties.
-          x-ms-client-flatten: true
-    Item:
-      required:
-      - key
-      - value
-      type: object
-      properties:
-        key:
-          type: string
-        value:
-          type: string
-    BaseModel:
-      description: Base class for models
-      type: object
-      properties:
-        id:
-          description: The identifier.
-          type: string
-          readOnly: true
-        name:
-          description: The name.
-          type: string
-          readOnly: true
-        type:
-          description: The type.
-          type: string
-          readOnly: true
-    Error:
-      required:
-      - errorCode
-      - message
-      type: object
-      properties:
-        errorCode:
-          type: string
-        message:
-          $ref: '#/components/schemas/Message'
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/Item'
-          x-ms-identifiers:
-          - key
     MetricDefinition:
       description: Monitoring metric definition represents the metadata of the metrics.
       required:
@@ -616,117 +660,58 @@ components:
         type:
           description: The metric definition type
           type: string
-    FileShareList:
-      description: Collection of file shares
+    MetricData:
+      description: The metric data.
       required:
-      - value
+      - timeStamp
+      - sum
+      - count
+      - average
+      - minimum
+      - maximum
       type: object
       properties:
-        value:
-          description: The value.
+        timeStamp:
+          format: date-time
+          description: The time when the metric data is fetched
+          type: string
+        sum:
+          format: double
+          description: The sum of all the samples available in the given instance of time for the specific metric data
+          type: number
+        count:
+          format: int32
+          description: The count of samples of the metric data available for the given instance
+          type: integer
+        average:
+          format: double
+          description: The average of all sample for the given instance
+          type: number
+        minimum:
+          format: double
+          description: The minimum of all samples available
+          type: number
+        maximum:
+          format: double
+          description: The maximum of all samples available
+          type: number
+    Error:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          $ref: '#/components/schemas/Message'
+        values:
           type: array
           items:
-            $ref: '#/components/schemas/FileShare'
-    MetricList:
-      description: Collection of metrics
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: The value.
-          type: array
-          items:
-            $ref: '#/components/schemas/Metrics'
-          x-ms-identifiers: []
-    FileShareProperties:
-      description: The File Share.
-      required:
-      - shareStatus
-      - dataPolicy
-      - adminUser
-      - provisionedCapacityInBytes
-      - monitoringStatus
-      type: object
-      properties:
-        description:
-          description: Description for file share
-          type: string
-        shareStatus:
-          description: The Share Status
-          enum:
-          - Online
-          - Offline
-          type: string
-          x-ms-enum:
-            name: ShareStatus
-            modelAsString: false
-        dataPolicy:
-          description: The data policy
-          enum:
-          - Invalid
-          - Local
-          - Tiered
-          - Cloud
-          type: string
-          x-ms-enum:
-            name: DataPolicy
-            modelAsString: false
-        adminUser:
-          description: 'The user/group who will have full permission in this share. Active directory email address. Example: xyz@contoso.com or Contoso\xyz.'
-          type: string
-        provisionedCapacityInBytes:
-          format: int64
-          description: The total provisioned capacity in Bytes
-          type: integer
-        usedCapacityInBytes:
-          format: int64
-          description: The used capacity in Bytes.
-          type: integer
-          readOnly: true
-        localUsedCapacityInBytes:
-          format: int64
-          description: The local used capacity in Bytes.
-          type: integer
-          readOnly: true
-        monitoringStatus:
-          description: The monitoring status
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: MonitoringStatus
-            modelAsString: false
-    MetricAvailablity:
-      description: Metric availability specifies the time grain (aggregation interval or frequency) and the retention period for that time grain
-      required:
-      - timeGrain
-      - retention
-      type: object
-      properties:
-        timeGrain:
-          description: The time grain, specifies the aggregation interval for the metric.
-          type: string
-        retention:
-          description: The retention period for the metric at the specified timegrain
-          type: string
+            $ref: '#/components/schemas/Item'
+          x-ms-identifiers:
+          - key
   parameters:
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The resource group name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The api version
-      required: true
-      schema:
-        type: string
     managerNameParameter:
       name: managerName
       in: path
@@ -737,6 +722,21 @@ components:
         type: string
         maxLength: 50
         minLength: 2
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The api version
+      required: true
+      schema:
+        type: string
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The resource group name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path

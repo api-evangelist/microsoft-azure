@@ -681,6 +681,12 @@ paths:
     - url: https://graph.windows.net
 components:
   schemas:
+    APIError:
+      type: object
+      description: Error information returned by the API
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
     GroupResult:
       type: object
       required:
@@ -701,20 +707,6 @@ components:
           items:
             type: string
             format: uuid
-    Error:
-      type: object
-      description: Error body.
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-    APIError:
-      type: object
-      description: Error information returned by the API
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
     GroupRequest:
       type: object
       required:
@@ -728,6 +720,100 @@ components:
           items:
             type: string
             format: uuid
+    Error:
+      type: object
+      description: Error body.
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    ADGroup:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/DirectoryObject'
+      properties:
+        displayName:
+          type: string
+          description: The display name of the group.
+        mailEnabled:
+          type: boolean
+          description: Whether the group is mail-enabled. Must be false. This is because only pure security groups can be created using the Graph API.
+        mailNickname:
+          type: string
+          description: 'The mail alias for the group. '
+        securityEnabled:
+          type: boolean
+          description: Whether the group is security-enable.
+        mail:
+          type: string
+          description: The primary email address of the group.
+      x-ms-discriminator-value: Group
+      description: Active Directory group information.
+    ErrorMessage:
+      type: object
+      properties:
+        value:
+          type: string
+          x-ms-client-name: message
+          description: Error message value.
+      description: Active Directory error message.
+    GroupGetMemberGroupsParameters:
+      type: object
+      properties:
+        securityEnabledOnly:
+          type: boolean
+          description: If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.
+      additionalProperties:
+        type: object
+      required:
+      - securityEnabledOnly
+      description: Request parameters for GetMemberGroups API call.
+    GroupListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ADGroup'
+          description: A collection of Active Directory groups.
+        odata.nextLink:
+          type: string
+          description: The URL to get the next set of results.
+      description: Server response for Get tenant groups API call
+    GroupGetMemberGroupsResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            type: string
+          description: A collection of group IDs of which the group is a member.
+      description: Server response for GetMemberGroups API call.
+    DirectoryObject:
+      type: object
+      discriminator:
+        propertyName: objectType
+      properties:
+        objectId:
+          type: string
+          description: The object ID.
+          readOnly: true
+        objectType:
+          type: string
+          description: The object type.
+        deletionTimestamp:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The time at which the directory object was deleted.
+          readOnly: true
+      required:
+      - objectType
+      additionalProperties:
+        type: object
+      description: Represents an Azure Active Directory object.
     CheckGroupMembershipParameters:
       type: object
       properties:
@@ -743,6 +829,18 @@ components:
       - groupId
       - memberId
       description: Request parameters for IsMemberOf API call.
+    OdataError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code.
+        message:
+          type: object
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ErrorMessage'
+          description: Error Message.
+      description: Active Directory OData error information.
     GroupCreateParameters:
       type: object
       properties:
@@ -770,57 +868,6 @@ components:
       additionalProperties:
         type: object
       description: Request parameters for creating a new group.
-    GraphError:
-      type: object
-      properties:
-        odata.error:
-          type: object
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/OdataError'
-          description: A Graph API error.
-      description: Active Directory error information.
-    GroupGetMemberGroupsParameters:
-      type: object
-      properties:
-        securityEnabledOnly:
-          type: boolean
-          description: If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.
-      additionalProperties:
-        type: object
-      required:
-      - securityEnabledOnly
-      description: Request parameters for GetMemberGroups API call.
-    OdataError:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Error code.
-        message:
-          type: object
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ErrorMessage'
-          description: Error Message.
-      description: Active Directory OData error information.
-    GroupAddMemberParameters:
-      type: object
-      properties:
-        url:
-          type: string
-          description: A member object URL, such as "https://graph.windows.net/0b1f9851-1bf0-433f-aec3-cb9272f093dc/directoryObjects/f260bbc4-c254-447b-94cf-293b5ec434dd", where "0b1f9851-1bf0-433f-aec3-cb9272f093dc" is the tenantId and "f260bbc4-c254-447b-94cf-293b5ec434dd" is the objectId of the member (user, application, servicePrincipal, group) to be added.
-      required:
-      - url
-      additionalProperties:
-        type: object
-      description: Request parameters for adding a member to a group.
-    ErrorMessage:
-      type: object
-      properties:
-        value:
-          type: string
-          x-ms-client-name: message
-          description: Error message value.
-      description: Active Directory error message.
     DirectoryObjectListResult:
       type: object
       properties:
@@ -833,40 +880,17 @@ components:
           type: string
           description: The URL to get the next set of results.
       description: DirectoryObject list operation result.
-    GroupListResult:
+    GroupAddMemberParameters:
       type: object
       properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/ADGroup'
-          description: A collection of Active Directory groups.
-        odata.nextLink:
+        url:
           type: string
-          description: The URL to get the next set of results.
-      description: Server response for Get tenant groups API call
-    ADGroup:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/DirectoryObject'
-      properties:
-        displayName:
-          type: string
-          description: The display name of the group.
-        mailEnabled:
-          type: boolean
-          description: Whether the group is mail-enabled. Must be false. This is because only pure security groups can be created using the Graph API.
-        mailNickname:
-          type: string
-          description: 'The mail alias for the group. '
-        securityEnabled:
-          type: boolean
-          description: Whether the group is security-enable.
-        mail:
-          type: string
-          description: The primary email address of the group.
-      x-ms-discriminator-value: Group
-      description: Active Directory group information.
+          description: A member object URL, such as "https://graph.windows.net/0b1f9851-1bf0-433f-aec3-cb9272f093dc/directoryObjects/f260bbc4-c254-447b-94cf-293b5ec434dd", where "0b1f9851-1bf0-433f-aec3-cb9272f093dc" is the tenantId and "f260bbc4-c254-447b-94cf-293b5ec434dd" is the objectId of the member (user, application, servicePrincipal, group) to be added.
+      required:
+      - url
+      additionalProperties:
+        type: object
+      description: Request parameters for adding a member to a group.
     CheckGroupMembershipResult:
       type: object
       properties:
@@ -876,39 +900,15 @@ components:
       additionalProperties:
         type: object
       description: Server response for IsMemberOf API call
-    DirectoryObject:
-      type: object
-      discriminator:
-        propertyName: objectType
-      properties:
-        objectId:
-          type: string
-          description: The object ID.
-          readOnly: true
-        objectType:
-          type: string
-          description: The object type.
-        deletionTimestamp:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: The time at which the directory object was deleted.
-          readOnly: true
-      required:
-      - objectType
-      additionalProperties:
-        type: object
-      description: Represents an Azure Active Directory object.
-    GroupGetMemberGroupsResult:
+    GraphError:
       type: object
       properties:
-        value:
-          type: array
-          items:
-            type: string
-          description: A collection of group IDs of which the group is a member.
-      description: Server response for GetMemberGroups API call.
+        odata.error:
+          type: object
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/OdataError'
+          description: A Graph API error.
+      description: Active Directory error information.
   parameters:
     ApiVersionParameter:
       name: api-version

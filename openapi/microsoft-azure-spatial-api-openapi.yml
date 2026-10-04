@@ -625,84 +625,44 @@ paths:
       tags:
       - Spatial
 components:
-  responses:
-    '401':
-      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
-      headers:
-        WWW-Authenticate:
-          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '500':
-      description: An error occurred while processing the request. Please try again later.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '400':
-      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '403':
-      description: Permission, capacity, or authentication issues.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-    '404':
-      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/ODataErrorResponse'
   schemas:
-    GeoJSONFeatureCollection:
-      description: A valid `GeoJSON FeatureCollection` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.3) for details.
+    ClosestPointResultEntry:
+      description: Closest Point Result Entry Object
+      type: object
+      readOnly: true
+      properties:
+        distanceInMeters:
+          description: The distance in meters from the source point to the closest point
+          type: number
+          readOnly: true
+        position:
+          $ref: '#/components/schemas/SpatialCoordinate'
+        geometryId:
+          description: The unique id identifies a geometry
+          type: string
+          readOnly: true
+    SpatialCoordinate:
+      description: A location represented as a latitude and longitude
       type: object
       properties:
-        type:
-          description: Specifies the `type` for the object. Value should always be equal to "FeatureCollection".
-          type: string
-        features:
-          description: Contains a list of valid `GeoJSON Feature` objects.
-          type: array
-          items:
-            description: A valid `GeoJSON Feature` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.2) for details.
-            type: object
-            properties:
-              type:
-                description: Specifies the `type` for the object. Value should always be equal to "Feature".
-                type: string
-              geometry:
-                $ref: '#/components/schemas/GeoJSONGeometry'
-              properties:
-                x-ms-client-flatten: true
-                description: Properties can contain any additional metadata about the `Feature`. Value can be any JSON object or a JSON null value
-                type: object
-      required:
-      - features
-      - type
+        lat:
+          description: Latitude property
+          type: number
+          format: double
+          readOnly: true
+        lon:
+          description: Longitude property
+          type: number
+          format: double
+          readOnly: true
+    PostPointInPolygonResponse:
+      description: Returns true if point is within the polygon, false otherwise
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/PostPointInPolygonSummary'
+        result:
+          $ref: '#/components/schemas/PointInPolygonResult'
     GetPointInPolygonResponse:
       description: Returns true if point is within the polygon, false otherwise
       type: object
@@ -711,8 +671,8 @@ components:
           $ref: '#/components/schemas/GetPointInPolygonSummary'
         result:
           $ref: '#/components/schemas/PointInPolygonResult'
-    PostPointInPolygonSummary:
-      description: Point In Polygon Summary object
+    PostClosestPointSummary:
+      description: Post Closest Point Summary object
       type: object
       readOnly: true
       properties:
@@ -726,51 +686,6 @@ components:
           description: Processing information
           type: string
           readOnly: true
-    GetClosestPointResponse:
-      description: This object is returned from a successful Get Spatial Closest Point call
-      type: object
-      properties:
-        summary:
-          $ref: '#/components/schemas/GetClosestPointSummary'
-        result:
-          $ref: '#/components/schemas/ClosestPointResult'
-    GetPointInPolygonSummary:
-      description: Point In Polygon Summary object
-      type: object
-      readOnly: true
-      properties:
-        sourcePoint:
-          $ref: '#/components/schemas/SpatialCoordinate'
-        udid:
-          description: A unique data id (udid) for the uploaded content
-          type: string
-          readOnly: true
-        information:
-          description: Processing information
-          type: string
-          readOnly: true
-    GreatCircleDistanceResponse:
-      description: This object is returned from a successful Great Circle Distance call
-      type: object
-      properties:
-        summary:
-          description: Summary object
-          type: object
-          readOnly: true
-          properties:
-            sourcePoint:
-              $ref: '#/components/schemas/SpatialCoordinate'
-            targetPoint:
-              $ref: '#/components/schemas/SpatialCoordinate'
-        result:
-          description: Result Object
-          type: object
-          readOnly: true
-          properties:
-            distanceInMeters:
-              description: The great circle distance in meters from the source point to the target point
-              type: number
-              readOnly: true
     GeofenceResponse:
       description: This object is returned from a geofence proximity call.
       type: object
@@ -797,24 +712,20 @@ components:
           description: True if at least one event is published to the Azure Maps event subscriber, false if no event is published to the Azure Maps event subscriber. This will only be presented in response when 'isAsync' query parameter is set to true.
           type: boolean
           readOnly: true
-    ClosestPointResult:
-      description: Closest Point Result Array
-      type: array
-      items:
-        $ref: '#/components/schemas/ClosestPointResultEntry'
-    SpatialCoordinate:
-      description: A location represented as a latitude and longitude
+    PostPointInPolygonSummary:
+      description: Point In Polygon Summary object
       type: object
+      readOnly: true
       properties:
-        lat:
-          description: Latitude property
-          type: number
-          format: double
+        sourcePoint:
+          $ref: '#/components/schemas/SpatialCoordinate'
+        udid:
+          description: A unique data id (udid) for the uploaded content. Udid is not applicable for POST spatial operations(set to null)
+          type: string
           readOnly: true
-        lon:
-          description: Longitude property
-          type: number
-          format: double
+        information:
+          description: Processing information
+          type: string
           readOnly: true
     GeofenceGeometry:
       description: The geofencing geometry.
@@ -849,6 +760,43 @@ components:
           description: Sea level in meter of the nearest point on the 2D extrusion geometry. This will only be presented in response when value is provided for 'zInMeter' in the request.
           type: number
           readOnly: true
+    ODataErrorResponse:
+      type: object
+      description: This response object is returned when an error occurs in the Azure Maps API.
+      properties:
+        error:
+          $ref: '#/components/schemas/ODataError'
+    ClosestPointResult:
+      description: Closest Point Result Array
+      type: array
+      items:
+        $ref: '#/components/schemas/ClosestPointResultEntry'
+    BufferRequestBody:
+      description: An object with a FeatureCollection and a list of distances.  All the feature's properties should contain `geometryId`, which is used for identifying the geometry and is case-sensitive.
+      type: object
+      properties:
+        geometries:
+          $ref: '#/components/schemas/GeoJSONFeatureCollection'
+        distances:
+          description: List of the distances to compute the buffer for, one-to-one per Feature in the collection, or one for all Features in the collection.
+          type: array
+          items:
+            type: number
+    GetClosestPointSummary:
+      description: Get Closest Point Summary object
+      type: object
+      readOnly: true
+      properties:
+        sourcePoint:
+          $ref: '#/components/schemas/SpatialCoordinate'
+        udid:
+          description: A unique data id (udid) for the uploaded content
+          type: string
+          readOnly: true
+        information:
+          description: Processing information
+          type: string
+          readOnly: true
     PointInPolygonResult:
       description: Point In Polygon Result Object
       type: object
@@ -863,20 +811,10 @@ components:
           readOnly: true
           items:
             $ref: '#/components/schemas/GeometryId'
-    PostClosestPointResponse:
-      description: This object is returned from a successful Post Spatial Closest Point call
-      type: object
-      properties:
-        summary:
-          $ref: '#/components/schemas/PostClosestPointSummary'
-        result:
-          $ref: '#/components/schemas/ClosestPointResult'
-    ODataErrorResponse:
-      type: object
-      description: This response object is returned when an error occurs in the Azure Maps API.
-      properties:
-        error:
-          $ref: '#/components/schemas/ODataError'
+    GeometryId:
+      description: The Spatial geometry
+      type: string
+      readOnly: true
     ODataError:
       type: object
       description: This object is returned when an error occurs in the Azure Maps API.
@@ -897,74 +835,6 @@ components:
           type: string
           readOnly: true
           description: If available, the target causing the error.
-    GetClosestPointSummary:
-      description: Get Closest Point Summary object
-      type: object
-      readOnly: true
-      properties:
-        sourcePoint:
-          $ref: '#/components/schemas/SpatialCoordinate'
-        udid:
-          description: A unique data id (udid) for the uploaded content
-          type: string
-          readOnly: true
-        information:
-          description: Processing information
-          type: string
-          readOnly: true
-    PostPointInPolygonResponse:
-      description: Returns true if point is within the polygon, false otherwise
-      type: object
-      properties:
-        summary:
-          $ref: '#/components/schemas/PostPointInPolygonSummary'
-        result:
-          $ref: '#/components/schemas/PointInPolygonResult'
-    ClosestPointResultEntry:
-      description: Closest Point Result Entry Object
-      type: object
-      readOnly: true
-      properties:
-        distanceInMeters:
-          description: The distance in meters from the source point to the closest point
-          type: number
-          readOnly: true
-        position:
-          $ref: '#/components/schemas/SpatialCoordinate'
-        geometryId:
-          description: The unique id identifies a geometry
-          type: string
-          readOnly: true
-    GeometryId:
-      description: The Spatial geometry
-      type: string
-      readOnly: true
-    PostClosestPointSummary:
-      description: Post Closest Point Summary object
-      type: object
-      readOnly: true
-      properties:
-        sourcePoint:
-          $ref: '#/components/schemas/SpatialCoordinate'
-        udid:
-          description: A unique data id (udid) for the uploaded content. Udid is not applicable for POST spatial operations(set to null)
-          type: string
-          readOnly: true
-        information:
-          description: Processing information
-          type: string
-          readOnly: true
-    BufferRequestBody:
-      description: An object with a FeatureCollection and a list of distances.  All the feature's properties should contain `geometryId`, which is used for identifying the geometry and is case-sensitive.
-      type: object
-      properties:
-        geometries:
-          $ref: '#/components/schemas/GeoJSONFeatureCollection'
-        distances:
-          description: List of the distances to compute the buffer for, one-to-one per Feature in the collection, or one for all Features in the collection.
-          type: array
-          items:
-            type: number
     GeoJSONGeometry:
       description: A valid `GeoJSON` geometry object. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.1) for details.
       type: object
@@ -1002,6 +872,77 @@ components:
               description: '`GeoJSON MultiPolygon` geometry.'
             - value: GeometryCollection
               description: '`GeoJSON GeometryCollection` geometry.'
+    GetClosestPointResponse:
+      description: This object is returned from a successful Get Spatial Closest Point call
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/GetClosestPointSummary'
+        result:
+          $ref: '#/components/schemas/ClosestPointResult'
+    GreatCircleDistanceResponse:
+      description: This object is returned from a successful Great Circle Distance call
+      type: object
+      properties:
+        summary:
+          description: Summary object
+          type: object
+          readOnly: true
+          properties:
+            sourcePoint:
+              $ref: '#/components/schemas/SpatialCoordinate'
+            targetPoint:
+              $ref: '#/components/schemas/SpatialCoordinate'
+        result:
+          description: Result Object
+          type: object
+          readOnly: true
+          properties:
+            distanceInMeters:
+              description: The great circle distance in meters from the source point to the target point
+              type: number
+              readOnly: true
+    GeoJSONFeatureCollection:
+      description: A valid `GeoJSON FeatureCollection` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.3) for details.
+      type: object
+      properties:
+        type:
+          description: Specifies the `type` for the object. Value should always be equal to "FeatureCollection".
+          type: string
+        features:
+          description: Contains a list of valid `GeoJSON Feature` objects.
+          type: array
+          items:
+            description: A valid `GeoJSON Feature` object type. Please refer to [RFC 7946](https://tools.ietf.org/html/rfc7946#section-3.2) for details.
+            type: object
+            properties:
+              type:
+                description: Specifies the `type` for the object. Value should always be equal to "Feature".
+                type: string
+              geometry:
+                $ref: '#/components/schemas/GeoJSONGeometry'
+              properties:
+                x-ms-client-flatten: true
+                description: Properties can contain any additional metadata about the `Feature`. Value can be any JSON object or a JSON null value
+                type: object
+      required:
+      - features
+      - type
+    GetPointInPolygonSummary:
+      description: Point In Polygon Summary object
+      type: object
+      readOnly: true
+      properties:
+        sourcePoint:
+          $ref: '#/components/schemas/SpatialCoordinate'
+        udid:
+          description: A unique data id (udid) for the uploaded content
+          type: string
+          readOnly: true
+        information:
+          description: Processing information
+          type: string
+          readOnly: true
     BufferResponse:
       description: This object is returned from a successful Spatial Buffer call.
       type: object
@@ -1022,15 +963,66 @@ components:
         result:
           description: The FeatureCollection of buffers for the input.
           $ref: '#/components/schemas/GeoJSONFeatureCollection'
+    PostClosestPointResponse:
+      description: This object is returned from a successful Post Spatial Closest Point call
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/PostClosestPointSummary'
+        result:
+          $ref: '#/components/schemas/ClosestPointResult'
+  responses:
+    '404':
+      description: 'Not Found: the requested resource could not be found, but it may be available again in the future.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '403':
+      description: Permission, capacity, or authentication issues.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '400':
+      description: 'Bad request: one or more parameters were incorrectly specified or are mutually exclusive.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '500':
+      description: An error occurred while processing the request. Please try again later.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+    '401':
+      description: Access denied due to invalid subscription key or invalid Microsoft Entra ID bearer token.  Make sure to provide a valid key for an active Azure subscription and Maps resource.  Otherwise, verify the [WWW-Authenticate](https://tools.ietf.org/html/rfc6750#section-3.1) header for error code and description of the provided Microsoft Entra ID bearer token.
+      headers:
+        WWW-Authenticate:
+          description: Bearer realm="https://atlas.microsoft.com/", error="invalid_token", error_description="The access token expired"
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ODataErrorResponse'
   parameters:
-    ClientId:
-      name: x-ms-client-id
-      description: Specifies which account is intended for usage in conjunction with the Microsoft Entra ID security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Microsoft Entra ID security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance.
-      in: header
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
     Mode:
       name: mode
       in: query
@@ -1050,6 +1042,23 @@ components:
         enum:
         - All
         - EnterAndExit
+    ApiVersion:
+      name: api-version
+      description: Version number of Azure Maps API. Current version is 1.0
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+        default: '1.0'
+    SubscriptionKey:
+      name: subscription-key
+      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](https://docs.microsoft.com/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
+      in: query
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
     JsonFormat:
       name: format
       description: Desired format of the response. Only `json` format is supported.
@@ -1074,19 +1083,10 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    ApiVersion:
-      name: api-version
-      description: Version number of Azure Maps API. Current version is 1.0
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-        default: '1.0'
-    SubscriptionKey:
-      name: subscription-key
-      description: One of the Azure Maps keys provided from an Azure Map Account. Please refer to this [article](https://docs.microsoft.com/azure/azure-maps/how-to-manage-authentication) for details on how to manage authentication.
-      in: query
+    ClientId:
+      name: x-ms-client-id
+      description: Specifies which account is intended for usage in conjunction with the Microsoft Entra ID security model.  It represents a unique ID for the Azure Maps account and can be retrieved from the Azure Maps management  plane Account API. To use Microsoft Entra ID security in Azure Maps see the following [articles](https://aka.ms/amauthdetails) for guidance.
+      in: header
       required: false
       x-ms-parameter-location: client
       schema:

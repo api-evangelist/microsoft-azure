@@ -1663,15 +1663,6 @@ paths:
       summary: Microsoft Azure Get Catalog Usql Databases
 components:
   schemas:
-    USqlTableColumn:
-      properties:
-        name:
-          type: string
-          description: the name of the column in the table.
-        type:
-          type: string
-          description: the object type of the specified column (such as System.String).
-      description: A Data Lake Analytics catalog U-SQL table column item.
     USqlAssemblyFileInfo:
       properties:
         type:
@@ -1690,34 +1681,29 @@ components:
           type: string
           description: The content path to the assembly file.
       description: A Data Lake Analytics catalog U-SQL assembly file information item.
-    CatalogItem:
-      properties:
-        computeAccountName:
-          type: string
-          description: the name of the Data Lake Analytics account.
-        version:
-          type: string
-          format: uuid
-          description: the version of the catalog item.
-      description: A Data Lake Analytics catalog item.
-    USqlView:
+    USqlExternalDataSource:
       allOf:
       - $ref: '#/components/schemas/CatalogItem'
       properties:
         databaseName:
           type: string
           description: the name of the database.
-        schemaName:
-          type: string
-          description: the name of the schema associated with this view and database.
-        viewName:
+        externalDataSourceName:
           type: string
           x-ms-client-name: name
-          description: the name of the view.
-        definition:
+          description: the name of the external data source.
+        provider:
           type: string
-          description: the defined query of the view.
-      description: A Data Lake Analytics catalog U-SQL view item.
+          description: the name of the provider for the external data source.
+        providerString:
+          type: string
+          description: the name of the provider string for the external data source.
+        pushdownTypes:
+          type: array
+          items:
+            type: string
+          description: the list of types to push down from the external data source.
+      description: A Data Lake Analytics catalog U-SQL external datasource item.
     USqlType:
       allOf:
       - $ref: '#/components/schemas/CatalogItem'
@@ -1773,57 +1759,26 @@ components:
           type: boolean
           description: The switch indicating if this type is a complex type.
       description: A Data Lake Analytics catalog U-SQL type item.
-    USqlAssemblyClr:
+    USqlTableStatisticsList:
       allOf:
-      - $ref: '#/components/schemas/CatalogItem'
+      - $ref: '#/components/schemas/CatalogItemList'
       properties:
-        databaseName:
-          type: string
-          description: the name of the database.
-        assemblyClrName:
-          type: string
-          x-ms-client-name: name
-          description: the name of the assembly.
-        clrName:
-          type: string
-          description: the name of the CLR.
-      description: A Data Lake Analytics catalog U-SQL assembly CLR item.
-    USqlProcedure:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItem'
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlTableStatistics'
+          description: the list of table statistics in the database, schema and table combination
+      description: A Data Lake Analytics catalog U-SQL table statistics item list.
+    TypeFieldInfo:
       properties:
-        databaseName:
+        name:
           type: string
-          description: the name of the database.
-        schemaName:
+          description: the name of the field associated with this type.
+        type:
           type: string
-          description: the name of the schema associated with this procedure and database.
-        procName:
-          type: string
-          x-ms-client-name: name
-          description: the name of the procedure.
-        definition:
-          type: string
-          description: the defined query of the procedure.
-      description: A Data Lake Analytics catalog U-SQL procedure item.
-    USqlCredential:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItem'
-      properties:
-        databaseName:
-          type: string
-          description: the name of the database the credential is in.
-        identity:
-          type: string
-          description: the name of the secret associated with the credential.
-        credentialName:
-          type: string
-          x-ms-client-name: name
-          description: the name of the credential.
-        userName:
-          type: string
-          description: the user name associated with the credential.
-      description: A Data Lake Analytics catalog U-SQL credential item.
+          description: the type of the field.
+      description: A Data Lake Analytics catalog type field information item.
     USqlTableType:
       allOf:
       - $ref: '#/components/schemas/USqlType'
@@ -1835,6 +1790,28 @@ components:
             $ref: '#/components/schemas/TypeFieldInfo'
           description: the type field information associated with this table type.
       description: A Data Lake Analytics catalog U-SQL table type item.
+    USqlSecret:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
+      properties:
+        databaseName:
+          type: string
+          description: the name of the database.
+        secretName:
+          type: string
+          x-ms-client-name: name
+          description: the name of the secret.
+        creationTime:
+          type: string
+          format: date-time
+          description: the creation time of the credential object. This is the only information returned about a secret from a GET.
+        uri:
+          type: string
+          description: the URI identifier for the secret in the format <hostname>:<port>
+        password:
+          type: string
+          description: the password for the secret to pass in
+      description: A Data Lake Analytics catalog U-SQL secret item.
     USqlAssembly:
       allOf:
       - $ref: '#/components/schemas/CatalogItem'
@@ -1866,15 +1843,17 @@ components:
             $ref: '#/components/schemas/USqlAssemblyDependencyInfo'
           description: the list of dependencies associated with the assembly
       description: A Data Lake Analytics catalog U-SQL Assembly.
-    USqlDatabase:
+    USqlAssemblyList:
       allOf:
-      - $ref: '#/components/schemas/CatalogItem'
+      - $ref: '#/components/schemas/CatalogItemList'
       properties:
-        databaseName:
-          type: string
-          x-ms-client-name: name
-          description: the name of the database.
-      description: A Data Lake Analytics catalog U-SQL database item.
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlAssemblyClr'
+          description: the list of assemblies in the database
+      description: A Data Lake Analytics catalog U-SQL assembly CLR item list.
     USqlSchemaList:
       allOf:
       - $ref: '#/components/schemas/CatalogItemList'
@@ -1886,25 +1865,154 @@ components:
             $ref: '#/components/schemas/USqlSchema'
           description: the list of schemas in the database
       description: A Data Lake Analytics catalog U-SQL schema item list.
-    CatalogItemList:
+    CatalogItem:
       properties:
-        count:
-          type: integer
-          format: int32
-          description: the count of items in the list.
-        nextLink:
+        computeAccountName:
           type: string
-          description: the link to the next page of results.
-      description: A Data Lake Analytics catalog item list.
-    ExternalTable:
+          description: the name of the Data Lake Analytics account.
+        version:
+          type: string
+          format: uuid
+          description: the version of the catalog item.
+      description: A Data Lake Analytics catalog item.
+    USqlTable:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
       properties:
+        databaseName:
+          type: string
+          description: the name of the database.
+        schemaName:
+          type: string
+          description: the name of the schema associated with this table and database.
         tableName:
           type: string
-          description: the name of the table associated with this database and schema.
-        dataSource:
+          x-ms-client-name: name
+          description: the name of the table.
+        columnList:
+          type: array
+          items:
+            $ref: '#/components/schemas/USqlTableColumn'
+          description: the list of columns in this table
+        indexList:
+          type: array
+          items:
+            $ref: '#/components/schemas/USqlIndex'
+          description: the list of indices in this table
+        partitionKeyList:
+          type: array
+          items:
+            type: string
+          description: the list of partition keys in the table
+        externalTable:
+          $ref: '#/components/schemas/ExternalTable'
+          description: the external table associated with the table.
+        distributionInfo:
+          $ref: '#/components/schemas/USqlDistributionInfo'
+          description: the distributions info of the table
+      description: A Data Lake Analytics catalog U-SQL table item.
+    USqlAssemblyClr:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
+      properties:
+        databaseName:
+          type: string
+          description: the name of the database.
+        assemblyClrName:
+          type: string
+          x-ms-client-name: name
+          description: the name of the assembly.
+        clrName:
+          type: string
+          description: the name of the CLR.
+      description: A Data Lake Analytics catalog U-SQL assembly CLR item.
+    USqlIndex:
+      properties:
+        name:
+          type: string
+          description: the name of the index in the table.
+        indexKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/USqlDirectedColumn'
+          description: the list of directed columns in the index
+        columns:
+          type: array
+          items:
+            type: string
+          description: the list of columns in the index
+        distributionInfo:
+          $ref: '#/components/schemas/USqlDistributionInfo'
+          description: the distributions info of the index
+        partitionFunction:
+          type: string
+          format: uuid
+          description: partition function ID for the index.
+        partitionKeyList:
+          type: array
+          items:
+            type: string
+          description: the list of partition keys in the index
+        streamNames:
+          type: array
+          items:
+            type: string
+          description: the list of full paths to the streams that contain this index in the DataLake account.
+        isColumnstore:
+          type: boolean
+          description: the switch indicating if this index is a columnstore index.
+        indexId:
+          type: integer
+          format: int32
+          description: the ID of this index within the table.
+        isUnique:
+          type: boolean
+          description: the switch indicating if this index is a unique index.
+      description: A Data Lake Analytics catalog U-SQL table index item.
+    USqlAssemblyDependencyInfo:
+      properties:
+        entityId:
           $ref: '#/components/schemas/EntityId'
-          description: the data source associated with this external table.
-      description: A Data Lake Analytics catalog external table item.
+          description: the EntityId of the dependency.
+      description: A Data Lake Analytics catalog U-SQL dependency information item.
+    USqlProcedureList:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItemList'
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlProcedure'
+          description: the list of procedure in the database and schema combination
+      description: A Data Lake Analytics catalog U-SQL procedure item list.
+    USqlDirectedColumn:
+      properties:
+        name:
+          type: string
+          description: the name of the index in the table.
+        descending:
+          type: boolean
+          description: the switch indicating if the index is descending or not.
+      description: A Data Lake Analytics catalog U-SQL directed column item.
+    USqlView:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
+      properties:
+        databaseName:
+          type: string
+          description: the name of the database.
+        schemaName:
+          type: string
+          description: the name of the schema associated with this view and database.
+        viewName:
+          type: string
+          x-ms-client-name: name
+          description: the name of the view.
+        definition:
+          type: string
+          description: the defined query of the view.
+      description: A Data Lake Analytics catalog U-SQL view item.
     USqlTableStatistics:
       allOf:
       - $ref: '#/components/schemas/CatalogItem'
@@ -1954,7 +2062,7 @@ components:
             type: string
           description: the list of column names associated with these statistics.
       description: A Data Lake Analytics catalog U-SQL table statistics item.
-    USqlTablePartitionList:
+    USqlTableTypeList:
       allOf:
       - $ref: '#/components/schemas/CatalogItemList'
       properties:
@@ -1962,30 +2070,86 @@ components:
           type: array
           readOnly: true
           items:
-            $ref: '#/components/schemas/USqlTablePartition'
-          description: the list of table partitions in the database, schema and table combination
-      description: A Data Lake Analytics catalog U-SQL table partition item list.
-    EntityId:
+            $ref: '#/components/schemas/USqlTableType'
+          description: the list of table types in the database and schema combination
+      description: A Data Lake Analytics catalog U-SQL table type item list.
+    CatalogItemList:
       properties:
-        name:
-          $ref: '#/components/schemas/DdlName'
-          description: the name of the external table associated with this database, schema and table.
-        version:
+        count:
+          type: integer
+          format: int32
+          description: the count of items in the list.
+        nextLink:
           type: string
-          format: uuid
-          description: the version of the external data source.
-      description: A Data Lake Analytics catalog entity identifier object.
-    DataLakeAnalyticsCatalogSecretCreateOrUpdateParameters:
+          description: the link to the next page of results.
+      description: A Data Lake Analytics catalog item list.
+    USqlProcedure:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
       properties:
-        password:
+        databaseName:
           type: string
-          description: the password for the secret to pass in
-        uri:
+          description: the name of the database.
+        schemaName:
           type: string
-          description: the URI identifier for the secret in the format <hostname>:<port>
-      required:
-      - password
-      description: DataLakeAnalytics DataLakeAnalyticsAccount information.
+          description: the name of the schema associated with this procedure and database.
+        procName:
+          type: string
+          x-ms-client-name: name
+          description: the name of the procedure.
+        definition:
+          type: string
+          description: the defined query of the procedure.
+      description: A Data Lake Analytics catalog U-SQL procedure item.
+    USqlCredentialList:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItemList'
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlCredential'
+          description: the list of credentials in the database
+      description: A Data Lake Analytics catalog U-SQL credential item list.
+    USqlDatabase:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
+      properties:
+        databaseName:
+          type: string
+          x-ms-client-name: name
+          description: the name of the database.
+      description: A Data Lake Analytics catalog U-SQL database item.
+    USqlTableList:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItemList'
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlTable'
+          description: the list of tables in the database and schema combination
+      description: A Data Lake Analytics catalog U-SQL table item list.
+    USqlCredential:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
+      properties:
+        databaseName:
+          type: string
+          description: the name of the database the credential is in.
+        identity:
+          type: string
+          description: the name of the secret associated with the credential.
+        credentialName:
+          type: string
+          x-ms-client-name: name
+          description: the name of the credential.
+        userName:
+          type: string
+          description: the user name associated with the credential.
+      description: A Data Lake Analytics catalog U-SQL credential item.
     USqlDatabaseList:
       allOf:
       - $ref: '#/components/schemas/CatalogItemList'
@@ -1997,6 +2161,91 @@ components:
             $ref: '#/components/schemas/USqlDatabase'
           description: the list of databases
       description: A Data Lake Analytics catalog U-SQL database item list.
+    USqlTableColumn:
+      properties:
+        name:
+          type: string
+          description: the name of the column in the table.
+        type:
+          type: string
+          description: the object type of the specified column (such as System.String).
+      description: A Data Lake Analytics catalog U-SQL table column item.
+    USqlTableValuedFunction:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItem'
+      properties:
+        databaseName:
+          type: string
+          description: the name of the database.
+        schemaName:
+          type: string
+          description: the name of the schema associated with this database.
+        tvfName:
+          type: string
+          x-ms-client-name: name
+          description: the name of the table valued function.
+        definition:
+          type: string
+          description: the definition of the table valued function.
+      description: A Data Lake Analytics catalog U-SQL table valued function item.
+    USqlExternalDataSourceList:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItemList'
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlExternalDataSource'
+          description: the list of external data sources in the database
+      description: A Data Lake Analytics catalog U-SQL external datasource item list.
+    DataLakeAnalyticsCatalogSecretCreateOrUpdateParameters:
+      properties:
+        password:
+          type: string
+          description: the password for the secret to pass in
+        uri:
+          type: string
+          description: the URI identifier for the secret in the format <hostname>:<port>
+      required:
+      - password
+      description: DataLakeAnalytics DataLakeAnalyticsAccount information.
+    USqlTableValuedFunctionList:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItemList'
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlTableValuedFunction'
+          description: the list of table valued functions in the database and schema combination
+      description: A Data Lake Analytics catalog U-SQL table valued function item list.
+    DdlName:
+      properties:
+        firstPart:
+          type: string
+          description: the name of the table associated with this database and schema.
+        secondPart:
+          type: string
+          description: the name of the table associated with this database and schema.
+        thirdPart:
+          type: string
+          description: the name of the table associated with this database and schema.
+        server:
+          type: string
+          description: the name of the table associated with this database and schema.
+      description: A Data Lake Analytics DDL name item.
+    EntityId:
+      properties:
+        name:
+          $ref: '#/components/schemas/DdlName'
+          description: the name of the external table associated with this database, schema and table.
+        version:
+          type: string
+          format: uuid
+          description: the version of the external data source.
+      description: A Data Lake Analytics catalog entity identifier object.
     USqlDistributionInfo:
       properties:
         type:
@@ -2017,151 +2266,6 @@ components:
           format: int32
           description: the dynamic count of indices using this distribution.
       description: A Data Lake Analytics catalog U-SQL distribution information object.
-    USqlDirectedColumn:
-      properties:
-        name:
-          type: string
-          description: the name of the index in the table.
-        descending:
-          type: boolean
-          description: the switch indicating if the index is descending or not.
-      description: A Data Lake Analytics catalog U-SQL directed column item.
-    USqlExternalDataSourceList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlExternalDataSource'
-          description: the list of external data sources in the database
-      description: A Data Lake Analytics catalog U-SQL external datasource item list.
-    USqlViewList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlView'
-          description: the list of view in the database and schema combination
-      description: A Data Lake Analytics catalog U-SQL view item list.
-    USqlTableList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlTable'
-          description: the list of tables in the database and schema combination
-      description: A Data Lake Analytics catalog U-SQL table item list.
-    USqlExternalDataSource:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItem'
-      properties:
-        databaseName:
-          type: string
-          description: the name of the database.
-        externalDataSourceName:
-          type: string
-          x-ms-client-name: name
-          description: the name of the external data source.
-        provider:
-          type: string
-          description: the name of the provider for the external data source.
-        providerString:
-          type: string
-          description: the name of the provider string for the external data source.
-        pushdownTypes:
-          type: array
-          items:
-            type: string
-          description: the list of types to push down from the external data source.
-      description: A Data Lake Analytics catalog U-SQL external datasource item.
-    USqlCredentialList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlCredential'
-          description: the list of credentials in the database
-      description: A Data Lake Analytics catalog U-SQL credential item list.
-    DdlName:
-      properties:
-        firstPart:
-          type: string
-          description: the name of the table associated with this database and schema.
-        secondPart:
-          type: string
-          description: the name of the table associated with this database and schema.
-        thirdPart:
-          type: string
-          description: the name of the table associated with this database and schema.
-        server:
-          type: string
-          description: the name of the table associated with this database and schema.
-      description: A Data Lake Analytics DDL name item.
-    USqlTableValuedFunctionList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlTableValuedFunction'
-          description: the list of table valued functions in the database and schema combination
-      description: A Data Lake Analytics catalog U-SQL table valued function item list.
-    USqlIndex:
-      properties:
-        name:
-          type: string
-          description: the name of the index in the table.
-        indexKeys:
-          type: array
-          items:
-            $ref: '#/components/schemas/USqlDirectedColumn'
-          description: the list of directed columns in the index
-        columns:
-          type: array
-          items:
-            type: string
-          description: the list of columns in the index
-        distributionInfo:
-          $ref: '#/components/schemas/USqlDistributionInfo'
-          description: the distributions info of the index
-        partitionFunction:
-          type: string
-          format: uuid
-          description: partition function ID for the index.
-        partitionKeyList:
-          type: array
-          items:
-            type: string
-          description: the list of partition keys in the index
-        streamNames:
-          type: array
-          items:
-            type: string
-          description: the list of full paths to the streams that contain this index in the DataLake account.
-        isColumnstore:
-          type: boolean
-          description: the switch indicating if this index is a columnstore index.
-        indexId:
-          type: integer
-          format: int32
-          description: the ID of this index within the table.
-        isUnique:
-          type: boolean
-          description: the switch indicating if this index is a unique index.
-      description: A Data Lake Analytics catalog U-SQL table index item.
     USqlSchema:
       allOf:
       - $ref: '#/components/schemas/CatalogItem'
@@ -2174,130 +2278,15 @@ components:
           x-ms-client-name: name
           description: the name of the schema.
       description: A Data Lake Analytics catalog U-SQL schema item.
-    USqlTableStatisticsList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
+    ExternalTable:
       properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlTableStatistics'
-          description: the list of table statistics in the database, schema and table combination
-      description: A Data Lake Analytics catalog U-SQL table statistics item list.
-    USqlTableTypeList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlTableType'
-          description: the list of table types in the database and schema combination
-      description: A Data Lake Analytics catalog U-SQL table type item list.
-    USqlTable:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItem'
-      properties:
-        databaseName:
-          type: string
-          description: the name of the database.
-        schemaName:
-          type: string
-          description: the name of the schema associated with this table and database.
         tableName:
           type: string
-          x-ms-client-name: name
-          description: the name of the table.
-        columnList:
-          type: array
-          items:
-            $ref: '#/components/schemas/USqlTableColumn'
-          description: the list of columns in this table
-        indexList:
-          type: array
-          items:
-            $ref: '#/components/schemas/USqlIndex'
-          description: the list of indices in this table
-        partitionKeyList:
-          type: array
-          items:
-            type: string
-          description: the list of partition keys in the table
-        externalTable:
-          $ref: '#/components/schemas/ExternalTable'
-          description: the external table associated with the table.
-        distributionInfo:
-          $ref: '#/components/schemas/USqlDistributionInfo'
-          description: the distributions info of the table
-      description: A Data Lake Analytics catalog U-SQL table item.
-    USqlAssemblyDependencyInfo:
-      properties:
-        entityId:
+          description: the name of the table associated with this database and schema.
+        dataSource:
           $ref: '#/components/schemas/EntityId'
-          description: the EntityId of the dependency.
-      description: A Data Lake Analytics catalog U-SQL dependency information item.
-    USqlProcedureList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlProcedure'
-          description: the list of procedure in the database and schema combination
-      description: A Data Lake Analytics catalog U-SQL procedure item list.
-    USqlTypeList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlType'
-          description: the list of types in the database and schema combination
-      description: A Data Lake Analytics catalog U-SQL type item list.
-    USqlTableValuedFunction:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItem'
-      properties:
-        databaseName:
-          type: string
-          description: the name of the database.
-        schemaName:
-          type: string
-          description: the name of the schema associated with this database.
-        tvfName:
-          type: string
-          x-ms-client-name: name
-          description: the name of the table valued function.
-        definition:
-          type: string
-          description: the definition of the table valued function.
-      description: A Data Lake Analytics catalog U-SQL table valued function item.
-    USqlAssemblyList:
-      allOf:
-      - $ref: '#/components/schemas/CatalogItemList'
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/USqlAssemblyClr'
-          description: the list of assemblies in the database
-      description: A Data Lake Analytics catalog U-SQL assembly CLR item list.
-    TypeFieldInfo:
-      properties:
-        name:
-          type: string
-          description: the name of the field associated with this type.
-        type:
-          type: string
-          description: the type of the field.
-      description: A Data Lake Analytics catalog type field information item.
+          description: the data source associated with this external table.
+      description: A Data Lake Analytics catalog external table item.
     USqlTablePartition:
       allOf:
       - $ref: '#/components/schemas/CatalogItem'
@@ -2329,28 +2318,39 @@ components:
           format: date-time
           description: the creation time of the partition
       description: A Data Lake Analytics catalog U-SQL table partition item.
-    USqlSecret:
+    USqlViewList:
       allOf:
-      - $ref: '#/components/schemas/CatalogItem'
+      - $ref: '#/components/schemas/CatalogItemList'
       properties:
-        databaseName:
-          type: string
-          description: the name of the database.
-        secretName:
-          type: string
-          x-ms-client-name: name
-          description: the name of the secret.
-        creationTime:
-          type: string
-          format: date-time
-          description: the creation time of the credential object. This is the only information returned about a secret from a GET.
-        uri:
-          type: string
-          description: the URI identifier for the secret in the format <hostname>:<port>
-        password:
-          type: string
-          description: the password for the secret to pass in
-      description: A Data Lake Analytics catalog U-SQL secret item.
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlView'
+          description: the list of view in the database and schema combination
+      description: A Data Lake Analytics catalog U-SQL view item list.
+    USqlTablePartitionList:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItemList'
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlTablePartition'
+          description: the list of table partitions in the database, schema and table combination
+      description: A Data Lake Analytics catalog U-SQL table partition item list.
+    USqlTypeList:
+      allOf:
+      - $ref: '#/components/schemas/CatalogItemList'
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/USqlType'
+          description: the list of types in the database and schema combination
+      description: A Data Lake Analytics catalog U-SQL type item list.
   parameters:
     ApiVersionParameter:
       name: api-version

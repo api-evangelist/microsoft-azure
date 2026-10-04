@@ -52,21 +52,48 @@ paths:
         required: true
 components:
   schemas:
-    queryBody:
+    workspacesParam:
+      description: Workspace names to include in cross-workspace queries.
+      type: array
+      items:
+        type: string
+    logsColumnType:
+      type: string
+      description: The data type of this column.
+      enum:
+      - bool
+      - datetime
+      - dynamic
+      - int
+      - long
+      - real
+      - string
+      - guid
+      - decimal
+      - timespan
+      x-ms-enum:
+        name: logsColumnType
+        modelAsString: true
+    timespanParam:
+      description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+      type: string
+    queryParam:
       description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+      type: string
+    batchQueryResponse:
       type: object
       properties:
-        query:
-          description: The query to execute.
-          $ref: '#/components/schemas/queryParam'
-        timespan:
-          description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
-          $ref: '#/components/schemas/timespanParam'
-        workspaces:
-          description: A list of workspaces that are included in the query.
-          $ref: '#/components/schemas/workspacesParam'
-      required:
-      - query
+        id:
+          type: string
+        status:
+          type: integer
+        body:
+          type: object
+          $ref: '#/components/schemas/batchQueryResults'
+        headers:
+          type: object
+          additionalProperties:
+            type: string
     column:
       title: A table column.
       description: A column in a table.
@@ -78,9 +105,39 @@ components:
         type:
           description: The data type of this column.
           $ref: '#/components/schemas/logsColumnType'
-    timespanParam:
-      description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
-      type: string
+    errorInfo:
+      title: The code and message for an error.
+      type: object
+      properties:
+        code:
+          description: A machine readable error code.
+          type: string
+        message:
+          description: A human readable error message.
+          type: string
+        details:
+          description: error details.
+          type: array
+          items:
+            $ref: '#/components/schemas/errorDetail'
+        innererror:
+          description: Inner error details if they exist.
+          $ref: '#/components/schemas/errorInfo'
+        additionalProperties:
+          description: Additional properties that can be provided on the error info object
+          type: object
+      required:
+      - code
+      - message
+    batchResponse:
+      type: object
+      description: Response to a batch query.
+      properties:
+        responses:
+          type: array
+          description: An array of responses corresponding to each individual request in a batch.
+          items:
+            $ref: '#/components/schemas/batchQueryResponse'
     errorDetail:
       title: Error details.
       type: object
@@ -108,6 +165,32 @@ components:
       required:
       - code
       - message
+    batchRequest:
+      type: object
+      description: An array of requests.
+      properties:
+        requests:
+          type: array
+          description: An single request in a batch.
+          items:
+            $ref: '#/components/schemas/batchQueryRequest'
+      required:
+      - requests
+    queryBody:
+      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
+      type: object
+      properties:
+        query:
+          description: The query to execute.
+          $ref: '#/components/schemas/queryParam'
+        timespan:
+          description: Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+          $ref: '#/components/schemas/timespanParam'
+        workspaces:
+          description: A list of workspaces that are included in the query.
+          $ref: '#/components/schemas/workspacesParam'
+      required:
+      - query
     errorResponse:
       title: Error details.
       description: Contains details when the response code indicates an error.
@@ -142,90 +225,6 @@ components:
       - name
       - columns
       - rows
-    batchQueryResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        status:
-          type: integer
-        body:
-          type: object
-          $ref: '#/components/schemas/batchQueryResults'
-        headers:
-          type: object
-          additionalProperties:
-            type: string
-    batchResponse:
-      type: object
-      description: Response to a batch query.
-      properties:
-        responses:
-          type: array
-          description: An array of responses corresponding to each individual request in a batch.
-          items:
-            $ref: '#/components/schemas/batchQueryResponse'
-    logsColumnType:
-      type: string
-      description: The data type of this column.
-      enum:
-      - bool
-      - datetime
-      - dynamic
-      - int
-      - long
-      - real
-      - string
-      - guid
-      - decimal
-      - timespan
-      x-ms-enum:
-        name: logsColumnType
-        modelAsString: true
-    batchQueryResults:
-      title: A query response for a single query in a batch.
-      description: Contains the tables, columns & rows resulting from a query.
-      type: object
-      properties:
-        tables:
-          description: The list of tables, columns and rows.
-          type: array
-          items:
-            $ref: '#/components/schemas/table'
-        statistics:
-          type: object
-          description: Statistics represented in JSON format.
-          properties: {}
-        render:
-          type: object
-          description: Visualization data in JSON format.
-          properties: {}
-        error:
-          $ref: '#/components/schemas/errorInfo'
-    errorInfo:
-      title: The code and message for an error.
-      type: object
-      properties:
-        code:
-          description: A machine readable error code.
-          type: string
-        message:
-          description: A human readable error message.
-          type: string
-        details:
-          description: error details.
-          type: array
-          items:
-            $ref: '#/components/schemas/errorDetail'
-        innererror:
-          description: Inner error details if they exist.
-          $ref: '#/components/schemas/errorInfo'
-        additionalProperties:
-          description: Additional properties that can be provided on the error info object
-          type: object
-      required:
-      - code
-      - message
     batchQueryRequest:
       type: object
       description: An single request in a batch.
@@ -254,25 +253,26 @@ components:
       - workspace
       - body
       - id
-    queryParam:
-      description: The Analytics query. Learn more about the [Analytics query syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
-      type: string
-    batchRequest:
+    batchQueryResults:
+      title: A query response for a single query in a batch.
+      description: Contains the tables, columns & rows resulting from a query.
       type: object
-      description: An array of requests.
       properties:
-        requests:
+        tables:
+          description: The list of tables, columns and rows.
           type: array
-          description: An single request in a batch.
           items:
-            $ref: '#/components/schemas/batchQueryRequest'
-      required:
-      - requests
-    workspacesParam:
-      description: Workspace names to include in cross-workspace queries.
-      type: array
-      items:
-        type: string
+            $ref: '#/components/schemas/table'
+        statistics:
+          type: object
+          description: Statistics represented in JSON format.
+          properties: {}
+        render:
+          type: object
+          description: Visualization data in JSON format.
+          properties: {}
+        error:
+          $ref: '#/components/schemas/errorInfo'
   securitySchemes:
     oauth2:
       type: oauth2

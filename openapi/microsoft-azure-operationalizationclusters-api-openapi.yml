@@ -365,6 +365,112 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    ServiceAuthConfiguration:
+      type: object
+      description: Global service auth configuration properties. These are the data-plane authorization keys and are used if a service doesn't define it's own.
+      required:
+      - primaryAuthKeyHash
+      - secondaryAuthKeyHash
+      properties:
+        primaryAuthKeyHash:
+          type: string
+          description: The primary auth key hash. This is not returned in response of GET/PUT on the resource.. To see this please call listKeys API.
+        secondaryAuthKeyHash:
+          type: string
+          description: The secondary auth key hash. This is not returned in response of GET/PUT on the resource.. To see this please call listKeys API.
+    AutoScaleConfiguration:
+      type: object
+      description: AutoScale configuration properties.
+      properties:
+        status:
+          type: string
+          default: Disabled
+          description: If auto-scale is enabled for all services. Each service can turn it off individually.
+          enum:
+          - Enabled
+          - Disabled
+          x-ms-enum:
+            name: Status
+            modelAsString: true
+        minReplicas:
+          type: integer
+          description: The minimum number of replicas for each service.
+          minimum: 1
+          default: 1
+        maxReplicas:
+          type: integer
+          description: The maximum number of replicas for each service.
+          minimum: 1
+          default: 100
+        targetUtilization:
+          type: number
+          description: The target utilization.
+        refreshPeriodInSeconds:
+          type: integer
+          description: Refresh period in seconds.
+    UpdateSystemResponse:
+      type: object
+      description: Response of the updateSystem API
+      properties:
+        updateStatus:
+          type: string
+          description: Update status
+          readOnly: true
+          enum:
+          - InProgress
+          - Completed
+          x-ms-enum:
+            name: UpdateStatus
+            modelAsString: true
+        updateStartedOn:
+          type: string
+          description: 'Read Only: The date and time when the last system services update was started.'
+          format: date-time
+          readOnly: true
+        updateCompletedOn:
+          type: string
+          description: 'Read Only: The date and time when the last system services update completed.'
+          format: date-time
+          readOnly: true
+    KubernetesClusterProperties:
+      type: object
+      description: Kubernetes cluster specific properties
+      x-ms-discriminator-value: Kubernetes
+      required:
+      - servicePrincipal
+      properties:
+        servicePrincipal:
+          description: The Azure Service Principal used by Kubernetes
+          $ref: '#/components/schemas/ServicePrincipalProperties'
+    AppInsightsCredentials:
+      type: object
+      description: AppInsights credentials.
+      properties:
+        appId:
+          type: string
+          description: The AppInsights application ID.
+        apiKey:
+          type: string
+          description: The AppInsights API key. This is not returned in response of GET/PUT on the resource.. To see this please call listKeys API.
+    PaginatedOperationalizationClustersList:
+      type: object
+      description: Paginated list of operationalization clusters.
+      properties:
+        value:
+          type: array
+          description: An array of cluster objects.
+          items:
+            $ref: '#/components/schemas/OperationalizationCluster'
+        nextLink:
+          type: string
+          description: A continuation link (absolute URI) to the next page of results in the list.
+    ContainerRegistryProperties:
+      type: object
+      description: Properties of Azure Container Registry.
+      properties:
+        resourceId:
+          type: string
+          description: ARM resource ID of the Azure Container Registry used to store Docker images for web services in the cluster. If not provided one will be created. This cannot be changed once the cluster is created.
     AcsClusterProperties:
       type: object
       description: Information about the container service backing the cluster
@@ -453,48 +559,24 @@ components:
           x-ms-enum:
             name: AgentVMSizeTypes
             modelAsString: true
-    ContainerRegistryCredentials:
+    ErrorResponse:
       type: object
-      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
+      description: Error response information
       properties:
-        loginServer:
+        code:
           type: string
-          description: The ACR login server name. User name is the first part of the FQDN.
-          readOnly: true
-        password:
+          description: error code
+        message:
           type: string
-          description: The ACR primary password.
-          readOnly: true
-        password2:
-          type: string
-          description: The ACR secondary password.
-          readOnly: true
-    SystemServices:
-      type: string
-      description: The choices of system services.
-      enum:
-      - Scoring
-      - Batch
-      x-ms-enum:
-        name: SystemServices
-        modelAsString: true
-    ContainerServiceCredentials:
-      type: object
-      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
-      properties:
-        acsKubeConfig:
-          type: string
-          description: The ACS kube config file.
-          readOnly: true
-        servicePrincipalConfiguration:
-          type: string
-          description: Client secret for the Service Principal used by Kubernetes.
-          readOnly: true
-          $ref: '#/components/schemas/ServicePrincipalProperties'
-        imagePullSecretName:
-          type: string
-          description: The ACR image pull secret name which was created in Kubernetes.
-          readOnly: true
+          description: Error message
+        details:
+          type: array
+          description: An array of error detail objects.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - code
+      - message
     CheckUpdateResponse:
       type: object
       description: Information about updates available for system services in a cluster.
@@ -509,6 +591,60 @@ components:
           x-ms-enum:
             name: UpdatesAvailable
             modelAsString: true
+    OperationalizationClusterCredentials:
+      type: object
+      description: Credentials to resources in the cluster.
+      properties:
+        storageAccount:
+          type: object
+          description: Credentials for the Storage Account.
+          $ref: '#/components/schemas/StorageAccountCredentials'
+        containerRegistry:
+          type: object
+          description: Credentials for Azure Container Registry.
+          $ref: '#/components/schemas/ContainerRegistryCredentials'
+        containerService:
+          type: object
+          description: Credentials for Azure Container Service.
+          $ref: '#/components/schemas/ContainerServiceCredentials'
+        appInsights:
+          type: object
+          description: Credentials for Azure AppInsights.
+          $ref: '#/components/schemas/AppInsightsCredentials'
+        serviceAuthConfiguration:
+          type: object
+          description: Global authorization keys for all user services deployed in cluster. These are used if the service does not have auth keys.
+          $ref: '#/components/schemas/ServiceAuthConfiguration'
+        sslConfiguration:
+          type: object
+          description: The SSL configuration for the services.
+          $ref: '#/components/schemas/SslConfiguration'
+    StorageAccountCredentials:
+      type: object
+      description: Access information for the storage account.
+      properties:
+        resourceId:
+          type: string
+          description: The ARM resource ID of the storage account.
+          readOnly: true
+        primaryKey:
+          type: string
+          description: The primary key of the storage account.
+          readOnly: true
+        secondaryKey:
+          type: string
+          description: The secondary key of the storage account.
+          readOnly: true
+    OperationalizationCluster:
+      type: object
+      description: Instance of an Azure ML Operationalization Cluster resource.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/OperationalizationClusterProperties'
+          description: Properties of an operationalization cluster.
     SslConfiguration:
       type: object
       description: SSL configuration. If configured data-plane calls to user services will be exposed over SSL only.
@@ -529,31 +665,65 @@ components:
         key:
           type: string
           description: The SSL key data in PEM format encoded as base64 string. This is not returned in response of GET/PUT on the resource.. To see this please call listKeys API.
-    PaginatedOperationalizationClustersList:
+    ContainerServiceCredentials:
       type: object
-      description: Paginated list of operationalization clusters.
+      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
       properties:
-        value:
-          type: array
-          description: An array of cluster objects.
-          items:
-            $ref: '#/components/schemas/OperationalizationCluster'
-        nextLink:
+        acsKubeConfig:
           type: string
-          description: A continuation link (absolute URI) to the next page of results in the list.
-    ServiceAuthConfiguration:
-      type: object
-      description: Global service auth configuration properties. These are the data-plane authorization keys and are used if a service doesn't define it's own.
+          description: The ACS kube config file.
+          readOnly: true
+        servicePrincipalConfiguration:
+          type: string
+          description: Client secret for the Service Principal used by Kubernetes.
+          readOnly: true
+          $ref: '#/components/schemas/ServicePrincipalProperties'
+        imagePullSecretName:
+          type: string
+          description: The ACR image pull secret name which was created in Kubernetes.
+          readOnly: true
+    Resource:
+      description: Azure resource
+      x-ms-azure-resource: true
       required:
-      - primaryAuthKeyHash
-      - secondaryAuthKeyHash
+      - location
       properties:
-        primaryAuthKeyHash:
+        id:
+          description: Specifies the resource ID.
           type: string
-          description: The primary auth key hash. This is not returned in response of GET/PUT on the resource.. To see this please call listKeys API.
-        secondaryAuthKeyHash:
+          readOnly: true
+        name:
+          description: Specifies the name of the resource.
           type: string
-          description: The secondary auth key hash. This is not returned in response of GET/PUT on the resource.. To see this please call listKeys API.
+          readOnly: true
+        location:
+          description: Specifies the location of the resource.
+          type: string
+        type:
+          description: Specifies the type of the resource.
+          type: string
+          readOnly: true
+        tags:
+          description: Contains resource tags defined as key/value pairs.
+          type: object
+          additionalProperties:
+            type: string
+    ContainerRegistryCredentials:
+      type: object
+      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
+      properties:
+        loginServer:
+          type: string
+          description: The ACR login server name. User name is the first part of the FQDN.
+          readOnly: true
+        password:
+          type: string
+          description: The ACR primary password.
+          readOnly: true
+        password2:
+          type: string
+          description: The ACR secondary password.
+          readOnly: true
     GlobalServiceConfiguration:
       type: object
       description: Global configuration for services in the cluster.
@@ -573,30 +743,41 @@ components:
       additionalProperties:
         type: string
         description: Any additional configuration key-value pairs.
-    StorageAccountProperties:
+    ServicePrincipalProperties:
       type: object
-      description: Properties of Storage Account.
+      description: The Azure service principal used by Kubernetes for configuring load balancers
+      required:
+      - clientId
+      - secret
       properties:
-        resourceId:
+        clientId:
           type: string
-          description: ARM resource ID of the Azure Storage Account to store CLI specific files. If not provided one will be created. This cannot be changed once the cluster is created.
-    ContainerRegistryProperties:
+          description: The service principal client ID
+        secret:
+          type: string
+          description: The service principal secret. This is not returned in response of GET/PUT on the resource. To see this please call listKeys.
+    ErrorDetail:
       type: object
-      description: Properties of Azure Container Registry.
+      description: Error detail information.
       properties:
-        resourceId:
+        code:
           type: string
-          description: ARM resource ID of the Azure Container Registry used to store Docker images for web services in the cluster. If not provided one will be created. This cannot be changed once the cluster is created.
-    AppInsightsCredentials:
-      type: object
-      description: AppInsights credentials.
-      properties:
-        appId:
+          description: error code
+        message:
           type: string
-          description: The AppInsights application ID.
-        apiKey:
-          type: string
-          description: The AppInsights API key. This is not returned in response of GET/PUT on the resource.. To see this please call listKeys API.
+          description: error message
+      required:
+      - code
+      - message
+    SystemServices:
+      type: string
+      description: The choices of system services.
+      enum:
+      - Scoring
+      - Batch
+      x-ms-enum:
+        name: SystemServices
+        modelAsString: true
     OperationalizationClusterProperties:
       type: object
       description: Properties of an operationalization cluster
@@ -653,93 +834,13 @@ components:
         globalServiceConfiguration:
           $ref: '#/components/schemas/GlobalServiceConfiguration'
           description: Contains global configuration for the web services in the cluster.
-    ServicePrincipalProperties:
+    StorageAccountProperties:
       type: object
-      description: The Azure service principal used by Kubernetes for configuring load balancers
-      required:
-      - clientId
-      - secret
+      description: Properties of Storage Account.
       properties:
-        clientId:
+        resourceId:
           type: string
-          description: The service principal client ID
-        secret:
-          type: string
-          description: The service principal secret. This is not returned in response of GET/PUT on the resource. To see this please call listKeys.
-    OperationalizationCluster:
-      type: object
-      description: Instance of an Azure ML Operationalization Cluster resource.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/OperationalizationClusterProperties'
-          description: Properties of an operationalization cluster.
-    KubernetesClusterProperties:
-      type: object
-      description: Kubernetes cluster specific properties
-      x-ms-discriminator-value: Kubernetes
-      required:
-      - servicePrincipal
-      properties:
-        servicePrincipal:
-          description: The Azure Service Principal used by Kubernetes
-          $ref: '#/components/schemas/ServicePrincipalProperties'
-    AutoScaleConfiguration:
-      type: object
-      description: AutoScale configuration properties.
-      properties:
-        status:
-          type: string
-          default: Disabled
-          description: If auto-scale is enabled for all services. Each service can turn it off individually.
-          enum:
-          - Enabled
-          - Disabled
-          x-ms-enum:
-            name: Status
-            modelAsString: true
-        minReplicas:
-          type: integer
-          description: The minimum number of replicas for each service.
-          minimum: 1
-          default: 1
-        maxReplicas:
-          type: integer
-          description: The maximum number of replicas for each service.
-          minimum: 1
-          default: 100
-        targetUtilization:
-          type: number
-          description: The target utilization.
-        refreshPeriodInSeconds:
-          type: integer
-          description: Refresh period in seconds.
-    UpdateSystemResponse:
-      type: object
-      description: Response of the updateSystem API
-      properties:
-        updateStatus:
-          type: string
-          description: Update status
-          readOnly: true
-          enum:
-          - InProgress
-          - Completed
-          x-ms-enum:
-            name: UpdateStatus
-            modelAsString: true
-        updateStartedOn:
-          type: string
-          description: 'Read Only: The date and time when the last system services update was started.'
-          format: date-time
-          readOnly: true
-        updateCompletedOn:
-          type: string
-          description: 'Read Only: The date and time when the last system services update completed.'
-          format: date-time
-          readOnly: true
+          description: ARM resource ID of the Azure Storage Account to store CLI specific files. If not provided one will be created. This cannot be changed once the cluster is created.
     OperationalizationClusterUpdateParameters:
       type: object
       description: Parameters for PATCH operation on an operationalization cluster
@@ -749,121 +850,24 @@ components:
           additionalProperties:
             type: string
           description: Gets or sets a list of key value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups). A maximum of 15 tags can be provided for a resource. Each tag must have a key no greater in length than 128 characters and a value no greater in length than 256 characters.
-    StorageAccountCredentials:
+    KubernetesClusterProperties_2:
       type: object
-      description: Access information for the storage account.
+      description: Kubernetes cluster specific properties
+      x-ms-discriminator-value: Kubernetes
       properties:
-        resourceId:
-          type: string
-          description: The ARM resource ID of the storage account.
-          readOnly: true
-        primaryKey:
-          type: string
-          description: The primary key of the storage account.
-          readOnly: true
-        secondaryKey:
-          type: string
-          description: The secondary key of the storage account.
-          readOnly: true
-    OperationalizationClusterCredentials:
+        servicePrincipal:
+          description: The Azure Service Principal used by Kubernetes
+          $ref: '#/components/schemas/ServicePrincipalProperties'
+    AppInsightsCredentials_2:
       type: object
-      description: Credentials to resources in the cluster.
+      description: AppInsights credentials.
       properties:
-        storageAccount:
-          type: object
-          description: Credentials for the Storage Account.
-          $ref: '#/components/schemas/StorageAccountCredentials'
-        containerRegistry:
-          type: object
-          description: Credentials for Azure Container Registry.
-          $ref: '#/components/schemas/ContainerRegistryCredentials'
-        containerService:
-          type: object
-          description: Credentials for Azure Container Service.
-          $ref: '#/components/schemas/ContainerServiceCredentials'
-        appInsights:
-          type: object
-          description: Credentials for Azure AppInsights.
-          $ref: '#/components/schemas/AppInsightsCredentials'
-        serviceAuthConfiguration:
-          type: object
-          description: Global authorization keys for all user services deployed in cluster. These are used if the service does not have auth keys.
-          $ref: '#/components/schemas/ServiceAuthConfiguration'
-        sslConfiguration:
-          type: object
-          description: The SSL configuration for the services.
-          $ref: '#/components/schemas/SslConfiguration'
-    ErrorDetail:
-      type: object
-      description: Error detail information.
-      properties:
-        code:
+        appId:
           type: string
-          description: error code
-        message:
+          description: The AppInsights application ID.
+        instrumentationKey:
           type: string
-          description: error message
-      required:
-      - code
-      - message
-    ErrorResponse:
-      type: object
-      description: Error response information
-      properties:
-        code:
-          type: string
-          description: error code
-        message:
-          type: string
-          description: Error message
-        details:
-          type: array
-          description: An array of error detail objects.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      required:
-      - code
-      - message
-    Resource:
-      description: Azure resource
-      x-ms-azure-resource: true
-      required:
-      - location
-      properties:
-        id:
-          description: Specifies the resource ID.
-          type: string
-          readOnly: true
-        name:
-          description: Specifies the name of the resource.
-          type: string
-          readOnly: true
-        location:
-          description: Specifies the location of the resource.
-          type: string
-        type:
-          description: Specifies the type of the resource.
-          type: string
-          readOnly: true
-        tags:
-          description: Contains resource tags defined as key/value pairs.
-          type: object
-          additionalProperties:
-            type: string
-    CheckSystemServicesUpdatesAvailableResponse:
-      type: object
-      description: Information about updates available for system services in a cluster.
-      properties:
-        updatesAvailable:
-          type: string
-          description: Yes if updates are available for the system services, No if not.
-          readOnly: true
-          enum:
-          - 'Yes'
-          - 'No'
-          x-ms-enum:
-            name: UpdatesAvailable
-            modelAsString: true
+          description: The AppInsights instrumentation key. This is not returned in response of GET/PUT on the resource. To see this please call listKeys API.
     AcsClusterProperties_2:
       type: object
       description: Information about the container service backing the cluster
@@ -960,49 +964,48 @@ components:
           x-ms-enum:
             name: AgentVMSizeTypes
             modelAsString: true
-    ContainerRegistryCredentials_2:
+    ErrorResponse_2:
       type: object
-      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
+      description: Error response information.
       properties:
-        loginServer:
+        code:
           type: string
-          description: The ACR login server name. User name is the first part of the FQDN.
-          readOnly: true
-        password:
+          description: Error code.
+        message:
           type: string
-          description: The ACR primary password.
-          readOnly: true
-        password2:
-          type: string
-          description: The ACR secondary password.
-          readOnly: true
-        username:
-          type: string
-          description: The ACR login username.
-          readOnly: true
-    ErrorResponseWrapper:
+          description: Error message.
+        details:
+          type: array
+          description: An array of error detail objects.
+          items:
+            $ref: '#/components/schemas/ErrorDetail_2'
+          x-ms-identifiers:
+          - code
+      required:
+      - code
+      - message
+    OperationalizationClusterCredentials_2:
       type: object
-      description: Wrapper for error response to follow ARM guidelines.
+      description: Credentials to resources in the cluster.
       properties:
-        error:
-          description: The error response.
-          $ref: '#/components/schemas/ErrorResponse_2'
-    ContainerServiceCredentials_2:
-      type: object
-      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
-      properties:
-        acsKubeConfig:
-          type: string
-          description: The ACS kube config file.
-          readOnly: true
-        servicePrincipalConfiguration:
-          description: Service principal configuration used by Kubernetes.
-          readOnly: true
-          $ref: '#/components/schemas/ServicePrincipalProperties'
-        imagePullSecretName:
-          type: string
-          description: The ACR image pull secret name which was created in Kubernetes.
-          readOnly: true
+        storageAccount:
+          description: Credentials for the Storage Account.
+          $ref: '#/components/schemas/StorageAccountCredentials'
+        containerRegistry:
+          description: Credentials for Azure Container Registry.
+          $ref: '#/components/schemas/ContainerRegistryCredentials_2'
+        containerService:
+          description: Credentials for Azure Container Service.
+          $ref: '#/components/schemas/ContainerServiceCredentials_2'
+        appInsights:
+          description: Credentials for Azure AppInsights.
+          $ref: '#/components/schemas/AppInsightsCredentials_2'
+        serviceAuthConfiguration:
+          description: Global authorization keys for all user services deployed in cluster. These are used if the service does not have auth keys.
+          $ref: '#/components/schemas/ServiceAuthConfiguration'
+        sslConfiguration:
+          description: The SSL configuration for the services.
+          $ref: '#/components/schemas/SslConfiguration_2'
     SslConfiguration_2:
       type: object
       description: SSL configuration. If configured data-plane calls to user services will be exposed over SSL only.
@@ -1026,30 +1029,117 @@ components:
         cname:
           type: string
           description: The CName of the certificate.
-    SystemService:
+    ContainerServiceCredentials_2:
       type: object
-      description: Information about a system service deployed in the cluster
-      required:
-      - systemServiceType
+      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
       properties:
-        systemServiceType:
+        acsKubeConfig:
           type: string
-          description: The system service type
-          enum:
-          - None
-          - ScoringFrontEnd
-          - BatchFrontEnd
-          x-ms-enum:
-            name: SystemServiceType
-            modelAsString: true
-        publicIpAddress:
-          type: string
-          description: The public IP address of the system service
+          description: The ACS kube config file.
           readOnly: true
-        version:
-          type: string
-          description: The state of the system service
+        servicePrincipalConfiguration:
+          description: Service principal configuration used by Kubernetes.
           readOnly: true
+          $ref: '#/components/schemas/ServicePrincipalProperties'
+        imagePullSecretName:
+          type: string
+          description: The ACR image pull secret name which was created in Kubernetes.
+          readOnly: true
+    Resource_2:
+      description: Azure resource
+      x-ms-azure-resource: true
+      required:
+      - location
+      properties:
+        id:
+          description: Specifies the resource ID.
+          type: string
+          readOnly: true
+        name:
+          description: Specifies the name of the resource.
+          type: string
+          readOnly: true
+        location:
+          description: Specifies the location of the resource.
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        type:
+          description: Specifies the type of the resource.
+          type: string
+          readOnly: true
+        tags:
+          description: Contains resource tags defined as key/value pairs.
+          type: object
+          additionalProperties:
+            type: string
+    ContainerRegistryCredentials_2:
+      type: object
+      description: Information about the Azure Container Registry which contains the images deployed to the cluster.
+      properties:
+        loginServer:
+          type: string
+          description: The ACR login server name. User name is the first part of the FQDN.
+          readOnly: true
+        password:
+          type: string
+          description: The ACR primary password.
+          readOnly: true
+        password2:
+          type: string
+          description: The ACR secondary password.
+          readOnly: true
+        username:
+          type: string
+          description: The ACR login username.
+          readOnly: true
+    GlobalServiceConfiguration_2:
+      type: object
+      description: Global configuration for services in the cluster.
+      properties:
+        etag:
+          type: string
+          description: The configuration ETag for updates.
+        ssl:
+          description: The SSL configuration properties
+          $ref: '#/components/schemas/SslConfiguration_2'
+        serviceAuth:
+          description: Optional global authorization keys for all user services deployed in cluster. These are used if the service does not have auth keys.
+          $ref: '#/components/schemas/ServiceAuthConfiguration'
+        autoScale:
+          description: The auto-scale configuration
+          $ref: '#/components/schemas/AutoScaleConfiguration'
+      additionalProperties:
+        type: object
+        description: Any additional configuration key-value pairs.
+    ErrorResponseWrapper:
+      type: object
+      description: Wrapper for error response to follow ARM guidelines.
+      properties:
+        error:
+          description: The error response.
+          $ref: '#/components/schemas/ErrorResponse_2'
+    ErrorDetail_2:
+      type: object
+      description: Error detail information.
+      properties:
+        code:
+          type: string
+          description: Error code.
+        message:
+          type: string
+          description: Error message.
+      required:
+      - code
+      - message
+    AppInsightsProperties:
+      type: object
+      description: Properties of App Insights.
+      properties:
+        resourceId:
+          type: string
+          description: ARM resource ID of the App Insights.
     UpdateSystemServicesResponse:
       type: object
       description: Response of the update system services API
@@ -1079,35 +1169,44 @@ components:
           description: The date and time when the last system services update completed.
           format: date-time
           readOnly: true
-    GlobalServiceConfiguration_2:
+    SystemService:
       type: object
-      description: Global configuration for services in the cluster.
+      description: Information about a system service deployed in the cluster
+      required:
+      - systemServiceType
       properties:
-        etag:
+        systemServiceType:
           type: string
-          description: The configuration ETag for updates.
-        ssl:
-          description: The SSL configuration properties
-          $ref: '#/components/schemas/SslConfiguration_2'
-        serviceAuth:
-          description: Optional global authorization keys for all user services deployed in cluster. These are used if the service does not have auth keys.
-          $ref: '#/components/schemas/ServiceAuthConfiguration'
-        autoScale:
-          description: The auto-scale configuration
-          $ref: '#/components/schemas/AutoScaleConfiguration'
-      additionalProperties:
-        type: object
-        description: Any additional configuration key-value pairs.
-    AppInsightsCredentials_2:
+          description: The system service type
+          enum:
+          - None
+          - ScoringFrontEnd
+          - BatchFrontEnd
+          x-ms-enum:
+            name: SystemServiceType
+            modelAsString: true
+        publicIpAddress:
+          type: string
+          description: The public IP address of the system service
+          readOnly: true
+        version:
+          type: string
+          description: The state of the system service
+          readOnly: true
+    CheckSystemServicesUpdatesAvailableResponse:
       type: object
-      description: AppInsights credentials.
+      description: Information about updates available for system services in a cluster.
       properties:
-        appId:
+        updatesAvailable:
           type: string
-          description: The AppInsights application ID.
-        instrumentationKey:
-          type: string
-          description: The AppInsights instrumentation key. This is not returned in response of GET/PUT on the resource. To see this please call listKeys API.
+          description: Yes if updates are available for the system services, No if not.
+          readOnly: true
+          enum:
+          - 'Yes'
+          - 'No'
+          x-ms-enum:
+            name: UpdatesAvailable
+            modelAsString: true
     OperationalizationClusterProperties_2:
       type: object
       description: Properties of an operationalization cluster
@@ -1174,105 +1273,6 @@ components:
         globalServiceConfiguration:
           description: Contains global configuration for the web services in the cluster.
           $ref: '#/components/schemas/GlobalServiceConfiguration_2'
-    KubernetesClusterProperties_2:
-      type: object
-      description: Kubernetes cluster specific properties
-      x-ms-discriminator-value: Kubernetes
-      properties:
-        servicePrincipal:
-          description: The Azure Service Principal used by Kubernetes
-          $ref: '#/components/schemas/ServicePrincipalProperties'
-    OperationalizationClusterCredentials_2:
-      type: object
-      description: Credentials to resources in the cluster.
-      properties:
-        storageAccount:
-          description: Credentials for the Storage Account.
-          $ref: '#/components/schemas/StorageAccountCredentials'
-        containerRegistry:
-          description: Credentials for Azure Container Registry.
-          $ref: '#/components/schemas/ContainerRegistryCredentials_2'
-        containerService:
-          description: Credentials for Azure Container Service.
-          $ref: '#/components/schemas/ContainerServiceCredentials_2'
-        appInsights:
-          description: Credentials for Azure AppInsights.
-          $ref: '#/components/schemas/AppInsightsCredentials_2'
-        serviceAuthConfiguration:
-          description: Global authorization keys for all user services deployed in cluster. These are used if the service does not have auth keys.
-          $ref: '#/components/schemas/ServiceAuthConfiguration'
-        sslConfiguration:
-          description: The SSL configuration for the services.
-          $ref: '#/components/schemas/SslConfiguration_2'
-    ErrorDetail_2:
-      type: object
-      description: Error detail information.
-      properties:
-        code:
-          type: string
-          description: Error code.
-        message:
-          type: string
-          description: Error message.
-      required:
-      - code
-      - message
-    ErrorResponse_2:
-      type: object
-      description: Error response information.
-      properties:
-        code:
-          type: string
-          description: Error code.
-        message:
-          type: string
-          description: Error message.
-        details:
-          type: array
-          description: An array of error detail objects.
-          items:
-            $ref: '#/components/schemas/ErrorDetail_2'
-          x-ms-identifiers:
-          - code
-      required:
-      - code
-      - message
-    Resource_2:
-      description: Azure resource
-      x-ms-azure-resource: true
-      required:
-      - location
-      properties:
-        id:
-          description: Specifies the resource ID.
-          type: string
-          readOnly: true
-        name:
-          description: Specifies the name of the resource.
-          type: string
-          readOnly: true
-        location:
-          description: Specifies the location of the resource.
-          type: string
-          x-ms-mutability:
-          - create
-          - read
-        type:
-          description: Specifies the type of the resource.
-          type: string
-          readOnly: true
-        tags:
-          description: Contains resource tags defined as key/value pairs.
-          type: object
-          additionalProperties:
-            type: string
-    AppInsightsProperties:
-      type: object
-      description: Properties of App Insights.
-      properties:
-        resourceId:
-          type: string
-          description: ARM resource ID of the App Insights.
   parameters:
     SubscriptionIdParameter:
       name: subscriptionId
@@ -1281,6 +1281,17 @@ components:
       required: true
       schema:
         type: string
+    ClusterNameParameter:
+      name: clusterName
+      description: The name of the cluster.
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 90
+        minLength: 1
+        pattern: ^[a-zA-Z][-\w\._\(\)]+[a-zA-Z0-9]$
     ApiVersionParameter:
       in: query
       name: api-version
@@ -1299,17 +1310,6 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+$
-    ClusterNameParameter:
-      name: clusterName
-      description: The name of the cluster.
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 90
-        minLength: 1
-        pattern: ^[a-zA-Z][-\w\._\(\)]+[a-zA-Z0-9]$
     DeleteAllParameter:
       name: deleteAll
       description: If true, deletes all resources associated with this cluster.

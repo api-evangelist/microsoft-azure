@@ -389,31 +389,6 @@ paths:
         required: true
 components:
   schemas:
-    DedicatedCapacity:
-      description: Represents an instance of a Dedicated Capacity resource.
-      type: object
-      properties:
-        sku:
-          $ref: '#/components/schemas/CapacitySku'
-          description: The SKU of the PowerBI Dedicated capacity resource.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/DedicatedCapacityProperties'
-          description: Properties of the provision operation request.
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      required:
-      - sku
-    SkuDetailsForExistingResource:
-      description: An object that represents SKU details for existing resources
-      type: object
-      properties:
-        resourceType:
-          type: string
-          description: The resource type
-        sku:
-          $ref: '#/components/schemas/CapacitySku'
-          description: The SKU in SKU details for existing resources.
     DedicatedCapacityUpdateParameters:
       description: Provision request specification
       type: object
@@ -430,27 +405,50 @@ components:
           x-ms-client-flatten: true
           $ref: '#/components/schemas/DedicatedCapacityMutableProperties'
           description: Properties of the provision operation request.
-    IdentityType:
-      description: The type of identity that created/modified the resource.
-      type: string
-      enum:
-      - User
-      - Application
-      - ManagedIdentity
-      - Key
-      x-ms-enum:
-        name: IdentityType
-        modelAsString: true
-    DedicatedCapacityAdministrators:
-      description: An array of administrator user identities
+    SkuEnumerationForExistingResourceResult:
+      description: An object that represents enumerating SKUs for existing resources
       type: object
       properties:
-        members:
+        value:
           type: array
           items:
+            $ref: '#/components/schemas/SkuDetailsForExistingResource'
+          x-ms-identifiers:
+          - /sku/name
+          description: The collection of available SKUs for existing resources
+    Resource:
+      description: Represents an instance of an PowerBI Dedicated resource.
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: An identifier that represents the PowerBI Dedicated resource.
+        name:
+          type: string
+          readOnly: true
+          description: The name of the PowerBI Dedicated resource.
+        type:
+          type: string
+          readOnly: true
+          description: The type of the PowerBI Dedicated resource.
+        location:
+          type: string
+          description: Location of the PowerBI Dedicated resource.
+          x-ms-mutability:
+          - create
+          - read
+        tags:
+          type: object
+          additionalProperties:
             type: string
-            description: 'The UPN of the user. For example: johnsmith@contoso.com.'
-          description: An array of administrator user identities.
+          description: Key-value pairs of additional resource provisioning properties.
+        systemData:
+          $ref: '#/components/schemas/SystemData'
+          description: Metadata pertaining to creation and last modification of the resource.
+      required:
+      - location
+      x-ms-azure-resource: true
     CheckCapacityNameAvailabilityResult:
       description: The checking result of capacity name availability.
       type: object
@@ -464,6 +462,54 @@ components:
         message:
           type: string
           description: The detailed message of the request unavailability.
+    CheckCapacityNameAvailabilityParameters:
+      description: Details of capacity name request body.
+      type: object
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z][a-z0-9]*$
+          minLength: 3
+          maxLength: 63
+          description: Name for checking availability.
+        type:
+          type: string
+          default: Microsoft.PowerBIDedicated/capacities
+          description: The resource type of PowerBI dedicated.
+    IdentityType:
+      description: The type of identity that created/modified the resource.
+      type: string
+      enum:
+      - User
+      - Application
+      - ManagedIdentity
+      - Key
+      x-ms-enum:
+        name: IdentityType
+        modelAsString: true
+    ErrorResponse:
+      type: object
+      description: Describes the format of Error response.
+      properties:
+        error:
+          description: The error object
+          properties:
+            code:
+              type: string
+              description: Error code
+            message:
+              type: string
+              description: Error message indicating why the operation failed.
+    SkuDetailsForExistingResource:
+      description: An object that represents SKU details for existing resources
+      type: object
+      properties:
+        resourceType:
+          type: string
+          description: The resource type
+        sku:
+          $ref: '#/components/schemas/CapacitySku'
+          description: The SKU in SKU details for existing resources.
     DedicatedCapacityMutableProperties:
       description: An object that represents a set of mutable Dedicated capacity resource properties.
       type: object
@@ -488,17 +534,6 @@ components:
           type: string
           description: Capacity name
           readOnly: true
-    SkuEnumerationForExistingResourceResult:
-      description: An object that represents enumerating SKUs for existing resources
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SkuDetailsForExistingResource'
-          x-ms-identifiers:
-          - /sku/name
-          description: The collection of available SKUs for existing resources
     DedicatedCapacities:
       description: An array of Dedicated capacities resources.
       type: object
@@ -510,6 +545,68 @@ components:
           description: An array of Dedicated capacities resources.
       required:
       - value
+    SystemData:
+      description: Metadata pertaining to creation and last modification of the resource.
+      type: object
+      properties:
+        createdBy:
+          type: string
+          description: An identifier for the identity that created the resource
+        createdByType:
+          $ref: '#/components/schemas/IdentityType'
+          description: The type of identity that created the resource
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp of resource creation (UTC)
+        lastModifiedBy:
+          type: string
+          description: An identifier for the identity that last modified the resource
+        lastModifiedByType:
+          $ref: '#/components/schemas/IdentityType'
+          description: The type of identity that last modified the resource
+        lastModifiedAt:
+          type: string
+          format: date-time
+          description: The timestamp of resource last modification (UTC)
+    CapacitySku:
+      description: Represents the SKU name and Azure pricing tier for PowerBI Dedicated capacity resource.
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the SKU level.
+        tier:
+          type: string
+          enum:
+          - PBIE_Azure
+          - Premium
+          - AutoPremiumHost
+          x-ms-enum:
+            name: CapacitySkuTier
+            modelAsString: true
+          description: The name of the Azure pricing tier to which the SKU applies.
+        capacity:
+          type: integer
+          format: int32
+          description: The capacity of the SKU.
+      required:
+      - name
+    DedicatedCapacity:
+      description: Represents an instance of a Dedicated Capacity resource.
+      type: object
+      properties:
+        sku:
+          $ref: '#/components/schemas/CapacitySku'
+          description: The SKU of the PowerBI Dedicated capacity resource.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/DedicatedCapacityProperties'
+          description: Properties of the provision operation request.
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      required:
+      - sku
     DedicatedCapacityProperties:
       description: Properties of Dedicated Capacity resource.
       type: object
@@ -556,119 +653,29 @@ components:
           description: The current deployment state of PowerBI Dedicated resource. The provisioningState is to indicate states for resource provisioning.
       allOf:
       - $ref: '#/components/schemas/DedicatedCapacityMutableProperties'
-    CheckCapacityNameAvailabilityParameters:
-      description: Details of capacity name request body.
+    DedicatedCapacityAdministrators:
+      description: An array of administrator user identities
       type: object
       properties:
-        name:
-          type: string
-          pattern: ^[a-z][a-z0-9]*$
-          minLength: 3
-          maxLength: 63
-          description: Name for checking availability.
-        type:
-          type: string
-          default: Microsoft.PowerBIDedicated/capacities
-          description: The resource type of PowerBI dedicated.
-    SystemData:
-      description: Metadata pertaining to creation and last modification of the resource.
-      type: object
-      properties:
-        createdBy:
-          type: string
-          description: An identifier for the identity that created the resource
-        createdByType:
-          $ref: '#/components/schemas/IdentityType'
-          description: The type of identity that created the resource
-        createdAt:
-          type: string
-          format: date-time
-          description: The timestamp of resource creation (UTC)
-        lastModifiedBy:
-          type: string
-          description: An identifier for the identity that last modified the resource
-        lastModifiedByType:
-          $ref: '#/components/schemas/IdentityType'
-          description: The type of identity that last modified the resource
-        lastModifiedAt:
-          type: string
-          format: date-time
-          description: The timestamp of resource last modification (UTC)
-    ErrorResponse:
-      type: object
-      description: Describes the format of Error response.
-      properties:
-        error:
-          description: The error object
-          properties:
-            code:
-              type: string
-              description: Error code
-            message:
-              type: string
-              description: Error message indicating why the operation failed.
-    Resource:
-      description: Represents an instance of an PowerBI Dedicated resource.
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: An identifier that represents the PowerBI Dedicated resource.
-        name:
-          type: string
-          readOnly: true
-          description: The name of the PowerBI Dedicated resource.
-        type:
-          type: string
-          readOnly: true
-          description: The type of the PowerBI Dedicated resource.
-        location:
-          type: string
-          description: Location of the PowerBI Dedicated resource.
-          x-ms-mutability:
-          - create
-          - read
-        tags:
-          type: object
-          additionalProperties:
+        members:
+          type: array
+          items:
             type: string
-          description: Key-value pairs of additional resource provisioning properties.
-        systemData:
-          $ref: '#/components/schemas/SystemData'
-          description: Metadata pertaining to creation and last modification of the resource.
-      required:
-      - location
-      x-ms-azure-resource: true
-    CapacitySku:
-      description: Represents the SKU name and Azure pricing tier for PowerBI Dedicated capacity resource.
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of the SKU level.
-        tier:
-          type: string
-          enum:
-          - PBIE_Azure
-          - Premium
-          - AutoPremiumHost
-          x-ms-enum:
-            name: CapacitySkuTier
-            modelAsString: true
-          description: The name of the Azure pricing tier to which the SKU applies.
-        capacity:
-          type: integer
-          format: int32
-          description: The capacity of the SKU.
-      required:
-      - name
+            description: 'The UPN of the user. For example: johnsmith@contoso.com.'
+          description: An array of administrator user identities.
   parameters:
     ApiVersionParameter:
       name: api-version
       in: query
       required: true
       description: The client API version.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
       schema:
         type: string
     ResourceGroupNameParameter:
@@ -682,13 +689,6 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+$
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

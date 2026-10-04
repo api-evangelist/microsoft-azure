@@ -420,67 +420,94 @@ paths:
         required: true
 components:
   schemas:
-    ServerProvisioningStatus:
+    ResourceId:
       type: string
-      description: Server provisioning status
-      enum:
-      - NotStarted
-      - InProgress
-      - Ready_SyncNotFunctional
-      - Ready_SyncFunctional
-      - Error
-      x-ms-enum:
-        name: ServerProvisioningStatus
-        modelAsString: true
-    ServerEndpointSyncActivityStatus:
+      description: Arm resource identifier.
+    ServerEndpointFilesNotSyncingError:
       type: object
-      description: Sync Session status object.
+      description: Files not syncing error object
       properties:
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp when properties were updated
+        errorCode:
+          type: integer
+          format: int32
+          description: Error code (HResult)
           readOnly: true
-        perItemErrorCount:
+        persistentCount:
           type: integer
           format: int64
           minimum: 0
-          description: Per item error count
+          description: Count of persistent files not syncing with the specified error code
           readOnly: true
-        appliedItemCount:
+        transientCount:
           type: integer
           format: int64
           minimum: 0
-          description: Applied item count.
+          description: Count of transient files not syncing with the specified error code
           readOnly: true
-        totalItemCount:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Total item count (if available)
-          readOnly: true
-        appliedBytes:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Applied bytes
-          readOnly: true
-        totalBytes:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Total bytes (if available)
-          readOnly: true
-        syncMode:
-          $ref: '#/components/schemas/ServerEndpointSyncMode'
-          description: Sync mode
-          readOnly: true
-        sessionMinutesRemaining:
+    ServerEndpointCreateParametersProperties:
+      type: object
+      description: ServerEndpoint Properties object.
+      properties:
+        serverLocalPath:
+          $ref: '#/components/schemas/PhysicalPath'
+          description: Server Local path.
+        cloudTiering:
+          $ref: '#/components/schemas/FeatureStatus'
+          description: Cloud Tiering.
+        volumeFreeSpacePercent:
           type: integer
           format: int32
           minimum: 0
-          description: Session minutes remaining (if available)
-          readOnly: true
+          maximum: 100
+          description: Level of free space to be maintained by Cloud Tiering if it is enabled.
+          default: 20
+        tierFilesOlderThanDays:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+          description: Tier files older than days.
+          default: 0
+        friendlyName:
+          type: string
+          description: Friendly Name
+        serverResourceId:
+          $ref: '#/components/schemas/ResourceId'
+          description: Server Resource Id.
+        offlineDataTransfer:
+          $ref: '#/components/schemas/FeatureStatus'
+          description: Offline data transfer
+        offlineDataTransferShareName:
+          type: string
+          description: Offline data transfer share name
+        initialDownloadPolicy:
+          $ref: '#/components/schemas/InitialDownloadPolicy'
+          description: Policy for how namespace and files are recalled during FastDr.
+        localCacheMode:
+          $ref: '#/components/schemas/LocalCacheMode'
+          description: 'Policy for enabling follow-the-sun business models: link local cache to cloud behavior to pre-populate before local access.'
+        initialUploadPolicy:
+          $ref: '#/components/schemas/InitialUploadPolicy'
+          description: Policy for how the initial upload sync session is performed.
+    StorageSyncError:
+      type: object
+      description: Error type
+      properties:
+        error:
+          $ref: '#/components/schemas/StorageSyncApiError'
+          description: Error details of the given entry.
+        innererror:
+          $ref: '#/components/schemas/StorageSyncApiError'
+          description: Error details of the given entry.
+    CloudTieringLowDiskModeState:
+      type: string
+      description: Type of the cloud tiering low disk mode state
+      enum:
+      - Enabled
+      - Disabled
+      x-ms-enum:
+        name: CloudTieringLowDiskModeState
+        modelAsString: true
     InitialDownloadPolicy:
       type: string
       description: Policy for how namespace and files are recalled during FastDr
@@ -492,50 +519,33 @@ components:
       x-ms-enum:
         name: InitialDownloadPolicy
         modelAsString: true
-    StorageSyncInnerErrorDetails:
+    ServerEndpointBackgroundDataDownloadActivity:
       type: object
-      description: Error Details object.
+      description: Background data download activity object
       properties:
-        callStack:
+        timestamp:
           type: string
-          description: Call stack of the error.
-        message:
+          format: date-time
+          description: Timestamp when properties were updated
+          readOnly: true
+        startedTimestamp:
           type: string
-          description: Error message of the error.
-        innerException:
-          type: string
-          description: Exception of the inner error.
-        innerExceptionCallStack:
-          type: string
-          description: Call stack of the inner error.
-    ServerEndpointUpdateProperties:
-      type: object
-      description: ServerEndpoint Update Properties object.
-      properties:
-        cloudTiering:
-          $ref: '#/components/schemas/FeatureStatus'
-          description: Cloud Tiering.
-        volumeFreeSpacePercent:
+          format: date-time
+          description: Timestamp when the operation started
+          readOnly: true
+        percentProgress:
           type: integer
           format: int32
           minimum: 0
           maximum: 100
-          description: Level of free space to be maintained by Cloud Tiering if it is enabled.
-        tierFilesOlderThanDays:
+          description: Progress percentage
+          readOnly: true
+        downloadedBytes:
           type: integer
-          format: int32
+          format: int64
           minimum: 0
-          maximum: 2147483647
-          description: Tier files older than days.
-        offlineDataTransfer:
-          $ref: '#/components/schemas/FeatureStatus'
-          description: Offline data transfer
-        offlineDataTransferShareName:
-          type: string
-          description: Offline data transfer share name
-        localCacheMode:
-          $ref: '#/components/schemas/LocalCacheMode'
-          description: 'Policy for enabling follow-the-sun business models: link local cache to cloud behavior to pre-populate before local access.'
+          description: Running count of bytes downloaded
+          readOnly: true
     ServerEndpointCloudTieringStatus:
       type: object
       description: Server endpoint cloud tiering status object.
@@ -587,6 +597,328 @@ components:
         lowDiskMode:
           $ref: '#/components/schemas/CloudTieringLowDiskMode'
           description: Information regarding the low disk mode state
+          readOnly: true
+    FeatureStatus:
+      type: string
+      description: Type of the Feature Status
+      enum:
+      - 'on'
+      - 'off'
+      x-ms-enum:
+        name: FeatureStatus
+        modelAsString: true
+    ServerEndpoint:
+      type: object
+      description: Server Endpoint object.
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ServerEndpointProperties'
+          description: Server Endpoint properties.
+    StorageSyncApiError:
+      type: object
+      description: Error type
+      properties:
+        code:
+          type: string
+          description: Error code of the given entry.
+        message:
+          type: string
+          description: Error message of the given entry.
+        target:
+          type: string
+          description: Target of the given error entry.
+        details:
+          $ref: '#/components/schemas/StorageSyncErrorDetails'
+          description: Error details of the given entry.
+        innererror:
+          $ref: '#/components/schemas/StorageSyncInnerErrorDetails'
+          description: Inner error details of the given entry.
+    ServerProvisioningStatus:
+      type: string
+      description: Server provisioning status
+      enum:
+      - NotStarted
+      - InProgress
+      - Ready_SyncNotFunctional
+      - Ready_SyncFunctional
+      - Error
+      x-ms-enum:
+        name: ServerProvisioningStatus
+        modelAsString: true
+    ServerEndpointRecallStatus:
+      type: object
+      description: Server endpoint recall status object.
+      properties:
+        lastUpdatedTimestamp:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          readOnly: true
+        totalRecallErrorsCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total count of recall errors.
+          readOnly: true
+        recallErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServerEndpointRecallError'
+          x-ms-identifiers:
+          - errorCode
+          description: Array of recall errors
+          readOnly: true
+    StorageSyncErrorDetails:
+      type: object
+      description: Error Details object.
+      properties:
+        code:
+          type: string
+          description: Error code of the given entry.
+        message:
+          type: string
+          description: Error message of the given entry.
+        target:
+          type: string
+          description: Target of the given entry.
+        requestUri:
+          type: string
+          description: Request URI of the given entry.
+        exceptionType:
+          type: string
+          description: Exception type of the given entry.
+        httpMethod:
+          type: string
+          description: HTTP method of the given entry.
+        hashedMessage:
+          type: string
+          description: Hashed message of the given entry.
+        httpErrorCode:
+          type: string
+          description: HTTP error code of the given entry.
+    ServerEndpointProvisioningStepStatus:
+      type: object
+      description: Server endpoint provisioning step status object.
+      properties:
+        name:
+          type: string
+          description: Name of the provisioning step
+          readOnly: true
+        status:
+          type: string
+          description: Status of the provisioning step
+          readOnly: true
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of the provisioning step
+          readOnly: true
+        minutesLeft:
+          type: integer
+          format: int32
+          description: Estimated completion time of the provisioning step in minutes
+          readOnly: true
+        progressPercentage:
+          type: integer
+          format: int32
+          description: Estimated progress percentage
+          readOnly: true
+        endTime:
+          type: string
+          format: date-time
+          description: End time of the provisioning step
+          readOnly: true
+        errorCode:
+          type: integer
+          format: int32
+          description: Error code (HResult) for the provisioning step
+          readOnly: true
+        additionalInformation:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional information for the provisioning step
+          readOnly: true
+    CloudTieringVolumeFreeSpacePolicyStatus:
+      type: object
+      description: Status of the volume free space policy
+      properties:
+        lastUpdatedTimestamp:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          readOnly: true
+        effectiveVolumeFreeSpacePolicy:
+          type: integer
+          format: int32
+          description: In the case where multiple server endpoints are present in a volume, an effective free space policy is applied.
+          readOnly: true
+          minimum: 0
+          maximum: 100
+        currentVolumeFreeSpacePercent:
+          type: integer
+          format: int32
+          description: Current volume free space percentage.
+          readOnly: true
+          minimum: 0
+          maximum: 100
+    ServerEndpointOfflineDataTransferState:
+      type: string
+      description: Type of the Health state
+      enum:
+      - InProgress
+      - Stopping
+      - NotRunning
+      - Complete
+      x-ms-enum:
+        name: ServerEndpointOfflineDataTransferState
+        modelAsString: true
+    ServerEndpointUpdateParameters:
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ServerEndpointUpdateProperties'
+          description: The properties of the server endpoint.
+      description: Parameters for updating an Server Endpoint.
+    ServerEndpointRecallError:
+      type: object
+      description: Server endpoint recall error object
+      properties:
+        errorCode:
+          type: integer
+          format: int32
+          description: Error code (HResult)
+          readOnly: true
+        count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Count of occurences of the error
+          readOnly: true
+    PhysicalPath:
+      type: string
+      description: Server folder used for data synchronization
+    ServerEndpointCreateParameters:
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ServerEndpointCreateParametersProperties'
+          description: The parameters used to create the server endpoint.
+      description: The parameters used when creating a server endpoint.
+    CloudTieringFilesNotTiering:
+      type: object
+      description: Server endpoint cloud tiering status object.
+      properties:
+        lastUpdatedTimestamp:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          readOnly: true
+        totalFileCount:
+          type: integer
+          format: int64
+          description: Last cloud tiering result (HResult)
+          readOnly: true
+          minimum: 0
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilesNotTieringError'
+          x-ms-identifiers:
+          - errorCode
+          description: Array of tiering errors
+          readOnly: true
+    ServerEndpointSyncMode:
+      type: string
+      description: Sync mode for the server endpoint.
+      enum:
+      - Regular
+      - NamespaceDownload
+      - InitialUpload
+      - SnapshotUpload
+      - InitialFullDownload
+      x-ms-enum:
+        name: ServerEndpointSyncMode
+        modelAsString: true
+    InitialUploadPolicy:
+      type: string
+      description: Policy for how the initial upload sync session is performed.
+      enum:
+      - ServerAuthoritative
+      - Merge
+      default: Merge
+      x-ms-enum:
+        name: InitialUploadPolicy
+        modelAsString: true
+    CloudTieringDatePolicyStatus:
+      type: object
+      description: Status of the date policy
+      properties:
+        lastUpdatedTimestamp:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          readOnly: true
+        tieredFilesMostRecentAccessTimestamp:
+          type: string
+          format: date-time
+          description: Most recent access time of tiered files
+          readOnly: true
+    ServerEndpointSyncActivityStatus:
+      type: object
+      description: Sync Session status object.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when properties were updated
+          readOnly: true
+        perItemErrorCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Per item error count
+          readOnly: true
+        appliedItemCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Applied item count.
+          readOnly: true
+        totalItemCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total item count (if available)
+          readOnly: true
+        appliedBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Applied bytes
+          readOnly: true
+        totalBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total bytes (if available)
+          readOnly: true
+        syncMode:
+          $ref: '#/components/schemas/ServerEndpointSyncMode'
+          description: Sync mode
+          readOnly: true
+        sessionMinutesRemaining:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Session minutes remaining (if available)
           readOnly: true
     ServerEndpointProperties:
       type: object
@@ -670,6 +1002,212 @@ components:
         serverEndpointProvisioningStatus:
           $ref: '#/components/schemas/ServerEndpointProvisioningStatus'
           description: Server Endpoint provisioning status
+    CloudTieringCachePerformance:
+      type: object
+      description: Server endpoint cloud tiering status object.
+      properties:
+        lastUpdatedTimestamp:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          readOnly: true
+        cacheHitBytes:
+          type: integer
+          format: int64
+          description: Count of bytes that were served from the local server
+          readOnly: true
+          minimum: 0
+        cacheMissBytes:
+          type: integer
+          format: int64
+          description: Count of bytes that were served from the cloud
+          readOnly: true
+          minimum: 0
+        cacheHitBytesPercent:
+          type: integer
+          format: int32
+          description: Percentage of total bytes (hit + miss) that were served from the local server
+          readOnly: true
+          minimum: 0
+          maximum: 100
+    CloudTieringLowDiskMode:
+      type: object
+      description: Information regarding the low disk mode state
+      properties:
+        lastUpdatedTimestamp:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          readOnly: true
+        state:
+          $ref: '#/components/schemas/CloudTieringLowDiskModeState'
+          description: Low disk mode state
+          readOnly: true
+    ServerEndpointSyncSessionStatus:
+      type: object
+      description: Sync Session status object.
+      properties:
+        lastSyncResult:
+          type: integer
+          format: int32
+          description: Last sync result (HResult)
+          readOnly: true
+        lastSyncTimestamp:
+          type: string
+          format: date-time
+          description: Last sync timestamp
+          readOnly: true
+        lastSyncSuccessTimestamp:
+          type: string
+          format: date-time
+          description: Last sync success timestamp
+          readOnly: true
+        lastSyncPerItemErrorCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Last sync per item error count.
+          readOnly: true
+        persistentFilesNotSyncingCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Count of persistent files not syncing.
+          readOnly: true
+        transientFilesNotSyncingCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Count of transient files not syncing.
+          readOnly: true
+        filesNotSyncingErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServerEndpointFilesNotSyncingError'
+          x-ms-identifiers:
+          - errorCode
+          description: Array of per-item errors coming from the last sync session.
+          readOnly: true
+        lastSyncMode:
+          $ref: '#/components/schemas/ServerEndpointSyncMode'
+          description: Sync mode
+          readOnly: true
+    CloudTieringSpaceSavings:
+      type: object
+      description: Server endpoint cloud tiering status object.
+      properties:
+        lastUpdatedTimestamp:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          readOnly: true
+        volumeSizeBytes:
+          type: integer
+          format: int64
+          description: Volume size
+          readOnly: true
+          minimum: 0
+        totalSizeCloudBytes:
+          type: integer
+          format: int64
+          description: Total size of content in the azure file share
+          readOnly: true
+          minimum: 0
+        cachedSizeBytes:
+          type: integer
+          format: int64
+          description: Cached content size on the server
+          readOnly: true
+          minimum: 0
+        spaceSavingsPercent:
+          type: integer
+          format: int32
+          description: Percentage of cached size over total size
+          readOnly: true
+          minimum: 0
+          maximum: 100
+        spaceSavingsBytes:
+          type: integer
+          format: int64
+          description: Count of bytes saved on the server
+          readOnly: true
+          minimum: 0
+    ServerEndpointSyncActivityState:
+      type: string
+      description: Type of the sync activity state
+      enum:
+      - Upload
+      - Download
+      - UploadAndDownload
+      x-ms-enum:
+        name: ServerEndpointSyncActivityState
+        modelAsString: true
+    ServerEndpointArray:
+      description: Array of ServerEndpoint
+      type: object
+      properties:
+        value:
+          type: array
+          description: Collection of ServerEndpoint.
+          items:
+            $ref: '#/components/schemas/ServerEndpoint'
+          x-ms-identifiers:
+          - id
+    ServerEndpointProvisioningStatus:
+      type: object
+      description: Server endpoint provisioning status information
+      properties:
+        provisioningStatus:
+          $ref: '#/components/schemas/ServerProvisioningStatus'
+          description: Server Endpoint provisioning status
+          readOnly: true
+        provisioningType:
+          type: string
+          description: Server Endpoint provisioning type
+          readOnly: true
+        provisioningStepStatuses:
+          type: array
+          description: Provisioning Step status information for each step in the provisioning process
+          items:
+            $ref: '#/components/schemas/ServerEndpointProvisioningStepStatus'
+          x-ms-identifiers:
+          - name
+          readOnly: true
+    ServerEndpointHealthState:
+      type: string
+      description: Type of the server endpoint health state
+      enum:
+      - Unavailable
+      - Healthy
+      - Error
+      x-ms-enum:
+        name: ServerEndpointHealthState
+        modelAsString: true
+    LocalCacheMode:
+      type: string
+      description: 'Policy for enabling follow-the-sun business models: link local cache to cloud behavior to pre-populate before local access.'
+      enum:
+      - DownloadNewAndModifiedFiles
+      - UpdateLocallyCachedFiles
+      default: UpdateLocallyCachedFiles
+      x-ms-enum:
+        name: LocalCacheMode
+        modelAsString: true
+    FilesNotTieringError:
+      type: object
+      description: Files not tiering error object
+      properties:
+        errorCode:
+          type: integer
+          format: int32
+          description: Error code (HResult)
+          readOnly: true
+        fileCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Count of files with this error
+          readOnly: true
     ServerEndpointSyncStatus:
       type: object
       description: Server Endpoint sync status
@@ -725,499 +1263,22 @@ components:
           $ref: '#/components/schemas/ServerEndpointBackgroundDataDownloadActivity'
           description: Background data download activity
           readOnly: true
-    CloudTieringDatePolicyStatus:
-      type: object
-      description: Status of the date policy
-      properties:
-        lastUpdatedTimestamp:
-          type: string
-          format: date-time
-          description: Last updated timestamp
-          readOnly: true
-        tieredFilesMostRecentAccessTimestamp:
-          type: string
-          format: date-time
-          description: Most recent access time of tiered files
-          readOnly: true
-    ServerEndpointProvisioningStatus:
-      type: object
-      description: Server endpoint provisioning status information
-      properties:
-        provisioningStatus:
-          $ref: '#/components/schemas/ServerProvisioningStatus'
-          description: Server Endpoint provisioning status
-          readOnly: true
-        provisioningType:
-          type: string
-          description: Server Endpoint provisioning type
-          readOnly: true
-        provisioningStepStatuses:
-          type: array
-          description: Provisioning Step status information for each step in the provisioning process
-          items:
-            $ref: '#/components/schemas/ServerEndpointProvisioningStepStatus'
-          x-ms-identifiers:
-          - name
-          readOnly: true
-    ServerEndpointCreateParametersProperties:
-      type: object
-      description: ServerEndpoint Properties object.
-      properties:
-        serverLocalPath:
-          $ref: '#/components/schemas/PhysicalPath'
-          description: Server Local path.
-        cloudTiering:
-          $ref: '#/components/schemas/FeatureStatus'
-          description: Cloud Tiering.
-        volumeFreeSpacePercent:
-          type: integer
-          format: int32
-          minimum: 0
-          maximum: 100
-          description: Level of free space to be maintained by Cloud Tiering if it is enabled.
-          default: 20
-        tierFilesOlderThanDays:
-          type: integer
-          format: int32
-          minimum: 0
-          maximum: 2147483647
-          description: Tier files older than days.
-          default: 0
-        friendlyName:
-          type: string
-          description: Friendly Name
-        serverResourceId:
-          $ref: '#/components/schemas/ResourceId'
-          description: Server Resource Id.
-        offlineDataTransfer:
-          $ref: '#/components/schemas/FeatureStatus'
-          description: Offline data transfer
-        offlineDataTransferShareName:
-          type: string
-          description: Offline data transfer share name
-        initialDownloadPolicy:
-          $ref: '#/components/schemas/InitialDownloadPolicy'
-          description: Policy for how namespace and files are recalled during FastDr.
-        localCacheMode:
-          $ref: '#/components/schemas/LocalCacheMode'
-          description: 'Policy for enabling follow-the-sun business models: link local cache to cloud behavior to pre-populate before local access.'
-        initialUploadPolicy:
-          $ref: '#/components/schemas/InitialUploadPolicy'
-          description: Policy for how the initial upload sync session is performed.
-    StorageSyncErrorDetails:
+    StorageSyncInnerErrorDetails:
       type: object
       description: Error Details object.
       properties:
-        code:
+        callStack:
           type: string
-          description: Error code of the given entry.
+          description: Call stack of the error.
         message:
           type: string
-          description: Error message of the given entry.
-        target:
+          description: Error message of the error.
+        innerException:
           type: string
-          description: Target of the given entry.
-        requestUri:
+          description: Exception of the inner error.
+        innerExceptionCallStack:
           type: string
-          description: Request URI of the given entry.
-        exceptionType:
-          type: string
-          description: Exception type of the given entry.
-        httpMethod:
-          type: string
-          description: HTTP method of the given entry.
-        hashedMessage:
-          type: string
-          description: Hashed message of the given entry.
-        httpErrorCode:
-          type: string
-          description: HTTP error code of the given entry.
-    FilesNotTieringError:
-      type: object
-      description: Files not tiering error object
-      properties:
-        errorCode:
-          type: integer
-          format: int32
-          description: Error code (HResult)
-          readOnly: true
-        fileCount:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Count of files with this error
-          readOnly: true
-    CloudTieringLowDiskMode:
-      type: object
-      description: Information regarding the low disk mode state
-      properties:
-        lastUpdatedTimestamp:
-          type: string
-          format: date-time
-          description: Last updated timestamp
-          readOnly: true
-        state:
-          $ref: '#/components/schemas/CloudTieringLowDiskModeState'
-          description: Low disk mode state
-          readOnly: true
-    ServerEndpoint:
-      type: object
-      description: Server Endpoint object.
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ServerEndpointProperties'
-          description: Server Endpoint properties.
-    StorageSyncApiError:
-      type: object
-      description: Error type
-      properties:
-        code:
-          type: string
-          description: Error code of the given entry.
-        message:
-          type: string
-          description: Error message of the given entry.
-        target:
-          type: string
-          description: Target of the given error entry.
-        details:
-          $ref: '#/components/schemas/StorageSyncErrorDetails'
-          description: Error details of the given entry.
-        innererror:
-          $ref: '#/components/schemas/StorageSyncInnerErrorDetails'
-          description: Inner error details of the given entry.
-    ServerEndpointHealthState:
-      type: string
-      description: Type of the server endpoint health state
-      enum:
-      - Unavailable
-      - Healthy
-      - Error
-      x-ms-enum:
-        name: ServerEndpointHealthState
-        modelAsString: true
-    ServerEndpointSyncActivityState:
-      type: string
-      description: Type of the sync activity state
-      enum:
-      - Upload
-      - Download
-      - UploadAndDownload
-      x-ms-enum:
-        name: ServerEndpointSyncActivityState
-        modelAsString: true
-    InitialUploadPolicy:
-      type: string
-      description: Policy for how the initial upload sync session is performed.
-      enum:
-      - ServerAuthoritative
-      - Merge
-      default: Merge
-      x-ms-enum:
-        name: InitialUploadPolicy
-        modelAsString: true
-    ServerEndpointOfflineDataTransferState:
-      type: string
-      description: Type of the Health state
-      enum:
-      - InProgress
-      - Stopping
-      - NotRunning
-      - Complete
-      x-ms-enum:
-        name: ServerEndpointOfflineDataTransferState
-        modelAsString: true
-    ServerEndpointArray:
-      description: Array of ServerEndpoint
-      type: object
-      properties:
-        value:
-          type: array
-          description: Collection of ServerEndpoint.
-          items:
-            $ref: '#/components/schemas/ServerEndpoint'
-          x-ms-identifiers:
-          - id
-    StorageSyncError:
-      type: object
-      description: Error type
-      properties:
-        error:
-          $ref: '#/components/schemas/StorageSyncApiError'
-          description: Error details of the given entry.
-        innererror:
-          $ref: '#/components/schemas/StorageSyncApiError'
-          description: Error details of the given entry.
-    ServerEndpointProvisioningStepStatus:
-      type: object
-      description: Server endpoint provisioning step status object.
-      properties:
-        name:
-          type: string
-          description: Name of the provisioning step
-          readOnly: true
-        status:
-          type: string
-          description: Status of the provisioning step
-          readOnly: true
-        startTime:
-          type: string
-          format: date-time
-          description: Start time of the provisioning step
-          readOnly: true
-        minutesLeft:
-          type: integer
-          format: int32
-          description: Estimated completion time of the provisioning step in minutes
-          readOnly: true
-        progressPercentage:
-          type: integer
-          format: int32
-          description: Estimated progress percentage
-          readOnly: true
-        endTime:
-          type: string
-          format: date-time
-          description: End time of the provisioning step
-          readOnly: true
-        errorCode:
-          type: integer
-          format: int32
-          description: Error code (HResult) for the provisioning step
-          readOnly: true
-        additionalInformation:
-          type: object
-          additionalProperties:
-            type: string
-          description: Additional information for the provisioning step
-          readOnly: true
-    ServerEndpointSyncSessionStatus:
-      type: object
-      description: Sync Session status object.
-      properties:
-        lastSyncResult:
-          type: integer
-          format: int32
-          description: Last sync result (HResult)
-          readOnly: true
-        lastSyncTimestamp:
-          type: string
-          format: date-time
-          description: Last sync timestamp
-          readOnly: true
-        lastSyncSuccessTimestamp:
-          type: string
-          format: date-time
-          description: Last sync success timestamp
-          readOnly: true
-        lastSyncPerItemErrorCount:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Last sync per item error count.
-          readOnly: true
-        persistentFilesNotSyncingCount:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Count of persistent files not syncing.
-          readOnly: true
-        transientFilesNotSyncingCount:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Count of transient files not syncing.
-          readOnly: true
-        filesNotSyncingErrors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServerEndpointFilesNotSyncingError'
-          x-ms-identifiers:
-          - errorCode
-          description: Array of per-item errors coming from the last sync session.
-          readOnly: true
-        lastSyncMode:
-          $ref: '#/components/schemas/ServerEndpointSyncMode'
-          description: Sync mode
-          readOnly: true
-    ServerEndpointCreateParameters:
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ServerEndpointCreateParametersProperties'
-          description: The parameters used to create the server endpoint.
-      description: The parameters used when creating a server endpoint.
-    FeatureStatus:
-      type: string
-      description: Type of the Feature Status
-      enum:
-      - 'on'
-      - 'off'
-      x-ms-enum:
-        name: FeatureStatus
-        modelAsString: true
-    ServerEndpointSyncMode:
-      type: string
-      description: Sync mode for the server endpoint.
-      enum:
-      - Regular
-      - NamespaceDownload
-      - InitialUpload
-      - SnapshotUpload
-      - InitialFullDownload
-      x-ms-enum:
-        name: ServerEndpointSyncMode
-        modelAsString: true
-    LocalCacheMode:
-      type: string
-      description: 'Policy for enabling follow-the-sun business models: link local cache to cloud behavior to pre-populate before local access.'
-      enum:
-      - DownloadNewAndModifiedFiles
-      - UpdateLocallyCachedFiles
-      default: UpdateLocallyCachedFiles
-      x-ms-enum:
-        name: LocalCacheMode
-        modelAsString: true
-    CloudTieringLowDiskModeState:
-      type: string
-      description: Type of the cloud tiering low disk mode state
-      enum:
-      - Enabled
-      - Disabled
-      x-ms-enum:
-        name: CloudTieringLowDiskModeState
-        modelAsString: true
-    ResourceId:
-      type: string
-      description: Arm resource identifier.
-    CloudTieringVolumeFreeSpacePolicyStatus:
-      type: object
-      description: Status of the volume free space policy
-      properties:
-        lastUpdatedTimestamp:
-          type: string
-          format: date-time
-          description: Last updated timestamp
-          readOnly: true
-        effectiveVolumeFreeSpacePolicy:
-          type: integer
-          format: int32
-          description: In the case where multiple server endpoints are present in a volume, an effective free space policy is applied.
-          readOnly: true
-          minimum: 0
-          maximum: 100
-        currentVolumeFreeSpacePercent:
-          type: integer
-          format: int32
-          description: Current volume free space percentage.
-          readOnly: true
-          minimum: 0
-          maximum: 100
-    ServerEndpointUpdateParameters:
-      type: object
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ServerEndpointUpdateProperties'
-          description: The properties of the server endpoint.
-      description: Parameters for updating an Server Endpoint.
-    ServerEndpointRecallStatus:
-      type: object
-      description: Server endpoint recall status object.
-      properties:
-        lastUpdatedTimestamp:
-          type: string
-          format: date-time
-          description: Last updated timestamp
-          readOnly: true
-        totalRecallErrorsCount:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Total count of recall errors.
-          readOnly: true
-        recallErrors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServerEndpointRecallError'
-          x-ms-identifiers:
-          - errorCode
-          description: Array of recall errors
-          readOnly: true
-    CloudTieringSpaceSavings:
-      type: object
-      description: Server endpoint cloud tiering status object.
-      properties:
-        lastUpdatedTimestamp:
-          type: string
-          format: date-time
-          description: Last updated timestamp
-          readOnly: true
-        volumeSizeBytes:
-          type: integer
-          format: int64
-          description: Volume size
-          readOnly: true
-          minimum: 0
-        totalSizeCloudBytes:
-          type: integer
-          format: int64
-          description: Total size of content in the azure file share
-          readOnly: true
-          minimum: 0
-        cachedSizeBytes:
-          type: integer
-          format: int64
-          description: Cached content size on the server
-          readOnly: true
-          minimum: 0
-        spaceSavingsPercent:
-          type: integer
-          format: int32
-          description: Percentage of cached size over total size
-          readOnly: true
-          minimum: 0
-          maximum: 100
-        spaceSavingsBytes:
-          type: integer
-          format: int64
-          description: Count of bytes saved on the server
-          readOnly: true
-          minimum: 0
-    CloudTieringCachePerformance:
-      type: object
-      description: Server endpoint cloud tiering status object.
-      properties:
-        lastUpdatedTimestamp:
-          type: string
-          format: date-time
-          description: Last updated timestamp
-          readOnly: true
-        cacheHitBytes:
-          type: integer
-          format: int64
-          description: Count of bytes that were served from the local server
-          readOnly: true
-          minimum: 0
-        cacheMissBytes:
-          type: integer
-          format: int64
-          description: Count of bytes that were served from the cloud
-          readOnly: true
-          minimum: 0
-        cacheHitBytesPercent:
-          type: integer
-          format: int32
-          description: Percentage of total bytes (hit + miss) that were served from the local server
-          readOnly: true
-          minimum: 0
-          maximum: 100
+          description: Call stack of the inner error.
     RecallActionParameters:
       type: object
       properties:
@@ -1228,95 +1289,34 @@ components:
           type: string
           description: Recall path.
       description: The parameters used when calling recall action on server endpoint.
-    ServerEndpointRecallError:
+    ServerEndpointUpdateProperties:
       type: object
-      description: Server endpoint recall error object
+      description: ServerEndpoint Update Properties object.
       properties:
-        errorCode:
-          type: integer
-          format: int32
-          description: Error code (HResult)
-          readOnly: true
-        count:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Count of occurences of the error
-          readOnly: true
-    PhysicalPath:
-      type: string
-      description: Server folder used for data synchronization
-    ServerEndpointBackgroundDataDownloadActivity:
-      type: object
-      description: Background data download activity object
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp when properties were updated
-          readOnly: true
-        startedTimestamp:
-          type: string
-          format: date-time
-          description: Timestamp when the operation started
-          readOnly: true
-        percentProgress:
+        cloudTiering:
+          $ref: '#/components/schemas/FeatureStatus'
+          description: Cloud Tiering.
+        volumeFreeSpacePercent:
           type: integer
           format: int32
           minimum: 0
           maximum: 100
-          description: Progress percentage
-          readOnly: true
-        downloadedBytes:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Running count of bytes downloaded
-          readOnly: true
-    ServerEndpointFilesNotSyncingError:
-      type: object
-      description: Files not syncing error object
-      properties:
-        errorCode:
+          description: Level of free space to be maintained by Cloud Tiering if it is enabled.
+        tierFilesOlderThanDays:
           type: integer
           format: int32
-          description: Error code (HResult)
-          readOnly: true
-        persistentCount:
-          type: integer
-          format: int64
           minimum: 0
-          description: Count of persistent files not syncing with the specified error code
-          readOnly: true
-        transientCount:
-          type: integer
-          format: int64
-          minimum: 0
-          description: Count of transient files not syncing with the specified error code
-          readOnly: true
-    CloudTieringFilesNotTiering:
-      type: object
-      description: Server endpoint cloud tiering status object.
-      properties:
-        lastUpdatedTimestamp:
+          maximum: 2147483647
+          description: Tier files older than days.
+        offlineDataTransfer:
+          $ref: '#/components/schemas/FeatureStatus'
+          description: Offline data transfer
+        offlineDataTransferShareName:
           type: string
-          format: date-time
-          description: Last updated timestamp
-          readOnly: true
-        totalFileCount:
-          type: integer
-          format: int64
-          description: Last cloud tiering result (HResult)
-          readOnly: true
-          minimum: 0
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilesNotTieringError'
-          x-ms-identifiers:
-          - errorCode
-          description: Array of tiering errors
-          readOnly: true
+          description: Offline data transfer share name
+        localCacheMode:
+          $ref: '#/components/schemas/LocalCacheMode'
+          description: 'Policy for enabling follow-the-sun business models: link local cache to cloud behavior to pre-populate before local access.'
   securitySchemes:
     azure_auth:
       type: oauth2

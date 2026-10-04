@@ -872,31 +872,24 @@ paths:
       - Bearer: []
 components:
   schemas:
-    Error:
-      description: An error from the Azure AgPlatform service.
-      required:
-      - code
-      - message
+    InnerError:
+      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
       type: object
       properties:
         code:
-          description: Server-defined set of error codes.
-          minLength: 1
+          description: Specific error code than was provided by the containing error.
           type: string
-        message:
-          description: Human-readable representation of the error.
-          minLength: 1
-          type: string
-        target:
-          description: Target of the error.
-          type: string
-        details:
-          description: Array of details about specific errors that led to this reported error.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
         innererror:
           $ref: '#/components/schemas/InnerError'
+    ErrorResponse:
+      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+        traceId:
+          description: Unique trace Id.
+          type: string
     Zone:
       description: Api Model for Zone object.
       type: object
@@ -976,6 +969,31 @@ components:
           example:
             key1: value1
             key2: 123.45
+    Error:
+      description: An error from the Azure AgPlatform service.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: Server-defined set of error codes.
+          minLength: 1
+          type: string
+        message:
+          description: Human-readable representation of the error.
+          minLength: 1
+          type: string
+        target:
+          description: Target of the error.
+          type: string
+        details:
+          description: Array of details about specific errors that led to this reported error.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     CascadeDeleteJob:
       description: Schema of cascade delete job.
       required:
@@ -1065,31 +1083,55 @@ components:
         nextLink:
           description: Continuation link (absolute URI) to the next page of results in the list.
           type: string
-    InnerError:
-      description: Inner error containing list of errors.See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#innererror--object for InnerError reference document.
+    Resource:
       type: object
-      properties:
-        code:
-          description: Specific error code than was provided by the containing error.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    ErrorResponse:
-      description: An error response from the Azure AgPlatform service. See https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses for ErrorResponse reference document.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-        traceId:
-          description: Unique trace Id.
-          type: string
-    SubResource:
-      type: object
+      x-ms-azure-resource: true
       properties:
         id:
+          readOnly: true
           type: string
-          description: Resource Id.
-      description: A reference to a another resource
+          description: Resource ID.
+        name:
+          readOnly: true
+          type: string
+          description: Resource name.
+        type:
+          readOnly: true
+          type: string
+          description: Resource type.
+        location:
+          type: string
+          description: Resource location.
+          x-ms-mutability:
+          - read
+          - create
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags.
+      required:
+      - location
+      description: Common properties of an Azure Resource Manager resource
+    DelegationSignerInfo:
+      type: object
+      properties:
+        digestAlgorithmType:
+          $ref: '#/components/schemas/DigestAlgorithmType'
+          readOnly: true
+        digestValue:
+          type: string
+          description: The digest value is a cryptographic hash value of the referenced DNSKEY Resource Record.
+          readOnly: true
+        record:
+          type: string
+          description: The record represents a delegation signer (DS) record.
+          readOnly: true
+      description: The delegation signer information.
+    DigestAlgorithmType:
+      type: integer
+      format: int32
+      description: 'The digest algorithm type represents the standard digest algorithm number used to construct the digest. See: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml'
     CloudErrorBody:
       type: object
       x-ms-external: true
@@ -1110,6 +1152,89 @@ components:
             $ref: '#/components/schemas/CloudErrorBody'
           description: A list of additional details about the error.
       description: An error response from the service.
+    SecurityAlgorithmType:
+      type: integer
+      format: int32
+      description: 'The security algorithm type represents the standard security algorithm number of the DNSKEY Resource Record. See: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml'
+    SubResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Resource Id.
+      description: A reference to a another resource
+    SigningKey:
+      type: object
+      properties:
+        delegationSignerInfo:
+          type: array
+          x-ms-identifiers: []
+          items:
+            $ref: '#/components/schemas/DelegationSignerInfo'
+          description: The delegation signer information.
+          readOnly: true
+        flags:
+          type: integer
+          format: int32
+          description: The flags specifies how the key is used.
+          readOnly: true
+        keyTag:
+          type: integer
+          format: int32
+          description: The key tag value of the DNSKEY Resource Record.
+          readOnly: true
+        protocol:
+          type: integer
+          format: int32
+          description: The protocol value. The value is always 3.
+          readOnly: true
+        publicKey:
+          type: string
+          description: The public key, represented as a Base64 encoding.
+          readOnly: true
+        securityAlgorithmType:
+          $ref: '#/components/schemas/SecurityAlgorithmType'
+          readOnly: true
+      description: Represents the signing key.
+    ZoneListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Zone_2'
+          description: Information about the DNS zones.
+        nextLink:
+          type: string
+          description: The continuation token for the next page of results.
+          readOnly: true
+      description: The response to a Zone List or ListAll operation.
+    Zone_2:
+      type: object
+      properties:
+        etag:
+          type: string
+          description: The etag of the zone.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ZoneProperties'
+          description: The properties of the zone.
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+          description: Metadata pertaining to creation and last modification of the resource.
+          readOnly: true
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      description: Describes a DNS zone.
+    ZoneUpdate:
+      type: object
+      properties:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags.
+      description: Describes a request to update a DNS zone.
     ZoneProperties:
       type: object
       properties:
@@ -1165,127 +1290,6 @@ components:
           description: The list of signing keys.
           readOnly: true
       description: Represents the properties of the zone.
-    ZoneUpdate:
-      type: object
-      properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags.
-      description: Describes a request to update a DNS zone.
-    Zone_2:
-      type: object
-      properties:
-        etag:
-          type: string
-          description: The etag of the zone.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ZoneProperties'
-          description: The properties of the zone.
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-          description: Metadata pertaining to creation and last modification of the resource.
-          readOnly: true
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      description: Describes a DNS zone.
-    ZoneListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Zone_2'
-          description: Information about the DNS zones.
-        nextLink:
-          type: string
-          description: The continuation token for the next page of results.
-          readOnly: true
-      description: The response to a Zone List or ListAll operation.
-    DelegationSignerInfo:
-      type: object
-      properties:
-        digestAlgorithmType:
-          $ref: '#/components/schemas/DigestAlgorithmType'
-          readOnly: true
-        digestValue:
-          type: string
-          description: The digest value is a cryptographic hash value of the referenced DNSKEY Resource Record.
-          readOnly: true
-        record:
-          type: string
-          description: The record represents a delegation signer (DS) record.
-          readOnly: true
-      description: The delegation signer information.
-    SigningKey:
-      type: object
-      properties:
-        delegationSignerInfo:
-          type: array
-          x-ms-identifiers: []
-          items:
-            $ref: '#/components/schemas/DelegationSignerInfo'
-          description: The delegation signer information.
-          readOnly: true
-        flags:
-          type: integer
-          format: int32
-          description: The flags specifies how the key is used.
-          readOnly: true
-        keyTag:
-          type: integer
-          format: int32
-          description: The key tag value of the DNSKEY Resource Record.
-          readOnly: true
-        protocol:
-          type: integer
-          format: int32
-          description: The protocol value. The value is always 3.
-          readOnly: true
-        publicKey:
-          type: string
-          description: The public key, represented as a Base64 encoding.
-          readOnly: true
-        securityAlgorithmType:
-          $ref: '#/components/schemas/SecurityAlgorithmType'
-          readOnly: true
-      description: Represents the signing key.
-    SecurityAlgorithmType:
-      type: integer
-      format: int32
-      description: 'The security algorithm type represents the standard security algorithm number of the DNSKEY Resource Record. See: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml'
-    Resource:
-      type: object
-      x-ms-azure-resource: true
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Resource ID.
-        name:
-          readOnly: true
-          type: string
-          description: Resource name.
-        type:
-          readOnly: true
-          type: string
-          description: Resource type.
-        location:
-          type: string
-          description: Resource location.
-          x-ms-mutability:
-          - read
-          - create
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags.
-      required:
-      - location
-      description: Common properties of an Azure Resource Manager resource
     CloudError:
       type: object
       x-ms-external: true
@@ -1294,20 +1298,16 @@ components:
           $ref: '#/components/schemas/CloudErrorBody'
           description: Cloud error body.
       description: An error response from the service.
-    DigestAlgorithmType:
-      type: integer
-      format: int32
-      description: 'The digest algorithm type represents the standard digest algorithm number used to construct the digest. See: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml'
-    GeoJsonObjectType:
-      description: GeoJSON object type.
-      enum:
-      - Point
-      - Polygon
-      - MultiPolygon
-      type: string
-      x-ms-enum:
-        name: GeoJsonObjectType
-        modelAsString: true
+    GeoJsonObject:
+      description: 'GeoJSON (For more details: https://geojson.org/). Note: Coordinates are expected in [Longitude, Latitude] format.'
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/GeoJsonObjectType'
+      discriminator:
+        propertyName: type
     ZoneMetaDataListResponse:
       description: Paged response contains list of requested objects and a skipToken to get the next set of results.
       required:
@@ -1406,6 +1406,78 @@ components:
           example:
             key1: value1
             key2: 123.45
+    SearchZoneQuery:
+      description: Get Zones query parameters.
+      type: object
+      properties:
+        types:
+          description: Types of the Zones.
+          type: array
+          items:
+            type: string
+        managementZoneIds:
+          description: ManagementZoneIds of the Zones.
+          type: array
+          items:
+            type: string
+        sources:
+          description: Sources of the Zones.
+          type: array
+          items:
+            type: string
+        ids:
+          description: Ids of the resource.
+          type: array
+          items:
+            type: string
+        names:
+          description: Names of the resource.
+          type: array
+          items:
+            type: string
+        propertyFilters:
+          description: 'Filters on key-value pairs within the Properties object.
+
+            e.g. "{testKey} eq {testValue}".'
+          type: array
+          items:
+            type: string
+        statuses:
+          description: Statuses of the resource.
+          type: array
+          items:
+            type: string
+        minCreatedDateTime:
+          format: date-time
+          description: Minimum creation date of resource (inclusive).
+          type: string
+        maxCreatedDateTime:
+          format: date-time
+          description: Maximum creation date of resource (inclusive).
+          type: string
+        minLastModifiedDateTime:
+          format: date-time
+          description: Minimum last modified date of resource (inclusive).
+          type: string
+        maxLastModifiedDateTime:
+          format: date-time
+          description: Maximum last modified date of resource (inclusive).
+          type: string
+        intersectsWithGeometry:
+          $ref: '#/components/schemas/GeoJsonObject'
+        partyId:
+          description: Party ID which belongs to the operation data.
+          type: string
+    GeoJsonObjectType:
+      description: GeoJSON object type.
+      enum:
+      - Point
+      - Polygon
+      - MultiPolygon
+      type: string
+      x-ms-enum:
+        name: GeoJsonObjectType
+        modelAsString: true
     ZoneMetaData:
       description: Api Model for Zone object.
       type: object
@@ -1485,78 +1557,6 @@ components:
           example:
             key1: value1
             key2: 123.45
-    GeoJsonObject:
-      description: 'GeoJSON (For more details: https://geojson.org/). Note: Coordinates are expected in [Longitude, Latitude] format.'
-      required:
-      - type
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/GeoJsonObjectType'
-      discriminator:
-        propertyName: type
-    SearchZoneQuery:
-      description: Get Zones query parameters.
-      type: object
-      properties:
-        types:
-          description: Types of the Zones.
-          type: array
-          items:
-            type: string
-        managementZoneIds:
-          description: ManagementZoneIds of the Zones.
-          type: array
-          items:
-            type: string
-        sources:
-          description: Sources of the Zones.
-          type: array
-          items:
-            type: string
-        ids:
-          description: Ids of the resource.
-          type: array
-          items:
-            type: string
-        names:
-          description: Names of the resource.
-          type: array
-          items:
-            type: string
-        propertyFilters:
-          description: 'Filters on key-value pairs within the Properties object.
-
-            e.g. "{testKey} eq {testValue}".'
-          type: array
-          items:
-            type: string
-        statuses:
-          description: Statuses of the resource.
-          type: array
-          items:
-            type: string
-        minCreatedDateTime:
-          format: date-time
-          description: Minimum creation date of resource (inclusive).
-          type: string
-        maxCreatedDateTime:
-          format: date-time
-          description: Maximum creation date of resource (inclusive).
-          type: string
-        minLastModifiedDateTime:
-          format: date-time
-          description: Minimum last modified date of resource (inclusive).
-          type: string
-        maxLastModifiedDateTime:
-          format: date-time
-          description: Maximum last modified date of resource (inclusive).
-          type: string
-        intersectsWithGeometry:
-          $ref: '#/components/schemas/GeoJsonObject'
-        partyId:
-          description: Party ID which belongs to the operation data.
-          type: string
   parameters:
     ZoneNameParameter:
       name: zoneName

@@ -166,48 +166,33 @@ paths:
           $ref: ./examples/delete_batch_synthesis.json
       summary: Microsoft Azure Delete Batchsyntheses Id
 components:
-  parameters:
-    PathId:
-      name: id
-      in: path
-      description: The id of resource.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-    QueryApiVersion:
-      name: api-version
-      in: query
-      description: The API version to use for this operation.
-      required: true
-      x-ms-parameter-location: method
-      x-ms-client-name: apiVersion
-      schema:
-        type: string
-        minLength: 1
-    QueryMaxPageSize:
-      name: maxpagesize
-      in: query
-      description: The maximum number of result items to include in a single response.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-    QuerySkip:
-      name: skip
-      in: query
-      description: The number of result items to skip.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        format: int32
-        default: 0
   schemas:
+    ResourceId:
+      description: Resource id
+      type: string
+      pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
+      minLength: 3
+      maxLength: 64
+    BatchSynthesisOutputs:
+      description: Batch Synthesis output.
+      type: object
+      properties:
+        result:
+          description: sas url of the result file. It would be relative path when "destinationContainerUrl" is specified.
+          type: string
+        summary:
+          description: When BatchSynthesisProperties.decompressOutputFiles is true, job summary file path will be provided here.
+          type: string
+    BatchSynthesisInput:
+      description: Batch Synthesis input.
+      required:
+      - content
+      type: object
+      properties:
+        content:
+          description: It could be SSML or plain text.
+          minLength: 1
+          type: string
     BatchSynthesisBackgroundAudioDefinition:
       description: Background audio setting.
       required:
@@ -230,16 +215,25 @@ components:
           format: double
           description: The volume value of background audio. Reference https://learn.microsoft.com/azure/ai-services/speech-service/speech-synthesis-markup-voice#add-background-audio.
           type: number
-    BatchSynthesisOutputs:
-      description: Batch Synthesis output.
+    ErrorResponse:
+      description: Error response.
+      required:
+      - error
       type: object
       properties:
-        result:
-          description: sas url of the result file. It would be relative path when "destinationContainerUrl" is specified.
-          type: string
-        summary:
-          description: When BatchSynthesisProperties.decompressOutputFiles is true, job summary file path will be provided here.
-          type: string
+        error:
+          $ref: '#/components/schemas/Error'
+    Status:
+      description: Status of a resource.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      type: string
+      x-ms-enum:
+        name: Status
+        modelAsString: true
     BatchSynthesis:
       description: Bath synthesis task.
       required:
@@ -286,30 +280,63 @@ components:
           format: date-time
           type: string
           readOnly: true
-    BatchSynthesisBillingDetails:
-      description: Bath synthesis billing details.
+    PaginatedBatchSynthesis:
+      description: Paginated batch synthesis task list
+      required:
+      - value
       type: object
       properties:
-        neuralCharacters:
-          format: int64
-          description: The number of billable characters for prebuilt neural voices in the input file.
-          type: integer
-        customNeuralCharacters:
-          format: int64
-          description: The number of billable characters for custom neural voices in the input file.
-          type: integer
-        aoaiCharacters:
-          format: int64
-          description: The number of billable characters for AOAI voices in the input file.
-          type: integer
-        aoaiHDCharacters:
-          format: int64
-          description: The number of billable characters for AOAI HD voices in the input file.
-          type: integer
-        personalVoiceCharacters:
-          format: int64
-          description: The number of billable characters for personal voices in the input file.
-          type: integer
+        value:
+          description: Bath synthesis tasks.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchSynthesis'
+        nextLink:
+          description: Link to next page.
+          format: uri
+          type: string
+    InnerError:
+      description: 'New Inner Error format which conforms to Cognitive Services API Guidelines which is available at https://microsoft.sharepoint.com/%3Aw%3A/t/CognitiveServicesPMO/EUoytcrjuJdKpeOKIK_QRC8BPtUYQpKBi8JsWyeDMRsWlQ?e=CPq8ow.
+
+        This contains required properties ErrorCode, message and optional properties target, inner error(this can be nested).'
+      type: object
+      properties:
+        code:
+          description: Detailed error code to help diagnostic.
+          type: string
+        target:
+          description: The source of the error.
+          type: string
+        message:
+          description: Detailed error message.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    ErrorCode:
+      description: Top-level error code
+      enum:
+      - BadRequest
+      - BadArgument
+      - Unauthorized
+      - Forbidden
+      - NotFound
+      - UnsupportedMediaType
+      - TooManyRequests
+      - InternalServerError
+      - ServiceUnavailable
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
+    InputKind:
+      description: Input text kind.
+      enum:
+      - PlainText
+      - SSML
+      type: string
+      x-ms-enum:
+        name: InputKind
+        modelAsString: true
     BatchSynthesisConfig:
       description: Text-to-speech configuration for plain text input.
       required:
@@ -334,64 +361,6 @@ components:
           type: string
         backgroundAudio:
           $ref: '#/components/schemas/BatchSynthesisBackgroundAudioDefinition'
-    BatchSynthesisError:
-      description: Batch Synthesis Error.
-      type: object
-      properties:
-        code:
-          description: Top level error code
-          type: string
-        message:
-          description: Error message
-          type: string
-    Status:
-      description: Status of a resource.
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      type: string
-      x-ms-enum:
-        name: Status
-        modelAsString: true
-    Error:
-      description: New format which conforms to the new Cognitive Services API guidelines which is available at https://microsoft.sharepoint.com/%3Aw%3A/t/CognitiveServicesPMO/EUoytcrjuJdKpeOKIK_QRC8BPtUYQpKBi8JsWyeDMRsWlQ?e=CPq8ow. This contains an outer error with error code, message, details, target and an inner error with more descriptive details.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          $ref: '#/components/schemas/ErrorCode'
-        target:
-          description: The source of the error.
-          type: string
-        message:
-          description: High level error message.
-          type: string
-        details:
-          description: Additional supportive details regarding the error and/or expected policies.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    ResourceId:
-      description: Resource id
-      type: string
-      pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-      minLength: 3
-      maxLength: 64
-    InputKind:
-      description: Input text kind.
-      enum:
-      - PlainText
-      - SSML
-      type: string
-      x-ms-enum:
-        name: InputKind
-        modelAsString: true
     BatchSynthesisProperties:
       description: Detailed properties of batch synthesis task.
       type: object
@@ -448,72 +417,103 @@ components:
         error:
           $ref: '#/components/schemas/BatchSynthesisError'
           readOnly: true
-    ErrorCode:
-      description: Top-level error code
-      enum:
-      - BadRequest
-      - BadArgument
-      - Unauthorized
-      - Forbidden
-      - NotFound
-      - UnsupportedMediaType
-      - TooManyRequests
-      - InternalServerError
-      - ServiceUnavailable
-      type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
-    InnerError:
-      description: 'New Inner Error format which conforms to Cognitive Services API Guidelines which is available at https://microsoft.sharepoint.com/%3Aw%3A/t/CognitiveServicesPMO/EUoytcrjuJdKpeOKIK_QRC8BPtUYQpKBi8JsWyeDMRsWlQ?e=CPq8ow.
-
-        This contains required properties ErrorCode, message and optional properties target, inner error(this can be nested).'
+    BatchSynthesisBillingDetails:
+      description: Bath synthesis billing details.
+      type: object
+      properties:
+        neuralCharacters:
+          format: int64
+          description: The number of billable characters for prebuilt neural voices in the input file.
+          type: integer
+        customNeuralCharacters:
+          format: int64
+          description: The number of billable characters for custom neural voices in the input file.
+          type: integer
+        aoaiCharacters:
+          format: int64
+          description: The number of billable characters for AOAI voices in the input file.
+          type: integer
+        aoaiHDCharacters:
+          format: int64
+          description: The number of billable characters for AOAI HD voices in the input file.
+          type: integer
+        personalVoiceCharacters:
+          format: int64
+          description: The number of billable characters for personal voices in the input file.
+          type: integer
+    Error:
+      description: New format which conforms to the new Cognitive Services API guidelines which is available at https://microsoft.sharepoint.com/%3Aw%3A/t/CognitiveServicesPMO/EUoytcrjuJdKpeOKIK_QRC8BPtUYQpKBi8JsWyeDMRsWlQ?e=CPq8ow. This contains an outer error with error code, message, details, target and an inner error with more descriptive details.
+      required:
+      - code
+      - message
       type: object
       properties:
         code:
-          description: Detailed error code to help diagnostic.
-          type: string
+          $ref: '#/components/schemas/ErrorCode'
         target:
           description: The source of the error.
           type: string
         message:
-          description: Detailed error message.
+          description: High level error message.
           type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    BatchSynthesisInput:
-      description: Batch Synthesis input.
-      required:
-      - content
-      type: object
-      properties:
-        content:
-          description: It could be SSML or plain text.
-          minLength: 1
-          type: string
-    ErrorResponse:
-      description: Error response.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-    PaginatedBatchSynthesis:
-      description: Paginated batch synthesis task list
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: Bath synthesis tasks.
+        details:
+          description: Additional supportive details regarding the error and/or expected policies.
           type: array
           items:
-            $ref: '#/components/schemas/BatchSynthesis'
-        nextLink:
-          description: Link to next page.
-          format: uri
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    BatchSynthesisError:
+      description: Batch Synthesis Error.
+      type: object
+      properties:
+        code:
+          description: Top level error code
           type: string
+        message:
+          description: Error message
+          type: string
+  parameters:
+    QuerySkip:
+      name: skip
+      in: query
+      description: The number of result items to skip.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    QueryApiVersion:
+      name: api-version
+      in: query
+      description: The API version to use for this operation.
+      required: true
+      x-ms-parameter-location: method
+      x-ms-client-name: apiVersion
+      schema:
+        type: string
+        minLength: 1
+    PathId:
+      name: id
+      in: path
+      description: The id of resource.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
+    QueryMaxPageSize:
+      name: maxpagesize
+      in: query
+      description: The maximum number of result items to include in a single response.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
   securitySchemes:
     subscription_key:
       type: apiKey

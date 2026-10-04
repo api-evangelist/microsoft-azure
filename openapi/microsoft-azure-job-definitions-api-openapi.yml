@@ -474,6 +474,64 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
+  parameters:
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The Resource Group Name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The API Version
+      required: true
+      schema:
+        type: string
+    dataManagerNameParameter:
+      name: dataManagerName
+      in: path
+      description: The name of the DataManager Resource within the specified resource group. DataManager names must be between 3 and 24 characters in length and use any alphanumeric and underscore only
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 24
+        minLength: 3
+        pattern: ^[-\w\.]+$
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The Subscription Id
+      required: true
+      schema:
+        type: string
+    StorageMoverNameParameter:
+      name: storageMoverName
+      in: path
+      required: true
+      description: The name of the Storage Mover resource.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ProjectNameParameter:
+      name: projectName
+      in: path
+      required: true
+      description: The name of the Project resource.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    JobDefinitionNameParameter:
+      name: jobDefinitionName
+      in: path
+      required: true
+      description: The name of the Job Definition resource.
+      x-ms-parameter-location: method
+      schema:
+        type: string
   schemas:
     JobDefinition:
       description: Job Definition.
@@ -487,28 +545,6 @@ components:
           $ref: '#/components/schemas/JobDefinitionProperties'
           description: JobDefinition properties.
           x-ms-client-flatten: true
-    RunParameters:
-      description: Run parameters for a job.
-      type: object
-      properties:
-        userConfirmation:
-          description: Enum to detect if user confirmation is required. If not passed will default to NotRequired.
-          default: NotRequired
-          enum:
-          - NotRequired
-          - Required
-          type: string
-          x-ms-enum:
-            name: UserConfirmation
-            modelAsString: false
-        dataServiceInput:
-          description: A generic json used differently by each data service type.
-          type: object
-        customerSecrets:
-          description: List of customer secrets containing a key identifier and key value. The key identifier is a way for the specific data source to understand the key. Value contains customer secret encrypted by the encryptionKeys.
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomerSecret'
     CustomerSecret:
       description: The pair of customer secret.
       required:
@@ -534,18 +570,28 @@ components:
           x-ms-enum:
             name: SupportedAlgorithm
             modelAsString: false
-    JobDefinitionList:
-      description: Job Definition Collection.
+    RunParameters:
+      description: Run parameters for a job.
       type: object
       properties:
-        value:
-          description: List of job definitions.
+        userConfirmation:
+          description: Enum to detect if user confirmation is required. If not passed will default to NotRequired.
+          default: NotRequired
+          enum:
+          - NotRequired
+          - Required
+          type: string
+          x-ms-enum:
+            name: UserConfirmation
+            modelAsString: false
+        dataServiceInput:
+          description: A generic json used differently by each data service type.
+          type: object
+        customerSecrets:
+          description: List of customer secrets containing a key identifier and key value. The key identifier is a way for the specific data source to understand the key. Value contains customer secret encrypted by the encryptionKeys.
           type: array
           items:
-            $ref: '#/components/schemas/JobDefinition'
-        nextLink:
-          description: Link for the next set of job definitions.
-          type: string
+            $ref: '#/components/schemas/CustomerSecret'
     JobDefinitionProperties:
       description: Job Definition
       required:
@@ -631,6 +677,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomerSecret'
+    Schedule:
+      description: Schedule for the job run.
+      type: object
+      properties:
+        name:
+          description: Name of the schedule.
+          type: string
+        policyList:
+          description: A list of repetition intervals in ISO 8601 format.
+          type: array
+          items:
+            type: string
     DmsBaseObject:
       description: Base class for all objects under DataManager Service
       type: object
@@ -647,18 +705,18 @@ components:
           description: Type of the object.
           type: string
           readOnly: true
-    Schedule:
-      description: Schedule for the job run.
+    JobDefinitionList:
+      description: Job Definition Collection.
       type: object
       properties:
-        name:
-          description: Name of the schedule.
-          type: string
-        policyList:
-          description: A list of repetition intervals in ISO 8601 format.
+        value:
+          description: List of job definitions.
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/JobDefinition'
+        nextLink:
+          description: Link for the next set of job definitions.
+          type: string
     JobDefinition_2:
       description: The Job Definition resource.
       type: object
@@ -673,27 +731,6 @@ components:
       - properties
       allOf:
       - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ProxyResource
-    JobRunResourceId:
-      description: Response that identifies a Job Run.
-      type: object
-      properties:
-        jobRunResourceId:
-          readOnly: true
-          type: string
-          description: Fully qualified resource id of the Job Run.
-    JobDefinitionList_2:
-      description: List of Job Definitions.
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobDefinition_2'
-          readOnly: true
-        nextLink:
-          type: string
-          description: Request URL that can be used to query next page of containers. Returned when total number of requested containers exceed maximum page size.
-          readOnly: true
     JobDefinitionProperties_2:
       description: Job definition properties.
       type: object
@@ -786,6 +823,13 @@ components:
       - copyMode
       - sourceName
       - targetName
+    JobDefinitionUpdateParameters:
+      description: The Job Definition resource.
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/JobDefinitionUpdateProperties'
     JobDefinitionUpdateProperties:
       description: Job definition properties.
       type: object
@@ -805,71 +849,27 @@ components:
         agentName:
           type: string
           description: Name of the Agent to assign for new Job Runs of this Job Definition.
-    JobDefinitionUpdateParameters:
-      description: The Job Definition resource.
+    JobDefinitionList_2:
+      description: List of Job Definitions.
       type: object
       properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/JobDefinitionUpdateProperties'
-  parameters:
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The Resource Group Name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The Subscription Id
-      required: true
-      schema:
-        type: string
-    dataManagerNameParameter:
-      name: dataManagerName
-      in: path
-      description: The name of the DataManager Resource within the specified resource group. DataManager names must be between 3 and 24 characters in length and use any alphanumeric and underscore only
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 24
-        minLength: 3
-        pattern: ^[-\w\.]+$
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The API Version
-      required: true
-      schema:
-        type: string
-    JobDefinitionNameParameter:
-      name: jobDefinitionName
-      in: path
-      required: true
-      description: The name of the Job Definition resource.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    StorageMoverNameParameter:
-      name: storageMoverName
-      in: path
-      required: true
-      description: The name of the Storage Mover resource.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ProjectNameParameter:
-      name: projectName
-      in: path
-      required: true
-      description: The name of the Project resource.
-      x-ms-parameter-location: method
-      schema:
-        type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobDefinition_2'
+          readOnly: true
+        nextLink:
+          type: string
+          description: Request URL that can be used to query next page of containers. Returned when total number of requested containers exceed maximum page size.
+          readOnly: true
+    JobRunResourceId:
+      description: Response that identifies a Job Run.
+      type: object
+      properties:
+        jobRunResourceId:
+          readOnly: true
+          type: string
+          description: Fully qualified resource id of the Job Run.
   securitySchemes:
     azure_auth:
       type: oauth2

@@ -492,6 +492,49 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
+  parameters:
+    PoolNameParameter:
+      name: poolName
+      in: path
+      required: true
+      description: Name of the pool.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    ScheduleNameParameter:
+      name: scheduleName
+      in: path
+      required: true
+      description: The name of the schedule that uniquely identifies it.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+        pattern: ^[-\w]+$
+    subscriptionId:
+      name: subscriptionId
+      in: path
+      description: The subscription ID.
+      required: true
+      schema:
+        type: string
+    resourceGroupName:
+      name: resourceGroupName
+      in: path
+      description: The name of the resource group.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    api-version:
+      name: api-version
+      in: query
+      description: Client API version.
+      required: true
+      schema:
+        type: string
+        default: '2018-09-15'
   schemas:
     ScheduleListResult:
       description: Result of the schedule list operation.
@@ -507,6 +550,14 @@ components:
           description: URL to get the next set of results if there are any.
           type: string
           readOnly: true
+    ScheduledFrequency:
+      description: The frequency of task execution.
+      enum:
+      - Daily
+      type: string
+      x-ms-enum:
+        name: ScheduledFrequency
+        modelAsString: true
     ScheduleUpdateProperties:
       description: Updatable properties of a Schedule.
       type: object
@@ -526,6 +577,24 @@ components:
         state:
           description: Indicates whether or not this scheduled task is enabled.
           $ref: devcenter.json#/definitions/EnableStatus
+    Schedule:
+      type: object
+      description: Represents a Schedule to execute a task.
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
+      properties:
+        properties:
+          description: Properties of a Schedule resource
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ScheduleProperties'
+    ScheduledType:
+      description: The supported types for a scheduled task.
+      enum:
+      - StopDevBox
+      type: string
+      x-ms-enum:
+        name: ScheduledType
+        modelAsString: true
     ScheduleUpdate:
       description: The schedule properties for partial update. Properties not provided in the update request will not be changed.
       type: object
@@ -551,32 +620,31 @@ components:
       - frequency
       - timeZone
       - time
-    ScheduledFrequency:
-      description: The frequency of task execution.
-      enum:
-      - Daily
-      type: string
-      x-ms-enum:
-        name: ScheduledFrequency
-        modelAsString: true
-    ScheduledType:
-      description: The supported types for a scheduled task.
-      enum:
-      - StopDevBox
-      type: string
-      x-ms-enum:
-        name: ScheduledType
-        modelAsString: true
-    Schedule:
+    Resource:
+      description: An Azure resource.
       type: object
-      description: Represents a Schedule to execute a task.
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/Resource
       properties:
-        properties:
-          description: Properties of a Schedule resource
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ScheduleProperties'
+        id:
+          description: The identifier of the resource.
+          type: string
+          readOnly: true
+        name:
+          description: The name of the resource.
+          type: string
+          readOnly: true
+        type:
+          description: The type of the resource.
+          type: string
+          readOnly: true
+        location:
+          description: The location of the resource.
+          type: string
+        tags:
+          description: The tags of the resource.
+          type: object
+          additionalProperties:
+            type: string
+      x-ms-azure-resource: true
     CloudErrorBody:
       description: Body of an error from a REST request.
       type: object
@@ -596,52 +664,32 @@ components:
           items:
             $ref: '#/components/schemas/CloudErrorBody'
       x-ms-external: true
-    WeekDetails:
-      description: Properties of a weekly schedule.
+    HourDetails:
+      description: Properties of an hourly schedule.
       type: object
       properties:
-        weekdays:
-          description: The days of the week for which the schedule is set (e.g. Sunday, Monday, Tuesday, etc.).
-          type: array
-          items:
-            type: string
-        time:
-          description: The time of the day the schedule will occur.
-          type: string
-    NotificationSettings:
-      description: Notification settings for a schedule.
-      type: object
-      properties:
-        status:
-          description: If notifications are enabled for this schedule (i.e. Enabled, Disabled).
-          default: Disabled
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: EnableStatus
-            modelAsString: true
-        timeInMinutes:
+        minute:
           format: int32
-          description: Time in minutes before event at which notification will be sent.
+          description: Minutes of the hour the schedule will run.
           type: integer
-        webhookUrl:
-          description: The webhook URL to which the notification will be sent.
-          type: string
-        emailRecipient:
-          description: The email recipient to send notifications to (can be a list of semi-colon separated email addresses).
-          type: string
-        notificationLocale:
-          description: The locale to use when sending a notification (fallback for unsupported languages is EN).
-          type: string
-    DayDetails:
-      description: Properties of a daily schedule.
+    ScheduleFragment:
+      description: A schedule.
       type: object
+      allOf:
+      - $ref: '#/components/schemas/UpdateResource'
+      properties: {}
+    Schedule_2:
+      description: A schedule.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
       properties:
-        time:
-          description: The time of day the schedule will occur.
-          type: string
+        properties:
+          $ref: '#/components/schemas/ScheduleProperties_2'
+          description: The properties of the resource.
+          x-ms-client-flatten: true
     ScheduleProperties_2:
       description: Properties of a schedule.
       type: object
@@ -690,29 +738,6 @@ components:
           description: The unique immutable identifier of a resource (Guid).
           type: string
           readOnly: true
-    HourDetails:
-      description: Properties of an hourly schedule.
-      type: object
-      properties:
-        minute:
-          format: int32
-          description: Minutes of the hour the schedule will run.
-          type: integer
-    UpdateResource:
-      description: Represents an update resource
-      type: object
-      properties:
-        tags:
-          description: The tags of the resource.
-          type: object
-          additionalProperties:
-            type: string
-    ScheduleFragment:
-      description: A schedule.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/UpdateResource'
-      properties: {}
     ScheduleList:
       description: The response of a list operation.
       type: object
@@ -725,31 +750,45 @@ components:
         nextLink:
           description: Link for next set of results.
           type: string
-    Resource:
-      description: An Azure resource.
+    WeekDetails:
+      description: Properties of a weekly schedule.
       type: object
       properties:
-        id:
-          description: The identifier of the resource.
-          type: string
-          readOnly: true
-        name:
-          description: The name of the resource.
-          type: string
-          readOnly: true
-        type:
-          description: The type of the resource.
-          type: string
-          readOnly: true
-        location:
-          description: The location of the resource.
-          type: string
-        tags:
-          description: The tags of the resource.
-          type: object
-          additionalProperties:
+        weekdays:
+          description: The days of the week for which the schedule is set (e.g. Sunday, Monday, Tuesday, etc.).
+          type: array
+          items:
             type: string
-      x-ms-azure-resource: true
+        time:
+          description: The time of the day the schedule will occur.
+          type: string
+    NotificationSettings:
+      description: Notification settings for a schedule.
+      type: object
+      properties:
+        status:
+          description: If notifications are enabled for this schedule (i.e. Enabled, Disabled).
+          default: Disabled
+          enum:
+          - Enabled
+          - Disabled
+          type: string
+          x-ms-enum:
+            name: EnableStatus
+            modelAsString: true
+        timeInMinutes:
+          format: int32
+          description: Time in minutes before event at which notification will be sent.
+          type: integer
+        webhookUrl:
+          description: The webhook URL to which the notification will be sent.
+          type: string
+        emailRecipient:
+          description: The email recipient to send notifications to (can be a list of semi-colon separated email addresses).
+          type: string
+        notificationLocale:
+          description: The locale to use when sending a notification (fallback for unsupported languages is EN).
+          type: string
     CloudError:
       description: Error from a REST request.
       type: object
@@ -758,61 +797,22 @@ components:
           $ref: '#/components/schemas/CloudErrorBody'
           description: The cloud error that occurred
       x-ms-external: true
-    Schedule_2:
-      description: A schedule.
-      required:
-      - properties
+    UpdateResource:
+      description: Represents an update resource
       type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
       properties:
-        properties:
-          $ref: '#/components/schemas/ScheduleProperties_2'
-          description: The properties of the resource.
-          x-ms-client-flatten: true
-  parameters:
-    ScheduleNameParameter:
-      name: scheduleName
-      in: path
-      required: true
-      description: The name of the schedule that uniquely identifies it.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 100
-        minLength: 1
-        pattern: ^[-\w]+$
-    PoolNameParameter:
-      name: poolName
-      in: path
-      required: true
-      description: Name of the pool.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    api-version:
-      name: api-version
-      in: query
-      description: Client API version.
-      required: true
-      schema:
-        type: string
-        default: '2018-09-15'
-    subscriptionId:
-      name: subscriptionId
-      in: path
-      description: The subscription ID.
-      required: true
-      schema:
-        type: string
-    resourceGroupName:
-      name: resourceGroupName
-      in: path
-      description: The name of the resource group.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
+        tags:
+          description: The tags of the resource.
+          type: object
+          additionalProperties:
+            type: string
+    DayDetails:
+      description: Properties of a daily schedule.
+      type: object
+      properties:
+        time:
+          description: The time of day the schedule will occur.
+          type: string
   securitySchemes:
     azure_auth:
       type: oauth2

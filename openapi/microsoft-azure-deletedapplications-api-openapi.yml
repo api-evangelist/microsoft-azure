@@ -86,34 +86,39 @@ paths:
       summary: Microsoft Azure Get Tenantid Deletedapplications
 components:
   schemas:
-    OAuth2Permission:
+    RequiredResourceAccess:
       type: object
-      description: Represents an OAuth 2.0 delegated permission scope. The specified OAuth 2.0 delegated permission scopes may be requested by client applications (through the requiredResourceAccess collection on the Application object) when calling a resource application. The oauth2Permissions property of the ServicePrincipal entity and of the Application entity is a collection of OAuth2Permission.
       properties:
-        adminConsentDescription:
-          description: Permission help text that appears in the admin consent and app assignment experiences.
+        resourceAccess:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceAccess'
+          description: The list of OAuth2.0 permission scopes and app roles that the application requires from the specified resource.
+        resourceAppId:
           type: string
-        adminConsentDisplayName:
-          description: Display name for the permission that appears in the admin consent and app assignment experiences.
-          type: string
-        id:
-          description: Unique scope permission identifier inside the oauth2Permissions collection.
-          type: string
-        isEnabled:
-          description: 'When creating or updating a permission, this property must be set to true (which is the default). To delete a permission, this property must first be set to false. At that point, in a subsequent call, the permission may be removed. '
-          type: boolean
-        type:
-          description: Specifies whether this scope permission can be consented to by an end user, or whether it is a tenant-wide permission that must be consented to by a Company Administrator. Possible values are "User" or "Admin".
-          type: string
-        userConsentDescription:
-          description: Permission help text that appears in the end user consent experience.
-          type: string
-        userConsentDisplayName:
-          description: Display name for the permission that appears in the end user consent experience.
-          type: string
+          description: The unique identifier for the resource that the application requires access to. This should be equal to the appId declared on the target resource application.
+      additionalProperties:
+        type: object
+      required:
+      - resourceAccess
+      description: Specifies the set of OAuth 2.0 permission scopes and app roles under the specified resource that an application requires access to. The specified OAuth 2.0 permission scopes may be requested by client applications (through the requiredResourceAccess collection) when calling a resource application. The requiredResourceAccess property of the Application entity is a collection of RequiredResourceAccess.
+    GraphError:
+      type: object
+      properties:
+        odata.error:
+          type: object
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/OdataError'
+          description: A Graph API error.
+      description: Active Directory error information.
+    ErrorMessage:
+      type: object
+      properties:
         value:
-          description: The value of the scope claim that the resource application should expect in the OAuth 2.0 access token.
           type: string
+          x-ms-client-name: message
+          description: Error message value.
+      description: Active Directory error message.
     KeyCredential:
       type: object
       properties:
@@ -143,42 +148,6 @@ components:
       additionalProperties:
         type: object
       description: Active Directory Key Credential information.
-    ErrorMessage:
-      type: object
-      properties:
-        value:
-          type: string
-          x-ms-client-name: message
-          description: Error message value.
-      description: Active Directory error message.
-    RequiredResourceAccess:
-      type: object
-      properties:
-        resourceAccess:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceAccess'
-          description: The list of OAuth2.0 permission scopes and app roles that the application requires from the specified resource.
-        resourceAppId:
-          type: string
-          description: The unique identifier for the resource that the application requires access to. This should be equal to the appId declared on the target resource application.
-      additionalProperties:
-        type: object
-      required:
-      - resourceAccess
-      description: Specifies the set of OAuth 2.0 permission scopes and app roles under the specified resource that an application requires access to. The specified OAuth 2.0 permission scopes may be requested by client applications (through the requiredResourceAccess collection) when calling a resource application. The requiredResourceAccess property of the Application entity is a collection of RequiredResourceAccess.
-    ApplicationListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Application'
-          description: A collection of applications.
-        odata.nextLink:
-          type: string
-          description: The URL to get the next set of results.
-      description: Application list operation result.
     DirectoryObject:
       type: object
       discriminator:
@@ -203,25 +172,6 @@ components:
       additionalProperties:
         type: object
       description: Represents an Azure Active Directory object.
-    GraphError:
-      type: object
-      properties:
-        odata.error:
-          type: object
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/OdataError'
-          description: A Graph API error.
-      description: Active Directory error information.
-    GroupMembershipClaims:
-      type: string
-      description: Configures the groups claim issued in a user or OAuth 2.0 access token that the app expects.
-      enum:
-      - None
-      - SecurityGroup
-      - All
-      x-ms-enum:
-        name: GroupMembershipClaimTypes
-        modelAsString: true
     ResourceAccess:
       type: object
       properties:
@@ -236,25 +186,18 @@ components:
       required:
       - id
       description: Specifies an OAuth 2.0 permission scope or an app role that an application requires. The resourceAccess property of the RequiredResourceAccess type is a collection of ResourceAccess.
-    OptionalClaims:
+    PreAuthorizedApplicationPermission:
       type: object
-      description: Specifying the claims to be included in the token.
+      description: Contains information about the pre-authorized permissions.
       properties:
-        idToken:
-          description: Optional claims requested to be included in the id token.
+        directAccessGrant:
+          description: Indicates whether the permission set is DirectAccess or impersonation.
+          type: boolean
+        accessGrants:
+          description: The list of permissions.
           type: array
           items:
-            $ref: '#/components/schemas/OptionalClaim'
-        accessToken:
-          description: Optional claims requested to be included in the access token.
-          type: array
-          items:
-            $ref: '#/components/schemas/OptionalClaim'
-        samlToken:
-          description: Optional claims requested to be included in the saml token.
-          type: array
-          items:
-            $ref: '#/components/schemas/OptionalClaim'
+            type: string
     AppRole:
       type: object
       properties:
@@ -278,18 +221,55 @@ components:
         value:
           type: string
           description: Specifies the value of the roles claim that the application should expect in the authentication and access tokens.
-    PreAuthorizedApplicationPermission:
+    PreAuthorizedApplicationExtension:
       type: object
-      description: Contains information about the pre-authorized permissions.
+      description: Representation of an app PreAuthorizedApplicationExtension required by a pre authorized client app.
       properties:
-        directAccessGrant:
-          description: Indicates whether the permission set is DirectAccess or impersonation.
-          type: boolean
-        accessGrants:
-          description: The list of permissions.
+        conditions:
+          description: The extension's conditions.
           type: array
           items:
             type: string
+    OAuth2Permission:
+      type: object
+      description: Represents an OAuth 2.0 delegated permission scope. The specified OAuth 2.0 delegated permission scopes may be requested by client applications (through the requiredResourceAccess collection on the Application object) when calling a resource application. The oauth2Permissions property of the ServicePrincipal entity and of the Application entity is a collection of OAuth2Permission.
+      properties:
+        adminConsentDescription:
+          description: Permission help text that appears in the admin consent and app assignment experiences.
+          type: string
+        adminConsentDisplayName:
+          description: Display name for the permission that appears in the admin consent and app assignment experiences.
+          type: string
+        id:
+          description: Unique scope permission identifier inside the oauth2Permissions collection.
+          type: string
+        isEnabled:
+          description: 'When creating or updating a permission, this property must be set to true (which is the default). To delete a permission, this property must first be set to false. At that point, in a subsequent call, the permission may be removed. '
+          type: boolean
+        type:
+          description: Specifies whether this scope permission can be consented to by an end user, or whether it is a tenant-wide permission that must be consented to by a Company Administrator. Possible values are "User" or "Admin".
+          type: string
+        userConsentDescription:
+          description: Permission help text that appears in the end user consent experience.
+          type: string
+        userConsentDisplayName:
+          description: Display name for the permission that appears in the end user consent experience.
+          type: string
+        value:
+          description: The value of the scope claim that the resource application should expect in the OAuth 2.0 access token.
+          type: string
+    ApplicationListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+          description: A collection of applications.
+        odata.nextLink:
+          type: string
+          description: The URL to get the next set of results.
+      description: Application list operation result.
     PasswordCredential:
       type: object
       properties:
@@ -314,32 +294,41 @@ components:
       additionalProperties:
         type: object
       description: Active Directory Password Credential information.
-    PreAuthorizedApplication:
+    InformationalUrl:
       type: object
-      description: Contains information about pre authorized client application.
+      description: Represents a group of URIs that provide terms of service, marketing, support and privacy policy information about an application. The default value for each string is null.
       properties:
-        appId:
-          description: Represents the application id.
+        termsOfService:
+          description: The terms of service URI
           type: string
-        permissions:
-          description: Collection of required app permissions/entitlements from the resource application.
-          type: array
-          items:
-            $ref: '#/components/schemas/PreAuthorizedApplicationPermission'
-        extensions:
-          description: Collection of extensions from the resource application.
-          type: array
-          items:
-            $ref: '#/components/schemas/PreAuthorizedApplicationExtension'
-    PreAuthorizedApplicationExtension:
+        marketing:
+          description: The marketing URI
+          type: string
+        privacy:
+          description: The privacy policy URI
+          type: string
+        support:
+          description: The support URI
+          type: string
+    OptionalClaims:
       type: object
-      description: Representation of an app PreAuthorizedApplicationExtension required by a pre authorized client app.
+      description: Specifying the claims to be included in the token.
       properties:
-        conditions:
-          description: The extension's conditions.
+        idToken:
+          description: Optional claims requested to be included in the id token.
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/OptionalClaim'
+        accessToken:
+          description: Optional claims requested to be included in the access token.
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionalClaim'
+        samlToken:
+          description: Optional claims requested to be included in the saml token.
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionalClaim'
     OdataError:
       type: object
       properties:
@@ -352,6 +341,16 @@ components:
           $ref: '#/components/schemas/ErrorMessage'
           description: Error Message.
       description: Active Directory OData error information.
+    GroupMembershipClaims:
+      type: string
+      description: Configures the groups claim issued in a user or OAuth 2.0 access token that the app expects.
+      enum:
+      - None
+      - SecurityGroup
+      - All
+      x-ms-enum:
+        name: GroupMembershipClaimTypes
+        modelAsString: true
     Application:
       type: object
       allOf:
@@ -475,22 +474,23 @@ components:
           description: The primary Web page.
           type: string
       description: Active Directory application information.
-    InformationalUrl:
+    PreAuthorizedApplication:
       type: object
-      description: Represents a group of URIs that provide terms of service, marketing, support and privacy policy information about an application. The default value for each string is null.
+      description: Contains information about pre authorized client application.
       properties:
-        termsOfService:
-          description: The terms of service URI
+        appId:
+          description: Represents the application id.
           type: string
-        marketing:
-          description: The marketing URI
-          type: string
-        privacy:
-          description: The privacy policy URI
-          type: string
-        support:
-          description: The support URI
-          type: string
+        permissions:
+          description: Collection of required app permissions/entitlements from the resource application.
+          type: array
+          items:
+            $ref: '#/components/schemas/PreAuthorizedApplicationPermission'
+        extensions:
+          description: Collection of extensions from the resource application.
+          type: array
+          items:
+            $ref: '#/components/schemas/PreAuthorizedApplicationExtension'
     OptionalClaim:
       type: object
       description: Specifying the claims to be included in a token.

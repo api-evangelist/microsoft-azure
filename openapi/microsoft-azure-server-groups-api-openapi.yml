@@ -251,6 +251,84 @@ paths:
         required: true
 components:
   schemas:
+    PostgreSQLVersion:
+      type: string
+      description: The PostgreSQL version.
+      enum:
+      - '11'
+      - '12'
+      x-ms-enum:
+        name: PostgreSQLVersion
+        modelAsString: true
+    NameAvailabilityRequest:
+      description: Request from client to check resource name availability.
+      properties:
+        name:
+          type: string
+          description: Resource name to verify.
+        type:
+          type: string
+          enum:
+          - Microsoft.DBforPostgreSQL/serverGroupsv2
+          description: Resource type used for verification.
+          x-ms-enum:
+            name: CheckNameAvailabilityResourceType
+            modelAsString: false
+      required:
+      - name
+      - type
+    ServerProperties:
+      description: The properties of a server.
+      properties:
+        serverEdition:
+          type: string
+          description: 'The edition of a server (default: GeneralPurpose).'
+          enum:
+          - GeneralPurpose
+          - MemoryOptimized
+          x-ms-enum:
+            name: ServerEdition
+            modelAsString: true
+        storageQuotaInMb:
+          type: integer
+          format: int64
+          description: 'The storage of a server in MB (max: 2097152 = 2TiB).'
+        vCores:
+          type: integer
+          format: int64
+          description: 'The vCores count of a server (max: 64).'
+        enableHa:
+          type: boolean
+          description: If high availability is enabled or not for the server.
+        enablePublicIp:
+          type: boolean
+          description: If public IP is requested or not for a server.
+          readOnly: true
+    ServerNameItem:
+      description: The name object for a server.
+      properties:
+        name:
+          type: string
+          description: The name of a server.
+        fullyQualifiedDomainName:
+          $ref: '#/components/schemas/FullyQualifiedDomainName'
+          description: The fully qualified domain name of a server.
+    ServerState:
+      type: string
+      description: A state of a server group/server that is visible to user.
+      enum:
+      - Ready
+      - Dropping
+      - Disabled
+      - Starting
+      - Stopping
+      - Stopped
+      - Updating
+      - Provisioning
+      x-ms-enum:
+        name: ServerState
+        modelAsString: true
+      readOnly: true
     CloudErrorBody:
       x-ms-external: true
       description: An error response from the Batch service.
@@ -271,18 +349,15 @@ components:
             $ref: '#/components/schemas/CloudErrorBody'
           x-ms-identifiers:
           - code
-    ServerGroup:
-      description: Represents a server group for create.
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/TrackedResource
-      properties:
-        systemData:
-          description: The system metadata relating to this resource
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-        properties:
-          $ref: '#/components/schemas/ServerGroupProperties'
-          x-ms-client-flatten: true
-          description: Properties of the server group create.
+    ServerRole:
+      type: string
+      description: The role of a server.
+      enum:
+      - Coordinator
+      - Worker
+      x-ms-enum:
+        name: ServerRole
+        modelAsString: true
     CitusVersion:
       type: string
       description: The Citus version.
@@ -297,6 +372,142 @@ components:
       x-ms-enum:
         name: CitusVersion
         modelAsString: true
+    ServerGroup:
+      description: Represents a server group for create.
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/TrackedResource
+      properties:
+        systemData:
+          description: The system metadata relating to this resource
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+        properties:
+          $ref: '#/components/schemas/ServerGroupProperties'
+          x-ms-client-flatten: true
+          description: Properties of the server group create.
+    CloudError:
+      x-ms-external: true
+      description: An error response from the Batch service.
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: The error.
+    MaintenanceWindow:
+      type: object
+      description: Maintenance window of a server group.
+      properties:
+        customWindow:
+          type: string
+          description: indicates whether custom window is enabled or disabled
+        startHour:
+          type: integer
+          format: int32
+          description: start hour for maintenance window
+        startMinute:
+          type: integer
+          format: int32
+          description: start minute for maintenance window
+        dayOfWeek:
+          type: integer
+          format: int32
+          description: day of week for maintenance window
+    ServerRoleGroupList:
+      type: array
+      description: The list of server role groups.
+      items:
+        $ref: '#/components/schemas/ServerRoleGroup'
+      x-ms-identifiers:
+      - name
+      minItems: 1
+      maxItems: 2
+      uniqueItems: true
+    NameAvailability:
+      description: Represents a resource name availability.
+      properties:
+        message:
+          type: string
+          description: Error Message.
+        nameAvailable:
+          type: boolean
+          description: Indicates whether the resource name is available.
+        name:
+          type: string
+          description: name of the PostgreSQL server.
+        type:
+          type: string
+          description: type of the server
+    ServerGroupListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServerGroup'
+          description: The list of server groups
+        nextLink:
+          description: The link used to get the next page of operations.
+          type: string
+          readOnly: true
+      description: A list of server groups.
+    ServerRoleGroup:
+      description: Represents a server role group.
+      allOf:
+      - $ref: '#/components/schemas/ServerProperties'
+      properties:
+        name:
+          type: string
+          description: The name of the server role group.
+        role:
+          $ref: '#/components/schemas/ServerRole'
+          description: The role of servers in the server role group.
+        serverCount:
+          type: integer
+          format: int32
+          description: The number of servers in the server role group.
+        serverNames:
+          type: array
+          description: The list of server names in the server role group.
+          items:
+            $ref: '#/components/schemas/ServerNameItem'
+          x-ms-identifiers:
+          - name
+          readOnly: true
+          uniqueItems: true
+    ServerGroupPropertiesForUpdate:
+      description: The properties used to update a server group.
+      properties:
+        administratorLoginPassword:
+          type: string
+          x-ms-secret: true
+          format: password
+          x-ms-mutability:
+          - create
+          - update
+          description: The password of the administrator login.
+        backupRetentionDays:
+          type: integer
+          format: int32
+          description: The backup retention days for server group.
+        postgresqlVersion:
+          $ref: '#/components/schemas/PostgreSQLVersion'
+          description: The PostgreSQL version of server group.
+        citusVersion:
+          $ref: '#/components/schemas/CitusVersion'
+          description: The Citus version of server group.
+        enableShardsOnCoordinator:
+          type: boolean
+          description: If shards on coordinator is enabled or not for the server group.
+        serverRoleGroups:
+          $ref: '#/components/schemas/ServerRoleGroupList'
+          description: The list of server role groups.
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+          description: Maintenance window of a server group.
+        availabilityZone:
+          type: string
+          description: Availability Zone information of the server group.
+        standbyAvailabilityZone:
+          type: string
+          description: Standby Availability Zone information of the server group.
     ServerGroupProperties:
       description: The properties used to create a new server group.
       properties:
@@ -430,6 +641,10 @@ components:
           description: Restore point creation time (ISO8601 format), specifying the time to restore from. It's required when 'createMode' is 'PointInTimeRestore'
           x-ms-mutability:
           - create
+    FullyQualifiedDomainName:
+      type: string
+      description: The fully qualified domain name of a server.
+      readOnly: true
     ServerGroupForUpdate:
       description: Represents a server group for update.
       properties:
@@ -445,221 +660,6 @@ components:
           additionalProperties:
             type: string
           description: Application-specific metadata in the form of key-value pairs.
-    MaintenanceWindow:
-      type: object
-      description: Maintenance window of a server group.
-      properties:
-        customWindow:
-          type: string
-          description: indicates whether custom window is enabled or disabled
-        startHour:
-          type: integer
-          format: int32
-          description: start hour for maintenance window
-        startMinute:
-          type: integer
-          format: int32
-          description: start minute for maintenance window
-        dayOfWeek:
-          type: integer
-          format: int32
-          description: day of week for maintenance window
-    NameAvailability:
-      description: Represents a resource name availability.
-      properties:
-        message:
-          type: string
-          description: Error Message.
-        nameAvailable:
-          type: boolean
-          description: Indicates whether the resource name is available.
-        name:
-          type: string
-          description: name of the PostgreSQL server.
-        type:
-          type: string
-          description: type of the server
-    ServerRole:
-      type: string
-      description: The role of a server.
-      enum:
-      - Coordinator
-      - Worker
-      x-ms-enum:
-        name: ServerRole
-        modelAsString: true
-    ServerGroupListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServerGroup'
-          description: The list of server groups
-        nextLink:
-          description: The link used to get the next page of operations.
-          type: string
-          readOnly: true
-      description: A list of server groups.
-    ServerProperties:
-      description: The properties of a server.
-      properties:
-        serverEdition:
-          type: string
-          description: 'The edition of a server (default: GeneralPurpose).'
-          enum:
-          - GeneralPurpose
-          - MemoryOptimized
-          x-ms-enum:
-            name: ServerEdition
-            modelAsString: true
-        storageQuotaInMb:
-          type: integer
-          format: int64
-          description: 'The storage of a server in MB (max: 2097152 = 2TiB).'
-        vCores:
-          type: integer
-          format: int64
-          description: 'The vCores count of a server (max: 64).'
-        enableHa:
-          type: boolean
-          description: If high availability is enabled or not for the server.
-        enablePublicIp:
-          type: boolean
-          description: If public IP is requested or not for a server.
-          readOnly: true
-    CloudError:
-      x-ms-external: true
-      description: An error response from the Batch service.
-      properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: The error.
-    FullyQualifiedDomainName:
-      type: string
-      description: The fully qualified domain name of a server.
-      readOnly: true
-    PostgreSQLVersion:
-      type: string
-      description: The PostgreSQL version.
-      enum:
-      - '11'
-      - '12'
-      x-ms-enum:
-        name: PostgreSQLVersion
-        modelAsString: true
-    ServerNameItem:
-      description: The name object for a server.
-      properties:
-        name:
-          type: string
-          description: The name of a server.
-        fullyQualifiedDomainName:
-          $ref: '#/components/schemas/FullyQualifiedDomainName'
-          description: The fully qualified domain name of a server.
-    ServerGroupPropertiesForUpdate:
-      description: The properties used to update a server group.
-      properties:
-        administratorLoginPassword:
-          type: string
-          x-ms-secret: true
-          format: password
-          x-ms-mutability:
-          - create
-          - update
-          description: The password of the administrator login.
-        backupRetentionDays:
-          type: integer
-          format: int32
-          description: The backup retention days for server group.
-        postgresqlVersion:
-          $ref: '#/components/schemas/PostgreSQLVersion'
-          description: The PostgreSQL version of server group.
-        citusVersion:
-          $ref: '#/components/schemas/CitusVersion'
-          description: The Citus version of server group.
-        enableShardsOnCoordinator:
-          type: boolean
-          description: If shards on coordinator is enabled or not for the server group.
-        serverRoleGroups:
-          $ref: '#/components/schemas/ServerRoleGroupList'
-          description: The list of server role groups.
-        maintenanceWindow:
-          $ref: '#/components/schemas/MaintenanceWindow'
-          description: Maintenance window of a server group.
-        availabilityZone:
-          type: string
-          description: Availability Zone information of the server group.
-        standbyAvailabilityZone:
-          type: string
-          description: Standby Availability Zone information of the server group.
-    NameAvailabilityRequest:
-      description: Request from client to check resource name availability.
-      properties:
-        name:
-          type: string
-          description: Resource name to verify.
-        type:
-          type: string
-          enum:
-          - Microsoft.DBforPostgreSQL/serverGroupsv2
-          description: Resource type used for verification.
-          x-ms-enum:
-            name: CheckNameAvailabilityResourceType
-            modelAsString: false
-      required:
-      - name
-      - type
-    ServerRoleGroup:
-      description: Represents a server role group.
-      allOf:
-      - $ref: '#/components/schemas/ServerProperties'
-      properties:
-        name:
-          type: string
-          description: The name of the server role group.
-        role:
-          $ref: '#/components/schemas/ServerRole'
-          description: The role of servers in the server role group.
-        serverCount:
-          type: integer
-          format: int32
-          description: The number of servers in the server role group.
-        serverNames:
-          type: array
-          description: The list of server names in the server role group.
-          items:
-            $ref: '#/components/schemas/ServerNameItem'
-          x-ms-identifiers:
-          - name
-          readOnly: true
-          uniqueItems: true
-    ServerState:
-      type: string
-      description: A state of a server group/server that is visible to user.
-      enum:
-      - Ready
-      - Dropping
-      - Disabled
-      - Starting
-      - Stopping
-      - Stopped
-      - Updating
-      - Provisioning
-      x-ms-enum:
-        name: ServerState
-        modelAsString: true
-      readOnly: true
-    ServerRoleGroupList:
-      type: array
-      description: The list of server role groups.
-      items:
-        $ref: '#/components/schemas/ServerRoleGroup'
-      x-ms-identifiers:
-      - name
-      minItems: 1
-      maxItems: 2
-      uniqueItems: true
   parameters:
     ServerGroupNameParameter:
       name: serverGroupName

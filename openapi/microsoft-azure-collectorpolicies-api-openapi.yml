@@ -146,6 +146,23 @@ paths:
       summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
+    CollectorPolicyPropertiesFormat:
+      type: object
+      properties:
+        ingestionPolicy:
+          $ref: '#/components/schemas/IngestionPolicyPropertiesFormat'
+          description: Ingestion policies.
+        emissionPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmissionPoliciesPropertiesFormat'
+          x-ms-identifiers: []
+          description: Emission policies.
+        provisioningState:
+          readOnly: true
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The provisioning state.
+      description: Collection policy properties.
     EmissionPoliciesPropertiesFormat:
       type: object
       properties:
@@ -164,6 +181,31 @@ components:
           x-ms-identifiers: []
           description: Emission policy destinations.
       description: Emission policy properties.
+    ProvisioningState:
+      type: string
+      readOnly: true
+      description: The current provisioning state.
+      enum:
+      - Succeeded
+      - Updating
+      - Deleting
+      - Failed
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    CollectorPolicyListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectorPolicy'
+          description: A list of collection policies.
+        nextLink:
+          type: string
+          description: The URL to get the next set of results.
+          readOnly: true
+      description: Response for the ListCollectorPolicies API service call.
     CloudErrorBody:
       type: object
       x-ms-external: true
@@ -203,48 +245,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/ProxyResource'
       description: Collector policy resource.
-    ProvisioningState:
-      type: string
-      readOnly: true
-      description: The current provisioning state.
-      enum:
-      - Succeeded
-      - Updating
-      - Deleting
-      - Failed
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    EmissionPolicyDestination:
-      type: object
-      properties:
-        destinationType:
-          type: string
-          enum:
-          - AzureMonitor
-          description: Emission destination type.
-          x-ms-enum:
-            name: destinationType
-            modelAsString: true
-      description: Emission policy destination properties.
-    IngestionPolicyPropertiesFormat:
-      type: object
-      properties:
-        ingestionType:
-          type: string
-          description: The ingestion type.
-          enum:
-          - IPFIX
-          x-ms-enum:
-            name: ingestionType
-            modelAsString: true
-        ingestionSources:
-          type: array
-          items:
-            $ref: '#/components/schemas/IngestionSourcesPropertiesFormat'
-          x-ms-identifiers: []
-          description: Ingestion Sources.
-      description: Ingestion Policy properties.
     ProxyResource:
       type: object
       x-ms-azure-resource: true
@@ -262,23 +262,21 @@ components:
           type: string
           readOnly: true
           description: Azure resource name
-    CollectorPolicyPropertiesFormat:
+    IngestionSourcesPropertiesFormat:
       type: object
       properties:
-        ingestionPolicy:
-          $ref: '#/components/schemas/IngestionPolicyPropertiesFormat'
-          description: Ingestion policies.
-        emissionPolicies:
-          type: array
-          items:
-            $ref: '#/components/schemas/EmissionPoliciesPropertiesFormat'
-          x-ms-identifiers: []
-          description: Emission policies.
-        provisioningState:
-          readOnly: true
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The provisioning state.
-      description: Collection policy properties.
+        sourceType:
+          type: string
+          description: Ingestion source type.
+          enum:
+          - Resource
+          x-ms-enum:
+            name: sourceType
+            modelAsString: true
+        resourceId:
+          type: string
+          description: Resource ID.
+      description: Ingestion policy properties.
     SystemData:
       description: Metadata pertaining to creation and last modification of the resource.
       type: object
@@ -316,19 +314,6 @@ components:
           x-ms-enum:
             name: createdByType
             modelAsString: true
-    CollectorPolicyListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/CollectorPolicy'
-          description: A list of collection policies.
-        nextLink:
-          type: string
-          description: The URL to get the next set of results.
-          readOnly: true
-      description: Response for the ListCollectorPolicies API service call.
     CloudError:
       type: object
       x-ms-external: true
@@ -337,38 +322,37 @@ components:
           description: An error response from the service.
           $ref: '#/components/schemas/CloudErrorBody'
       description: An error response from the service.
-    IngestionSourcesPropertiesFormat:
+    EmissionPolicyDestination:
       type: object
       properties:
-        sourceType:
+        destinationType:
           type: string
-          description: Ingestion source type.
           enum:
-          - Resource
+          - AzureMonitor
+          description: Emission destination type.
           x-ms-enum:
-            name: sourceType
+            name: destinationType
             modelAsString: true
-        resourceId:
+      description: Emission policy destination properties.
+    IngestionPolicyPropertiesFormat:
+      type: object
+      properties:
+        ingestionType:
           type: string
-          description: Resource ID.
-      description: Ingestion policy properties.
+          description: The ingestion type.
+          enum:
+          - IPFIX
+          x-ms-enum:
+            name: ingestionType
+            modelAsString: true
+        ingestionSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestionSourcesPropertiesFormat'
+          x-ms-identifiers: []
+          description: Ingestion Sources.
+      description: Ingestion Policy properties.
   parameters:
-    azureTrafficCollectorNameParameter:
-      name: azureTrafficCollectorName
-      in: path
-      description: Azure Traffic Collector name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    collectorPolicyNameParameter:
-      name: collectorPolicyName
-      in: path
-      description: Collector Policy Name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     apiVersionParameter:
       name: api-version
       in: query
@@ -382,6 +366,14 @@ components:
         enum:
         - 2021-09-01-preview
         default: 2021-09-01-preview
+    azureTrafficCollectorNameParameter:
+      name: azureTrafficCollectorName
+      in: path
+      description: Azure Traffic Collector name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -393,6 +385,14 @@ components:
       name: resourceGroupName
       in: path
       description: The name of the resource group.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    collectorPolicyNameParameter:
+      name: collectorPolicyName
+      in: path
+      description: Collector Policy Name
       required: true
       x-ms-parameter-location: method
       schema:

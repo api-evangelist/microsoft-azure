@@ -334,6 +334,29 @@ paths:
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
+    SubnetResourceId:
+      type: string
+      format: arm-id
+      description: A type definition that refers the id to an Azure Resource Manager resource.
+      x-ms-arm-id-details:
+        allowedResources:
+        - type: Microsoft.Network/virtualNetworks/subnets
+    AgentProfile:
+      type: object
+      description: Agent profile for the Fleet hub.
+      properties:
+        subnetId:
+          $ref: '#/components/schemas/SubnetResourceId'
+          description: The ID of the subnet which the Fleet hub node will join on startup. If this is not specified, a vnet and subnet will be generated and used.
+          x-ms-mutability:
+          - read
+          - create
+        vmSize:
+          type: string
+          description: The virtual machine size of the Fleet hub.
+          x-ms-mutability:
+          - read
+          - create
     FleetProvisioningState:
       type: string
       description: The provisioning state of the last accepted operation.
@@ -367,18 +390,71 @@ components:
           value: Deleting
           description: The provisioning state of a fleet being deleted.
       readOnly: true
-    FleetCredentialResults:
+    APIServerAccessProfile:
       type: object
-      description: The Credential results response.
+      description: Access profile for the Fleet hub API server.
       properties:
-        kubeconfigs:
-          type: array
-          description: Array of base64-encoded Kubernetes configuration files.
-          items:
-            $ref: '#/components/schemas/FleetCredentialResult'
+        enablePrivateCluster:
+          type: boolean
+          description: Whether to create the Fleet hub as a private cluster or not.
+          x-ms-mutability:
+          - read
+          - create
+        enableVnetIntegration:
+          type: boolean
+          description: Whether to enable apiserver vnet integration for the Fleet hub or not.
+          x-ms-mutability:
+          - read
+          - create
+        subnetId:
+          $ref: '#/components/schemas/SubnetResourceId'
+          description: The subnet to be used when apiserver vnet integration is enabled. It is required when creating a new Fleet with BYO vnet.
+          x-ms-mutability:
+          - read
+          - create
+    Fleet:
+      type: object
+      description: The Fleet resource.
+      properties:
+        properties:
+          $ref: '#/components/schemas/FleetProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        eTag:
+          type: string
+          description: If eTag is provided in the response body, it may also be provided as a header per the normal etag convention.  Entity tags are used for comparing two or more entities from the same requested resource. HTTP/1.1 uses entity tags in the etag (section 14.19), If-Match (section 14.24), If-None-Match (section 14.26), and If-Range (section 14.27) header fields.
           readOnly: true
-          x-ms-identifiers:
-          - name
+        identity:
+          $ref: ../../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
+          description: Managed identity.
+      allOf:
+      - $ref: ../../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    FleetProperties:
+      type: object
+      description: Fleet properties.
+      properties:
+        provisioningState:
+          $ref: '#/components/schemas/FleetProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
+        hubProfile:
+          $ref: '#/components/schemas/FleetHubProfile'
+          description: The FleetHubProfile configures the Fleet's hub.
+    FleetPatch:
+      type: object
+      description: Properties of a Fleet that can be patched.
+      properties:
+        tags:
+          type: object
+          description: Resource tags.
+          additionalProperties:
+            type: string
+        identity:
+          $ref: ../../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
+          description: Managed identity.
     FleetHubProfile:
       type: object
       description: The FleetHubProfile configures the fleet hub.
@@ -416,22 +492,31 @@ components:
           type: string
           description: The Azure Portal FQDN of the Fleet hub.
           readOnly: true
-    AgentProfile:
+    FleetCredentialResult:
       type: object
-      description: Agent profile for the Fleet hub.
+      description: One credential result item.
       properties:
-        subnetId:
-          $ref: '#/components/schemas/SubnetResourceId'
-          description: The ID of the subnet which the Fleet hub node will join on startup. If this is not specified, a vnet and subnet will be generated and used.
-          x-ms-mutability:
-          - read
-          - create
-        vmSize:
+        name:
           type: string
-          description: The virtual machine size of the Fleet hub.
-          x-ms-mutability:
-          - read
-          - create
+          description: The name of the credential.
+          readOnly: true
+        value:
+          type: string
+          format: byte
+          description: Base64-encoded Kubernetes configuration file.
+          readOnly: true
+    FleetCredentialResults:
+      type: object
+      description: The Credential results response.
+      properties:
+        kubeconfigs:
+          type: array
+          description: Array of base64-encoded Kubernetes configuration files.
+          items:
+            $ref: '#/components/schemas/FleetCredentialResult'
+          readOnly: true
+          x-ms-identifiers:
+          - name
     FleetListResult:
       type: object
       description: The response of a Fleet list operation.
@@ -447,91 +532,6 @@ components:
           description: The link to the next page of items
       required:
       - value
-    FleetCredentialResult:
-      type: object
-      description: One credential result item.
-      properties:
-        name:
-          type: string
-          description: The name of the credential.
-          readOnly: true
-        value:
-          type: string
-          format: byte
-          description: Base64-encoded Kubernetes configuration file.
-          readOnly: true
-    Fleet:
-      type: object
-      description: The Fleet resource.
-      properties:
-        properties:
-          $ref: '#/components/schemas/FleetProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        eTag:
-          type: string
-          description: If eTag is provided in the response body, it may also be provided as a header per the normal etag convention.  Entity tags are used for comparing two or more entities from the same requested resource. HTTP/1.1 uses entity tags in the etag (section 14.19), If-Match (section 14.24), If-None-Match (section 14.26), and If-Range (section 14.27) header fields.
-          readOnly: true
-        identity:
-          $ref: ../../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
-          description: Managed identity.
-      allOf:
-      - $ref: ../../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    APIServerAccessProfile:
-      type: object
-      description: Access profile for the Fleet hub API server.
-      properties:
-        enablePrivateCluster:
-          type: boolean
-          description: Whether to create the Fleet hub as a private cluster or not.
-          x-ms-mutability:
-          - read
-          - create
-        enableVnetIntegration:
-          type: boolean
-          description: Whether to enable apiserver vnet integration for the Fleet hub or not.
-          x-ms-mutability:
-          - read
-          - create
-        subnetId:
-          $ref: '#/components/schemas/SubnetResourceId'
-          description: The subnet to be used when apiserver vnet integration is enabled. It is required when creating a new Fleet with BYO vnet.
-          x-ms-mutability:
-          - read
-          - create
-    SubnetResourceId:
-      type: string
-      format: arm-id
-      description: A type definition that refers the id to an Azure Resource Manager resource.
-      x-ms-arm-id-details:
-        allowedResources:
-        - type: Microsoft.Network/virtualNetworks/subnets
-    FleetProperties:
-      type: object
-      description: Fleet properties.
-      properties:
-        provisioningState:
-          $ref: '#/components/schemas/FleetProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
-        hubProfile:
-          $ref: '#/components/schemas/FleetHubProfile'
-          description: The FleetHubProfile configures the Fleet's hub.
-    FleetPatch:
-      type: object
-      description: Properties of a Fleet that can be patched.
-      properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-        identity:
-          $ref: ../../../../../../common-types/resource-management/v4/managedidentity.json#/definitions/ManagedServiceIdentity
-          description: Managed identity.
   securitySchemes:
     azure_auth:
       type: oauth2

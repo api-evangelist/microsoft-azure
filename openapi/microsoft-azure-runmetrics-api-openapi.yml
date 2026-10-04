@@ -201,29 +201,63 @@ paths:
               $ref: '#/components/schemas/QueryParams'
         description: Query Parameters for data sorting and filtering.
 components:
+  parameters:
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The Name of the resource group in which the workspace is located.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    workspaceNameParameter:
+      name: workspaceName
+      in: path
+      description: The name of the workspace.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The Azure Subscription ID.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
   schemas:
-    MetricSchemaProperty:
+    BatchMetric:
       type: object
       properties:
-        propertyId:
-          type: string
-        name:
-          type: string
-        type:
-          type: string
-    ErrorDetails:
-      description: The error details.
+        values:
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+    RootError:
+      description: The root error.
       type: object
       properties:
         code:
-          description: The error code.
+          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
           type: string
         message:
-          description: The error message.
+          description: A human-readable representation of the error.
           type: string
         target:
           description: The target of the error (e.g., the name of the property in error).
           type: string
+        details:
+          description: The related errors that occurred during the request.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     QueryParams:
       description: The set of supported filters.
       type: object
@@ -250,79 +284,6 @@ components:
 
             If not specified, all items are returned.'
           type: integer
-    RootError:
-      description: The root error.
-      type: object
-      properties:
-        code:
-          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
-          type: string
-        message:
-          description: A human-readable representation of the error.
-          type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
-          type: string
-        details:
-          description: The related errors that occurred during the request.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetails'
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    BatchMetric:
-      type: object
-      properties:
-        values:
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/Metric'
-    InnerErrorResponse:
-      description: A nested structure of errors.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    Metric:
-      type: object
-      properties:
-        metricId:
-          format: uuid
-          type: string
-        dataContainerId:
-          type: string
-        metricType:
-          type: string
-        createdUtc:
-          format: date-time
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        label:
-          type: string
-        numCells:
-          format: int32
-          type: integer
-        dataLocation:
-          type: string
-        cells:
-          uniqueItems: false
-          type: array
-          items:
-            type: object
-            additionalProperties:
-              type: object
-        schema:
-          $ref: '#/components/schemas/MetricSchema'
     PaginatedRunMetricList:
       description: A paginated list of RunMetrics.
       type: object
@@ -339,17 +300,47 @@ components:
         nextLink:
           description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
-    MetricSchema:
+    ErrorResponse:
+      description: The error response.
       type: object
       properties:
-        numProperties:
-          format: int32
-          type: integer
-        properties:
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/MetricSchemaProperty'
+        error:
+          $ref: '#/components/schemas/RootError'
+          description: The top level error that occurred.
+        correlation:
+          description: Dictionary containing correlation details for the error.
+          type: object
+          additionalProperties:
+            type: string
+        environment:
+          description: The hosting environment.
+          type: string
+        location:
+          description: The Azure region.
+          type: string
+        time:
+          format: date-time
+          description: The time in UTC.
+          type: string
+    MetricSchemaProperty:
+      type: object
+      properties:
+        propertyId:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+    InnerErrorResponse:
+      description: A nested structure of errors.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     RunMetric:
       type: object
       properties:
@@ -385,54 +376,63 @@ components:
               type: object
         schema:
           $ref: '#/components/schemas/MetricSchema'
-    ErrorResponse:
-      description: The error response.
+    Metric:
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/RootError'
-          description: The top level error that occurred.
-        correlation:
-          description: Dictionary containing correlation details for the error.
-          type: object
-          additionalProperties:
-            type: string
-        environment:
-          description: The hosting environment.
+        metricId:
+          format: uuid
           type: string
-        location:
-          description: The Azure region.
+        dataContainerId:
           type: string
-        time:
+        metricType:
+          type: string
+        createdUtc:
           format: date-time
-          description: The time in UTC.
           type: string
-  parameters:
-    workspaceNameParameter:
-      name: workspaceName
-      in: path
-      description: The name of the workspace.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The Name of the resource group in which the workspace is located.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The Azure Subscription ID.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        label:
+          type: string
+        numCells:
+          format: int32
+          type: integer
+        dataLocation:
+          type: string
+        cells:
+          uniqueItems: false
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: object
+        schema:
+          $ref: '#/components/schemas/MetricSchema'
+    MetricSchema:
+      type: object
+      properties:
+        numProperties:
+          format: int32
+          type: integer
+        properties:
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricSchemaProperty'
+    ErrorDetails:
+      description: The error details.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
   securitySchemes:
     azure_auth:
       type: oauth2

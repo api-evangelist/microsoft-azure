@@ -406,6 +406,48 @@ paths:
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
+    NamespaceJunction:
+      description: A namespace junction.
+      type: object
+      properties:
+        namespacePath:
+          description: Namespace path on a cache for a Storage Target.
+          type: string
+        targetPath:
+          description: Path in Storage Target to which namespacePath points.
+          type: string
+        nfsExport:
+          description: NFS export where targetPath exists.
+          type: string
+        nfsAccessPolicy:
+          description: Name of the access policy applied to this junction.
+          type: string
+          default: default
+    StorageTargetResource:
+      type: object
+      description: Resource used by a cache.
+      properties:
+        name:
+          description: Name of the Storage Target.
+          readOnly: true
+          $ref: '#/components/schemas/ResourceName'
+        id:
+          readOnly: true
+          type: string
+          description: Resource ID of the Storage Target.
+        type:
+          description: Type of the Storage Target; Microsoft.StorageCache/Cache/StorageTarget
+          readOnly: true
+          type: string
+        location:
+          description: Region name string.
+          readOnly: true
+          type: string
+        systemData:
+          readOnly: true
+          description: The system meta data relating to this resource.
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+      x-ms-azure-resource: true
     CloudErrorBody:
       description: An error response.
       properties:
@@ -425,27 +467,52 @@ components:
           description: The target of the particular error. For example, the name of the property in error.
           type: string
       type: object
-    ResourceName:
-      description: Schema for the name of resources served by this provider. Note that objects will contain an odata @id annotation as appropriate. This will contain the complete resource id of the object. These names are case-preserving, but not case sensitive.
-      pattern: ^[-0-9a-zA-Z_]{1,80}$
-      type: string
-    NamespaceJunction:
-      description: A namespace junction.
+    UnknownProperties:
+      description: Properties of an unknown type of Storage Target.
       type: object
+      additionalProperties:
+        type: string
+    BlobNfsTarget:
+      type: object
+      description: Properties pertaining to the BlobNfsTarget.
       properties:
-        namespacePath:
-          description: Namespace path on a cache for a Storage Target.
+        target:
+          description: Resource ID of the storage container.
+          $ref: '#/components/schemas/URLString'
+          x-ms-mutability:
+          - read
+          - create
+        usageModel:
+          description: Identifies the StorageCache usage model to be used for this storage target.
           type: string
-        targetPath:
-          description: Path in Storage Target to which namespacePath points.
-          type: string
-        nfsExport:
-          description: NFS export where targetPath exists.
-          type: string
-        nfsAccessPolicy:
-          description: Name of the access policy applied to this junction.
-          type: string
-          default: default
+        verificationTimer:
+          description: Amount of time (in seconds) the cache waits before it checks the back-end storage for file updates.
+          type: integer
+          format: int32
+        writeBackTimer:
+          description: Amount of time (in seconds) the cache waits after the last file change before it copies the changed file to back-end storage.
+          type: integer
+          format: int32
+    StorageTarget:
+      type: object
+      description: Type of the Storage Target.
+      allOf:
+      - $ref: '#/components/schemas/StorageTargetResource'
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: StorageTarget properties
+          $ref: '#/components/schemas/StorageTargetProperties'
+    ClfsTarget:
+      type: object
+      description: Properties pertaining to the ClfsTarget
+      properties:
+        target:
+          description: Resource ID of storage container.
+          $ref: '#/components/schemas/URLString'
+          x-ms-mutability:
+          - read
+          - create
     StorageTargetProperties:
       type: object
       description: Properties of the Storage Target.
@@ -516,27 +583,16 @@ components:
           minimum: 1
           maximum: 100
           readOnly: true
-    BlobNfsTarget:
+    URLString:
+      description: A fully qualified URL.
+      type: string
+    UnknownTarget:
       type: object
-      description: Properties pertaining to the BlobNfsTarget.
+      description: Properties pertaining to the UnknownTarget
       properties:
-        target:
-          description: Resource ID of the storage container.
-          $ref: '#/components/schemas/URLString'
-          x-ms-mutability:
-          - read
-          - create
-        usageModel:
-          description: Identifies the StorageCache usage model to be used for this storage target.
-          type: string
-        verificationTimer:
-          description: Amount of time (in seconds) the cache waits before it checks the back-end storage for file updates.
-          type: integer
-          format: int32
-        writeBackTimer:
-          description: Amount of time (in seconds) the cache waits after the last file change before it copies the changed file to back-end storage.
-          type: integer
-          format: int32
+        attributes:
+          description: Dictionary of string->string pairs containing information about the Storage Target.
+          $ref: '#/components/schemas/UnknownProperties'
     StorageTargetsResult:
       description: A list of Storage Targets.
       properties:
@@ -549,13 +605,6 @@ components:
             $ref: '#/components/schemas/StorageTarget'
           type: array
       type: object
-    UnknownTarget:
-      type: object
-      description: Properties pertaining to the UnknownTarget
-      properties:
-        attributes:
-          description: Dictionary of string->string pairs containing information about the Storage Target.
-          $ref: '#/components/schemas/UnknownProperties'
     Nfs3Target:
       type: object
       description: Properties pertaining to the Nfs3Target
@@ -578,31 +627,6 @@ components:
           description: Amount of time (in seconds) the cache waits after the last file change before it copies the changed file to back-end storage.
           type: integer
           format: int32
-    StorageTarget:
-      type: object
-      description: Type of the Storage Target.
-      allOf:
-      - $ref: '#/components/schemas/StorageTargetResource'
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: StorageTarget properties
-          $ref: '#/components/schemas/StorageTargetProperties'
-    ClfsTarget:
-      type: object
-      description: Properties pertaining to the ClfsTarget
-      properties:
-        target:
-          description: Resource ID of storage container.
-          $ref: '#/components/schemas/URLString'
-          x-ms-mutability:
-          - read
-          - create
-    UnknownProperties:
-      description: Properties of an unknown type of Storage Target.
-      type: object
-      additionalProperties:
-        type: string
     CloudError:
       x-ms-external: true
       description: An error response.
@@ -611,48 +635,24 @@ components:
           description: The body of the error.
           $ref: '#/components/schemas/CloudErrorBody'
       type: object
-    StorageTargetResource:
-      type: object
-      description: Resource used by a cache.
-      properties:
-        name:
-          description: Name of the Storage Target.
-          readOnly: true
-          $ref: '#/components/schemas/ResourceName'
-        id:
-          readOnly: true
-          type: string
-          description: Resource ID of the Storage Target.
-        type:
-          description: Type of the Storage Target; Microsoft.StorageCache/Cache/StorageTarget
-          readOnly: true
-          type: string
-        location:
-          description: Region name string.
-          readOnly: true
-          type: string
-        systemData:
-          readOnly: true
-          description: The system meta data relating to this resource.
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-      x-ms-azure-resource: true
-    URLString:
-      description: A fully qualified URL.
+    ResourceName:
+      description: Schema for the name of resources served by this provider. Note that objects will contain an odata @id annotation as appropriate. This will contain the complete resource id of the object. These names are case-preserving, but not case sensitive.
+      pattern: ^[-0-9a-zA-Z_]{1,80}$
       type: string
   parameters:
-    StorageTargetParameter:
-      description: Name of Storage Target.
+    CacheNameParameter:
+      description: Name of cache. Length of name must not be greater than 80 and chars must be from the [-0-9a-zA-Z_] char class.
       in: path
-      name: storageTargetName
+      name: cacheName
       required: true
       x-ms-parameter-location: method
       schema:
         type: string
         pattern: ^[-0-9a-zA-Z_]{1,80}$
-    CacheNameParameter:
-      description: Name of cache. Length of name must not be greater than 80 and chars must be from the [-0-9a-zA-Z_] char class.
+    StorageTargetParameter:
+      description: Name of Storage Target.
       in: path
-      name: cacheName
+      name: storageTargetName
       required: true
       x-ms-parameter-location: method
       schema:

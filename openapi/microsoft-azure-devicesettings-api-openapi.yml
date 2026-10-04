@@ -262,23 +262,53 @@ paths:
         description: The time settings to be added or updated.
         required: true
 components:
+  parameters:
+    deviceNameParameter:
+      name: deviceName
+      in: path
+      description: The device name
+      required: true
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    managerNameParameter:
+      name: managerName
+      in: path
+      description: The manager name
+      required: true
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+        maxLength: 50
+        minLength: 2
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The api version
+      required: true
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The resource group name
+      required: true
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The subscription id
+      required: true
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
   schemas:
-    ChapSettings:
-      description: The Challenge-Handshake Authentication Protocol (CHAP) settings.
-      type: object
-      properties:
-        initiatorUser:
-          description: The CHAP initiator user.
-          type: string
-        initiatorSecret:
-          $ref: '#/components/schemas/AsymmetricEncryptedSecret'
-          description: The CHAP initiator secret.
-        targetUser:
-          description: The CHAP target user.
-          type: string
-        targetSecret:
-          $ref: '#/components/schemas/AsymmetricEncryptedSecret'
-          description: The target secret.
     RemoteManagementSettingsPatch:
       description: The settings for updating remote management mode of the device.
       required:
@@ -296,16 +326,6 @@ components:
           x-ms-enum:
             name: RemoteManagementModeConfiguration
             modelAsString: false
-    NetworkSettingsPatch:
-      description: Represents the patch request for the network settings of a device.
-      required:
-      - properties
-      type: object
-      properties:
-        properties:
-          $ref: '#/components/schemas/NetworkSettingsPatchProperties'
-          description: The properties of the network settings patch.
-          x-ms-client-flatten: true
     NetworkSettingsPatchProperties:
       description: The properties of the network settings patch.
       type: object
@@ -316,6 +336,35 @@ components:
         networkAdapters:
           $ref: '#/components/schemas/NetworkAdapterList'
           description: The network adapter list of device.
+    NetworkSettingsProperties:
+      description: The properties of the network settings of device.
+      required:
+      - dnsSettings
+      - networkAdapters
+      - webproxySettings
+      type: object
+      properties:
+        dnsSettings:
+          $ref: '#/components/schemas/DNSSettings'
+          description: The DNS (Domain Name System) settings of device.
+        networkAdapters:
+          $ref: '#/components/schemas/NetworkAdapterList'
+          description: The network adapter list of device.
+        webproxySettings:
+          $ref: '#/components/schemas/WebproxySettings'
+          description: The webproxy settings of device.
+    NetworkSettings:
+      description: Represents the network settings of a device.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      properties:
+        properties:
+          $ref: '#/components/schemas/NetworkSettingsProperties'
+          description: The properties of network settings of a device.
+          x-ms-client-flatten: true
     AlertNotificationProperties:
       description: The properties of the alert notification settings.
       required:
@@ -348,25 +397,32 @@ components:
           type: array
           items:
             type: string
-    NicIPv6:
-      description: Details related to the IPv6 address configuration.
+    NetworkAdapterList:
+      description: The collection of network adapters on the device.
+      required:
+      - value
       type: object
       properties:
-        ipv6Address:
-          description: The IPv6 address of the network adapter.
-          type: string
-        ipv6Prefix:
-          description: The IPv6 prefix of the network adapter.
-          type: string
-        ipv6Gateway:
-          description: The IPv6 gateway of the network adapter.
-          type: string
-        controller0Ipv6Address:
-          description: The IPv6 address of Controller0.
-          type: string
-        controller1Ipv6Address:
-          description: The IPv6 address of Controller1.
-          type: string
+        value:
+          description: The value.
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkAdapters'
+          x-ms-identifiers:
+          - interfaceId
+    SecuritySettingsProperties:
+      description: The properties of security settings of a device.
+      required:
+      - remoteManagementSettings
+      - chapSettings
+      type: object
+      properties:
+        remoteManagementSettings:
+          $ref: '#/components/schemas/RemoteManagementSettings'
+          description: The settings for remote management of a device.
+        chapSettings:
+          $ref: '#/components/schemas/ChapSettings'
+          description: The Challenge-Handshake Authentication Protocol (CHAP) settings.
     NetworkAdapters:
       description: Represents the network adapter on device.
       required:
@@ -434,23 +490,90 @@ components:
         nicIpv6Settings:
           $ref: '#/components/schemas/NicIPv6'
           description: The IPv6 configuration of the network adapter.
-    NetworkSettingsProperties:
-      description: The properties of the network settings of device.
+    TimeSettings:
+      description: The time settings of a device.
       required:
-      - dnsSettings
-      - networkAdapters
-      - webproxySettings
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      properties:
+        properties:
+          $ref: '#/components/schemas/TimeSettingsProperties'
+          description: The properties of the time settings of a device.
+          x-ms-client-flatten: true
+    AsymmetricEncryptedSecret:
+      description: Represent the secrets intended for encryption with asymmetric key pair.
+      required:
+      - value
+      - encryptionAlgorithm
       type: object
       properties:
-        dnsSettings:
-          $ref: '#/components/schemas/DNSSettings'
-          description: The DNS (Domain Name System) settings of device.
-        networkAdapters:
-          $ref: '#/components/schemas/NetworkAdapterList'
-          description: The network adapter list of device.
-        webproxySettings:
-          $ref: '#/components/schemas/WebproxySettings'
-          description: The webproxy settings of device.
+        value:
+          description: The value of the secret.
+          type: string
+        encryptionCertThumbprint:
+          description: Thumbprint certificate that was used to encrypt "Value". If the value in unencrypted, it will be null.
+          type: string
+        encryptionAlgorithm:
+          description: The algorithm used to encrypt "Value".
+          enum:
+          - None
+          - AES256
+          - RSAES_PKCS1_v_1_5
+          type: string
+          x-ms-enum:
+            name: EncryptionAlgorithm
+            modelAsString: false
+    RemoteManagementSettings:
+      description: The settings for remote management of a device.
+      required:
+      - remoteManagementMode
+      type: object
+      properties:
+        remoteManagementMode:
+          description: The remote management mode.
+          enum:
+          - Unknown
+          - Disabled
+          - HttpsEnabled
+          - HttpsAndHttpEnabled
+          type: string
+          x-ms-enum:
+            name: RemoteManagementModeConfiguration
+            modelAsString: false
+        remoteManagementCertificate:
+          description: The remote management certificates.
+          type: string
+    CloudApplianceSettings:
+      description: The cloud appliance settings.
+      type: object
+      properties:
+        serviceDataEncryptionKey:
+          $ref: '#/components/schemas/AsymmetricEncryptedSecret'
+          description: The service data encryption key (encrypted with DAK).
+        channelIntegrityKey:
+          $ref: '#/components/schemas/AsymmetricEncryptedSecret'
+          description: The channel integrity key (encrypted with DAK).
+    NicIPv6:
+      description: Details related to the IPv6 address configuration.
+      type: object
+      properties:
+        ipv6Address:
+          description: The IPv6 address of the network adapter.
+          type: string
+        ipv6Prefix:
+          description: The IPv6 prefix of the network adapter.
+          type: string
+        ipv6Gateway:
+          description: The IPv6 gateway of the network adapter.
+          type: string
+        controller0Ipv6Address:
+          description: The IPv6 address of Controller0.
+          type: string
+        controller1Ipv6Address:
+          description: The IPv6 address of Controller1.
+          type: string
     SecuritySettingsPatchProperties:
       description: The properties of the security settings patch.
       type: object
@@ -470,6 +593,23 @@ components:
         cloudApplianceSettings:
           $ref: '#/components/schemas/CloudApplianceSettings'
           description: The cloud appliance settings.
+    TimeSettingsProperties:
+      description: The properties of time settings of a device.
+      required:
+      - timeZone
+      type: object
+      properties:
+        timeZone:
+          description: The timezone of device, like '(UTC -06:00) Central America'
+          type: string
+        primaryTimeServer:
+          description: The primary Network Time Protocol (NTP) server name, like 'time.windows.com'.
+          type: string
+        secondaryTimeServer:
+          description: The secondary Network Time Protocol (NTP) server name, like 'time.contoso.com'. It's optional.
+          type: array
+          items:
+            type: string
     SecuritySettings:
       description: The security settings of a device.
       required:
@@ -481,16 +621,6 @@ components:
         properties:
           $ref: '#/components/schemas/SecuritySettingsProperties'
           description: The properties of the security settings of a device.
-          x-ms-client-flatten: true
-    SecuritySettingsPatch:
-      description: Represents the patch request for the security settings of a device.
-      required:
-      - properties
-      type: object
-      properties:
-        properties:
-          $ref: '#/components/schemas/SecuritySettingsPatchProperties'
-          description: The properties of the security settings patch.
           x-ms-client-flatten: true
     BaseModel:
       description: Represents the base class for all other ARM object models
@@ -516,94 +646,44 @@ components:
           x-ms-enum:
             name: Kind
             modelAsString: false
-    RemoteManagementSettings:
-      description: The settings for remote management of a device.
-      required:
-      - remoteManagementMode
+    ChapSettings:
+      description: The Challenge-Handshake Authentication Protocol (CHAP) settings.
       type: object
       properties:
-        remoteManagementMode:
-          description: The remote management mode.
-          enum:
-          - Unknown
-          - Disabled
-          - HttpsEnabled
-          - HttpsAndHttpEnabled
+        initiatorUser:
+          description: The CHAP initiator user.
           type: string
-          x-ms-enum:
-            name: RemoteManagementModeConfiguration
-            modelAsString: false
-        remoteManagementCertificate:
-          description: The remote management certificates.
-          type: string
-    AsymmetricEncryptedSecret:
-      description: Represent the secrets intended for encryption with asymmetric key pair.
-      required:
-      - value
-      - encryptionAlgorithm
-      type: object
-      properties:
-        value:
-          description: The value of the secret.
-          type: string
-        encryptionCertThumbprint:
-          description: Thumbprint certificate that was used to encrypt "Value". If the value in unencrypted, it will be null.
-          type: string
-        encryptionAlgorithm:
-          description: The algorithm used to encrypt "Value".
-          enum:
-          - None
-          - AES256
-          - RSAES_PKCS1_v_1_5
-          type: string
-          x-ms-enum:
-            name: EncryptionAlgorithm
-            modelAsString: false
-    CloudApplianceSettings:
-      description: The cloud appliance settings.
-      type: object
-      properties:
-        serviceDataEncryptionKey:
+        initiatorSecret:
           $ref: '#/components/schemas/AsymmetricEncryptedSecret'
-          description: The service data encryption key (encrypted with DAK).
-        channelIntegrityKey:
+          description: The CHAP initiator secret.
+        targetUser:
+          description: The CHAP target user.
+          type: string
+        targetSecret:
           $ref: '#/components/schemas/AsymmetricEncryptedSecret'
-          description: The channel integrity key (encrypted with DAK).
-    NetworkAdapterList:
-      description: The collection of network adapters on the device.
+          description: The target secret.
+    NetworkSettingsPatch:
+      description: Represents the patch request for the network settings of a device.
       required:
-      - value
+      - properties
       type: object
       properties:
-        value:
-          description: The value.
-          type: array
-          items:
-            $ref: '#/components/schemas/NetworkAdapters'
-          x-ms-identifiers:
-          - interfaceId
-    DNSSettings:
-      description: The DNS(Domain Name Server) settings of a device.
+        properties:
+          $ref: '#/components/schemas/NetworkSettingsPatchProperties'
+          description: The properties of the network settings patch.
+          x-ms-client-flatten: true
+    SecuritySettingsPatch:
+      description: Represents the patch request for the security settings of a device.
+      required:
+      - properties
       type: object
       properties:
-        primaryDnsServer:
-          description: The primary IPv4 DNS server for the device
-          type: string
-        primaryIpv6DnsServer:
-          description: The primary IPv6 DNS server for the device
-          type: string
-        secondaryDnsServers:
-          description: The secondary IPv4 DNS server for the device
-          type: array
-          items:
-            type: string
-        secondaryIpv6DnsServers:
-          description: The secondary IPv6 DNS server for the device
-          type: array
-          items:
-            type: string
-    NetworkSettings:
-      description: Represents the network settings of a device.
+        properties:
+          $ref: '#/components/schemas/SecuritySettingsPatchProperties'
+          description: The properties of the security settings patch.
+          x-ms-client-flatten: true
+    AlertSettings:
+      description: The alert settings.
       required:
       - properties
       type: object
@@ -611,41 +691,9 @@ components:
       - $ref: '#/components/schemas/BaseModel'
       properties:
         properties:
-          $ref: '#/components/schemas/NetworkSettingsProperties'
-          description: The properties of network settings of a device.
+          $ref: '#/components/schemas/AlertNotificationProperties'
+          description: The properties of the alert notification settings.
           x-ms-client-flatten: true
-    SecuritySettingsProperties:
-      description: The properties of security settings of a device.
-      required:
-      - remoteManagementSettings
-      - chapSettings
-      type: object
-      properties:
-        remoteManagementSettings:
-          $ref: '#/components/schemas/RemoteManagementSettings'
-          description: The settings for remote management of a device.
-        chapSettings:
-          $ref: '#/components/schemas/ChapSettings'
-          description: The Challenge-Handshake Authentication Protocol (CHAP) settings.
-    NicIPv4:
-      description: Details related to the IPv4 address configuration.
-      type: object
-      properties:
-        ipv4Address:
-          description: The IPv4 address of the network adapter.
-          type: string
-        ipv4Netmask:
-          description: The IPv4 netmask of the network adapter.
-          type: string
-        ipv4Gateway:
-          description: The IPv4 gateway of the network adapter.
-          type: string
-        controller0Ipv4Address:
-          description: The IPv4 address of Controller0.
-          type: string
-        controller1Ipv4Address:
-          description: The IPv4 address of Controller1.
-          type: string
     WebproxySettings:
       description: The web proxy settings on the device.
       required:
@@ -670,93 +718,45 @@ components:
         username:
           description: The webproxy username.
           type: string
-    TimeSettings:
-      description: The time settings of a device.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel'
-      properties:
-        properties:
-          $ref: '#/components/schemas/TimeSettingsProperties'
-          description: The properties of the time settings of a device.
-          x-ms-client-flatten: true
-    TimeSettingsProperties:
-      description: The properties of time settings of a device.
-      required:
-      - timeZone
+    DNSSettings:
+      description: The DNS(Domain Name Server) settings of a device.
       type: object
       properties:
-        timeZone:
-          description: The timezone of device, like '(UTC -06:00) Central America'
+        primaryDnsServer:
+          description: The primary IPv4 DNS server for the device
           type: string
-        primaryTimeServer:
-          description: The primary Network Time Protocol (NTP) server name, like 'time.windows.com'.
+        primaryIpv6DnsServer:
+          description: The primary IPv6 DNS server for the device
           type: string
-        secondaryTimeServer:
-          description: The secondary Network Time Protocol (NTP) server name, like 'time.contoso.com'. It's optional.
+        secondaryDnsServers:
+          description: The secondary IPv4 DNS server for the device
           type: array
           items:
             type: string
-    AlertSettings:
-      description: The alert settings.
-      required:
-      - properties
+        secondaryIpv6DnsServers:
+          description: The secondary IPv6 DNS server for the device
+          type: array
+          items:
+            type: string
+    NicIPv4:
+      description: Details related to the IPv4 address configuration.
       type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel'
       properties:
-        properties:
-          $ref: '#/components/schemas/AlertNotificationProperties'
-          description: The properties of the alert notification settings.
-          x-ms-client-flatten: true
-  parameters:
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The resource group name
-      required: true
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The api version
-      required: true
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    managerNameParameter:
-      name: managerName
-      in: path
-      description: The manager name
-      required: true
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-        maxLength: 50
-        minLength: 2
-    deviceNameParameter:
-      name: deviceName
-      in: path
-      description: The device name
-      required: true
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The subscription id
-      required: true
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
+        ipv4Address:
+          description: The IPv4 address of the network adapter.
+          type: string
+        ipv4Netmask:
+          description: The IPv4 netmask of the network adapter.
+          type: string
+        ipv4Gateway:
+          description: The IPv4 gateway of the network adapter.
+          type: string
+        controller0Ipv4Address:
+          description: The IPv4 address of Controller0.
+          type: string
+        controller1Ipv4Address:
+          description: The IPv4 address of Controller1.
+          type: string
   securitySchemes:
     azure_auth:
       type: oauth2

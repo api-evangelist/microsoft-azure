@@ -85,6 +85,29 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
+  parameters:
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The resource group name.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The API version.
+      required: true
+      schema:
+        type: string
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The subscription ID.
+      required: true
+      schema:
+        type: string
   schemas:
     CloudErrorBody:
       description: An error response from the service.
@@ -103,65 +126,76 @@ components:
             $ref: '#/components/schemas/CloudErrorBody'
           x-ms-identifiers: []
       x-ms-external: true
-    JobErrorDetails:
-      description: The job error information containing the list of job errors.
+    JobProperties:
+      description: The properties for the job.
       type: object
       properties:
-        errorDetails:
-          description: The error details.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/JobErrorItem'
-          x-ms-identifiers: []
-          readOnly: true
-        code:
-          description: The code intended for programmatic access.
+        jobType:
+          description: The type of the job.
+          enum:
+          - Invalid
+          - ScanForUpdates
+          - DownloadUpdates
+          - InstallUpdates
+          - RefreshShare
+          - RefreshContainer
+          - Backup
+          - Restore
+          - TriggerSupportPackage
           type: string
           readOnly: true
-        message:
-          description: The message that describes the error in detail.
+          x-ms-enum:
+            name: JobType
+            modelAsString: true
+        currentStage:
+          description: Current stage of the update operation.
+          enum:
+          - Unknown
+          - Initial
+          - ScanStarted
+          - ScanComplete
+          - ScanFailed
+          - DownloadStarted
+          - DownloadComplete
+          - DownloadFailed
+          - InstallStarted
+          - InstallComplete
+          - InstallFailed
+          - RebootInitiated
+          - Success
+          - Failure
+          - RescanStarted
+          - RescanComplete
+          - RescanFailed
           type: string
           readOnly: true
-    UpdateInstallProgress:
-      description: Progress details during installation of updates.
-      type: object
-      properties:
-        percentComplete:
+          x-ms-enum:
+            name: UpdateOperationStage
+            modelAsString: true
+        downloadProgress:
+          $ref: '#/components/schemas/UpdateDownloadProgress'
+          description: The download progress.
+          readOnly: true
+        installProgress:
+          $ref: '#/components/schemas/UpdateInstallProgress'
+          description: The install progress.
+          readOnly: true
+        totalRefreshErrors:
           format: int32
-          description: Percentage completed.
+          description: Total number of errors encountered during the refresh process.
           type: integer
           readOnly: true
-        numberOfUpdatesToInstall:
-          format: int32
-          description: Number of updates to install.
-          type: integer
-          readOnly: true
-        numberOfUpdatesInstalled:
-          format: int32
-          description: Number of updates installed.
-          type: integer
-          readOnly: true
-    JobErrorItem:
-      description: The job error items.
-      type: object
-      properties:
-        recommendations:
-          description: The recommended actions.
-          uniqueItems: false
-          type: array
-          items:
-            type: string
-          readOnly: true
-          x-ms-identifiers: []
-        code:
-          description: The code intended for programmatic access.
+        errorManifestFile:
+          description: Local share/remote container relative path to the error manifest file of the refresh.
           type: string
           readOnly: true
-        message:
-          description: The message that describes the error in detail.
+        refreshedEntityId:
+          description: ARM ID of the entity that was refreshed.
           type: string
           readOnly: true
+        folder:
+          description: If only subfolders need to be refreshed, then the subfolder path inside the share or container. (The path is empty if there are no subfolders.)
+          type: string
     Job:
       description: A device job.
       type: object
@@ -258,6 +292,65 @@ components:
           description: Number of updates downloaded.
           type: integer
           readOnly: true
+    JobErrorDetails:
+      description: The job error information containing the list of job errors.
+      type: object
+      properties:
+        errorDetails:
+          description: The error details.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/JobErrorItem'
+          x-ms-identifiers: []
+          readOnly: true
+        code:
+          description: The code intended for programmatic access.
+          type: string
+          readOnly: true
+        message:
+          description: The message that describes the error in detail.
+          type: string
+          readOnly: true
+    JobErrorItem:
+      description: The job error items.
+      type: object
+      properties:
+        recommendations:
+          description: The recommended actions.
+          uniqueItems: false
+          type: array
+          items:
+            type: string
+          readOnly: true
+          x-ms-identifiers: []
+        code:
+          description: The code intended for programmatic access.
+          type: string
+          readOnly: true
+        message:
+          description: The message that describes the error in detail.
+          type: string
+          readOnly: true
+    UpdateInstallProgress:
+      description: Progress details during installation of updates.
+      type: object
+      properties:
+        percentComplete:
+          format: int32
+          description: Percentage completed.
+          type: integer
+          readOnly: true
+        numberOfUpdatesToInstall:
+          format: int32
+          description: Number of updates to install.
+          type: integer
+          readOnly: true
+        numberOfUpdatesInstalled:
+          format: int32
+          description: Number of updates installed.
+          type: integer
+          readOnly: true
     CloudError:
       description: An error response from the service.
       type: object
@@ -266,76 +359,6 @@ components:
           $ref: '#/components/schemas/CloudErrorBody'
           description: The error details.
       x-ms-external: true
-    JobProperties:
-      description: The properties for the job.
-      type: object
-      properties:
-        jobType:
-          description: The type of the job.
-          enum:
-          - Invalid
-          - ScanForUpdates
-          - DownloadUpdates
-          - InstallUpdates
-          - RefreshShare
-          - RefreshContainer
-          - Backup
-          - Restore
-          - TriggerSupportPackage
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: JobType
-            modelAsString: true
-        currentStage:
-          description: Current stage of the update operation.
-          enum:
-          - Unknown
-          - Initial
-          - ScanStarted
-          - ScanComplete
-          - ScanFailed
-          - DownloadStarted
-          - DownloadComplete
-          - DownloadFailed
-          - InstallStarted
-          - InstallComplete
-          - InstallFailed
-          - RebootInitiated
-          - Success
-          - Failure
-          - RescanStarted
-          - RescanComplete
-          - RescanFailed
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: UpdateOperationStage
-            modelAsString: true
-        downloadProgress:
-          $ref: '#/components/schemas/UpdateDownloadProgress'
-          description: The download progress.
-          readOnly: true
-        installProgress:
-          $ref: '#/components/schemas/UpdateInstallProgress'
-          description: The install progress.
-          readOnly: true
-        totalRefreshErrors:
-          format: int32
-          description: Total number of errors encountered during the refresh process.
-          type: integer
-          readOnly: true
-        errorManifestFile:
-          description: Local share/remote container relative path to the error manifest file of the refresh.
-          type: string
-          readOnly: true
-        refreshedEntityId:
-          description: ARM ID of the entity that was refreshed.
-          type: string
-          readOnly: true
-        folder:
-          description: If only subfolders need to be refreshed, then the subfolder path inside the share or container. (The path is empty if there are no subfolders.)
-          type: string
     OperationStatus:
       description: The status of a long-running operation.
       type: object
@@ -358,29 +381,6 @@ components:
         error:
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ErrorResponse
           description: Error response describing why the operation failed.
-  parameters:
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The resource group name.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The subscription ID.
-      required: true
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The API version.
-      required: true
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

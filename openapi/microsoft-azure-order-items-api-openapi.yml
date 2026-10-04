@@ -345,40 +345,88 @@ paths:
         required: true
 components:
   schemas:
-    Preferences:
-      description: Preferences related to the order.
+    OrderItemProperties:
+      description: Represents order item properties.
+      required:
+      - orderItemDetails
+      - addressDetails
+      - orderId
       type: object
       properties:
-        notificationPreferences:
-          description: Notification preferences.
+        orderItemDetails:
+          $ref: '#/components/schemas/OrderItemDetails'
+          description: Represents order item details.
+        addressDetails:
+          $ref: '#/components/schemas/AddressDetails'
+          description: Represents shipping and return address for order item.
+        startTime:
+          format: date-time
+          description: Start time of order item.
+          type: string
+          readOnly: true
+        orderId:
+          description: Id of the order to which order item belongs to.
+          type: string
+    AddressProperties:
+      description: Address Properties.
+      required:
+      - contactDetails
+      type: object
+      properties:
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+          description: Shipping details for the address.
+        contactDetails:
+          $ref: '#/components/schemas/ContactDetails'
+          description: Contact details for the address.
+        addressValidationStatus:
+          description: Status of address validation.
+          enum:
+          - Valid
+          - Invalid
+          - Ambiguous
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: AddressValidationStatus
+            modelAsString: true
+            values:
+            - value: Valid
+              description: Address provided is valid.
+            - value: Invalid
+              description: Address provided is invalid or not supported.
+            - value: Ambiguous
+              description: Address provided is ambiguous, please choose one of the alternate addresses returned.
+    DeviceDetails:
+      description: Device details.
+      type: object
+      properties:
+        serialNumber:
+          description: Device serial number.
+          type: string
+          readOnly: true
+        managementResourceId:
+          description: Management Resource Id.
+          type: string
+          readOnly: true
+        managementResourceTenantId:
+          description: Management Resource Tenant ID.
+          type: string
+          readOnly: true
+    OrderItemResourceList:
+      description: List of order items.
+      type: object
+      properties:
+        value:
+          description: List of order item resources.
           uniqueItems: false
           type: array
           items:
-            $ref: '#/components/schemas/NotificationPreference'
-          x-ms-identifiers: []
-        transportPreferences:
-          $ref: '#/components/schemas/TransportPreferences'
-          description: Preferences related to the shipment logistics of the order.
-        encryptionPreferences:
-          $ref: '#/components/schemas/EncryptionPreferences'
-          description: Preferences related to the Encryption.
-        managementResourcePreferences:
-          $ref: '#/components/schemas/ManagementResourcePreferences'
-          description: Preferences related to the Management resource.
-    AdditionalConfiguration:
-      description: Additional Configuration details.
-      required:
-      - hierarchyInformation
-      - quantity
-      type: object
-      properties:
-        hierarchyInformation:
-          $ref: '#/components/schemas/HierarchyInformation'
-          description: Hierarchy of the product which uniquely identifies the configuration.
-        quantity:
-          format: int32
-          description: Quantity of the product.
-          type: integer
+            $ref: '#/components/schemas/OrderItemResource'
+          readOnly: true
+        nextLink:
+          description: Link for the next set of order item resources.
+          type: string
     NotificationPreference:
       description: Notification preference for a job stage.
       required:
@@ -403,107 +451,6 @@ components:
         sendNotification:
           description: Notification is required or not.
           type: boolean
-    AddressDetails:
-      description: Address details for an order item.
-      required:
-      - forwardAddress
-      type: object
-      properties:
-        forwardAddress:
-          $ref: '#/components/schemas/AddressProperties'
-          description: Customer address and contact details.
-        returnAddress:
-          $ref: '#/components/schemas/AddressProperties'
-          description: Return shipping address.
-          readOnly: true
-    EncryptionPreferences:
-      description: Preferences related to the double encryption.
-      type: object
-      properties:
-        doubleEncryptionStatus:
-          description: Double encryption status as entered by the customer. It is compulsory to give this parameter if the 'Deny' or 'Disabled' policy is configured.
-          enum:
-          - Disabled
-          - Enabled
-          type: string
-          x-ms-enum:
-            name: DoubleEncryptionStatus
-            modelAsString: true
-            values:
-            - value: Disabled
-              description: Double encryption is disabled.
-            - value: Enabled
-              description: Double encryption is enabled.
-    CancellationReason:
-      description: Reason for cancellation.
-      required:
-      - reason
-      type: object
-      properties:
-        reason:
-          description: Reason for cancellation.
-          type: string
-    ProductDetails:
-      description: Represents product details.
-      required:
-      - hierarchyInformation
-      type: object
-      properties:
-        displayInfo:
-          $ref: '#/components/schemas/DisplayInfo'
-          description: Display details of the product.
-        hierarchyInformation:
-          $ref: '#/components/schemas/HierarchyInformation'
-          description: Hierarchy of the product which uniquely identifies the product.
-        productDoubleEncryptionStatus:
-          description: Double encryption status of the configuration. Read-only field.
-          enum:
-          - Disabled
-          - Enabled
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: DoubleEncryptionStatus
-            modelAsString: true
-            values:
-            - value: Disabled
-              description: Double encryption is disabled.
-            - value: Enabled
-              description: Double encryption is enabled.
-        identificationType:
-          description: Identification type of the configuration.
-          enum:
-          - NotSupported
-          - SerialNumber
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: IdentificationType
-            modelAsString: true
-            values:
-            - value: NotSupported
-              description: Product does not have any explicit identifier.
-            - value: SerialNumber
-              description: Product is identifiable by serial number.
-        parentDeviceDetails:
-          $ref: '#/components/schemas/DeviceDetails'
-          description: Device details of the parent configuration.
-          readOnly: true
-        optInAdditionalConfigurations:
-          description: List of additional configurations customer wants in the order item apart from the ones included in the base configuration.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/AdditionalConfiguration'
-          x-ms-identifiers: []
-        childConfigurationDeviceDetails:
-          description: Details of all child configurations that are part of the order item.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ConfigurationDeviceDetails'
-          readOnly: true
-          x-ms-identifiers: []
     StageDetails:
       description: Resource stage details.
       type: object
@@ -589,73 +536,50 @@ components:
           description: Stage start time.
           type: string
           readOnly: true
-    DeviceDetails:
-      description: Device details.
+    ResourceProviderDetails:
+      description: Management RP details.
       type: object
       properties:
-        serialNumber:
-          description: Device serial number.
+        resourceProviderNamespace:
+          description: Resource provider namespace.
           type: string
           readOnly: true
-        managementResourceId:
-          description: Management Resource Id.
-          type: string
-          readOnly: true
-        managementResourceTenantId:
-          description: Management Resource Tenant ID.
-          type: string
-          readOnly: true
-    ShippingAddress:
-      description: Shipping address where customer wishes to receive the device.
-      required:
-      - streetAddress1
-      - country
+    HierarchyInformation:
+      description: Holds details about product hierarchy information.
       type: object
       properties:
-        streetAddress1:
-          description: Street Address line 1.
+        productFamilyName:
+          description: Represents product family name that uniquely identifies product family.
           type: string
-        streetAddress2:
-          description: Street Address line 2.
+        productLineName:
+          description: Represents product line name that uniquely identifies product line.
           type: string
-        streetAddress3:
-          description: Street Address line 3.
+        productName:
+          description: Represents product name that uniquely identifies product.
           type: string
-        city:
-          description: Name of the City.
+        configurationName:
+          description: Represents configuration name that uniquely identifies configuration.
           type: string
-        stateOrProvince:
-          description: Name of the State or Province.
-          type: string
-        country:
-          description: Name of the Country.
-          type: string
-        postalCode:
-          description: Postal code.
-          type: string
-        zipExtendedCode:
-          description: Extended Zip Code.
-          type: string
-        companyName:
-          description: Name of the company.
-          type: string
-        addressType:
-          description: Type of address.
-          enum:
-          - None
-          - Residential
-          - Commercial
-          type: string
-          x-ms-enum:
-            name: AddressType
-            modelAsString: true
-            values:
-            - value: None
-              description: Address type not known.
-            - value: Residential
-              description: Residential Address.
-            - value: Commercial
-              description: Commercial Address.
+    Preferences:
+      description: Preferences related to the order.
+      type: object
+      properties:
+        notificationPreferences:
+          description: Notification preferences.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationPreference'
+          x-ms-identifiers: []
+        transportPreferences:
+          $ref: '#/components/schemas/TransportPreferences'
+          description: Preferences related to the shipment logistics of the order.
+        encryptionPreferences:
+          $ref: '#/components/schemas/EncryptionPreferences'
+          description: Preferences related to the Encryption.
+        managementResourcePreferences:
+          $ref: '#/components/schemas/ManagementResourcePreferences'
+          description: Preferences related to the Management resource.
     ForwardShippingDetails:
       description: Forward shipment details.
       type: object
@@ -676,6 +600,131 @@ components:
           description: TrackingUrl of the package.
           type: string
           readOnly: true
+    AddressDetails:
+      description: Address details for an order item.
+      required:
+      - forwardAddress
+      type: object
+      properties:
+        forwardAddress:
+          $ref: '#/components/schemas/AddressProperties'
+          description: Customer address and contact details.
+        returnAddress:
+          $ref: '#/components/schemas/AddressProperties'
+          description: Return shipping address.
+          readOnly: true
+    OrderItemUpdateParameter:
+      description: Updates order item parameters.
+      type: object
+      properties:
+        properties:
+          $ref: '#/components/schemas/OrderItemUpdateProperties'
+          description: Order item update properties.
+          x-ms-client-flatten: true
+        tags:
+          description: The list of key value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups).
+          type: object
+          additionalProperties:
+            type: string
+    ProductDetails:
+      description: Represents product details.
+      required:
+      - hierarchyInformation
+      type: object
+      properties:
+        displayInfo:
+          $ref: '#/components/schemas/DisplayInfo'
+          description: Display details of the product.
+        hierarchyInformation:
+          $ref: '#/components/schemas/HierarchyInformation'
+          description: Hierarchy of the product which uniquely identifies the product.
+        productDoubleEncryptionStatus:
+          description: Double encryption status of the configuration. Read-only field.
+          enum:
+          - Disabled
+          - Enabled
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: DoubleEncryptionStatus
+            modelAsString: true
+            values:
+            - value: Disabled
+              description: Double encryption is disabled.
+            - value: Enabled
+              description: Double encryption is enabled.
+        identificationType:
+          description: Identification type of the configuration.
+          enum:
+          - NotSupported
+          - SerialNumber
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: IdentificationType
+            modelAsString: true
+            values:
+            - value: NotSupported
+              description: Product does not have any explicit identifier.
+            - value: SerialNumber
+              description: Product is identifiable by serial number.
+        parentDeviceDetails:
+          $ref: '#/components/schemas/DeviceDetails'
+          description: Device details of the parent configuration.
+          readOnly: true
+        optInAdditionalConfigurations:
+          description: List of additional configurations customer wants in the order item apart from the ones included in the base configuration.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalConfiguration'
+          x-ms-identifiers: []
+        childConfigurationDeviceDetails:
+          description: Details of all child configurations that are part of the order item.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigurationDeviceDetails'
+          readOnly: true
+          x-ms-identifiers: []
+    EncryptionPreferences:
+      description: Preferences related to the double encryption.
+      type: object
+      properties:
+        doubleEncryptionStatus:
+          description: Double encryption status as entered by the customer. It is compulsory to give this parameter if the 'Deny' or 'Disabled' policy is configured.
+          enum:
+          - Disabled
+          - Enabled
+          type: string
+          x-ms-enum:
+            name: DoubleEncryptionStatus
+            modelAsString: true
+            values:
+            - value: Disabled
+              description: Double encryption is disabled.
+            - value: Enabled
+              description: Double encryption is enabled.
+    TransportPreferences:
+      description: Preferences related to the shipment logistics of the sku.
+      required:
+      - preferredShipmentType
+      type: object
+      properties:
+        preferredShipmentType:
+          description: Indicates Shipment Logistics type that the customer preferred.
+          enum:
+          - CustomerManaged
+          - MicrosoftManaged
+          type: string
+          x-ms-enum:
+            name: TransportShipmentTypes
+            modelAsString: true
+            values:
+            - value: CustomerManaged
+              description: Shipment Logistics is handled by the customer.
+            - value: MicrosoftManaged
+              description: Shipment Logistics is handled by Microsoft.
     ReverseShippingDetails:
       description: Reverse shipment details.
       type: object
@@ -700,43 +749,34 @@ components:
           description: TrackingUrl of the package.
           type: string
           readOnly: true
-    OrderItemResourceList:
-      description: List of order items.
+    DisplayInfo:
+      description: Describes product display information.
       type: object
       properties:
-        value:
-          description: List of order item resources.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderItemResource'
+        productFamilyDisplayName:
+          description: Product family display name.
+          type: string
           readOnly: true
-        nextLink:
-          description: Link for the next set of order item resources.
+        configurationDisplayName:
+          description: Configuration display name.
           type: string
-    OrderItemUpdateProperties:
-      description: Order item update properties.
+          readOnly: true
+    OrderItemResource:
+      description: Represents order item resource.
+      required:
+      - properties
       type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
       properties:
-        forwardAddress:
-          $ref: '#/components/schemas/AddressProperties'
-          description: Updates forward shipping address and contact details.
-        preferences:
-          $ref: '#/components/schemas/Preferences'
-          description: Customer preference.
-        notificationEmailList:
-          description: Additional notification email list.
-          uniqueItems: false
-          type: array
-          items:
-            type: string
-    ManagementResourcePreferences:
-      description: Management resource preference to link device.
-      type: object
-      properties:
-        preferredManagementResourceId:
-          description: Customer preferred Management resource ARM ID.
-          type: string
+        properties:
+          $ref: '#/components/schemas/OrderItemProperties'
+          description: Order item properties.
+          x-ms-client-flatten: true
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+          description: Represents resource creation and update time.
+          readOnly: true
     ConfigurationDeviceDetails:
       description: Device details for configuration.
       type: object
@@ -776,60 +816,6 @@ components:
             $ref: '#/components/schemas/DeviceDetails'
           readOnly: true
           x-ms-identifiers: []
-    TransportPreferences:
-      description: Preferences related to the shipment logistics of the sku.
-      required:
-      - preferredShipmentType
-      type: object
-      properties:
-        preferredShipmentType:
-          description: Indicates Shipment Logistics type that the customer preferred.
-          enum:
-          - CustomerManaged
-          - MicrosoftManaged
-          type: string
-          x-ms-enum:
-            name: TransportShipmentTypes
-            modelAsString: true
-            values:
-            - value: CustomerManaged
-              description: Shipment Logistics is handled by the customer.
-            - value: MicrosoftManaged
-              description: Shipment Logistics is handled by Microsoft.
-    DisplayInfo:
-      description: Describes product display information.
-      type: object
-      properties:
-        productFamilyDisplayName:
-          description: Product family display name.
-          type: string
-          readOnly: true
-        configurationDisplayName:
-          description: Configuration display name.
-          type: string
-          readOnly: true
-    OrderItemProperties:
-      description: Represents order item properties.
-      required:
-      - orderItemDetails
-      - addressDetails
-      - orderId
-      type: object
-      properties:
-        orderItemDetails:
-          $ref: '#/components/schemas/OrderItemDetails'
-          description: Represents order item details.
-        addressDetails:
-          $ref: '#/components/schemas/AddressDetails'
-          description: Represents shipping and return address for order item.
-        startTime:
-          format: date-time
-          description: Start time of order item.
-          type: string
-          readOnly: true
-        orderId:
-          description: Id of the order to which order item belongs to.
-          type: string
     OrderItemDetails:
       description: Order item details.
       required:
@@ -968,22 +954,87 @@ components:
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/ErrorDetail
           description: Top level error for the job.
           readOnly: true
-    HierarchyInformation:
-      description: Holds details about product hierarchy information.
+    ShippingAddress:
+      description: Shipping address where customer wishes to receive the device.
+      required:
+      - streetAddress1
+      - country
       type: object
       properties:
-        productFamilyName:
-          description: Represents product family name that uniquely identifies product family.
+        streetAddress1:
+          description: Street Address line 1.
           type: string
-        productLineName:
-          description: Represents product line name that uniquely identifies product line.
+        streetAddress2:
+          description: Street Address line 2.
           type: string
-        productName:
-          description: Represents product name that uniquely identifies product.
+        streetAddress3:
+          description: Street Address line 3.
           type: string
-        configurationName:
-          description: Represents configuration name that uniquely identifies configuration.
+        city:
+          description: Name of the City.
           type: string
+        stateOrProvince:
+          description: Name of the State or Province.
+          type: string
+        country:
+          description: Name of the Country.
+          type: string
+        postalCode:
+          description: Postal code.
+          type: string
+        zipExtendedCode:
+          description: Extended Zip Code.
+          type: string
+        companyName:
+          description: Name of the company.
+          type: string
+        addressType:
+          description: Type of address.
+          enum:
+          - None
+          - Residential
+          - Commercial
+          type: string
+          x-ms-enum:
+            name: AddressType
+            modelAsString: true
+            values:
+            - value: None
+              description: Address type not known.
+            - value: Residential
+              description: Residential Address.
+            - value: Commercial
+              description: Commercial Address.
+    AdditionalConfiguration:
+      description: Additional Configuration details.
+      required:
+      - hierarchyInformation
+      - quantity
+      type: object
+      properties:
+        hierarchyInformation:
+          $ref: '#/components/schemas/HierarchyInformation'
+          description: Hierarchy of the product which uniquely identifies the configuration.
+        quantity:
+          format: int32
+          description: Quantity of the product.
+          type: integer
+    OrderItemUpdateProperties:
+      description: Order item update properties.
+      type: object
+      properties:
+        forwardAddress:
+          $ref: '#/components/schemas/AddressProperties'
+          description: Updates forward shipping address and contact details.
+        preferences:
+          $ref: '#/components/schemas/Preferences'
+          description: Customer preference.
+        notificationEmailList:
+          description: Additional notification email list.
+          uniqueItems: false
+          type: array
+          items:
+            type: string
     ContactDetails:
       description: Contact Details.
       required:
@@ -1010,43 +1061,15 @@ components:
           type: array
           items:
             type: string
-    OrderItemResource:
-      description: Represents order item resource.
+    CancellationReason:
+      description: Reason for cancellation.
       required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/TrackedResource
-      properties:
-        properties:
-          $ref: '#/components/schemas/OrderItemProperties'
-          description: Order item properties.
-          x-ms-client-flatten: true
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-          description: Represents resource creation and update time.
-          readOnly: true
-    OrderItemUpdateParameter:
-      description: Updates order item parameters.
+      - reason
       type: object
       properties:
-        properties:
-          $ref: '#/components/schemas/OrderItemUpdateProperties'
-          description: Order item update properties.
-          x-ms-client-flatten: true
-        tags:
-          description: The list of key value pairs that describe the resource. These tags can be used in viewing and grouping this resource (across resource groups).
-          type: object
-          additionalProperties:
-            type: string
-    ResourceProviderDetails:
-      description: Management RP details.
-      type: object
-      properties:
-        resourceProviderNamespace:
-          description: Resource provider namespace.
+        reason:
+          description: Reason for cancellation.
           type: string
-          readOnly: true
     ReturnOrderItemDetails:
       description: Return order item request body.
       required:
@@ -1066,36 +1089,13 @@ components:
           description: Shipping Box required.
           default: false
           type: boolean
-    AddressProperties:
-      description: Address Properties.
-      required:
-      - contactDetails
+    ManagementResourcePreferences:
+      description: Management resource preference to link device.
       type: object
       properties:
-        shippingAddress:
-          $ref: '#/components/schemas/ShippingAddress'
-          description: Shipping details for the address.
-        contactDetails:
-          $ref: '#/components/schemas/ContactDetails'
-          description: Contact details for the address.
-        addressValidationStatus:
-          description: Status of address validation.
-          enum:
-          - Valid
-          - Invalid
-          - Ambiguous
+        preferredManagementResourceId:
+          description: Customer preferred Management resource ARM ID.
           type: string
-          readOnly: true
-          x-ms-enum:
-            name: AddressValidationStatus
-            modelAsString: true
-            values:
-            - value: Valid
-              description: Address provided is valid.
-            - value: Invalid
-              description: Address provided is invalid or not supported.
-            - value: Ambiguous
-              description: Address provided is ambiguous, please choose one of the alternate addresses returned.
   parameters:
     orderItemNameParameter:
       name: orderItemName

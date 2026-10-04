@@ -272,66 +272,7 @@ paths:
       summary: Microsoft Azure Gets A List Of All Conversions
       description: Needs a more full description created.
 components:
-  parameters:
-    account_id:
-      name: account_id
-      description: The Azure Remote Rendering account ID.
-      in: path
-      required: true
-      x-example: 30ea64bd-100f-4bf0-adc9-29fa45d4880c
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    api_version:
-      name: api-version
-      in: query
-      description: The API version to be used with the HTTP request.
-      required: true
-      x-example: 2021-01-01-preview
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    conversion_id:
-      description: An ID uniquely identifying the conversion for the given account. The ID is case sensitive, can contain any combination of alphanumeric characters including hyphens and underscores, and cannot contain more than 256 characters.
-      in: path
-      name: conversion_id
-      required: true
-      x-example: contoso-conversion-fbc3646c-0b97-4553-81ca-6fae2bfb754e
-      x-ms-parameter-location: method
-      schema:
-        type: string
   schemas:
-    conversion_output_settings:
-      properties:
-        storageContainerUri:
-          type: string
-          description: The URI of the Azure blob storage container where the result of the conversion should be written to.
-          format: uri
-          example: https://contosostorage01.blob.core.windows.net/arroutput
-        storageContainerWriteSas:
-          type: string
-          description: An Azure blob storage container shared access signature giving write access to the storage container. Optional. If not provided, the Azure Remote Rendering account needs to be linked with the storage account containing the blob container. See https://docs.microsoft.com/azure/remote-rendering/how-tos/create-an-account#link-storage-accounts for details. For security purposes this field will never be filled out in responses bodies.
-        blobPrefix:
-          type: string
-          description: A prefix which gets prepended in front of all files produced by the conversion process. Will be treated as a virtual folder. Optional. If not provided, output files will be stored at the container root.
-          example: conversionOutput/fbc3646c-0b97-4553-81ca-6fae2bfb754e
-        outputAssetFilename:
-          type: string
-          description: The file name of the output asset. Must end in '.arrAsset'. Optional. If not provided, file name will the same name as the input asset, with '.arrAsset' extension
-          example: house.arrAsset
-      required:
-      - storageContainerUri
-      type: object
-      description: Conversion output settings describe the destination of conversion output.
-    create_conversion_settings:
-      description: Request to start a conversion
-      properties:
-        settings:
-          $ref: '#/components/schemas/conversion_settings'
-      required:
-      - settings
-      type: object
     conversion_status:
       description: The status of the conversion. Terminal states are 'Cancelled', 'Failed', and 'Succeeded'.
       enum:
@@ -355,6 +296,95 @@ components:
           description: The conversion has failed. Check the 'error' field for more details. This is a terminal state.
         - value: Succeeded
           description: The conversion has succeeded. Check the 'output' field for output asset location. This is a terminal state.
+    create_conversion_settings:
+      description: Request to start a conversion
+      properties:
+        settings:
+          $ref: '#/components/schemas/conversion_settings'
+      required:
+      - settings
+      type: object
+    conversion_list:
+      description: List of conversions.
+      properties:
+        conversions:
+          items:
+            $ref: '#/components/schemas/conversion'
+          type: array
+          description: The list of conversions.
+        '@nextLink':
+          description: If more conversions are available this field will contain a URL where the next batch of conversions can be requested. This URL will need the same authentication as all calls to the Azure Remote Rendering API.
+          type: string
+          readOnly: true
+      required:
+      - conversions
+      type: object
+    conversion_output_settings:
+      properties:
+        storageContainerUri:
+          type: string
+          description: The URI of the Azure blob storage container where the result of the conversion should be written to.
+          format: uri
+          example: https://contosostorage01.blob.core.windows.net/arroutput
+        storageContainerWriteSas:
+          type: string
+          description: An Azure blob storage container shared access signature giving write access to the storage container. Optional. If not provided, the Azure Remote Rendering account needs to be linked with the storage account containing the blob container. See https://docs.microsoft.com/azure/remote-rendering/how-tos/create-an-account#link-storage-accounts for details. For security purposes this field will never be filled out in responses bodies.
+        blobPrefix:
+          type: string
+          description: A prefix which gets prepended in front of all files produced by the conversion process. Will be treated as a virtual folder. Optional. If not provided, output files will be stored at the container root.
+          example: conversionOutput/fbc3646c-0b97-4553-81ca-6fae2bfb754e
+        outputAssetFilename:
+          type: string
+          description: The file name of the output asset. Must end in '.arrAsset'. Optional. If not provided, file name will the same name as the input asset, with '.arrAsset' extension
+          example: house.arrAsset
+      required:
+      - storageContainerUri
+      type: object
+      description: Conversion output settings describe the destination of conversion output.
+    conversion_input_settings:
+      properties:
+        storageContainerUri:
+          type: string
+          description: The URI of the Azure blob storage container containing the input model.
+          format: uri
+          example: https://contosostorage01.blob.core.windows.net/arrinput
+        storageContainerReadListSas:
+          type: string
+          description: An Azure blob storage container shared access signature giving read and list access to the storage container. Optional. If not provided, the Azure Remote Rendering account needs to be linked with the storage account containing the blob container. See https://docs.microsoft.com/azure/remote-rendering/how-tos/create-an-account#link-storage-accounts for details. For security purposes this field will never be filled out in responses bodies.
+        blobPrefix:
+          type: string
+          description: Only Blobs starting with this prefix will be downloaded to perform the conversion. Optional. If not provided, all Blobs from the container will be downloaded.
+          example: models/
+        relativeInputAssetPath:
+          type: string
+          description: The relative path starting at blobPrefix (or at the container root if blobPrefix is not provided) to the input model. Must point to a file with a supported file format ending. See https://docs.microsoft.com/azure/remote-rendering/how-tos/conversion/model-conversion for details.
+          example: house.fbx
+      required:
+      - storageContainerUri
+      - relativeInputAssetPath
+      type: object
+      description: Conversion input settings describe the origin of conversion input.
+    error_response:
+      description: The error response containing details of why the request failed.
+      properties:
+        error:
+          description: The error object containing details of why the request failed.
+          type: object
+          $ref: '#/components/schemas/error'
+      type: object
+      required:
+      - error
+    conversion_settings:
+      description: Conversion settings describe the origin of input files and destination of output files.
+      properties:
+        inputLocation:
+          $ref: '#/components/schemas/conversion_input_settings'
+        outputLocation:
+          $ref: '#/components/schemas/conversion_output_settings'
+      required:
+      - inputLocation
+      - outputLocation
+      type: object
     conversion:
       description: The properties of the conversion.
       properties:
@@ -394,55 +424,6 @@ components:
       - error
       - creationTime
       type: object
-    conversion_input_settings:
-      properties:
-        storageContainerUri:
-          type: string
-          description: The URI of the Azure blob storage container containing the input model.
-          format: uri
-          example: https://contosostorage01.blob.core.windows.net/arrinput
-        storageContainerReadListSas:
-          type: string
-          description: An Azure blob storage container shared access signature giving read and list access to the storage container. Optional. If not provided, the Azure Remote Rendering account needs to be linked with the storage account containing the blob container. See https://docs.microsoft.com/azure/remote-rendering/how-tos/create-an-account#link-storage-accounts for details. For security purposes this field will never be filled out in responses bodies.
-        blobPrefix:
-          type: string
-          description: Only Blobs starting with this prefix will be downloaded to perform the conversion. Optional. If not provided, all Blobs from the container will be downloaded.
-          example: models/
-        relativeInputAssetPath:
-          type: string
-          description: The relative path starting at blobPrefix (or at the container root if blobPrefix is not provided) to the input model. Must point to a file with a supported file format ending. See https://docs.microsoft.com/azure/remote-rendering/how-tos/conversion/model-conversion for details.
-          example: house.fbx
-      required:
-      - storageContainerUri
-      - relativeInputAssetPath
-      type: object
-      description: Conversion input settings describe the origin of conversion input.
-    conversion_settings:
-      description: Conversion settings describe the origin of input files and destination of output files.
-      properties:
-        inputLocation:
-          $ref: '#/components/schemas/conversion_input_settings'
-        outputLocation:
-          $ref: '#/components/schemas/conversion_output_settings'
-      required:
-      - inputLocation
-      - outputLocation
-      type: object
-    conversion_list:
-      description: List of conversions.
-      properties:
-        conversions:
-          items:
-            $ref: '#/components/schemas/conversion'
-          type: array
-          description: The list of conversions.
-        '@nextLink':
-          description: If more conversions are available this field will contain a URL where the next batch of conversions can be requested. This URL will need the same authentication as all calls to the Azure Remote Rendering API.
-          type: string
-          readOnly: true
-      required:
-      - conversions
-      type: object
     error:
       description: The error object containing details of why the request failed.
       properties:
@@ -471,16 +452,35 @@ components:
       required:
       - code
       - message
-    error_response:
-      description: The error response containing details of why the request failed.
-      properties:
-        error:
-          description: The error object containing details of why the request failed.
-          type: object
-          $ref: '#/components/schemas/error'
-      type: object
-      required:
-      - error
+  parameters:
+    account_id:
+      name: account_id
+      description: The Azure Remote Rendering account ID.
+      in: path
+      required: true
+      x-example: 30ea64bd-100f-4bf0-adc9-29fa45d4880c
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    conversion_id:
+      description: An ID uniquely identifying the conversion for the given account. The ID is case sensitive, can contain any combination of alphanumeric characters including hyphens and underscores, and cannot contain more than 256 characters.
+      in: path
+      name: conversion_id
+      required: true
+      x-example: contoso-conversion-fbc3646c-0b97-4553-81ca-6fae2bfb754e
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    api_version:
+      name: api-version
+      in: query
+      description: The API version to be used with the HTTP request.
+      required: true
+      x-example: 2021-01-01-preview
+      x-ms-parameter-location: method
+      schema:
+        type: string
   securitySchemes:
     MrcBearerAuth:
       in: header

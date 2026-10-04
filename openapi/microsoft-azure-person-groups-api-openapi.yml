@@ -516,18 +516,48 @@ paths:
       - Person Groups
 components:
   parameters:
-    personGroupId:
-      name: personGroupId
+    personId:
+      name: personId
       in: path
-      description: Id referencing a particular person group.
+      description: Id referencing a particular person.
       required: true
       x-ms-parameter-location: method
       style: simple
       explode: false
       schema:
         type: string
-        maxLength: 64
-        pattern: ^[a-z0-9-_]+$
+        format: uuid
+    detectionModel:
+      name: detectionModel
+      description: Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
+      required: false
+      in: query
+      x-ms-parameter-location: method
+      x-ms-enum:
+        name: DetectionModel
+        modelAsString: true
+      schema:
+        type: string
+        enum:
+        - detection_01
+        - detection_02
+        - detection_03
+        default: detection_01
+    targetFace:
+      name: targetFace
+      in: query
+      description: A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
+      x-ms-parameter-location: method
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: integer
+          format: int32
+          maxItems: 4
+          minItems: 4
     faceUserData:
       name: userData
       in: query
@@ -550,17 +580,6 @@ components:
       schema:
         type: string
         format: uuid
-    personId:
-      name: personId
-      in: path
-      description: Id referencing a particular person.
-      required: true
-      x-ms-parameter-location: method
-      style: simple
-      explode: false
-      schema:
-        type: string
-        format: uuid
     returnRecognitionModel:
       name: returnRecognitionModel
       description: A value indicating whether the operation should return 'recognitionModel' in response.
@@ -570,37 +589,18 @@ components:
       schema:
         type: boolean
         default: false
-    targetFace:
-      name: targetFace
-      in: query
-      description: A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
+    personGroupId:
+      name: personGroupId
+      in: path
+      description: Id referencing a particular person group.
+      required: true
       x-ms-parameter-location: method
-      required: false
-      style: form
+      style: simple
       explode: false
       schema:
-        type: array
-        items:
-          type: integer
-          format: int32
-          maxItems: 4
-          minItems: 4
-    detectionModel:
-      name: detectionModel
-      description: Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
-      required: false
-      in: query
-      x-ms-parameter-location: method
-      x-ms-enum:
-        name: DetectionModel
-        modelAsString: true
-      schema:
         type: string
-        enum:
-        - detection_01
-        - detection_02
-        - detection_03
-        default: detection_01
+        maxLength: 64
+        pattern: ^[a-z0-9-_]+$
   schemas:
     NameAndUserDataContractForCreation:
       type: object
@@ -617,45 +617,70 @@ components:
           type: string
           description: User specified data. Length should not exceed 16KB.
           maxLength: 16384
-    RecognitionModel:
-      type: string
-      description: Name of recognition model. Recognition model is used when the face features are extracted and associated with detected faceIds, (Large)FaceList or (Large)PersonGroup. A recognition model name can be provided when performing Face - Detect or (Large)FaceList - Create or (Large)PersonGroup - Create. The default value is 'recognition_01', if latest model needed, please explicitly specify the model you need.
-      default: recognition_01
-      x-ms-enum:
-        name: RecognitionModel
-        modelAsString: true
-      enum:
-      - recognition_01
-      - recognition_02
-      - recognition_03
-      - recognition_04
-    UpdateFaceRequest:
+    NameAndUserDataContract:
       type: object
-      description: Request to update face data.
+      description: A combination of user defined name and user specified data for the person, largePersonGroup/personGroup, and largeFaceList/faceList.
       properties:
+        name:
+          type: string
+          description: User defined name, maximum length is 128.
+          maxLength: 128
         userData:
           type: string
-          description: User-provided data attached to the face. The size limit is 1KB.
-          maxLength: 1024
+          description: User specified data. Length should not exceed 16KB.
+          maxLength: 16384
+    Persons:
+      type: array
+      description: An array of Persons.
+      items:
+        $ref: '#/components/schemas/Person'
+    PersonGroup:
+      type: object
+      required:
+      - personGroupId
+      - name
+      description: Person group object.
+      properties:
+        personGroupId:
+          description: PersonGroupId of the target person group.
+          type: string
+          maxLength: 64
+          pattern: ^[a-z0-9-_]+$
+        name:
+          type: string
+          description: User defined name, maximum length is 128.
+          maxLength: 128
+          minLength: 1
+        userData:
+          type: string
+          description: User specified data. Length should not exceed 16KB.
+          maxLength: 16384
+        recognitionModel:
+          $ref: '#/components/schemas/RecognitionModel'
+    Person:
+      type: object
+      required:
+      - personId
+      description: Person object.
+      properties:
+        personId:
+          type: string
+          format: uuid
+          description: PersonId of the target face list.
+        persistedFaceIds:
+          type: array
+          description: PersistedFaceIds of registered faces in the person. These persistedFaceIds are returned from Person - Add a Person Face, and will not expire.
+          items:
+            type: string
+            format: uuid
+      allOf:
+      - $ref: '#/components/schemas/NameAndUserDataContract'
     APIError:
       type: object
       description: Error information returned by the API
       properties:
         error:
           $ref: '#/components/schemas/Error'
-    Persons:
-      type: array
-      description: An array of Persons.
-      items:
-        $ref: '#/components/schemas/Person'
-    Error:
-      type: object
-      description: Error body.
-      properties:
-        code:
-          type: string
-        message:
-          type: string
     TrainingStatus:
       type: object
       required:
@@ -692,59 +717,18 @@ components:
         message:
           type: string
           description: Show failure message when training failed (omitted when training succeed).
-    Person:
-      type: object
-      required:
-      - personId
-      description: Person object.
-      properties:
-        personId:
-          type: string
-          format: uuid
-          description: PersonId of the target face list.
-        persistedFaceIds:
-          type: array
-          description: PersistedFaceIds of registered faces in the person. These persistedFaceIds are returned from Person - Add a Person Face, and will not expire.
-          items:
-            type: string
-            format: uuid
-      allOf:
-      - $ref: '#/components/schemas/NameAndUserDataContract'
-    NameAndUserDataContract:
-      type: object
-      description: A combination of user defined name and user specified data for the person, largePersonGroup/personGroup, and largeFaceList/faceList.
-      properties:
-        name:
-          type: string
-          description: User defined name, maximum length is 128.
-          maxLength: 128
-        userData:
-          type: string
-          description: User specified data. Length should not exceed 16KB.
-          maxLength: 16384
-    PersonGroup:
-      type: object
-      required:
-      - personGroupId
-      - name
-      description: Person group object.
-      properties:
-        personGroupId:
-          description: PersonGroupId of the target person group.
-          type: string
-          maxLength: 64
-          pattern: ^[a-z0-9-_]+$
-        name:
-          type: string
-          description: User defined name, maximum length is 128.
-          maxLength: 128
-          minLength: 1
-        userData:
-          type: string
-          description: User specified data. Length should not exceed 16KB.
-          maxLength: 16384
-        recognitionModel:
-          $ref: '#/components/schemas/RecognitionModel'
+    RecognitionModel:
+      type: string
+      description: Name of recognition model. Recognition model is used when the face features are extracted and associated with detected faceIds, (Large)FaceList or (Large)PersonGroup. A recognition model name can be provided when performing Face - Detect or (Large)FaceList - Create or (Large)PersonGroup - Create. The default value is 'recognition_01', if latest model needed, please explicitly specify the model you need.
+      default: recognition_01
+      x-ms-enum:
+        name: RecognitionModel
+        modelAsString: true
+      enum:
+      - recognition_01
+      - recognition_02
+      - recognition_03
+      - recognition_04
     MetaDataContract:
       type: object
       description: A combination of user defined name and user specified data and recognition model name for largePersonGroup/personGroup, and largeFaceList/faceList.
@@ -753,6 +737,22 @@ components:
           $ref: '#/components/schemas/RecognitionModel'
       allOf:
       - $ref: '#/components/schemas/NameAndUserDataContractForCreation'
+    UpdateFaceRequest:
+      type: object
+      description: Request to update face data.
+      properties:
+        userData:
+          type: string
+          description: User-provided data attached to the face. The size limit is 1KB.
+          maxLength: 1024
+    Error:
+      type: object
+      description: Error body.
+      properties:
+        code:
+          type: string
+        message:
+          type: string
     PersistedFace:
       type: object
       required:

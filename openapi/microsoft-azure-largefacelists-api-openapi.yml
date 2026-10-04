@@ -395,6 +395,81 @@ paths:
       tags:
       - Largefacelists
 components:
+  parameters:
+    targetFace:
+      name: targetFace
+      in: query
+      description: A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
+      x-ms-parameter-location: method
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: integer
+          format: int32
+          maxItems: 4
+          minItems: 4
+    faceUserData:
+      name: userData
+      in: query
+      description: User-specified data about the face for any purpose. The maximum length is 1KB.
+      x-ms-parameter-location: method
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: string
+        maxLength: 1024
+    largeFaceListId:
+      name: largeFaceListId
+      in: path
+      description: Id referencing a particular large face list.
+      required: true
+      x-ms-parameter-location: method
+      style: simple
+      explode: false
+      schema:
+        type: string
+        maxLength: 64
+        pattern: ^[a-z0-9-_]+$
+    returnRecognitionModel:
+      name: returnRecognitionModel
+      description: A value indicating whether the operation should return 'recognitionModel' in response.
+      required: false
+      in: query
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
+        default: false
+    persistedFaceId:
+      name: persistedFaceId
+      in: path
+      description: Id referencing a particular persistedFaceId of an existing face.
+      required: true
+      x-ms-parameter-location: method
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    detectionModel:
+      name: detectionModel
+      description: Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
+      required: false
+      in: query
+      x-ms-parameter-location: method
+      x-ms-enum:
+        name: DetectionModel
+        modelAsString: true
+      schema:
+        type: string
+        enum:
+        - detection_01
+        - detection_02
+        - detection_03
+        default: detection_01
   schemas:
     RecognitionModel:
       type: string
@@ -408,6 +483,28 @@ components:
       - recognition_02
       - recognition_03
       - recognition_04
+    MetaDataContract:
+      type: object
+      description: A combination of user defined name and user specified data and recognition model name for largePersonGroup/personGroup, and largeFaceList/faceList.
+      properties:
+        recognitionModel:
+          $ref: '#/components/schemas/RecognitionModel'
+      allOf:
+      - $ref: '#/components/schemas/NameAndUserDataContractForCreation'
+    APIError:
+      type: object
+      description: Error information returned by the API
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    UpdateFaceRequest:
+      type: object
+      description: Request to update face data.
+      properties:
+        userData:
+          type: string
+          description: User-provided data attached to the face. The size limit is 1KB.
+          maxLength: 1024
     PersistedFaces:
       type: array
       description: An array of persisted faces within the face list or large face list.
@@ -421,26 +518,35 @@ components:
           type: string
         message:
           type: string
-    UpdateFaceRequest:
-      type: object
-      description: Request to update face data.
-      properties:
-        userData:
-          type: string
-          description: User-provided data attached to the face. The size limit is 1KB.
-          maxLength: 1024
-    NameAndUserDataContract:
+    NameAndUserDataContractForCreation:
       type: object
       description: A combination of user defined name and user specified data for the person, largePersonGroup/personGroup, and largeFaceList/faceList.
+      required:
+      - name
       properties:
         name:
           type: string
           description: User defined name, maximum length is 128.
           maxLength: 128
+          minLength: 1
         userData:
           type: string
           description: User specified data. Length should not exceed 16KB.
           maxLength: 16384
+    PersistedFace:
+      type: object
+      required:
+      - persistedFaceId
+      description: PersonFace object.
+      properties:
+        persistedFaceId:
+          type: string
+          format: uuid
+          description: The persistedFaceId of the target face, which is persisted and will not expire. Different from faceId created by Face - Detect and will expire in at the time specified by faceIdTimeToLive after the detection call.
+        userData:
+          type: string
+          description: User-provided data attached to the face. The size limit is 1KB.
+          maxLength: 1024
     LargeFaceList:
       description: Large face list object.
       type: object
@@ -464,12 +570,23 @@ components:
           maxLength: 16384
         recognitionModel:
           $ref: '#/components/schemas/RecognitionModel'
-    APIError:
+    LargeFaceLists:
+      type: array
+      description: An array of large face list results, with fields of largeFaceListId, name and userData
+      items:
+        $ref: '#/components/schemas/LargeFaceList'
+    NameAndUserDataContract:
       type: object
-      description: Error information returned by the API
+      description: A combination of user defined name and user specified data for the person, largePersonGroup/personGroup, and largeFaceList/faceList.
       properties:
-        error:
-          $ref: '#/components/schemas/Error'
+        name:
+          type: string
+          description: User defined name, maximum length is 128.
+          maxLength: 128
+        userData:
+          type: string
+          description: User specified data. Length should not exceed 16KB.
+          maxLength: 16384
     TrainingStatus:
       type: object
       required:
@@ -506,123 +623,6 @@ components:
         message:
           type: string
           description: Show failure message when training failed (omitted when training succeed).
-    MetaDataContract:
-      type: object
-      description: A combination of user defined name and user specified data and recognition model name for largePersonGroup/personGroup, and largeFaceList/faceList.
-      properties:
-        recognitionModel:
-          $ref: '#/components/schemas/RecognitionModel'
-      allOf:
-      - $ref: '#/components/schemas/NameAndUserDataContractForCreation'
-    NameAndUserDataContractForCreation:
-      type: object
-      description: A combination of user defined name and user specified data for the person, largePersonGroup/personGroup, and largeFaceList/faceList.
-      required:
-      - name
-      properties:
-        name:
-          type: string
-          description: User defined name, maximum length is 128.
-          maxLength: 128
-          minLength: 1
-        userData:
-          type: string
-          description: User specified data. Length should not exceed 16KB.
-          maxLength: 16384
-    LargeFaceLists:
-      type: array
-      description: An array of large face list results, with fields of largeFaceListId, name and userData
-      items:
-        $ref: '#/components/schemas/LargeFaceList'
-    PersistedFace:
-      type: object
-      required:
-      - persistedFaceId
-      description: PersonFace object.
-      properties:
-        persistedFaceId:
-          type: string
-          format: uuid
-          description: The persistedFaceId of the target face, which is persisted and will not expire. Different from faceId created by Face - Detect and will expire in at the time specified by faceIdTimeToLive after the detection call.
-        userData:
-          type: string
-          description: User-provided data attached to the face. The size limit is 1KB.
-          maxLength: 1024
-  parameters:
-    returnRecognitionModel:
-      name: returnRecognitionModel
-      description: A value indicating whether the operation should return 'recognitionModel' in response.
-      required: false
-      in: query
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
-        default: false
-    targetFace:
-      name: targetFace
-      in: query
-      description: A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
-      x-ms-parameter-location: method
-      required: false
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: integer
-          format: int32
-          maxItems: 4
-          minItems: 4
-    faceUserData:
-      name: userData
-      in: query
-      description: User-specified data about the face for any purpose. The maximum length is 1KB.
-      x-ms-parameter-location: method
-      required: false
-      style: form
-      explode: false
-      schema:
-        type: string
-        maxLength: 1024
-    persistedFaceId:
-      name: persistedFaceId
-      in: path
-      description: Id referencing a particular persistedFaceId of an existing face.
-      required: true
-      x-ms-parameter-location: method
-      style: simple
-      explode: false
-      schema:
-        type: string
-        format: uuid
-    detectionModel:
-      name: detectionModel
-      description: Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
-      required: false
-      in: query
-      x-ms-parameter-location: method
-      x-ms-enum:
-        name: DetectionModel
-        modelAsString: true
-      schema:
-        type: string
-        enum:
-        - detection_01
-        - detection_02
-        - detection_03
-        default: detection_01
-    largeFaceListId:
-      name: largeFaceListId
-      in: path
-      description: Id referencing a particular large face list.
-      required: true
-      x-ms-parameter-location: method
-      style: simple
-      explode: false
-      schema:
-        type: string
-        maxLength: 64
-        pattern: ^[a-z0-9-_]+$
   securitySchemes:
     apim_key:
       type: apiKey

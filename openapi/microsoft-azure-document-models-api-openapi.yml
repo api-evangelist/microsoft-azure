@@ -252,6 +252,22 @@ paths:
       - Document Models
 components:
   schemas:
+    DocumentBuildMode:
+      type: string
+      description: Custom document model build mode.
+      enum:
+      - template
+      - neural
+      x-ms-enum:
+        name: DocumentBuildMode
+        modelAsString: true
+        values:
+        - name: template
+          value: template
+          description: Target documents with similar visual templates.
+        - name: neural
+          value: neural
+          description: Support documents with diverse visual templates.
     Document:
       type: object
       description: An object describing the location and semantic content of a document.
@@ -288,117 +304,46 @@ components:
       - docType
       - spans
       - confidence
-    CurrencyValue:
+    PagedDocumentModelDetails:
       type: object
-      description: Currency field value.
+      description: Paged collection of DocumentModelDetails items
       properties:
-        amount:
-          type: number
-          format: double
-          description: Currency amount.
-        currencySymbol:
-          type: string
-          description: Currency symbol label, if any.
-        currencyCode:
-          type: string
-          description: Resolved currency code (ISO 4217), if any.
-      required:
-      - amount
-    DocumentSection:
-      type: object
-      description: An object representing a section in the document.
-      properties:
-        spans:
+        value:
           type: array
-          description: Location of the section in the reading order concatenated content.
+          description: The DocumentModelDetails items on this page
           items:
-            $ref: '#/components/schemas/DocumentSpan'
+            $ref: '#/components/schemas/DocumentModelDetails'
           x-ms-identifiers: []
-        elements:
-          type: array
-          description: Child elements of the section.
-          items:
-            $ref: '#/components/schemas/DocumentElement'
-      required:
-      - spans
-    AzureBlobContentSource:
-      type: object
-      description: Azure Blob Storage content.
-      properties:
-        containerUrl:
+        nextLink:
           type: string
           format: uri
-          description: Azure Blob Storage container URL.
-        prefix:
-          type: string
-          description: Blob name prefix.
+          description: The link to the next page of items
       required:
-      - containerUrl
-    OperationStatus:
-      type: string
-      description: Operation status.
-      enum:
-      - notStarted
-      - running
-      - failed
-      - succeeded
-      - completed
-      - canceled
-      x-ms-enum:
-        name: OperationStatus
-        modelAsString: true
-        values:
-        - name: notStarted
-          value: notStarted
-          description: The operation has not started yet.
-        - name: running
-          value: running
-          description: The operation is in progress.
-        - name: failed
-          value: failed
-          description: The operation has failed.
-        - name: succeeded
-          value: succeeded
-          description: The operation has succeeded.
-        - name: completed
-          value: completed
-          description: The operation has completed.
-        - name: canceled
-          value: canceled
-          description: The operation has been canceled.
-    DocumentListItem:
+      - value
+    BoundingRegion:
       type: object
-      description: An object representing a list item in the document.
+      description: Bounding polygon on a specific page of the input.
       properties:
-        level:
+        pageNumber:
           type: integer
           format: int32
-          description: Level of the list item (1-indexed).
+          description: 1-based page number of page containing the bounding region.
           minimum: 1
-        content:
-          type: string
-          description: Content of the list item.
-        boundingRegions:
+        polygon:
           type: array
-          description: Bounding regions covering the list item.
+          description: 'Bounding polygon on the page, or the entire page if not specified.
+
+            Coordinates specified relative to the top-left of the page. The numbers
+
+            represent the x, y values of the polygon vertices, clockwise from the left
+
+            (-180 degrees inclusive) relative to the element orientation.'
           items:
-            $ref: '#/components/schemas/BoundingRegion'
-          x-ms-identifiers: []
-        spans:
-          type: array
-          description: Location of the list item in the reading order concatenated content.
-          items:
-            $ref: '#/components/schemas/DocumentSpan'
-          x-ms-identifiers: []
-        elements:
-          type: array
-          description: Child elements of the list item.
-          items:
-            $ref: '#/components/schemas/DocumentElement'
+            type: number
+            format: float
       required:
-      - level
-      - content
-      - spans
+      - pageNumber
+      - polygon
     DocumentList:
       type: object
       description: An object representing a list in the document.
@@ -418,75 +363,42 @@ components:
       required:
       - spans
       - items
-    DocumentSignatureType:
-      type: string
-      description: Presence of signature.
-      enum:
-      - signed
-      - unsigned
-      x-ms-enum:
-        name: DocumentSignatureType
-        modelAsString: true
-        values:
-        - name: signed
-          value: signed
-          description: A signature is detected.
-        - name: unsigned
-          value: unsigned
-          description: No signatures are detected.
-    DocumentKeyValuePair:
+    DocumentWord:
       type: object
-      description: 'An object representing a form field with distinct field label (key) and field
+      description: 'A word object consisting of a contiguous sequence of characters.  For non-space
 
-        value (may be empty).'
+        delimited languages, such as Chinese, Japanese, and Korean, each character is
+
+        represented as its own word.'
       properties:
-        key:
-          $ref: '#/components/schemas/DocumentKeyValueElement'
-          description: Field label of the key-value pair.
-        value:
-          $ref: '#/components/schemas/DocumentKeyValueElement'
-          description: Field value of the key-value pair.
+        content:
+          type: string
+          description: Text content of the word.
+        polygon:
+          type: array
+          description: 'Bounding polygon of the word, with coordinates specified relative to the
+
+            top-left of the page. The numbers represent the x, y values of the polygon
+
+            vertices, clockwise from the left (-180 degrees inclusive) relative to the
+
+            element orientation.'
+          items:
+            type: number
+            format: float
+        span:
+          $ref: '#/components/schemas/DocumentSpan'
+          description: Location of the word in the reading order concatenated content.
         confidence:
           type: number
           format: float
-          description: Confidence of correctly extracting the key-value pair.
+          description: Confidence of correctly extracting the word.
           minimum: 0
           maximum: 1
       required:
-      - key
+      - content
+      - span
       - confidence
-    DocumentFigure:
-      type: object
-      description: An object representing a figure in the document.
-      properties:
-        boundingRegions:
-          type: array
-          description: Bounding regions covering the figure.
-          items:
-            $ref: '#/components/schemas/BoundingRegion'
-          x-ms-identifiers: []
-        spans:
-          type: array
-          description: Location of the figure in the reading order concatenated content.
-          items:
-            $ref: '#/components/schemas/DocumentSpan'
-          x-ms-identifiers: []
-        elements:
-          type: array
-          description: Child elements of the figure, excluding any caption or footnotes.
-          items:
-            $ref: '#/components/schemas/DocumentElement'
-        caption:
-          $ref: '#/components/schemas/DocumentCaption'
-          description: Caption associated with the figure.
-        footnotes:
-          type: array
-          description: List of footnotes associated with the figure.
-          items:
-            $ref: '#/components/schemas/DocumentFootnote'
-          x-ms-identifiers: []
-      required:
-      - spans
     DocumentField:
       type: object
       description: An object representing the content and location of a field value.
@@ -573,372 +485,64 @@ components:
           maximum: 1
       required:
       - type
-    DocumentSpan:
+    DocumentModelDetails:
       type: object
-      description: 'Contiguous region of the concatenated content property, specified as an offset
-
-        and length.'
+      description: Document model info.
       properties:
-        offset:
-          type: integer
-          format: int32
-          description: Zero-based index of the content represented by the span.
-          minimum: 0
-        length:
-          type: integer
-          format: int32
-          description: Number of characters in the content represented by the span.
-          minimum: 0
-      required:
-      - offset
-      - length
-    DocumentLine:
-      type: object
-      description: 'A content line object consisting of an adjacent sequence of content elements,
-
-        such as words and selection marks.'
-      properties:
-        content:
+        modelId:
           type: string
-          description: Concatenated content of the contained elements in reading order.
-        polygon:
-          type: array
-          description: 'Bounding polygon of the line, with coordinates specified relative to the
-
-            top-left of the page. The numbers represent the x, y values of the polygon
-
-            vertices, clockwise from the left (-180 degrees inclusive) relative to the
-
-            element orientation.'
-          items:
-            type: number
-            format: float
-        spans:
-          type: array
-          description: Location of the line in the reading order concatenated content.
-          items:
-            $ref: '#/components/schemas/DocumentSpan'
-          x-ms-identifiers: []
-      required:
-      - content
-      - spans
-    DocumentCaption:
-      type: object
-      description: A caption object describing a table or figure.
-      properties:
-        content:
-          type: string
-          description: Content of the caption.
-        boundingRegions:
-          type: array
-          description: Bounding regions covering the caption.
-          items:
-            $ref: '#/components/schemas/BoundingRegion'
-          x-ms-identifiers: []
-        spans:
-          type: array
-          description: Location of the caption in the reading order concatenated content.
-          items:
-            $ref: '#/components/schemas/DocumentSpan'
-          x-ms-identifiers: []
-        elements:
-          type: array
-          description: Child elements of the caption.
-          items:
-            $ref: '#/components/schemas/DocumentElement'
-      required:
-      - content
-      - spans
-    DocumentSelectionMark:
-      type: object
-      description: 'A selection mark object representing check boxes, radio buttons, and other
-
-        elements indicating a selection.'
-      properties:
-        state:
-          $ref: '#/components/schemas/DocumentSelectionMarkState'
-          description: State of the selection mark.
-        polygon:
-          type: array
-          description: 'Bounding polygon of the selection mark, with coordinates specified relative
-
-            to the top-left of the page. The numbers represent the x, y values of the
-
-            polygon vertices, clockwise from the left (-180 degrees inclusive) relative
-
-            to the element orientation.'
-          items:
-            type: number
-            format: float
-        span:
-          $ref: '#/components/schemas/DocumentSpan'
-          description: Location of the selection mark in the reading order concatenated content.
-        confidence:
-          type: number
-          format: float
-          description: Confidence of correctly extracting the selection mark.
-          minimum: 0
-          maximum: 1
-      required:
-      - state
-      - span
-      - confidence
-    DocumentWord:
-      type: object
-      description: 'A word object consisting of a contiguous sequence of characters.  For non-space
-
-        delimited languages, such as Chinese, Japanese, and Korean, each character is
-
-        represented as its own word.'
-      properties:
-        content:
-          type: string
-          description: Text content of the word.
-        polygon:
-          type: array
-          description: 'Bounding polygon of the word, with coordinates specified relative to the
-
-            top-left of the page. The numbers represent the x, y values of the polygon
-
-            vertices, clockwise from the left (-180 degrees inclusive) relative to the
-
-            element orientation.'
-          items:
-            type: number
-            format: float
-        span:
-          $ref: '#/components/schemas/DocumentSpan'
-          description: Location of the word in the reading order concatenated content.
-        confidence:
-          type: number
-          format: float
-          description: Confidence of correctly extracting the word.
-          minimum: 0
-          maximum: 1
-      required:
-      - content
-      - span
-      - confidence
-    DocumentTypeDetails:
-      type: object
-      description: Document type info.
-      properties:
+          description: Unique document model name.
+          pattern: ^[a-zA-Z0-9][a-zA-Z0-9._~-]{1,63}$
+          x-ms-mutability:
+          - read
+          - create
         description:
           type: string
           description: Document model description.
           maxLength: 4096
+        createdDateTime:
+          type: string
+          format: date-time
+          description: Date and time (UTC) when the document model was created.
+        expirationDateTime:
+          type: string
+          format: date-time
+          description: Date and time (UTC) when the document model will expire.
+        apiVersion:
+          type: string
+          description: API version used to create this document model.
+        tags:
+          type: object
+          description: List of key-value tag attributes associated with the document model.
+          additionalProperties:
+            type: string
         buildMode:
           $ref: '#/components/schemas/DocumentBuildMode'
           description: Custom document model build mode.
-        fieldSchema:
+        azureBlobSource:
+          $ref: '#/components/schemas/AzureBlobContentSource'
+          description: 'Azure Blob Storage location containing the training data.  Either
+
+            azureBlobSource or azureBlobFileListSource must be specified.'
+        azureBlobFileListSource:
+          $ref: '#/components/schemas/AzureBlobFileListContentSource'
+          description: 'Azure Blob Storage file list specifying the training data.  Either
+
+            azureBlobSource or azureBlobFileListSource must be specified.'
+        docTypes:
           type: object
-          description: Description of the document semantic schema using a JSON Schema style syntax.
+          description: Supported document types.
           additionalProperties:
-            $ref: '#/components/schemas/DocumentFieldSchema'
-        fieldConfidence:
-          type: object
-          description: Estimated confidence for each field.
-          additionalProperties:
-            format: float
-            type: number
-      required:
-      - fieldSchema
-    DocumentBuildMode:
-      type: string
-      description: Custom document model build mode.
-      enum:
-      - template
-      - neural
-      x-ms-enum:
-        name: DocumentBuildMode
-        modelAsString: true
-        values:
-        - name: template
-          value: template
-          description: Target documents with similar visual templates.
-        - name: neural
-          value: neural
-          description: Support documents with diverse visual templates.
-    FontWeight:
-      type: string
-      description: Font weight.
-      enum:
-      - normal
-      - bold
-      x-ms-enum:
-        name: FontWeight
-        modelAsString: true
-        values:
-        - name: normal
-          value: normal
-          description: Characters are represented normally.
-        - name: bold
-          value: bold
-          description: Characters are represented with thicker strokes.
-    DocumentSelectionMarkState:
-      type: string
-      description: State of the selection mark.
-      enum:
-      - selected
-      - unselected
-      x-ms-enum:
-        name: DocumentSelectionMarkState
-        modelAsString: true
-        values:
-        - name: selected
-          value: selected
-          description: 'The selection mark is selected, often indicated by a check ✓ or cross X inside
-
-            the selection mark.'
-        - name: unselected
-          value: unselected
-          description: The selection mark is not selected.
-    DocumentLanguage:
-      type: object
-      description: An object representing the detected language for a given text span.
-      properties:
-        locale:
-          type: string
-          description: 'Detected language.  Value may an ISO 639-1 language code (ex. "en", "fr")
-
-            or BCP 47 language tag (ex. "zh-Hans").'
-        spans:
+            $ref: '#/components/schemas/DocumentTypeDetails'
+        warnings:
           type: array
-          description: 'Location of the text elements in the concatenated content the language applies
-
-            to.'
+          description: List of warnings encountered while building the model.
           items:
-            $ref: '#/components/schemas/DocumentSpan'
+            $ref: '#/components/schemas/Warning'
           x-ms-identifiers: []
-        confidence:
-          type: number
-          format: float
-          description: Confidence of correctly identifying the language.
-          minimum: 0
-          maximum: 1
       required:
-      - locale
-      - spans
-      - confidence
-    DocumentBarcodeKind:
-      type: string
-      description: Barcode kind.
-      enum:
-      - QRCode
-      - PDF417
-      - UPCA
-      - UPCE
-      - Code39
-      - Code128
-      - EAN8
-      - EAN13
-      - DataBar
-      - Code93
-      - Codabar
-      - DataBarExpanded
-      - ITF
-      - MicroQRCode
-      - Aztec
-      - DataMatrix
-      - MaxiCode
-      x-ms-enum:
-        name: DocumentBarcodeKind
-        modelAsString: true
-        values:
-        - name: QRCode
-          value: QRCode
-          description: QR code, as defined in ISO/IEC 18004:2015.
-        - name: PDF417
-          value: PDF417
-          description: PDF417, as defined in ISO 15438.
-        - name: UPCA
-          value: UPCA
-          description: GS1 12-digit Universal Product Code.
-        - name: UPCE
-          value: UPCE
-          description: GS1 6-digit Universal Product Code.
-        - name: Code39
-          value: Code39
-          description: Code 39 barcode, as defined in ISO/IEC 16388:2007.
-        - name: Code128
-          value: Code128
-          description: Code 128 barcode, as defined in ISO/IEC 15417:2007.
-        - name: EAN8
-          value: EAN8
-          description: GS1 8-digit International Article Number (European Article Number).
-        - name: EAN13
-          value: EAN13
-          description: GS1 13-digit International Article Number (European Article Number).
-        - name: DataBar
-          value: DataBar
-          description: GS1 DataBar barcode.
-        - name: Code93
-          value: Code93
-          description: Code 93 barcode, as defined in ANSI/AIM BC5-1995.
-        - name: Codabar
-          value: Codabar
-          description: Codabar barcode, as defined in ANSI/AIM BC3-1995.
-        - name: DataBarExpanded
-          value: DataBarExpanded
-          description: GS1 DataBar Expanded barcode.
-        - name: ITF
-          value: ITF
-          description: Interleaved 2 of 5 barcode, as defined in ANSI/AIM BC2-1995.
-        - name: MicroQRCode
-          value: MicroQRCode
-          description: Micro QR code, as defined in ISO/IEC 23941:2022.
-        - name: Aztec
-          value: Aztec
-          description: Aztec code, as defined in ISO/IEC 24778:2008.
-        - name: DataMatrix
-          value: DataMatrix
-          description: Data matrix code, as defined in ISO/IEC 16022:2006.
-        - name: MaxiCode
-          value: MaxiCode
-          description: MaxiCode, as defined in ISO/IEC 16023:2000.
-    DocumentFootnote:
-      type: object
-      description: A footnote object describing a table or figure.
-      properties:
-        content:
-          type: string
-          description: Content of the footnote.
-        boundingRegions:
-          type: array
-          description: Bounding regions covering the footnote.
-          items:
-            $ref: '#/components/schemas/BoundingRegion'
-          x-ms-identifiers: []
-        spans:
-          type: array
-          description: Location of the footnote in the reading order concatenated content.
-          items:
-            $ref: '#/components/schemas/DocumentSpan'
-          x-ms-identifiers: []
-        elements:
-          type: array
-          description: Child elements of the footnote.
-          items:
-            $ref: '#/components/schemas/DocumentElement'
-      required:
-      - content
-      - spans
-    LengthUnit:
-      type: string
-      description: The unit used by the width, height, and polygon properties. For images, the unit is "pixel". For PDF, the unit is "inch".
-      enum:
-      - pixel
-      - inch
-      x-ms-enum:
-        name: LengthUnit
-        modelAsString: true
-        values:
-        - name: pixel
-          value: pixel
-          description: Length unit for image files.
-        - name: inch
-          value: inch
-          description: Length unit for PDF files.
+      - modelId
+      - createdDateTime
     DocumentFieldSchema:
       type: object
       description: Description of the field semantic schema using a JSON Schema style syntax.
@@ -963,58 +567,11 @@ components:
             $ref: '#/components/schemas/DocumentFieldSchema'
       required:
       - type
-    DocumentParagraph:
-      type: object
-      description: 'A paragraph object consisting with contiguous lines generally with common
+    DocumentElement:
+      type: string
+      description: 'An JSON pointer referencing an element of the document, such as paragraph,
 
-        alignment and spacing.'
-      properties:
-        role:
-          $ref: '#/components/schemas/ParagraphRole'
-          description: Semantic role of the paragraph.
-        content:
-          type: string
-          description: Concatenated content of the paragraph in reading order.
-        boundingRegions:
-          type: array
-          description: Bounding regions covering the paragraph.
-          items:
-            $ref: '#/components/schemas/BoundingRegion'
-          x-ms-identifiers: []
-        spans:
-          type: array
-          description: Location of the paragraph in the reading order concatenated content.
-          items:
-            $ref: '#/components/schemas/DocumentSpan'
-          x-ms-identifiers: []
-      required:
-      - content
-      - spans
-    Error:
-      type: object
-      description: The error object.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          description: An array of details about specific errors that led to this reported error.
-          items:
-            $ref: '#/components/schemas/Error'
-          x-ms-identifiers: []
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: An object containing more specific information than the current object about the error.
-      required:
-      - code
-      - message
+        table, section, etc.'
     AddressValue:
       type: object
       description: Address field value.
@@ -1063,35 +620,58 @@ components:
         level:
           type: string
           description: Floor number, such as 3F.
-    DocumentElement:
+    ParagraphRole:
       type: string
-      description: 'An JSON pointer referencing an element of the document, such as paragraph,
-
-        table, section, etc.'
-    BoundingRegion:
-      type: object
-      description: Bounding polygon on a specific page of the input.
-      properties:
-        pageNumber:
-          type: integer
-          format: int32
-          description: 1-based page number of page containing the bounding region.
-          minimum: 1
-        polygon:
-          type: array
-          description: 'Bounding polygon on the page, or the entire page if not specified.
-
-            Coordinates specified relative to the top-left of the page. The numbers
-
-            represent the x, y values of the polygon vertices, clockwise from the left
-
-            (-180 degrees inclusive) relative to the element orientation.'
-          items:
-            type: number
-            format: float
-      required:
+      description: Semantic role of the paragraph.
+      enum:
+      - pageHeader
+      - pageFooter
       - pageNumber
-      - polygon
+      - title
+      - sectionHeading
+      - footnote
+      - formulaBlock
+      x-ms-enum:
+        name: ParagraphRole
+        modelAsString: true
+        values:
+        - name: pageHeader
+          value: pageHeader
+          description: Text near the top edge of the page.
+        - name: pageFooter
+          value: pageFooter
+          description: Text near the bottom edge of the page.
+        - name: pageNumber
+          value: pageNumber
+          description: Page number.
+        - name: title
+          value: title
+          description: Top-level title describing the entire document.
+        - name: sectionHeading
+          value: sectionHeading
+          description: Sub heading describing a section of the document.
+        - name: footnote
+          value: footnote
+          description: A note usually placed after the main content on a page.
+        - name: formulaBlock
+          value: formulaBlock
+          description: A block of formulas, often with shared alignment.
+    DocumentFormulaKind:
+      type: string
+      description: Formula kind.
+      enum:
+      - inline
+      - display
+      x-ms-enum:
+        name: DocumentFormulaKind
+        modelAsString: true
+        values:
+        - name: inline
+          value: inline
+          description: A formula embedded within the content of a paragraph.
+        - name: display
+          value: display
+          description: A formula in display mode that takes up an entire line.
     DocumentFieldType:
       type: string
       description: Semantic data type of the field value.
@@ -1160,186 +740,6 @@ components:
         - name: selectionGroup
           value: selectionGroup
           description: Array of selected string values.
-    AnalyzeResult:
-      type: object
-      description: Document analysis result.
-      properties:
-        apiVersion:
-          type: string
-          description: API version used to produce this result.
-        modelId:
-          type: string
-          description: Document model ID used to produce this result.
-          pattern: ^[a-zA-Z0-9][a-zA-Z0-9._~-]{1,63}$
-        stringIndexType:
-          $ref: '#/components/schemas/StringIndexType'
-          description: Method used to compute string offset and length.
-        contentFormat:
-          $ref: '#/components/schemas/ContentFormat'
-          description: Format of the analyze result top-level content.
-        content:
-          type: string
-          description: 'Concatenate string representation of all textual and visual elements in reading
-
-            order.'
-        pages:
-          type: array
-          description: Analyzed pages.
-          items:
-            $ref: '#/components/schemas/DocumentPage'
-          x-ms-identifiers: []
-        paragraphs:
-          type: array
-          description: Extracted paragraphs.
-          items:
-            $ref: '#/components/schemas/DocumentParagraph'
-          x-ms-identifiers: []
-        tables:
-          type: array
-          description: Extracted tables.
-          items:
-            $ref: '#/components/schemas/DocumentTable'
-          x-ms-identifiers: []
-        figures:
-          type: array
-          description: Extracted figures.
-          items:
-            $ref: '#/components/schemas/DocumentFigure'
-          x-ms-identifiers: []
-        lists:
-          type: array
-          description: Extracted lists.
-          items:
-            $ref: '#/components/schemas/DocumentList'
-          x-ms-identifiers: []
-        sections:
-          type: array
-          description: Extracted sections.
-          items:
-            $ref: '#/components/schemas/DocumentSection'
-          x-ms-identifiers: []
-        keyValuePairs:
-          type: array
-          description: Extracted key-value pairs.
-          items:
-            $ref: '#/components/schemas/DocumentKeyValuePair'
-          x-ms-identifiers: []
-        styles:
-          type: array
-          description: Extracted font styles.
-          items:
-            $ref: '#/components/schemas/DocumentStyle'
-          x-ms-identifiers: []
-        languages:
-          type: array
-          description: Detected languages.
-          items:
-            $ref: '#/components/schemas/DocumentLanguage'
-          x-ms-identifiers: []
-        documents:
-          type: array
-          description: Extracted documents.
-          items:
-            $ref: '#/components/schemas/Document'
-          x-ms-identifiers: []
-      required:
-      - apiVersion
-      - modelId
-      - stringIndexType
-      - content
-      - pages
-    PagedDocumentModelDetails:
-      type: object
-      description: Paged collection of DocumentModelDetails items
-      properties:
-        value:
-          type: array
-          description: The DocumentModelDetails items on this page
-          items:
-            $ref: '#/components/schemas/DocumentModelDetails'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-      required:
-      - value
-    StringIndexType:
-      type: string
-      description: Method used to compute string offset and length.
-      enum:
-      - textElements
-      - unicodeCodePoint
-      - utf16CodeUnit
-      x-ms-enum:
-        name: StringIndexType
-        modelAsString: true
-        values:
-        - name: textElements
-          value: textElements
-          description: 'User-perceived display character, or grapheme cluster, as defined by Unicode
-
-            8.0.0.'
-        - name: unicodeCodePoint
-          value: unicodeCodePoint
-          description: Character unit represented by a single unicode code point.  Used by Python 3.
-        - name: utf16CodeUnit
-          value: utf16CodeUnit
-          description: 'Character unit represented by a 16-bit Unicode code unit.  Used by JavaScript,
-
-            Java, and .NET.'
-    DocumentFormulaKind:
-      type: string
-      description: Formula kind.
-      enum:
-      - inline
-      - display
-      x-ms-enum:
-        name: DocumentFormulaKind
-        modelAsString: true
-        values:
-        - name: inline
-          value: inline
-          description: A formula embedded within the content of a paragraph.
-        - name: display
-          value: display
-          description: A formula in display mode that takes up an entire line.
-    DocumentFormula:
-      type: object
-      description: A formula object.
-      properties:
-        kind:
-          $ref: '#/components/schemas/DocumentFormulaKind'
-          description: Formula kind.
-        value:
-          type: string
-          description: LaTex expression describing the formula.
-        polygon:
-          type: array
-          description: 'Bounding polygon of the formula, with coordinates specified relative to the
-
-            top-left of the page. The numbers represent the x, y values of the polygon
-
-            vertices, clockwise from the left (-180 degrees inclusive) relative to the
-
-            element orientation.'
-          items:
-            type: number
-            format: float
-        span:
-          $ref: '#/components/schemas/DocumentSpan'
-          description: Location of the formula in the reading order concatenated content.
-        confidence:
-          type: number
-          format: float
-          description: Confidence of correctly extracting the formula.
-          minimum: 0
-          maximum: 1
-      required:
-      - kind
-      - value
-      - span
-      - confidence
     Warning:
       type: object
       description: The error object.
@@ -1356,6 +756,215 @@ components:
       required:
       - code
       - message
+    DocumentCaption:
+      type: object
+      description: A caption object describing a table or figure.
+      properties:
+        content:
+          type: string
+          description: Content of the caption.
+        boundingRegions:
+          type: array
+          description: Bounding regions covering the caption.
+          items:
+            $ref: '#/components/schemas/BoundingRegion'
+          x-ms-identifiers: []
+        spans:
+          type: array
+          description: Location of the caption in the reading order concatenated content.
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+        elements:
+          type: array
+          description: Child elements of the caption.
+          items:
+            $ref: '#/components/schemas/DocumentElement'
+      required:
+      - content
+      - spans
+    DocumentKeyValueElement:
+      type: object
+      description: An object representing the field key or value in a key-value pair.
+      properties:
+        content:
+          type: string
+          description: Concatenated content of the key-value element in reading order.
+        boundingRegions:
+          type: array
+          description: Bounding regions covering the key-value element.
+          items:
+            $ref: '#/components/schemas/BoundingRegion'
+          x-ms-identifiers: []
+        spans:
+          type: array
+          description: Location of the key-value element in the reading order concatenated content.
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+      required:
+      - content
+      - spans
+    ErrorResponse:
+      type: object
+      description: Error response object.
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+          description: Error info.
+      required:
+      - error
+    DocumentSelectionMarkState:
+      type: string
+      description: State of the selection mark.
+      enum:
+      - selected
+      - unselected
+      x-ms-enum:
+        name: DocumentSelectionMarkState
+        modelAsString: true
+        values:
+        - name: selected
+          value: selected
+          description: 'The selection mark is selected, often indicated by a check ✓ or cross X inside
+
+            the selection mark.'
+        - name: unselected
+          value: unselected
+          description: The selection mark is not selected.
+    DocumentSignatureType:
+      type: string
+      description: Presence of signature.
+      enum:
+      - signed
+      - unsigned
+      x-ms-enum:
+        name: DocumentSignatureType
+        modelAsString: true
+        values:
+        - name: signed
+          value: signed
+          description: A signature is detected.
+        - name: unsigned
+          value: unsigned
+          description: No signatures are detected.
+    DocumentBarcode:
+      type: object
+      description: A barcode object.
+      properties:
+        kind:
+          $ref: '#/components/schemas/DocumentBarcodeKind'
+          description: Barcode kind.
+        value:
+          type: string
+          description: Barcode value.
+        polygon:
+          type: array
+          description: 'Bounding polygon of the barcode, with coordinates specified relative to the
+
+            top-left of the page. The numbers represent the x, y values of the polygon
+
+            vertices, clockwise from the left (-180 degrees inclusive) relative to the
+
+            element orientation.'
+          items:
+            type: number
+            format: float
+        span:
+          $ref: '#/components/schemas/DocumentSpan'
+          description: Location of the barcode in the reading order concatenated content.
+        confidence:
+          type: number
+          format: float
+          description: Confidence of correctly extracting the barcode.
+          minimum: 0
+          maximum: 1
+      required:
+      - kind
+      - value
+      - span
+      - confidence
+    OperationStatus:
+      type: string
+      description: Operation status.
+      enum:
+      - notStarted
+      - running
+      - failed
+      - succeeded
+      - completed
+      - canceled
+      x-ms-enum:
+        name: OperationStatus
+        modelAsString: true
+        values:
+        - name: notStarted
+          value: notStarted
+          description: The operation has not started yet.
+        - name: running
+          value: running
+          description: The operation is in progress.
+        - name: failed
+          value: failed
+          description: The operation has failed.
+        - name: succeeded
+          value: succeeded
+          description: The operation has succeeded.
+        - name: completed
+          value: completed
+          description: The operation has completed.
+        - name: canceled
+          value: canceled
+          description: The operation has been canceled.
+    LengthUnit:
+      type: string
+      description: The unit used by the width, height, and polygon properties. For images, the unit is "pixel". For PDF, the unit is "inch".
+      enum:
+      - pixel
+      - inch
+      x-ms-enum:
+        name: LengthUnit
+        modelAsString: true
+        values:
+        - name: pixel
+          value: pixel
+          description: Length unit for image files.
+        - name: inch
+          value: inch
+          description: Length unit for PDF files.
+    FontWeight:
+      type: string
+      description: Font weight.
+      enum:
+      - normal
+      - bold
+      x-ms-enum:
+        name: FontWeight
+        modelAsString: true
+        values:
+        - name: normal
+          value: normal
+          description: Characters are represented normally.
+        - name: bold
+          value: bold
+          description: Characters are represented with thicker strokes.
+    DocumentSection:
+      type: object
+      description: An object representing a section in the document.
+      properties:
+        spans:
+          type: array
+          description: Location of the section in the reading order concatenated content.
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+        elements:
+          type: array
+          description: Child elements of the section.
+          items:
+            $ref: '#/components/schemas/DocumentElement'
+      required:
+      - spans
     CopyAuthorization:
       type: object
       description: 'Authorization to copy a document model to the specified target resource and
@@ -1393,22 +1002,138 @@ components:
       - targetModelLocation
       - accessToken
       - expirationDateTime
-    FontStyle:
-      type: string
-      description: Font style.
-      enum:
-      - normal
-      - italic
-      x-ms-enum:
-        name: FontStyle
-        modelAsString: true
-        values:
-        - name: normal
-          value: normal
-          description: Characters are represented normally.
-        - name: italic
-          value: italic
-          description: Characters are visually slanted to the right.
+    DocumentListItem:
+      type: object
+      description: An object representing a list item in the document.
+      properties:
+        level:
+          type: integer
+          format: int32
+          description: Level of the list item (1-indexed).
+          minimum: 1
+        content:
+          type: string
+          description: Content of the list item.
+        boundingRegions:
+          type: array
+          description: Bounding regions covering the list item.
+          items:
+            $ref: '#/components/schemas/BoundingRegion'
+          x-ms-identifiers: []
+        spans:
+          type: array
+          description: Location of the list item in the reading order concatenated content.
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+        elements:
+          type: array
+          description: Child elements of the list item.
+          items:
+            $ref: '#/components/schemas/DocumentElement'
+      required:
+      - level
+      - content
+      - spans
+    AnalyzeResultOperation:
+      type: object
+      description: Status and result of the analyze operation.
+      properties:
+        status:
+          $ref: '#/components/schemas/OperationStatus'
+          description: Operation status.  notStarted, running, succeeded, or failed
+        createdDateTime:
+          type: string
+          format: date-time
+          description: Date and time (UTC) when the analyze operation was submitted.
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          description: Date and time (UTC) when the status was last updated.
+        error:
+          $ref: '#/components/schemas/Error'
+          description: Encountered error during document analysis.
+        analyzeResult:
+          $ref: '#/components/schemas/AnalyzeResult'
+          description: Document analysis result.
+      required:
+      - status
+      - createdDateTime
+      - lastUpdatedDateTime
+    InnerError:
+      type: object
+      description: An object containing more specific information about the error.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: Inner error.
+    DocumentSelectionMark:
+      type: object
+      description: 'A selection mark object representing check boxes, radio buttons, and other
+
+        elements indicating a selection.'
+      properties:
+        state:
+          $ref: '#/components/schemas/DocumentSelectionMarkState'
+          description: State of the selection mark.
+        polygon:
+          type: array
+          description: 'Bounding polygon of the selection mark, with coordinates specified relative
+
+            to the top-left of the page. The numbers represent the x, y values of the
+
+            polygon vertices, clockwise from the left (-180 degrees inclusive) relative
+
+            to the element orientation.'
+          items:
+            type: number
+            format: float
+        span:
+          $ref: '#/components/schemas/DocumentSpan'
+          description: Location of the selection mark in the reading order concatenated content.
+        confidence:
+          type: number
+          format: float
+          description: Confidence of correctly extracting the selection mark.
+          minimum: 0
+          maximum: 1
+      required:
+      - state
+      - span
+      - confidence
+    DocumentFootnote:
+      type: object
+      description: A footnote object describing a table or figure.
+      properties:
+        content:
+          type: string
+          description: Content of the footnote.
+        boundingRegions:
+          type: array
+          description: Bounding regions covering the footnote.
+          items:
+            $ref: '#/components/schemas/BoundingRegion'
+          x-ms-identifiers: []
+        spans:
+          type: array
+          description: Location of the footnote in the reading order concatenated content.
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+        elements:
+          type: array
+          description: Child elements of the footnote.
+          items:
+            $ref: '#/components/schemas/DocumentElement'
+      required:
+      - content
+      - spans
     DocumentStyle:
       type: object
       description: An object representing observed text styles.
@@ -1528,28 +1253,211 @@ components:
       - columnIndex
       - content
       - spans
-    DocumentKeyValueElement:
+    DocumentLanguage:
       type: object
-      description: An object representing the field key or value in a key-value pair.
+      description: An object representing the detected language for a given text span.
       properties:
+        locale:
+          type: string
+          description: 'Detected language.  Value may an ISO 639-1 language code (ex. "en", "fr")
+
+            or BCP 47 language tag (ex. "zh-Hans").'
+        spans:
+          type: array
+          description: 'Location of the text elements in the concatenated content the language applies
+
+            to.'
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+        confidence:
+          type: number
+          format: float
+          description: Confidence of correctly identifying the language.
+          minimum: 0
+          maximum: 1
+      required:
+      - locale
+      - spans
+      - confidence
+    AzureBlobFileListContentSource:
+      type: object
+      description: File list in Azure Blob Storage.
+      properties:
+        containerUrl:
+          type: string
+          format: uri
+          description: Azure Blob Storage container URL.
+        fileList:
+          type: string
+          description: Path to a JSONL file within the container specifying a subset of documents.
+      required:
+      - containerUrl
+      - fileList
+    DocumentKeyValuePair:
+      type: object
+      description: 'An object representing a form field with distinct field label (key) and field
+
+        value (may be empty).'
+      properties:
+        key:
+          $ref: '#/components/schemas/DocumentKeyValueElement'
+          description: Field label of the key-value pair.
+        value:
+          $ref: '#/components/schemas/DocumentKeyValueElement'
+          description: Field value of the key-value pair.
+        confidence:
+          type: number
+          format: float
+          description: Confidence of correctly extracting the key-value pair.
+          minimum: 0
+          maximum: 1
+      required:
+      - key
+      - confidence
+    StringIndexType:
+      type: string
+      description: Method used to compute string offset and length.
+      enum:
+      - textElements
+      - unicodeCodePoint
+      - utf16CodeUnit
+      x-ms-enum:
+        name: StringIndexType
+        modelAsString: true
+        values:
+        - name: textElements
+          value: textElements
+          description: 'User-perceived display character, or grapheme cluster, as defined by Unicode
+
+            8.0.0.'
+        - name: unicodeCodePoint
+          value: unicodeCodePoint
+          description: Character unit represented by a single unicode code point.  Used by Python 3.
+        - name: utf16CodeUnit
+          value: utf16CodeUnit
+          description: 'Character unit represented by a 16-bit Unicode code unit.  Used by JavaScript,
+
+            Java, and .NET.'
+    AzureBlobContentSource:
+      type: object
+      description: Azure Blob Storage content.
+      properties:
+        containerUrl:
+          type: string
+          format: uri
+          description: Azure Blob Storage container URL.
+        prefix:
+          type: string
+          description: Blob name prefix.
+      required:
+      - containerUrl
+    DocumentParagraph:
+      type: object
+      description: 'A paragraph object consisting with contiguous lines generally with common
+
+        alignment and spacing.'
+      properties:
+        role:
+          $ref: '#/components/schemas/ParagraphRole'
+          description: Semantic role of the paragraph.
         content:
           type: string
-          description: Concatenated content of the key-value element in reading order.
+          description: Concatenated content of the paragraph in reading order.
         boundingRegions:
           type: array
-          description: Bounding regions covering the key-value element.
+          description: Bounding regions covering the paragraph.
           items:
             $ref: '#/components/schemas/BoundingRegion'
           x-ms-identifiers: []
         spans:
           type: array
-          description: Location of the key-value element in the reading order concatenated content.
+          description: Location of the paragraph in the reading order concatenated content.
           items:
             $ref: '#/components/schemas/DocumentSpan'
           x-ms-identifiers: []
       required:
       - content
       - spans
+    DocumentFormula:
+      type: object
+      description: A formula object.
+      properties:
+        kind:
+          $ref: '#/components/schemas/DocumentFormulaKind'
+          description: Formula kind.
+        value:
+          type: string
+          description: LaTex expression describing the formula.
+        polygon:
+          type: array
+          description: 'Bounding polygon of the formula, with coordinates specified relative to the
+
+            top-left of the page. The numbers represent the x, y values of the polygon
+
+            vertices, clockwise from the left (-180 degrees inclusive) relative to the
+
+            element orientation.'
+          items:
+            type: number
+            format: float
+        span:
+          $ref: '#/components/schemas/DocumentSpan'
+          description: Location of the formula in the reading order concatenated content.
+        confidence:
+          type: number
+          format: float
+          description: Confidence of correctly extracting the formula.
+          minimum: 0
+          maximum: 1
+      required:
+      - kind
+      - value
+      - span
+      - confidence
+    DocumentTypeDetails:
+      type: object
+      description: Document type info.
+      properties:
+        description:
+          type: string
+          description: Document model description.
+          maxLength: 4096
+        buildMode:
+          $ref: '#/components/schemas/DocumentBuildMode'
+          description: Custom document model build mode.
+        fieldSchema:
+          type: object
+          description: Description of the document semantic schema using a JSON Schema style syntax.
+          additionalProperties:
+            $ref: '#/components/schemas/DocumentFieldSchema'
+        fieldConfidence:
+          type: object
+          description: Estimated confidence for each field.
+          additionalProperties:
+            format: float
+            type: number
+      required:
+      - fieldSchema
+    DocumentSpan:
+      type: object
+      description: 'Contiguous region of the concatenated content property, specified as an offset
+
+        and length.'
+      properties:
+        offset:
+          type: integer
+          format: int32
+          description: Zero-based index of the content represented by the span.
+          minimum: 0
+        length:
+          type: integer
+          format: int32
+          description: Number of characters in the content represented by the span.
+          minimum: 0
+      required:
+      - offset
+      - length
     ContentFormat:
       type: string
       description: Format of the content in analyzed result.
@@ -1568,19 +1476,94 @@ components:
           description: 'Markdown representation of the document content with section headings, tables,
 
             etc.'
-    InnerError:
+    AnalyzeResult:
       type: object
-      description: An object containing more specific information about the error.
+      description: Document analysis result.
       properties:
-        code:
+        apiVersion:
           type: string
-          description: One of a server-defined set of error codes.
-        message:
+          description: API version used to produce this result.
+        modelId:
           type: string
-          description: A human-readable representation of the error.
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: Inner error.
+          description: Document model ID used to produce this result.
+          pattern: ^[a-zA-Z0-9][a-zA-Z0-9._~-]{1,63}$
+        stringIndexType:
+          $ref: '#/components/schemas/StringIndexType'
+          description: Method used to compute string offset and length.
+        contentFormat:
+          $ref: '#/components/schemas/ContentFormat'
+          description: Format of the analyze result top-level content.
+        content:
+          type: string
+          description: 'Concatenate string representation of all textual and visual elements in reading
+
+            order.'
+        pages:
+          type: array
+          description: Analyzed pages.
+          items:
+            $ref: '#/components/schemas/DocumentPage'
+          x-ms-identifiers: []
+        paragraphs:
+          type: array
+          description: Extracted paragraphs.
+          items:
+            $ref: '#/components/schemas/DocumentParagraph'
+          x-ms-identifiers: []
+        tables:
+          type: array
+          description: Extracted tables.
+          items:
+            $ref: '#/components/schemas/DocumentTable'
+          x-ms-identifiers: []
+        figures:
+          type: array
+          description: Extracted figures.
+          items:
+            $ref: '#/components/schemas/DocumentFigure'
+          x-ms-identifiers: []
+        lists:
+          type: array
+          description: Extracted lists.
+          items:
+            $ref: '#/components/schemas/DocumentList'
+          x-ms-identifiers: []
+        sections:
+          type: array
+          description: Extracted sections.
+          items:
+            $ref: '#/components/schemas/DocumentSection'
+          x-ms-identifiers: []
+        keyValuePairs:
+          type: array
+          description: Extracted key-value pairs.
+          items:
+            $ref: '#/components/schemas/DocumentKeyValuePair'
+          x-ms-identifiers: []
+        styles:
+          type: array
+          description: Extracted font styles.
+          items:
+            $ref: '#/components/schemas/DocumentStyle'
+          x-ms-identifiers: []
+        languages:
+          type: array
+          description: Detected languages.
+          items:
+            $ref: '#/components/schemas/DocumentLanguage'
+          x-ms-identifiers: []
+        documents:
+          type: array
+          description: Extracted documents.
+          items:
+            $ref: '#/components/schemas/Document'
+          x-ms-identifiers: []
+      required:
+      - apiVersion
+      - modelId
+      - stringIndexType
+      - content
+      - pages
     DocumentTable:
       type: object
       description: A table object consisting table cells arranged in a rectangular layout.
@@ -1626,6 +1609,201 @@ components:
       - rowCount
       - columnCount
       - cells
+      - spans
+    CurrencyValue:
+      type: object
+      description: Currency field value.
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Currency amount.
+        currencySymbol:
+          type: string
+          description: Currency symbol label, if any.
+        currencyCode:
+          type: string
+          description: Resolved currency code (ISO 4217), if any.
+      required:
+      - amount
+    DocumentBarcodeKind:
+      type: string
+      description: Barcode kind.
+      enum:
+      - QRCode
+      - PDF417
+      - UPCA
+      - UPCE
+      - Code39
+      - Code128
+      - EAN8
+      - EAN13
+      - DataBar
+      - Code93
+      - Codabar
+      - DataBarExpanded
+      - ITF
+      - MicroQRCode
+      - Aztec
+      - DataMatrix
+      - MaxiCode
+      x-ms-enum:
+        name: DocumentBarcodeKind
+        modelAsString: true
+        values:
+        - name: QRCode
+          value: QRCode
+          description: QR code, as defined in ISO/IEC 18004:2015.
+        - name: PDF417
+          value: PDF417
+          description: PDF417, as defined in ISO 15438.
+        - name: UPCA
+          value: UPCA
+          description: GS1 12-digit Universal Product Code.
+        - name: UPCE
+          value: UPCE
+          description: GS1 6-digit Universal Product Code.
+        - name: Code39
+          value: Code39
+          description: Code 39 barcode, as defined in ISO/IEC 16388:2007.
+        - name: Code128
+          value: Code128
+          description: Code 128 barcode, as defined in ISO/IEC 15417:2007.
+        - name: EAN8
+          value: EAN8
+          description: GS1 8-digit International Article Number (European Article Number).
+        - name: EAN13
+          value: EAN13
+          description: GS1 13-digit International Article Number (European Article Number).
+        - name: DataBar
+          value: DataBar
+          description: GS1 DataBar barcode.
+        - name: Code93
+          value: Code93
+          description: Code 93 barcode, as defined in ANSI/AIM BC5-1995.
+        - name: Codabar
+          value: Codabar
+          description: Codabar barcode, as defined in ANSI/AIM BC3-1995.
+        - name: DataBarExpanded
+          value: DataBarExpanded
+          description: GS1 DataBar Expanded barcode.
+        - name: ITF
+          value: ITF
+          description: Interleaved 2 of 5 barcode, as defined in ANSI/AIM BC2-1995.
+        - name: MicroQRCode
+          value: MicroQRCode
+          description: Micro QR code, as defined in ISO/IEC 23941:2022.
+        - name: Aztec
+          value: Aztec
+          description: Aztec code, as defined in ISO/IEC 24778:2008.
+        - name: DataMatrix
+          value: DataMatrix
+          description: Data matrix code, as defined in ISO/IEC 16022:2006.
+        - name: MaxiCode
+          value: MaxiCode
+          description: MaxiCode, as defined in ISO/IEC 16023:2000.
+    Error:
+      type: object
+      description: The error object.
+      properties:
+        code:
+          type: string
+          description: One of a server-defined set of error codes.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          description: The target of the error.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/Error'
+          x-ms-identifiers: []
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: An object containing more specific information than the current object about the error.
+      required:
+      - code
+      - message
+    FontStyle:
+      type: string
+      description: Font style.
+      enum:
+      - normal
+      - italic
+      x-ms-enum:
+        name: FontStyle
+        modelAsString: true
+        values:
+        - name: normal
+          value: normal
+          description: Characters are represented normally.
+        - name: italic
+          value: italic
+          description: Characters are visually slanted to the right.
+    DocumentFigure:
+      type: object
+      description: An object representing a figure in the document.
+      properties:
+        boundingRegions:
+          type: array
+          description: Bounding regions covering the figure.
+          items:
+            $ref: '#/components/schemas/BoundingRegion'
+          x-ms-identifiers: []
+        spans:
+          type: array
+          description: Location of the figure in the reading order concatenated content.
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+        elements:
+          type: array
+          description: Child elements of the figure, excluding any caption or footnotes.
+          items:
+            $ref: '#/components/schemas/DocumentElement'
+        caption:
+          $ref: '#/components/schemas/DocumentCaption'
+          description: Caption associated with the figure.
+        footnotes:
+          type: array
+          description: List of footnotes associated with the figure.
+          items:
+            $ref: '#/components/schemas/DocumentFootnote'
+          x-ms-identifiers: []
+      required:
+      - spans
+    DocumentLine:
+      type: object
+      description: 'A content line object consisting of an adjacent sequence of content elements,
+
+        such as words and selection marks.'
+      properties:
+        content:
+          type: string
+          description: Concatenated content of the contained elements in reading order.
+        polygon:
+          type: array
+          description: 'Bounding polygon of the line, with coordinates specified relative to the
+
+            top-left of the page. The numbers represent the x, y values of the polygon
+
+            vertices, clockwise from the left (-180 degrees inclusive) relative to the
+
+            element orientation.'
+          items:
+            type: number
+            format: float
+        spans:
+          type: array
+          description: Location of the line in the reading order concatenated content.
+          items:
+            $ref: '#/components/schemas/DocumentSpan'
+          x-ms-identifiers: []
+      required:
+      - content
       - spans
     DocumentPage:
       type: object
@@ -1699,206 +1877,7 @@ components:
       required:
       - pageNumber
       - spans
-    DocumentModelDetails:
-      type: object
-      description: Document model info.
-      properties:
-        modelId:
-          type: string
-          description: Unique document model name.
-          pattern: ^[a-zA-Z0-9][a-zA-Z0-9._~-]{1,63}$
-          x-ms-mutability:
-          - read
-          - create
-        description:
-          type: string
-          description: Document model description.
-          maxLength: 4096
-        createdDateTime:
-          type: string
-          format: date-time
-          description: Date and time (UTC) when the document model was created.
-        expirationDateTime:
-          type: string
-          format: date-time
-          description: Date and time (UTC) when the document model will expire.
-        apiVersion:
-          type: string
-          description: API version used to create this document model.
-        tags:
-          type: object
-          description: List of key-value tag attributes associated with the document model.
-          additionalProperties:
-            type: string
-        buildMode:
-          $ref: '#/components/schemas/DocumentBuildMode'
-          description: Custom document model build mode.
-        azureBlobSource:
-          $ref: '#/components/schemas/AzureBlobContentSource'
-          description: 'Azure Blob Storage location containing the training data.  Either
-
-            azureBlobSource or azureBlobFileListSource must be specified.'
-        azureBlobFileListSource:
-          $ref: '#/components/schemas/AzureBlobFileListContentSource'
-          description: 'Azure Blob Storage file list specifying the training data.  Either
-
-            azureBlobSource or azureBlobFileListSource must be specified.'
-        docTypes:
-          type: object
-          description: Supported document types.
-          additionalProperties:
-            $ref: '#/components/schemas/DocumentTypeDetails'
-        warnings:
-          type: array
-          description: List of warnings encountered while building the model.
-          items:
-            $ref: '#/components/schemas/Warning'
-          x-ms-identifiers: []
-      required:
-      - modelId
-      - createdDateTime
-    AzureBlobFileListContentSource:
-      type: object
-      description: File list in Azure Blob Storage.
-      properties:
-        containerUrl:
-          type: string
-          format: uri
-          description: Azure Blob Storage container URL.
-        fileList:
-          type: string
-          description: Path to a JSONL file within the container specifying a subset of documents.
-      required:
-      - containerUrl
-      - fileList
-    AnalyzeResultOperation:
-      type: object
-      description: Status and result of the analyze operation.
-      properties:
-        status:
-          $ref: '#/components/schemas/OperationStatus'
-          description: Operation status.  notStarted, running, succeeded, or failed
-        createdDateTime:
-          type: string
-          format: date-time
-          description: Date and time (UTC) when the analyze operation was submitted.
-        lastUpdatedDateTime:
-          type: string
-          format: date-time
-          description: Date and time (UTC) when the status was last updated.
-        error:
-          $ref: '#/components/schemas/Error'
-          description: Encountered error during document analysis.
-        analyzeResult:
-          $ref: '#/components/schemas/AnalyzeResult'
-          description: Document analysis result.
-      required:
-      - status
-      - createdDateTime
-      - lastUpdatedDateTime
-    ErrorResponse:
-      type: object
-      description: Error response object.
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-          description: Error info.
-      required:
-      - error
-    DocumentBarcode:
-      type: object
-      description: A barcode object.
-      properties:
-        kind:
-          $ref: '#/components/schemas/DocumentBarcodeKind'
-          description: Barcode kind.
-        value:
-          type: string
-          description: Barcode value.
-        polygon:
-          type: array
-          description: 'Bounding polygon of the barcode, with coordinates specified relative to the
-
-            top-left of the page. The numbers represent the x, y values of the polygon
-
-            vertices, clockwise from the left (-180 degrees inclusive) relative to the
-
-            element orientation.'
-          items:
-            type: number
-            format: float
-        span:
-          $ref: '#/components/schemas/DocumentSpan'
-          description: Location of the barcode in the reading order concatenated content.
-        confidence:
-          type: number
-          format: float
-          description: Confidence of correctly extracting the barcode.
-          minimum: 0
-          maximum: 1
-      required:
-      - kind
-      - value
-      - span
-      - confidence
-    ParagraphRole:
-      type: string
-      description: Semantic role of the paragraph.
-      enum:
-      - pageHeader
-      - pageFooter
-      - pageNumber
-      - title
-      - sectionHeading
-      - footnote
-      - formulaBlock
-      x-ms-enum:
-        name: ParagraphRole
-        modelAsString: true
-        values:
-        - name: pageHeader
-          value: pageHeader
-          description: Text near the top edge of the page.
-        - name: pageFooter
-          value: pageFooter
-          description: Text near the bottom edge of the page.
-        - name: pageNumber
-          value: pageNumber
-          description: Page number.
-        - name: title
-          value: title
-          description: Top-level title describing the entire document.
-        - name: sectionHeading
-          value: sectionHeading
-          description: Sub heading describing a section of the document.
-        - name: footnote
-          value: footnote
-          description: A note usually placed after the main content on a page.
-        - name: formulaBlock
-          value: formulaBlock
-          description: A block of formulas, often with shared alignment.
   parameters:
-    AnalyzeFromStreamRequestParams.input:
-      name: input
-      in: body
-      description: Input content.
-      required: true
-      schema:
-        type: string
-        format: binary
-      x-ms-parameter-location: method
-    DocumentModelAnalyzeRequestParams.queryFields:
-      name: queryFields
-      in: query
-      description: List of additional fields to extract.  Ex. "NumberOfGuests,StoreNumber"
-      required: false
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: string
     DocumentModelAnalyzeRequestParams.outputContentFormat:
       name: outputContentFormat
       in: query
@@ -1932,26 +1911,16 @@ components:
       schema:
         type: string
         pattern: ^(\d+(-\d+)?)(,\s*(\d+(-\d+)?))*$
-    Azure.Core.ClientRequestIdHeader:
-      name: x-ms-client-request-id
-      in: header
-      description: An opaque, globally-unique, client-generated string identifier for the request.
-      required: false
-      x-ms-parameter-location: method
-      x-ms-client-name: clientRequestId
-      schema:
-        type: string
-        format: uuid
-    DocumentModelAnalyzeRequestParams.locale:
-      name: locale
+    Azure.Core.Foundations.ApiVersionParameter:
+      name: api-version
       in: query
-      description: 'Locale hint for text recognition and document analysis.  Value may contain only
-
-        the language code (ex. "en", "fr") or BCP 47 language tag (ex. "en-US").'
-      required: false
+      description: The API version to use for this operation.
+      required: true
       x-ms-parameter-location: method
+      x-ms-client-name: apiVersion
       schema:
         type: string
+        minLength: 1
     DocumentModelAnalyzeRequestParams.features:
       name: features
       in: query
@@ -1997,16 +1966,28 @@ components:
             - name: queryFields
               value: queryFields
               description: Enable the extraction of additional fields via the queryFields query parameter.
-    Azure.Core.Foundations.ApiVersionParameter:
-      name: api-version
+    DocumentModelAnalyzeRequestParams.queryFields:
+      name: queryFields
       in: query
-      description: The API version to use for this operation.
-      required: true
+      description: List of additional fields to extract.  Ex. "NumberOfGuests,StoreNumber"
+      required: false
       x-ms-parameter-location: method
-      x-ms-client-name: apiVersion
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    DocumentModelAnalyzeRequestParams.locale:
+      name: locale
+      in: query
+      description: 'Locale hint for text recognition and document analysis.  Value may contain only
+
+        the language code (ex. "en", "fr") or BCP 47 language tag (ex. "en-US").'
+      required: false
+      x-ms-parameter-location: method
       schema:
         type: string
-        minLength: 1
     DocumentModelAnalyzeRequestParams.stringIndexType:
       name: stringIndexType
       in: query
@@ -2037,6 +2018,25 @@ components:
         - unicodeCodePoint
         - utf16CodeUnit
         default: textElements
+    Azure.Core.ClientRequestIdHeader:
+      name: x-ms-client-request-id
+      in: header
+      description: An opaque, globally-unique, client-generated string identifier for the request.
+      required: false
+      x-ms-parameter-location: method
+      x-ms-client-name: clientRequestId
+      schema:
+        type: string
+        format: uuid
+    AnalyzeFromStreamRequestParams.input:
+      name: input
+      in: body
+      description: Input content.
+      required: true
+      schema:
+        type: string
+        format: binary
+      x-ms-parameter-location: method
     DocumentModelAnalyzeRequestParams.modelId:
       name: modelId
       in: path

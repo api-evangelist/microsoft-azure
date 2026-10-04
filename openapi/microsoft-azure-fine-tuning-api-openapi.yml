@@ -223,6 +223,30 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
+    FineTuningJobCreation:
+      title: FineTuningJobCreation
+      description: Defines the values of a fine tune job.
+      required:
+      - model
+      - training_file
+      type: object
+      properties:
+        model:
+          description: The identifier (model-id) of the base model used for this fine-tune.
+          minLength: 1
+          type: string
+        training_file:
+          description: The file identity (file-id) that is used for training this fine tuned model.
+          minLength: 1
+          type: string
+        validation_file:
+          description: The file identity (file-id) that is used to evaluate the fine tuned model during training.
+          type: string
+        hyperparameters:
+          $ref: '#/components/schemas/FineTuningHyperParameters'
+        suffix:
+          description: The suffix used to identify the fine-tuned model. The suffix can contain up to 40 characters (a-z, A-Z, 0-9,- and _) that will be added to your fine-tuned model name.
+          type: string
     FineTuningJob:
       title: FineTuningJob
       description: Defines the values of a fine tune job.
@@ -290,57 +314,74 @@ components:
         suffix:
           description: The suffix used to identify the fine-tuned model. The suffix can contain up to 40 characters (a-z, A-Z, 0-9,- and _) that will be added to your fine-tuned model name.
           type: string
-    FineTuningJobCreation:
-      title: FineTuningJobCreation
-      description: Defines the values of a fine tune job.
-      required:
-      - model
-      - training_file
-      type: object
-      properties:
-        model:
-          description: The identifier (model-id) of the base model used for this fine-tune.
-          minLength: 1
-          type: string
-        training_file:
-          description: The file identity (file-id) that is used for training this fine tuned model.
-          minLength: 1
-          type: string
-        validation_file:
-          description: The file identity (file-id) that is used to evaluate the fine tuned model during training.
-          type: string
-        hyperparameters:
-          $ref: '#/components/schemas/FineTuningHyperParameters'
-        suffix:
-          description: The suffix used to identify the fine-tuned model. The suffix can contain up to 40 characters (a-z, A-Z, 0-9,- and _) that will be added to your fine-tuned model name.
-          type: string
-    Error:
-      title: Error
-      description: 'Error content as defined in the Microsoft REST guidelines
+    FineTuningState:
+      title: FineTuningState
+      description: The state of a finetunes object or fine tuning job.
+      enum:
+      - created
+      - pending
+      - running
+      - succeeded
+      - cancelled
+      - failed
+      type: string
+      readOnly: true
+      x-ms-enum:
+        name: FineTuningState
+        modelAsString: true
+        values:
+        - value: created
+          description: The operation was created. This state is not returned by Azure OpenAI and exposed only for compatibility. It can be categorized as an inactive state.
+        - value: pending
+          description: The operation is not yet queued to be processed in the future. It can be categorized as an inactive state.
+        - value: running
+          description: The operation has started to be processed. It can be categorized as an active state.
+        - value: succeeded
+          description: The operation has successfully be processed and is ready for consumption. It can be categorized as a terminal state.
+        - value: cancelled
+          description: The operation has been cancelled and is incomplete. It can be categorized as a terminal state.
+        - value: failed
+          description: The operation has completed processing with a failure and cannot be further consumed. It can be categorized as a terminal state.
+    EventType:
+      title: EventType
+      description: Defines the severity of a content filter result.
+      enum:
+      - message
+      - metrics
+      type: string
+      x-ms-enum:
+        name: EventType
+        modelAsString: true
+        values:
+        - value: message
+          description: Event only contains human readable messages.
+        - value: metrics
+          description: Event contains metrics.
+    InnerError:
+      title: InnerError
+      description: 'Inner error as defined in the Microsoft REST guidelines
 
         (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      required:
-      - code
-      - message
       type: object
       properties:
         code:
-          $ref: '#/components/schemas/ErrorCode'
-        message:
-          description: The message of this error.
-          minLength: 1
-          type: string
-        target:
-          description: The location where the error happened if available.
-          type: string
-        details:
-          description: The error details if available.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
+          $ref: '#/components/schemas/InnerErrorCode'
         innererror:
           $ref: '#/components/schemas/InnerError'
-      readOnly: true
+    InnerErrorCode:
+      title: InnerErrorCode
+      description: 'Inner error codes as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      enum:
+      - invalidPayload
+      type: string
+      x-ms-enum:
+        name: InnerErrorCode
+        modelAsString: true
+        values:
+        - value: invalidPayload
+          description: The request data is invalid for this operation.
     ErrorCode:
       title: ErrorCode
       description: 'Error codes as defined in the Microsoft REST guidelines
@@ -394,21 +435,6 @@ components:
           description: The current user/api key is not authorized for the operation.
         - value: contentFilter
           description: Image generation failed as a result of our safety system.
-    FineTuningJobList:
-      title: FineTuningJobList
-      description: Represents a list of fine tunes.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        data:
-          description: The list of items.
-          type: array
-          items:
-            $ref: '#/components/schemas/FineTuningJob'
-        has_more:
-          description: A value indicating whether the list of events contains more elements than returned.
-          type: boolean
     TypeDiscriminator:
       title: TypeDiscriminator
       description: Defines the type of an object.
@@ -440,89 +466,44 @@ components:
           description: This object represents an event of a fine tuning job.
         - value: model
           description: This object represents a model (can be a base model or fine tune job result).
-    InnerError:
-      title: InnerError
-      description: 'Inner error as defined in the Microsoft REST guidelines
+    ErrorResponse:
+      title: ErrorResponse
+      description: 'Error response as defined in the Microsoft REST guidelines
 
         (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    Error:
+      title: Error
+      description: 'Error content as defined in the Microsoft REST guidelines
+
+        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
+      required:
+      - code
+      - message
       type: object
       properties:
         code:
-          $ref: '#/components/schemas/InnerErrorCode'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    InnerErrorCode:
-      title: InnerErrorCode
-      description: 'Inner error codes as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      enum:
-      - invalidPayload
-      type: string
-      x-ms-enum:
-        name: InnerErrorCode
-        modelAsString: true
-        values:
-        - value: invalidPayload
-          description: The request data is invalid for this operation.
-    LogLevel:
-      title: LogLevel
-      description: The verbosity level of an event.
-      enum:
-      - info
-      - warning
-      - error
-      type: string
-      x-ms-enum:
-        name: LogLevel
-        modelAsString: true
-        values:
-        - value: info
-          description: This event is for information only.
-        - value: warning
-          description: This event represents a mitigated issue.
-        - value: error
-          description: This message represents a non recoverable issue.
-    FineTuningHyperParameters:
-      title: FineTuningHyperParameters
-      description: The hyper parameter settings used in a fine tune job.
-      type: object
-      properties:
-        n_epochs:
-          format: int32
-          description: The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.
-          type: integer
-        batch_size:
-          format: int32
-          description: 'The batch size to use for training. The batch size is the number of training examples used to train a single forward and backward pass.
-
-            In general, we''ve found that larger batch sizes tend to work better for larger datasets.
-
-            The default value as well as the maximum value for this property are specific to a base model.'
-          type: integer
-        learning_rate_multiplier:
-          format: double
-          description: 'The learning rate multiplier to use for training. The fine-tuning learning rate is the original learning rate used for pre-training multiplied by this value.
-
-            Larger learning rates tend to perform better with larger batch sizes.
-
-            We recommend experimenting with values in the range 0.02 to 0.2 to see what produces the best results.'
-          type: number
-    FineTuningJobEventList:
-      title: FineTuningJobEventList
-      description: Represents a list of events.
-      type: object
-      properties:
-        object:
-          $ref: '#/components/schemas/TypeDiscriminator'
-        data:
-          description: The list of items.
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          description: The message of this error.
+          minLength: 1
+          type: string
+        target:
+          description: The location where the error happened if available.
+          type: string
+        details:
+          description: The error details if available.
           type: array
           items:
-            $ref: '#/components/schemas/FineTuningJobEvent'
-        has_more:
-          description: A value indicating whether the list of events contains more elements than returned.
-          type: boolean
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+      readOnly: true
     FineTuningJobEvent:
       title: FineTuningJobEvent
       required:
@@ -552,60 +533,79 @@ components:
           $ref: '#/components/schemas/EventType'
         data:
           description: Machine readable data of this event.
-    ErrorResponse:
-      title: ErrorResponse
-      description: 'Error response as defined in the Microsoft REST guidelines
-
-        (https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses).'
-      required:
-      - error
+    FineTuningJobList:
+      title: FineTuningJobList
+      description: Represents a list of fine tunes.
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/Error'
-    EventType:
-      title: EventType
-      description: Defines the severity of a content filter result.
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        data:
+          description: The list of items.
+          type: array
+          items:
+            $ref: '#/components/schemas/FineTuningJob'
+        has_more:
+          description: A value indicating whether the list of events contains more elements than returned.
+          type: boolean
+    FineTuningJobEventList:
+      title: FineTuningJobEventList
+      description: Represents a list of events.
+      type: object
+      properties:
+        object:
+          $ref: '#/components/schemas/TypeDiscriminator'
+        data:
+          description: The list of items.
+          type: array
+          items:
+            $ref: '#/components/schemas/FineTuningJobEvent'
+        has_more:
+          description: A value indicating whether the list of events contains more elements than returned.
+          type: boolean
+    FineTuningHyperParameters:
+      title: FineTuningHyperParameters
+      description: The hyper parameter settings used in a fine tune job.
+      type: object
+      properties:
+        n_epochs:
+          format: int32
+          description: The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.
+          type: integer
+        batch_size:
+          format: int32
+          description: 'The batch size to use for training. The batch size is the number of training examples used to train a single forward and backward pass.
+
+            In general, we''ve found that larger batch sizes tend to work better for larger datasets.
+
+            The default value as well as the maximum value for this property are specific to a base model.'
+          type: integer
+        learning_rate_multiplier:
+          format: double
+          description: 'The learning rate multiplier to use for training. The fine-tuning learning rate is the original learning rate used for pre-training multiplied by this value.
+
+            Larger learning rates tend to perform better with larger batch sizes.
+
+            We recommend experimenting with values in the range 0.02 to 0.2 to see what produces the best results.'
+          type: number
+    LogLevel:
+      title: LogLevel
+      description: The verbosity level of an event.
       enum:
-      - message
-      - metrics
+      - info
+      - warning
+      - error
       type: string
       x-ms-enum:
-        name: EventType
+        name: LogLevel
         modelAsString: true
         values:
-        - value: message
-          description: Event only contains human readable messages.
-        - value: metrics
-          description: Event contains metrics.
-    FineTuningState:
-      title: FineTuningState
-      description: The state of a finetunes object or fine tuning job.
-      enum:
-      - created
-      - pending
-      - running
-      - succeeded
-      - cancelled
-      - failed
-      type: string
-      readOnly: true
-      x-ms-enum:
-        name: FineTuningState
-        modelAsString: true
-        values:
-        - value: created
-          description: The operation was created. This state is not returned by Azure OpenAI and exposed only for compatibility. It can be categorized as an inactive state.
-        - value: pending
-          description: The operation is not yet queued to be processed in the future. It can be categorized as an inactive state.
-        - value: running
-          description: The operation has started to be processed. It can be categorized as an active state.
-        - value: succeeded
-          description: The operation has successfully be processed and is ready for consumption. It can be categorized as a terminal state.
-        - value: cancelled
-          description: The operation has been cancelled and is incomplete. It can be categorized as a terminal state.
-        - value: failed
-          description: The operation has completed processing with a failure and cannot be further consumed. It can be categorized as a terminal state.
+        - value: info
+          description: This event is for information only.
+        - value: warning
+          description: This event represents a mitigated issue.
+        - value: error
+          description: This message represents a non recoverable issue.
   parameters:
     apiVersionQueryParameter:
       in: query

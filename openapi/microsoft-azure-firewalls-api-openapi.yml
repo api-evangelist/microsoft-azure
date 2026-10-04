@@ -343,6 +343,168 @@ paths:
               $ref: '#/components/schemas/LogSettings'
 components:
   schemas:
+    FrontendSetting:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Settings name
+        protocol:
+          $ref: '#/components/schemas/ProtocolType'
+          description: Protocol Type
+        frontendConfiguration:
+          $ref: '#/components/schemas/EndpointConfiguration'
+          description: Frontend configurations
+        backendConfiguration:
+          $ref: '#/components/schemas/EndpointConfiguration'
+          description: Backend configurations
+      description: Frontend setting for Firewall
+      required:
+      - name
+      - protocol
+      - frontendConfiguration
+      - backendConfiguration
+    ProtocolType:
+      type: string
+      description: Protocol Enum
+      enum:
+      - TCP
+      - UDP
+      x-ms-enum:
+        name: ProtocolType
+        modelAsString: true
+    FirewallResourceUpdate:
+      type: object
+      properties:
+        identity:
+          $ref: '#/components/schemas/Azure.ResourceManager.ManagedIdentityProperties'
+          description: The managed service identities assigned to this resource.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags.
+        properties:
+          $ref: '#/components/schemas/FirewallResourceUpdateProperties'
+      description: The type used for update operations of the FirewallResource.
+    IPAddressSpace:
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: Resource Id
+        addressSpace:
+          type: string
+          description: Address Space
+      description: IP Address Space
+    Azure.ResourceManager.ManagedIdentityType:
+      type: string
+      description: The kind of managed identity assigned to this resource.
+      enum:
+      - None
+      - SystemAssigned
+      - UserAssigned
+      - SystemAssigned,UserAssigned
+      x-ms-enum:
+        name: ManagedIdentityType
+        modelAsString: true
+        values:
+        - name: None
+          value: None
+        - name: SystemAssigned
+          value: SystemAssigned
+        - name: UserAssigned
+          value: UserAssigned
+        - name: SystemAndUserAssigned
+          value: SystemAssigned,UserAssigned
+    IPAddress:
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: Resource Id
+        address:
+          type: string
+          description: Address value
+      description: IP Address
+    Azure.ResourceManager.UserAssignedIdentity:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: The active directory client identifier for this principal.
+        principalId:
+          type: string
+          description: The active directory identifier for this principal.
+      description: A managed identity assigned by the user.
+    PanoramaConfig:
+      type: object
+      properties:
+        configString:
+          type: string
+          description: Base64 encoded string representing Panorama parameters to be used by Firewall to connect to Panorama. This string is generated via azure plugin in Panorama
+        vmAuthKey:
+          type: string
+          description: VM auth key for panorama connectivity
+          readOnly: true
+        panoramaServer:
+          type: string
+          description: Primary Panorama Server IP address value in dotted format for IPv4
+          readOnly: true
+        panoramaServer2:
+          type: string
+          description: Secondary Panorama Server IP address value in dotted format for IPv4
+          readOnly: true
+        dgName:
+          type: string
+          description: Panorama Device Group to join
+          readOnly: true
+        tplName:
+          type: string
+          description: Panorama Template Stack to join - (Once configured we can not edit the value)
+          readOnly: true
+        cgName:
+          type: string
+          description: Panorama Collector Group to join - (Once configured we can not edit the value)
+          readOnly: true
+        hostName:
+          type: string
+          description: Resource name(may be unique) for PN admin
+          readOnly: true
+      description: Panorama Config
+      required:
+      - configString
+    GlobalRulestackInfo:
+      type: object
+      properties:
+        azureId:
+          type: string
+          description: rulestack description
+      description: PAN Rulestack Describe Object
+      required:
+      - azureId
+    DNSProxy:
+      type: string
+      description: DNS Proxy
+      enum:
+      - DISABLED
+      - ENABLED
+      x-ms-enum:
+        name: DNSProxy
+        modelAsString: true
+    EndpointConfiguration:
+      type: object
+      properties:
+        port:
+          type: string
+          description: port ID
+        address:
+          $ref: '#/components/schemas/IPAddress'
+          description: Address Space
+      description: Endpoint Configuration for frontend and backend
+      required:
+      - port
+      - address
     LogSettings:
       type: object
       properties:
@@ -368,6 +530,23 @@ components:
           $ref: '#/components/schemas/LogDestination'
           description: Decrypt destination configurations
       description: Log Settings for Firewall
+    DNSSettings:
+      type: object
+      properties:
+        enableDnsProxy:
+          $ref: '#/components/schemas/DNSProxy'
+          description: Enable DNS proxy, disabled by default
+        enabledDnsType:
+          $ref: '#/components/schemas/EnabledDNSType'
+          description: Enabled DNS proxy type, disabled by default
+        dnsServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/IPAddress'
+          x-ms-identifiers: []
+          x-cadl-name: IPAddress[]
+          description: List of IPs associated with the Firewall
+      description: DNS Proxy settings for Firewall
     FirewallResourceUpdateProperties:
       type: object
       properties:
@@ -409,24 +588,143 @@ components:
           $ref: '#/components/schemas/MarketplaceDetails'
           description: Marketplace details
       description: The updatable properties of the FirewallResource.
-    StrataCloudManagerConfig:
+    VnetConfiguration:
       type: object
       properties:
-        cloudManagerName:
-          type: string
-          description: Strata Cloud Manager name which is intended to manage the policy for this firewall.
-      description: This field is only present if Strata Cloud Manager is managing the policy for this firewall
+        vnet:
+          $ref: '#/components/schemas/IPAddressSpace'
+          description: Azure Virtual Network
+        trustSubnet:
+          $ref: '#/components/schemas/IPAddressSpace'
+          description: Trust Subnet
+        unTrustSubnet:
+          $ref: '#/components/schemas/IPAddressSpace'
+          description: Untrust Subnet
+        ipOfTrustSubnetForUdr:
+          $ref: '#/components/schemas/IPAddress'
+          description: IP of trust subnet for UDR
+      description: VnetInfo for Firewall Networking
       required:
-      - cloudManagerName
-    LogOption:
+      - vnet
+      - trustSubnet
+      - unTrustSubnet
+    Azure.ResourceManager.ManagedIdentityProperties:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: The Active Directory tenant id of the principal.
+          readOnly: true
+        principalId:
+          type: string
+          description: The active directory identifier of this principal.
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/Azure.ResourceManager.ManagedIdentityType'
+          description: The type of managed identity assigned to this resource.
+        userAssignedIdentities:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Azure.ResourceManager.UserAssignedIdentity'
+          description: The identities assigned to this resource by the user.
+      description: The properties of the managed service identities assigned to this resource.
+      required:
+      - type
+    SupportInfo:
+      type: object
+      properties:
+        productSku:
+          type: string
+          description: product SKU associated with given resource
+        productSerial:
+          type: string
+          description: product Serial associated with given resource
+        accountRegistered:
+          $ref: '#/components/schemas/BooleanEnum'
+          description: account registered in Customer Support Portal
+        accountId:
+          type: string
+          description: Support account associated with given resource
+        userDomainSupported:
+          $ref: '#/components/schemas/BooleanEnum'
+          description: user domain is supported in Customer Support Portal
+        userRegistered:
+          $ref: '#/components/schemas/BooleanEnum'
+          description: user registered in Customer Support Portal
+        freeTrial:
+          $ref: '#/components/schemas/BooleanEnum'
+          description: Product usage is in free trial period
+        freeTrialDaysLeft:
+          type: integer
+          format: int32
+          description: Free trial days remaining
+        freeTrialCreditLeft:
+          type: integer
+          format: int32
+          description: Free trial credit remaining
+        helpURL:
+          type: string
+          description: URL for paloaltonetworks live community
+        supportURL:
+          type: string
+          description: URL for paloaltonetworks Customer Service Portal
+        registerURL:
+          type: string
+          description: URL for registering product in paloaltonetworks Customer Service Portal
+      description: Support information for the resource
+    LogType:
       type: string
-      description: Log options possible
+      description: Possible log types
       enum:
-      - SAME_DESTINATION
-      - INDIVIDUAL_DESTINATION
+      - TRAFFIC
+      - THREAT
+      - DECRYPTION
+      - WILDFIRE
+      - DLP
+      - AUDIT
       x-ms-enum:
-        name: LogOption
+        name: LogType
         modelAsString: true
+    NetworkType:
+      type: string
+      description: NetworkType Enum
+      enum:
+      - VNET
+      - VWAN
+      x-ms-enum:
+        name: NetworkType
+        modelAsString: true
+    BillingCycle:
+      type: string
+      description: Billing cycle
+      enum:
+      - WEEKLY
+      - MONTHLY
+      x-ms-enum:
+        name: BillingCycle
+        modelAsString: true
+    PlanData:
+      type: object
+      properties:
+        usageType:
+          $ref: '#/components/schemas/UsageType'
+          description: different usage type like PAYG/COMMITTED
+        billingCycle:
+          $ref: '#/components/schemas/BillingCycle'
+          description: different billing cycles like MONTHLY/WEEKLY
+        planId:
+          type: string
+          description: plan id as published by Liftr.PAN
+          maxLength: 50
+        effectiveDate:
+          type: string
+          format: date-time
+          description: date when plan was applied
+          readOnly: true
+      description: Billing plan information.
+      required:
+      - billingCycle
+      - planId
     FirewallDeploymentProperties:
       type: object
       properties:
@@ -477,19 +775,15 @@ components:
       - dnsSettings
       - planData
       - marketplaceDetails
-    RulestackDetails:
-      type: object
-      properties:
-        resourceId:
-          type: string
-          description: Resource Id
-        rulestackId:
-          type: string
-          description: Associated rulestack Id
-        location:
-          type: string
-          description: Rulestack location
-      description: Associated rulestack details
+    EgressNat:
+      type: string
+      description: Egress NAT
+      enum:
+      - DISABLED
+      - ENABLED
+      x-ms-enum:
+        name: EgressNat
+        modelAsString: true
     UsageType:
       type: string
       description: Usage Type
@@ -499,218 +793,26 @@ components:
       x-ms-enum:
         name: UsageType
         modelAsString: true
-    EventHub:
+    MarketplaceDetails:
       type: object
       properties:
-        id:
+        marketplaceSubscriptionId:
           type: string
-          description: Resource ID of EventHub
-        subscriptionId:
-          type: string
-          description: Subscription Id
-        name:
-          type: string
-          description: EventHub name
-        nameSpace:
-          type: string
-          description: EventHub namespace
-        policyName:
-          type: string
-          description: EventHub policy name
-      description: EventHub configurations
-    ApplicationInsights:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Resource id for Application Insights
-        key:
-          type: string
-          description: Application Insights key
-      description: Application Insights key
-    IPAddress:
-      type: object
-      properties:
-        resourceId:
-          type: string
-          description: Resource Id
-        address:
-          type: string
-          description: Address value
-      description: IP Address
-    LogType:
-      type: string
-      description: Possible log types
-      enum:
-      - TRAFFIC
-      - THREAT
-      - DECRYPTION
-      - WILDFIRE
-      - DLP
-      - AUDIT
-      x-ms-enum:
-        name: LogType
-        modelAsString: true
-    LogDestination:
-      type: object
-      properties:
-        storageConfigurations:
-          $ref: '#/components/schemas/StorageAccount'
-          description: Storage account configurations
-        eventHubConfigurations:
-          $ref: '#/components/schemas/EventHub'
-          description: Event Hub configurations
-        monitorConfigurations:
-          $ref: '#/components/schemas/MonitorLog'
-          description: Monitor Log configurations
-      description: Log Destination
-    PlanData:
-      type: object
-      properties:
-        usageType:
-          $ref: '#/components/schemas/UsageType'
-          description: different usage type like PAYG/COMMITTED
-        billingCycle:
-          $ref: '#/components/schemas/BillingCycle'
-          description: different billing cycles like MONTHLY/WEEKLY
-        planId:
-          type: string
-          description: plan id as published by Liftr.PAN
-          maxLength: 50
-        effectiveDate:
-          type: string
-          format: date-time
-          description: date when plan was applied
+          description: Marketplace Subscription Id
           readOnly: true
-      description: Billing plan information.
+        offerId:
+          type: string
+          description: Offer Id
+        publisherId:
+          type: string
+          description: Publisher Id
+        marketplaceSubscriptionStatus:
+          $ref: '#/components/schemas/MarketplaceSubscriptionStatus'
+          description: Marketplace Subscription Status
+      description: MarketplaceDetails of PAN Firewall resource
       required:
-      - billingCycle
-      - planId
-    SupportInfo:
-      type: object
-      properties:
-        productSku:
-          type: string
-          description: product SKU associated with given resource
-        productSerial:
-          type: string
-          description: product Serial associated with given resource
-        accountRegistered:
-          $ref: '#/components/schemas/BooleanEnum'
-          description: account registered in Customer Support Portal
-        accountId:
-          type: string
-          description: Support account associated with given resource
-        userDomainSupported:
-          $ref: '#/components/schemas/BooleanEnum'
-          description: user domain is supported in Customer Support Portal
-        userRegistered:
-          $ref: '#/components/schemas/BooleanEnum'
-          description: user registered in Customer Support Portal
-        freeTrial:
-          $ref: '#/components/schemas/BooleanEnum'
-          description: Product usage is in free trial period
-        freeTrialDaysLeft:
-          type: integer
-          format: int32
-          description: Free trial days remaining
-        freeTrialCreditLeft:
-          type: integer
-          format: int32
-          description: Free trial credit remaining
-        helpURL:
-          type: string
-          description: URL for paloaltonetworks live community
-        supportURL:
-          type: string
-          description: URL for paloaltonetworks Customer Service Portal
-        registerURL:
-          type: string
-          description: URL for registering product in paloaltonetworks Customer Service Portal
-      description: Support information for the resource
-    IPAddressSpace:
-      type: object
-      properties:
-        resourceId:
-          type: string
-          description: Resource Id
-        addressSpace:
-          type: string
-          description: Address Space
-      description: IP Address Space
-    ProtocolType:
-      type: string
-      description: Protocol Enum
-      enum:
-      - TCP
-      - UDP
-      x-ms-enum:
-        name: ProtocolType
-        modelAsString: true
-    MarketplaceSubscriptionStatus:
-      type: string
-      description: Marketplace Subscription Status
-      enum:
-      - PendingFulfillmentStart
-      - Subscribed
-      - Suspended
-      - Unsubscribed
-      - NotStarted
-      - FulfillmentRequested
-      x-ms-enum:
-        name: MarketplaceSubscriptionStatus
-        modelAsString: true
-    DNSSettings:
-      type: object
-      properties:
-        enableDnsProxy:
-          $ref: '#/components/schemas/DNSProxy'
-          description: Enable DNS proxy, disabled by default
-        enabledDnsType:
-          $ref: '#/components/schemas/EnabledDNSType'
-          description: Enabled DNS proxy type, disabled by default
-        dnsServers:
-          type: array
-          items:
-            $ref: '#/components/schemas/IPAddress'
-          x-ms-identifiers: []
-          x-cadl-name: IPAddress[]
-          description: List of IPs associated with the Firewall
-      description: DNS Proxy settings for Firewall
-    ProvisioningState:
-      type: string
-      description: Provisioning state of the firewall resource.
-      enum:
-      - Accepted
-      - Creating
-      - Updating
-      - Deleting
-      - Succeeded
-      - Failed
-      - Canceled
-      - Deleted
-      - NotSpecified
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    NetworkType:
-      type: string
-      description: NetworkType Enum
-      enum:
-      - VNET
-      - VWAN
-      x-ms-enum:
-        name: NetworkType
-        modelAsString: true
-    GlobalRulestackInfo:
-      type: object
-      properties:
-        azureId:
-          type: string
-          description: rulestack description
-      description: PAN Rulestack Describe Object
-      required:
-      - azureId
+      - offerId
+      - publisherId
     MonitorLog:
       type: object
       properties:
@@ -743,60 +845,25 @@ components:
           type: string
           description: Storage account name
       description: Storage Account configurations
-    EndpointConfiguration:
+    EventHub:
       type: object
       properties:
-        port:
+        id:
           type: string
-          description: port ID
-        address:
-          $ref: '#/components/schemas/IPAddress'
-          description: Address Space
-      description: Endpoint Configuration for frontend and backend
-      required:
-      - port
-      - address
-    BillingCycle:
-      type: string
-      description: Billing cycle
-      enum:
-      - WEEKLY
-      - MONTHLY
-      x-ms-enum:
-        name: BillingCycle
-        modelAsString: true
-    Azure.ResourceManager.UserAssignedIdentity:
-      type: object
-      properties:
-        clientId:
+          description: Resource ID of EventHub
+        subscriptionId:
           type: string
-          description: The active directory client identifier for this principal.
-        principalId:
+          description: Subscription Id
+        name:
           type: string
-          description: The active directory identifier for this principal.
-      description: A managed identity assigned by the user.
-    FirewallResource:
-      type: object
-      properties:
-        properties:
-          $ref: '#/components/schemas/FirewallDeploymentProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-mutability:
-          - read
-          - create
-          x-ms-client-flatten: true
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/systemData
-          description: System metadata for this resource.
-          readOnly: true
-        identity:
-          $ref: '#/components/schemas/Azure.ResourceManager.ManagedIdentityProperties'
-          description: The managed service identities assigned to this resource.
-      description: PaloAltoNetworks Firewall
-      required:
-      - properties
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+          description: EventHub name
+        nameSpace:
+          type: string
+          description: EventHub namespace
+        policyName:
+          type: string
+          description: EventHub policy name
+      description: EventHub configurations
     EnabledDNSType:
       type: string
       description: Enabled DNS type values
@@ -806,15 +873,19 @@ components:
       x-ms-enum:
         name: EnabledDNSType
         modelAsString: true
-    EgressNat:
-      type: string
-      description: Egress NAT
-      enum:
-      - DISABLED
-      - ENABLED
-      x-ms-enum:
-        name: EgressNat
-        modelAsString: true
+    RulestackDetails:
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: Resource Id
+        rulestackId:
+          type: string
+          description: Associated rulestack Id
+        location:
+          type: string
+          description: Rulestack location
+      description: Associated rulestack details
     FirewallResourceListResult:
       type: object
       properties:
@@ -830,15 +901,6 @@ components:
       description: The response of a FirewallResource list operation.
       required:
       - value
-    BooleanEnum:
-      type: string
-      description: Boolean Enum
-      enum:
-      - 'TRUE'
-      - 'FALSE'
-      x-ms-enum:
-        name: BooleanEnum
-        modelAsString: true
     NetworkProfile:
       type: object
       properties:
@@ -885,26 +947,67 @@ components:
       - networkType
       - publicIps
       - enableEgressNat
-    VnetConfiguration:
+    ProvisioningState:
+      type: string
+      description: Provisioning state of the firewall resource.
+      enum:
+      - Accepted
+      - Creating
+      - Updating
+      - Deleting
+      - Succeeded
+      - Failed
+      - Canceled
+      - Deleted
+      - NotSpecified
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    LogOption:
+      type: string
+      description: Log options possible
+      enum:
+      - SAME_DESTINATION
+      - INDIVIDUAL_DESTINATION
+      x-ms-enum:
+        name: LogOption
+        modelAsString: true
+    ApplicationInsights:
       type: object
       properties:
-        vnet:
-          $ref: '#/components/schemas/IPAddressSpace'
-          description: Azure Virtual Network
-        trustSubnet:
-          $ref: '#/components/schemas/IPAddressSpace'
-          description: Trust Subnet
-        unTrustSubnet:
-          $ref: '#/components/schemas/IPAddressSpace'
-          description: Untrust Subnet
-        ipOfTrustSubnetForUdr:
-          $ref: '#/components/schemas/IPAddress'
-          description: IP of trust subnet for UDR
-      description: VnetInfo for Firewall Networking
-      required:
-      - vnet
-      - trustSubnet
-      - unTrustSubnet
+        id:
+          type: string
+          description: Resource id for Application Insights
+        key:
+          type: string
+          description: Application Insights key
+      description: Application Insights key
+    LogDestination:
+      type: object
+      properties:
+        storageConfigurations:
+          $ref: '#/components/schemas/StorageAccount'
+          description: Storage account configurations
+        eventHubConfigurations:
+          $ref: '#/components/schemas/EventHub'
+          description: Event Hub configurations
+        monitorConfigurations:
+          $ref: '#/components/schemas/MonitorLog'
+          description: Monitor Log configurations
+      description: Log Destination
+    MarketplaceSubscriptionStatus:
+      type: string
+      description: Marketplace Subscription Status
+      enum:
+      - PendingFulfillmentStart
+      - Subscribed
+      - Suspended
+      - Unsubscribed
+      - NotStarted
+      - FulfillmentRequested
+      x-ms-enum:
+        name: MarketplaceSubscriptionStatus
+        modelAsString: true
     VwanConfiguration:
       type: object
       properties:
@@ -926,149 +1029,46 @@ components:
       description: VwanInfo for Firewall Networking
       required:
       - vHub
-    Azure.ResourceManager.ManagedIdentityType:
-      type: string
-      description: The kind of managed identity assigned to this resource.
-      enum:
-      - None
-      - SystemAssigned
-      - UserAssigned
-      - SystemAssigned,UserAssigned
-      x-ms-enum:
-        name: ManagedIdentityType
-        modelAsString: true
-        values:
-        - name: None
-          value: None
-        - name: SystemAssigned
-          value: SystemAssigned
-        - name: UserAssigned
-          value: UserAssigned
-        - name: SystemAndUserAssigned
-          value: SystemAssigned,UserAssigned
-    MarketplaceDetails:
+    FirewallResource:
       type: object
       properties:
-        marketplaceSubscriptionId:
-          type: string
-          description: Marketplace Subscription Id
+        properties:
+          $ref: '#/components/schemas/FirewallDeploymentProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-mutability:
+          - read
+          - create
+          x-ms-client-flatten: true
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/systemData
+          description: System metadata for this resource.
           readOnly: true
-        offerId:
-          type: string
-          description: Offer Id
-        publisherId:
-          type: string
-          description: Publisher Id
-        marketplaceSubscriptionStatus:
-          $ref: '#/components/schemas/MarketplaceSubscriptionStatus'
-          description: Marketplace Subscription Status
-      description: MarketplaceDetails of PAN Firewall resource
-      required:
-      - offerId
-      - publisherId
-    PanoramaConfig:
-      type: object
-      properties:
-        configString:
-          type: string
-          description: Base64 encoded string representing Panorama parameters to be used by Firewall to connect to Panorama. This string is generated via azure plugin in Panorama
-        vmAuthKey:
-          type: string
-          description: VM auth key for panorama connectivity
-          readOnly: true
-        panoramaServer:
-          type: string
-          description: Primary Panorama Server IP address value in dotted format for IPv4
-          readOnly: true
-        panoramaServer2:
-          type: string
-          description: Secondary Panorama Server IP address value in dotted format for IPv4
-          readOnly: true
-        dgName:
-          type: string
-          description: Panorama Device Group to join
-          readOnly: true
-        tplName:
-          type: string
-          description: Panorama Template Stack to join - (Once configured we can not edit the value)
-          readOnly: true
-        cgName:
-          type: string
-          description: Panorama Collector Group to join - (Once configured we can not edit the value)
-          readOnly: true
-        hostName:
-          type: string
-          description: Resource name(may be unique) for PN admin
-          readOnly: true
-      description: Panorama Config
-      required:
-      - configString
-    Azure.ResourceManager.ManagedIdentityProperties:
-      type: object
-      properties:
-        tenantId:
-          type: string
-          description: The Active Directory tenant id of the principal.
-          readOnly: true
-        principalId:
-          type: string
-          description: The active directory identifier of this principal.
-          readOnly: true
-        type:
-          $ref: '#/components/schemas/Azure.ResourceManager.ManagedIdentityType'
-          description: The type of managed identity assigned to this resource.
-        userAssignedIdentities:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Azure.ResourceManager.UserAssignedIdentity'
-          description: The identities assigned to this resource by the user.
-      description: The properties of the managed service identities assigned to this resource.
-      required:
-      - type
-    FirewallResourceUpdate:
-      type: object
-      properties:
         identity:
           $ref: '#/components/schemas/Azure.ResourceManager.ManagedIdentityProperties'
           description: The managed service identities assigned to this resource.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags.
-        properties:
-          $ref: '#/components/schemas/FirewallResourceUpdateProperties'
-      description: The type used for update operations of the FirewallResource.
-    DNSProxy:
+      description: PaloAltoNetworks Firewall
+      required:
+      - properties
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    BooleanEnum:
       type: string
-      description: DNS Proxy
+      description: Boolean Enum
       enum:
-      - DISABLED
-      - ENABLED
+      - 'TRUE'
+      - 'FALSE'
       x-ms-enum:
-        name: DNSProxy
+        name: BooleanEnum
         modelAsString: true
-    FrontendSetting:
+    StrataCloudManagerConfig:
       type: object
       properties:
-        name:
+        cloudManagerName:
           type: string
-          description: Settings name
-        protocol:
-          $ref: '#/components/schemas/ProtocolType'
-          description: Protocol Type
-        frontendConfiguration:
-          $ref: '#/components/schemas/EndpointConfiguration'
-          description: Frontend configurations
-        backendConfiguration:
-          $ref: '#/components/schemas/EndpointConfiguration'
-          description: Backend configurations
-      description: Frontend setting for Firewall
+          description: Strata Cloud Manager name which is intended to manage the policy for this firewall.
+      description: This field is only present if Strata Cloud Manager is managing the policy for this firewall
       required:
-      - name
-      - protocol
-      - frontendConfiguration
-      - backendConfiguration
+      - cloudManagerName
   parameters:
     FirewallResource.firewallName:
       name: firewallName

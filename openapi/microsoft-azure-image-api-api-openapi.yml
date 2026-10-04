@@ -1651,47 +1651,6 @@ components:
         message:
           description: A message explaining the error reported by the service.
           type: string
-    SuggestedTagAndRegionQueryToken:
-      description: 'Contains properties we need to fetch suggested tags for. For the first call, Session and continuation set to null.
-
-        Then on subsequent calls, uses the session/continuation from the previous SuggestedTagAndRegionQuery result to fetch additional results.'
-      type: object
-      properties:
-        tagIds:
-          description: Existing TagIds in project to filter suggested tags on.
-          type: array
-          items:
-            format: uuid
-            type: string
-          readOnly: false
-        threshold:
-          format: double
-          description: Confidence threshold to filter suggested tags on.
-          type: number
-          readOnly: false
-        session:
-          description: SessionId for database query. Initially set to null but later used to paginate.
-          type: string
-          readOnly: false
-        continuation:
-          description: Continuation Id for database pagination. Initially null but later used to paginate.
-          type: string
-          readOnly: false
-        maxCount:
-          format: int32
-          description: Maximum number of results you want to be returned in the response.
-          type: integer
-          readOnly: false
-        sortBy:
-          description: OrderBy. Ordering mechanism for your results.
-          enum:
-          - UncertaintyAscending
-          - UncertaintyDescending
-          type: string
-          readOnly: false
-          x-ms-enum:
-            name: SortBy
-            modelAsString: true
     Image:
       description: Image model to be sent as JSON.
       type: object
@@ -1753,20 +1712,63 @@ components:
           additionalProperties:
             type: string
           readOnly: true
-    SuggestedTagAndRegionQuery:
-      description: The array of result images and token containing session and continuation Ids for the next query.
+    TagFilter:
+      description: Model that query for counting of images whose suggested tags match given tags and their probability are greater than or equal to the given threshold.
       type: object
       properties:
-        token:
-          $ref: '#/components/schemas/SuggestedTagAndRegionQueryToken'
-          description: Contains properties we need to fetch suggested tags for.
-          readOnly: false
-        results:
-          description: Result of a suggested tags and regions request of the untagged image.
+        tagIds:
+          description: Existing TagIds in project to get suggested tags count for.
           type: array
           items:
-            $ref: '#/components/schemas/StoredSuggestedTagAndRegion'
-          readOnly: true
+            format: uuid
+            type: string
+          readOnly: false
+        threshold:
+          format: double
+          description: Confidence threshold to filter suggested tags on.
+          type: number
+          readOnly: false
+    ImageRegionCreateEntry:
+      description: Entry associating a region to an image.
+      required:
+      - imageId
+      - tagId
+      - left
+      - top
+      - width
+      - height
+      type: object
+      properties:
+        imageId:
+          format: uuid
+          description: Id of the image.
+          type: string
+          readOnly: false
+        tagId:
+          format: uuid
+          description: Id of the tag associated with this region.
+          type: string
+          readOnly: false
+        left:
+          format: float
+          description: Coordinate of the left boundary.
+          type: number
+          readOnly: false
+        top:
+          format: float
+          description: Coordinate of the top boundary.
+          type: number
+          readOnly: false
+        width:
+          format: float
+          description: Width.
+          type: number
+          readOnly: false
+        height:
+          format: float
+          description: Height.
+          type: number
+          readOnly: false
     ImageRegionCreateResult:
       required:
       - tagId
@@ -1816,99 +1818,6 @@ components:
           description: Height.
           type: number
           readOnly: false
-    Region:
-      required:
-      - tagId
-      - left
-      - top
-      - width
-      - height
-      type: object
-      properties:
-        tagId:
-          format: uuid
-          description: Id of the tag associated with this region.
-          type: string
-          readOnly: false
-        left:
-          format: float
-          description: Coordinate of the left boundary.
-          type: number
-          readOnly: false
-        top:
-          format: float
-          description: Coordinate of the top boundary.
-          type: number
-          readOnly: false
-        width:
-          format: float
-          description: Width.
-          type: number
-          readOnly: false
-        height:
-          format: float
-          description: Height.
-          type: number
-          readOnly: false
-    ImageTag:
-      type: object
-      properties:
-        tagId:
-          format: uuid
-          type: string
-          readOnly: true
-        tagName:
-          type: string
-          readOnly: true
-        created:
-          format: date-time
-          type: string
-          readOnly: true
-    ImageUrlCreateBatch:
-      type: object
-      properties:
-        images:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageUrlCreateEntry'
-          readOnly: false
-        tagIds:
-          type: array
-          items:
-            format: uuid
-            type: string
-          readOnly: false
-        metadata:
-          description: The metadata of image. Limited to 50 key-value pairs per image. The length of key is limited to 256. The length of value is limited to 512.
-          type:
-          - object
-          - 'null'
-          additionalProperties:
-            type: string
-          readOnly: false
-    ImageTagCreateEntry:
-      description: Entry associating a tag to an image.
-      type: object
-      properties:
-        imageId:
-          format: uuid
-          description: Id of the image.
-          type: string
-          readOnly: false
-        tagId:
-          format: uuid
-          description: Id of the tag.
-          type: string
-          readOnly: false
-    ImageRegionCreateBatch:
-      description: Batch of image region information to create.
-      type: object
-      properties:
-        regions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageRegionCreateEntry'
-          readOnly: false
     ImageMetadataUpdateEntry:
       description: Entry associating a metadata to an image.
       type: object
@@ -1938,6 +1847,31 @@ components:
           additionalProperties:
             type: string
           readOnly: false
+    ImageTagCreateEntry:
+      description: Entry associating a tag to an image.
+      type: object
+      properties:
+        imageId:
+          format: uuid
+          description: Id of the image.
+          type: string
+          readOnly: false
+        tagId:
+          format: uuid
+          description: Id of the tag.
+          type: string
+          readOnly: false
+    ImageMetadataUpdateSummary:
+      type: object
+      properties:
+        isBatchSuccessful:
+          type: boolean
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageMetadataUpdateEntry'
+          readOnly: true
     ImageFileCreateEntry:
       type: object
       properties:
@@ -1960,6 +1894,282 @@ components:
           items:
             $ref: '#/components/schemas/Region'
           readOnly: false
+    ImageCreateSummary:
+      type: object
+      properties:
+        isBatchSuccessful:
+          description: True if all of the images in the batch were created successfully, otherwise false.
+          type: boolean
+          readOnly: true
+        images:
+          description: List of the image creation results.
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageCreateResult'
+          readOnly: true
+    ImageTagCreateSummary:
+      type: object
+      properties:
+        created:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry'
+          readOnly: false
+        duplicated:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry'
+          readOnly: false
+        exceeded:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry'
+          readOnly: false
+    ImageTagCreateBatch:
+      description: Batch of image tags.
+      type: object
+      properties:
+        tags:
+          description: Image Tag entries to include in this batch.
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry'
+          readOnly: false
+    Prediction:
+      description: Prediction result.
+      type: object
+      properties:
+        probability:
+          format: float
+          description: Probability of the tag.
+          type: number
+          readOnly: true
+        tagId:
+          format: uuid
+          description: Id of the predicted tag.
+          type: string
+          readOnly: true
+        tagName:
+          description: Name of the predicted tag.
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        boundingBox:
+          $ref: '#/components/schemas/BoundingBox'
+          description: Bounding box of the prediction.
+          readOnly: true
+        tagType:
+          description: Type of the predicted tag.
+          enum:
+          - Regular
+          - Negative
+          - GeneralProduct
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          x-ms-enum:
+            name: TagType
+            modelAsString: true
+    ImageIdCreateEntry:
+      type: object
+      properties:
+        id:
+          format: uuid
+          description: Id of the image.
+          type: string
+          readOnly: false
+        tagIds:
+          type: array
+          items:
+            format: uuid
+            type: string
+          readOnly: false
+        regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Region'
+          readOnly: false
+    ImageRegionCreateBatch:
+      description: Batch of image region information to create.
+      type: object
+      properties:
+        regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageRegionCreateEntry'
+          readOnly: false
+    ImageUrlCreateEntry:
+      required:
+      - url
+      type: object
+      properties:
+        url:
+          description: Url of the image.
+          type: string
+          readOnly: false
+        tagIds:
+          type: array
+          items:
+            format: uuid
+            type: string
+          readOnly: false
+        regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Region'
+          readOnly: false
+    ImageIdCreateBatch:
+      type: object
+      properties:
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageIdCreateEntry'
+          readOnly: false
+        tagIds:
+          type: array
+          items:
+            format: uuid
+            type: string
+          readOnly: false
+        metadata:
+          description: The metadata of image. Limited to 50 key-value pairs per image. The length of key is limited to 256. The length of value is limited to 512.
+          type:
+          - object
+          - 'null'
+          additionalProperties:
+            type: string
+          readOnly: false
+    SuggestedTagAndRegionQueryToken:
+      description: 'Contains properties we need to fetch suggested tags for. For the first call, Session and continuation set to null.
+
+        Then on subsequent calls, uses the session/continuation from the previous SuggestedTagAndRegionQuery result to fetch additional results.'
+      type: object
+      properties:
+        tagIds:
+          description: Existing TagIds in project to filter suggested tags on.
+          type: array
+          items:
+            format: uuid
+            type: string
+          readOnly: false
+        threshold:
+          format: double
+          description: Confidence threshold to filter suggested tags on.
+          type: number
+          readOnly: false
+        session:
+          description: SessionId for database query. Initially set to null but later used to paginate.
+          type: string
+          readOnly: false
+        continuation:
+          description: Continuation Id for database pagination. Initially null but later used to paginate.
+          type: string
+          readOnly: false
+        maxCount:
+          format: int32
+          description: Maximum number of results you want to be returned in the response.
+          type: integer
+          readOnly: false
+        sortBy:
+          description: OrderBy. Ordering mechanism for your results.
+          enum:
+          - UncertaintyAscending
+          - UncertaintyDescending
+          type: string
+          readOnly: false
+          x-ms-enum:
+            name: SortBy
+            modelAsString: true
+    SuggestedTagAndRegionQuery:
+      description: The array of result images and token containing session and continuation Ids for the next query.
+      type: object
+      properties:
+        token:
+          $ref: '#/components/schemas/SuggestedTagAndRegionQueryToken'
+          description: Contains properties we need to fetch suggested tags for.
+          readOnly: false
+        results:
+          description: Result of a suggested tags and regions request of the untagged image.
+          type: array
+          items:
+            $ref: '#/components/schemas/StoredSuggestedTagAndRegion'
+          readOnly: true
+    ImageTag:
+      type: object
+      properties:
+        tagId:
+          format: uuid
+          type: string
+          readOnly: true
+        tagName:
+          type: string
+          readOnly: true
+        created:
+          format: date-time
+          type: string
+          readOnly: true
+    ImageFileCreateBatch:
+      type: object
+      properties:
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageFileCreateEntry'
+          readOnly: false
+        tagIds:
+          type: array
+          items:
+            format: uuid
+            type: string
+            example: 00000000-0000-0000-0000-000000000000
+          readOnly: false
+        metadata:
+          description: The metadata of image. Limited to 50 key-value pairs per image. The length of key is limited to 256. The length of value is limited to 512.
+          type:
+          - object
+          - 'null'
+          additionalProperties:
+            type: string
+          readOnly: false
+    ImageCreateResult:
+      type: object
+      properties:
+        sourceUrl:
+          description: Source URL of the image.
+          type: string
+          readOnly: true
+        status:
+          description: Status of the image creation.
+          enum:
+          - OK
+          - OKDuplicate
+          - ErrorSource
+          - ErrorImageFormat
+          - ErrorImageSize
+          - ErrorStorage
+          - ErrorLimitExceed
+          - ErrorTagLimitExceed
+          - ErrorRegionLimitExceed
+          - ErrorUnknown
+          - ErrorNegativeAndRegularTagOnSameImage
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: ImageCreateStatus
+            modelAsString: true
+        image:
+          $ref: '#/components/schemas/Image'
+          description: The image.
+          readOnly: true
     StoredSuggestedTagAndRegion:
       description: Result of a suggested tags and regions request of the untagged image.
       type: object
@@ -2022,45 +2232,20 @@ components:
           description: Uncertainty (entropy) of suggested tags or regions per image.
           type: number
           readOnly: true
-    ImageMetadataUpdateSummary:
-      type: object
-      properties:
-        isBatchSuccessful:
-          type: boolean
-          readOnly: true
-        images:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageMetadataUpdateEntry'
-          readOnly: true
-    ImageIdCreateEntry:
-      type: object
-      properties:
-        id:
-          format: uuid
-          description: Id of the image.
-          type: string
-          readOnly: false
-        tagIds:
-          type: array
-          items:
-            format: uuid
-            type: string
-          readOnly: false
-        regions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Region'
-          readOnly: false
-    BoundingBox:
-      description: Bounding box that defines a region of an image.
+    Region:
       required:
+      - tagId
       - left
       - top
       - width
       - height
       type: object
       properties:
+        tagId:
+          format: uuid
+          description: Id of the tag associated with this region.
+          type: string
+          readOnly: false
         left:
           format: float
           description: Coordinate of the left boundary.
@@ -2081,109 +2266,27 @@ components:
           description: Height.
           type: number
           readOnly: false
-    TagFilter:
-      description: Model that query for counting of images whose suggested tags match given tags and their probability are greater than or equal to the given threshold.
+    ImageUrlCreateBatch:
       type: object
       properties:
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageUrlCreateEntry'
+          readOnly: false
         tagIds:
-          description: Existing TagIds in project to get suggested tags count for.
           type: array
           items:
             format: uuid
             type: string
           readOnly: false
-        threshold:
-          format: double
-          description: Confidence threshold to filter suggested tags on.
-          type: number
-          readOnly: false
-    ImageTagCreateBatch:
-      description: Batch of image tags.
-      type: object
-      properties:
-        tags:
-          description: Image Tag entries to include in this batch.
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageTagCreateEntry'
-          readOnly: false
-    ImageRegionCreateSummary:
-      type: object
-      properties:
-        created:
+        metadata:
+          description: The metadata of image. Limited to 50 key-value pairs per image. The length of key is limited to 256. The length of value is limited to 512.
           type:
-          - array
+          - object
           - 'null'
-          items:
-            $ref: '#/components/schemas/ImageRegionCreateResult'
-          readOnly: false
-        duplicated:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageRegionCreateEntry'
-          readOnly: false
-        exceeded:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageRegionCreateEntry'
-          readOnly: false
-    ImageCreateResult:
-      type: object
-      properties:
-        sourceUrl:
-          description: Source URL of the image.
-          type: string
-          readOnly: true
-        status:
-          description: Status of the image creation.
-          enum:
-          - OK
-          - OKDuplicate
-          - ErrorSource
-          - ErrorImageFormat
-          - ErrorImageSize
-          - ErrorStorage
-          - ErrorLimitExceed
-          - ErrorTagLimitExceed
-          - ErrorRegionLimitExceed
-          - ErrorUnknown
-          - ErrorNegativeAndRegularTagOnSameImage
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: ImageCreateStatus
-            modelAsString: true
-        image:
-          $ref: '#/components/schemas/Image'
-          description: The image.
-          readOnly: true
-    ImageTagCreateSummary:
-      type: object
-      properties:
-        created:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageTagCreateEntry'
-          readOnly: false
-        duplicated:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageTagCreateEntry'
-          readOnly: false
-        exceeded:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageTagCreateEntry'
+          additionalProperties:
+            type: string
           readOnly: false
     ImageRegion:
       required:
@@ -2230,109 +2333,15 @@ components:
           description: Height.
           type: number
           readOnly: false
-    ImageFileCreateBatch:
-      type: object
-      properties:
-        images:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageFileCreateEntry'
-          readOnly: false
-        tagIds:
-          type: array
-          items:
-            format: uuid
-            type: string
-            example: 00000000-0000-0000-0000-000000000000
-          readOnly: false
-        metadata:
-          description: The metadata of image. Limited to 50 key-value pairs per image. The length of key is limited to 256. The length of value is limited to 512.
-          type:
-          - object
-          - 'null'
-          additionalProperties:
-            type: string
-          readOnly: false
-    Prediction:
-      description: Prediction result.
-      type: object
-      properties:
-        probability:
-          format: float
-          description: Probability of the tag.
-          type: number
-          readOnly: true
-        tagId:
-          format: uuid
-          description: Id of the predicted tag.
-          type: string
-          readOnly: true
-        tagName:
-          description: Name of the predicted tag.
-          type:
-          - string
-          - 'null'
-          readOnly: true
-        boundingBox:
-          $ref: '#/components/schemas/BoundingBox'
-          description: Bounding box of the prediction.
-          readOnly: true
-        tagType:
-          description: Type of the predicted tag.
-          enum:
-          - Regular
-          - Negative
-          - GeneralProduct
-          type:
-          - string
-          - 'null'
-          readOnly: true
-          x-ms-enum:
-            name: TagType
-            modelAsString: true
-    ImageIdCreateBatch:
-      type: object
-      properties:
-        images:
-          type: array
-          items:
-            $ref: '#/components/schemas/ImageIdCreateEntry'
-          readOnly: false
-        tagIds:
-          type: array
-          items:
-            format: uuid
-            type: string
-          readOnly: false
-        metadata:
-          description: The metadata of image. Limited to 50 key-value pairs per image. The length of key is limited to 256. The length of value is limited to 512.
-          type:
-          - object
-          - 'null'
-          additionalProperties:
-            type: string
-          readOnly: false
-    ImageRegionCreateEntry:
-      description: Entry associating a region to an image.
+    BoundingBox:
+      description: Bounding box that defines a region of an image.
       required:
-      - imageId
-      - tagId
       - left
       - top
       - width
       - height
       type: object
       properties:
-        imageId:
-          format: uuid
-          description: Id of the image.
-          type: string
-          readOnly: false
-        tagId:
-          format: uuid
-          description: Id of the tag associated with this region.
-          type: string
-          readOnly: false
         left:
           format: float
           description: Coordinate of the left boundary.
@@ -2353,39 +2362,30 @@ components:
           description: Height.
           type: number
           readOnly: false
-    ImageUrlCreateEntry:
-      required:
-      - url
+    ImageRegionCreateSummary:
       type: object
       properties:
-        url:
-          description: Url of the image.
-          type: string
-          readOnly: false
-        tagIds:
-          type: array
+        created:
+          type:
+          - array
+          - 'null'
           items:
-            format: uuid
-            type: string
+            $ref: '#/components/schemas/ImageRegionCreateResult'
           readOnly: false
-        regions:
-          type: array
+        duplicated:
+          type:
+          - array
+          - 'null'
           items:
-            $ref: '#/components/schemas/Region'
+            $ref: '#/components/schemas/ImageRegionCreateEntry'
           readOnly: false
-    ImageCreateSummary:
-      type: object
-      properties:
-        isBatchSuccessful:
-          description: True if all of the images in the batch were created successfully, otherwise false.
-          type: boolean
-          readOnly: true
-        images:
-          description: List of the image creation results.
-          type: array
+        exceeded:
+          type:
+          - array
+          - 'null'
           items:
-            $ref: '#/components/schemas/ImageCreateResult'
-          readOnly: true
+            $ref: '#/components/schemas/ImageRegionCreateEntry'
+          readOnly: false
     Image_2:
       description: Image model to be sent as JSON
       type:
@@ -2432,6 +2432,29 @@ components:
           items:
             $ref: '#/components/schemas/ImageRegion_2'
           readOnly: true
+    ImageRegionCreateEntry_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        imageId:
+          format: uuid
+          type: string
+        tagId:
+          format: uuid
+          type: string
+        left:
+          format: float
+          type: number
+        top:
+          format: float
+          type: number
+        width:
+          format: float
+          type: number
+        height:
+          format: float
+          type: number
     ImageRegionCreateResult_2:
       type:
       - object
@@ -2469,62 +2492,6 @@ components:
         height:
           format: float
           type: number
-    Region_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        tagId:
-          format: uuid
-          type: string
-        left:
-          format: float
-          type: number
-        top:
-          format: float
-          type: number
-        width:
-          format: float
-          type: number
-        height:
-          format: float
-          type: number
-    ImageTag_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        tagId:
-          format: uuid
-          type: string
-          readOnly: true
-        tagName:
-          type:
-          - string
-          - 'null'
-          readOnly: true
-        created:
-          format: date-time
-          type: string
-          readOnly: true
-    ImageUrlCreateBatch_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        images:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageUrlCreateEntry_2'
-        tagIds:
-          type:
-          - array
-          - 'null'
-          items:
-            format: uuid
-            type: string
     ImageTagCreateEntry_2:
       type:
       - object
@@ -2536,18 +2503,6 @@ components:
         tagId:
           format: uuid
           type: string
-    ImageRegionCreateBatch_2:
-      description: Batch of image region information to create.
-      type:
-      - object
-      - 'null'
-      properties:
-        regions:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageRegionCreateEntry_2'
     ImageFileCreateEntry_2:
       type:
       - object
@@ -2575,6 +2530,55 @@ components:
           - 'null'
           items:
             $ref: '#/components/schemas/Region_2'
+    ImageCreateSummary_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        isBatchSuccessful:
+          type: boolean
+          readOnly: true
+        images:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageCreateResult_2'
+          readOnly: true
+    ImageTagCreateSummary_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        created:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry_2'
+        duplicated:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry_2'
+        exceeded:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry_2'
+    ImageTagCreateBatch_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        tags:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageTagCreateEntry_2'
     ImageIdCreateEntry_2:
       type:
       - object
@@ -2596,40 +2600,94 @@ components:
           - 'null'
           items:
             $ref: '#/components/schemas/Region_2'
-    ImageTagCreateBatch_2:
+    ImageRegionCreateBatch_2:
+      description: Batch of image region information to create.
       type:
       - object
       - 'null'
       properties:
-        tags:
+        regions:
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/ImageTagCreateEntry_2'
-    ImageRegionCreateSummary_2:
+            $ref: '#/components/schemas/ImageRegionCreateEntry_2'
+    ImageUrlCreateEntry_2:
       type:
       - object
       - 'null'
       properties:
+        url:
+          type:
+          - string
+          - 'null'
+        tagIds:
+          type:
+          - array
+          - 'null'
+          items:
+            format: uuid
+            type: string
+        regions:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/Region_2'
+    ImageIdCreateBatch_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        images:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/ImageIdCreateEntry_2'
+        tagIds:
+          type:
+          - array
+          - 'null'
+          items:
+            format: uuid
+            type: string
+    ImageTag_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        tagId:
+          format: uuid
+          type: string
+          readOnly: true
+        tagName:
+          type:
+          - string
+          - 'null'
+          readOnly: true
         created:
+          format: date-time
+          type: string
+          readOnly: true
+    ImageFileCreateBatch_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        images:
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/ImageRegionCreateResult_2'
-        duplicated:
+            $ref: '#/components/schemas/ImageFileCreateEntry_2'
+        tagIds:
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/ImageRegionCreateEntry_2'
-        exceeded:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageRegionCreateEntry_2'
+            format: uuid
+            type: string
     ImageCreateResult_2:
       type:
       - object
@@ -2660,29 +2718,44 @@ components:
         image:
           $ref: '#/components/schemas/Image_2'
           readOnly: true
-    ImageTagCreateSummary_2:
+    Region_2:
       type:
       - object
       - 'null'
       properties:
-        created:
+        tagId:
+          format: uuid
+          type: string
+        left:
+          format: float
+          type: number
+        top:
+          format: float
+          type: number
+        width:
+          format: float
+          type: number
+        height:
+          format: float
+          type: number
+    ImageUrlCreateBatch_2:
+      type:
+      - object
+      - 'null'
+      properties:
+        images:
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/ImageTagCreateEntry_2'
-        duplicated:
+            $ref: '#/components/schemas/ImageUrlCreateEntry_2'
+        tagIds:
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/ImageTagCreateEntry_2'
-        exceeded:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageTagCreateEntry_2'
+            format: uuid
+            type: string
     ImageRegion_2:
       type:
       - object
@@ -2716,102 +2789,29 @@ components:
         height:
           format: float
           type: number
-    ImageFileCreateBatch_2:
+    ImageRegionCreateSummary_2:
       type:
       - object
       - 'null'
       properties:
-        images:
+        created:
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/ImageFileCreateEntry_2'
-        tagIds:
+            $ref: '#/components/schemas/ImageRegionCreateResult_2'
+        duplicated:
           type:
           - array
           - 'null'
           items:
-            format: uuid
-            type: string
-    ImageIdCreateBatch_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        images:
+            $ref: '#/components/schemas/ImageRegionCreateEntry_2'
+        exceeded:
           type:
           - array
           - 'null'
           items:
-            $ref: '#/components/schemas/ImageIdCreateEntry_2'
-        tagIds:
-          type:
-          - array
-          - 'null'
-          items:
-            format: uuid
-            type: string
-    ImageRegionCreateEntry_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        imageId:
-          format: uuid
-          type: string
-        tagId:
-          format: uuid
-          type: string
-        left:
-          format: float
-          type: number
-        top:
-          format: float
-          type: number
-        width:
-          format: float
-          type: number
-        height:
-          format: float
-          type: number
-    ImageUrlCreateEntry_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        url:
-          type:
-          - string
-          - 'null'
-        tagIds:
-          type:
-          - array
-          - 'null'
-          items:
-            format: uuid
-            type: string
-        regions:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/Region_2'
-    ImageCreateSummary_2:
-      type:
-      - object
-      - 'null'
-      properties:
-        isBatchSuccessful:
-          type: boolean
-          readOnly: true
-        images:
-          type:
-          - array
-          - 'null'
-          items:
-            $ref: '#/components/schemas/ImageCreateResult_2'
-          readOnly: true
+            $ref: '#/components/schemas/ImageRegionCreateEntry_2'
   parameters:
     ApiKey:
       name: Training-Key

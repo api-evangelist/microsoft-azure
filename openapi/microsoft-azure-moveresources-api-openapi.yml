@@ -115,6 +115,86 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
+    MoveResource:
+      description: Defines the move resource.
+      type: object
+      x-ms-azure-resource: true
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Fully qualified resource Id for the resource.
+        name:
+          readOnly: true
+          type: string
+          description: The name of the resource
+        type:
+          readOnly: true
+          type: string
+          description: The type of the resource.
+        properties:
+          $ref: '#/components/schemas/MoveResourceProperties'
+    ResourceSettings:
+      description: Gets or sets the resource settings.
+      type: object
+      required:
+      - resourceType
+      - targetResourceName
+      properties:
+        resourceType:
+          description: The resource type. For example, the value can be Microsoft.Compute/virtualMachines.
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        targetResourceName:
+          description: Gets or sets the target Resource name.
+          type: string
+      discriminator:
+        propertyName: resourceType
+    MoveResourceErrorBody:
+      properties:
+        code:
+          type: string
+          readOnly: true
+          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          type: string
+          readOnly: true
+          description: A message describing the error, intended to be suitable for display in a user interface.
+        target:
+          type: string
+          readOnly: true
+          description: The target of the particular error. For example, the name of the property in error.
+        details:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/MoveResourceErrorBody'
+          description: A list of additional details about the error.
+      description: An error response from the Azure Migrate service.
+    JobName:
+      description: Defines the job name.
+      enum:
+      - InitialSync
+      type: string
+      readOnly: true
+      x-ms-enum:
+        name: JobName
+        modelAsString: true
+    OperationStatusProperties:
+      description: Class for operation result properties.
+      type: object
+      properties: {}
+    DependencyType:
+      description: Defines the dependency type.
+      enum:
+      - RequiredForPrepare
+      - RequiredForMove
+      type: string
+      x-ms-enum:
+        name: DependencyType
+        modelAsString: true
     CloudErrorBody:
       x-ms-external: true
       properties:
@@ -133,66 +213,6 @@ components:
             $ref: '#/components/schemas/CloudErrorBody'
           description: A list of additional details about the error.
       description: An error response from the service.
-    AutomaticResolutionProperties:
-      description: Defines the properties for automatic resolution.
-      type: object
-      properties:
-        moveResourceId:
-          description: 'Gets the MoveResource ARM ID of
-
-            the dependent resource if the resolution type is Automatic.'
-          type: string
-    OperationStatus:
-      description: Operation status REST resource.
-      type: object
-      properties:
-        id:
-          description: Resource Id.
-          type: string
-          readOnly: true
-        name:
-          description: Operation name.
-          type: string
-          readOnly: true
-        status:
-          description: Status of the operation. ARM expects the terminal status to be one of Succeeded/ Failed/ Canceled. All other values imply that the operation is still running.
-          type: string
-          readOnly: true
-        startTime:
-          description: Start time.
-          type: string
-          readOnly: true
-        endTime:
-          description: End time.
-          type: string
-          readOnly: true
-        error:
-          $ref: '#/components/schemas/OperationStatusError'
-          description: Error stating all error details for the operation.
-          readOnly: true
-        properties:
-          $ref: '#/components/schemas/OperationStatusProperties'
-          description: Custom data.
-          readOnly: true
-    MoveResourceStatus:
-      description: Defines the move resource status.
-      type: object
-      properties:
-        moveState:
-          $ref: '#/components/schemas/MoveState'
-        jobStatus:
-          $ref: '#/components/schemas/JobStatus'
-        errors:
-          $ref: '#/components/schemas/MoveResourceError'
-    ResolutionType:
-      description: Defines the resolution type.
-      enum:
-      - Manual
-      - Automatic
-      type: string
-      x-ms-enum:
-        name: ResolutionType
-        modelAsString: true
     MoveResourceProperties:
       description: Defines the move resource properties.
       type: object
@@ -243,24 +263,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/MoveResourceError'
           readOnly: true
-    AffectedMoveResource:
-      description: The RP custom operation error info.
-      type: object
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: The affected move resource id.
-        sourceId:
-          readOnly: true
-          type: string
-          description: The affected move resource source id.
-        moveResources:
-          readOnly: true
-          type: array
-          description: The affected move resources.
-          items:
-            $ref: '#/components/schemas/AffectedMoveResource'
     JobStatus:
       description: Defines the job status.
       type: object
@@ -270,6 +272,38 @@ components:
         jobProgress:
           description: Gets or sets the monitoring job percentage.
           type: string
+          readOnly: true
+    OperationStatus:
+      description: Operation status REST resource.
+      type: object
+      properties:
+        id:
+          description: Resource Id.
+          type: string
+          readOnly: true
+        name:
+          description: Operation name.
+          type: string
+          readOnly: true
+        status:
+          description: Status of the operation. ARM expects the terminal status to be one of Succeeded/ Failed/ Canceled. All other values imply that the operation is still running.
+          type: string
+          readOnly: true
+        startTime:
+          description: Start time.
+          type: string
+          readOnly: true
+        endTime:
+          description: End time.
+          type: string
+          readOnly: true
+        error:
+          $ref: '#/components/schemas/OperationStatusError'
+          description: Error stating all error details for the operation.
+          readOnly: true
+        properties:
+          $ref: '#/components/schemas/OperationStatusProperties'
+          description: Custom data.
           readOnly: true
     CloudError:
       x-ms-external: true
@@ -285,6 +319,63 @@ components:
           description: The move resource error body.
           $ref: '#/components/schemas/MoveResourceErrorBody'
       description: An error response from the azure resource mover service.
+    MoveState:
+      description: Defines the MoveResource states.
+      enum:
+      - AssignmentPending
+      - PreparePending
+      - PrepareInProgress
+      - PrepareFailed
+      - MovePending
+      - MoveInProgress
+      - MoveFailed
+      - DiscardInProgress
+      - DiscardFailed
+      - CommitPending
+      - CommitInProgress
+      - CommitFailed
+      - Committed
+      - DeleteSourcePending
+      - ResourceMoveCompleted
+      type: string
+      readOnly: true
+      x-ms-enum:
+        name: MoveState
+        modelAsString: true
+    ProvisioningState:
+      description: Defines the provisioning states.
+      enum:
+      - Succeeded
+      - Updating
+      - Creating
+      - Failed
+      type: string
+      readOnly: true
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    MoveErrorInfo:
+      description: The move custom error info.
+      type: object
+      properties:
+        moveResources:
+          readOnly: true
+          type: array
+          description: The affected move resources.
+          items:
+            $ref: '#/components/schemas/AffectedMoveResource'
+    MoveResourceDependencyOverride:
+      description: Defines the dependency override of the move resource.
+      type: object
+      properties:
+        id:
+          description: Gets or sets the ARM ID of the dependent resource.
+          type: string
+        targetId:
+          description: 'Gets or sets the resource ARM id of either the MoveResource or the resource ARM ID of
+
+            the dependent resource.'
+          type: string
     OperationErrorAdditionalInfo:
       description: The operation error info.
       type: object
@@ -297,37 +388,36 @@ components:
           readOnly: true
           $ref: '#/components/schemas/MoveErrorInfo'
           description: The operation error info.
-    MoveResourceErrorBody:
-      properties:
-        code:
-          type: string
-          readOnly: true
-          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          type: string
-          readOnly: true
-          description: A message describing the error, intended to be suitable for display in a user interface.
-        target:
-          type: string
-          readOnly: true
-          description: The target of the particular error. For example, the name of the property in error.
-        details:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/MoveResourceErrorBody'
-          description: A list of additional details about the error.
-      description: An error response from the Azure Migrate service.
-    MoveErrorInfo:
-      description: The move custom error info.
+    MoveResourceDependency:
+      description: Defines the dependency of the move resource.
       type: object
       properties:
-        moveResources:
-          readOnly: true
-          type: array
-          description: The affected move resources.
-          items:
-            $ref: '#/components/schemas/AffectedMoveResource'
+        id:
+          description: Gets the source ARM ID of the dependent resource.
+          type: string
+        resolutionStatus:
+          description: Gets the dependency resolution status.
+          type: string
+        resolutionType:
+          $ref: '#/components/schemas/ResolutionType'
+        dependencyType:
+          $ref: '#/components/schemas/DependencyType'
+        manualResolution:
+          $ref: '#/components/schemas/ManualResolutionProperties'
+        automaticResolution:
+          $ref: '#/components/schemas/AutomaticResolutionProperties'
+        isOptional:
+          description: Gets or sets a value indicating whether the dependency is optional.
+          type: string
+    ResolutionType:
+      description: Defines the resolution type.
+      enum:
+      - Manual
+      - Automatic
+      type: string
+      x-ms-enum:
+        name: ResolutionType
+        modelAsString: true
     OperationStatusError:
       description: Class for operation status errors.
       type: object
@@ -352,70 +442,33 @@ components:
           description: The additional info.
           items:
             $ref: '#/components/schemas/OperationErrorAdditionalInfo'
-    OperationStatusProperties:
-      description: Class for operation result properties.
-      type: object
-      properties: {}
-    ProvisioningState:
-      description: Defines the provisioning states.
-      enum:
-      - Succeeded
-      - Updating
-      - Creating
-      - Failed
-      type: string
-      readOnly: true
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    ResourceSettings:
-      description: Gets or sets the resource settings.
-      type: object
-      required:
-      - resourceType
-      - targetResourceName
-      properties:
-        resourceType:
-          description: The resource type. For example, the value can be Microsoft.Compute/virtualMachines.
-          type: string
-          x-ms-mutability:
-          - create
-          - read
-        targetResourceName:
-          description: Gets or sets the target Resource name.
-          type: string
-      discriminator:
-        propertyName: resourceType
-    MoveResourceDependency:
-      description: Defines the dependency of the move resource.
+    AffectedMoveResource:
+      description: The RP custom operation error info.
       type: object
       properties:
         id:
-          description: Gets the source ARM ID of the dependent resource.
+          readOnly: true
           type: string
-        resolutionStatus:
-          description: Gets the dependency resolution status.
+          description: The affected move resource id.
+        sourceId:
+          readOnly: true
           type: string
-        resolutionType:
-          $ref: '#/components/schemas/ResolutionType'
-        dependencyType:
-          $ref: '#/components/schemas/DependencyType'
-        manualResolution:
-          $ref: '#/components/schemas/ManualResolutionProperties'
-        automaticResolution:
-          $ref: '#/components/schemas/AutomaticResolutionProperties'
-        isOptional:
-          description: Gets or sets a value indicating whether the dependency is optional.
+          description: The affected move resource source id.
+        moveResources:
+          readOnly: true
+          type: array
+          description: The affected move resources.
+          items:
+            $ref: '#/components/schemas/AffectedMoveResource'
+    AutomaticResolutionProperties:
+      description: Defines the properties for automatic resolution.
+      type: object
+      properties:
+        moveResourceId:
+          description: 'Gets the MoveResource ARM ID of
+
+            the dependent resource if the resolution type is Automatic.'
           type: string
-    JobName:
-      description: Defines the job name.
-      enum:
-      - InitialSync
-      type: string
-      readOnly: true
-      x-ms-enum:
-        name: JobName
-        modelAsString: true
     ManualResolutionProperties:
       description: Defines the properties for manual resolution.
       type: object
@@ -423,86 +476,17 @@ components:
         targetId:
           description: Gets or sets the target resource ARM ID of the dependent resource if the resource type is Manual.
           type: string
-    MoveResource:
-      description: Defines the move resource.
-      type: object
-      x-ms-azure-resource: true
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Fully qualified resource Id for the resource.
-        name:
-          readOnly: true
-          type: string
-          description: The name of the resource
-        type:
-          readOnly: true
-          type: string
-          description: The type of the resource.
-        properties:
-          $ref: '#/components/schemas/MoveResourceProperties'
-    DependencyType:
-      description: Defines the dependency type.
-      enum:
-      - RequiredForPrepare
-      - RequiredForMove
-      type: string
-      x-ms-enum:
-        name: DependencyType
-        modelAsString: true
-    MoveState:
-      description: Defines the MoveResource states.
-      enum:
-      - AssignmentPending
-      - PreparePending
-      - PrepareInProgress
-      - PrepareFailed
-      - MovePending
-      - MoveInProgress
-      - MoveFailed
-      - DiscardInProgress
-      - DiscardFailed
-      - CommitPending
-      - CommitInProgress
-      - CommitFailed
-      - Committed
-      - DeleteSourcePending
-      - ResourceMoveCompleted
-      type: string
-      readOnly: true
-      x-ms-enum:
-        name: MoveState
-        modelAsString: true
-    MoveResourceDependencyOverride:
-      description: Defines the dependency override of the move resource.
+    MoveResourceStatus:
+      description: Defines the move resource status.
       type: object
       properties:
-        id:
-          description: Gets or sets the ARM ID of the dependent resource.
-          type: string
-        targetId:
-          description: 'Gets or sets the resource ARM id of either the MoveResource or the resource ARM ID of
-
-            the dependent resource.'
-          type: string
+        moveState:
+          $ref: '#/components/schemas/MoveState'
+        jobStatus:
+          $ref: '#/components/schemas/JobStatus'
+        errors:
+          $ref: '#/components/schemas/MoveResourceError'
   parameters:
-    moveCollectionName:
-      in: path
-      name: moveCollectionName
-      description: The Move Collection Name.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    moveResourceName:
-      in: path
-      name: moveResourceName
-      description: The Move Resource Name.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
     api-version:
       in: query
       name: api-version
@@ -521,6 +505,22 @@ components:
       in: path
       name: resourceGroupName
       description: The Resource Group Name.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    moveCollectionName:
+      in: path
+      name: moveCollectionName
+      description: The Move Collection Name.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    moveResourceName:
+      in: path
+      name: moveResourceName
+      description: The Move Resource Name.
       required: true
       x-ms-parameter-location: method
       schema:

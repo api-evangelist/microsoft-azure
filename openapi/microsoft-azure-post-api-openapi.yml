@@ -322,38 +322,32 @@ paths:
         description: Region to failover to. Must be the Azure paired region. Get the value from the secondary location in the locations property. To learn more, see https://aka.ms/manualfailover/region
         required: true
 components:
-  parameters:
-    resourceName:
-      name: resourceName
-      in: path
-      description: The name of the IoT hub.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    api-version:
-      name: api-version
-      in: query
-      description: The version of the API.
-      required: true
-      schema:
-        type: string
-    subscriptionId:
-      name: subscriptionId
-      in: path
-      description: The subscription identifier.
-      required: true
-      schema:
-        type: string
-    resourceGroupName:
-      name: resourceGroupName
-      description: The name of the resource group that contains the IoT hub.
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
   schemas:
+    TestAllRoutesInput:
+      description: Input for testing all routes
+      type: object
+      properties:
+        routingSource:
+          description: Routing source
+          enum:
+          - Invalid
+          - DeviceMessages
+          - TwinChangeEvents
+          - DeviceLifecycleEvents
+          - DeviceJobLifecycleEvents
+          - DigitalTwinChangeEvents
+          - DeviceConnectionStateEvents
+          - MqttBrokerMessages
+          type: string
+          x-ms-enum:
+            name: RoutingSource
+            modelAsString: true
+        message:
+          description: Routing message
+          $ref: '#/components/schemas/RoutingMessage'
+        twin:
+          description: Routing Twin Reference
+          $ref: '#/components/schemas/RoutingTwin'
     TestRouteResultDetails:
       description: Detailed result of testing a route
       type: object
@@ -363,66 +357,73 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RouteCompilationError'
-    ManagedIdentity:
-      description: The properties of the Managed identity.
+    OperationInputs:
+      description: Input values.
       type: object
       properties:
-        userAssignedIdentity:
-          type: string
-          description: The user assigned identity.
-    RouteCompilationError:
-      description: Compilation error when evaluating route
-      type: object
-      properties:
-        message:
-          description: Route error message
-          type: string
-        severity:
-          description: Severity of the route error
-          enum:
-          - error
-          - warning
-          type: string
-          x-ms-enum:
-            name: RouteErrorSeverity
-            modelAsString: true
-        location:
-          description: Location where the route error happened
-          $ref: '#/components/schemas/RouteErrorRange'
-    ExportDevicesRequest:
-      description: Use to provide parameters when requesting an export of all devices in the IoT hub.
-      type: object
-      properties:
-        exportBlobContainerUri:
-          description: The export blob container URI.
-          type: string
-        excludeKeys:
-          description: The value indicating whether keys should be excluded during export.
-          type: boolean
-        exportBlobName:
-          description: The name of the blob that will be created in the provided output blob container. This blob will contain the exported device registry information for the IoT Hub.
-          type: string
-        authenticationType:
-          description: Specifies authentication type being used for connecting to the storage account.
-          enum:
-          - keyBased
-          - identityBased
-          type: string
-          x-ms-enum:
-            name: AuthenticationType
-            modelAsString: true
-        identity:
-          description: Managed identity properties of storage endpoint for export devices.
-          $ref: '#/components/schemas/ManagedIdentity'
-        includeConfigurations:
-          description: The value indicating whether configurations should be exported.
-          type: boolean
-        configurationsBlobName:
-          description: The name of the blob that will be created in the provided output blob container. This blob will contain the exported configurations for the Iot Hub.
+        name:
+          description: The name of the IoT hub to check.
           type: string
       required:
-      - exportBlobContainerUri
-      - excludeKeys
+      - name
+    SharedAccessSignatureAuthorizationRule:
+      description: The properties of an IoT hub shared access policy.
+      type: object
+      properties:
+        keyName:
+          description: The name of the shared access policy.
+          type: string
+        primaryKey:
+          description: The primary key.
+          type: string
+        secondaryKey:
+          description: The secondary key.
+          type: string
+        rights:
+          description: The permissions assigned to the shared access policy.
+          enum:
+          - RegistryRead
+          - RegistryWrite
+          - ServiceConnect
+          - DeviceConnect
+          - RegistryRead, RegistryWrite
+          - RegistryRead, ServiceConnect
+          - RegistryRead, DeviceConnect
+          - RegistryWrite, ServiceConnect
+          - RegistryWrite, DeviceConnect
+          - ServiceConnect, DeviceConnect
+          - RegistryRead, RegistryWrite, ServiceConnect
+          - RegistryRead, RegistryWrite, DeviceConnect
+          - RegistryRead, ServiceConnect, DeviceConnect
+          - RegistryWrite, ServiceConnect, DeviceConnect
+          - RegistryRead, RegistryWrite, ServiceConnect, DeviceConnect
+          type: string
+          x-ms-enum:
+            name: AccessRights
+            modelAsString: false
+      required:
+      - keyName
+      - rights
+    ErrorDetails:
+      description: Error details.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+          readOnly: true
+        httpStatusCode:
+          description: The HTTP status code.
+          type: string
+          readOnly: true
+        message:
+          description: The error message.
+          type: string
+          readOnly: true
+        details:
+          description: The error details.
+          type: string
+          readOnly: true
     IotHubNameAvailabilityInfo:
       description: The properties indicating whether a given IoT hub name is available.
       type: object
@@ -444,77 +445,6 @@ components:
         message:
           description: The detailed reason message.
           type: string
-    TestAllRoutesResult:
-      description: Result of testing all routes
-      type: object
-      properties:
-        routes:
-          description: JSON-serialized array of matched routes
-          type: array
-          items:
-            $ref: '#/components/schemas/MatchedRoute'
-    RoutingTwin:
-      description: Twin reference input parameter. This is an optional parameter
-      type: object
-      properties:
-        tags:
-          description: Twin Tags
-          type: object
-        properties:
-          properties:
-            desired:
-              description: Twin desired properties
-              type: object
-            reported:
-              description: Twin desired properties
-              type: object
-    FailoverInput:
-      description: Use to provide failover region when requesting manual Failover for a hub.
-      type: object
-      properties:
-        failoverRegion:
-          description: Region the hub will be failed over to
-          type: string
-      required:
-      - failoverRegion
-    RouteErrorRange:
-      description: Range of route errors
-      type: object
-      properties:
-        start:
-          description: Start where the route error happened
-          $ref: '#/components/schemas/RouteErrorPosition'
-        end:
-          description: End where the route error happened
-          $ref: '#/components/schemas/RouteErrorPosition'
-    TestRouteInput:
-      required:
-      - route
-      description: Input for testing route
-      type: object
-      properties:
-        message:
-          description: Routing message
-          $ref: '#/components/schemas/RoutingMessage'
-        route:
-          description: Route properties
-          $ref: '#/components/schemas/RouteProperties'
-        twin:
-          description: Routing Twin Reference
-          $ref: '#/components/schemas/RoutingTwin'
-    SharedAccessSignatureAuthorizationRuleListResult:
-      description: The list of shared access policies with a next link.
-      type: object
-      properties:
-        value:
-          description: The list of shared access policies.
-          type: array
-          items:
-            $ref: '#/components/schemas/SharedAccessSignatureAuthorizationRule'
-        nextLink:
-          description: The next link.
-          type: string
-          readOnly: true
     ImportDevicesRequest:
       description: Use to provide parameters when requesting an import of all devices in the hub.
       type: object
@@ -552,26 +482,143 @@ components:
       required:
       - inputBlobContainerUri
       - outputBlobContainerUri
-    ErrorDetails:
-      description: Error details.
+    MatchedRoute:
+      description: Routes that matched
       type: object
       properties:
-        code:
-          description: The error code.
-          type: string
-          readOnly: true
-        httpStatusCode:
-          description: The HTTP status code.
-          type: string
-          readOnly: true
+        properties:
+          description: Properties of routes that matched
+          $ref: '#/components/schemas/RouteProperties'
+    RoutingTwin:
+      description: Twin reference input parameter. This is an optional parameter
+      type: object
+      properties:
+        tags:
+          description: Twin Tags
+          type: object
+        properties:
+          properties:
+            desired:
+              description: Twin desired properties
+              type: object
+            reported:
+              description: Twin desired properties
+              type: object
+    RouteErrorRange:
+      description: Range of route errors
+      type: object
+      properties:
+        start:
+          description: Start where the route error happened
+          $ref: '#/components/schemas/RouteErrorPosition'
+        end:
+          description: End where the route error happened
+          $ref: '#/components/schemas/RouteErrorPosition'
+    RouteCompilationError:
+      description: Compilation error when evaluating route
+      type: object
+      properties:
         message:
-          description: The error message.
+          description: Route error message
           type: string
-          readOnly: true
-        details:
-          description: The error details.
+        severity:
+          description: Severity of the route error
+          enum:
+          - error
+          - warning
           type: string
-          readOnly: true
+          x-ms-enum:
+            name: RouteErrorSeverity
+            modelAsString: true
+        location:
+          description: Location where the route error happened
+          $ref: '#/components/schemas/RouteErrorRange'
+    FailoverInput:
+      description: Use to provide failover region when requesting manual Failover for a hub.
+      type: object
+      properties:
+        failoverRegion:
+          description: Region the hub will be failed over to
+          type: string
+      required:
+      - failoverRegion
+    RouteErrorPosition:
+      description: Position where the route error happened
+      type: object
+      properties:
+        line:
+          description: Line where the route error happened
+          format: int32
+          type: integer
+        column:
+          description: Column where the route error happened
+          format: int32
+          type: integer
+    RouteProperties:
+      description: The properties of a routing rule that your IoT hub uses to route messages to endpoints.
+      type: object
+      properties:
+        name:
+          description: The name of the route. The name can only include alphanumeric characters, periods, underscores, hyphens, has a maximum length of 64 characters, and must be unique.
+          type: string
+          pattern: ^[A-Za-z0-9-._]{1,64}$
+        source:
+          description: The source that the routing rule is to be applied to, such as DeviceMessages.
+          enum:
+          - Invalid
+          - DeviceMessages
+          - TwinChangeEvents
+          - DeviceLifecycleEvents
+          - DeviceJobLifecycleEvents
+          - DigitalTwinChangeEvents
+          - DeviceConnectionStateEvents
+          - MqttBrokerMessages
+          type: string
+          x-ms-enum:
+            name: RoutingSource
+            modelAsString: true
+        condition:
+          description: 'The condition that is evaluated to apply the routing rule. If no condition is provided, it evaluates to true by default. For grammar, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-query-language'
+          type: string
+        endpointNames:
+          description: The list of endpoints to which messages that satisfy the condition are routed. Currently only one endpoint is allowed.
+          minItems: 1
+          maxItems: 1
+          type: array
+          items:
+            type: string
+        isEnabled:
+          description: Used to specify whether a route is enabled.
+          type: boolean
+      required:
+      - name
+      - endpointNames
+      - source
+      - isEnabled
+    RoutingMessage:
+      description: Routing message
+      type: object
+      properties:
+        body:
+          description: Body of routing message
+          type: string
+        appProperties:
+          description: App properties
+          type: object
+          additionalProperties:
+            type: string
+        systemProperties:
+          description: System properties
+          type: object
+          additionalProperties:
+            type: string
+    ManagedIdentity:
+      description: The properties of the Managed identity.
+      type: object
+      properties:
+        userAssignedIdentity:
+          type: string
+          description: The user assigned identity.
     JobResponse:
       description: The properties of the Job Response object.
       type: object
@@ -634,65 +681,40 @@ components:
           description: The job identifier of the parent job, if any.
           type: string
           readOnly: true
-    SharedAccessSignatureAuthorizationRule:
-      description: The properties of an IoT hub shared access policy.
+    ExportDevicesRequest:
+      description: Use to provide parameters when requesting an export of all devices in the IoT hub.
       type: object
       properties:
-        keyName:
-          description: The name of the shared access policy.
+        exportBlobContainerUri:
+          description: The export blob container URI.
           type: string
-        primaryKey:
-          description: The primary key.
+        excludeKeys:
+          description: The value indicating whether keys should be excluded during export.
+          type: boolean
+        exportBlobName:
+          description: The name of the blob that will be created in the provided output blob container. This blob will contain the exported device registry information for the IoT Hub.
           type: string
-        secondaryKey:
-          description: The secondary key.
-          type: string
-        rights:
-          description: The permissions assigned to the shared access policy.
+        authenticationType:
+          description: Specifies authentication type being used for connecting to the storage account.
           enum:
-          - RegistryRead
-          - RegistryWrite
-          - ServiceConnect
-          - DeviceConnect
-          - RegistryRead, RegistryWrite
-          - RegistryRead, ServiceConnect
-          - RegistryRead, DeviceConnect
-          - RegistryWrite, ServiceConnect
-          - RegistryWrite, DeviceConnect
-          - ServiceConnect, DeviceConnect
-          - RegistryRead, RegistryWrite, ServiceConnect
-          - RegistryRead, RegistryWrite, DeviceConnect
-          - RegistryRead, ServiceConnect, DeviceConnect
-          - RegistryWrite, ServiceConnect, DeviceConnect
-          - RegistryRead, RegistryWrite, ServiceConnect, DeviceConnect
+          - keyBased
+          - identityBased
           type: string
           x-ms-enum:
-            name: AccessRights
-            modelAsString: false
-      required:
-      - keyName
-      - rights
-    RouteErrorPosition:
-      description: Position where the route error happened
-      type: object
-      properties:
-        line:
-          description: Line where the route error happened
-          format: int32
-          type: integer
-        column:
-          description: Column where the route error happened
-          format: int32
-          type: integer
-    OperationInputs:
-      description: Input values.
-      type: object
-      properties:
-        name:
-          description: The name of the IoT hub to check.
+            name: AuthenticationType
+            modelAsString: true
+        identity:
+          description: Managed identity properties of storage endpoint for export devices.
+          $ref: '#/components/schemas/ManagedIdentity'
+        includeConfigurations:
+          description: The value indicating whether configurations should be exported.
+          type: boolean
+        configurationsBlobName:
+          description: The name of the blob that will be created in the provided output blob container. This blob will contain the exported configurations for the Iot Hub.
           type: string
       required:
-      - name
+      - exportBlobContainerUri
+      - excludeKeys
     TestRouteResult:
       description: Result of testing one route
       type: object
@@ -710,96 +732,74 @@ components:
         details:
           description: Detailed result of testing route
           $ref: '#/components/schemas/TestRouteResultDetails'
-    MatchedRoute:
-      description: Routes that matched
+    TestRouteInput:
+      required:
+      - route
+      description: Input for testing route
       type: object
       properties:
-        properties:
-          description: Properties of routes that matched
-          $ref: '#/components/schemas/RouteProperties'
-    RoutingMessage:
-      description: Routing message
-      type: object
-      properties:
-        body:
-          description: Body of routing message
-          type: string
-        appProperties:
-          description: App properties
-          type: object
-          additionalProperties:
-            type: string
-        systemProperties:
-          description: System properties
-          type: object
-          additionalProperties:
-            type: string
-    TestAllRoutesInput:
-      description: Input for testing all routes
-      type: object
-      properties:
-        routingSource:
-          description: Routing source
-          enum:
-          - Invalid
-          - DeviceMessages
-          - TwinChangeEvents
-          - DeviceLifecycleEvents
-          - DeviceJobLifecycleEvents
-          - DigitalTwinChangeEvents
-          - DeviceConnectionStateEvents
-          - MqttBrokerMessages
-          type: string
-          x-ms-enum:
-            name: RoutingSource
-            modelAsString: true
         message:
           description: Routing message
           $ref: '#/components/schemas/RoutingMessage'
+        route:
+          description: Route properties
+          $ref: '#/components/schemas/RouteProperties'
         twin:
           description: Routing Twin Reference
           $ref: '#/components/schemas/RoutingTwin'
-    RouteProperties:
-      description: The properties of a routing rule that your IoT hub uses to route messages to endpoints.
+    TestAllRoutesResult:
+      description: Result of testing all routes
       type: object
       properties:
-        name:
-          description: The name of the route. The name can only include alphanumeric characters, periods, underscores, hyphens, has a maximum length of 64 characters, and must be unique.
-          type: string
-          pattern: ^[A-Za-z0-9-._]{1,64}$
-        source:
-          description: The source that the routing rule is to be applied to, such as DeviceMessages.
-          enum:
-          - Invalid
-          - DeviceMessages
-          - TwinChangeEvents
-          - DeviceLifecycleEvents
-          - DeviceJobLifecycleEvents
-          - DigitalTwinChangeEvents
-          - DeviceConnectionStateEvents
-          - MqttBrokerMessages
-          type: string
-          x-ms-enum:
-            name: RoutingSource
-            modelAsString: true
-        condition:
-          description: 'The condition that is evaluated to apply the routing rule. If no condition is provided, it evaluates to true by default. For grammar, see: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-query-language'
-          type: string
-        endpointNames:
-          description: The list of endpoints to which messages that satisfy the condition are routed. Currently only one endpoint is allowed.
-          minItems: 1
-          maxItems: 1
+        routes:
+          description: JSON-serialized array of matched routes
           type: array
           items:
-            type: string
-        isEnabled:
-          description: Used to specify whether a route is enabled.
-          type: boolean
-      required:
-      - name
-      - endpointNames
-      - source
-      - isEnabled
+            $ref: '#/components/schemas/MatchedRoute'
+    SharedAccessSignatureAuthorizationRuleListResult:
+      description: The list of shared access policies with a next link.
+      type: object
+      properties:
+        value:
+          description: The list of shared access policies.
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedAccessSignatureAuthorizationRule'
+        nextLink:
+          description: The next link.
+          type: string
+          readOnly: true
+  parameters:
+    resourceName:
+      name: resourceName
+      in: path
+      description: The name of the IoT hub.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    api-version:
+      name: api-version
+      in: query
+      description: The version of the API.
+      required: true
+      schema:
+        type: string
+    subscriptionId:
+      name: subscriptionId
+      in: path
+      description: The subscription identifier.
+      required: true
+      schema:
+        type: string
+    resourceGroupName:
+      name: resourceGroupName
+      description: The name of the resource group that contains the IoT hub.
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

@@ -885,6 +885,20 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    BrokerProperties:
+      type: object
+      description: Properties of the Event Broker operation.
+      properties:
+        lockToken:
+          type: string
+          description: The token of the lock on the event.
+        deliveryCount:
+          type: integer
+          format: int32
+          description: The attempt count for delivering the event.
+      required:
+      - lockToken
+      - deliveryCount
     Azure.Core.Foundations.Error:
       type: object
       description: The error object.
@@ -910,16 +924,6 @@ components:
       required:
       - code
       - message
-    Azure.Core.Foundations.InnerError:
-      type: object
-      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
-      properties:
-        code:
-          type: string
-          description: One of a server-defined set of error codes.
-        innererror:
-          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
-          description: Inner error.
     FailedLockToken:
       type: object
       description: Failed LockToken information.
@@ -933,19 +937,6 @@ components:
       required:
       - lockToken
       - error
-    ReceiveDetails:
-      type: object
-      description: Receive operation details per Cloud Event.
-      properties:
-        brokerProperties:
-          $ref: '#/components/schemas/BrokerProperties'
-          description: The Event Broker details.
-        event:
-          $ref: '#/components/schemas/CloudEvent'
-          description: Cloud Event details.
-      required:
-      - brokerProperties
-      - event
     CloudEvent:
       type: object
       description: Properties of an event published to an Azure Messaging EventGrid Namespace topic using the CloudEvent 1.0 Schema.
@@ -1004,9 +995,9 @@ components:
       required:
       - failedLockTokens
       - succeededLockTokens
-    AcknowledgeOptions:
+    RejectOptions:
       type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be acknowledged.
+      description: Array of lock tokens for the corresponding received Cloud Events to be rejected.
       properties:
         lockTokens:
           type: array
@@ -1015,15 +1006,17 @@ components:
             type: string
       required:
       - lockTokens
-    Azure.Core.Foundations.ErrorResponse:
+    ReleaseOptions:
       type: object
-      description: A response containing error details.
+      description: Array of lock tokens for the corresponding received Cloud Events to be released.
       properties:
-        error:
-          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
-          description: The error object.
+        lockTokens:
+          type: array
+          description: Array of lock tokens.
+          items:
+            type: string
       required:
-      - error
+      - lockTokens
     AcknowledgeResult:
       type: object
       description: The result of the Acknowledge operation.
@@ -1042,20 +1035,6 @@ components:
       required:
       - failedLockTokens
       - succeededLockTokens
-    BrokerProperties:
-      type: object
-      description: Properties of the Event Broker operation.
-      properties:
-        lockToken:
-          type: string
-          description: The token of the lock on the event.
-        deliveryCount:
-          type: integer
-          format: int32
-          description: The attempt count for delivering the event.
-      required:
-      - lockToken
-      - deliveryCount
     RenewCloudEventLocksResult:
       type: object
       description: The result of the RenewLock operation.
@@ -1074,9 +1053,37 @@ components:
       required:
       - failedLockTokens
       - succeededLockTokens
-    PublishResult:
+    Azure.Core.Foundations.ErrorResponse:
       type: object
-      description: The result of the Publish operation.
+      description: A response containing error details.
+      properties:
+        error:
+          $ref: '#/components/schemas/Azure.Core.Foundations.Error'
+          description: The error object.
+      required:
+      - error
+    RenewLockOptions:
+      type: object
+      description: Array of lock tokens for the corresponding received Cloud Events to be renewed.
+      properties:
+        lockTokens:
+          type: array
+          description: Array of lock tokens.
+          items:
+            type: string
+      required:
+      - lockTokens
+    AcknowledgeOptions:
+      type: object
+      description: Array of lock tokens for the corresponding received Cloud Events to be acknowledged.
+      properties:
+        lockTokens:
+          type: array
+          description: Array of lock tokens.
+          items:
+            type: string
+      required:
+      - lockTokens
     ReleaseResult:
       type: object
       description: The result of the Release operation.
@@ -1095,17 +1102,6 @@ components:
       required:
       - failedLockTokens
       - succeededLockTokens
-    RejectOptions:
-      type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be rejected.
-      properties:
-        lockTokens:
-          type: array
-          description: Array of lock tokens.
-          items:
-            type: string
-      required:
-      - lockTokens
     ReceiveResult:
       type: object
       description: Details of the Receive operation response.
@@ -1118,63 +1114,32 @@ components:
           x-ms-identifiers: []
       required:
       - value
-    ReleaseOptions:
+    ReceiveDetails:
       type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be released.
+      description: Receive operation details per Cloud Event.
       properties:
-        lockTokens:
-          type: array
-          description: Array of lock tokens.
-          items:
-            type: string
+        brokerProperties:
+          $ref: '#/components/schemas/BrokerProperties'
+          description: The Event Broker details.
+        event:
+          $ref: '#/components/schemas/CloudEvent'
+          description: Cloud Event details.
       required:
-      - lockTokens
-    RenewLockOptions:
+      - brokerProperties
+      - event
+    Azure.Core.Foundations.InnerError:
       type: object
-      description: Array of lock tokens for the corresponding received Cloud Events to be renewed.
+      description: An object containing more specific information about the error. As per Microsoft One API guidelines - https://github.com/Microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses.
       properties:
-        lockTokens:
-          type: array
-          description: Array of lock tokens.
-          items:
-            type: string
-      required:
-      - lockTokens
-    TopicUpdateParameters:
-      description: Properties of the Topic update
-      type: object
-      properties:
-        tags:
-          description: Tags of the Topic resource.
-          type: object
-          additionalProperties:
-            type: string
-        identity:
-          $ref: '#/components/schemas/IdentityInfo'
-          description: Topic resource identity information.
-        properties:
-          $ref: '#/components/schemas/TopicUpdateParameterProperties'
-          description: Properties of the Topic resource.
-          x-ms-client-flatten: true
-        sku:
-          $ref: '#/components/schemas/ResourceSku'
-          description: The Sku pricing tier for the topic.
-    InputSchemaMapping:
-      description: By default, Event Grid expects events to be in the Event Grid event schema. Specifying an input schema mapping enables publishing to Event Grid using a custom input schema. Currently, the only supported type of InputSchemaMapping is 'JsonInputSchemaMapping'.
-      required:
-      - inputSchemaMappingType
-      type: object
-      properties:
-        inputSchemaMappingType:
-          description: Type of the custom mapping
-          enum:
-          - Json
+        code:
           type: string
-          x-ms-enum:
-            name: InputSchemaMappingType
-            modelAsString: true
-      discriminator:
-        propertyName: inputSchemaMappingType
+          description: One of a server-defined set of error codes.
+        innererror:
+          $ref: '#/components/schemas/Azure.Core.Foundations.InnerError'
+          description: Inner error.
+    PublishResult:
+      type: object
+      description: The result of the Publish operation.
     TrackedResource:
       description: Definition of a Tracked Resource.
       required:
@@ -1194,6 +1159,56 @@ components:
           type: object
           additionalProperties:
             type: string
+    PrivateEndpointConnection:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
+          description: Properties of the PrivateEndpointConnection.
+          x-ms-client-flatten: true
+    TopicSharedAccessKeys:
+      description: Shared access keys of the Topic
+      type: object
+      properties:
+        key1:
+          description: Shared access key1 for the topic.
+          type: string
+        key2:
+          description: Shared access key2 for the topic.
+          type: string
+    ConnectionState:
+      description: ConnectionState information.
+      type: object
+      properties:
+        status:
+          description: Status of the connection.
+          enum:
+          - Pending
+          - Approved
+          - Rejected
+          - Disconnected
+          type: string
+          x-ms-enum:
+            name: PersistedConnectionStatus
+            modelAsString: true
+        description:
+          description: Description of the connection state.
+          type: string
+        actionsRequired:
+          description: Actions required (if any).
+          type: string
+    ExtensionTopicProperties:
+      description: Properties of the Extension Topic
+      type: object
+      properties:
+        description:
+          description: Description of the extension topic.
+          type: string
+        systemTopic:
+          description: System topic resource id which is mapped to the source.
+          type: string
     ExtensionTopic:
       description: Event grid Extension Topic. This is used for getting Event Grid related metrics for Azure resources.
       type: object
@@ -1209,37 +1224,6 @@ components:
           type: object
           readOnly: true
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-    TopicSharedAccessKeys:
-      description: Shared access keys of the Topic
-      type: object
-      properties:
-        key1:
-          description: Shared access key1 for the topic.
-          type: string
-        key2:
-          description: Shared access key2 for the topic.
-          type: string
-    EventTypesListResult:
-      description: Result of the List Event Types operation
-      type: object
-      properties:
-        value:
-          description: A collection of event types
-          type: array
-          items:
-            $ref: '#/components/schemas/EventType'
-    TopicsListResult:
-      description: Result of the List Topics operation
-      type: object
-      properties:
-        value:
-          description: A collection of Topics
-          type: array
-          items:
-            $ref: '#/components/schemas/Topic'
-        nextLink:
-          description: A link for the next page of topics
-          type: string
     Topic:
       description: EventGrid Topic
       type: object
@@ -1274,182 +1258,22 @@ components:
           type: object
           readOnly: true
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-    ExtensionTopicProperties:
-      description: Properties of the Extension Topic
+    EventTypeProperties:
+      description: Properties of the event type
       type: object
       properties:
+        displayName:
+          description: Display name of the event type.
+          type: string
         description:
-          description: Description of the extension topic.
+          description: Description of the event type.
           type: string
-        systemTopic:
-          description: System topic resource id which is mapped to the source.
+        schemaUrl:
+          description: Url of the schema for this event type.
           type: string
-    EventType:
-      description: Event Type for a subject under a topic
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/EventTypeProperties'
-          description: Properties of the event type.
-          x-ms-client-flatten: true
-    TopicRegenerateKeyRequest:
-      description: Topic regenerate share access key request
-      required:
-      - keyName
-      type: object
-      properties:
-        keyName:
-          description: Key name to regenerate key1 or key2
-          type: string
-    ExtendedLocation:
-      description: Definition of an Extended Location
-      type: object
-      properties:
-        name:
-          description: Fully qualified name of the extended location.
-          type: string
-        type:
-          description: Type of the extended location.
-          type: string
-    PrivateEndpoint:
-      description: PrivateEndpoint information.
-      type: object
-      properties:
-        id:
-          description: The ARM identifier for Private Endpoint.
-          type: string
-    UserIdentityProperties:
-      description: The information about the user identity.
-      type: object
-      properties:
-        principalId:
-          description: The principal id of user assigned identity.
-          type: string
-        clientId:
-          description: The client id of user assigned identity.
-          type: string
-    IdentityInfo:
-      description: The identity information for the resource.
-      type: object
-      properties:
-        type:
-          description: The type of managed identity used. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user-assigned identities. The type 'None' will remove any identity.
-          enum:
-          - None
-          - SystemAssigned
-          - UserAssigned
-          - SystemAssigned, UserAssigned
-          type: string
-          x-ms-enum:
-            name: IdentityType
-            modelAsString: true
-        principalId:
-          description: The principal ID of resource identity.
-          type: string
-        tenantId:
-          description: The tenant ID of resource.
-          type: string
-        userAssignedIdentities:
-          description: 'The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form:
-
-            ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.
-
-            This property is currently not used and reserved for future usage.'
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/UserIdentityProperties'
-    ConnectionState:
-      description: ConnectionState information.
-      type: object
-      properties:
-        status:
-          description: Status of the connection.
-          enum:
-          - Pending
-          - Approved
-          - Rejected
-          - Disconnected
-          type: string
-          x-ms-enum:
-            name: PersistedConnectionStatus
-            modelAsString: true
-        description:
-          description: Description of the connection state.
-          type: string
-        actionsRequired:
-          description: Actions required (if any).
-          type: string
-    PrivateEndpointConnection:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/PrivateEndpointConnectionProperties'
-          description: Properties of the PrivateEndpointConnection.
-          x-ms-client-flatten: true
-    TopicUpdateParameterProperties:
-      description: Information of topic update parameter properties.
-      type: object
-      properties:
-        publicNetworkAccess:
-          description: "This determines if traffic is allowed over public network. By default it is enabled. \nYou can further restrict to specific IPs by configuring <seealso cref=\"P:Microsoft.Azure.Events.ResourceProvider.Common.Contracts.TopicUpdateParameterProperties.InboundIpRules\" />"
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: PublicNetworkAccess
-            modelAsString: true
-          default: Enabled
-        inboundIpRules:
-          description: 'This can be used to restrict traffic from specific IPs instead of all IPs. Note: These are considered only if PublicNetworkAccess is enabled.'
-          type: array
-          items:
-            $ref: '#/components/schemas/InboundIpRule'
-          x-ms-identifiers: []
-        disableLocalAuth:
-          description: This boolean is used to enable or disable local auth. Default value is false. When the property is set to true, only AAD token will be used to authenticate if user is allowed to publish to the topic.
+        isInDefaultSet:
+          description: IsInDefaultSet flag of the event type.
           type: boolean
-        dataResidencyBoundary:
-          description: The data residency boundary for the topic.
-          enum:
-          - WithinGeopair
-          - WithinRegion
-          type: string
-          x-ms-enum:
-            name: DataResidencyBoundary
-            modelAsString: true
-    InboundIpRule:
-      type: object
-      properties:
-        ipMask:
-          description: IP Address in CIDR notation e.g., 10.0.0.0/8.
-          type: string
-        action:
-          description: Action to perform based on the match or no match of the IpMask.
-          enum:
-          - Allow
-          type: string
-          x-ms-enum:
-            name: IpActionType
-            modelAsString: true
-    ResourceSku:
-      description: Describes an EventGrid Resource Sku.
-      type: object
-      properties:
-        name:
-          description: 'The Sku name of the resource. The possible values are: Basic or Premium.'
-          default: Basic
-          enum:
-          - Basic
-          - Premium
-          type: string
-          x-ms-enum:
-            name: Sku
-            modelAsString: true
     TopicProperties:
       description: Properties of the Topic.
       type: object
@@ -1524,22 +1348,205 @@ components:
           x-ms-enum:
             name: DataResidencyBoundary
             modelAsString: true
-    EventTypeProperties:
-      description: Properties of the event type
+    TopicRegenerateKeyRequest:
+      description: Topic regenerate share access key request
+      required:
+      - keyName
       type: object
       properties:
-        displayName:
-          description: Display name of the event type.
+        keyName:
+          description: Key name to regenerate key1 or key2
           type: string
-        description:
-          description: Description of the event type.
+    ExtendedLocation:
+      description: Definition of an Extended Location
+      type: object
+      properties:
+        name:
+          description: Fully qualified name of the extended location.
           type: string
-        schemaUrl:
-          description: Url of the schema for this event type.
+        type:
+          description: Type of the extended location.
           type: string
-        isInDefaultSet:
-          description: IsInDefaultSet flag of the event type.
+    InputSchemaMapping:
+      description: By default, Event Grid expects events to be in the Event Grid event schema. Specifying an input schema mapping enables publishing to Event Grid using a custom input schema. Currently, the only supported type of InputSchemaMapping is 'JsonInputSchemaMapping'.
+      required:
+      - inputSchemaMappingType
+      type: object
+      properties:
+        inputSchemaMappingType:
+          description: Type of the custom mapping
+          enum:
+          - Json
+          type: string
+          x-ms-enum:
+            name: InputSchemaMappingType
+            modelAsString: true
+      discriminator:
+        propertyName: inputSchemaMappingType
+    EventTypesListResult:
+      description: Result of the List Event Types operation
+      type: object
+      properties:
+        value:
+          description: A collection of event types
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+    PrivateEndpoint:
+      description: PrivateEndpoint information.
+      type: object
+      properties:
+        id:
+          description: The ARM identifier for Private Endpoint.
+          type: string
+    Resource:
+      description: Definition of a Resource
+      type: object
+      properties:
+        id:
+          description: Fully qualified identifier of the resource.
+          type: string
+          readOnly: true
+        name:
+          description: Name of the resource.
+          type: string
+          readOnly: true
+        type:
+          description: Type of the resource.
+          type: string
+          readOnly: true
+      x-ms-azure-resource: true
+    IdentityInfo:
+      description: The identity information for the resource.
+      type: object
+      properties:
+        type:
+          description: The type of managed identity used. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user-assigned identities. The type 'None' will remove any identity.
+          enum:
+          - None
+          - SystemAssigned
+          - UserAssigned
+          - SystemAssigned, UserAssigned
+          type: string
+          x-ms-enum:
+            name: IdentityType
+            modelAsString: true
+        principalId:
+          description: The principal ID of resource identity.
+          type: string
+        tenantId:
+          description: The tenant ID of resource.
+          type: string
+        userAssignedIdentities:
+          description: 'The list of user identities associated with the resource. The user identity dictionary key references will be ARM resource ids in the form:
+
+            ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.
+
+            This property is currently not used and reserved for future usage.'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/UserIdentityProperties'
+    TopicUpdateParameters:
+      description: Properties of the Topic update
+      type: object
+      properties:
+        tags:
+          description: Tags of the Topic resource.
+          type: object
+          additionalProperties:
+            type: string
+        identity:
+          $ref: '#/components/schemas/IdentityInfo'
+          description: Topic resource identity information.
+        properties:
+          $ref: '#/components/schemas/TopicUpdateParameterProperties'
+          description: Properties of the Topic resource.
+          x-ms-client-flatten: true
+        sku:
+          $ref: '#/components/schemas/ResourceSku'
+          description: The Sku pricing tier for the topic.
+    TopicUpdateParameterProperties:
+      description: Information of topic update parameter properties.
+      type: object
+      properties:
+        publicNetworkAccess:
+          description: "This determines if traffic is allowed over public network. By default it is enabled. \nYou can further restrict to specific IPs by configuring <seealso cref=\"P:Microsoft.Azure.Events.ResourceProvider.Common.Contracts.TopicUpdateParameterProperties.InboundIpRules\" />"
+          enum:
+          - Enabled
+          - Disabled
+          type: string
+          x-ms-enum:
+            name: PublicNetworkAccess
+            modelAsString: true
+          default: Enabled
+        inboundIpRules:
+          description: 'This can be used to restrict traffic from specific IPs instead of all IPs. Note: These are considered only if PublicNetworkAccess is enabled.'
+          type: array
+          items:
+            $ref: '#/components/schemas/InboundIpRule'
+          x-ms-identifiers: []
+        disableLocalAuth:
+          description: This boolean is used to enable or disable local auth. Default value is false. When the property is set to true, only AAD token will be used to authenticate if user is allowed to publish to the topic.
           type: boolean
+        dataResidencyBoundary:
+          description: The data residency boundary for the topic.
+          enum:
+          - WithinGeopair
+          - WithinRegion
+          type: string
+          x-ms-enum:
+            name: DataResidencyBoundary
+            modelAsString: true
+    ResourceSku:
+      description: Describes an EventGrid Resource Sku.
+      type: object
+      properties:
+        name:
+          description: 'The Sku name of the resource. The possible values are: Basic or Premium.'
+          default: Basic
+          enum:
+          - Basic
+          - Premium
+          type: string
+          x-ms-enum:
+            name: Sku
+            modelAsString: true
+    EventType:
+      description: Event Type for a subject under a topic
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/EventTypeProperties'
+          description: Properties of the event type.
+          x-ms-client-flatten: true
+    TopicsListResult:
+      description: Result of the List Topics operation
+      type: object
+      properties:
+        value:
+          description: A collection of Topics
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+        nextLink:
+          description: A link for the next page of topics
+          type: string
+    InboundIpRule:
+      type: object
+      properties:
+        ipMask:
+          description: IP Address in CIDR notation e.g., 10.0.0.0/8.
+          type: string
+        action:
+          description: Action to perform based on the match or no match of the IpMask.
+          enum:
+          - Allow
+          type: string
+          x-ms-enum:
+            name: IpActionType
+            modelAsString: true
     PrivateEndpointConnectionProperties:
       description: Properties of the private endpoint connection resource.
       type: object
@@ -1568,35 +1575,30 @@ components:
           x-ms-enum:
             name: ResourceProvisioningState
             modelAsString: true
-    Resource:
-      description: Definition of a Resource
+    UserIdentityProperties:
+      description: The information about the user identity.
       type: object
       properties:
-        id:
-          description: Fully qualified identifier of the resource.
+        principalId:
+          description: The principal id of user assigned identity.
           type: string
-          readOnly: true
-        name:
-          description: Name of the resource.
+        clientId:
+          description: The client id of user assigned identity.
           type: string
-          readOnly: true
-        type:
-          description: Type of the resource.
-          type: string
-          readOnly: true
-      x-ms-azure-resource: true
-    SBTopicListResult:
+    SBTopic:
       type: object
       properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SBTopic'
-          description: Result of the List Topics operation.
-        nextLink:
-          type: string
-          description: Link to the next set of results. Not empty if Value contains incomplete list of topics.
-      description: The response to the List Topics operation.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/SBTopicProperties'
+          description: Properties of topic resource.
+        systemData:
+          readOnly: true
+          description: The system meta data relating to this resource.
+          $ref: ../../../common/v1/definitions.json#/definitions/systemData
+      allOf:
+      - $ref: ../../../common/v2/definitions.json#/definitions/ProxyResource
+      description: Description of topic resource.
     SBTopicProperties:
       type: object
       properties:
@@ -1668,20 +1670,18 @@ components:
           type: boolean
           description: Value that indicates whether Express Entities are enabled. An express topic holds a message in memory temporarily before writing it to persistent storage.
       description: The Topic Properties definition.
-    SBTopic:
+    SBTopicListResult:
       type: object
       properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/SBTopicProperties'
-          description: Properties of topic resource.
-        systemData:
-          readOnly: true
-          description: The system meta data relating to this resource.
-          $ref: ../../../common/v1/definitions.json#/definitions/systemData
-      allOf:
-      - $ref: ../../../common/v2/definitions.json#/definitions/ProxyResource
-      description: Description of topic resource.
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SBTopic'
+          description: Result of the List Topics operation.
+        nextLink:
+          type: string
+          description: Link to the next set of results. Not empty if Value contains incomplete list of topics.
+      description: The response to the List Topics operation.
   parameters:
     Azure.Core.Foundations.ApiVersionParameter:
       name: api-version

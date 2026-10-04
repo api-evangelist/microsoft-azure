@@ -244,12 +244,30 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    Dataset:
-      title: Dataset
+    DatasetKind:
+      title: DatasetKind
+      description: Kind of data import.
+      enum:
+      - Language
+      - Acoustic
+      - Pronunciation
+      type: string
+      x-ms-enum:
+        name: DatasetKind
+        modelAsString: false
+        values:
+        - value: Language
+          description: A language dataset.
+        - value: Acoustic
+          description: An acoustic dataset.
+        - value: Pronunciation
+          description: A pronunciation dataset.
+    Model:
+      title: Model
       required:
-      - dataImportKind
       - id
       - locale
+      - modelKind
       - name
       type: object
       properties:
@@ -257,13 +275,26 @@ components:
           format: uuid
           description: The identifier of this entity.
           type: string
-        dataImportKind:
-          $ref: '#/components/schemas/DatasetKind'
         name:
           description: The name of the object.
           type: string
         description:
           description: The description of the object.
+          type: string
+        modelKind:
+          $ref: '#/components/schemas/ModelKind'
+        text:
+          description: The text used to adapt this language model.
+          type: string
+        baseModel:
+          $ref: '#/components/schemas/Model'
+        datasets:
+          description: Datasets used for adaptation.
+          type: array
+          items:
+            $ref: '#/components/schemas/Dataset'
+        locale:
+          description: The locale of the contained data.
           type: string
         properties:
           description: 'The custom properties of this entity. The maximum allowed key length is 64 characters, the maximum
@@ -272,9 +303,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        locale:
-          description: The locale of the contained data.
-          type: string
         lastActionDateTime:
           format: date-time
           description: 'The time-stamp when the current status was entered.
@@ -295,73 +323,6 @@ components:
             ("YYYY-MM-DDThh:mm:ssZ", see https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations).'
           type: string
           readOnly: true
-    TestDefinition:
-      title: TestDefinition
-      required:
-      - models
-      - name
-      type: object
-      properties:
-        models:
-          description: Information about the models used for this accuracy test.
-          type: array
-          items:
-            $ref: '#/components/schemas/ModelIdentity'
-        dataset:
-          $ref: '#/components/schemas/DatasetIdentity'
-        name:
-          description: The name of the object.
-          type: string
-        description:
-          description: The description of the object.
-          type: string
-        properties:
-          description: 'The custom properties of this entity. The maximum allowed key length is 64 characters, the maximum
-
-            allowed value length is 256 characters and the count of allowed entries is 10.'
-          type: object
-          additionalProperties:
-            type: string
-    Error:
-      title: Error
-      description: The interface represents the content of an error response defined in the OneAPI v2.1 documentation.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        details:
-          description: An array of details representing distinct related errors that occurred during the request.
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-        innererror:
-          $ref: '#/components/schemas/InnerErrorV2'
-        code:
-          description: 'A service-defined error code that should be human-readable.
-
-            This code serves as a more specific indicator of the error than
-
-            the HTTP error code specified in the response.'
-          type: string
-        message:
-          description: 'A human-readable representation of the error. It is intended as
-
-            an aid to developers and is not suitable for exposure to end users.'
-          type: string
-        target:
-          description: The target of the particular error (e.g., the name of the property in error).
-          type: string
-    ModelIdentity:
-      title: ModelIdentity
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          format: uuid
-          description: The identifier of this entity.
-          type: string
     Test:
       title: Test
       required:
@@ -424,47 +385,6 @@ components:
           type: object
           additionalProperties:
             type: string
-    InnerErrorV2:
-      title: InnerErrorV2
-      description: 'An implementation of this interface represents a stage in a stack trace.
-
-        If the error level is the root, the Microsoft.SpeechServices.Http.Dto.IInnerError.Code and the Microsoft.SpeechServices.Http.Dto.IInnerError.InnerError
-
-        property may be omitted.'
-      type: object
-      properties:
-        code:
-          description: 'A service-defined error code that should be human-readable.
-
-            This code serves as a more specific indicator of the error than
-
-            the HTTP error code specified in the response.'
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InnerErrorV2'
-    ErrorDetail:
-      title: ErrorDetail
-      description: An array of implementations of this interface can be used as details for an error.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          description: 'A service-defined error code that should be human-readable.
-
-            This code serves as a more specific indicator of the error than
-
-            the HTTP error code specified in the response.'
-          type: string
-        message:
-          description: 'A human-readable representation of the error. It is intended as
-
-            an aid to developers and is not suitable for exposure to end users.'
-          type: string
-        target:
-          description: The target of the particular error (e.g., the name of the property in error).
-          type: string
     ModelKind:
       title: ModelKind
       description: Type of speech model.
@@ -483,88 +403,53 @@ components:
           description: A language model.
         - value: AcousticAndLanguage
           description: An acoustic and language model.
-    Model:
-      title: Model
-      required:
-      - id
-      - locale
-      - modelKind
-      - name
+    InnerErrorV2:
+      title: InnerErrorV2
+      description: 'An implementation of this interface represents a stage in a stack trace.
+
+        If the error level is the root, the Microsoft.SpeechServices.Http.Dto.IInnerError.Code and the Microsoft.SpeechServices.Http.Dto.IInnerError.InnerError
+
+        property may be omitted.'
       type: object
       properties:
-        id:
-          format: uuid
-          description: The identifier of this entity.
+        code:
+          description: 'A service-defined error code that should be human-readable.
+
+            This code serves as a more specific indicator of the error than
+
+            the HTTP error code specified in the response.'
           type: string
-        name:
-          description: The name of the object.
-          type: string
-        description:
-          description: The description of the object.
-          type: string
-        modelKind:
-          $ref: '#/components/schemas/ModelKind'
-        text:
-          description: The text used to adapt this language model.
-          type: string
-        baseModel:
-          $ref: '#/components/schemas/Model'
-        datasets:
-          description: Datasets used for adaptation.
+        innererror:
+          $ref: '#/components/schemas/InnerErrorV2'
+    Error:
+      title: Error
+      description: The interface represents the content of an error response defined in the OneAPI v2.1 documentation.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        details:
+          description: An array of details representing distinct related errors that occurred during the request.
           type: array
           items:
-            $ref: '#/components/schemas/Dataset'
-        locale:
-          description: The locale of the contained data.
-          type: string
-        properties:
-          description: 'The custom properties of this entity. The maximum allowed key length is 64 characters, the maximum
+            $ref: '#/components/schemas/ErrorDetail'
+        innererror:
+          $ref: '#/components/schemas/InnerErrorV2'
+        code:
+          description: 'A service-defined error code that should be human-readable.
 
-            allowed value length is 256 characters and the count of allowed entries is 10.'
-          type: object
-          additionalProperties:
-            type: string
-        lastActionDateTime:
-          format: date-time
-          description: 'The time-stamp when the current status was entered.
+            This code serves as a more specific indicator of the error than
 
-            The time stamp is encoded as ISO 8601 date and time format
+            the HTTP error code specified in the response.'
+          type: string
+        message:
+          description: 'A human-readable representation of the error. It is intended as
 
-            ("YYYY-MM-DDThh:mm:ssZ", see https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations).'
+            an aid to developers and is not suitable for exposure to end users.'
           type: string
-          readOnly: true
-        status:
-          $ref: '#/components/schemas/Status'
-        createdDateTime:
-          format: date-time
-          description: 'The time-stamp when the object was created.
-
-            The time stamp is encoded as ISO 8601 date and time format
-
-            ("YYYY-MM-DDThh:mm:ssZ", see https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations).'
-          type: string
-          readOnly: true
-    TestUpdate:
-      title: TestUpdate
-      required:
-      - name
-      type: object
-      properties:
-        name:
-          description: The name of the object.
-          type: string
-        description:
-          description: The description of the object.
-          type: string
-    DatasetIdentity:
-      title: DatasetIdentity
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          format: uuid
-          description: The identifier of this entity.
+        target:
+          description: The target of the particular error (e.g., the name of the property in error).
           type: string
     Status:
       title: Status
@@ -588,24 +473,139 @@ components:
           description: The long running operation has successfully completed.
         - value: Failed
           description: The long running operation has failed.
-    DatasetKind:
-      title: DatasetKind
-      description: Kind of data import.
-      enum:
-      - Language
-      - Acoustic
-      - Pronunciation
-      type: string
-      x-ms-enum:
-        name: DatasetKind
-        modelAsString: false
-        values:
-        - value: Language
-          description: A language dataset.
-        - value: Acoustic
-          description: An acoustic dataset.
-        - value: Pronunciation
-          description: A pronunciation dataset.
+    TestDefinition:
+      title: TestDefinition
+      required:
+      - models
+      - name
+      type: object
+      properties:
+        models:
+          description: Information about the models used for this accuracy test.
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelIdentity'
+        dataset:
+          $ref: '#/components/schemas/DatasetIdentity'
+        name:
+          description: The name of the object.
+          type: string
+        description:
+          description: The description of the object.
+          type: string
+        properties:
+          description: 'The custom properties of this entity. The maximum allowed key length is 64 characters, the maximum
+
+            allowed value length is 256 characters and the count of allowed entries is 10.'
+          type: object
+          additionalProperties:
+            type: string
+    ModelIdentity:
+      title: ModelIdentity
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          format: uuid
+          description: The identifier of this entity.
+          type: string
+    TestUpdate:
+      title: TestUpdate
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          description: The name of the object.
+          type: string
+        description:
+          description: The description of the object.
+          type: string
+    DatasetIdentity:
+      title: DatasetIdentity
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          format: uuid
+          description: The identifier of this entity.
+          type: string
+    ErrorDetail:
+      title: ErrorDetail
+      description: An array of implementations of this interface can be used as details for an error.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          description: 'A service-defined error code that should be human-readable.
+
+            This code serves as a more specific indicator of the error than
+
+            the HTTP error code specified in the response.'
+          type: string
+        message:
+          description: 'A human-readable representation of the error. It is intended as
+
+            an aid to developers and is not suitable for exposure to end users.'
+          type: string
+        target:
+          description: The target of the particular error (e.g., the name of the property in error).
+          type: string
+    Dataset:
+      title: Dataset
+      required:
+      - dataImportKind
+      - id
+      - locale
+      - name
+      type: object
+      properties:
+        id:
+          format: uuid
+          description: The identifier of this entity.
+          type: string
+        dataImportKind:
+          $ref: '#/components/schemas/DatasetKind'
+        name:
+          description: The name of the object.
+          type: string
+        description:
+          description: The description of the object.
+          type: string
+        properties:
+          description: 'The custom properties of this entity. The maximum allowed key length is 64 characters, the maximum
+
+            allowed value length is 256 characters and the count of allowed entries is 10.'
+          type: object
+          additionalProperties:
+            type: string
+        locale:
+          description: The locale of the contained data.
+          type: string
+        lastActionDateTime:
+          format: date-time
+          description: 'The time-stamp when the current status was entered.
+
+            The time stamp is encoded as ISO 8601 date and time format
+
+            ("YYYY-MM-DDThh:mm:ssZ", see https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations).'
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/Status'
+        createdDateTime:
+          format: date-time
+          description: 'The time-stamp when the object was created.
+
+            The time stamp is encoded as ISO 8601 date and time format
+
+            ("YYYY-MM-DDThh:mm:ssZ", see https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations).'
+          type: string
+          readOnly: true
   securitySchemes:
     api_key:
       type: apiKey

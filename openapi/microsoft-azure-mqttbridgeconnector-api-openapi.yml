@@ -252,7 +252,19 @@ paths:
       summary: Microsoft Azure Delete Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    NodeTolerationsUpdate:
+    MqttBridgeRemoteBrokerConnectionTls:
+      type: object
+      description: MqttBridge RemoteBrokerConnection TLS details
+      properties:
+        tlsEnabled:
+          type: boolean
+          description: Tls Enabled on Remote Broker Connection.
+        trustedCaCertificateConfigMap:
+          type: string
+          description: Trusted CA certificate name for Remote Broker.
+      required:
+      - tlsEnabled
+    NodeTolerations:
       type: object
       description: Defines the Node Tolerations details
       properties:
@@ -268,43 +280,43 @@ components:
         value:
           type: string
           description: Toleration Value.
-    LocalBrokerAuthenticationMethods:
-      type: object
-      description: Mqtt Local Broker Authentication details. Only one method at a time is supported. Default - kubernetes authentication
-      properties:
-        kubernetes:
-          $ref: '#/components/schemas/LocalBrokerKubernetesAuthentication'
-          description: Kubernetes local broker authentication method.
       required:
-      - kubernetes
-    KeyVaultConnectionProperties:
+      - effect
+      - key
+      - operator
+      - value
+    KeyVaultCredentialsPropertiesUpdate:
       type: object
-      description: KeyVault properties
+      description: KeyVault credentials properties. NOTE - Future this will be ENUM.
       properties:
-        credentials:
-          $ref: '#/components/schemas/KeyVaultCredentialsProperties'
-          description: KeyVault credentials.
-        directoryId:
+        servicePrincipalLocalSecretName:
           type: string
-          description: KeyVault directoryId.
-        name:
-          type: string
-          description: KeyVault name.
-      required:
-      - credentials
-      - directoryId
-      - name
-    ManagedIdentityAuthenticationUpdate:
+          description: KeyVault service principal local secret name.
+    LocalBrokerConnectionSpecUpdate:
       type: object
-      description: Managed identity authentication details.
+      description: Mqtt Local Broker ConnectionSpec details
       properties:
-        audience:
+        authentication:
+          $ref: '#/components/schemas/LocalBrokerAuthenticationMethodsUpdate'
+          description: The authentication methods for LocalBroker connection. NOTE - Enum only one method at a time is supported.
+        endpoint:
           type: string
-          description: Token audience.
-        extensionName:
+          description: The endpoint of local broker to connect to.
+          default: aio-mq-dmqtt-frontend:1883
+        tls:
+          $ref: '#/components/schemas/LocalBrokerConnectionTls'
+          description: TLS details for Local broker Connection.
+    MqttBridgeRemoteBrokerX509Authentication:
+      type: object
+      description: MqttBridge RemoteBroker X509 Authentication properties.
+      properties:
+        keyVault:
+          $ref: '#/components/schemas/KeyVaultCertificateProperties'
+          description: Keyvault X509 secret properties.
+        secretName:
           type: string
-          description: Arc Extension name.
-    ContainerImageUpdate:
+          description: Secret where cert details are stored.
+    ContainerImage:
       type: object
       description: Defines the Docker image details
       properties:
@@ -320,36 +332,9 @@ components:
         tag:
           type: string
           description: The Docker  image tag.
-    LocalBrokerConnectionTls:
-      type: object
-      description: Mqtt Local Broker Connection TLS details
-      properties:
-        tlsEnabled:
-          type: boolean
-          description: Tls Enabled on Local Broker Connection.
-          default: false
-        trustedCaCertificateConfigMap:
-          type: string
-          description: Trusted CA certificate config map name for Local Broker.
-    MqttBridgeRemoteBrokerConnectionTls:
-      type: object
-      description: MqttBridge RemoteBrokerConnection TLS details
-      properties:
-        tlsEnabled:
-          type: boolean
-          description: Tls Enabled on Remote Broker Connection.
-        trustedCaCertificateConfigMap:
-          type: string
-          description: Trusted CA certificate name for Remote Broker.
       required:
-      - tlsEnabled
-    KeyVaultCredentialsPropertiesUpdate:
-      type: object
-      description: KeyVault credentials properties. NOTE - Future this will be ENUM.
-      properties:
-        servicePrincipalLocalSecretName:
-          type: string
-          description: KeyVault service principal local secret name.
+      - repository
+      - tag
     MqttBridgeRemoteBrokerX509AuthenticationUpdate:
       type: object
       description: MqttBridge RemoteBroker X509 Authentication properties.
@@ -367,82 +352,34 @@ components:
         kubernetes:
           $ref: '#/components/schemas/LocalBrokerKubernetesAuthentication'
           description: Kubernetes local broker authentication method.
-    MqttBridgeRemoteBrokerAuthenticationMethodsUpdate:
+    ContainerImageUpdate:
       type: object
-      description: MqttBridge RemoteBrokerConnection Authentication methods. NOTE - Enum only one is allowed to be passed.
+      description: Defines the Docker image details
       properties:
-        x509:
-          $ref: '#/components/schemas/MqttBridgeRemoteBrokerX509AuthenticationUpdate'
-          description: X509 remote broker authentication method.
-        systemAssignedManagedIdentity:
-          $ref: '#/components/schemas/ManagedIdentityAuthenticationUpdate'
-          description: Managed identity remote broker authentication method.
-    MqttBridgeConnectorResourceUpdateProperties:
+        pullPolicy:
+          type: string
+          description: Image pull policy.
+        pullSecrets:
+          type: string
+          description: Image pull secrets.
+        repository:
+          type: string
+          description: The Docker image name.
+        tag:
+          type: string
+          description: The Docker  image tag.
+    KeyVaultSecretObject:
       type: object
-      description: The updatable properties of the MqttBridgeConnectorResource.
+      description: KeyVault secret object properties
       properties:
-        bridgeInstances:
-          type: integer
-          format: int32
-          description: The number of instances to deploy for a bridge rollout.
-          minimum: 0
-          maximum: 65535
-        clientIdPrefix:
+        name:
           type: string
-          description: The client id prefix of the dynamically generated client ids.
-        image:
-          $ref: '#/components/schemas/ContainerImageUpdate'
-          description: The details of MqttBridge Docker Image.
-        localBrokerConnection:
-          $ref: '#/components/schemas/LocalBrokerConnectionSpecUpdate'
-          description: The details for connecting with Local Broker.
-        logLevel:
+          description: KeyVault secret name.
+        version:
           type: string
-          description: The log level of the Bridge Connector instances.
-        nodeTolerations:
-          $ref: '#/components/schemas/NodeTolerationsUpdate'
-          description: The Node Tolerations for the Bridge Connector pods.
-        protocol:
-          $ref: '#/components/schemas/MqttProtocol'
-          description: The protocol to use for connecting with Brokers.
-        remoteBrokerConnection:
-          $ref: '#/components/schemas/MqttBridgeRemoteBrokerConnectionSpecUpdate'
-          description: The details for connecting with Remote Broker.
-    MqttBridgeConnectorResourceListResult:
-      type: object
-      description: The response of a MqttBridgeConnectorResource list operation.
-      properties:
-        value:
-          type: array
-          description: The MqttBridgeConnectorResource items on this page
-          items:
-            $ref: '#/components/schemas/MqttBridgeConnectorResource'
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
+          description: KeyVault secret version.
       required:
-      - value
-    MqttBridgeRemoteBrokerConnectionTlsUpdate:
-      type: object
-      description: MqttBridge RemoteBrokerConnection TLS details
-      properties:
-        tlsEnabled:
-          type: boolean
-          description: Tls Enabled on Remote Broker Connection.
-        trustedCaCertificateConfigMap:
-          type: string
-          description: Trusted CA certificate name for Remote Broker.
-    MqttBridgeRemoteBrokerX509Authentication:
-      type: object
-      description: MqttBridge RemoteBroker X509 Authentication properties.
-      properties:
-        keyVault:
-          $ref: '#/components/schemas/KeyVaultCertificateProperties'
-          description: Keyvault X509 secret properties.
-        secretName:
-          type: string
-          description: Secret where cert details are stored.
+      - name
     KeyVaultCertificatePropertiesUpdate:
       type: object
       description: KeyVault certificate properties
@@ -469,91 +406,6 @@ components:
         name:
           type: string
           description: KeyVault name.
-    NodeTolerations:
-      type: object
-      description: Defines the Node Tolerations details
-      properties:
-        effect:
-          type: string
-          description: Toleration effect.
-        key:
-          type: string
-          description: Toleration key.
-        operator:
-          type: string
-          description: Toleration operator like 'Exists', 'Equal' etc.
-        value:
-          type: string
-          description: Toleration Value.
-      required:
-      - effect
-      - key
-      - operator
-      - value
-    KeyVaultCertificateProperties:
-      type: object
-      description: KeyVault certificate properties
-      properties:
-        vault:
-          $ref: '#/components/schemas/KeyVaultConnectionProperties'
-          description: KeyVault properties.
-        vaultCaChainSecret:
-          $ref: '#/components/schemas/KeyVaultSecretObject'
-          description: KeyVault CA chain secret details.
-        vaultCert:
-          $ref: '#/components/schemas/KeyVaultSecretObject'
-          description: KeyVault Cert secret details.
-      required:
-      - vault
-      - vaultCert
-    ExtendedLocationType:
-      type: string
-      description: The enum defining type of ExtendedLocation accepted.
-      enum:
-      - CustomLocation
-      x-ms-enum:
-        name: ExtendedLocationType
-        modelAsString: true
-        values:
-        - name: CustomLocation
-          value: CustomLocation
-          description: CustomLocation type
-    ProvisioningState:
-      type: string
-      description: The enum defining status of resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Updating
-      - Deleting
-      - Accepted
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-        values:
-        - name: Succeeded
-          value: Succeeded
-          description: Resource has been created.
-        - name: Failed
-          value: Failed
-          description: Resource creation failed.
-        - name: Canceled
-          value: Canceled
-          description: Resource creation was canceled.
-        - name: Provisioning
-          value: Provisioning
-          description: Resource is getting provisioned.
-        - name: Updating
-          value: Updating
-          description: Resource is Updating.
-        - name: Deleting
-          value: Deleting
-          description: Resource is Deleting.
-        - name: Accepted
-          value: Accepted
-          description: Resource has been Accepted.
     MqttBridgeRemoteBrokerAuthenticationMethods:
       type: object
       description: MqttBridge RemoteBrokerConnection Authentication methods. NOTE - Enum only one is allowed to be passed.
@@ -578,62 +430,16 @@ components:
         tls:
           $ref: '#/components/schemas/LocalBrokerConnectionTls'
           description: TLS details for Local broker Connection.
-    ExtendedLocationProperty:
+    MqttBridgeRemoteBrokerAuthenticationMethodsUpdate:
       type: object
-      description: ExtendedLocation properties
+      description: MqttBridge RemoteBrokerConnection Authentication methods. NOTE - Enum only one is allowed to be passed.
       properties:
-        name:
-          type: string
-          description: The name of the extended location.
-        type:
-          $ref: '#/components/schemas/ExtendedLocationType'
-          description: Type of ExtendedLocation.
-      required:
-      - name
-      - type
-    MqttBridgeRemoteBrokerConnectionSpec:
-      type: object
-      description: MqttBridge RemoteBrokerConnectionSpec details
-      properties:
-        authentication:
-          $ref: '#/components/schemas/MqttBridgeRemoteBrokerAuthenticationMethods'
-          description: The remote broker authentication methods. NOTE - Enum only one method is allowed to be passed.
-        endpoint:
-          type: string
-          description: The endpoint of remote broker to connect to.
-        protocol:
-          type: string
-          description: Protocol for remote connection.
-          default: mqtt
-          enum:
-          - mqtt
-          - webSocket
-          x-ms-enum:
-            name: MqttBridgeRemoteBrokerProtocol
-            modelAsString: true
-            values:
-            - name: mqtt
-              value: mqtt
-              description: MQTT protocol.
-            - name: webSocket
-              value: webSocket
-              description: MQTT over WebSocket protocol.
-        tls:
-          $ref: '#/components/schemas/MqttBridgeRemoteBrokerConnectionTls'
-          description: TLS details for Remote broker Connection.
-      required:
-      - authentication
-      - endpoint
-      - tls
-    KeyVaultCredentialsProperties:
-      type: object
-      description: KeyVault credentials properties. NOTE - Future this will be ENUM.
-      properties:
-        servicePrincipalLocalSecretName:
-          type: string
-          description: KeyVault service principal local secret name.
-      required:
-      - servicePrincipalLocalSecretName
+        x509:
+          $ref: '#/components/schemas/MqttBridgeRemoteBrokerX509AuthenticationUpdate'
+          description: X509 remote broker authentication method.
+        systemAssignedManagedIdentity:
+          $ref: '#/components/schemas/ManagedIdentityAuthenticationUpdate'
+          description: Managed identity remote broker authentication method.
     MqttBridgeConnectorProperties:
       type: object
       description: MqttBridgeConnector Properties
@@ -673,7 +479,90 @@ components:
       - image
       - protocol
       - remoteBrokerConnection
-    KeyVaultSecretObject:
+    MqttBridgeRemoteBrokerConnectionSpecUpdate:
+      type: object
+      description: MqttBridge RemoteBrokerConnectionSpec details
+      properties:
+        authentication:
+          $ref: '#/components/schemas/MqttBridgeRemoteBrokerAuthenticationMethodsUpdate'
+          description: The remote broker authentication methods. NOTE - Enum only one method is allowed to be passed.
+        endpoint:
+          type: string
+          description: The endpoint of remote broker to connect to.
+        protocol:
+          type: string
+          description: Protocol for remote connection.
+          default: mqtt
+          enum:
+          - mqtt
+          - webSocket
+          x-ms-enum:
+            name: MqttBridgeRemoteBrokerProtocol
+            modelAsString: true
+            values:
+            - name: mqtt
+              value: mqtt
+              description: MQTT protocol.
+            - name: webSocket
+              value: webSocket
+              description: MQTT over WebSocket protocol.
+        tls:
+          $ref: '#/components/schemas/MqttBridgeRemoteBrokerConnectionTlsUpdate'
+          description: TLS details for Remote broker Connection.
+    LocalBrokerKubernetesAuthentication:
+      type: object
+      description: Local Broker Kubernetes Authentication
+      properties:
+        secretPath:
+          type: string
+          description: Secret Path where SAT is mounted.
+          default: /var/run/serviceaccount/localbroker
+        serviceAccountTokenName:
+          type: string
+          description: Token name where SAT is mounted on secret path.
+          default: sat
+    ManagedIdentityAuthenticationUpdate:
+      type: object
+      description: Managed identity authentication details.
+      properties:
+        audience:
+          type: string
+          description: Token audience.
+        extensionName:
+          type: string
+          description: Arc Extension name.
+    MqttBridgeConnectorResourceUpdateProperties:
+      type: object
+      description: The updatable properties of the MqttBridgeConnectorResource.
+      properties:
+        bridgeInstances:
+          type: integer
+          format: int32
+          description: The number of instances to deploy for a bridge rollout.
+          minimum: 0
+          maximum: 65535
+        clientIdPrefix:
+          type: string
+          description: The client id prefix of the dynamically generated client ids.
+        image:
+          $ref: '#/components/schemas/ContainerImageUpdate'
+          description: The details of MqttBridge Docker Image.
+        localBrokerConnection:
+          $ref: '#/components/schemas/LocalBrokerConnectionSpecUpdate'
+          description: The details for connecting with Local Broker.
+        logLevel:
+          type: string
+          description: The log level of the Bridge Connector instances.
+        nodeTolerations:
+          $ref: '#/components/schemas/NodeTolerationsUpdate'
+          description: The Node Tolerations for the Bridge Connector pods.
+        protocol:
+          $ref: '#/components/schemas/MqttProtocol'
+          description: The protocol to use for connecting with Brokers.
+        remoteBrokerConnection:
+          $ref: '#/components/schemas/MqttBridgeRemoteBrokerConnectionSpecUpdate'
+          description: The details for connecting with Remote Broker.
+    KeyVaultSecretObjectUpdate:
       type: object
       description: KeyVault secret object properties
       properties:
@@ -683,8 +572,228 @@ components:
         version:
           type: string
           description: KeyVault secret version.
+    NodeTolerationsUpdate:
+      type: object
+      description: Defines the Node Tolerations details
+      properties:
+        effect:
+          type: string
+          description: Toleration effect.
+        key:
+          type: string
+          description: Toleration key.
+        operator:
+          type: string
+          description: Toleration operator like 'Exists', 'Equal' etc.
+        value:
+          type: string
+          description: Toleration Value.
+    LocalBrokerConnectionTls:
+      type: object
+      description: Mqtt Local Broker Connection TLS details
+      properties:
+        tlsEnabled:
+          type: boolean
+          description: Tls Enabled on Local Broker Connection.
+          default: false
+        trustedCaCertificateConfigMap:
+          type: string
+          description: Trusted CA certificate config map name for Local Broker.
+    KeyVaultCredentialsProperties:
+      type: object
+      description: KeyVault credentials properties. NOTE - Future this will be ENUM.
+      properties:
+        servicePrincipalLocalSecretName:
+          type: string
+          description: KeyVault service principal local secret name.
+      required:
+      - servicePrincipalLocalSecretName
+    MqttBridgeConnectorResourceListResult:
+      type: object
+      description: The response of a MqttBridgeConnectorResource list operation.
+      properties:
+        value:
+          type: array
+          description: The MqttBridgeConnectorResource items on this page
+          items:
+            $ref: '#/components/schemas/MqttBridgeConnectorResource'
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+      required:
+      - value
+    KeyVaultCertificateProperties:
+      type: object
+      description: KeyVault certificate properties
+      properties:
+        vault:
+          $ref: '#/components/schemas/KeyVaultConnectionProperties'
+          description: KeyVault properties.
+        vaultCaChainSecret:
+          $ref: '#/components/schemas/KeyVaultSecretObject'
+          description: KeyVault CA chain secret details.
+        vaultCert:
+          $ref: '#/components/schemas/KeyVaultSecretObject'
+          description: KeyVault Cert secret details.
+      required:
+      - vault
+      - vaultCert
+    MqttBridgeConnectorResourceUpdate:
+      type: object
+      description: The type used for update operations of the MqttBridgeConnectorResource.
+      properties:
+        tags:
+          type: object
+          description: Resource tags.
+          additionalProperties:
+            type: string
+        properties:
+          $ref: '#/components/schemas/MqttBridgeConnectorResourceUpdateProperties'
+          x-ms-client-flatten: true
+    ProvisioningState:
+      type: string
+      description: The enum defining status of resource.
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Updating
+      - Deleting
+      - Accepted
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+        values:
+        - name: Succeeded
+          value: Succeeded
+          description: Resource has been created.
+        - name: Failed
+          value: Failed
+          description: Resource creation failed.
+        - name: Canceled
+          value: Canceled
+          description: Resource creation was canceled.
+        - name: Provisioning
+          value: Provisioning
+          description: Resource is getting provisioned.
+        - name: Updating
+          value: Updating
+          description: Resource is Updating.
+        - name: Deleting
+          value: Deleting
+          description: Resource is Deleting.
+        - name: Accepted
+          value: Accepted
+          description: Resource has been Accepted.
+    MqttBridgeRemoteBrokerConnectionSpec:
+      type: object
+      description: MqttBridge RemoteBrokerConnectionSpec details
+      properties:
+        authentication:
+          $ref: '#/components/schemas/MqttBridgeRemoteBrokerAuthenticationMethods'
+          description: The remote broker authentication methods. NOTE - Enum only one method is allowed to be passed.
+        endpoint:
+          type: string
+          description: The endpoint of remote broker to connect to.
+        protocol:
+          type: string
+          description: Protocol for remote connection.
+          default: mqtt
+          enum:
+          - mqtt
+          - webSocket
+          x-ms-enum:
+            name: MqttBridgeRemoteBrokerProtocol
+            modelAsString: true
+            values:
+            - name: mqtt
+              value: mqtt
+              description: MQTT protocol.
+            - name: webSocket
+              value: webSocket
+              description: MQTT over WebSocket protocol.
+        tls:
+          $ref: '#/components/schemas/MqttBridgeRemoteBrokerConnectionTls'
+          description: TLS details for Remote broker Connection.
+      required:
+      - authentication
+      - endpoint
+      - tls
+    ExtendedLocationType:
+      type: string
+      description: The enum defining type of ExtendedLocation accepted.
+      enum:
+      - CustomLocation
+      x-ms-enum:
+        name: ExtendedLocationType
+        modelAsString: true
+        values:
+        - name: CustomLocation
+          value: CustomLocation
+          description: CustomLocation type
+    KeyVaultConnectionProperties:
+      type: object
+      description: KeyVault properties
+      properties:
+        credentials:
+          $ref: '#/components/schemas/KeyVaultCredentialsProperties'
+          description: KeyVault credentials.
+        directoryId:
+          type: string
+          description: KeyVault directoryId.
+        name:
+          type: string
+          description: KeyVault name.
+      required:
+      - credentials
+      - directoryId
+      - name
+    MqttBridgeRemoteBrokerConnectionTlsUpdate:
+      type: object
+      description: MqttBridge RemoteBrokerConnection TLS details
+      properties:
+        tlsEnabled:
+          type: boolean
+          description: Tls Enabled on Remote Broker Connection.
+        trustedCaCertificateConfigMap:
+          type: string
+          description: Trusted CA certificate name for Remote Broker.
+    ManagedIdentityAuthentication:
+      type: object
+      description: Managed identity authentication details.
+      properties:
+        audience:
+          type: string
+          description: Token audience.
+        extensionName:
+          type: string
+          description: Arc Extension name.
+      required:
+      - audience
+    ExtendedLocationProperty:
+      type: object
+      description: ExtendedLocation properties
+      properties:
+        name:
+          type: string
+          description: The name of the extended location.
+        type:
+          $ref: '#/components/schemas/ExtendedLocationType'
+          description: Type of ExtendedLocation.
       required:
       - name
+      - type
+    LocalBrokerAuthenticationMethods:
+      type: object
+      description: Mqtt Local Broker Authentication details. Only one method at a time is supported. Default - kubernetes authentication
+      properties:
+        kubernetes:
+          $ref: '#/components/schemas/LocalBrokerKubernetesAuthentication'
+          description: Kubernetes local broker authentication method.
+      required:
+      - kubernetes
     MqttProtocol:
       type: string
       description: Mqtt Protocol types
@@ -722,115 +831,6 @@ components:
       - extendedLocation
       allOf:
       - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    MqttBridgeConnectorResourceUpdate:
-      type: object
-      description: The type used for update operations of the MqttBridgeConnectorResource.
-      properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-        properties:
-          $ref: '#/components/schemas/MqttBridgeConnectorResourceUpdateProperties'
-          x-ms-client-flatten: true
-    KeyVaultSecretObjectUpdate:
-      type: object
-      description: KeyVault secret object properties
-      properties:
-        name:
-          type: string
-          description: KeyVault secret name.
-        version:
-          type: string
-          description: KeyVault secret version.
-    LocalBrokerKubernetesAuthentication:
-      type: object
-      description: Local Broker Kubernetes Authentication
-      properties:
-        secretPath:
-          type: string
-          description: Secret Path where SAT is mounted.
-          default: /var/run/serviceaccount/localbroker
-        serviceAccountTokenName:
-          type: string
-          description: Token name where SAT is mounted on secret path.
-          default: sat
-    ContainerImage:
-      type: object
-      description: Defines the Docker image details
-      properties:
-        pullPolicy:
-          type: string
-          description: Image pull policy.
-        pullSecrets:
-          type: string
-          description: Image pull secrets.
-        repository:
-          type: string
-          description: The Docker image name.
-        tag:
-          type: string
-          description: The Docker  image tag.
-      required:
-      - repository
-      - tag
-    MqttBridgeRemoteBrokerConnectionSpecUpdate:
-      type: object
-      description: MqttBridge RemoteBrokerConnectionSpec details
-      properties:
-        authentication:
-          $ref: '#/components/schemas/MqttBridgeRemoteBrokerAuthenticationMethodsUpdate'
-          description: The remote broker authentication methods. NOTE - Enum only one method is allowed to be passed.
-        endpoint:
-          type: string
-          description: The endpoint of remote broker to connect to.
-        protocol:
-          type: string
-          description: Protocol for remote connection.
-          default: mqtt
-          enum:
-          - mqtt
-          - webSocket
-          x-ms-enum:
-            name: MqttBridgeRemoteBrokerProtocol
-            modelAsString: true
-            values:
-            - name: mqtt
-              value: mqtt
-              description: MQTT protocol.
-            - name: webSocket
-              value: webSocket
-              description: MQTT over WebSocket protocol.
-        tls:
-          $ref: '#/components/schemas/MqttBridgeRemoteBrokerConnectionTlsUpdate'
-          description: TLS details for Remote broker Connection.
-    ManagedIdentityAuthentication:
-      type: object
-      description: Managed identity authentication details.
-      properties:
-        audience:
-          type: string
-          description: Token audience.
-        extensionName:
-          type: string
-          description: Arc Extension name.
-      required:
-      - audience
-    LocalBrokerConnectionSpecUpdate:
-      type: object
-      description: Mqtt Local Broker ConnectionSpec details
-      properties:
-        authentication:
-          $ref: '#/components/schemas/LocalBrokerAuthenticationMethodsUpdate'
-          description: The authentication methods for LocalBroker connection. NOTE - Enum only one method at a time is supported.
-        endpoint:
-          type: string
-          description: The endpoint of local broker to connect to.
-          default: aio-mq-dmqtt-frontend:1883
-        tls:
-          $ref: '#/components/schemas/LocalBrokerConnectionTls'
-          description: TLS details for Local broker Connection.
   securitySchemes:
     azure_auth:
       type: oauth2

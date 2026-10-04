@@ -897,6 +897,49 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    UserCollection:
+      description: The paged results of users.
+      type: object
+      properties:
+        value:
+          description: The collection of users.
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        nextLink:
+          description: URL to get the next page of users.
+          type: string
+      required:
+      - value
+    User:
+      description: The user definition.
+      allOf:
+      - $ref: '#/components/schemas/Permission'
+      type: object
+      properties:
+        id:
+          description: Unique ID of the user.
+          type: string
+          readOnly: true
+        type:
+          description: Type of the user.
+          type: string
+      required:
+      - type
+      discriminator:
+        propertyName: type
+    RoleAssignment:
+      description: The role assignment definition.
+      type: object
+      properties:
+        role:
+          description: ID of the role for this role assignment.
+          type: string
+        organization:
+          description: ID of the organization for this role assignment.
+          type: string
+      required:
+      - role
     Error:
       description: The response error definition.
       type: object
@@ -906,6 +949,18 @@ components:
           $ref: '#/components/schemas/ErrorDetails'
       required:
       - error
+    Permission:
+      description: The permission definition.
+      type: object
+      properties:
+        roles:
+          description: List of role assignments that specify the permissions to access the application.
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleAssignment'
+          minItems: 1
+      required:
+      - roles
     ErrorDetails:
       description: The detail information of the error.
       type: object
@@ -926,114 +981,30 @@ components:
       required:
       - code
       - message
-    RoleAssignment:
-      description: The role assignment definition.
-      type: object
-      properties:
-        role:
-          description: ID of the role for this role assignment.
-          type: string
-        organization:
-          description: ID of the organization for this role assignment.
-          type: string
-      required:
-      - role
-    User:
-      description: The user definition.
-      allOf:
-      - $ref: '#/components/schemas/Permission'
-      type: object
-      properties:
-        id:
-          description: Unique ID of the user.
-          type: string
-          readOnly: true
-        type:
-          description: Type of the user.
-          type: string
-      required:
-      - type
-      discriminator:
-        propertyName: type
-    Permission:
-      description: The permission definition.
-      type: object
-      properties:
-        roles:
-          description: List of role assignments that specify the permissions to access the application.
-          type: array
-          items:
-            $ref: '#/components/schemas/RoleAssignment'
-          minItems: 1
-      required:
-      - roles
-    UserCollection:
-      description: The paged results of users.
-      type: object
-      properties:
-        value:
-          description: The collection of users.
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-        nextLink:
-          description: URL to get the next page of users.
-          type: string
+    AsymmetricEncryptedSecret:
+      description: Represent the secrets intended for encryption with asymmetric key pair.
       required:
       - value
-    CloudErrorBody:
-      description: An error response from the service.
-      type: object
-      properties:
-        code:
-          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-          type: string
-        message:
-          description: A message describing the error, intended to be suitable for display in a user interface.
-          type: string
-        details:
-          description: A list of additional details about the error.
-          type: array
-          items:
-            $ref: '#/components/schemas/CloudErrorBody'
-          x-ms-identifiers: []
-      x-ms-external: true
-    ShareAccessRight:
-      description: Specifies the mapping between this particular user and the type of access he has on shares on this device.
-      required:
-      - shareId
-      - accessType
-      type: object
-      properties:
-        shareId:
-          description: The share ID.
-          type: string
-        accessType:
-          description: Type of access to be allowed on the share for this user.
-          enum:
-          - Change
-          - Read
-          - Custom
-          type: string
-          x-ms-enum:
-            name: ShareAccessType
-            modelAsString: true
-    UserList:
-      description: Collection of users.
+      - encryptionAlgorithm
       type: object
       properties:
         value:
-          description: The list of users.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/User_2'
-          readOnly: true
-          x-ms-identifiers: []
-        nextLink:
-          description: Link to the next set of results.
+          description: The value of the secret.
           type: string
-          readOnly: true
+        encryptionCertThumbprint:
+          description: Thumbprint certificate used to encrypt \"Value\". If the value is unencrypted, it will be null.
+          x-ms-secret: true
+          type: string
+        encryptionAlgorithm:
+          description: The algorithm used to encrypt "Value".
+          enum:
+          - None
+          - AES256
+          - RSAES_PKCS1_v_1_5
+          type: string
+          x-ms-enum:
+            name: EncryptionAlgorithm
+            modelAsString: true
     UserProperties:
       description: The user properties.
       required:
@@ -1078,37 +1049,22 @@ components:
           $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
           description: Metadata pertaining to creation and last modification of User
           readOnly: true
-    AsymmetricEncryptedSecret:
-      description: Represent the secrets intended for encryption with asymmetric key pair.
-      required:
-      - value
-      - encryptionAlgorithm
-      type: object
-      properties:
-        value:
-          description: The value of the secret.
-          type: string
-        encryptionCertThumbprint:
-          description: Thumbprint certificate used to encrypt \"Value\". If the value is unencrypted, it will be null.
-          x-ms-secret: true
-          type: string
-        encryptionAlgorithm:
-          description: The algorithm used to encrypt "Value".
-          enum:
-          - None
-          - AES256
-          - RSAES_PKCS1_v_1_5
-          type: string
-          x-ms-enum:
-            name: EncryptionAlgorithm
-            modelAsString: true
-    CloudError:
+    CloudErrorBody:
       description: An error response from the service.
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: The error details.
+        code:
+          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+          type: string
+        message:
+          description: A message describing the error, intended to be suitable for display in a user interface.
+          type: string
+        details:
+          description: A list of additional details about the error.
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody'
+          x-ms-identifiers: []
       x-ms-external: true
     ARMBaseModel:
       description: Represents the base class for all object models.
@@ -1127,24 +1083,49 @@ components:
           type: string
           readOnly: true
       x-ms-azure-resource: true
-    CloudErrorBody_2:
-      description: Body of an error from a REST request.
+    UserList:
+      description: Collection of users.
       type: object
       properties:
-        code:
-          description: The error code.
-          type: string
-        message:
-          description: The error message.
-          type: string
-        target:
-          description: The error target.
-          type: string
-        details:
-          description: Inner errors.
+        value:
+          description: The list of users.
+          uniqueItems: false
           type: array
           items:
-            $ref: '#/components/schemas/CloudErrorBody_2'
+            $ref: '#/components/schemas/User_2'
+          readOnly: true
+          x-ms-identifiers: []
+        nextLink:
+          description: Link to the next set of results.
+          type: string
+          readOnly: true
+    ShareAccessRight:
+      description: Specifies the mapping between this particular user and the type of access he has on shares on this device.
+      required:
+      - shareId
+      - accessType
+      type: object
+      properties:
+        shareId:
+          description: The share ID.
+          type: string
+        accessType:
+          description: Type of access to be allowed on the share for this user.
+          enum:
+          - Change
+          - Read
+          - Custom
+          type: string
+          x-ms-enum:
+            name: ShareAccessType
+            modelAsString: true
+    CloudError:
+      description: An error response from the service.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: The error details.
       x-ms-external: true
     Resource:
       description: An Azure resource.
@@ -1171,46 +1152,6 @@ components:
           additionalProperties:
             type: string
       x-ms-azure-resource: true
-    UserIdentity:
-      description: Identity attributes of a lab user.
-      type: object
-      properties:
-        principalName:
-          description: Set to the principal name / UPN of the client JWT making the request.
-          type: string
-        principalId:
-          description: Set to the principal Id of the client JWT making the request. Service principal will not have the principal Id.
-          type: string
-        tenantId:
-          description: Set to the tenant ID of the client JWT making the request.
-          type: string
-        objectId:
-          description: Set to the object Id of the client JWT making the request. Not all users have object Id. For CSP (reseller) scenarios for example, object Id is not available.
-          type: string
-        appId:
-          description: Set to the app Id of the client JWT making the request.
-          type: string
-    UserList_2:
-      description: The response of a list operation.
-      type: object
-      properties:
-        value:
-          description: Results of the list operation.
-          type: array
-          items:
-            $ref: '#/components/schemas/User_3'
-        nextLink:
-          description: Link for next set of results.
-          type: string
-    UpdateResource:
-      description: Represents an update resource
-      type: object
-      properties:
-        tags:
-          description: The tags of the resource.
-          type: object
-          additionalProperties:
-            type: string
     UserProperties_2:
       description: Properties of a lab user profile.
       type: object
@@ -1250,6 +1191,73 @@ components:
       allOf:
       - $ref: '#/components/schemas/UpdateResource'
       properties: {}
+    CloudErrorBody_2:
+      description: Body of an error from a REST request.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        message:
+          description: The error message.
+          type: string
+        target:
+          description: The error target.
+          type: string
+        details:
+          description: Inner errors.
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody_2'
+      x-ms-external: true
+    UserList_2:
+      description: The response of a list operation.
+      type: object
+      properties:
+        value:
+          description: Results of the list operation.
+          type: array
+          items:
+            $ref: '#/components/schemas/User_3'
+        nextLink:
+          description: Link for next set of results.
+          type: string
+    UserIdentity:
+      description: Identity attributes of a lab user.
+      type: object
+      properties:
+        principalName:
+          description: Set to the principal name / UPN of the client JWT making the request.
+          type: string
+        principalId:
+          description: Set to the principal Id of the client JWT making the request. Service principal will not have the principal Id.
+          type: string
+        tenantId:
+          description: Set to the tenant ID of the client JWT making the request.
+          type: string
+        objectId:
+          description: Set to the object Id of the client JWT making the request. Not all users have object Id. For CSP (reseller) scenarios for example, object Id is not available.
+          type: string
+        appId:
+          description: Set to the app Id of the client JWT making the request.
+          type: string
+    UpdateResource:
+      description: Represents an update resource
+      type: object
+      properties:
+        tags:
+          description: The tags of the resource.
+          type: object
+          additionalProperties:
+            type: string
+    CloudError_2:
+      description: Error from a REST request.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody_2'
+          description: The cloud error that occurred
+      x-ms-external: true
     UserSecretStore:
       description: Properties of a user's secret store.
       type: object
@@ -1260,58 +1268,6 @@ components:
         keyVaultId:
           description: The ID of the user's Key vault.
           type: string
-    CloudError_2:
-      description: Error from a REST request.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody_2'
-          description: The cloud error that occurred
-      x-ms-external: true
-    CloudErrorBody_3:
-      description: Body of an error from a REST request.
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        target:
-          type: string
-        details:
-          description: Inner errors.
-          type: array
-          items:
-            $ref: '#/components/schemas/CloudErrorBody_3'
-      x-ms-external: true
-    LatestOperationResult:
-      description: Details of the status of an operation.
-      type: object
-      properties:
-        status:
-          description: The current status of the operation.
-          type: string
-          readOnly: true
-        errorCode:
-          description: Error code on failure.
-          type: string
-          readOnly: true
-        errorMessage:
-          description: The error message.
-          type: string
-          readOnly: true
-        requestUri:
-          description: Request URI of the operation.
-          type: string
-          readOnly: true
-        httpMethod:
-          description: The HttpMethod - PUT/POST/DELETE for the operation.
-          type: string
-          readOnly: true
-        operationUrl:
-          description: The URL to use to check long-running operation status
-          type: string
-          readOnly: true
     UserPropertiesFragment:
       description: Lab User properties
       type: object
@@ -1321,6 +1277,18 @@ components:
           type: string
         uniqueIdentifier:
           description: The unique immutable identifier of a resource (Guid).
+          type: string
+    ResponseWithContinuation_User:
+      description: The response of a list operation.
+      type: object
+      properties:
+        value:
+          description: Results of the list operation.
+          type: array
+          items:
+            $ref: '#/components/schemas/User_4'
+        nextLink:
+          description: Link for next set of results.
           type: string
     UserProperties_3:
       description: Lab User properties
@@ -1367,18 +1335,6 @@ components:
           $ref: '#/components/schemas/UserProperties_3'
           description: These are the properties for the user registered under a lab.
           x-ms-client-flatten: true
-    ResponseWithContinuation_User:
-      description: The response of a list operation.
-      type: object
-      properties:
-        value:
-          description: Results of the list operation.
-          type: array
-          items:
-            $ref: '#/components/schemas/User_4'
-        nextLink:
-          description: Link for next set of results.
-          type: string
     UserFragment_2:
       description: The User registered to a lab
       type: object
@@ -1389,6 +1345,50 @@ components:
           $ref: '#/components/schemas/UserPropertiesFragment'
           description: These are the properties for the user registered under a lab.
           x-ms-client-flatten: true
+    CloudErrorBody_3:
+      description: Body of an error from a REST request.
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        target:
+          type: string
+        details:
+          description: Inner errors.
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody_3'
+      x-ms-external: true
+    LatestOperationResult:
+      description: Details of the status of an operation.
+      type: object
+      properties:
+        status:
+          description: The current status of the operation.
+          type: string
+          readOnly: true
+        errorCode:
+          description: Error code on failure.
+          type: string
+          readOnly: true
+        errorMessage:
+          description: The error message.
+          type: string
+          readOnly: true
+        requestUri:
+          description: Request URI of the operation.
+          type: string
+          readOnly: true
+        httpMethod:
+          description: The HttpMethod - PUT/POST/DELETE for the operation.
+          type: string
+          readOnly: true
+        operationUrl:
+          description: The URL to use to check long-running operation status
+          type: string
+          readOnly: true
     CloudError_3:
       description: Error from a REST request.
       type: object
@@ -1405,17 +1405,6 @@ components:
       required: true
       schema:
         type: string
-    MaxPageSize:
-      in: query
-      name: maxpagesize
-      description: The maximum number of resources to return from one response.
-      x-ms-parameter-location: method
-      required: false
-      schema:
-        type: integer
-        format: int32
-        maximum: 100
-        minimum: 1
     IfMatch:
       in: header
       name: If-Match
@@ -1434,13 +1423,17 @@ components:
         type: string
         maxLength: 48
         pattern: ^[a-zA-Z0-9-_]*$
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The subscription ID.
-      required: true
+    MaxPageSize:
+      in: query
+      name: maxpagesize
+      description: The maximum number of resources to return from one response.
+      x-ms-parameter-location: method
+      required: false
       schema:
-        type: string
+        type: integer
+        format: int32
+        maximum: 100
+        minimum: 1
     resourceGroupNameParameter:
       name: resourceGroupName
       in: path
@@ -1456,14 +1449,13 @@ components:
       required: true
       schema:
         type: string
-    api-version:
-      name: api-version
-      in: query
-      description: Client API version.
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The subscription ID.
       required: true
       schema:
         type: string
-        default: '2018-09-15'
     subscriptionId:
       name: subscriptionId
       in: path
@@ -1479,6 +1471,14 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
+    api-version:
+      name: api-version
+      in: query
+      description: Client API version.
+      required: true
+      schema:
+        type: string
+        default: '2018-09-15'
     api-version_2:
       name: api-version
       in: query

@@ -786,28 +786,33 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
-    DFPInstances:
-      description: An array of DFP instance resources.
+    CheckInstanceNameAvailabilityResult:
+      description: The checking result of DFP instance name availability.
       type: object
       properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/DFPInstance'
-          description: An array of DFP instance resources.
-        nextLink:
-          description: URL to get the next set of operation list results if there are any.
+        nameAvailable:
+          type: boolean
+          description: Indicator of availability of the DFP instance name.
+        reason:
           type: string
-          readOnly: true
-      required:
-      - value
-    DFPInstanceMutableProperties:
-      description: An object that represents a set of mutable DFP resource properties.
+          description: The reason of unavailability.
+        message:
+          type: string
+          description: The detailed message of the request unavailability.
+    CheckInstanceNameAvailabilityParameters:
+      description: Details of DFP instance name request body.
       type: object
       properties:
-        administration:
-          $ref: '#/components/schemas/DFPInstanceAdministrators'
-          description: A collection of DFP instance administrators
+        name:
+          type: string
+          pattern: ^[a-z][a-z0-9]*$
+          minLength: 3
+          maxLength: 63
+          description: Name for checking availability.
+        type:
+          type: string
+          default: Microsoft.Dynamics365FraudProtection/instances
+          description: The resource type of DFP instance.
     DFPInstanceUpdateParameters:
       description: Provision request specification
       type: object
@@ -821,16 +826,13 @@ components:
           x-ms-client-flatten: true
           $ref: '#/components/schemas/DFPInstanceMutableProperties'
           description: Properties of the provision operation request
-    DFPInstanceAdministrators:
-      description: An array of administrator user identities
+    DFPInstanceMutableProperties:
+      description: An object that represents a set of mutable DFP resource properties.
       type: object
       properties:
-        members:
-          type: array
-          items:
-            type: string
-            description: 'The UPN of the user. For example: johnsmith@contoso.com.'
-          description: An array of administrator user identities.
+        administration:
+          $ref: '#/components/schemas/DFPInstanceAdministrators'
+          description: A collection of DFP instance administrators
     DFPInstance:
       description: Represents an instance of a DFP instance resource.
       type: object
@@ -856,33 +858,31 @@ components:
       required:
       - location
       x-ms-azure-resource: true
-    CheckInstanceNameAvailabilityParameters:
-      description: Details of DFP instance name request body.
+    DFPInstances:
+      description: An array of DFP instance resources.
       type: object
       properties:
-        name:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/DFPInstance'
+          description: An array of DFP instance resources.
+        nextLink:
+          description: URL to get the next set of operation list results if there are any.
           type: string
-          pattern: ^[a-z][a-z0-9]*$
-          minLength: 3
-          maxLength: 63
-          description: Name for checking availability.
-        type:
-          type: string
-          default: Microsoft.Dynamics365FraudProtection/instances
-          description: The resource type of DFP instance.
-    CheckInstanceNameAvailabilityResult:
-      description: The checking result of DFP instance name availability.
+          readOnly: true
+      required:
+      - value
+    DFPInstanceAdministrators:
+      description: An array of administrator user identities
       type: object
       properties:
-        nameAvailable:
-          type: boolean
-          description: Indicator of availability of the DFP instance name.
-        reason:
-          type: string
-          description: The reason of unavailability.
-        message:
-          type: string
-          description: The detailed message of the request unavailability.
+        members:
+          type: array
+          items:
+            type: string
+            description: 'The UPN of the user. For example: johnsmith@contoso.com.'
+          description: An array of administrator user identities.
     DFPInstanceProperties:
       description: Properties of DFP resource.
       type: object
@@ -909,17 +909,19 @@ components:
           description: The current deployment state of DFP resource. The provisioningState is to indicate states for resource provisioning.
       allOf:
       - $ref: '#/components/schemas/DFPInstanceMutableProperties'
-    InstanceProperties:
+    ExtendedLocation:
       type: object
-      description: The properties of a Instance resource.
+      description: Extended location is an extension of Azure locations. They provide a way to use their Azure ARC enabled Kubernetes clusters as target locations for deploying Azure services instances.
       properties:
-        description:
+        name:
           type: string
-          description: Detailed description of the Instance.
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-          description: The status of the last operation.
-          readOnly: true
+          description: The name of the extended location.
+        type:
+          type: string
+          description: The type of the extended location.
+      required:
+      - name
+      - type
     InstanceListResult:
       type: object
       description: The response of a Instance list operation.
@@ -935,6 +937,27 @@ components:
           description: The link to the next page of items
       required:
       - value
+    Instance:
+      type: object
+      description: A Instance resource is a logical container for a set of child resources.
+      properties:
+        properties:
+          $ref: '#/components/schemas/InstanceProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocation'
+          description: Edge location of the resource.
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
     ProvisioningState:
       type: string
       description: The provisioning status of the resource.
@@ -971,12 +994,64 @@ components:
         - name: Accepted
           value: Accepted
           description: The resource was accepted by the server.
-    Instance:
+    InstanceProperties:
       type: object
-      description: A Instance resource is a logical container for a set of child resources.
+      description: The properties of a Instance resource.
+      properties:
+        description:
+          type: string
+          description: Detailed description of the Instance.
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          description: The status of the last operation.
+          readOnly: true
+    InstanceTagsUpdate:
+      type: object
+      description: The type used for updating tags in Instance resources.
+      properties:
+        tags:
+          type: object
+          description: Resource tags.
+          additionalProperties:
+            type: string
+    TargetSelectorProperties:
+      type: object
+      description: Properties of the reference target.
+      properties:
+        name:
+          type: string
+          description: Name of the target.
+    ReconciliationPolicy:
+      type: object
+      description: Reconciliation Policy.
+      properties:
+        type:
+          $ref: '#/components/schemas/ReconciliationPolicies'
+          description: Policy type
+        interval:
+          type: string
+          description: Policy interval.
+          minLength: 1
+      required:
+      - type
+    ReconciliationPolicies:
+      type: string
+      description: Policies to control how the resource should reconcile.
+      enum:
+      - periodic
+      x-ms-enum:
+        name: ReconciliationPolicies
+        modelAsString: true
+        values:
+        - name: periodic
+          value: periodic
+          description: Allows resource to reconcile periodically.
+    Instance_2:
+      type: object
+      description: A Instance resource belonging to an Instance resource.
       properties:
         properties:
-          $ref: '#/components/schemas/InstanceProperties'
+          $ref: '#/components/schemas/InstanceProperties_2'
           description: The resource-specific properties for this resource.
           x-ms-client-flatten: true
           x-ms-mutability:
@@ -992,51 +1067,6 @@ components:
       - extendedLocation
       allOf:
       - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    ExtendedLocation:
-      type: object
-      description: Extended location is an extension of Azure locations. They provide a way to use their Azure ARC enabled Kubernetes clusters as target locations for deploying Azure services instances.
-      properties:
-        name:
-          type: string
-          description: The name of the extended location.
-        type:
-          type: string
-          description: The type of the extended location.
-      required:
-      - name
-      - type
-    InstanceTagsUpdate:
-      type: object
-      description: The type used for updating tags in Instance resources.
-      properties:
-        tags:
-          type: object
-          description: Resource tags.
-          additionalProperties:
-            type: string
-    InstanceProperties_2:
-      type: object
-      description: The properties of an Instance resource.
-      properties:
-        scope:
-          type: string
-          description: Deployment scope (such as Kubernetes namespace).
-        solution:
-          type: string
-          description: Name of the solution.
-        target:
-          $ref: '#/components/schemas/TargetSelectorProperties'
-          description: Defines the Target the Instance will deploy to.
-        reconciliationPolicy:
-          $ref: '#/components/schemas/ReconciliationPolicy'
-          description: Reconciliation Policy.
-        version:
-          type: string
-          description: Version of the particular resource.
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState_2'
-          description: The status of the last operation.
-          readOnly: true
     ProvisioningState_2:
       type: string
       description: The provisioning status of the resource.
@@ -1069,65 +1099,42 @@ components:
         - name: Accepted
           value: Accepted
           description: The resource was accepted by the server.
-    ReconciliationPolicy:
+    InstanceProperties_2:
       type: object
-      description: Reconciliation Policy.
+      description: The properties of an Instance resource.
       properties:
-        type:
-          $ref: '#/components/schemas/ReconciliationPolicies'
-          description: Policy type
-        interval:
+        scope:
           type: string
-          description: Policy interval.
-          minLength: 1
-      required:
-      - type
-    Instance_2:
-      type: object
-      description: A Instance resource belonging to an Instance resource.
-      properties:
-        properties:
-          $ref: '#/components/schemas/InstanceProperties_2'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocation'
-          description: Edge location of the resource.
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    ReconciliationPolicies:
-      type: string
-      description: Policies to control how the resource should reconcile.
-      enum:
-      - periodic
-      x-ms-enum:
-        name: ReconciliationPolicies
-        modelAsString: true
-        values:
-        - name: periodic
-          value: periodic
-          description: Allows resource to reconcile periodically.
-    TargetSelectorProperties:
-      type: object
-      description: Properties of the reference target.
-      properties:
-        name:
+          description: Deployment scope (such as Kubernetes namespace).
+        solution:
           type: string
-          description: Name of the target.
+          description: Name of the solution.
+        target:
+          $ref: '#/components/schemas/TargetSelectorProperties'
+          description: Defines the Target the Instance will deploy to.
+        reconciliationPolicy:
+          $ref: '#/components/schemas/ReconciliationPolicy'
+          description: Reconciliation Policy.
+        version:
+          type: string
+          description: Version of the particular resource.
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState_2'
+          description: The status of the last operation.
+          readOnly: true
   parameters:
     ApiVersionParameter:
       name: api-version
       in: query
       required: true
       description: The client API version.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
       schema:
         type: string
     ResourceGroupNameParameter:
@@ -1141,13 +1148,6 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+$
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

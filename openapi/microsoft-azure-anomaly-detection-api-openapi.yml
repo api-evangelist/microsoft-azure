@@ -449,7 +449,108 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    RootCauseList:
+    MetricAlertingConfiguration:
+      required:
+      - anomalyDetectionConfigurationId
+      - anomalyScopeType
+      type: object
+      properties:
+        anomalyDetectionConfigurationId:
+          format: uuid
+          description: Anomaly detection configuration unique id
+          type: string
+        anomalyScopeType:
+          description: Anomaly scope
+          enum:
+          - All
+          - Dimension
+          - TopN
+          type: string
+          example: All
+          x-ms-enum:
+            name: AnomalyScope
+            modelAsString: true
+        negationOperation:
+          description: Negation operation
+          default: false
+          type: boolean
+        dimensionAnomalyScope:
+          $ref: '#/components/schemas/DimensionGroupIdentity'
+        topNAnomalyScope:
+          $ref: '#/components/schemas/TopNGroupScope'
+        severityFilter:
+          $ref: '#/components/schemas/SeverityCondition'
+        snoozeFilter:
+          $ref: '#/components/schemas/AlertSnoozeCondition'
+        valueFilter:
+          $ref: '#/components/schemas/ValueCondition'
+    ChangeThresholdConditionPatch:
+      type: object
+      properties:
+        changePercentage:
+          format: double
+          description: 'change percentage, value range : [0, +∞)'
+          type: number
+        shiftPoint:
+          format: int32
+          description: 'shift point, value range : [1, +∞)'
+          type: integer
+        withinRange:
+          description: 'if the withinRange = true, detected data is abnormal when the value falls in the range, in this case anomalyDetectorDirection must be Both
+
+            if the withinRange = false, detected data is abnormal when the value falls out of the range'
+          type: boolean
+        anomalyDetectorDirection:
+          description: detection direction
+          enum:
+          - Both
+          - Down
+          - Up
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectorDirection
+            modelAsString: true
+        suppressCondition:
+          $ref: '#/components/schemas/SuppressConditionPatch'
+    AnomalyProperty:
+      required:
+      - anomalySeverity
+      type: object
+      properties:
+        anomalySeverity:
+          description: anomaly severity
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+        anomalyStatus:
+          description: 'anomaly status
+
+
+            only return for alerting anomaly result'
+          enum:
+          - Active
+          - Resolved
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: AnomalyStatus
+            modelAsString: true
+        value:
+          format: double
+          description: value of the anomaly
+          type: number
+          readOnly: true
+        expectedValue:
+          format: double
+          description: expected value of the anomaly given by smart detector
+          type: number
+          readOnly: true
+    SeriesResultList:
       required:
       - value
       type: object
@@ -457,7 +558,7 @@ components:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/RootCause'
+            $ref: '#/components/schemas/SeriesResult'
     AnomalyAlertingConfigurationList:
       type: object
       properties:
@@ -469,6 +570,346 @@ components:
         '@nextLink':
           type: string
           readOnly: true
+    SeriesResult:
+      required:
+      - expectedValueList
+      - isAnomalyList
+      - lowerBoundaryList
+      - periodList
+      - series
+      - timestampList
+      - upperBoundaryList
+      - valueList
+      type: object
+      properties:
+        series:
+          $ref: '#/components/schemas/SeriesIdentity'
+        timestampList:
+          description: timestamps of the series
+          type: array
+          items:
+            format: date-time
+            type: string
+        valueList:
+          description: values of the series
+          type: array
+          items:
+            format: double
+            type: number
+        isAnomalyList:
+          description: whether points of the series are anomalies
+          type: array
+          items:
+            type: boolean
+        periodList:
+          description: period calculated on each point of the series
+          type: array
+          items:
+            format: int32
+            type: integer
+        expectedValueList:
+          description: expected values of the series given by smart detector
+          type: array
+          items:
+            format: double
+            type: number
+        lowerBoundaryList:
+          description: lower boundary list of the series given by smart detector
+          type: array
+          items:
+            format: double
+            type: number
+        upperBoundaryList:
+          description: upper boundary list of the series given by smart detector
+          type: array
+          items:
+            format: double
+            type: number
+    HardThresholdConditionPatch:
+      type: object
+      properties:
+        lowerBound:
+          format: double
+          description: 'lower bound
+
+
+            should be specified when anomalyDetectorDirection is Both or Down'
+          type: number
+        upperBound:
+          format: double
+          description: 'upper bound
+
+
+            should be specified when anomalyDetectorDirection is Both or Up'
+          type: number
+        anomalyDetectorDirection:
+          description: detection direction
+          enum:
+          - Both
+          - Down
+          - Up
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectorDirection
+            modelAsString: true
+        suppressCondition:
+          $ref: '#/components/schemas/SuppressConditionPatch'
+    SeriesConfiguration:
+      required:
+      - series
+      type: object
+      properties:
+        series:
+          $ref: '#/components/schemas/SeriesIdentity'
+        conditionOperator:
+          description: 'condition operator
+
+
+            should be specified when combining multiple detection conditions'
+          enum:
+          - AND
+          - OR
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectionConfigurationLogicType
+            modelAsString: true
+        smartDetectionCondition:
+          $ref: '#/components/schemas/SmartDetectionCondition'
+        hardThresholdCondition:
+          $ref: '#/components/schemas/HardThresholdCondition'
+        changeThresholdCondition:
+          $ref: '#/components/schemas/ChangeThresholdCondition'
+    DetectionSeriesQuery:
+      required:
+      - endTime
+      - series
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: This is inclusive. The maximum number of data points (series number * time range) is 10000.
+          type: string
+        endTime:
+          format: date-time
+          description: This is exclusive. The maximum number of data points (series number * time range) is 10000.
+          type: string
+        series:
+          description: The series to be queried. The identity must be able to define one single time series instead of a group of time series. The maximum number of series is 100.
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesIdentity'
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+        series:
+        - dimension:
+            category: Jewelry
+            city: Beijing
+    WholeMetricConfigurationPatch:
+      type: object
+      properties:
+        conditionOperator:
+          description: 'condition operator
+
+
+            should be specified when combining multiple detection conditions'
+          enum:
+          - AND
+          - OR
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectionConfigurationLogicType
+            modelAsString: true
+        smartDetectionCondition:
+          $ref: '#/components/schemas/SmartDetectionConditionPatch'
+        hardThresholdCondition:
+          $ref: '#/components/schemas/HardThresholdConditionPatch'
+        changeThresholdCondition:
+          $ref: '#/components/schemas/ChangeThresholdConditionPatch'
+    DetectionAnomalyResultQuery:
+      required:
+      - endTime
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: start time
+          type: string
+        endTime:
+          format: date-time
+          description: end time
+          type: string
+        filter:
+          $ref: '#/components/schemas/DetectionAnomalyFilterCondition'
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+        filter:
+          dimensionFilter:
+          - dimension:
+              city: Beijing
+          severityFilter:
+            min: Low
+            max: High
+    RootCause:
+      required:
+      - description
+      - path
+      - rootCause
+      - score
+      type: object
+      properties:
+        rootCause:
+          $ref: '#/components/schemas/DimensionGroupIdentity'
+        path:
+          description: drilling down path from query anomaly to root cause
+          type: array
+          items:
+            type: string
+        score:
+          format: double
+          description: score of the root cause
+          type: number
+        description:
+          description: description of the root cause
+          type: string
+    SeverityFilterCondition:
+      required:
+      - max
+      - min
+      type: object
+      properties:
+        min:
+          description: min severity
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+        max:
+          description: max severity
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+    AnomalyResult:
+      required:
+      - dimension
+      - property
+      - timestamp
+      type: object
+      properties:
+        dataFeedId:
+          format: uuid
+          description: 'data feed unique id
+
+
+            only return for alerting anomaly result'
+          type: string
+          readOnly: true
+        metricId:
+          format: uuid
+          description: 'metric unique id
+
+
+            only return for alerting anomaly result'
+          type: string
+          readOnly: true
+        anomalyDetectionConfigurationId:
+          format: uuid
+          description: 'anomaly detection configuration unique id
+
+
+            only return for alerting anomaly result'
+          type: string
+          readOnly: true
+        timestamp:
+          format: date-time
+          description: anomaly time
+          type: string
+        createdTime:
+          format: date-time
+          description: 'created time
+
+
+            only return for alerting result'
+          type: string
+          readOnly: true
+        modifiedTime:
+          format: date-time
+          description: 'modified time
+
+
+            only return for alerting result'
+          type: string
+          readOnly: true
+        dimension:
+          description: dimension specified for series
+          type: object
+          additionalProperties:
+            type: string
+        property:
+          $ref: '#/components/schemas/AnomalyProperty'
+    AnomalyDimensionQuery:
+      required:
+      - dimensionName
+      - endTime
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: start time
+          type: string
+        endTime:
+          format: date-time
+          description: end time
+          type: string
+        dimensionName:
+          description: dimension to query
+          type: string
+        dimensionFilter:
+          $ref: '#/components/schemas/DimensionGroupIdentity'
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+        dimensionName: category
+        dimensionFilter:
+          dimension:
+            city: Beijing
+    SuppressConditionPatch:
+      type: object
+      properties:
+        minNumber:
+          format: int32
+          description: 'min point number, value range : [1, +∞)'
+          type: integer
+        minRatio:
+          format: double
+          description: 'min point ratio, value range : (0, 100]'
+          type: number
+    IncidentResultList:
+      required:
+      - value
+      type: object
+      properties:
+        '@nextLink':
+          type: string
+          readOnly: true
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentResult'
     IncidentResult:
       required:
       - incidentId
@@ -517,42 +958,10 @@ components:
           $ref: '#/components/schemas/SeriesIdentity'
         property:
           $ref: '#/components/schemas/IncidentProperty'
-    SmartDetectionCondition:
+    HardThresholdCondition:
       required:
       - anomalyDetectorDirection
-      - sensitivity
       - suppressCondition
-      type: object
-      properties:
-        sensitivity:
-          format: double
-          description: 'sensitivity, value range : (0, 100]'
-          type: number
-        anomalyDetectorDirection:
-          description: detection direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectorDirection
-            modelAsString: true
-        suppressCondition:
-          $ref: '#/components/schemas/SuppressCondition'
-    AnomalyResultList:
-      required:
-      - value
-      type: object
-      properties:
-        '@nextLink':
-          type: string
-          readOnly: true
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/AnomalyResult'
-    HardThresholdConditionPatch:
       type: object
       properties:
         lowerBound:
@@ -580,85 +989,123 @@ components:
             name: AnomalyDetectorDirection
             modelAsString: true
         suppressCondition:
-          $ref: '#/components/schemas/SuppressConditionPatch'
-    SeriesIdentity:
+          $ref: '#/components/schemas/SuppressCondition'
+    AnomalyAlertingConfiguration:
       required:
-      - dimension
+      - hookIds
+      - metricAlertingConfigurations
+      - name
       type: object
       properties:
-        dimension:
-          description: dimension specified for series
-          type: object
-          additionalProperties:
-            type: string
-    DimensionGroupIdentity:
-      required:
-      - dimension
-      type: object
-      properties:
-        dimension:
-          description: dimension specified for series group
-          type: object
-          additionalProperties:
-            type: string
-    RootCause:
-      required:
-      - description
-      - path
-      - rootCause
-      - score
-      type: object
-      properties:
-        rootCause:
-          $ref: '#/components/schemas/DimensionGroupIdentity'
-        path:
-          description: drilling down path from query anomaly to root cause
+        anomalyAlertingConfigurationId:
+          format: uuid
+          description: anomaly alerting configuration unique id
+          type: string
+          readOnly: true
+        name:
+          description: anomaly alerting configuration name
+          type: string
+        description:
+          description: anomaly alerting configuration description
+          default: ''
+          type: string
+        crossMetricsOperator:
+          description: 'cross metrics operator
+
+
+            should be specified when setting up multiple metric alerting configurations'
+          enum:
+          - AND
+          - OR
+          - XOR
+          type: string
+          x-ms-enum:
+            name: AnomalyAlertingConfigurationLogicType
+            modelAsString: true
+        splitAlertByDimensions:
+          description: dimensions used to split alert
+          uniqueItems: true
           type: array
           items:
             type: string
-        score:
-          format: double
-          description: score of the root cause
-          type: number
-        description:
-          description: description of the root cause
-          type: string
-    MetricAlertingConfiguration:
-      required:
-      - anomalyDetectionConfigurationId
-      - anomalyScopeType
+        hookIds:
+          description: hook unique ids
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            type: string
+        metricAlertingConfigurations:
+          description: Anomaly alerting configurations
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricAlertingConfiguration'
+      example:
+        name: alerting configuration name
+        crossMetricsOperator: AND
+        hookIds:
+        - 00000000-0000-0000-0000-000000000001
+        metricAlertingConfigurations:
+        - anomalyDetectionConfigurationId: 33333333-3333-3333-3333-000000000001
+          anomalyScopeType: All
+          negationOperation: false
+          severityFilter:
+            minAlertSeverity: Medium
+            maxAlertSeverity: High
+          snoozeFilter:
+            autoSnooze: 0
+            snoozeScope: Series
+            onlyForSuccessive: true
+        - anomalyDetectionConfigurationId: 33333333-3333-3333-3333-000000000002
+          anomalyScopeType: Dimension
+          negationOperation: false
+          dimensionAnomalyScope:
+            dimension:
+              city: Beijing
+          severityFilter:
+            minAlertSeverity: Low
+            maxAlertSeverity: High
+          snoozeFilter:
+            autoSnooze: 0
+            snoozeScope: Series
+            onlyForSuccessive: true
+          valueFilter:
+            lower: 0
+            upper: 1000
+            direction: Both
+            type: Value
+    SmartDetectionConditionPatch:
       type: object
       properties:
-        anomalyDetectionConfigurationId:
-          format: uuid
-          description: Anomaly detection configuration unique id
-          type: string
-        anomalyScopeType:
-          description: Anomaly scope
+        sensitivity:
+          format: double
+          description: 'sensitivity, value range : (0, 100]'
+          type: number
+        anomalyDetectorDirection:
+          description: detection direction
           enum:
-          - All
-          - Dimension
-          - TopN
+          - Both
+          - Down
+          - Up
           type: string
-          example: All
           x-ms-enum:
-            name: AnomalyScope
+            name: AnomalyDetectorDirection
             modelAsString: true
-        negationOperation:
-          description: Negation operation
-          default: false
-          type: boolean
-        dimensionAnomalyScope:
-          $ref: '#/components/schemas/DimensionGroupIdentity'
-        topNAnomalyScope:
-          $ref: '#/components/schemas/TopNGroupScope'
+        suppressCondition:
+          $ref: '#/components/schemas/SuppressConditionPatch'
+    DetectionAnomalyFilterCondition:
+      type: object
+      properties:
+        dimensionFilter:
+          description: dimension filter
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/DimensionGroupIdentity'
         severityFilter:
-          $ref: '#/components/schemas/SeverityCondition'
-        snoozeFilter:
-          $ref: '#/components/schemas/AlertSnoozeCondition'
-        valueFilter:
-          $ref: '#/components/schemas/ValueCondition'
-    WholeMetricConfigurationPatch:
+          $ref: '#/components/schemas/SeverityFilterCondition'
+    WholeMetricConfiguration:
       type: object
       properties:
         conditionOperator:
@@ -674,11 +1121,385 @@ components:
             name: AnomalyDetectionConfigurationLogicType
             modelAsString: true
         smartDetectionCondition:
-          $ref: '#/components/schemas/SmartDetectionConditionPatch'
+          $ref: '#/components/schemas/SmartDetectionCondition'
         hardThresholdCondition:
-          $ref: '#/components/schemas/HardThresholdConditionPatch'
+          $ref: '#/components/schemas/HardThresholdCondition'
         changeThresholdCondition:
-          $ref: '#/components/schemas/ChangeThresholdConditionPatch'
+          $ref: '#/components/schemas/ChangeThresholdCondition'
+    DimensionGroupConfiguration:
+      required:
+      - group
+      type: object
+      properties:
+        group:
+          $ref: '#/components/schemas/DimensionGroupIdentity'
+        conditionOperator:
+          description: 'condition operator
+
+
+            should be specified when combining multiple detection conditions'
+          enum:
+          - AND
+          - OR
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectionConfigurationLogicType
+            modelAsString: true
+        smartDetectionCondition:
+          $ref: '#/components/schemas/SmartDetectionCondition'
+        hardThresholdCondition:
+          $ref: '#/components/schemas/HardThresholdCondition'
+        changeThresholdCondition:
+          $ref: '#/components/schemas/ChangeThresholdCondition'
+    AlertSnoozeCondition:
+      required:
+      - autoSnooze
+      - onlyForSuccessive
+      - snoozeScope
+      type: object
+      properties:
+        autoSnooze:
+          format: int32
+          description: 'snooze point count, value range : [0, +∞)'
+          type: integer
+        snoozeScope:
+          description: snooze scope
+          enum:
+          - Metric
+          - Series
+          type: string
+          x-ms-enum:
+            name: SnoozeScope
+            modelAsString: true
+        onlyForSuccessive:
+          description: only snooze for successive anomalies
+          type: boolean
+    SmartDetectionCondition:
+      required:
+      - anomalyDetectorDirection
+      - sensitivity
+      - suppressCondition
+      type: object
+      properties:
+        sensitivity:
+          format: double
+          description: 'sensitivity, value range : (0, 100]'
+          type: number
+        anomalyDetectorDirection:
+          description: detection direction
+          enum:
+          - Both
+          - Down
+          - Up
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectorDirection
+            modelAsString: true
+        suppressCondition:
+          $ref: '#/components/schemas/SuppressCondition'
+    SuppressCondition:
+      required:
+      - minNumber
+      - minRatio
+      type: object
+      properties:
+        minNumber:
+          format: int32
+          description: 'min point number, value range : [1, +∞)'
+          type: integer
+        minRatio:
+          format: double
+          description: 'min point ratio, value range : (0, 100]'
+          type: number
+    ErrorCode:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+    RootCauseList:
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RootCause'
+    DetectionIncidentResultQuery:
+      required:
+      - endTime
+      - startTime
+      type: object
+      properties:
+        startTime:
+          format: date-time
+          description: start time
+          type: string
+        endTime:
+          format: date-time
+          description: end time
+          type: string
+        filter:
+          $ref: '#/components/schemas/DetectionIncidentFilterCondition'
+      example:
+        startTime: '2020-01-01T00:00:00Z'
+        endTime: '2020-02-01T00:00:00Z'
+        filter:
+          dimensionFilter:
+          - dimension:
+              city: Beijing
+    ValueCondition:
+      required:
+      - direction
+      type: object
+      properties:
+        lower:
+          format: double
+          description: 'lower bound
+
+
+            should be specified when direction is Both or Down'
+          type: number
+        upper:
+          format: double
+          description: 'upper bound
+
+
+            should be specified when direction is Both or Up'
+          type: number
+        direction:
+          description: value filter direction
+          enum:
+          - Both
+          - Down
+          - Up
+          type: string
+          x-ms-enum:
+            name: Direction
+            modelAsString: true
+        type:
+          description: data used to implement value filter
+          default: Value
+          enum:
+          - Value
+          - Mean
+          type: string
+          x-ms-enum:
+            name: ValueType
+            modelAsString: true
+        metricId:
+          format: uuid
+          description: the other metric unique id used for value filter
+          type: string
+        triggerForMissing:
+          description: 'trigger alert when the corresponding point is missing in the other metric
+
+
+            should be specified only when using other metric to filter'
+          type: boolean
+    AnomalyDimensionList:
+      required:
+      - value
+      type: object
+      properties:
+        '@nextLink':
+          type: string
+          readOnly: true
+        value:
+          type: array
+          items:
+            type: string
+    IncidentProperty:
+      required:
+      - maxSeverity
+      type: object
+      properties:
+        maxSeverity:
+          description: max severity of latest anomalies in the incident
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+        incidentStatus:
+          description: 'incident status
+
+
+            only return for alerting incident result'
+          enum:
+          - Active
+          - Resolved
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: IncidentStatus
+            modelAsString: true
+        valueOfRootNode:
+          format: double
+          description: value of the root node
+          type: number
+          readOnly: true
+        expectedValueOfRootNode:
+          format: double
+          description: expected value of the root node given by smart detector
+          type: number
+          readOnly: true
+    SeverityCondition:
+      required:
+      - maxAlertSeverity
+      - minAlertSeverity
+      type: object
+      properties:
+        minAlertSeverity:
+          description: min alert severity
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+        maxAlertSeverity:
+          description: max alert severity
+          enum:
+          - Low
+          - Medium
+          - High
+          type: string
+          x-ms-enum:
+            name: Severity
+            modelAsString: true
+    AnomalyDetectionConfigurationPatch:
+      type: object
+      properties:
+        name:
+          description: anomaly detection configuration name
+          type: string
+        description:
+          description: anomaly detection configuration description
+          default: ''
+          type: string
+        wholeMetricConfiguration:
+          $ref: '#/components/schemas/WholeMetricConfigurationPatch'
+        dimensionGroupOverrideConfigurations:
+          description: detection configuration for series group
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/DimensionGroupConfiguration'
+        seriesOverrideConfigurations:
+          description: detection configuration for specific series
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesConfiguration'
+      example:
+        wholeMetricConfiguration:
+          smartDetectionCondition:
+            sensitivity: 91
+    ChangeThresholdCondition:
+      required:
+      - anomalyDetectorDirection
+      - changePercentage
+      - shiftPoint
+      - suppressCondition
+      - withinRange
+      type: object
+      properties:
+        changePercentage:
+          format: double
+          description: 'change percentage, value range : [0, +∞)'
+          type: number
+        shiftPoint:
+          format: int32
+          description: 'shift point, value range : [1, +∞)'
+          type: integer
+        withinRange:
+          description: 'if the withinRange = true, detected data is abnormal when the value falls in the range, in this case anomalyDetectorDirection must be Both
+
+            if the withinRange = false, detected data is abnormal when the value falls out of the range'
+          type: boolean
+        anomalyDetectorDirection:
+          description: detection direction
+          enum:
+          - Both
+          - Down
+          - Up
+          type: string
+          x-ms-enum:
+            name: AnomalyDetectorDirection
+            modelAsString: true
+        suppressCondition:
+          $ref: '#/components/schemas/SuppressCondition'
+    SeriesIdentity:
+      required:
+      - dimension
+      type: object
+      properties:
+        dimension:
+          description: dimension specified for series
+          type: object
+          additionalProperties:
+            type: string
+    AnomalyResultList:
+      required:
+      - value
+      type: object
+      properties:
+        '@nextLink':
+          type: string
+          readOnly: true
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnomalyResult'
+    TopNGroupScope:
+      required:
+      - minTopCount
+      - period
+      - top
+      type: object
+      properties:
+        top:
+          format: int32
+          description: 'top N, value range : [1, +∞)'
+          type: integer
+        period:
+          format: int32
+          description: 'point count used to look back, value range : [1, +∞)'
+          type: integer
+        minTopCount:
+          format: int32
+          description: 'min count should be in top N, value range : [1, +∞)
+
+
+            should be less than or equal to period'
+          type: integer
+    DetectionIncidentFilterCondition:
+      type: object
+      properties:
+        dimensionFilter:
+          description: dimension filter
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/DimensionGroupIdentity'
+    DimensionGroupIdentity:
+      required:
+      - dimension
+      type: object
+      properties:
+        dimension:
+          description: dimension specified for series group
+          type: object
+          additionalProperties:
+            type: string
     AnomalyDetectionConfiguration:
       required:
       - metricId
@@ -796,827 +1617,6 @@ components:
             suppressCondition:
               minNumber: 1
               minRatio: 100
-    SeriesConfiguration:
-      required:
-      - series
-      type: object
-      properties:
-        series:
-          $ref: '#/components/schemas/SeriesIdentity'
-        conditionOperator:
-          description: 'condition operator
-
-
-            should be specified when combining multiple detection conditions'
-          enum:
-          - AND
-          - OR
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectionConfigurationLogicType
-            modelAsString: true
-        smartDetectionCondition:
-          $ref: '#/components/schemas/SmartDetectionCondition'
-        hardThresholdCondition:
-          $ref: '#/components/schemas/HardThresholdCondition'
-        changeThresholdCondition:
-          $ref: '#/components/schemas/ChangeThresholdCondition'
-    ChangeThresholdConditionPatch:
-      type: object
-      properties:
-        changePercentage:
-          format: double
-          description: 'change percentage, value range : [0, +∞)'
-          type: number
-        shiftPoint:
-          format: int32
-          description: 'shift point, value range : [1, +∞)'
-          type: integer
-        withinRange:
-          description: 'if the withinRange = true, detected data is abnormal when the value falls in the range, in this case anomalyDetectorDirection must be Both
-
-            if the withinRange = false, detected data is abnormal when the value falls out of the range'
-          type: boolean
-        anomalyDetectorDirection:
-          description: detection direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectorDirection
-            modelAsString: true
-        suppressCondition:
-          $ref: '#/components/schemas/SuppressConditionPatch'
-    HardThresholdCondition:
-      required:
-      - anomalyDetectorDirection
-      - suppressCondition
-      type: object
-      properties:
-        lowerBound:
-          format: double
-          description: 'lower bound
-
-
-            should be specified when anomalyDetectorDirection is Both or Down'
-          type: number
-        upperBound:
-          format: double
-          description: 'upper bound
-
-
-            should be specified when anomalyDetectorDirection is Both or Up'
-          type: number
-        anomalyDetectorDirection:
-          description: detection direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectorDirection
-            modelAsString: true
-        suppressCondition:
-          $ref: '#/components/schemas/SuppressCondition'
-    AlertSnoozeCondition:
-      required:
-      - autoSnooze
-      - onlyForSuccessive
-      - snoozeScope
-      type: object
-      properties:
-        autoSnooze:
-          format: int32
-          description: 'snooze point count, value range : [0, +∞)'
-          type: integer
-        snoozeScope:
-          description: snooze scope
-          enum:
-          - Metric
-          - Series
-          type: string
-          x-ms-enum:
-            name: SnoozeScope
-            modelAsString: true
-        onlyForSuccessive:
-          description: only snooze for successive anomalies
-          type: boolean
-    DetectionIncidentResultQuery:
-      required:
-      - endTime
-      - startTime
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: start time
-          type: string
-        endTime:
-          format: date-time
-          description: end time
-          type: string
-        filter:
-          $ref: '#/components/schemas/DetectionIncidentFilterCondition'
-      example:
-        startTime: '2020-01-01T00:00:00Z'
-        endTime: '2020-02-01T00:00:00Z'
-        filter:
-          dimensionFilter:
-          - dimension:
-              city: Beijing
-    AnomalyDimensionList:
-      required:
-      - value
-      type: object
-      properties:
-        '@nextLink':
-          type: string
-          readOnly: true
-        value:
-          type: array
-          items:
-            type: string
-    DetectionAnomalyResultQuery:
-      required:
-      - endTime
-      - startTime
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: start time
-          type: string
-        endTime:
-          format: date-time
-          description: end time
-          type: string
-        filter:
-          $ref: '#/components/schemas/DetectionAnomalyFilterCondition'
-      example:
-        startTime: '2020-01-01T00:00:00Z'
-        endTime: '2020-02-01T00:00:00Z'
-        filter:
-          dimensionFilter:
-          - dimension:
-              city: Beijing
-          severityFilter:
-            min: Low
-            max: High
-    DetectionAnomalyFilterCondition:
-      type: object
-      properties:
-        dimensionFilter:
-          description: dimension filter
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/DimensionGroupIdentity'
-        severityFilter:
-          $ref: '#/components/schemas/SeverityFilterCondition'
-    DimensionGroupConfiguration:
-      required:
-      - group
-      type: object
-      properties:
-        group:
-          $ref: '#/components/schemas/DimensionGroupIdentity'
-        conditionOperator:
-          description: 'condition operator
-
-
-            should be specified when combining multiple detection conditions'
-          enum:
-          - AND
-          - OR
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectionConfigurationLogicType
-            modelAsString: true
-        smartDetectionCondition:
-          $ref: '#/components/schemas/SmartDetectionCondition'
-        hardThresholdCondition:
-          $ref: '#/components/schemas/HardThresholdCondition'
-        changeThresholdCondition:
-          $ref: '#/components/schemas/ChangeThresholdCondition'
-    ValueCondition:
-      required:
-      - direction
-      type: object
-      properties:
-        lower:
-          format: double
-          description: 'lower bound
-
-
-            should be specified when direction is Both or Down'
-          type: number
-        upper:
-          format: double
-          description: 'upper bound
-
-
-            should be specified when direction is Both or Up'
-          type: number
-        direction:
-          description: value filter direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: Direction
-            modelAsString: true
-        type:
-          description: data used to implement value filter
-          default: Value
-          enum:
-          - Value
-          - Mean
-          type: string
-          x-ms-enum:
-            name: ValueType
-            modelAsString: true
-        metricId:
-          format: uuid
-          description: the other metric unique id used for value filter
-          type: string
-        triggerForMissing:
-          description: 'trigger alert when the corresponding point is missing in the other metric
-
-
-            should be specified only when using other metric to filter'
-          type: boolean
-    SmartDetectionConditionPatch:
-      type: object
-      properties:
-        sensitivity:
-          format: double
-          description: 'sensitivity, value range : (0, 100]'
-          type: number
-        anomalyDetectorDirection:
-          description: detection direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectorDirection
-            modelAsString: true
-        suppressCondition:
-          $ref: '#/components/schemas/SuppressConditionPatch'
-    SeverityCondition:
-      required:
-      - maxAlertSeverity
-      - minAlertSeverity
-      type: object
-      properties:
-        minAlertSeverity:
-          description: min alert severity
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-        maxAlertSeverity:
-          description: max alert severity
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-    SeriesResult:
-      required:
-      - expectedValueList
-      - isAnomalyList
-      - lowerBoundaryList
-      - periodList
-      - series
-      - timestampList
-      - upperBoundaryList
-      - valueList
-      type: object
-      properties:
-        series:
-          $ref: '#/components/schemas/SeriesIdentity'
-        timestampList:
-          description: timestamps of the series
-          type: array
-          items:
-            format: date-time
-            type: string
-        valueList:
-          description: values of the series
-          type: array
-          items:
-            format: double
-            type: number
-        isAnomalyList:
-          description: whether points of the series are anomalies
-          type: array
-          items:
-            type: boolean
-        periodList:
-          description: period calculated on each point of the series
-          type: array
-          items:
-            format: int32
-            type: integer
-        expectedValueList:
-          description: expected values of the series given by smart detector
-          type: array
-          items:
-            format: double
-            type: number
-        lowerBoundaryList:
-          description: lower boundary list of the series given by smart detector
-          type: array
-          items:
-            format: double
-            type: number
-        upperBoundaryList:
-          description: upper boundary list of the series given by smart detector
-          type: array
-          items:
-            format: double
-            type: number
-    AnomalyDimensionQuery:
-      required:
-      - dimensionName
-      - endTime
-      - startTime
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: start time
-          type: string
-        endTime:
-          format: date-time
-          description: end time
-          type: string
-        dimensionName:
-          description: dimension to query
-          type: string
-        dimensionFilter:
-          $ref: '#/components/schemas/DimensionGroupIdentity'
-      example:
-        startTime: '2020-01-01T00:00:00Z'
-        endTime: '2020-02-01T00:00:00Z'
-        dimensionName: category
-        dimensionFilter:
-          dimension:
-            city: Beijing
-    SeverityFilterCondition:
-      required:
-      - max
-      - min
-      type: object
-      properties:
-        min:
-          description: min severity
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-        max:
-          description: max severity
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-    TopNGroupScope:
-      required:
-      - minTopCount
-      - period
-      - top
-      type: object
-      properties:
-        top:
-          format: int32
-          description: 'top N, value range : [1, +∞)'
-          type: integer
-        period:
-          format: int32
-          description: 'point count used to look back, value range : [1, +∞)'
-          type: integer
-        minTopCount:
-          format: int32
-          description: 'min count should be in top N, value range : [1, +∞)
-
-
-            should be less than or equal to period'
-          type: integer
-    IncidentResultList:
-      required:
-      - value
-      type: object
-      properties:
-        '@nextLink':
-          type: string
-          readOnly: true
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/IncidentResult'
-    AnomalyDetectionConfigurationPatch:
-      type: object
-      properties:
-        name:
-          description: anomaly detection configuration name
-          type: string
-        description:
-          description: anomaly detection configuration description
-          default: ''
-          type: string
-        wholeMetricConfiguration:
-          $ref: '#/components/schemas/WholeMetricConfigurationPatch'
-        dimensionGroupOverrideConfigurations:
-          description: detection configuration for series group
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/DimensionGroupConfiguration'
-        seriesOverrideConfigurations:
-          description: detection configuration for specific series
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/SeriesConfiguration'
-      example:
-        wholeMetricConfiguration:
-          smartDetectionCondition:
-            sensitivity: 91
-    DetectionSeriesQuery:
-      required:
-      - endTime
-      - series
-      - startTime
-      type: object
-      properties:
-        startTime:
-          format: date-time
-          description: This is inclusive. The maximum number of data points (series number * time range) is 10000.
-          type: string
-        endTime:
-          format: date-time
-          description: This is exclusive. The maximum number of data points (series number * time range) is 10000.
-          type: string
-        series:
-          description: The series to be queried. The identity must be able to define one single time series instead of a group of time series. The maximum number of series is 100.
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/SeriesIdentity'
-      example:
-        startTime: '2020-01-01T00:00:00Z'
-        endTime: '2020-02-01T00:00:00Z'
-        series:
-        - dimension:
-            category: Jewelry
-            city: Beijing
-    ChangeThresholdCondition:
-      required:
-      - anomalyDetectorDirection
-      - changePercentage
-      - shiftPoint
-      - suppressCondition
-      - withinRange
-      type: object
-      properties:
-        changePercentage:
-          format: double
-          description: 'change percentage, value range : [0, +∞)'
-          type: number
-        shiftPoint:
-          format: int32
-          description: 'shift point, value range : [1, +∞)'
-          type: integer
-        withinRange:
-          description: 'if the withinRange = true, detected data is abnormal when the value falls in the range, in this case anomalyDetectorDirection must be Both
-
-            if the withinRange = false, detected data is abnormal when the value falls out of the range'
-          type: boolean
-        anomalyDetectorDirection:
-          description: detection direction
-          enum:
-          - Both
-          - Down
-          - Up
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectorDirection
-            modelAsString: true
-        suppressCondition:
-          $ref: '#/components/schemas/SuppressCondition'
-    AnomalyResult:
-      required:
-      - dimension
-      - property
-      - timestamp
-      type: object
-      properties:
-        dataFeedId:
-          format: uuid
-          description: 'data feed unique id
-
-
-            only return for alerting anomaly result'
-          type: string
-          readOnly: true
-        metricId:
-          format: uuid
-          description: 'metric unique id
-
-
-            only return for alerting anomaly result'
-          type: string
-          readOnly: true
-        anomalyDetectionConfigurationId:
-          format: uuid
-          description: 'anomaly detection configuration unique id
-
-
-            only return for alerting anomaly result'
-          type: string
-          readOnly: true
-        timestamp:
-          format: date-time
-          description: anomaly time
-          type: string
-        createdTime:
-          format: date-time
-          description: 'created time
-
-
-            only return for alerting result'
-          type: string
-          readOnly: true
-        modifiedTime:
-          format: date-time
-          description: 'modified time
-
-
-            only return for alerting result'
-          type: string
-          readOnly: true
-        dimension:
-          description: dimension specified for series
-          type: object
-          additionalProperties:
-            type: string
-        property:
-          $ref: '#/components/schemas/AnomalyProperty'
-    WholeMetricConfiguration:
-      type: object
-      properties:
-        conditionOperator:
-          description: 'condition operator
-
-
-            should be specified when combining multiple detection conditions'
-          enum:
-          - AND
-          - OR
-          type: string
-          x-ms-enum:
-            name: AnomalyDetectionConfigurationLogicType
-            modelAsString: true
-        smartDetectionCondition:
-          $ref: '#/components/schemas/SmartDetectionCondition'
-        hardThresholdCondition:
-          $ref: '#/components/schemas/HardThresholdCondition'
-        changeThresholdCondition:
-          $ref: '#/components/schemas/ChangeThresholdCondition'
-    DetectionIncidentFilterCondition:
-      type: object
-      properties:
-        dimensionFilter:
-          description: dimension filter
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/DimensionGroupIdentity'
-    ErrorCode:
-      type: object
-      properties:
-        message:
-          type: string
-        code:
-          type: string
-    IncidentProperty:
-      required:
-      - maxSeverity
-      type: object
-      properties:
-        maxSeverity:
-          description: max severity of latest anomalies in the incident
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-        incidentStatus:
-          description: 'incident status
-
-
-            only return for alerting incident result'
-          enum:
-          - Active
-          - Resolved
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: IncidentStatus
-            modelAsString: true
-        valueOfRootNode:
-          format: double
-          description: value of the root node
-          type: number
-          readOnly: true
-        expectedValueOfRootNode:
-          format: double
-          description: expected value of the root node given by smart detector
-          type: number
-          readOnly: true
-    SeriesResultList:
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SeriesResult'
-    AnomalyAlertingConfiguration:
-      required:
-      - hookIds
-      - metricAlertingConfigurations
-      - name
-      type: object
-      properties:
-        anomalyAlertingConfigurationId:
-          format: uuid
-          description: anomaly alerting configuration unique id
-          type: string
-          readOnly: true
-        name:
-          description: anomaly alerting configuration name
-          type: string
-        description:
-          description: anomaly alerting configuration description
-          default: ''
-          type: string
-        crossMetricsOperator:
-          description: 'cross metrics operator
-
-
-            should be specified when setting up multiple metric alerting configurations'
-          enum:
-          - AND
-          - OR
-          - XOR
-          type: string
-          x-ms-enum:
-            name: AnomalyAlertingConfigurationLogicType
-            modelAsString: true
-        splitAlertByDimensions:
-          description: dimensions used to split alert
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        hookIds:
-          description: hook unique ids
-          uniqueItems: true
-          type: array
-          items:
-            format: uuid
-            type: string
-        metricAlertingConfigurations:
-          description: Anomaly alerting configurations
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/MetricAlertingConfiguration'
-      example:
-        name: alerting configuration name
-        crossMetricsOperator: AND
-        hookIds:
-        - 00000000-0000-0000-0000-000000000001
-        metricAlertingConfigurations:
-        - anomalyDetectionConfigurationId: 33333333-3333-3333-3333-000000000001
-          anomalyScopeType: All
-          negationOperation: false
-          severityFilter:
-            minAlertSeverity: Medium
-            maxAlertSeverity: High
-          snoozeFilter:
-            autoSnooze: 0
-            snoozeScope: Series
-            onlyForSuccessive: true
-        - anomalyDetectionConfigurationId: 33333333-3333-3333-3333-000000000002
-          anomalyScopeType: Dimension
-          negationOperation: false
-          dimensionAnomalyScope:
-            dimension:
-              city: Beijing
-          severityFilter:
-            minAlertSeverity: Low
-            maxAlertSeverity: High
-          snoozeFilter:
-            autoSnooze: 0
-            snoozeScope: Series
-            onlyForSuccessive: true
-          valueFilter:
-            lower: 0
-            upper: 1000
-            direction: Both
-            type: Value
-    SuppressConditionPatch:
-      type: object
-      properties:
-        minNumber:
-          format: int32
-          description: 'min point number, value range : [1, +∞)'
-          type: integer
-        minRatio:
-          format: double
-          description: 'min point ratio, value range : (0, 100]'
-          type: number
-    SuppressCondition:
-      required:
-      - minNumber
-      - minRatio
-      type: object
-      properties:
-        minNumber:
-          format: int32
-          description: 'min point number, value range : [1, +∞)'
-          type: integer
-        minRatio:
-          format: double
-          description: 'min point ratio, value range : (0, 100]'
-          type: number
-    AnomalyProperty:
-      required:
-      - anomalySeverity
-      type: object
-      properties:
-        anomalySeverity:
-          description: anomaly severity
-          enum:
-          - Low
-          - Medium
-          - High
-          type: string
-          x-ms-enum:
-            name: Severity
-            modelAsString: true
-        anomalyStatus:
-          description: 'anomaly status
-
-
-            only return for alerting anomaly result'
-          enum:
-          - Active
-          - Resolved
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: AnomalyStatus
-            modelAsString: true
-        value:
-          format: double
-          description: value of the anomaly
-          type: number
-          readOnly: true
-        expectedValue:
-          format: double
-          description: expected value of the anomaly given by smart detector
-          type: number
-          readOnly: true
   securitySchemes:
     ma_api_key:
       type: apiKey

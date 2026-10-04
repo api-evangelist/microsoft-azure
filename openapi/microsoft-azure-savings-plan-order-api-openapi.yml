@@ -95,26 +95,14 @@ paths:
       summary: Microsoft Azure Get Providers Microsoft Billingbenefits Savingsplanorders
 components:
   schemas:
-    BillingPlanInformation:
-      type: object
-      description: Information describing the type of billing plan for this savings plan.
-      properties:
-        pricingCurrencyTotal:
-          $ref: '#/components/schemas/Price'
-          description: Amount of money to be paid for the Order. Tax is not included.
-        startDate:
-          type: string
-          format: date
-          description: Date when the billing plan has started.
-        nextPaymentDueDate:
-          type: string
-          format: date
-          description: For recurring billing plans, indicates the date when next payment will be processed. Null when total is paid off.
-        transactions:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentDetail'
-          x-ms-identifiers: []
+    BillingProfileId:
+      type: string
+      readOnly: true
+      description: Fully-qualified identifier of the billing profile where the savings plan is applied. Present only for Field-led or Customer-led customers.
+    CustomerId:
+      type: string
+      readOnly: true
+      description: Fully-qualified identifier of the customer where the savings plan is applied. Present only for Partner-led customers.
     ExtendedStatusInfo:
       type: object
       readOnly: true
@@ -140,23 +128,25 @@ components:
           description: Savings plan order properties
           x-ms-client-flatten: true
           $ref: '#/components/schemas/SavingsPlanOrderModelProperties'
-    RoleAssignmentEntityProperties:
+    SavingsPlanOrderModelList:
       type: object
-      description: Role assignment entity properties
       properties:
-        principalId:
-          description: Principal Id
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavingsPlanOrderModel'
+        nextLink:
           type: string
-        roleDefinitionId:
-          description: Role definition id
+          description: Url to get the next page.
+    Price:
+      type: object
+      properties:
+        currencyCode:
           type: string
-        scope:
-          description: Scope of the role assignment entity
-          type: string
-    BillingProfileId:
-      type: string
-      readOnly: true
-      description: Fully-qualified identifier of the billing profile where the savings plan is applied. Present only for Field-led or Customer-led customers.
+          description: The ISO 4217 3-letter currency code for the currency used by this purchase record.
+        amount:
+          type: number
+          format: double
     RoleAssignmentEntity:
       type: object
       description: Role assignment entity
@@ -171,6 +161,114 @@ components:
           description: Role assignment entity properties
           x-ms-client-flatten: true
           $ref: '#/components/schemas/RoleAssignmentEntityProperties'
+    Term:
+      type: string
+      description: Represent benefit term in ISO 8601 format.
+      enum:
+      - P1Y
+      - P3Y
+      - P5Y
+      x-ms-enum:
+        name: Term
+        modelAsString: true
+    BenefitStartTime:
+      type: string
+      format: date-time
+      description: This is the DateTime when the savings plan benefit started.
+    PaymentDetail:
+      type: object
+      description: Information about payment related to a savings plan order.
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Date when the payment needs to be done.
+        paymentDate:
+          type: string
+          format: date
+          description: Date when the transaction is completed. Is null when it is scheduled.
+        pricingCurrencyTotal:
+          $ref: '#/components/schemas/Price'
+          description: Amount in pricing currency. Tax not included.
+        billingCurrencyTotal:
+          $ref: '#/components/schemas/Price'
+          description: Amount charged in Billing currency. Tax not included. Is null for future payments
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        extendedStatusInfo:
+          $ref: '#/components/schemas/ExtendedStatusInfo'
+        billingAccount:
+          type: string
+          description: Billing account
+    SavingsPlanId:
+      type: string
+      description: Identifier of the savings plan
+      readOnly: true
+    ExpiryDateTime:
+      type: string
+      description: Expiry date time
+      readOnly: true
+      format: date-time
+    RoleAssignmentEntityProperties:
+      type: object
+      description: Role assignment entity properties
+      properties:
+        principalId:
+          description: Principal Id
+          type: string
+        roleDefinitionId:
+          description: Role definition id
+          type: string
+        scope:
+          description: Scope of the role assignment entity
+          type: string
+    ProvisioningState:
+      type: string
+      description: Provisioning state
+      readOnly: true
+      enum:
+      - Creating
+      - PendingBilling
+      - ConfirmedBilling
+      - Created
+      - Succeeded
+      - Cancelled
+      - Expired
+      - Failed
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    BillingPlan:
+      type: string
+      description: Represents the billing plan in ISO 8601 format. Required only for monthly billing plans.
+      enum:
+      - P1M
+      x-ms-enum:
+        name: BillingPlan
+        modelAsString: true
+    BillingScopeId:
+      type: string
+      description: Subscription that will be charged for purchasing the benefit
+    BillingPlanInformation:
+      type: object
+      description: Information describing the type of billing plan for this savings plan.
+      properties:
+        pricingCurrencyTotal:
+          $ref: '#/components/schemas/Price'
+          description: Amount of money to be paid for the Order. Tax is not included.
+        startDate:
+          type: string
+          format: date
+          description: Date when the billing plan has started.
+        nextPaymentDueDate:
+          type: string
+          format: date
+          description: For recurring billing plans, indicates the date when next payment will be processed. Null when total is paid off.
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentDetail'
+          x-ms-identifiers: []
     SavingsPlanOrderModelProperties:
       type: object
       description: Savings plan order properties
@@ -203,16 +301,20 @@ components:
             $ref: '#/components/schemas/SavingsPlanId'
         extendedStatusInfo:
           $ref: '#/components/schemas/ExtendedStatusInfo'
-    SavingsPlanOrderModelList:
+    DisplayName:
+      type: string
+      description: Display name
+    BillingAccountId:
+      type: string
+      readOnly: true
+      description: Fully-qualified identifier of the billing account where the savings plan is applied. Present only for Enterprise Agreement customers.
+    Sku:
       type: object
+      description: The SKU to be applied for this resource
       properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/SavingsPlanOrderModel'
-        nextLink:
+        name:
           type: string
-          description: Url to get the next page.
+          description: Name of the SKU to be applied
     PaymentStatus:
       type: string
       description: Describes whether the payment is completed, failed, cancelled or scheduled in the future.
@@ -224,123 +326,21 @@ components:
       x-ms-enum:
         name: PaymentStatus
         modelAsString: true
-    ExpiryDateTime:
-      type: string
-      description: Expiry date time
-      readOnly: true
-      format: date-time
-    Term:
-      type: string
-      description: Represent benefit term in ISO 8601 format.
-      enum:
-      - P1Y
-      - P3Y
-      - P5Y
-      x-ms-enum:
-        name: Term
-        modelAsString: true
-    Sku:
-      type: object
-      description: The SKU to be applied for this resource
-      properties:
-        name:
-          type: string
-          description: Name of the SKU to be applied
-    BenefitStartTime:
-      type: string
-      format: date-time
-      description: This is the DateTime when the savings plan benefit started.
-    BillingAccountId:
-      type: string
-      readOnly: true
-      description: Fully-qualified identifier of the billing account where the savings plan is applied. Present only for Enterprise Agreement customers.
-    SavingsPlanId:
-      type: string
-      description: Identifier of the savings plan
-      readOnly: true
-    CustomerId:
-      type: string
-      readOnly: true
-      description: Fully-qualified identifier of the customer where the savings plan is applied. Present only for Partner-led customers.
-    ProvisioningState:
-      type: string
-      description: Provisioning state
-      readOnly: true
-      enum:
-      - Creating
-      - PendingBilling
-      - ConfirmedBilling
-      - Created
-      - Succeeded
-      - Cancelled
-      - Expired
-      - Failed
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    BillingScopeId:
-      type: string
-      description: Subscription that will be charged for purchasing the benefit
-    BillingPlan:
-      type: string
-      description: Represents the billing plan in ISO 8601 format. Required only for monthly billing plans.
-      enum:
-      - P1M
-      x-ms-enum:
-        name: BillingPlan
-        modelAsString: true
-    PaymentDetail:
-      type: object
-      description: Information about payment related to a savings plan order.
-      properties:
-        dueDate:
-          type: string
-          format: date
-          description: Date when the payment needs to be done.
-        paymentDate:
-          type: string
-          format: date
-          description: Date when the transaction is completed. Is null when it is scheduled.
-        pricingCurrencyTotal:
-          $ref: '#/components/schemas/Price'
-          description: Amount in pricing currency. Tax not included.
-        billingCurrencyTotal:
-          $ref: '#/components/schemas/Price'
-          description: Amount charged in Billing currency. Tax not included. Is null for future payments
-        status:
-          $ref: '#/components/schemas/PaymentStatus'
-        extendedStatusInfo:
-          $ref: '#/components/schemas/ExtendedStatusInfo'
-        billingAccount:
-          type: string
-          description: Billing account
-    Price:
-      type: object
-      properties:
-        currencyCode:
-          type: string
-          description: The ISO 4217 3-letter currency code for the currency used by this purchase record.
-        amount:
-          type: number
-          format: double
-    DisplayName:
-      type: string
-      description: Display name
   parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      x-ms-parameter-location: client
-      required: true
-      description: The api-version to be used by the service
-      schema:
-        type: string
     SavingsPlanOrderIdParameter:
       name: savingsPlanOrderId
       x-ms-parameter-location: method
       in: path
       required: true
       description: Order ID of the savings plan
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      x-ms-parameter-location: client
+      required: true
+      description: The api-version to be used by the service
       schema:
         type: string
     ExpandParameter:

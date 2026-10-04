@@ -387,39 +387,316 @@ paths:
                 $ref: '#/components/schemas/ErrorModel'
 components:
   schemas:
-    NodeType:
+    SubResource:
       type: object
-      allOf:
-      - $ref: '#/components/schemas/ManagedProxyResource'
       properties:
+        id:
+          type: string
+          description: Azure resource identifier.
+      description: Azure resource identifier.
+      x-ms-azure-resource: true
+    EndpointRangeDescription:
+      type: object
+      required:
+      - endPort
+      - startPort
+      properties:
+        startPort:
+          type: integer
+          format: int32
+          description: Starting port of a range of ports
+        endPort:
+          type: integer
+          format: int32
+          description: End port of a range of ports
+      description: Port range details
+    NodeTypeActionParameters:
+      type: object
+      properties:
+        nodes:
+          description: List of node names from the node type.
+          type: array
+          items:
+            type: string
+        force:
+          description: Force the action to go through.
+          type: boolean
+        updateType:
+          type: string
+          description: Specifies the way the operation will be performed.
+          enum:
+          - Default
+          - ByUpgradeDomain
+          x-ms-enum:
+            name: updateType
+            modelAsString: true
+            values:
+            - value: Default
+              description: The operation will proceed in all specified nodes at the same time.
+            - value: ByUpgradeDomain
+              description: The operation will proceed one upgrade domain at a time, checking the health in between each to continue.
+      description: Parameters for Node type action. If nodes are not specified on the parameters, the operation will be performed in all nodes of the node type one upgrade domain at a time.
+    VmManagedIdentity:
+      type: object
+      properties:
+        userAssignedIdentities:
+          type: array
+          description: 'The list of user identities associated with the virtual machine scale set under the node type. Each entry will be an ARM resource ids in the form: ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.'
+          items:
+            type: string
+      description: Identities for the virtual machine scale set under the node type.
+    NodeTypeListSkuResult:
+      type: object
+      properties:
+        value:
+          type: array
+          title: Node type sku list value.
+          description: The list of available node type SKUs.
+          items:
+            $ref: '#/components/schemas/NodeTypeAvailableSku'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          description: The URL to use for getting the next set of results.
+      description: Node type available sku list results
+    NodeTypeSkuCapacity:
+      type: object
+      properties:
+        minimum:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Lowest permitted node count in a node type.
+        maximum:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Highest permitted node count in a node type.
+        default:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Default node count in a node type.
+        scaleType:
+          $ref: '#/components/schemas/NodeTypeSkuScaleType'
+          readOnly: true
+          description: Node type capacity scale type.
+      description: Provides information about how node type can be scaled.
+    ManagedResourceProvisioningState:
+      type: string
+      description: The provisioning state of the managed resource.
+      enum:
+      - None
+      - Creating
+      - Created
+      - Updating
+      - Succeeded
+      - Failed
+      - Canceled
+      - Deleting
+      - Deleted
+      - Other
+      x-ms-enum:
+        name: ManagedResourceProvisioningState
+        modelAsString: true
+    ErrorModelError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The error code.
+        message:
+          type: string
+          description: The error message.
+      description: The error details.
+    VmssDataDisk:
+      type: object
+      required:
+      - lun
+      - diskSizeGB
+      - diskType
+      - diskLetter
+      properties:
+        lun:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Specifies the logical unit number of the data disk. This value is used to identify data disks within the VM and therefore must be unique for each data disk attached to a VM. Lun 0 is reserved for the service fabric data disk.
+        diskSizeGB:
+          type: integer
+          format: int32
+          description: Disk size for each vm in the node type in GBs.
+        diskType:
+          $ref: '#/components/schemas/DiskType'
+          description: Managed data disk type. Specifies the storage account type for the managed disk
+        diskLetter:
+          type: string
+          pattern: ^[a-zA-Z]{1}$
+          description: Managed data disk letter. It can not use the reserved letter C or D and it can not change after created.
+      description: Managed data disk description.
+    ManagedProxyResource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Azure resource identifier.
+          readOnly: true
+        name:
+          type: string
+          description: Azure resource name.
+          readOnly: true
+        type:
+          type: string
+          description: Azure resource type.
+          readOnly: true
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Azure resource tags.
+          x-ms-mutability:
+          - create
+          - read
+        systemData:
+          $ref: '#/components/schemas/SystemData'
+      description: The resource model definition for proxy-only resource.
+      x-ms-azure-resource: true
+    NetworkSecurityRule:
+      type: object
+      required:
+      - name
+      - protocol
+      - access
+      - priority
+      - direction
+      properties:
+        name:
+          type: string
+          description: Network security rule name.
+        description:
+          type: string
+          description: Network security rule description.
+        protocol:
+          type: string
+          description: Network protocol this rule applies to.
+          enum:
+          - http
+          - https
+          - tcp
+          - udp
+          - icmp
+          - ah
+          - esp
+          x-ms-enum:
+            name: nsgProtocol
+            modelAsString: true
+        sourceAddressPrefixes:
+          type: array
+          items:
+            type: string
+          description: The CIDR or source IP ranges.
+        destinationAddressPrefixes:
+          type: array
+          items:
+            type: string
+          description: The destination address prefixes. CIDR or destination IP ranges.
+        sourcePortRanges:
+          type: array
+          items:
+            type: string
+          description: The source port ranges.
+        destinationPortRanges:
+          type: array
+          items:
+            type: string
+          description: The destination port ranges.
+        sourceAddressPrefix:
+          type: string
+          description: The CIDR or source IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from.
+        destinationAddressPrefix:
+          type: string
+          description: The destination address prefix. CIDR or destination IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.
+        sourcePortRange:
+          type: string
+          description: The source port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.
+        destinationPortRange:
+          type: string
+          description: he destination port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.
+        access:
+          type: string
+          description: The network traffic is allowed or denied.
+          enum:
+          - allow
+          - deny
+          x-ms-enum:
+            name: access
+            modelAsString: true
+        priority:
+          type: integer
+          format: int32
+          description: The priority of the rule. The value can be in the range 1000 to 3000. Values outside this range are reserved for Service Fabric ManagerCluster Resource Provider. The priority number must be unique for each rule in the collection. The lower the priority number, the higher the priority of the rule.
+          minimum: 1000
+          maximum: 3000
+        direction:
+          type: string
+          description: Network security rule direction.
+          enum:
+          - inbound
+          - outbound
+          x-ms-enum:
+            name: direction
+            modelAsString: true
+      description: Describes a network security rule.
+    VMSSExtension:
+      type: object
+      required:
+      - name
+      - properties
+      properties:
+        name:
+          type: string
+          description: The name of the extension.
         properties:
           x-ms-client-flatten: true
-          $ref: '#/components/schemas/NodeTypeProperties'
-          description: The node type properties
-        sku:
-          $ref: '#/components/schemas/NodeTypeSku'
-          description: The node type sku.
-      description: Describes a node type in the cluster, each node type represents sub set of nodes in the cluster.
-    DiskType:
+          $ref: '#/components/schemas/VMSSExtensionProperties'
+          description: Describes the properties of a Virtual Machine Scale Set Extension.
+      description: Specifies set of extensions that should be installed onto the virtual machines.
+    FrontendConfiguration:
+      type: object
+      properties:
+        ipAddressType:
+          $ref: '#/components/schemas/IPAddressType'
+          description: The IP address type of this frontend configuration. If omitted the default value is IPv4.
+        loadBalancerBackendAddressPoolId:
+          type: string
+          format: arm-id
+          description: The resource Id of the Load Balancer backend address pool that the VM instances of the node type are associated with. The format of the resource Id is '/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Network/loadBalancers/<loadBalancerName>/backendAddressPools/<backendAddressPoolName>'.
+        loadBalancerInboundNatPoolId:
+          type: string
+          format: arm-id
+          description: The resource Id of the Load Balancer inbound NAT pool that the VM instances of the node type are associated with. The format of the resource Id is '/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Network/loadBalancers/<loadBalancerName>/inboundNatPools/<inboundNatPoolName>'.
+        applicationGatewayBackendAddressPoolId:
+          type: string
+          format: arm-id
+          x-ms-arm-id-details:
+            allowedResources:
+            - type: Microsoft.Network/applicationGateways/backendAddressPools
+          description: The resource Id of application gateway backend address pool. The format of the resource Id is '/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Network/applicationGateways/<applicationGatewayName>/backendAddressPools/<backendAddressPoolName>'.
+      description: Describes the frontend configurations for the node type.
+    VmSetupAction:
       type: string
-      description: 'Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types.
-
-        '
+      description: action to be performed on the vms before bootstrapping the service fabric runtime.
       enum:
-      - Standard_LRS
-      - StandardSSD_LRS
-      - Premium_LRS
-      default: StandardSSD_LRS
+      - EnableContainers
+      - EnableHyperV
       x-ms-enum:
-        name: DiskType
+        name: VmSetupAction
         modelAsString: true
         values:
-        - value: Standard_LRS
-          description: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.
-        - value: StandardSSD_LRS
-          description: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.
-        - value: Premium_LRS
-          description: Premium SSD locally redundant storage. Best for production and performance sensitive workloads.
+        - value: EnableContainers
+          description: Enable windows containers feature.
+        - value: EnableHyperV
+          description: Enables windows HyperV feature.
     EvictionPolicyType:
       type: string
       description: Specifies the eviction policy for virtual machines in a SPOT node type.
@@ -434,6 +711,121 @@ components:
           description: Eviction policy will be Delete for SPOT vms.
         - value: Deallocate
           description: Eviction policy will be Deallocate for SPOT vms.
+    VaultSecretGroup:
+      type: object
+      required:
+      - sourceVault
+      - vaultCertificates
+      properties:
+        sourceVault:
+          $ref: '#/components/schemas/SubResource'
+          description: The relative URL of the Key Vault containing all of the certificates in VaultCertificates.
+        vaultCertificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/VaultCertificate'
+          x-ms-identifiers: []
+          description: The list of key vault references in SourceVault which contain certificates.
+      description: Specifies set of certificates that should be installed onto the virtual machines.
+    NodeType:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ManagedProxyResource'
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/NodeTypeProperties'
+          description: The node type properties
+        sku:
+          $ref: '#/components/schemas/NodeTypeSku'
+          description: The node type sku.
+      description: Describes a node type in the cluster, each node type represents sub set of nodes in the cluster.
+    IpTag:
+      type: object
+      required:
+      - ipTagType
+      - tag
+      properties:
+        ipTagType:
+          type: string
+          description: 'IP tag type. Example: FirstPartyUsage.'
+        tag:
+          type: string
+          description: 'IP tag associated with the public IP. Example: SQL, Storage etc.'
+      description: The IP tag associated with the public IP address.
+    NodeTypeListResult:
+      type: object
+      properties:
+        value:
+          type: array
+          title: node type list value.
+          description: The list of node types.
+          items:
+            $ref: '#/components/schemas/NodeType'
+        nextLink:
+          type: string
+          description: The URL to use for getting the next set of results.
+      description: Node type list results
+    VaultCertificate:
+      type: object
+      required:
+      - certificateUrl
+      - certificateStore
+      properties:
+        certificateUrl:
+          type: string
+          description: 'This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  "data":"<Base64-encoded-certificate>",<br>  "dataType":"pfx",<br>  "password":"<pfx-file-password>"<br>}'
+        certificateStore:
+          type: string
+          description: For Windows VMs, specifies the certificate store on the Virtual Machine to which the certificate should be added. The specified certificate store is implicitly in the LocalMachine account. <br><br>For Linux VMs, the certificate file is placed under the /var/lib/waagent directory, with the file name <UppercaseThumbprint>.crt for the X509 certificate file and <UppercaseThumbprint>.prv for private key. Both of these files are .pem formatted.
+      description: Describes a single certificate reference in a Key Vault, and where the certificate should reside on the VM.
+    NodeTypeNatConfig:
+      type: object
+      properties:
+        backendPort:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 65535
+          description: The internal port for the NAT configuration.
+        frontendPortRangeStart:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 65534
+          description: The port range start for the external endpoint.
+        frontendPortRangeEnd:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 65534
+          description: The port range end for the external endpoint.
+      description: Provides information about NAT configuration on the default public Load Balancer for the node type.
+    SystemData:
+      description: Metadata pertaining to creation and last modification of the resource.
+      type: object
+      readOnly: true
+      properties:
+        createdBy:
+          type: string
+          description: The identity that created the resource.
+        createdByType:
+          type: string
+          description: The type of identity that created the resource.
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp of resource creation (UTC).
+        lastModifiedBy:
+          type: string
+          description: The identity that last modified the resource.
+        lastModifiedByType:
+          type: string
+          description: The type of identity that last modified the resource.
+        lastModifiedAt:
+          type: string
+          format: date-time
+          description: The timestamp of resource last modification (UTC).
     NodeTypeSku:
       type: object
       required:
@@ -452,6 +844,189 @@ components:
           minimum: 1
           maximum: 2147483647
       description: Describes a node type sku.
+    NodeTypeAvailableSku:
+      type: object
+      properties:
+        resourceType:
+          type: string
+          readOnly: true
+          description: 'The type of resource the sku applies to.  <br /><br />Value: Microsoft.ServiceFabric/managedClusters/nodeTypes.'
+        sku:
+          $ref: '#/components/schemas/NodeTypeSupportedSku'
+          description: The supported SKU for a for node type.
+          readOnly: true
+        capacity:
+          $ref: '#/components/schemas/NodeTypeSkuCapacity'
+          description: Provides information about how the node count can be scaled.
+          readOnly: true
+      description: Defines the type of sku available for a node type
+    AdditionalNetworkInterfaceConfiguration:
+      type: object
+      required:
+      - name
+      - ipConfigurations
+      properties:
+        name:
+          type: string
+          description: Name of the network interface.
+        enableAcceleratedNetworking:
+          type: boolean
+          description: Specifies whether the network interface is accelerated networking-enabled.
+        dscpConfiguration:
+          $ref: '#/components/schemas/SubResource'
+          description: Specifies the DSCP configuration to apply to the network interface.
+        ipConfigurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/IpConfiguration'
+          x-ms-identifiers:
+          - name
+          description: Specifies the IP configurations of the network interface.
+      description: Specifies the settings for a network interface to attach to the node type.
+    ErrorModel:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorModelError'
+          description: The error details.
+      description: The structure of the error.
+    NodeTypeSkuScaleType:
+      type: string
+      description: 'Node type capacity scale type.
+
+        '
+      enum:
+      - None
+      - Manual
+      - Automatic
+      default: None
+      x-ms-enum:
+        name: NodeTypeSkuScaleType
+        modelAsString: true
+        values:
+        - value: None
+          description: Node count is not adjustable in any way (e.g. it is fixed).
+        - value: Manual
+          description: The user must manually scale out/in.
+        - value: Automatic
+          description: Automatic scale is allowed.
+    NodeTypeSupportedSku:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The sku name.
+          readOnly: true
+        tier:
+          type: string
+          description: Specifies the tier of the node type. <br /><br /> Possible Values:<br /> **Standard**
+          readOnly: true
+      description: Describes a node type supported sku.
+    VmImagePlan:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The plan ID.
+        product:
+          type: string
+          description: Specifies the product of the image from the marketplace. This is the same value as Offer under the imageReference element.
+        promotionCode:
+          type: string
+          description: The promotion code.
+        publisher:
+          type: string
+          description: The publisher ID.
+      description: Specifies information about the marketplace image used to create the virtual machine. This element is only used for marketplace images. Before you can use a marketplace image from an API, you must enable the image for programmatic use. In the Azure portal, find the marketplace image that you want to use and then click Want to deploy programmatically, Get Started ->. Enter any required information and then click Save.
+    IPAddressType:
+      type: string
+      description: 'The IP address type.
+
+        '
+      enum:
+      - IPv4
+      - IPv6
+      default: IPv4
+      x-ms-enum:
+        name: IPAddressType
+        modelAsString: true
+        values:
+        - value: IPv4
+          description: IPv4 address type.
+        - value: IPv6
+          description: IPv6 address type.
+    NodeTypeUpdateParameters:
+      type: object
+      properties:
+        tags:
+          type: object
+          description: Node type update parameters
+          additionalProperties:
+            type: string
+        sku:
+          $ref: '#/components/schemas/NodeTypeSku'
+          description: The node type sku.
+      description: Node type update request
+    VMSSExtensionProperties:
+      type: object
+      required:
+      - publisher
+      - type
+      - typeHandlerVersion
+      properties:
+        publisher:
+          type: string
+          description: The name of the extension handler publisher.
+        type:
+          type: string
+          description: Specifies the type of the extension; an example is "CustomScriptExtension".
+        typeHandlerVersion:
+          type: string
+          description: Specifies the version of the script handler.
+        autoUpgradeMinorVersion:
+          type: boolean
+          description: Indicates whether the extension should use a newer minor version if one is available at deployment time. Once deployed, however, the extension will not upgrade minor versions unless redeployed, even with this property set to true.
+        settings:
+          type: object
+          description: Json formatted public settings for the extension.
+        protectedSettings:
+          type: object
+          description: The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.
+        forceUpdateTag:
+          type: string
+          description: If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.
+        provisionAfterExtensions:
+          type: array
+          items:
+            type: string
+          description: Collection of extension names after which this extension needs to be provisioned.
+        provisioningState:
+          readOnly: true
+          type: string
+          description: The provisioning state, which only appears in the response.
+        enableAutomaticUpgrade:
+          type: boolean
+          description: Indicates whether the extension should be automatically upgraded by the platform if there is a newer version of the extension available.
+        setupOrder:
+          type: array
+          items:
+            $ref: '#/components/schemas/VmssExtensionSetupOrder'
+          x-ms-identifiers: []
+          description: Indicates the setup order for the extension.
+      description: Describes the properties of a Virtual Machine Scale Set Extension.
+    VmssExtensionSetupOrder:
+      type: string
+      description: 'Vm extension setup order.
+
+        '
+      enum:
+      - BeforeSFRuntime
+      x-ms-enum:
+        name: VmssExtensionSetupOrder
+        modelAsString: true
+        values:
+        - value: BeforeSFRuntime
+          description: Indicates that the vm extension should run before the service fabric runtime starts.
     IpConfiguration:
       type: object
       required:
@@ -520,181 +1095,26 @@ components:
                 values:
                 - value: IPv4
                 - value: IPv6
-    IPAddressType:
+    DiskType:
       type: string
-      description: 'The IP address type.
+      description: 'Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-types.
 
         '
       enum:
-      - IPv4
-      - IPv6
-      default: IPv4
+      - Standard_LRS
+      - StandardSSD_LRS
+      - Premium_LRS
+      default: StandardSSD_LRS
       x-ms-enum:
-        name: IPAddressType
+        name: DiskType
         modelAsString: true
         values:
-        - value: IPv4
-          description: IPv4 address type.
-        - value: IPv6
-          description: IPv6 address type.
-    NodeTypeListResult:
-      type: object
-      properties:
-        value:
-          type: array
-          title: node type list value.
-          description: The list of node types.
-          items:
-            $ref: '#/components/schemas/NodeType'
-        nextLink:
-          type: string
-          description: The URL to use for getting the next set of results.
-      description: Node type list results
-    VmssDataDisk:
-      type: object
-      required:
-      - lun
-      - diskSizeGB
-      - diskType
-      - diskLetter
-      properties:
-        lun:
-          type: integer
-          format: int32
-          minimum: 1
-          description: Specifies the logical unit number of the data disk. This value is used to identify data disks within the VM and therefore must be unique for each data disk attached to a VM. Lun 0 is reserved for the service fabric data disk.
-        diskSizeGB:
-          type: integer
-          format: int32
-          description: Disk size for each vm in the node type in GBs.
-        diskType:
-          $ref: '#/components/schemas/DiskType'
-          description: Managed data disk type. Specifies the storage account type for the managed disk
-        diskLetter:
-          type: string
-          pattern: ^[a-zA-Z]{1}$
-          description: Managed data disk letter. It can not use the reserved letter C or D and it can not change after created.
-      description: Managed data disk description.
-    NodeTypeActionParameters:
-      type: object
-      properties:
-        nodes:
-          description: List of node names from the node type.
-          type: array
-          items:
-            type: string
-        force:
-          description: Force the action to go through.
-          type: boolean
-        updateType:
-          type: string
-          description: Specifies the way the operation will be performed.
-          enum:
-          - Default
-          - ByUpgradeDomain
-          x-ms-enum:
-            name: updateType
-            modelAsString: true
-            values:
-            - value: Default
-              description: The operation will proceed in all specified nodes at the same time.
-            - value: ByUpgradeDomain
-              description: The operation will proceed one upgrade domain at a time, checking the health in between each to continue.
-      description: Parameters for Node type action. If nodes are not specified on the parameters, the operation will be performed in all nodes of the node type one upgrade domain at a time.
-    NodeTypeSkuScaleType:
-      type: string
-      description: 'Node type capacity scale type.
-
-        '
-      enum:
-      - None
-      - Manual
-      - Automatic
-      default: None
-      x-ms-enum:
-        name: NodeTypeSkuScaleType
-        modelAsString: true
-        values:
-        - value: None
-          description: Node count is not adjustable in any way (e.g. it is fixed).
-        - value: Manual
-          description: The user must manually scale out/in.
-        - value: Automatic
-          description: Automatic scale is allowed.
-    ErrorModelError:
-      type: object
-      properties:
-        code:
-          type: string
-          description: The error code.
-        message:
-          type: string
-          description: The error message.
-      description: The error details.
-    ManagedResourceProvisioningState:
-      type: string
-      description: The provisioning state of the managed resource.
-      enum:
-      - None
-      - Creating
-      - Created
-      - Updating
-      - Succeeded
-      - Failed
-      - Canceled
-      - Deleting
-      - Deleted
-      - Other
-      x-ms-enum:
-        name: ManagedResourceProvisioningState
-        modelAsString: true
-    VMSSExtensionProperties:
-      type: object
-      required:
-      - publisher
-      - type
-      - typeHandlerVersion
-      properties:
-        publisher:
-          type: string
-          description: The name of the extension handler publisher.
-        type:
-          type: string
-          description: Specifies the type of the extension; an example is "CustomScriptExtension".
-        typeHandlerVersion:
-          type: string
-          description: Specifies the version of the script handler.
-        autoUpgradeMinorVersion:
-          type: boolean
-          description: Indicates whether the extension should use a newer minor version if one is available at deployment time. Once deployed, however, the extension will not upgrade minor versions unless redeployed, even with this property set to true.
-        settings:
-          type: object
-          description: Json formatted public settings for the extension.
-        protectedSettings:
-          type: object
-          description: The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.
-        forceUpdateTag:
-          type: string
-          description: If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.
-        provisionAfterExtensions:
-          type: array
-          items:
-            type: string
-          description: Collection of extension names after which this extension needs to be provisioned.
-        provisioningState:
-          readOnly: true
-          type: string
-          description: The provisioning state, which only appears in the response.
-        enableAutomaticUpgrade:
-          type: boolean
-          description: Indicates whether the extension should be automatically upgraded by the platform if there is a newer version of the extension available.
-        setupOrder:
-          type: array
-          items:
-            $ref: '#/components/schemas/VmssExtensionSetupOrder'
-          x-ms-identifiers: []
-          description: Indicates the setup order for the extension.
-      description: Describes the properties of a Virtual Machine Scale Set Extension.
+        - value: Standard_LRS
+          description: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.
+        - value: StandardSSD_LRS
+          description: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.
+        - value: Premium_LRS
+          description: Premium SSD locally redundant storage. Best for production and performance sensitive workloads.
     NodeTypeProperties:
       type: object
       required:
@@ -930,431 +1350,19 @@ components:
           - name
           description: Specifies the settings for any additional secondary network interfaces to attach to the node type.
       description: Describes a node type in the cluster, each node type represents sub set of nodes in the cluster.
-    NodeTypeSkuCapacity:
-      type: object
-      properties:
-        minimum:
-          type: integer
-          format: int32
-          readOnly: true
-          description: Lowest permitted node count in a node type.
-        maximum:
-          type: integer
-          format: int32
-          readOnly: true
-          description: Highest permitted node count in a node type.
-        default:
-          type: integer
-          format: int32
-          readOnly: true
-          description: Default node count in a node type.
-        scaleType:
-          $ref: '#/components/schemas/NodeTypeSkuScaleType'
-          readOnly: true
-          description: Node type capacity scale type.
-      description: Provides information about how node type can be scaled.
-    VmSetupAction:
-      type: string
-      description: action to be performed on the vms before bootstrapping the service fabric runtime.
-      enum:
-      - EnableContainers
-      - EnableHyperV
-      x-ms-enum:
-        name: VmSetupAction
-        modelAsString: true
-        values:
-        - value: EnableContainers
-          description: Enable windows containers feature.
-        - value: EnableHyperV
-          description: Enables windows HyperV feature.
-    FrontendConfiguration:
-      type: object
-      properties:
-        ipAddressType:
-          $ref: '#/components/schemas/IPAddressType'
-          description: The IP address type of this frontend configuration. If omitted the default value is IPv4.
-        loadBalancerBackendAddressPoolId:
-          type: string
-          format: arm-id
-          description: The resource Id of the Load Balancer backend address pool that the VM instances of the node type are associated with. The format of the resource Id is '/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Network/loadBalancers/<loadBalancerName>/backendAddressPools/<backendAddressPoolName>'.
-        loadBalancerInboundNatPoolId:
-          type: string
-          format: arm-id
-          description: The resource Id of the Load Balancer inbound NAT pool that the VM instances of the node type are associated with. The format of the resource Id is '/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Network/loadBalancers/<loadBalancerName>/inboundNatPools/<inboundNatPoolName>'.
-        applicationGatewayBackendAddressPoolId:
-          type: string
-          format: arm-id
-          x-ms-arm-id-details:
-            allowedResources:
-            - type: Microsoft.Network/applicationGateways/backendAddressPools
-          description: The resource Id of application gateway backend address pool. The format of the resource Id is '/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Network/applicationGateways/<applicationGatewayName>/backendAddressPools/<backendAddressPoolName>'.
-      description: Describes the frontend configurations for the node type.
-    ManagedProxyResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Azure resource identifier.
-          readOnly: true
-        name:
-          type: string
-          description: Azure resource name.
-          readOnly: true
-        type:
-          type: string
-          description: Azure resource type.
-          readOnly: true
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Azure resource tags.
-          x-ms-mutability:
-          - create
-          - read
-        systemData:
-          $ref: '#/components/schemas/SystemData'
-      description: The resource model definition for proxy-only resource.
-      x-ms-azure-resource: true
-    SubResource:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Azure resource identifier.
-      description: Azure resource identifier.
-      x-ms-azure-resource: true
-    VmManagedIdentity:
-      type: object
-      properties:
-        userAssignedIdentities:
-          type: array
-          description: 'The list of user identities associated with the virtual machine scale set under the node type. Each entry will be an ARM resource ids in the form: ''/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}''.'
-          items:
-            type: string
-      description: Identities for the virtual machine scale set under the node type.
-    NetworkSecurityRule:
-      type: object
-      required:
-      - name
-      - protocol
-      - access
-      - priority
-      - direction
-      properties:
-        name:
-          type: string
-          description: Network security rule name.
-        description:
-          type: string
-          description: Network security rule description.
-        protocol:
-          type: string
-          description: Network protocol this rule applies to.
-          enum:
-          - http
-          - https
-          - tcp
-          - udp
-          - icmp
-          - ah
-          - esp
-          x-ms-enum:
-            name: nsgProtocol
-            modelAsString: true
-        sourceAddressPrefixes:
-          type: array
-          items:
-            type: string
-          description: The CIDR or source IP ranges.
-        destinationAddressPrefixes:
-          type: array
-          items:
-            type: string
-          description: The destination address prefixes. CIDR or destination IP ranges.
-        sourcePortRanges:
-          type: array
-          items:
-            type: string
-          description: The source port ranges.
-        destinationPortRanges:
-          type: array
-          items:
-            type: string
-          description: The destination port ranges.
-        sourceAddressPrefix:
-          type: string
-          description: The CIDR or source IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from.
-        destinationAddressPrefix:
-          type: string
-          description: The destination address prefix. CIDR or destination IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.
-        sourcePortRange:
-          type: string
-          description: The source port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.
-        destinationPortRange:
-          type: string
-          description: he destination port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.
-        access:
-          type: string
-          description: The network traffic is allowed or denied.
-          enum:
-          - allow
-          - deny
-          x-ms-enum:
-            name: access
-            modelAsString: true
-        priority:
-          type: integer
-          format: int32
-          description: The priority of the rule. The value can be in the range 1000 to 3000. Values outside this range are reserved for Service Fabric ManagerCluster Resource Provider. The priority number must be unique for each rule in the collection. The lower the priority number, the higher the priority of the rule.
-          minimum: 1000
-          maximum: 3000
-        direction:
-          type: string
-          description: Network security rule direction.
-          enum:
-          - inbound
-          - outbound
-          x-ms-enum:
-            name: direction
-            modelAsString: true
-      description: Describes a network security rule.
-    AdditionalNetworkInterfaceConfiguration:
-      type: object
-      required:
-      - name
-      - ipConfigurations
-      properties:
-        name:
-          type: string
-          description: Name of the network interface.
-        enableAcceleratedNetworking:
-          type: boolean
-          description: Specifies whether the network interface is accelerated networking-enabled.
-        dscpConfiguration:
-          $ref: '#/components/schemas/SubResource'
-          description: Specifies the DSCP configuration to apply to the network interface.
-        ipConfigurations:
-          type: array
-          items:
-            $ref: '#/components/schemas/IpConfiguration'
-          x-ms-identifiers:
-          - name
-          description: Specifies the IP configurations of the network interface.
-      description: Specifies the settings for a network interface to attach to the node type.
-    IpTag:
-      type: object
-      required:
-      - ipTagType
-      - tag
-      properties:
-        ipTagType:
-          type: string
-          description: 'IP tag type. Example: FirstPartyUsage.'
-        tag:
-          type: string
-          description: 'IP tag associated with the public IP. Example: SQL, Storage etc.'
-      description: The IP tag associated with the public IP address.
-    NodeTypeNatConfig:
-      type: object
-      properties:
-        backendPort:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 65535
-          description: The internal port for the NAT configuration.
-        frontendPortRangeStart:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 65534
-          description: The port range start for the external endpoint.
-        frontendPortRangeEnd:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 65534
-          description: The port range end for the external endpoint.
-      description: Provides information about NAT configuration on the default public Load Balancer for the node type.
-    NodeTypeAvailableSku:
-      type: object
-      properties:
-        resourceType:
-          type: string
-          readOnly: true
-          description: 'The type of resource the sku applies to.  <br /><br />Value: Microsoft.ServiceFabric/managedClusters/nodeTypes.'
-        sku:
-          $ref: '#/components/schemas/NodeTypeSupportedSku'
-          description: The supported SKU for a for node type.
-          readOnly: true
-        capacity:
-          $ref: '#/components/schemas/NodeTypeSkuCapacity'
-          description: Provides information about how the node count can be scaled.
-          readOnly: true
-      description: Defines the type of sku available for a node type
-    EndpointRangeDescription:
-      type: object
-      required:
-      - endPort
-      - startPort
-      properties:
-        startPort:
-          type: integer
-          format: int32
-          description: Starting port of a range of ports
-        endPort:
-          type: integer
-          format: int32
-          description: End port of a range of ports
-      description: Port range details
-    ErrorModel:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorModelError'
-          description: The error details.
-      description: The structure of the error.
-    VmssExtensionSetupOrder:
-      type: string
-      description: 'Vm extension setup order.
-
-        '
-      enum:
-      - BeforeSFRuntime
-      x-ms-enum:
-        name: VmssExtensionSetupOrder
-        modelAsString: true
-        values:
-        - value: BeforeSFRuntime
-          description: Indicates that the vm extension should run before the service fabric runtime starts.
-    NodeTypeSupportedSku:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The sku name.
-          readOnly: true
-        tier:
-          type: string
-          description: Specifies the tier of the node type. <br /><br /> Possible Values:<br /> **Standard**
-          readOnly: true
-      description: Describes a node type supported sku.
-    VMSSExtension:
-      type: object
-      required:
-      - name
-      - properties
-      properties:
-        name:
-          type: string
-          description: The name of the extension.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/VMSSExtensionProperties'
-          description: Describes the properties of a Virtual Machine Scale Set Extension.
-      description: Specifies set of extensions that should be installed onto the virtual machines.
-    NodeTypeUpdateParameters:
-      type: object
-      properties:
-        tags:
-          type: object
-          description: Node type update parameters
-          additionalProperties:
-            type: string
-        sku:
-          $ref: '#/components/schemas/NodeTypeSku'
-          description: The node type sku.
-      description: Node type update request
-    VaultCertificate:
-      type: object
-      required:
-      - certificateUrl
-      - certificateStore
-      properties:
-        certificateUrl:
-          type: string
-          description: 'This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  "data":"<Base64-encoded-certificate>",<br>  "dataType":"pfx",<br>  "password":"<pfx-file-password>"<br>}'
-        certificateStore:
-          type: string
-          description: For Windows VMs, specifies the certificate store on the Virtual Machine to which the certificate should be added. The specified certificate store is implicitly in the LocalMachine account. <br><br>For Linux VMs, the certificate file is placed under the /var/lib/waagent directory, with the file name <UppercaseThumbprint>.crt for the X509 certificate file and <UppercaseThumbprint>.prv for private key. Both of these files are .pem formatted.
-      description: Describes a single certificate reference in a Key Vault, and where the certificate should reside on the VM.
-    VmImagePlan:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The plan ID.
-        product:
-          type: string
-          description: Specifies the product of the image from the marketplace. This is the same value as Offer under the imageReference element.
-        promotionCode:
-          type: string
-          description: The promotion code.
-        publisher:
-          type: string
-          description: The publisher ID.
-      description: Specifies information about the marketplace image used to create the virtual machine. This element is only used for marketplace images. Before you can use a marketplace image from an API, you must enable the image for programmatic use. In the Azure portal, find the marketplace image that you want to use and then click Want to deploy programmatically, Get Started ->. Enter any required information and then click Save.
-    NodeTypeListSkuResult:
-      type: object
-      properties:
-        value:
-          type: array
-          title: Node type sku list value.
-          description: The list of available node type SKUs.
-          items:
-            $ref: '#/components/schemas/NodeTypeAvailableSku'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          description: The URL to use for getting the next set of results.
-      description: Node type available sku list results
-    SystemData:
-      description: Metadata pertaining to creation and last modification of the resource.
-      type: object
-      readOnly: true
-      properties:
-        createdBy:
-          type: string
-          description: The identity that created the resource.
-        createdByType:
-          type: string
-          description: The type of identity that created the resource.
-        createdAt:
-          type: string
-          format: date-time
-          description: The timestamp of resource creation (UTC).
-        lastModifiedBy:
-          type: string
-          description: The identity that last modified the resource.
-        lastModifiedByType:
-          type: string
-          description: The type of identity that last modified the resource.
-        lastModifiedAt:
-          type: string
-          format: date-time
-          description: The timestamp of resource last modification (UTC).
-    VaultSecretGroup:
-      type: object
-      required:
-      - sourceVault
-      - vaultCertificates
-      properties:
-        sourceVault:
-          $ref: '#/components/schemas/SubResource'
-          description: The relative URL of the Key Vault containing all of the certificates in VaultCertificates.
-        vaultCertificates:
-          type: array
-          items:
-            $ref: '#/components/schemas/VaultCertificate'
-          x-ms-identifiers: []
-          description: The list of key vault references in SourceVault which contain certificates.
-      description: Specifies set of certificates that should be installed onto the virtual machines.
   parameters:
-    resourceGroupNameParameter:
-      name: resourceGroupName
+    api-version:
+      name: api-version
+      in: query
+      description: The version of the Service Fabric resource provider API. This is a required parameter and it's value must be "2024-02-01-preview" for this specification.
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    nodeTypeNameParameter:
+      name: nodeTypeName
       in: path
-      description: The name of the resource group.
+      description: The name of the node type.
       required: true
       x-ms-parameter-location: method
       schema:
@@ -1367,14 +1375,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    api-version:
-      name: api-version
-      in: query
-      description: The version of the Service Fabric resource provider API. This is a required parameter and it's value must be "2024-02-01-preview" for this specification.
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
     subscriptionId:
       name: subscriptionId
       in: path
@@ -1383,10 +1383,10 @@ components:
       x-ms-parameter-location: client
       schema:
         type: string
-    nodeTypeNameParameter:
-      name: nodeTypeName
+    resourceGroupNameParameter:
+      name: resourceGroupName
       in: path
-      description: The name of the node type.
+      description: The name of the resource group.
       required: true
       x-ms-parameter-location: method
       schema:

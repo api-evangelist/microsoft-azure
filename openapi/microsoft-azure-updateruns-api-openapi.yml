@@ -450,13 +450,37 @@ paths:
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    FleetUpdateStrategyResourceId:
-      type: string
-      format: arm-id
-      description: A type definition that refers the id to an Azure Resource Manager resource.
-      x-ms-arm-id-details:
-        allowedResources:
-        - type: Microsoft.ContainerService/fleets/updateStrategies
+    NodeImageVersion:
+      type: object
+      description: The node upgrade image version.
+      properties:
+        version:
+          type: string
+          description: The image version to upgrade the nodes to (e.g., 'AKSUbuntu-1804gen2containerd-2022.12.13').
+          readOnly: true
+    UpdateStage:
+      type: object
+      description: Defines a stage which contains the groups to update and the steps to take (e.g., wait for a time period) before starting the next stage.
+      properties:
+        name:
+          type: string
+          description: The name of the stage. Must be unique within the UpdateRun.
+          minLength: 1
+          maxLength: 50
+          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+        groups:
+          type: array
+          description: 'Defines the groups to be executed in parallel in this stage. Duplicate groups are not allowed. Min size: 1.'
+          items:
+            $ref: '#/components/schemas/UpdateGroup'
+          x-ms-identifiers:
+          - name
+        afterStageWaitInSeconds:
+          type: integer
+          format: int32
+          description: The time in seconds to wait at the end of this stage before starting the next one. Defaults to 0 seconds if unspecified.
+      required:
+      - name
     WaitStatus:
       type: object
       description: The status of the wait duration.
@@ -484,62 +508,6 @@ components:
           pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
       required:
       - name
-    ManagedClusterUpgradeSpec:
-      type: object
-      description: The upgrade to apply to a ManagedCluster.
-      properties:
-        type:
-          $ref: '#/components/schemas/ManagedClusterUpgradeType'
-          description: ManagedClusterUpgradeType is the type of upgrade to be applied.
-        kubernetesVersion:
-          $ref: '#/components/schemas/KubernetesVersion'
-          description: The Kubernetes version to upgrade the member clusters to.
-      required:
-      - type
-    MemberUpdateStatus:
-      type: object
-      description: The status of a member update operation.
-      properties:
-        status:
-          $ref: '#/components/schemas/UpdateStatus'
-          description: The status of the MemberUpdate operation.
-          readOnly: true
-        name:
-          type: string
-          description: The name of the FleetMember.
-          readOnly: true
-        clusterResourceId:
-          type: string
-          description: The Azure resource id of the target Kubernetes cluster.
-          readOnly: true
-        operationId:
-          type: string
-          description: The operation resource id of the latest attempt to perform the operation.
-          readOnly: true
-        message:
-          type: string
-          description: The status message after processing the member update operation.
-          readOnly: true
-    NodeImageVersion:
-      type: object
-      description: The node upgrade image version.
-      properties:
-        version:
-          type: string
-          description: The image version to upgrade the nodes to (e.g., 'AKSUbuntu-1804gen2containerd-2022.12.13').
-          readOnly: true
-    NodeImageSelectionStatus:
-      type: object
-      description: The node image upgrade specs for the update run.
-      properties:
-        selectedNodeImageVersions:
-          type: array
-          description: The image versions to upgrade the nodes to.
-          items:
-            $ref: '#/components/schemas/NodeImageVersion'
-          readOnly: true
-          x-ms-identifiers:
-          - version
     SkipTarget:
       type: object
       description: The definition of a single skip request.
@@ -553,134 +521,22 @@ components:
       required:
       - type
       - name
-    KubernetesVersion:
+    NodeImageSelectionType:
       type: string
-    UpdateRunStrategy:
-      type: object
-      description: 'Defines the update sequence of the clusters via stages and groups.
-
-
-        Stages within a run are executed sequentially one after another.
-
-        Groups within a stage are executed in parallel.
-
-        Member clusters within a group are updated sequentially one after another.
-
-
-        A valid strategy contains no duplicate groups within or across stages.'
-      properties:
-        stages:
-          type: array
-          description: 'The list of stages that compose this update run. Min size: 1.'
-          items:
-            $ref: '#/components/schemas/UpdateStage'
-          x-ms-identifiers:
-          - name
-      required:
-      - stages
-    TargetType:
-      type: string
-      description: The target type of a skip request.
+      description: The node image upgrade type.
       enum:
-      - Member
-      - Group
-      - Stage
-      - AfterStageWait
+      - Latest
+      - Consistent
       x-ms-enum:
-        name: TargetType
+        name: NodeImageSelectionType
         modelAsString: true
         values:
-        - name: Member
-          value: Member
-          description: Skip the update of a member.
-        - name: Group
-          value: Group
-          description: Skip the update of a group.
-        - name: Stage
-          value: Stage
-          description: Skip the update of an entire stage including the after stage wait.
-        - name: AfterStageWait
-          value: AfterStageWait
-          description: Skip the update of the after stage wait of a certain stage.
-    UpdateRun:
-      type: object
-      description: A multi-stage process to perform update operations across members of a Fleet.
-      properties:
-        properties:
-          $ref: '#/components/schemas/UpdateRunProperties'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        eTag:
-          type: string
-          description: If eTag is provided in the response body, it may also be provided as a header per the normal etag convention.  Entity tags are used for comparing two or more entities from the same requested resource. HTTP/1.1 uses entity tags in the etag (section 14.19), If-Match (section 14.24), If-None-Match (section 14.26), and If-Range (section 14.27) header fields.
-          readOnly: true
-      allOf:
-      - $ref: ../../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
-    UpdateRunProvisioningState:
-      type: string
-      description: The provisioning state of the UpdateRun resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      x-ms-enum:
-        name: UpdateRunProvisioningState
-        modelAsString: true
-        values:
-        - name: Succeeded
-          value: Succeeded
-          description: Resource has been created.
-        - name: Failed
-          value: Failed
-          description: Resource creation failed.
-        - name: Canceled
-          value: Canceled
-          description: Resource creation was canceled.
-      readOnly: true
-    ManagedClusterUpdate:
-      type: object
-      description: The update to be applied to the ManagedClusters.
-      properties:
-        upgrade:
-          $ref: '#/components/schemas/ManagedClusterUpgradeSpec'
-          description: The upgrade to apply to the ManagedClusters.
-        nodeImageSelection:
-          $ref: '#/components/schemas/NodeImageSelection'
-          description: The node image upgrade to be applied to the target nodes in update run.
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - upgrade
-    NodeImageSelection:
-      type: object
-      description: The node image upgrade to be applied to the target nodes in update run.
-      properties:
-        type:
-          $ref: '#/components/schemas/NodeImageSelectionType'
-          description: The node image upgrade type.
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - type
-    SkipProperties:
-      type: object
-      description: The properties of a skip operation containing multiple skip requests.
-      properties:
-        targets:
-          type: array
-          description: The targets to skip.
-          items:
-            $ref: '#/components/schemas/SkipTarget'
-          x-ms-identifiers:
-          - type
-          - name
-      required:
-      - targets
+        - name: Latest
+          value: Latest
+          description: Use the latest image version when upgrading nodes. Clusters may use different image versions (e.g., 'AKSUbuntu-1804gen2containerd-2021.10.12' and 'AKSUbuntu-1804gen2containerd-2021.10.19') because, for example, the latest available version is different in different regions.
+        - name: Consistent
+          value: Consistent
+          description: 'The image versions to upgrade nodes to are selected as described below: for each node pool in managed clusters affected by the update run, the system selects the latest image version such that it is available across all other node pools (in all other clusters) of the same image type. As a result, all node pools of the same image type will be upgraded to the same image version. For example, if the latest image version for image type ''AKSUbuntu-1804gen2containerd'' is ''AKSUbuntu-1804gen2containerd-2021.10.12'' for a node pool in cluster A in region X, and is ''AKSUbuntu-1804gen2containerd-2021.10.17'' for a node pool in cluster B in region Y, the system will upgrade both node pools to image version ''AKSUbuntu-1804gen2containerd-2021.10.12''.'
     UpdateStageStatus:
       type: object
       description: The status of a UpdateStage.
@@ -705,69 +561,68 @@ components:
           $ref: '#/components/schemas/WaitStatus'
           description: The status of the wait period configured on the UpdateStage.
           readOnly: true
-    ManagedClusterUpgradeType:
+    KubernetesVersion:
       type: string
-      description: The type of upgrade to perform when targeting ManagedClusters.
+    TargetType:
+      type: string
+      description: The target type of a skip request.
       enum:
-      - Full
-      - NodeImageOnly
-      - ControlPlaneOnly
+      - Member
+      - Group
+      - Stage
+      - AfterStageWait
       x-ms-enum:
-        name: ManagedClusterUpgradeType
+        name: TargetType
         modelAsString: true
         values:
-        - name: Full
-          value: Full
-          description: Full upgrades the control plane and all agent pools of the target ManagedClusters. Requires the ManagedClusterUpgradeSpec.KubernetesVersion property to be set.
-        - name: NodeImageOnly
-          value: NodeImageOnly
-          description: NodeImageOnly upgrades only the node images of the target ManagedClusters. Requires the ManagedClusterUpgradeSpec.KubernetesVersion property to NOT be set.
-        - name: ControlPlaneOnly
-          value: ControlPlaneOnly
-          description: ControlPlaneOnly upgrades only targets the KubernetesVersion of the ManagedClusters and will not be applied to the AgentPool. Requires the ManagedClusterUpgradeSpec.KubernetesVersion property to be set.
-    UpdateStage:
+        - name: Member
+          value: Member
+          description: Skip the update of a member.
+        - name: Group
+          value: Group
+          description: Skip the update of a group.
+        - name: Stage
+          value: Stage
+          description: Skip the update of an entire stage including the after stage wait.
+        - name: AfterStageWait
+          value: AfterStageWait
+          description: Skip the update of the after stage wait of a certain stage.
+    MemberUpdateStatus:
       type: object
-      description: Defines a stage which contains the groups to update and the steps to take (e.g., wait for a time period) before starting the next stage.
-      properties:
-        name:
-          type: string
-          description: The name of the stage. Must be unique within the UpdateRun.
-          minLength: 1
-          maxLength: 50
-          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-        groups:
-          type: array
-          description: 'Defines the groups to be executed in parallel in this stage. Duplicate groups are not allowed. Min size: 1.'
-          items:
-            $ref: '#/components/schemas/UpdateGroup'
-          x-ms-identifiers:
-          - name
-        afterStageWaitInSeconds:
-          type: integer
-          format: int32
-          description: The time in seconds to wait at the end of this stage before starting the next one. Defaults to 0 seconds if unspecified.
-      required:
-      - name
-    UpdateRunStatus:
-      type: object
-      description: The status of a UpdateRun.
+      description: The status of a member update operation.
       properties:
         status:
           $ref: '#/components/schemas/UpdateStatus'
-          description: The status of the UpdateRun.
+          description: The status of the MemberUpdate operation.
           readOnly: true
-        stages:
-          type: array
-          description: The stages composing an update run. Stages are run sequentially withing an UpdateRun.
-          items:
-            $ref: '#/components/schemas/UpdateStageStatus'
+        name:
+          type: string
+          description: The name of the FleetMember.
           readOnly: true
-          x-ms-identifiers:
-          - name
-        nodeImageSelection:
-          $ref: '#/components/schemas/NodeImageSelectionStatus'
-          description: The node image upgrade specs for the update run. It is only set in update run when `NodeImageSelection.type` is `Consistent`.
+        clusterResourceId:
+          type: string
+          description: The Azure resource id of the target Kubernetes cluster.
           readOnly: true
+        operationId:
+          type: string
+          description: The operation resource id of the latest attempt to perform the operation.
+          readOnly: true
+        message:
+          type: string
+          description: The status message after processing the member update operation.
+          readOnly: true
+    NodeImageSelection:
+      type: object
+      description: The node image upgrade to be applied to the target nodes in update run.
+      properties:
+        type:
+          $ref: '#/components/schemas/NodeImageSelectionType'
+          description: The node image upgrade type.
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - type
     UpdateStatus:
       type: object
       description: The status for an operation or group of operations.
@@ -790,33 +645,49 @@ components:
           $ref: ../../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorDetail
           description: The error details when a failure is encountered.
           readOnly: true
-    UpdateRunProperties:
+    UpdateRunStatus:
       type: object
-      description: The properties of the UpdateRun.
+      description: The status of a UpdateRun.
       properties:
-        provisioningState:
-          $ref: '#/components/schemas/UpdateRunProvisioningState'
-          description: The provisioning state of the UpdateRun resource.
-          readOnly: true
-        updateStrategyId:
-          $ref: '#/components/schemas/FleetUpdateStrategyResourceId'
-          description: "The resource id of the FleetUpdateStrategy resource to reference.\n\nWhen creating a new run, there are three ways to define a strategy for the run:\n1. Define a new strategy in place: Set the \"strategy\" field.\n2. Use an existing strategy: Set the \"updateStrategyId\" field. (since 2023-08-15-preview)\n3. Use the default strategy to update all the members one by one: Leave both \"updateStrategyId\" and \"strategy\" unset. (since 2023-08-15-preview)\n\nSetting both \"updateStrategyId\" and \"strategy\" is invalid.\n\nUpdateRuns created by \"updateStrategyId\" snapshot the referenced UpdateStrategy at the time of creation and store it in the \"strategy\" field. \nSubsequent changes to the referenced FleetUpdateStrategy resource do not propagate.\nUpdateRunStrategy changes can be made directly on the \"strategy\" field before launching the UpdateRun."
-        strategy:
-          $ref: '#/components/schemas/UpdateRunStrategy'
-          description: 'The strategy defines the order in which the clusters will be updated.
-
-            If not set, all members will be updated sequentially. The UpdateRun status will show a single UpdateStage and a single UpdateGroup targeting all members.
-
-            The strategy of the UpdateRun can be modified until the run is started.'
-        managedClusterUpdate:
-          $ref: '#/components/schemas/ManagedClusterUpdate'
-          description: The update to be applied to all clusters in the UpdateRun. The managedClusterUpdate can be modified until the run is started.
         status:
-          $ref: '#/components/schemas/UpdateRunStatus'
+          $ref: '#/components/schemas/UpdateStatus'
           description: The status of the UpdateRun.
           readOnly: true
+        stages:
+          type: array
+          description: The stages composing an update run. Stages are run sequentially withing an UpdateRun.
+          items:
+            $ref: '#/components/schemas/UpdateStageStatus'
+          readOnly: true
+          x-ms-identifiers:
+          - name
+        nodeImageSelection:
+          $ref: '#/components/schemas/NodeImageSelectionStatus'
+          description: The node image upgrade specs for the update run. It is only set in update run when `NodeImageSelection.type` is `Consistent`.
+          readOnly: true
+    UpdateRunStrategy:
+      type: object
+      description: 'Defines the update sequence of the clusters via stages and groups.
+
+
+        Stages within a run are executed sequentially one after another.
+
+        Groups within a stage are executed in parallel.
+
+        Member clusters within a group are updated sequentially one after another.
+
+
+        A valid strategy contains no duplicate groups within or across stages.'
+      properties:
+        stages:
+          type: array
+          description: 'The list of stages that compose this update run. Min size: 1.'
+          items:
+            $ref: '#/components/schemas/UpdateStage'
+          x-ms-identifiers:
+          - name
       required:
-      - managedClusterUpdate
+      - stages
     UpdateRunListResult:
       type: object
       description: The response of a UpdateRun list operation.
@@ -832,6 +703,42 @@ components:
           description: The link to the next page of items
       required:
       - value
+    NodeImageSelectionStatus:
+      type: object
+      description: The node image upgrade specs for the update run.
+      properties:
+        selectedNodeImageVersions:
+          type: array
+          description: The image versions to upgrade the nodes to.
+          items:
+            $ref: '#/components/schemas/NodeImageVersion'
+          readOnly: true
+          x-ms-identifiers:
+          - version
+    UpdateRun:
+      type: object
+      description: A multi-stage process to perform update operations across members of a Fleet.
+      properties:
+        properties:
+          $ref: '#/components/schemas/UpdateRunProperties'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        eTag:
+          type: string
+          description: If eTag is provided in the response body, it may also be provided as a header per the normal etag convention.  Entity tags are used for comparing two or more entities from the same requested resource. HTTP/1.1 uses entity tags in the etag (section 14.19), If-Match (section 14.24), If-None-Match (section 14.26), and If-Range (section 14.27) header fields.
+          readOnly: true
+      allOf:
+      - $ref: ../../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
+    FleetUpdateStrategyResourceId:
+      type: string
+      format: arm-id
+      description: A type definition that refers the id to an Azure Resource Manager resource.
+      x-ms-arm-id-details:
+        allowedResources:
+        - type: Microsoft.ContainerService/fleets/updateStrategies
     UpdateState:
       type: string
       description: The state of the UpdateRun, UpdateStage, UpdateGroup, or MemberUpdate.
@@ -868,6 +775,26 @@ components:
         - name: Completed
           value: Completed
           description: The state of an UpdateRun/UpdateStage/UpdateGroup/MemberUpdate that has completed.
+    ManagedClusterUpgradeType:
+      type: string
+      description: The type of upgrade to perform when targeting ManagedClusters.
+      enum:
+      - Full
+      - NodeImageOnly
+      - ControlPlaneOnly
+      x-ms-enum:
+        name: ManagedClusterUpgradeType
+        modelAsString: true
+        values:
+        - name: Full
+          value: Full
+          description: Full upgrades the control plane and all agent pools of the target ManagedClusters. Requires the ManagedClusterUpgradeSpec.KubernetesVersion property to be set.
+        - name: NodeImageOnly
+          value: NodeImageOnly
+          description: NodeImageOnly upgrades only the node images of the target ManagedClusters. Requires the ManagedClusterUpgradeSpec.KubernetesVersion property to NOT be set.
+        - name: ControlPlaneOnly
+          value: ControlPlaneOnly
+          description: ControlPlaneOnly upgrades only targets the KubernetesVersion of the ManagedClusters and will not be applied to the AgentPool. Requires the ManagedClusterUpgradeSpec.KubernetesVersion property to be set.
     UpdateGroupStatus:
       type: object
       description: The status of a UpdateGroup.
@@ -888,22 +815,95 @@ components:
           readOnly: true
           x-ms-identifiers:
           - name
-    NodeImageSelectionType:
+    SkipProperties:
+      type: object
+      description: The properties of a skip operation containing multiple skip requests.
+      properties:
+        targets:
+          type: array
+          description: The targets to skip.
+          items:
+            $ref: '#/components/schemas/SkipTarget'
+          x-ms-identifiers:
+          - type
+          - name
+      required:
+      - targets
+    UpdateRunProvisioningState:
       type: string
-      description: The node image upgrade type.
+      description: The provisioning state of the UpdateRun resource.
       enum:
-      - Latest
-      - Consistent
+      - Succeeded
+      - Failed
+      - Canceled
       x-ms-enum:
-        name: NodeImageSelectionType
+        name: UpdateRunProvisioningState
         modelAsString: true
         values:
-        - name: Latest
-          value: Latest
-          description: Use the latest image version when upgrading nodes. Clusters may use different image versions (e.g., 'AKSUbuntu-1804gen2containerd-2021.10.12' and 'AKSUbuntu-1804gen2containerd-2021.10.19') because, for example, the latest available version is different in different regions.
-        - name: Consistent
-          value: Consistent
-          description: 'The image versions to upgrade nodes to are selected as described below: for each node pool in managed clusters affected by the update run, the system selects the latest image version such that it is available across all other node pools (in all other clusters) of the same image type. As a result, all node pools of the same image type will be upgraded to the same image version. For example, if the latest image version for image type ''AKSUbuntu-1804gen2containerd'' is ''AKSUbuntu-1804gen2containerd-2021.10.12'' for a node pool in cluster A in region X, and is ''AKSUbuntu-1804gen2containerd-2021.10.17'' for a node pool in cluster B in region Y, the system will upgrade both node pools to image version ''AKSUbuntu-1804gen2containerd-2021.10.12''.'
+        - name: Succeeded
+          value: Succeeded
+          description: Resource has been created.
+        - name: Failed
+          value: Failed
+          description: Resource creation failed.
+        - name: Canceled
+          value: Canceled
+          description: Resource creation was canceled.
+      readOnly: true
+    ManagedClusterUpdate:
+      type: object
+      description: The update to be applied to the ManagedClusters.
+      properties:
+        upgrade:
+          $ref: '#/components/schemas/ManagedClusterUpgradeSpec'
+          description: The upgrade to apply to the ManagedClusters.
+        nodeImageSelection:
+          $ref: '#/components/schemas/NodeImageSelection'
+          description: The node image upgrade to be applied to the target nodes in update run.
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - upgrade
+    ManagedClusterUpgradeSpec:
+      type: object
+      description: The upgrade to apply to a ManagedCluster.
+      properties:
+        type:
+          $ref: '#/components/schemas/ManagedClusterUpgradeType'
+          description: ManagedClusterUpgradeType is the type of upgrade to be applied.
+        kubernetesVersion:
+          $ref: '#/components/schemas/KubernetesVersion'
+          description: The Kubernetes version to upgrade the member clusters to.
+      required:
+      - type
+    UpdateRunProperties:
+      type: object
+      description: The properties of the UpdateRun.
+      properties:
+        provisioningState:
+          $ref: '#/components/schemas/UpdateRunProvisioningState'
+          description: The provisioning state of the UpdateRun resource.
+          readOnly: true
+        updateStrategyId:
+          $ref: '#/components/schemas/FleetUpdateStrategyResourceId'
+          description: "The resource id of the FleetUpdateStrategy resource to reference.\n\nWhen creating a new run, there are three ways to define a strategy for the run:\n1. Define a new strategy in place: Set the \"strategy\" field.\n2. Use an existing strategy: Set the \"updateStrategyId\" field. (since 2023-08-15-preview)\n3. Use the default strategy to update all the members one by one: Leave both \"updateStrategyId\" and \"strategy\" unset. (since 2023-08-15-preview)\n\nSetting both \"updateStrategyId\" and \"strategy\" is invalid.\n\nUpdateRuns created by \"updateStrategyId\" snapshot the referenced UpdateStrategy at the time of creation and store it in the \"strategy\" field. \nSubsequent changes to the referenced FleetUpdateStrategy resource do not propagate.\nUpdateRunStrategy changes can be made directly on the \"strategy\" field before launching the UpdateRun."
+        strategy:
+          $ref: '#/components/schemas/UpdateRunStrategy'
+          description: 'The strategy defines the order in which the clusters will be updated.
+
+            If not set, all members will be updated sequentially. The UpdateRun status will show a single UpdateStage and a single UpdateGroup targeting all members.
+
+            The strategy of the UpdateRun can be modified until the run is started.'
+        managedClusterUpdate:
+          $ref: '#/components/schemas/ManagedClusterUpdate'
+          description: The update to be applied to all clusters in the UpdateRun. The managedClusterUpdate can be modified until the run is started.
+        status:
+          $ref: '#/components/schemas/UpdateRunStatus'
+          description: The status of the UpdateRun.
+          readOnly: true
+      required:
+      - managedClusterUpdate
   securitySchemes:
     azure_auth:
       type: oauth2

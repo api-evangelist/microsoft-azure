@@ -87,40 +87,136 @@ paths:
           $ref: examples/GetAssetConversionJob.json
       description: Needs a more full description created.
 components:
-  parameters:
-    ApiVersionParameter:
-      in: query
-      name: api-version
-      description: The API version.
-      required: true
-      schema:
-        type: string
-    AccountIdParameter:
-      in: path
-      name: accountId
-      description: Identifier for the Azure Object Anchors account.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    JobIdParameter:
-      in: path
-      name: jobId
-      description: Identifier for the Azure Object Anchors ingestion job.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    ClientRequestCorrelationVectorParameter:
-      in: header
-      name: x-mrc-cv
-      description: The client request correlation vector, which should be set to a new value for each request.
-      x-ms-parameter-location: method
-      schema:
-        type: string
   schemas:
+    Quaternion:
+      description: Represents a vector that is used to encode three-dimensional physical rotations.
+      required:
+      - x
+      - y
+      - z
+      - w
+      type: object
+      properties:
+        x:
+          format: float
+          description: The x value of the vector component of the quaternion.
+          type: number
+        y:
+          format: float
+          description: The y value of the vector component of the quaternion.
+          type: number
+        z:
+          format: float
+          description: The z value of the vector component of the quaternion.
+          type: number
+        w:
+          format: float
+          description: The rotation component of the quaternion.
+          type: number
+        isIdentity:
+          description: Gets a value that indicates whether the current instance is the identity quaternion
+          type: boolean
+          readOnly: true
+    InnerError:
+      description: Inner error.
+      type: object
+      properties:
+        code:
+          description: A more specific error code than was provided by the containing error.
+          type: string
+        innererror:
+          description: An object containing more specific information than the current object about the error.
+          $ref: '#/components/schemas/InnerError'
+    Vector4:
+      description: Represents a vector with four single-precision floating-point values.
+      required:
+      - x
+      - y
+      - z
+      - w
+      type: object
+      properties:
+        x:
+          format: float
+          description: The x component of the vector.
+          type: number
+        y:
+          format: float
+          description: The y component of the vector.
+          type: number
+        z:
+          format: float
+          description: The z component of the vector.
+          type: number
+        w:
+          format: float
+          description: The w component of the vector.
+          type: number
+    JobStatus:
+      description: Represents job status state.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      - Cancelled
+      type: string
+      x-ms-enum:
+        name: JobStatus
+        modelAsString: false
+    ErrorResponse:
+      description: Represents an error response.
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          description: The Error object.
+          $ref: '#/components/schemas/ErrorDetail'
+    IngestionConfiguration:
+      description: Represents an ingestion configuration.
+      required:
+      - gravity
+      - scale
+      type: object
+      properties:
+        dimensions:
+          description: Dimensions of the asset.
+          $ref: '#/components/schemas/Vector3'
+        boundingBoxCenter:
+          description: BoundingBoxCenter of the asset.
+          $ref: '#/components/schemas/Vector3'
+        gravity:
+          description: Gravity vector with respect to object's nominal position.
+          $ref: '#/components/schemas/Vector3'
+        keyFrameIndexes:
+          description: Indices of Key Frames.
+          type:
+          - array
+          - 'null'
+          items:
+            format: int32
+            type: integer
+        gtTrajectory:
+          description: Ground truth trajectory.
+          type: array
+          items:
+            $ref: '#/components/schemas/Pose'
+        principalAxis:
+          description: Orientation of model's bounding box.
+          $ref: '#/components/schemas/Quaternion'
+        scale:
+          format: float
+          description: Scale of transformation of asset units into meter space.
+          type: number
+        supportingPlane:
+          description: Definition of supporting plane.
+          $ref: '#/components/schemas/Vector4'
+        testTrajectory:
+          description: Test Trajectory.
+          type: array
+          items:
+            $ref: '#/components/schemas/Pose'
     ConversionErrorCode:
       description: The asset conversion error code.
       enum:
@@ -185,41 +281,19 @@ components:
         - value: ASSET_CANNOT_BE_CONVERTED
           description: The provided asset was corrupted, malformed, or otherwise unable to be converted in its provided format.
           name: AssetCannotBeConverted
-    Vector4:
-      description: Represents a vector with four single-precision floating-point values.
+    Pose:
+      description: Represents a pose.
       required:
-      - x
-      - y
-      - z
-      - w
+      - rotation
+      - translation
       type: object
       properties:
-        x:
-          format: float
-          description: The x component of the vector.
-          type: number
-        y:
-          format: float
-          description: The y component of the vector.
-          type: number
-        z:
-          format: float
-          description: The z component of the vector.
-          type: number
-        w:
-          format: float
-          description: The w component of the vector.
-          type: number
-    InnerError:
-      description: Inner error.
-      type: object
-      properties:
-        code:
-          description: A more specific error code than was provided by the containing error.
-          type: string
-        innererror:
-          description: An object containing more specific information than the current object about the error.
-          $ref: '#/components/schemas/InnerError'
+        rotation:
+          description: The pose's rotation.
+          $ref: '#/components/schemas/Quaternion'
+        translation:
+          description: The pose's translation.
+          $ref: '#/components/schemas/Vector3'
     Vector3:
       description: Represents a vector with three single-precision floating-point values.
       required:
@@ -263,50 +337,6 @@ components:
         innererror:
           description: An object containing more specific information than the current object about the error.
           $ref: '#/components/schemas/InnerError'
-    IngestionConfiguration:
-      description: Represents an ingestion configuration.
-      required:
-      - gravity
-      - scale
-      type: object
-      properties:
-        dimensions:
-          description: Dimensions of the asset.
-          $ref: '#/components/schemas/Vector3'
-        boundingBoxCenter:
-          description: BoundingBoxCenter of the asset.
-          $ref: '#/components/schemas/Vector3'
-        gravity:
-          description: Gravity vector with respect to object's nominal position.
-          $ref: '#/components/schemas/Vector3'
-        keyFrameIndexes:
-          description: Indices of Key Frames.
-          type:
-          - array
-          - 'null'
-          items:
-            format: int32
-            type: integer
-        gtTrajectory:
-          description: Ground truth trajectory.
-          type: array
-          items:
-            $ref: '#/components/schemas/Pose'
-        principalAxis:
-          description: Orientation of model's bounding box.
-          $ref: '#/components/schemas/Quaternion'
-        scale:
-          format: float
-          description: Scale of transformation of asset units into meter space.
-          type: number
-        supportingPlane:
-          description: Definition of supporting plane.
-          $ref: '#/components/schemas/Vector4'
-        testTrajectory:
-          description: Test Trajectory.
-          type: array
-          items:
-            $ref: '#/components/schemas/Pose'
     IngestionProperties:
       description: Represents the status of an AOA asset conversion job.
       type: object
@@ -355,66 +385,36 @@ components:
           description: The scaled dimensions of the asset.
           $ref: '#/components/schemas/Vector3'
           readOnly: true
-    Pose:
-      description: Represents a pose.
-      required:
-      - rotation
-      - translation
-      type: object
-      properties:
-        rotation:
-          description: The pose's rotation.
-          $ref: '#/components/schemas/Quaternion'
-        translation:
-          description: The pose's translation.
-          $ref: '#/components/schemas/Vector3'
-    Quaternion:
-      description: Represents a vector that is used to encode three-dimensional physical rotations.
-      required:
-      - x
-      - y
-      - z
-      - w
-      type: object
-      properties:
-        x:
-          format: float
-          description: The x value of the vector component of the quaternion.
-          type: number
-        y:
-          format: float
-          description: The y value of the vector component of the quaternion.
-          type: number
-        z:
-          format: float
-          description: The z value of the vector component of the quaternion.
-          type: number
-        w:
-          format: float
-          description: The rotation component of the quaternion.
-          type: number
-        isIdentity:
-          description: Gets a value that indicates whether the current instance is the identity quaternion
-          type: boolean
-          readOnly: true
-    JobStatus:
-      description: Represents job status state.
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      - Cancelled
-      type: string
-      x-ms-enum:
-        name: JobStatus
-        modelAsString: false
-    ErrorResponse:
-      description: Represents an error response.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          description: The Error object.
-          $ref: '#/components/schemas/ErrorDetail'
+  parameters:
+    ApiVersionParameter:
+      in: query
+      name: api-version
+      description: The API version.
+      required: true
+      schema:
+        type: string
+    AccountIdParameter:
+      in: path
+      name: accountId
+      description: Identifier for the Azure Object Anchors account.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    JobIdParameter:
+      in: path
+      name: jobId
+      description: Identifier for the Azure Object Anchors ingestion job.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    ClientRequestCorrelationVectorParameter:
+      in: header
+      name: x-mrc-cv
+      description: The client request correlation vector, which should be set to a new value for each request.
+      x-ms-parameter-location: method
+      schema:
+        type: string

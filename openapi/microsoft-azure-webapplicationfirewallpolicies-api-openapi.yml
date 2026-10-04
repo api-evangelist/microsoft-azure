@@ -395,6 +395,169 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    ManagedRuleSetList:
+      description: Defines the list of managed rule sets for the policy.
+      properties:
+        managedRuleSets:
+          description: List of rule sets.
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedRuleSet'
+          x-ms-identifiers:
+          - ruleSetType
+          - ruleSetVersion
+    CdnWebApplicationFirewallPolicy:
+      description: Defines web application firewall policy for Azure CDN.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Properties of the web application firewall policy.
+          $ref: '#/components/schemas/CdnWebApplicationFirewallPolicyProperties'
+        etag:
+          type: string
+          description: Gets a unique read-only string that changes whenever the resource is updated.
+        sku:
+          description: The pricing tier (defines a CDN provider, feature list and rate) of the CdnWebApplicationFirewallPolicy.
+          $ref: ./cdn.json#/definitions/Sku
+      required:
+      - sku
+      allOf:
+      - $ref: ./cdn.json#/definitions/TrackedResource
+    RateLimitRuleList:
+      description: Defines contents of rate limit rules
+      properties:
+        rules:
+          description: List of rules
+          type: array
+          items:
+            $ref: '#/components/schemas/RateLimitRule'
+          x-ms-identifiers:
+          - name
+    CdnWebApplicationFirewallPolicyList:
+      description: Defines a list of WebApplicationFirewallPolicies for Azure CDN. It contains a list of WebApplicationFirewallPolicy objects and a URL link to get the next set of results.
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CdnWebApplicationFirewallPolicy'
+          description: List of Azure CDN WebApplicationFirewallPolicies within a resource group.
+        nextLink:
+          type: string
+          description: URL to get the next set of WebApplicationFirewallPolicy objects if there are any.
+    CdnEndpoint:
+      description: Defines the ARM Resource ID for the linked endpoints
+      type: object
+      readOnly: true
+      properties:
+        id:
+          type: string
+          description: ARM Resource ID string.
+    CdnWebApplicationFirewallPolicyPatchParameters:
+      type: object
+      description: Properties required to update a CdnWebApplicationFirewallPolicy.
+      properties:
+        tags:
+          description: CdnWebApplicationFirewallPolicy tags
+          type: object
+          additionalProperties:
+            type: string
+      x-ms-azure-resource: true
+    ManagedRuleOverride:
+      description: Defines a managed rule group override setting.
+      required:
+      - ruleId
+      properties:
+        ruleId:
+          description: Identifier for the managed rule.
+          type: string
+        enabledState:
+          description: Describes if the managed rule is in enabled or disabled state. Defaults to Disabled if not specified.
+          type: string
+          enum:
+          - Disabled
+          - Enabled
+          x-ms-enum:
+            name: ManagedRuleEnabledState
+            modelAsString: true
+        action:
+          description: Describes the override action to be applied when rule matches.
+          $ref: '#/components/schemas/ActionType'
+    TransformType:
+      description: Describes what transforms were applied before matching.
+      type: string
+      enum:
+      - Lowercase
+      - Uppercase
+      - Trim
+      - UrlDecode
+      - UrlEncode
+      - RemoveNulls
+      x-ms-enum:
+        name: TransformType
+        modelAsString: true
+    ManagedRuleSet:
+      type: object
+      description: Defines a managed rule set.
+      required:
+      - ruleSetType
+      - ruleSetVersion
+      properties:
+        ruleSetType:
+          description: Defines the rule set type to use.
+          type: string
+        ruleSetVersion:
+          description: Defines the version of the rule set to use.
+          type: string
+        anomalyScore:
+          description: 'Verizon only : If the rule set supports anomaly detection mode, this describes the threshold for blocking requests.'
+          type: integer
+          format: int32
+          maximum: 20
+          minimum: 0
+        ruleGroupOverrides:
+          description: Defines the rule overrides to apply to the rule set.
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedRuleGroupOverride'
+          x-ms-identifiers:
+          - ruleGroupName
+    ActionType:
+      description: Defines the action to take on rule match.
+      type: string
+      enum:
+      - Allow
+      - Block
+      - Log
+      - Redirect
+      x-ms-enum:
+        name: ActionType
+        modelAsString: true
+    CustomRuleList:
+      description: Defines contents of custom rules
+      properties:
+        rules:
+          description: List of rules
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomRule'
+          x-ms-identifiers:
+          - name
+    ManagedRuleGroupOverride:
+      description: Defines a managed rule group override setting.
+      required:
+      - ruleGroupName
+      properties:
+        ruleGroupName:
+          description: Describes the managed rule group within the rule set to override
+          type: string
+        rules:
+          description: List of rules that will be enabled. If none specified, all rules in the group will be disabled.
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedRuleOverride'
+          x-ms-identifiers:
+          - ruleId
     CustomRule:
       description: Defines the common attributes for a custom rule that can be included in a waf policy
       type: object
@@ -431,112 +594,6 @@ components:
         action:
           description: Describes what action to be applied when rule matches
           $ref: '#/components/schemas/ActionType'
-    policySettings:
-      description: Defines contents of a web application firewall global configuration
-      properties:
-        enabledState:
-          description: describes if the policy is in enabled state or disabled state
-          type: string
-          enum:
-          - Disabled
-          - Enabled
-          x-ms-enum:
-            name: PolicyEnabledState
-            modelAsString: true
-        mode:
-          description: Describes if it is in detection mode or prevention mode at policy level.
-          type: string
-          enum:
-          - Prevention
-          - Detection
-          x-ms-enum:
-            name: PolicyMode
-            modelAsString: true
-        defaultRedirectUrl:
-          description: If action type is redirect, this field represents the default redirect URL for the client.
-          type: string
-        defaultCustomBlockResponseStatusCode:
-          description: If the action type is block, this field defines the default customer overridable http response status code.
-          type: integer
-          format: int32
-          enum:
-          - 200
-          - 403
-          - 405
-          - 406
-          - 429
-        defaultCustomBlockResponseBody:
-          description: If the action type is block, customer can override the response body. The body must be specified in base64 encoding.
-          type: string
-          pattern: ^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$
-    CdnWebApplicationFirewallPolicyProperties:
-      description: Defines CDN web application firewall policy properties.
-      properties:
-        policySettings:
-          description: Describes  policySettings for policy
-          $ref: '#/components/schemas/policySettings'
-        rateLimitRules:
-          description: Describes rate limit rules inside the policy.
-          $ref: '#/components/schemas/RateLimitRuleList'
-        customRules:
-          description: Describes custom rules inside the policy.
-          $ref: '#/components/schemas/CustomRuleList'
-        managedRules:
-          description: Describes managed rules inside the policy.
-          $ref: '#/components/schemas/ManagedRuleSetList'
-        endpointLinks:
-          description: Describes Azure CDN endpoints associated with this Web Application Firewall policy.
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/CdnEndpoint'
-        extendedProperties:
-          description: Key-Value pair representing additional properties for Web Application Firewall policy.
-          type: object
-          additionalProperties:
-            type: string
-        provisioningState:
-          readOnly: true
-          type: string
-          description: Provisioning state of the WebApplicationFirewallPolicy.
-          enum:
-          - Creating
-          - Succeeded
-          - Failed
-          x-ms-enum:
-            name: ProvisioningState
-            modelAsString: true
-        resourceState:
-          title: Resource status of the policy.
-          readOnly: true
-          enum:
-          - Creating
-          - Enabling
-          - Enabled
-          - Disabling
-          - Disabled
-          - Deleting
-          type: string
-          x-ms-enum:
-            name: PolicyResourceState
-            modelAsString: true
-    CdnWebApplicationFirewallPolicy:
-      description: Defines web application firewall policy for Azure CDN.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Properties of the web application firewall policy.
-          $ref: '#/components/schemas/CdnWebApplicationFirewallPolicyProperties'
-        etag:
-          type: string
-          description: Gets a unique read-only string that changes whenever the resource is updated.
-        sku:
-          description: The pricing tier (defines a CDN provider, feature list and rate) of the CdnWebApplicationFirewallPolicy.
-          $ref: ./cdn.json#/definitions/Sku
-      required:
-      - sku
-      allOf:
-      - $ref: ./cdn.json#/definitions/TrackedResource
     MatchCondition:
       description: Define match conditions
       required:
@@ -595,118 +652,57 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TransformType'
-    CdnWebApplicationFirewallPolicyPatchParameters:
-      type: object
-      description: Properties required to update a CdnWebApplicationFirewallPolicy.
+    CdnWebApplicationFirewallPolicyProperties:
+      description: Defines CDN web application firewall policy properties.
       properties:
-        tags:
-          description: CdnWebApplicationFirewallPolicy tags
-          type: object
-          additionalProperties:
-            type: string
-      x-ms-azure-resource: true
-    ManagedRuleSetList:
-      description: Defines the list of managed rule sets for the policy.
-      properties:
-        managedRuleSets:
-          description: List of rule sets.
-          type: array
-          items:
-            $ref: '#/components/schemas/ManagedRuleSet'
-          x-ms-identifiers:
-          - ruleSetType
-          - ruleSetVersion
-    RateLimitRuleList:
-      description: Defines contents of rate limit rules
-      properties:
-        rules:
-          description: List of rules
-          type: array
-          items:
-            $ref: '#/components/schemas/RateLimitRule'
-          x-ms-identifiers:
-          - name
-    CustomRuleList:
-      description: Defines contents of custom rules
-      properties:
-        rules:
-          description: List of rules
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomRule'
-          x-ms-identifiers:
-          - name
-    TransformType:
-      description: Describes what transforms were applied before matching.
-      type: string
-      enum:
-      - Lowercase
-      - Uppercase
-      - Trim
-      - UrlDecode
-      - UrlEncode
-      - RemoveNulls
-      x-ms-enum:
-        name: TransformType
-        modelAsString: true
-    ManagedRuleSet:
-      type: object
-      description: Defines a managed rule set.
-      required:
-      - ruleSetType
-      - ruleSetVersion
-      properties:
-        ruleSetType:
-          description: Defines the rule set type to use.
-          type: string
-        ruleSetVersion:
-          description: Defines the version of the rule set to use.
-          type: string
-        anomalyScore:
-          description: 'Verizon only : If the rule set supports anomaly detection mode, this describes the threshold for blocking requests.'
-          type: integer
-          format: int32
-          maximum: 20
-          minimum: 0
-        ruleGroupOverrides:
-          description: Defines the rule overrides to apply to the rule set.
-          type: array
-          items:
-            $ref: '#/components/schemas/ManagedRuleGroupOverride'
-          x-ms-identifiers:
-          - ruleGroupName
-    ManagedRuleOverride:
-      description: Defines a managed rule group override setting.
-      required:
-      - ruleId
-      properties:
-        ruleId:
-          description: Identifier for the managed rule.
-          type: string
-        enabledState:
-          description: Describes if the managed rule is in enabled or disabled state. Defaults to Disabled if not specified.
-          type: string
-          enum:
-          - Disabled
-          - Enabled
-          x-ms-enum:
-            name: ManagedRuleEnabledState
-            modelAsString: true
-        action:
-          description: Describes the override action to be applied when rule matches.
-          $ref: '#/components/schemas/ActionType'
-    CdnWebApplicationFirewallPolicyList:
-      description: Defines a list of WebApplicationFirewallPolicies for Azure CDN. It contains a list of WebApplicationFirewallPolicy objects and a URL link to get the next set of results.
-      properties:
-        value:
+        policySettings:
+          description: Describes  policySettings for policy
+          $ref: '#/components/schemas/policySettings'
+        rateLimitRules:
+          description: Describes rate limit rules inside the policy.
+          $ref: '#/components/schemas/RateLimitRuleList'
+        customRules:
+          description: Describes custom rules inside the policy.
+          $ref: '#/components/schemas/CustomRuleList'
+        managedRules:
+          description: Describes managed rules inside the policy.
+          $ref: '#/components/schemas/ManagedRuleSetList'
+        endpointLinks:
+          description: Describes Azure CDN endpoints associated with this Web Application Firewall policy.
           type: array
           readOnly: true
           items:
-            $ref: '#/components/schemas/CdnWebApplicationFirewallPolicy'
-          description: List of Azure CDN WebApplicationFirewallPolicies within a resource group.
-        nextLink:
+            $ref: '#/components/schemas/CdnEndpoint'
+        extendedProperties:
+          description: Key-Value pair representing additional properties for Web Application Firewall policy.
+          type: object
+          additionalProperties:
+            type: string
+        provisioningState:
+          readOnly: true
           type: string
-          description: URL to get the next set of WebApplicationFirewallPolicy objects if there are any.
+          description: Provisioning state of the WebApplicationFirewallPolicy.
+          enum:
+          - Creating
+          - Succeeded
+          - Failed
+          x-ms-enum:
+            name: ProvisioningState
+            modelAsString: true
+        resourceState:
+          title: Resource status of the policy.
+          readOnly: true
+          enum:
+          - Creating
+          - Enabling
+          - Enabled
+          - Disabling
+          - Disabled
+          - Deleting
+          type: string
+          x-ms-enum:
+            name: PolicyResourceState
+            modelAsString: true
     RateLimitRule:
       description: Defines a rate limiting rule that can be included in a waf policy
       type: object
@@ -727,46 +723,65 @@ components:
           minimum: 0
       allOf:
       - $ref: '#/components/schemas/CustomRule'
-    CdnEndpoint:
-      description: Defines the ARM Resource ID for the linked endpoints
-      type: object
-      readOnly: true
+    policySettings:
+      description: Defines contents of a web application firewall global configuration
       properties:
-        id:
+        enabledState:
+          description: describes if the policy is in enabled state or disabled state
           type: string
-          description: ARM Resource ID string.
-    ActionType:
-      description: Defines the action to take on rule match.
-      type: string
-      enum:
-      - Allow
-      - Block
-      - Log
-      - Redirect
-      x-ms-enum:
-        name: ActionType
-        modelAsString: true
-    ManagedRuleGroupOverride:
-      description: Defines a managed rule group override setting.
+          enum:
+          - Disabled
+          - Enabled
+          x-ms-enum:
+            name: PolicyEnabledState
+            modelAsString: true
+        mode:
+          description: Describes if it is in detection mode or prevention mode at policy level.
+          type: string
+          enum:
+          - Prevention
+          - Detection
+          x-ms-enum:
+            name: PolicyMode
+            modelAsString: true
+        defaultRedirectUrl:
+          description: If action type is redirect, this field represents the default redirect URL for the client.
+          type: string
+        defaultCustomBlockResponseStatusCode:
+          description: If the action type is block, this field defines the default customer overridable http response status code.
+          type: integer
+          format: int32
+          enum:
+          - 200
+          - 403
+          - 405
+          - 406
+          - 429
+        defaultCustomBlockResponseBody:
+          description: If the action type is block, customer can override the response body. The body must be specified in base64 encoding.
+          type: string
+          pattern: ^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$
+    ManagedRulesDefinition:
+      description: Allow to exclude some variable satisfy the condition for the WAF check.
       required:
-      - ruleGroupName
+      - managedRuleSets
       properties:
-        ruleGroupName:
-          description: Describes the managed rule group within the rule set to override
-          type: string
-        rules:
-          description: List of rules that will be enabled. If none specified, all rules in the group will be disabled.
+        exclusions:
           type: array
           items:
-            $ref: '#/components/schemas/ManagedRuleOverride'
-          x-ms-identifiers:
-          - ruleId
-    WebApplicationFirewallScrubbingRules:
-      description: Allow certain variables to be scrubbed on WAF logs
-      type: object
+            $ref: '#/components/schemas/OwaspCrsExclusionEntry'
+          description: The Exclusions that are applied on the policy.
+        managedRuleSets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedRuleSet_2'
+          description: The managed rule sets that are associated with the policy.
+    OwaspCrsExclusionEntry:
       required:
       - matchVariable
       - selectorMatchOperator
+      - selector
+      description: Allow to exclude some variable satisfy the condition for the WAF check.
       properties:
         matchVariable:
           type: string
@@ -774,52 +789,36 @@ components:
           - RequestHeaderNames
           - RequestCookieNames
           - RequestArgNames
-          - RequestPostArgNames
-          - RequestJSONArgNames
-          - RequestIPAddress
-          description: The variable to be scrubbed from the logs.
+          - RequestHeaderKeys
+          - RequestHeaderValues
+          - RequestCookieKeys
+          - RequestCookieValues
+          - RequestArgKeys
+          - RequestArgValues
+          description: The variable to be excluded.
           x-ms-enum:
-            name: scrubbingRuleEntryMatchVariable
+            name: OwaspCrsExclusionEntryMatchVariable
             modelAsString: true
         selectorMatchOperator:
           type: string
           enum:
           - Equals
+          - Contains
+          - StartsWith
+          - EndsWith
           - EqualsAny
-          description: When matchVariable is a collection, operate on the selector to specify which elements in the collection this rule applies to.
+          description: When matchVariable is a collection, operate on the selector to specify which elements in the collection this exclusion applies to.
           x-ms-enum:
-            name: ' scrubbingRuleEntryMatchOperator'
+            name: OwaspCrsExclusionEntrySelectorMatchOperator
             modelAsString: true
         selector:
           type: string
-          description: When matchVariable is a collection, operator used to specify which elements in the collection this rule applies to.
-        state:
-          type: string
-          enum:
-          - Enabled
-          - Disabled
-          description: Defines the state of log scrubbing rule. Default value is Enabled.
-          x-ms-enum:
-            name: ' scrubbingRuleEntryState'
-            modelAsString: true
-    ExclusionManagedRuleSet:
-      type: object
-      description: Defines a managed rule set for Exclusions.
-      required:
-      - ruleSetType
-      - ruleSetVersion
-      properties:
-        ruleSetType:
-          description: Defines the rule set type to use.
-          type: string
-        ruleSetVersion:
-          description: Defines the version of the rule set to use.
-          type: string
-        ruleGroups:
-          description: Defines the rule groups to apply to the rule set.
+          description: When matchVariable is a collection, operator used to specify which elements in the collection this exclusion applies to.
+        exclusionManagedRuleSets:
           type: array
           items:
-            $ref: '#/components/schemas/ExclusionManagedRuleGroup'
+            $ref: '#/components/schemas/ExclusionManagedRuleSet'
+          description: The managed rule sets that are associated with the exclusion.
     PolicySettings:
       description: Defines contents of a web application firewall global configuration.
       properties:
@@ -974,172 +973,6 @@ components:
           x-ms-enum:
             name: WebApplicationFirewallAction
             modelAsString: true
-    OwaspCrsExclusionEntry:
-      required:
-      - matchVariable
-      - selectorMatchOperator
-      - selector
-      description: Allow to exclude some variable satisfy the condition for the WAF check.
-      properties:
-        matchVariable:
-          type: string
-          enum:
-          - RequestHeaderNames
-          - RequestCookieNames
-          - RequestArgNames
-          - RequestHeaderKeys
-          - RequestHeaderValues
-          - RequestCookieKeys
-          - RequestCookieValues
-          - RequestArgKeys
-          - RequestArgValues
-          description: The variable to be excluded.
-          x-ms-enum:
-            name: OwaspCrsExclusionEntryMatchVariable
-            modelAsString: true
-        selectorMatchOperator:
-          type: string
-          enum:
-          - Equals
-          - Contains
-          - StartsWith
-          - EndsWith
-          - EqualsAny
-          description: When matchVariable is a collection, operate on the selector to specify which elements in the collection this exclusion applies to.
-          x-ms-enum:
-            name: OwaspCrsExclusionEntrySelectorMatchOperator
-            modelAsString: true
-        selector:
-          type: string
-          description: When matchVariable is a collection, operator used to specify which elements in the collection this exclusion applies to.
-        exclusionManagedRuleSets:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExclusionManagedRuleSet'
-          description: The managed rule sets that are associated with the exclusion.
-    GroupByUserSession:
-      type: object
-      description: Define user session identifier group by clauses.
-      required:
-      - groupByVariables
-      properties:
-        groupByVariables:
-          description: List of group by clause variables.
-          type: array
-          x-ms-identifiers: []
-          items:
-            $ref: '#/components/schemas/GroupByVariable'
-    Transform:
-      description: Transforms applied before matching.
-      type: string
-      enum:
-      - Uppercase
-      - Lowercase
-      - Trim
-      - UrlDecode
-      - UrlEncode
-      - RemoveNulls
-      - HtmlEntityDecode
-      x-ms-enum:
-        name: WebApplicationFirewallTransform
-        modelAsString: true
-    ExclusionManagedRule:
-      type: object
-      description: Defines a managed rule to use for exclusion.
-      required:
-      - ruleId
-      properties:
-        ruleId:
-          description: Identifier for the managed rule.
-          type: string
-    MatchCondition_2:
-      description: Define match conditions.
-      required:
-      - matchVariables
-      - operator
-      - matchValues
-      properties:
-        matchVariables:
-          description: List of match variables.
-          type: array
-          items:
-            $ref: '#/components/schemas/MatchVariable'
-        operator:
-          description: The operator to be matched.
-          type: string
-          enum:
-          - IPMatch
-          - Equal
-          - Contains
-          - LessThan
-          - GreaterThan
-          - LessThanOrEqual
-          - GreaterThanOrEqual
-          - BeginsWith
-          - EndsWith
-          - Regex
-          - GeoMatch
-          - Any
-          x-ms-enum:
-            name: WebApplicationFirewallOperator
-            modelAsString: true
-        negationConditon:
-          description: Whether this is negate condition or not.
-          type: boolean
-        matchValues:
-          description: Match value.
-          type: array
-          items:
-            type: string
-        transforms:
-          description: List of transforms.
-          type: array
-          items:
-            $ref: '#/components/schemas/Transform'
-    GroupByVariable:
-      type: object
-      description: Define user session group by clause variables.
-      required:
-      - variableName
-      properties:
-        variableName:
-          description: User Session clause variable.
-          type: string
-          enum:
-          - ClientAddr
-          - GeoLocation
-          - None
-          x-ms-enum:
-            name: ApplicationGatewayFirewallUserSessionVariable
-            modelAsString: true
-    ManagedRulesDefinition:
-      description: Allow to exclude some variable satisfy the condition for the WAF check.
-      required:
-      - managedRuleSets
-      properties:
-        exclusions:
-          type: array
-          items:
-            $ref: '#/components/schemas/OwaspCrsExclusionEntry'
-          description: The Exclusions that are applied on the policy.
-        managedRuleSets:
-          type: array
-          items:
-            $ref: '#/components/schemas/ManagedRuleSet_2'
-          description: The managed rule sets that are associated with the policy.
-    WebApplicationFirewallPolicyListResult:
-      description: Result of the request to list WebApplicationFirewallPolicies. It contains a list of WebApplicationFirewallPolicy objects and a URL link to get the next set of results.
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/WebApplicationFirewallPolicy'
-          description: List of WebApplicationFirewallPolicies within a resource group.
-        nextLink:
-          readOnly: true
-          type: string
-          description: URL to get the next set of WebApplicationFirewallPolicy objects if there are any.
     WebApplicationFirewallPolicyPropertiesFormat:
       description: Defines web application firewall policy properties.
       required:
@@ -1193,38 +1026,28 @@ components:
           items:
             $ref: ./network.json#/definitions/SubResource
           description: A collection of references to application gateway path rules.
-    ExclusionManagedRuleGroup:
+    ExclusionManagedRule:
       type: object
-      description: Defines a managed rule group to use for exclusion.
+      description: Defines a managed rule to use for exclusion.
       required:
-      - ruleGroupName
+      - ruleId
       properties:
-        ruleGroupName:
-          description: The managed rule group for exclusion.
+        ruleId:
+          description: Identifier for the managed rule.
           type: string
-        rules:
-          description: List of rules that will be excluded. If none specified, all rules in the group will be excluded.
-          type: array
-          items:
-            $ref: '#/components/schemas/ExclusionManagedRule'
-    ManagedRuleSet_2:
-      type: object
-      description: Defines a managed rule set.
-      required:
-      - ruleSetType
-      - ruleSetVersion
+    WebApplicationFirewallPolicy:
+      description: Defines web application firewall policy.
       properties:
-        ruleSetType:
-          description: Defines the rule set type to use.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/WebApplicationFirewallPolicyPropertiesFormat'
+          description: Properties of the web application firewall policy.
+        etag:
+          readOnly: true
           type: string
-        ruleSetVersion:
-          description: Defines the version of the rule set to use.
-          type: string
-        ruleGroupOverrides:
-          description: Defines the rule group overrides to apply to the rule set.
-          type: array
-          items:
-            $ref: '#/components/schemas/ManagedRuleGroupOverride_2'
+          description: A unique read-only string that changes whenever the resource is updated.
+      allOf:
+      - $ref: ./network.json#/definitions/Resource
     ManagedRuleOverride_2:
       type: object
       description: Defines a managed rule group override setting.
@@ -1246,42 +1069,52 @@ components:
         action:
           description: Describes the override action to be applied when rule matches.
           $ref: '#/components/schemas/ActionType_2'
-    MatchVariable:
-      description: Define match variables.
+    GroupByUserSession:
+      type: object
+      description: Define user session identifier group by clauses.
+      required:
+      - groupByVariables
+      properties:
+        groupByVariables:
+          description: List of group by clause variables.
+          type: array
+          x-ms-identifiers: []
+          items:
+            $ref: '#/components/schemas/GroupByVariable'
+    ManagedRuleSet_2:
+      type: object
+      description: Defines a managed rule set.
+      required:
+      - ruleSetType
+      - ruleSetVersion
+      properties:
+        ruleSetType:
+          description: Defines the rule set type to use.
+          type: string
+        ruleSetVersion:
+          description: Defines the version of the rule set to use.
+          type: string
+        ruleGroupOverrides:
+          description: Defines the rule group overrides to apply to the rule set.
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedRuleGroupOverride_2'
+    GroupByVariable:
+      type: object
+      description: Define user session group by clause variables.
       required:
       - variableName
       properties:
         variableName:
-          description: Match Variable.
+          description: User Session clause variable.
           type: string
           enum:
-          - RemoteAddr
-          - RequestMethod
-          - QueryString
-          - PostArgs
-          - RequestUri
-          - RequestHeaders
-          - RequestBody
-          - RequestCookies
+          - ClientAddr
+          - GeoLocation
+          - None
           x-ms-enum:
-            name: WebApplicationFirewallMatchVariable
+            name: ApplicationGatewayFirewallUserSessionVariable
             modelAsString: true
-        selector:
-          description: The selector of match variable.
-          type: string
-    WebApplicationFirewallPolicy:
-      description: Defines web application firewall policy.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/WebApplicationFirewallPolicyPropertiesFormat'
-          description: Properties of the web application firewall policy.
-        etag:
-          readOnly: true
-          type: string
-          description: A unique read-only string that changes whenever the resource is updated.
-      allOf:
-      - $ref: ./network.json#/definitions/Resource
     ActionType_2:
       description: Defines the action to take on rule match.
       type: string
@@ -1308,7 +1141,181 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ManagedRuleOverride_2'
+    ExclusionManagedRuleGroup:
+      type: object
+      description: Defines a managed rule group to use for exclusion.
+      required:
+      - ruleGroupName
+      properties:
+        ruleGroupName:
+          description: The managed rule group for exclusion.
+          type: string
+        rules:
+          description: List of rules that will be excluded. If none specified, all rules in the group will be excluded.
+          type: array
+          items:
+            $ref: '#/components/schemas/ExclusionManagedRule'
+    WebApplicationFirewallScrubbingRules:
+      description: Allow certain variables to be scrubbed on WAF logs
+      type: object
+      required:
+      - matchVariable
+      - selectorMatchOperator
+      properties:
+        matchVariable:
+          type: string
+          enum:
+          - RequestHeaderNames
+          - RequestCookieNames
+          - RequestArgNames
+          - RequestPostArgNames
+          - RequestJSONArgNames
+          - RequestIPAddress
+          description: The variable to be scrubbed from the logs.
+          x-ms-enum:
+            name: scrubbingRuleEntryMatchVariable
+            modelAsString: true
+        selectorMatchOperator:
+          type: string
+          enum:
+          - Equals
+          - EqualsAny
+          description: When matchVariable is a collection, operate on the selector to specify which elements in the collection this rule applies to.
+          x-ms-enum:
+            name: ' scrubbingRuleEntryMatchOperator'
+            modelAsString: true
+        selector:
+          type: string
+          description: When matchVariable is a collection, operator used to specify which elements in the collection this rule applies to.
+        state:
+          type: string
+          enum:
+          - Enabled
+          - Disabled
+          description: Defines the state of log scrubbing rule. Default value is Enabled.
+          x-ms-enum:
+            name: ' scrubbingRuleEntryState'
+            modelAsString: true
+    MatchVariable:
+      description: Define match variables.
+      required:
+      - variableName
+      properties:
+        variableName:
+          description: Match Variable.
+          type: string
+          enum:
+          - RemoteAddr
+          - RequestMethod
+          - QueryString
+          - PostArgs
+          - RequestUri
+          - RequestHeaders
+          - RequestBody
+          - RequestCookies
+          x-ms-enum:
+            name: WebApplicationFirewallMatchVariable
+            modelAsString: true
+        selector:
+          description: The selector of match variable.
+          type: string
+    Transform:
+      description: Transforms applied before matching.
+      type: string
+      enum:
+      - Uppercase
+      - Lowercase
+      - Trim
+      - UrlDecode
+      - UrlEncode
+      - RemoveNulls
+      - HtmlEntityDecode
+      x-ms-enum:
+        name: WebApplicationFirewallTransform
+        modelAsString: true
+    ExclusionManagedRuleSet:
+      type: object
+      description: Defines a managed rule set for Exclusions.
+      required:
+      - ruleSetType
+      - ruleSetVersion
+      properties:
+        ruleSetType:
+          description: Defines the rule set type to use.
+          type: string
+        ruleSetVersion:
+          description: Defines the version of the rule set to use.
+          type: string
+        ruleGroups:
+          description: Defines the rule groups to apply to the rule set.
+          type: array
+          items:
+            $ref: '#/components/schemas/ExclusionManagedRuleGroup'
+    MatchCondition_2:
+      description: Define match conditions.
+      required:
+      - matchVariables
+      - operator
+      - matchValues
+      properties:
+        matchVariables:
+          description: List of match variables.
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchVariable'
+        operator:
+          description: The operator to be matched.
+          type: string
+          enum:
+          - IPMatch
+          - Equal
+          - Contains
+          - LessThan
+          - GreaterThan
+          - LessThanOrEqual
+          - GreaterThanOrEqual
+          - BeginsWith
+          - EndsWith
+          - Regex
+          - GeoMatch
+          - Any
+          x-ms-enum:
+            name: WebApplicationFirewallOperator
+            modelAsString: true
+        negationConditon:
+          description: Whether this is negate condition or not.
+          type: boolean
+        matchValues:
+          description: Match value.
+          type: array
+          items:
+            type: string
+        transforms:
+          description: List of transforms.
+          type: array
+          items:
+            $ref: '#/components/schemas/Transform'
+    WebApplicationFirewallPolicyListResult:
+      description: Result of the request to list WebApplicationFirewallPolicies. It contains a list of WebApplicationFirewallPolicy objects and a URL link to get the next set of results.
+      properties:
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/WebApplicationFirewallPolicy'
+          description: List of WebApplicationFirewallPolicies within a resource group.
+        nextLink:
+          readOnly: true
+          type: string
+          description: URL to get the next set of WebApplicationFirewallPolicy objects if there are any.
   parameters:
+    apiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Version of the API to be used with the client request. Current version is 2023-05-01.
+      schema:
+        type: string
     PolicyNameParameter:
       name: policyName
       in: path
@@ -1318,13 +1325,6 @@ components:
       schema:
         type: string
         maxLength: 128
-    apiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Version of the API to be used with the client request. Current version is 2023-05-01.
-      schema:
-        type: string
     ResourceGroupNameParameter:
       name: resourceGroupName
       in: path

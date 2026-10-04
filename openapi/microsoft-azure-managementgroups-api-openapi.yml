@@ -226,6 +226,14 @@ paths:
       summary: Microsoft Azure Delete Providers Microsoft Management Managementgroups Groupid…
 components:
   parameters:
+    RecurseParameter:
+      name: $recurse
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      description: The $recurse=true query string parameter allows clients to request inclusion of entire hierarchy in the response payload. Note that  $expand=children must be passed up if $recurse is set to true.
+      schema:
+        type: boolean
     CacheControlHeader:
       name: Cache-Control
       in: header
@@ -234,19 +242,20 @@ components:
       schema:
         type: string
         default: no-cache
+    GroupIdParameter:
+      name: groupId
+      in: path
+      required: true
+      description: Management Group ID.
+      x-ms-parameter-location: method
+      schema:
+        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
       required: true
       description: Subscription ID.
       x-ms-parameter-location: method
-      schema:
-        type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Version of the API to be used with the client request. The current version is 2018-01-01-preview.
       schema:
         type: string
     SkipTokenParameter:
@@ -257,30 +266,6 @@ components:
       x-ms-parameter-location: client
       schema:
         type: string
-    FilterParameter:
-      name: $filter
-      in: query
-      required: false
-      description: A filter which allows the exclusion of subscriptions from results (i.e. '$filter=children.childType ne Subscription')
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    CreateManagementGroupRequestParameter:
-      name: createManagementGroupRequest
-      in: body
-      required: true
-      description: Management group creation parameters.
-      schema:
-        $ref: '#/components/schemas/CreateManagementGroupRequest'
-      x-ms-parameter-location: client
-    GroupIdParameter:
-      name: groupId
-      in: path
-      required: true
-      description: Management Group ID.
-      x-ms-parameter-location: method
-      schema:
-        type: string
     PatchGroupRequestParameter:
       name: patchGroupRequest
       in: body
@@ -289,14 +274,21 @@ components:
       schema:
         $ref: '#/components/schemas/PatchManagementGroupRequest'
       x-ms-parameter-location: client
-    RecurseParameter:
-      name: $recurse
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+      schema:
+        type: string
+    FilterParameter:
+      name: $filter
       in: query
       required: false
+      description: A filter which allows the exclusion of subscriptions from results (i.e. '$filter=children.childType ne Subscription')
       x-ms-parameter-location: method
-      description: The $recurse=true query string parameter allows clients to request inclusion of entire hierarchy in the response payload. Note that  $expand=children must be passed up if $recurse is set to true.
       schema:
-        type: boolean
+        type: string
     ExpandParameter:
       name: $expand
       in: query
@@ -307,13 +299,15 @@ components:
         type: string
         enum:
         - children
+    CreateManagementGroupRequestParameter:
+      name: createManagementGroupRequest
+      in: body
+      required: true
+      description: Management group creation parameters.
+      schema:
+        $ref: '#/components/schemas/CreateManagementGroupRequest'
+      x-ms-parameter-location: client
   schemas:
-    ManagementGroupChildType:
-      type: string
-      enum:
-      - /providers/Microsoft.Management/managementGroups
-      - /subscriptions
-      description: The type of child resource.
     CreateManagementGroupRequest:
       description: Management group creation parameters.
       type: object
@@ -334,60 +328,78 @@ components:
           title: Properties
           x-ms-client-flatten: true
           $ref: '#/components/schemas/CreateManagementGroupProperties'
-    CreateManagementGroupDetails:
-      description: The details of a management group used during creation.
+    ManagementGroupInfoProperties:
+      description: The generic properties of a management group.
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: The AAD Tenant ID associated with the management group. For example, 00000000-0000-0000-0000-000000000000
+        displayName:
+          type: string
+          description: The friendly name of the management group.
+    ManagementGroupChildInfo:
+      description: The child information of a management group.
+      properties:
+        type:
+          title: The type of child resource.
+          $ref: '#/components/schemas/ManagementGroupChildType'
+          description: The fully qualified resource type which includes provider namespace (e.g. /providers/Microsoft.Management/managementGroups)
+        id:
+          type: string
+          description: The fully qualified ID for the child resource (management group or subscription).  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
+        name:
+          type: string
+          description: The name of the child entity.
+        displayName:
+          type: string
+          description: The friendly name of the child resource.
+        roles:
+          description: The roles definitions associated with the management group.
+          type: array
+          items:
+            type: string
+        children:
+          description: The list of children.
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagementGroupChildInfo'
+    ErrorDetails:
+      description: The details of the error.
+      properties:
+        code:
+          description: One of a server-defined set of error codes.
+          type: string
+        message:
+          description: A human-readable representation of the error.
+          type: string
+        details:
+          description: A human-readable representation of the error's details.
+          type: string
+    ManagementGroupDetails:
+      description: The details of a management group.
       type: object
       properties:
         version:
           type: number
-          readOnly: true
           format: int32
           description: The version number of the object.
         updatedTime:
           type: string
-          readOnly: true
           format: date-time
           description: The date and time when this object was last updated.
         updatedBy:
           type: string
-          readOnly: true
           description: The identity of the principal or process that updated the object.
         parent:
           title: Parent
-          $ref: '#/components/schemas/CreateParentGroupInfo'
-    ManagementGroupInfo:
-      description: The management group resource.
+          $ref: '#/components/schemas/ParentGroupInfo'
+    ErrorResponse:
+      description: The error object.
       properties:
-        id:
-          type: string
-          description: The fully qualified ID for the management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
-          readOnly: true
-        type:
-          type: string
-          description: The type of the resource. For example, /providers/Microsoft.Management/managementGroups
-          readOnly: true
-        name:
-          type: string
-          description: The name of the management group. For example, 00000000-0000-0000-0000-000000000000
-          readOnly: true
-        properties:
-          x-ms-client-flatten: true
-          title: Properties
-          $ref: '#/components/schemas/ManagementGroupInfoProperties'
-    PatchManagementGroupRequest:
-      description: Management group patch parameters.
-      type: object
-      properties:
-        displayName:
-          type:
-          - string
-          - 'null'
-          description: The friendly name of the management group.
-        parentId:
-          type:
-          - string
-          - 'null'
-          description: (Optional) The fully qualified ID for the parent management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
+        error:
+          title: Error
+          $ref: '#/components/schemas/ErrorDetails'
     CreateManagementGroupProperties:
       description: The generic properties of a management group used during creation.
       type: object
@@ -420,6 +432,25 @@ components:
           - 'null'
           items:
             $ref: '#/components/schemas/CreateManagementGroupChildInfo'
+    ManagementGroupInfo:
+      description: The management group resource.
+      properties:
+        id:
+          type: string
+          description: The fully qualified ID for the management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
+          readOnly: true
+        type:
+          type: string
+          description: The type of the resource. For example, /providers/Microsoft.Management/managementGroups
+          readOnly: true
+        name:
+          type: string
+          description: The name of the management group. For example, 00000000-0000-0000-0000-000000000000
+          readOnly: true
+        properties:
+          x-ms-client-flatten: true
+          title: Properties
+          $ref: '#/components/schemas/ManagementGroupInfoProperties'
     ParentGroupInfo:
       description: (Optional) The ID of the parent management group.
       properties:
@@ -432,87 +463,65 @@ components:
         displayName:
           type: string
           description: The friendly name of the parent management group.
-    ErrorDetails:
-      description: The details of the error.
+    ManagementGroupChildType:
+      type: string
+      enum:
+      - /providers/Microsoft.Management/managementGroups
+      - /subscriptions
+      description: The type of child resource.
+    ManagementGroupListResult:
+      description: Describes the result of the request to list management groups.
       properties:
-        code:
-          description: One of a server-defined set of error codes.
+        value:
+          description: The list of management groups.
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagementGroupInfo'
+        nextLink:
+          description: The URL to use for getting the next set of results.
           type: string
-        message:
-          description: A human-readable representation of the error.
+          readOnly: true
+    CreateManagementGroupDetails:
+      description: The details of a management group used during creation.
+      type: object
+      properties:
+        version:
+          type: number
+          readOnly: true
+          format: int32
+          description: The version number of the object.
+        updatedTime:
           type: string
-        details:
-          description: A human-readable representation of the error's details.
+          readOnly: true
+          format: date-time
+          description: The date and time when this object was last updated.
+        updatedBy:
           type: string
+          readOnly: true
+          description: The identity of the principal or process that updated the object.
+        parent:
+          title: Parent
+          $ref: '#/components/schemas/CreateParentGroupInfo'
     ProvisioningState:
       title: Provisioning State
       type: string
       enum:
       - Updating
       description: The provisioning status.
-    OperationResults:
-      description: The results of an asynchronous operation.
+    PatchManagementGroupRequest:
+      description: Management group patch parameters.
+      type: object
       properties:
-        id:
-          type: string
-          description: The fully qualified ID for the management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
-          readOnly: true
-        type:
-          type: string
-          description: The type of the resource.  For example, /providers/Microsoft.Management/managementGroups
-          readOnly: true
-        name:
-          type: string
-          description: The name of the management group. For example, 00000000-0000-0000-0000-000000000000
-          readOnly: true
-        properties:
-          title: Properties
-          x-ms-client-flatten: true
-          type: object
-          properties:
-            provisioningState:
-              title: Provisioning State
-              $ref: '#/components/schemas/ProvisioningState'
-    ManagementGroupChildInfo:
-      description: The child information of a management group.
-      properties:
-        type:
-          title: The type of child resource.
-          $ref: '#/components/schemas/ManagementGroupChildType'
-          description: The fully qualified resource type which includes provider namespace (e.g. /providers/Microsoft.Management/managementGroups)
-        id:
-          type: string
-          description: The fully qualified ID for the child resource (management group or subscription).  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
-        name:
-          type: string
-          description: The name of the child entity.
         displayName:
-          type: string
-          description: The friendly name of the child resource.
-        roles:
-          description: The roles definitions associated with the management group.
-          type: array
-          items:
-            type: string
-        children:
-          description: The list of children.
-          type: array
-          items:
-            $ref: '#/components/schemas/ManagementGroupChildInfo'
-    CreateParentGroupInfo:
-      description: (Optional) The ID of the parent management group used during creation.
-      properties:
-        id:
-          type: string
-          description: The fully qualified ID for the parent management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
-        name:
-          type: string
-          readOnly: true
-          description: The name of the parent management group
-        displayName:
-          type: string
-          readOnly: true
-          description: The friendly name of the parent management group.
+          type:
+          - string
+          - 'null'
+          description: The friendly name of the management group.
+        parentId:
+          type:
+          - string
+          - 'null'
+          description: (Optional) The fully qualified ID for the parent management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
     ManagementGroupProperties:
       description: The generic properties of a management group.
       type: object
@@ -540,18 +549,20 @@ components:
           - 'null'
           items:
             $ref: '#/components/schemas/ManagementGroupChildInfo'
-    ManagementGroupListResult:
-      description: Describes the result of the request to list management groups.
+    CreateParentGroupInfo:
+      description: (Optional) The ID of the parent management group used during creation.
       properties:
-        value:
-          description: The list of management groups.
-          type: array
-          items:
-            $ref: '#/components/schemas/ManagementGroupInfo'
-        nextLink:
-          description: The URL to use for getting the next set of results.
+        id:
+          type: string
+          description: The fully qualified ID for the parent management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
+        name:
           type: string
           readOnly: true
+          description: The name of the parent management group
+        displayName:
+          type: string
+          readOnly: true
+          description: The friendly name of the parent management group.
     CreateManagementGroupChildInfo:
       description: The child information of a management group used during creation.
       properties:
@@ -604,40 +615,29 @@ components:
           title: Properties
           x-ms-client-flatten: true
           $ref: '#/components/schemas/ManagementGroupProperties'
-    ManagementGroupInfoProperties:
-      description: The generic properties of a management group.
-      type: object
+    OperationResults:
+      description: The results of an asynchronous operation.
       properties:
-        tenantId:
+        id:
           type: string
-          description: The AAD Tenant ID associated with the management group. For example, 00000000-0000-0000-0000-000000000000
-        displayName:
+          description: The fully qualified ID for the management group.  For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
+          readOnly: true
+        type:
           type: string
-          description: The friendly name of the management group.
-    ErrorResponse:
-      description: The error object.
-      properties:
-        error:
-          title: Error
-          $ref: '#/components/schemas/ErrorDetails'
-    ManagementGroupDetails:
-      description: The details of a management group.
-      type: object
-      properties:
-        version:
-          type: number
-          format: int32
-          description: The version number of the object.
-        updatedTime:
+          description: The type of the resource.  For example, /providers/Microsoft.Management/managementGroups
+          readOnly: true
+        name:
           type: string
-          format: date-time
-          description: The date and time when this object was last updated.
-        updatedBy:
-          type: string
-          description: The identity of the principal or process that updated the object.
-        parent:
-          title: Parent
-          $ref: '#/components/schemas/ParentGroupInfo'
+          description: The name of the management group. For example, 00000000-0000-0000-0000-000000000000
+          readOnly: true
+        properties:
+          title: Properties
+          x-ms-client-flatten: true
+          type: object
+          properties:
+            provisioningState:
+              title: Provisioning State
+              $ref: '#/components/schemas/ProvisioningState'
   securitySchemes:
     azure_auth:
       type: oauth2

@@ -239,6 +239,33 @@ paths:
         required: true
 components:
   schemas:
+    ControllerList:
+      properties:
+        value:
+          description: List of Azure Dev Spaces Controllers.
+          type: array
+          items:
+            $ref: '#/components/schemas/Controller'
+        nextLink:
+          description: The URI that can be used to request the next page for list of Azure Dev Spaces Controllers.
+          type: string
+          readOnly: true
+    Resource:
+      description: An Azure resource.
+      properties:
+        id:
+          description: Fully qualified resource Id for the resource.
+          type: string
+          readOnly: true
+        name:
+          description: The name of the resource.
+          type: string
+          readOnly: true
+        type:
+          description: The type of the resource.
+          type: string
+          readOnly: true
+      x-ms-azure-resource: true
     ControllerProperties:
       required:
       - targetContainerHostResourceId
@@ -282,37 +309,16 @@ components:
           type: string
           x-ms-mutability:
           - create
-    OrchestratorSpecificConnectionDetails:
-      description: Base class for types that supply values used to connect to container orchestrators
+    ControllerUpdateParameters:
+      description: Parameters for updating an Azure Dev Spaces Controller.
       properties:
-        instanceType:
-          description: Gets the Instance type.
-          type: string
-          readOnly: true
-      discriminator:
-        propertyName: instanceType
-    ListConnectionDetailsParameters:
-      description: Parameters for listing connection details of an Azure Dev Spaces Controller.
-      required:
-      - targetContainerHostResourceId
-      properties:
-        targetContainerHostResourceId:
-          description: Resource ID of the target container host mapped to the Azure Dev Spaces Controller.
-          type: string
-    ErrorDetails:
-      properties:
-        code:
-          description: Status code for the error.
-          type: string
-          readOnly: true
-        message:
-          description: Error message describing the error in detail.
-          type: string
-          readOnly: true
-        target:
-          description: The target of the particular error.
-          type: string
-          readOnly: true
+        tags:
+          description: Tags for the Azure Dev Spaces Controller.
+          additionalProperties:
+            type: string
+        properties:
+          $ref: '#/components/schemas/ControllerUpdateParametersProperties'
+          x-ms-client-flatten: true
     ControllerConnectionDetails:
       properties:
         orchestratorSpecificConnectionDetails:
@@ -337,6 +343,48 @@ components:
           x-ms-mutability:
           - read
           - create
+    ControllerUpdateParametersProperties:
+      properties:
+        targetContainerHostCredentialsBase64:
+          description: Credentials of the target container host (base64).
+          type: string
+    OrchestratorSpecificConnectionDetails:
+      description: Base class for types that supply values used to connect to container orchestrators
+      properties:
+        instanceType:
+          description: Gets the Instance type.
+          type: string
+          readOnly: true
+      discriminator:
+        propertyName: instanceType
+    Controller:
+      required:
+      - properties
+      - sku
+      - location
+      allOf:
+      - $ref: '#/components/schemas/TrackedResource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/ControllerProperties'
+          x-ms-client-flatten: true
+        sku:
+          $ref: '#/components/schemas/Sku'
+    ListConnectionDetailsParameters:
+      description: Parameters for listing connection details of an Azure Dev Spaces Controller.
+      required:
+      - targetContainerHostResourceId
+      properties:
+        targetContainerHostResourceId:
+          description: Resource ID of the target container host mapped to the Azure Dev Spaces Controller.
+          type: string
+    ControllerConnectionDetailsList:
+      properties:
+        connectionDetailsList:
+          description: List of Azure Dev Spaces Controller connection details.
+          type: array
+          items:
+            $ref: '#/components/schemas/ControllerConnectionDetails'
     Sku:
       description: Model representing SKU for Azure Dev Spaces Controller.
       required:
@@ -358,75 +406,38 @@ components:
           x-ms-enum:
             name: SkuTier
             modelAsString: true
-    ControllerList:
+    ErrorDetails:
       properties:
-        value:
-          description: List of Azure Dev Spaces Controllers.
-          type: array
-          items:
-            $ref: '#/components/schemas/Controller'
-        nextLink:
-          description: The URI that can be used to request the next page for list of Azure Dev Spaces Controllers.
+        code:
+          description: Status code for the error.
           type: string
           readOnly: true
-    ControllerUpdateParametersProperties:
-      properties:
-        targetContainerHostCredentialsBase64:
-          description: Credentials of the target container host (base64).
+        message:
+          description: Error message describing the error in detail.
           type: string
-    ControllerUpdateParameters:
-      description: Parameters for updating an Azure Dev Spaces Controller.
-      properties:
-        tags:
-          description: Tags for the Azure Dev Spaces Controller.
-          additionalProperties:
-            type: string
-        properties:
-          $ref: '#/components/schemas/ControllerUpdateParametersProperties'
-          x-ms-client-flatten: true
+          readOnly: true
+        target:
+          description: The target of the particular error.
+          type: string
+          readOnly: true
     DevSpacesErrorResponse:
       description: Error response indicates that the service is not able to process the incoming request. The reason is provided in the error message.
       properties:
         error:
           $ref: '#/components/schemas/ErrorDetails'
           description: The details of the error.
-    ControllerConnectionDetailsList:
-      properties:
-        connectionDetailsList:
-          description: List of Azure Dev Spaces Controller connection details.
-          type: array
-          items:
-            $ref: '#/components/schemas/ControllerConnectionDetails'
-    Controller:
-      required:
-      - properties
-      - sku
-      - location
-      allOf:
-      - $ref: '#/components/schemas/TrackedResource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/ControllerProperties'
-          x-ms-client-flatten: true
-        sku:
-          $ref: '#/components/schemas/Sku'
-    Resource:
-      description: An Azure resource.
-      properties:
-        id:
-          description: Fully qualified resource Id for the resource.
-          type: string
-          readOnly: true
-        name:
-          description: The name of the resource.
-          type: string
-          readOnly: true
-        type:
-          description: The type of the resource.
-          type: string
-          readOnly: true
-      x-ms-azure-resource: true
   parameters:
+    NameParameter:
+      name: name
+      in: path
+      description: Name of the resource.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 63
+        minLength: 1
+        pattern: ^[a-zA-Z0-9]([_-]*[a-zA-Z0-9])*$
     ApiVersionParameter:
       name: api-version
       in: query
@@ -444,17 +455,6 @@ components:
         type: string
         maxLength: 90
         minLength: 1
-    NameParameter:
-      name: name
-      in: path
-      description: Name of the resource.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 63
-        minLength: 1
-        pattern: ^[a-zA-Z0-9]([_-]*[a-zA-Z0-9])*$
     SubscriptionIdParameter:
       name: subscriptionId
       in: path

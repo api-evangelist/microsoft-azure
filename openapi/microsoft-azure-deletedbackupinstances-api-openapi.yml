@@ -111,17 +111,54 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
-    ErrorAdditionalInfo:
-      description: The resource management error additional info.
+    PolicyParameters:
+      description: Parameters in Policy
+      type: object
+      x-ms-mutability:
+      - create
+      - read
       properties:
-        info:
-          description: The additional info.
-          readOnly: true
-          type: object
-        type:
-          description: The additional info type.
+        dataStoreParametersList:
+          description: Gets or sets the DataStore Parameters
+          type: array
+          items:
+            $ref: '#/components/schemas/DataStoreParameters'
+          x-ms-identifiers: []
+        backupDatasourceParametersList:
+          description: Gets or sets the Backup Data Source Parameters
+          type: array
+          items:
+            $ref: '#/components/schemas/BackupDatasourceParameters'
+          x-ms-identifiers: []
+    DeletedBackupInstanceResource:
+      description: Deleted Backup Instance
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/DppResource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/DeletedBackupInstance'
+          description: DeletedBackupInstanceResource properties
+    DppResource:
+      description: Resource class
+      properties:
+        id:
+          description: Resource Id represents the complete path to the resource.
           readOnly: true
           type: string
+        name:
+          description: Resource name associated with the resource.
+          readOnly: true
+          type: string
+        type:
+          description: Resource type represents the complete path of the form Namespace/ResourceType/ResourceType/...
+          readOnly: true
+          type: string
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v4/types.json#/definitions/systemData
+      title: DppResource
+      type: object
+      x-ms-azure-resource: true
     UserFacingError:
       description: Error object used by layers that have access to localized content, and propagate that to user
       properties:
@@ -159,26 +196,74 @@ components:
           description: Target of the error.
           type: string
       type: object
-    DppResource:
-      description: Resource class
+    DppResourceList:
+      description: ListResource
       properties:
-        id:
-          description: Resource Id represents the complete path to the resource.
-          readOnly: true
+        nextLink:
+          description: The uri to fetch the next page of resources. Call ListNext() fetches next page of resources.
           type: string
-        name:
-          description: Resource name associated with the resource.
-          readOnly: true
-          type: string
-        type:
-          description: Resource type represents the complete path of the form Namespace/ResourceType/ResourceType/...
-          readOnly: true
-          type: string
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v4/types.json#/definitions/systemData
-      title: DppResource
+      title: List Resource
       type: object
-      x-ms-azure-resource: true
+    BaseResourceProperties:
+      description: Properties which are specific to datasource/datasourceSets
+      required:
+      - objectType
+      type: object
+      properties:
+        objectType:
+          description: Type of the specific object - used for deserializing
+          type: string
+          readOnly: false
+          enum:
+          - DefaultResourceProperties
+          x-ms-enum:
+            name: ResourcePropertiesObjectType
+            modelAsString: true
+      discriminator:
+        propertyName: objectType
+    BackupDatasourceParameters:
+      description: Parameters for Backup Datasource
+      required:
+      - objectType
+      type: object
+      properties:
+        objectType:
+          description: Type of the specific object - used for deserializing
+          type: string
+          readOnly: false
+      discriminator:
+        propertyName: objectType
+    DeletedBackupInstanceResourceList:
+      description: List of DeletedBackupInstance resources
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/DppResourceList'
+      properties:
+        value:
+          description: List of resources.
+          type: array
+          items:
+            $ref: '#/components/schemas/DeletedBackupInstanceResource'
+    CloudError:
+      description: An error response from Azure Backup.
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+      title: CloudError
+      x-ms-external: true
+    DeletedBackupInstance:
+      description: Deleted Backup Instance
+      required:
+      - dataSourceInfo
+      - policyInfo
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BackupInstance'
+      properties:
+        deletionInfo:
+          $ref: '#/components/schemas/DeletionInfo'
+          description: Deletion info of Backup Instance
+          readOnly: true
     DataStoreParameters:
       description: Parameters for DataStore
       required:
@@ -202,56 +287,42 @@ components:
             modelAsString: true
       discriminator:
         propertyName: objectType
-    BaseResourceProperties:
-      description: Properties which are specific to datasource/datasourceSets
-      required:
-      - objectType
-      type: object
+    InnerError:
+      description: Inner Error
       properties:
-        objectType:
-          description: Type of the specific object - used for deserializing
+        additionalInfo:
+          additionalProperties:
+            type: string
+          description: Any Key value pairs that can be provided to the client for additional  verbose information.
+          type: object
+        code:
+          description: Unique code for this error
           type: string
-          readOnly: false
-          enum:
-          - DefaultResourceProperties
-          x-ms-enum:
-            name: ResourcePropertiesObjectType
-            modelAsString: true
-      discriminator:
-        propertyName: objectType
-    DeletedBackupInstance:
-      description: Deleted Backup Instance
-      required:
-      - dataSourceInfo
-      - policyInfo
+        embeddedInnerError:
+          $ref: '#/components/schemas/InnerError'
+          description: Child Inner Error, to allow Nesting.
+      title: InnerError
       type: object
-      allOf:
-      - $ref: '#/components/schemas/BackupInstance'
+    DeletionInfo:
+      description: Deletion Info
+      type: object
       properties:
-        deletionInfo:
-          $ref: '#/components/schemas/DeletionInfo'
-          description: Deletion info of Backup Instance
+        deletionTime:
+          description: Specifies time of deletion
+          type: string
           readOnly: true
-    DppResourceList:
-      description: ListResource
-      properties:
-        nextLink:
-          description: The uri to fetch the next page of resources. Call ListNext() fetches next page of resources.
+        billingEndDate:
+          description: Specifies billing end date
           type: string
-      title: List Resource
-      type: object
-    BackupDatasourceParameters:
-      description: Parameters for Backup Datasource
-      required:
-      - objectType
-      type: object
-      properties:
-        objectType:
-          description: Type of the specific object - used for deserializing
+          readOnly: true
+        scheduledPurgeTime:
+          description: Specifies purge time
           type: string
-          readOnly: false
-      discriminator:
-        propertyName: objectType
+          readOnly: true
+        deleteActivityID:
+          description: Delete activity ID for troubleshooting purpose
+          type: string
+          readOnly: true
     DatasourceSet:
       description: DatasourceSet details of datasource to be backed up
       properties:
@@ -282,6 +353,53 @@ components:
       required:
       - resourceID
       title: DatasourceSet
+      type: object
+    ErrorAdditionalInfo:
+      description: The resource management error additional info.
+      properties:
+        info:
+          description: The additional info.
+          readOnly: true
+          type: object
+        type:
+          description: The additional info type.
+          readOnly: true
+          type: string
+    ProtectionStatusDetails:
+      description: Protection status details
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/UserFacingError'
+          description: Specifies the protection status error of the resource
+        status:
+          description: Specifies the protection status of the resource
+          enum:
+          - ConfiguringProtection
+          - ConfiguringProtectionFailed
+          - ProtectionConfigured
+          - ProtectionStopped
+          - SoftDeleted
+          - SoftDeleting
+          type: string
+          x-ms-enum:
+            modelAsString: true
+            name: Status
+      title: ProtectionStatusDetails
+      type: object
+    PolicyInfo:
+      description: Policy Info in backupInstance
+      properties:
+        policyId:
+          type: string
+        policyVersion:
+          readOnly: true
+          type: string
+        policyParameters:
+          $ref: '#/components/schemas/PolicyParameters'
+          description: Policy parameters for the backup instance
+      required:
+      - policyId
+      title: PolicyInfo
       type: object
     AuthCredentials:
       description: Base class for different types of authentication credentials.
@@ -366,13 +484,6 @@ components:
             If it is null, default will be considered as System Assigned.'
         objectType:
           type: string
-    CloudError:
-      description: An error response from Azure Backup.
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-      title: CloudError
-      x-ms-external: true
     Error:
       description: The resource management error response.
       properties:
@@ -402,106 +513,15 @@ components:
           description: The error target.
           readOnly: true
           type: string
-    DeletedBackupInstanceResource:
-      description: Deleted Backup Instance
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/DppResource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/DeletedBackupInstance'
-          description: DeletedBackupInstanceResource properties
-    ProtectionStatusDetails:
-      description: Protection status details
-      properties:
-        errorDetails:
-          $ref: '#/components/schemas/UserFacingError'
-          description: Specifies the protection status error of the resource
-        status:
-          description: Specifies the protection status of the resource
-          enum:
-          - ConfiguringProtection
-          - ConfiguringProtectionFailed
-          - ProtectionConfigured
-          - ProtectionStopped
-          - SoftDeleted
-          - SoftDeleting
-          type: string
-          x-ms-enum:
-            modelAsString: true
-            name: Status
-      title: ProtectionStatusDetails
-      type: object
-    DeletionInfo:
-      description: Deletion Info
+    IdentityDetails:
       type: object
       properties:
-        deletionTime:
-          description: Specifies time of deletion
+        useSystemAssignedIdentity:
+          description: Specifies if the BI is protected by System Identity.
+          type: boolean
+        userAssignedIdentityArmUrl:
+          description: ARM URL for User Assigned Identity.
           type: string
-          readOnly: true
-        billingEndDate:
-          description: Specifies billing end date
-          type: string
-          readOnly: true
-        scheduledPurgeTime:
-          description: Specifies purge time
-          type: string
-          readOnly: true
-        deleteActivityID:
-          description: Delete activity ID for troubleshooting purpose
-          type: string
-          readOnly: true
-    InnerError:
-      description: Inner Error
-      properties:
-        additionalInfo:
-          additionalProperties:
-            type: string
-          description: Any Key value pairs that can be provided to the client for additional  verbose information.
-          type: object
-        code:
-          description: Unique code for this error
-          type: string
-        embeddedInnerError:
-          $ref: '#/components/schemas/InnerError'
-          description: Child Inner Error, to allow Nesting.
-      title: InnerError
-      type: object
-    PolicyParameters:
-      description: Parameters in Policy
-      type: object
-      x-ms-mutability:
-      - create
-      - read
-      properties:
-        dataStoreParametersList:
-          description: Gets or sets the DataStore Parameters
-          type: array
-          items:
-            $ref: '#/components/schemas/DataStoreParameters'
-          x-ms-identifiers: []
-        backupDatasourceParametersList:
-          description: Gets or sets the Backup Data Source Parameters
-          type: array
-          items:
-            $ref: '#/components/schemas/BackupDatasourceParameters'
-          x-ms-identifiers: []
-    PolicyInfo:
-      description: Policy Info in backupInstance
-      properties:
-        policyId:
-          type: string
-        policyVersion:
-          readOnly: true
-          type: string
-        policyParameters:
-          $ref: '#/components/schemas/PolicyParameters'
-          description: Policy parameters for the backup instance
-      required:
-      - policyId
-      title: PolicyInfo
-      type: object
     Datasource:
       description: Datasource to be backed up
       properties:
@@ -533,26 +553,6 @@ components:
       - resourceID
       title: Datasource
       type: object
-    DeletedBackupInstanceResourceList:
-      description: List of DeletedBackupInstance resources
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/DppResourceList'
-      properties:
-        value:
-          description: List of resources.
-          type: array
-          items:
-            $ref: '#/components/schemas/DeletedBackupInstanceResource'
-    IdentityDetails:
-      type: object
-      properties:
-        useSystemAssignedIdentity:
-          description: Specifies if the BI is protected by System Identity.
-          type: boolean
-        userAssignedIdentityArmUrl:
-          description: ARM URL for User Assigned Identity.
-          type: string
   parameters:
     VaultName:
       name: vaultName

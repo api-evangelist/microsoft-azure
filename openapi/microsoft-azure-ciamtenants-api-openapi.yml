@@ -257,6 +257,159 @@ paths:
       summary: Delete Subscriptions Subscriptionid Resourcegroups Resourcegroupname Providers…
 components:
   schemas:
+    CreateCIAMTenantProperties:
+      type: object
+      description: These properties are used to create the Azure AD for customers tenant. These properties are not part of the Azure resource.
+      required:
+      - displayName
+      - countryCode
+      x-ms-mutability:
+      - create
+      - read
+      x-ms-client-flatten: true
+      properties:
+        displayName:
+          description: The display name of the Azure AD for customers tenant.
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        countryCode:
+          type: string
+          description: Country code of Azure tenant (e.g. 'US'). Refer to [https://aka.ms/ciam-data-location](https://aka.ms/ciam-data-location) to see valid country codes and corresponding data residency locations. If you do not see a country code in an valid data residency location, choose one from the list.
+          x-ms-mutability:
+          - create
+          - read
+    CheckNameAvailabilityRequestBody:
+      type: object
+      description: The information required to check the availability of the sub domain name for the tenant.
+      required:
+      - name
+      - countryCode
+      properties:
+        name:
+          type: string
+          description: The sub domain name to check for availability.
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+    CountryCode:
+      type: string
+      description: Country code of Azure tenant (e.g. 'US'). Refer to [aka.ms/B2CDataResidency](https://aka.ms/B2CDataResidency) to see valid country codes and corresponding data residency locations. If you do not see a country code in an valid data residency location, choose one from the list.
+    ProvisioningState:
+      title: Provisioning State
+      type: string
+      readOnly: true
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Deleting
+      - Deleted
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    CIAMResourceSKU:
+      description: SKU properties of the Azure AD for customers tenant. Learn more about Azure AD for customers billing at [https://aka.ms/ciambilling](https://aka.ms/ciambilling).
+      type: object
+      required:
+      - name
+      - tier
+      properties:
+        name:
+          type: string
+          description: The name of the SKU for the tenant.
+          enum:
+          - Standard
+          - PremiumP1
+          - PremiumP2
+          x-ms-enum:
+            name: CIAMResourceSKUName
+            modelAsString: true
+        tier:
+          type: string
+          description: The tier of the tenant.
+          enum:
+          - A0
+          x-ms-mutability:
+          - create
+          - read
+          x-ms-client-flatten: true
+          x-ms-enum:
+            name: CIAMResourceSKUTier
+            modelAsString: true
+            values:
+            - value: A0
+              description: The SKU tier used for all Azure AD for customers tenants.
+    CIAMTenantUpdateRequest:
+      type: object
+      description: The request body to update the Azure AD for customers tenant resource.
+      properties:
+        sku:
+          $ref: '#/components/schemas/CIAMResourceSKU'
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource Tags
+    CIAMTenantResourceList:
+      description: The collection of Azure AD for customers tenant resources
+      type: object
+      properties:
+        value:
+          description: List of Azure AD for customers tenant resources
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/CIAMTenantResource'
+        nextLink:
+          description: The URL to get the next set of Azure AD for customers tenant resources.
+          type:
+          - string
+          - 'null'
+          readOnly: true
+    CIAMTenantResourceProperties:
+      description: Properties of the Azure AD for customers tenant Azure resource.
+      type: object
+      required:
+      - createTenantProperties
+      properties:
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+        createTenantProperties:
+          $ref: '#/components/schemas/CreateCIAMTenantProperties'
+        domainName:
+          type: string
+          description: The domain name of the tenant
+          readOnly: true
+        billingConfig:
+          type: object
+          description: The billing configuration for the tenant.
+          x-ms-client-flatten: true
+          readOnly: true
+          properties:
+            billingType:
+              type: string
+              readOnly: true
+              description: The type of billing. Will be MAU for all new customers. Cannot be changed if value is 'MAU'. Learn more about Azure AD for customers billing at [aka.ms/b2cBilling](https://aka.ms/b2cbilling).
+              enum:
+              - MAU
+              x-ms-enum:
+                name: ciamBillingType
+                modelAsString: true
+                values:
+                - value: MAU
+                  description: Azure AD for customers usage is billed to a linked Azure subscription and uses a monthly active users (MAU) billing model.
+            effectiveStartDateUtc:
+              type: string
+              readOnly: true
+              description: The data from which the billing type took effect
+        tenantId:
+          type: string
+          description: An identifier of the Azure AD for customers tenant.
+          x-ms-mutability:
+          - create
+          - read
     CIAMTenantResource:
       type: object
       description: The Azure AD for customers resource.
@@ -318,6 +471,25 @@ components:
         systemData:
           $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/systemData
           readOnly: true
+    CloudError:
+      x-ms-external: true
+      type: object
+      properties:
+        error:
+          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
+      description: An error response for a resource management request.
+    NameAvailabilityResponse:
+      description: Response of the CheckNameAvailability operation.
+      type: object
+      properties:
+        message:
+          type: string
+          description: Description of the reason if name is not available.
+        nameAvailable:
+          type: boolean
+          description: True if the name is available and can be used to create a new tenant. Otherwise false.
+        reason:
+          $ref: '#/components/schemas/NameAvailabilityReason'
     NameAvailabilityReason:
       description: Describes the reason for the 'nameAvailable' value.
       type: string
@@ -332,184 +504,19 @@ components:
           description: The name is already in use and is therefore unavailable.
         - value: Invalid
           description: The name provided does not match the resource provider’s naming requirements (incorrect length, unsupported characters, etc.).
-    CreateCIAMTenantProperties:
-      type: object
-      description: These properties are used to create the Azure AD for customers tenant. These properties are not part of the Azure resource.
-      required:
-      - displayName
-      - countryCode
-      x-ms-mutability:
-      - create
-      - read
-      x-ms-client-flatten: true
-      properties:
-        displayName:
-          description: The display name of the Azure AD for customers tenant.
-          type: string
-          x-ms-mutability:
-          - create
-          - read
-        countryCode:
-          type: string
-          description: Country code of Azure tenant (e.g. 'US'). Refer to [https://aka.ms/ciam-data-location](https://aka.ms/ciam-data-location) to see valid country codes and corresponding data residency locations. If you do not see a country code in an valid data residency location, choose one from the list.
-          x-ms-mutability:
-          - create
-          - read
-    CIAMTenantResourceProperties:
-      description: Properties of the Azure AD for customers tenant Azure resource.
-      type: object
-      required:
-      - createTenantProperties
-      properties:
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-        createTenantProperties:
-          $ref: '#/components/schemas/CreateCIAMTenantProperties'
-        domainName:
-          type: string
-          description: The domain name of the tenant
-          readOnly: true
-        billingConfig:
-          type: object
-          description: The billing configuration for the tenant.
-          x-ms-client-flatten: true
-          readOnly: true
-          properties:
-            billingType:
-              type: string
-              readOnly: true
-              description: The type of billing. Will be MAU for all new customers. Cannot be changed if value is 'MAU'. Learn more about Azure AD for customers billing at [aka.ms/b2cBilling](https://aka.ms/b2cbilling).
-              enum:
-              - MAU
-              x-ms-enum:
-                name: ciamBillingType
-                modelAsString: true
-                values:
-                - value: MAU
-                  description: Azure AD for customers usage is billed to a linked Azure subscription and uses a monthly active users (MAU) billing model.
-            effectiveStartDateUtc:
-              type: string
-              readOnly: true
-              description: The data from which the billing type took effect
-        tenantId:
-          type: string
-          description: An identifier of the Azure AD for customers tenant.
-          x-ms-mutability:
-          - create
-          - read
-    ProvisioningState:
-      title: Provisioning State
-      type: string
-      readOnly: true
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Deleting
-      - Deleted
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    CIAMResourceSKU:
-      description: SKU properties of the Azure AD for customers tenant. Learn more about Azure AD for customers billing at [https://aka.ms/ciambilling](https://aka.ms/ciambilling).
-      type: object
-      required:
-      - name
-      - tier
-      properties:
-        name:
-          type: string
-          description: The name of the SKU for the tenant.
-          enum:
-          - Standard
-          - PremiumP1
-          - PremiumP2
-          x-ms-enum:
-            name: CIAMResourceSKUName
-            modelAsString: true
-        tier:
-          type: string
-          description: The tier of the tenant.
-          enum:
-          - A0
-          x-ms-mutability:
-          - create
-          - read
-          x-ms-client-flatten: true
-          x-ms-enum:
-            name: CIAMResourceSKUTier
-            modelAsString: true
-            values:
-            - value: A0
-              description: The SKU tier used for all Azure AD for customers tenants.
-    NameAvailabilityResponse:
-      description: Response of the CheckNameAvailability operation.
-      type: object
-      properties:
-        message:
-          type: string
-          description: Description of the reason if name is not available.
-        nameAvailable:
-          type: boolean
-          description: True if the name is available and can be used to create a new tenant. Otherwise false.
-        reason:
-          $ref: '#/components/schemas/NameAvailabilityReason'
-    CountryCode:
-      type: string
-      description: Country code of Azure tenant (e.g. 'US'). Refer to [aka.ms/B2CDataResidency](https://aka.ms/B2CDataResidency) to see valid country codes and corresponding data residency locations. If you do not see a country code in an valid data residency location, choose one from the list.
-    CIAMTenantResourceList:
-      description: The collection of Azure AD for customers tenant resources
-      type: object
-      properties:
-        value:
-          description: List of Azure AD for customers tenant resources
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/CIAMTenantResource'
-        nextLink:
-          description: The URL to get the next set of Azure AD for customers tenant resources.
-          type:
-          - string
-          - 'null'
-          readOnly: true
-    CIAMTenantUpdateRequest:
-      type: object
-      description: The request body to update the Azure AD for customers tenant resource.
-      properties:
-        sku:
-          $ref: '#/components/schemas/CIAMResourceSKU'
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource Tags
-    CheckNameAvailabilityRequestBody:
-      type: object
-      description: The information required to check the availability of the sub domain name for the tenant.
-      required:
-      - name
-      - countryCode
-      properties:
-        name:
-          type: string
-          description: The sub domain name to check for availability.
-        countryCode:
-          $ref: '#/components/schemas/CountryCode'
-    CloudError:
-      x-ms-external: true
-      type: object
-      properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
-      description: An error response for a resource management request.
   parameters:
     ApiVersionParameter:
       name: api-version
       in: query
       required: true
       description: Version of the API to be used with the client request.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
       schema:
         type: string
     CIAMResourceNameParameter:
@@ -522,13 +529,6 @@ components:
         type: string
         maxLength: 26
         pattern: ^[a-zA-Z0-9]{1,26}
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-      schema:
-        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

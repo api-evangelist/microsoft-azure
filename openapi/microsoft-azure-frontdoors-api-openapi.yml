@@ -362,6 +362,40 @@ paths:
         required: true
 components:
   schemas:
+    ValidateCustomDomainInput:
+      description: Input of the custom domain to be validated for DNS mapping.
+      type: object
+      required:
+      - hostName
+      properties:
+        hostName:
+          description: The host name of the custom domain. Must be a domain name.
+          type: string
+    ValidateCustomDomainOutput:
+      description: Output of custom domain validation.
+      type: object
+      properties:
+        customDomainValidated:
+          description: Indicates whether the custom domain is valid or not.
+          readOnly: true
+          type: boolean
+        reason:
+          description: The reason why the custom domain is not valid.
+          readOnly: true
+          type: string
+        message:
+          description: Error message describing why the custom domain is not valid.
+          readOnly: true
+          type: string
+    FrontDoor:
+      properties:
+        properties:
+          description: Properties of the Front Door Load Balancer
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/FrontDoorProperties'
+      allOf:
+      - $ref: ./network.json#/definitions/Resource
+      description: Front Door represents a collection of backend endpoints to route traffic to along with rules that specify how traffic is sent there.
     FrontendEndpointUpdateParameters:
       description: Frontend endpoint used in routing rule
       type: object
@@ -388,103 +422,34 @@ components:
             id:
               type: string
               description: Resource ID.
-    Backend:
-      description: Backend address of a frontDoor load balancer.
-      type: object
+    FrontendEndpointsListResult:
+      description: Result of the request to list frontend endpoints. It contains a list of Frontend endpoint objects and a URL link to get the next set of results.
       properties:
-        address:
-          description: Location of the backend (IP address or FQDN)
+        value:
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/FrontendEndpoint'
+          description: List of Frontend endpoints within a Front Door.
+        nextLink:
           type: string
-        httpPort:
-          description: The HTTP TCP port number. Must be between 1 and 65535.
-          type: integer
-          maximum: 65535
-          minimum: 1
-        httpsPort:
-          description: The HTTPS TCP port number. Must be between 1 and 65535.
-          type: integer
-          maximum: 65535
-          minimum: 1
-        enabledState:
-          description: Whether to enable use of this backend. Permitted values are 'Enabled' or 'Disabled'
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: FrontDoorEnabledState
-            modelAsString: true
-        priority:
-          description: Priority to use for load balancing. Higher priorities will not be used for load balancing if any lower priority backend is healthy.
-          type: integer
-          maximum: 5
-          minimum: 1
-        weight:
-          description: Weight of this endpoint for load balancing purposes.
-          type: integer
-          maximum: 1000
-          minimum: 1
-        backendHostHeader:
-          description: The value to use as the host header sent to the backend. If blank or unspecified, this defaults to the incoming host.
-          type: string
-    FrontDoor:
-      properties:
-        properties:
-          description: Properties of the Front Door Load Balancer
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/FrontDoorProperties'
+          description: URL to get the next set of frontend endpoints if there are any.
+    FrontDoorProperties:
+      description: The JSON object that contains the properties required to create an endpoint.
       allOf:
-      - $ref: ./network.json#/definitions/Resource
-      description: Front Door represents a collection of backend endpoints to route traffic to along with rules that specify how traffic is sent there.
-    CustomHttpsConfiguration:
-      description: Https settings for a domain
-      type: object
-      properties:
-        certificateSource:
-          description: Defines the source of the SSL certificate
-          enum:
-          - AzureKeyVault
-          - FrontDoor
-          type: string
-          x-ms-enum:
-            name: FrontDoorCertificateSource
-            modelAsString: true
-        protocolType:
-          description: Defines the TLS extension protocol that is used for secure delivery
-          enum:
-          - ServerNameIndication
-          type: string
-          x-ms-enum:
-            name: FrontDoorTlsProtocolType
-            modelAsString: true
-        keyVaultCertificateSourceParameters:
-          description: KeyVault certificate source parameters (if certificateSource=AzureKeyVault)
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/KeyVaultCertificateSourceParameters'
-        frontDoorCertificateSourceParameters:
-          description: Parameters required for enabling SSL with Front Door-managed certificates (if certificateSource=FrontDoor)
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/FrontDoorCertificateSourceParameters'
-    LoadBalancingSettingsProperties:
-      description: The JSON object that contains the properties required to create load balancing settings
-      allOf:
-      - $ref: '#/components/schemas/LoadBalancingSettingsUpdateParameters'
+      - $ref: '#/components/schemas/FrontDoorUpdateParameters'
       properties:
         resourceState:
-          description: Resource status.
+          description: Resource status of the Front Door.
           $ref: '#/components/schemas/ResourceState'
-    FrontDoorCertificateSourceParameters:
-      description: Parameters required for enabling SSL with Front Door-managed certificates
-      type: object
-      properties:
-        certificateType:
-          description: Defines the type of the certificate used for secure connections to a frontendEndpoint
-          enum:
-          - Dedicated
+        provisioningState:
+          readOnly: true
           type: string
-          x-ms-enum:
-            name: FrontDoorCertificateType
-            modelAsString: true
+          description: Provisioning state of the Front Door.
+        cname:
+          readOnly: true
+          type: string
+          description: The host that each frontendEndpoint must CNAME to.
     BackendPoolUpdateParameters:
       description: A collection of backends that can be routed to.
       type: object
@@ -500,156 +465,6 @@ components:
         healthProbeSettings:
           description: L7 health probe settings for a backend pool
           $ref: ./network.json#/definitions/SubResource
-    LoadBalancingSettingsUpdateParameters:
-      description: Round-Robin load balancing settings for a backend pool
-      type: object
-      properties:
-        sampleSize:
-          description: The number of samples to consider for load balancing decisions
-          type: integer
-        successfulSamplesRequired:
-          description: The number of samples within the sample period that must succeed
-          type: integer
-        additionalLatencyMilliseconds:
-          description: The additional latency in milliseconds for probes to fall into the lowest latency bucket
-          type: integer
-    FrontendEndpointProperties:
-      description: The JSON object that contains the properties required to create a frontend endpoint.
-      allOf:
-      - $ref: '#/components/schemas/FrontendEndpointUpdateParameters'
-      properties:
-        resourceState:
-          description: Resource status.
-          $ref: '#/components/schemas/ResourceState'
-        customHttpsProvisioningState:
-          description: Provisioning status of Custom Https of the frontendEndpoint.
-          readOnly: true
-          enum:
-          - Enabling
-          - Enabled
-          - Disabling
-          - Disabled
-          - Failed
-          type: string
-          x-ms-enum:
-            name: CustomHttpsProvisioningState
-            modelAsString: true
-        customHttpsProvisioningSubstate:
-          description: Provisioning substate shows the progress of custom HTTPS enabling/disabling process step by step.
-          readOnly: true
-          enum:
-          - SubmittingDomainControlValidationRequest
-          - PendingDomainControlValidationREquestApproval
-          - DomainControlValidationRequestApproved
-          - DomainControlValidationRequestRejected
-          - DomainControlValidationRequestTimedOut
-          - IssuingCertificate
-          - DeployingCertificate
-          - CertificateDeployed
-          - DeletingCertificate
-          - CertificateDeleted
-          type: string
-          x-ms-enum:
-            name: CustomHttpsProvisioningSubstate
-            modelAsString: true
-        customHttpsConfiguration:
-          description: The configuration specifying how to enable HTTPS
-          readOnly: true
-          $ref: '#/components/schemas/CustomHttpsConfiguration'
-    HealthProbeSettingsUpdateParameters:
-      description: L7 health probe settings for a backend pool
-      type: object
-      properties:
-        path:
-          description: The path to use for the health probe. Default is /
-          type: string
-        protocol:
-          description: Protocol scheme to use for this probe
-          type: string
-          enum:
-          - Http
-          - Https
-          x-ms-enum:
-            name: FrontDoorProtocol
-            modelAsString: true
-        intervalInSeconds:
-          description: The number of seconds between health probes.
-          type: integer
-    RoutingRule:
-      properties:
-        properties:
-          description: Properties of the Front Door Routing Rule
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/RoutingRuleProperties'
-        name:
-          type: string
-          description: Resource name.
-        type:
-          type: string
-          readOnly: true
-          description: Resource type.
-      allOf:
-      - $ref: ./network.json#/definitions/SubResource
-      description: A routing rule represents a specification for traffic to treat and where to send it, along with health probe information.
-    ValidateCustomDomainOutput:
-      description: Output of custom domain validation.
-      type: object
-      properties:
-        customDomainValidated:
-          description: Indicates whether the custom domain is valid or not.
-          readOnly: true
-          type: boolean
-        reason:
-          description: The reason why the custom domain is not valid.
-          readOnly: true
-          type: string
-        message:
-          description: Error message describing why the custom domain is not valid.
-          readOnly: true
-          type: string
-    LoadBalancingSettingsModel:
-      properties:
-        properties:
-          description: Properties of the load balancing settings
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/LoadBalancingSettingsProperties'
-        name:
-          type: string
-          description: Resource name.
-        type:
-          type: string
-          readOnly: true
-          description: Resource type.
-      allOf:
-      - $ref: ./network.json#/definitions/SubResource
-      description: Load balancing settings for a backend pool
-    PurgeParameters:
-      type: object
-      description: Parameters required for content purge.
-      required:
-      - contentPaths
-      properties:
-        contentPaths:
-          description: The path to the content to be purged. Can describe a file path or a wild card directory.
-          type: array
-          items:
-            type: string
-    FrontendEndpoint:
-      properties:
-        properties:
-          description: Properties of the Frontend endpoint
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/FrontendEndpointProperties'
-        name:
-          type: string
-          description: Resource name.
-        type:
-          type: string
-          readOnly: true
-          description: Resource type.
-      allOf:
-      - $ref: ./network.json#/definitions/SubResource
-      description: A frontend endpoint used for routing.
     CacheConfiguration:
       description: Caching settings for a caching-type route. To disable caching, do not provide a cacheConfiguration object.
       type: object
@@ -672,18 +487,161 @@ components:
           x-ms-enum:
             name: DynamicCompressionEnabled
             modelAsString: true
-    FrontendEndpointsListResult:
-      description: Result of the request to list frontend endpoints. It contains a list of Frontend endpoint objects and a URL link to get the next set of results.
+    LoadBalancingSettingsModel:
       properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/FrontendEndpoint'
-          description: List of Frontend endpoints within a Front Door.
-        nextLink:
+        properties:
+          description: Properties of the load balancing settings
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/LoadBalancingSettingsProperties'
+        name:
           type: string
-          description: URL to get the next set of frontend endpoints if there are any.
+          description: Resource name.
+        type:
+          type: string
+          readOnly: true
+          description: Resource type.
+      allOf:
+      - $ref: ./network.json#/definitions/SubResource
+      description: Load balancing settings for a backend pool
+    ErrorResponse:
+      description: Error response indicates Front Door service is not able to process the incoming request. The reason is provided in the error message.
+      type: object
+      properties:
+        code:
+          description: Error code.
+          readOnly: true
+          type: string
+        message:
+          description: Error message indicating why the operation failed.
+          readOnly: true
+          type: string
+    HealthProbeSettingsUpdateParameters:
+      description: L7 health probe settings for a backend pool
+      type: object
+      properties:
+        path:
+          description: The path to use for the health probe. Default is /
+          type: string
+        protocol:
+          description: Protocol scheme to use for this probe
+          type: string
+          enum:
+          - Http
+          - Https
+          x-ms-enum:
+            name: FrontDoorProtocol
+            modelAsString: true
+        intervalInSeconds:
+          description: The number of seconds between health probes.
+          type: integer
+    HealthProbeSettingsModel:
+      properties:
+        properties:
+          description: Properties of the health probe settings
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/HealthProbeSettingsProperties'
+        name:
+          type: string
+          description: Resource name.
+        type:
+          type: string
+          readOnly: true
+          description: Resource type.
+      allOf:
+      - $ref: ./network.json#/definitions/SubResource
+      description: Load balancing settings for a backend pool
+    FrontDoorCertificateSourceParameters:
+      description: Parameters required for enabling SSL with Front Door-managed certificates
+      type: object
+      properties:
+        certificateType:
+          description: Defines the type of the certificate used for secure connections to a frontendEndpoint
+          enum:
+          - Dedicated
+          type: string
+          x-ms-enum:
+            name: FrontDoorCertificateType
+            modelAsString: true
+    BackendPoolProperties:
+      description: The JSON object that contains the properties required to create a routing rule.
+      allOf:
+      - $ref: '#/components/schemas/BackendPoolUpdateParameters'
+      properties:
+        resourceState:
+          description: Resource status.
+          $ref: '#/components/schemas/ResourceState'
+    FrontDoorUpdateParameters:
+      description: The properties needed to update a Front Door
+      properties:
+        friendlyName:
+          description: A friendly name for the frontDoor
+          type: string
+        routingRules:
+          description: Routing rules associated with this Front Door.
+          type: array
+          items:
+            description: A routing rule
+            $ref: '#/components/schemas/RoutingRule'
+        loadBalancingSettings:
+          description: Load balancing settings associated with this Front Door instance.
+          type: array
+          items:
+            description: A load balancing settings
+            $ref: '#/components/schemas/LoadBalancingSettingsModel'
+        healthProbeSettings:
+          description: Health probe settings associated with this Front Door instance.
+          type: array
+          items:
+            description: A health probe settings
+            $ref: '#/components/schemas/HealthProbeSettingsModel'
+        backendPools:
+          description: Backend pools available to routing rules.
+          type: array
+          items:
+            description: A backend pool
+            $ref: '#/components/schemas/BackendPool'
+        frontendEndpoints:
+          description: Frontend endpoints available to routing rules.
+          type: array
+          items:
+            description: A frontend endpoint
+            $ref: '#/components/schemas/FrontendEndpoint'
+        enabledState:
+          description: Operational status of the Front Door load balancer. Permitted values are 'Enabled' or 'Disabled'
+          enum:
+          - Enabled
+          - Disabled
+          type: string
+          x-ms-enum:
+            name: FrontDoorEnabledState
+            modelAsString: true
+    BackendPool:
+      properties:
+        properties:
+          description: Properties of the Front Door Backend Pool
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BackendPoolProperties'
+        name:
+          type: string
+          description: Resource name.
+        type:
+          type: string
+          readOnly: true
+          description: Resource type.
+      allOf:
+      - $ref: ./network.json#/definitions/SubResource
+      description: A backend pool is a collection of backends that can be routed to.
+    PurgeParameters:
+      type: object
+      description: Parameters required for content purge.
+      required:
+      - contentPaths
+      properties:
+        contentPaths:
+          description: The path to the content to be purged. Can describe a file path or a wild card directory.
+          type: array
+          items:
+            type: string
     HealthProbeSettingsProperties:
       description: The JSON object that contains the properties required to create a health probe settings.
       allOf:
@@ -692,6 +650,52 @@ components:
         resourceState:
           description: Resource status.
           $ref: '#/components/schemas/ResourceState'
+    LoadBalancingSettingsUpdateParameters:
+      description: Round-Robin load balancing settings for a backend pool
+      type: object
+      properties:
+        sampleSize:
+          description: The number of samples to consider for load balancing decisions
+          type: integer
+        successfulSamplesRequired:
+          description: The number of samples within the sample period that must succeed
+          type: integer
+        additionalLatencyMilliseconds:
+          description: The additional latency in milliseconds for probes to fall into the lowest latency bucket
+          type: integer
+    KeyVaultCertificateSourceParameters:
+      description: Parameters required for bring-your-own-certification via Key Vault
+      type: object
+      properties:
+        vault:
+          description: The Key Vault containing the SSL certificate
+          type: object
+          properties:
+            id:
+              type: string
+              description: Resource ID.
+        secretName:
+          type: string
+          description: The name of the Key Vault secret representing the full certificate PFX
+        secretVersion:
+          type: string
+          description: The version of the Key Vault secret representing the full certificate PFX
+    RoutingRule:
+      properties:
+        properties:
+          description: Properties of the Front Door Routing Rule
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/RoutingRuleProperties'
+        name:
+          type: string
+          description: Resource name.
+        type:
+          type: string
+          readOnly: true
+          description: Resource type.
+      allOf:
+      - $ref: ./network.json#/definitions/SubResource
+      description: A routing rule represents a specification for traffic to treat and where to send it, along with health probe information.
     RoutingRuleUpdateParameters:
       description: Routing rules to apply to an endpoint
       type: object
@@ -748,88 +752,47 @@ components:
           x-ms-enum:
             name: FrontDoorEnabledState
             modelAsString: true
-    KeyVaultCertificateSourceParameters:
-      description: Parameters required for bring-your-own-certification via Key Vault
+    CustomHttpsConfiguration:
+      description: Https settings for a domain
       type: object
       properties:
-        vault:
-          description: The Key Vault containing the SSL certificate
-          type: object
-          properties:
-            id:
-              type: string
-              description: Resource ID.
-        secretName:
+        certificateSource:
+          description: Defines the source of the SSL certificate
+          enum:
+          - AzureKeyVault
+          - FrontDoor
           type: string
-          description: The name of the Key Vault secret representing the full certificate PFX
-        secretVersion:
+          x-ms-enum:
+            name: FrontDoorCertificateSource
+            modelAsString: true
+        protocolType:
+          description: Defines the TLS extension protocol that is used for secure delivery
+          enum:
+          - ServerNameIndication
           type: string
-          description: The version of the Key Vault secret representing the full certificate PFX
-    ValidateCustomDomainInput:
-      description: Input of the custom domain to be validated for DNS mapping.
-      type: object
-      required:
-      - hostName
-      properties:
-        hostName:
-          description: The host name of the custom domain. Must be a domain name.
-          type: string
-    HealthProbeSettingsModel:
-      properties:
-        properties:
-          description: Properties of the health probe settings
+          x-ms-enum:
+            name: FrontDoorTlsProtocolType
+            modelAsString: true
+        keyVaultCertificateSourceParameters:
+          description: KeyVault certificate source parameters (if certificateSource=AzureKeyVault)
           x-ms-client-flatten: true
-          $ref: '#/components/schemas/HealthProbeSettingsProperties'
-        name:
-          type: string
-          description: Resource name.
-        type:
-          type: string
-          readOnly: true
-          description: Resource type.
-      allOf:
-      - $ref: ./network.json#/definitions/SubResource
-      description: Load balancing settings for a backend pool
-    RoutingRuleProperties:
-      description: The JSON object that contains the properties required to create a routing rule.
-      allOf:
-      - $ref: '#/components/schemas/RoutingRuleUpdateParameters'
-      properties:
-        resourceState:
-          description: Resource status.
-          $ref: '#/components/schemas/ResourceState'
-    BackendPool:
-      properties:
-        properties:
-          description: Properties of the Front Door Backend Pool
+          $ref: '#/components/schemas/KeyVaultCertificateSourceParameters'
+        frontDoorCertificateSourceParameters:
+          description: Parameters required for enabling SSL with Front Door-managed certificates (if certificateSource=FrontDoor)
           x-ms-client-flatten: true
-          $ref: '#/components/schemas/BackendPoolProperties'
-        name:
-          type: string
-          description: Resource name.
-        type:
-          type: string
-          readOnly: true
-          description: Resource type.
-      allOf:
-      - $ref: ./network.json#/definitions/SubResource
-      description: A backend pool is a collection of backends that can be routed to.
-    FrontDoorProperties:
-      description: The JSON object that contains the properties required to create an endpoint.
-      allOf:
-      - $ref: '#/components/schemas/FrontDoorUpdateParameters'
+          $ref: '#/components/schemas/FrontDoorCertificateSourceParameters'
+    FrontDoorListResult:
+      description: Result of the request to list Front Doors. It contains a list of Front Door objects and a URL link to get the next set of results.
       properties:
-        resourceState:
-          description: Resource status of the Front Door.
-          $ref: '#/components/schemas/ResourceState'
-        provisioningState:
+        value:
+          type: array
           readOnly: true
+          items:
+            $ref: '#/components/schemas/FrontDoor'
+          description: List of Front Doors within a resource group.
+        nextLink:
           type: string
-          description: Provisioning state of the Front Door.
-        cname:
-          readOnly: true
-          type: string
-          description: The host that each frontendEndpoint must CNAME to.
+          description: URL to get the next set of Front Door objects if there are any.
     ResourceState:
       title: Resource status of the Front Door or Front Door SubResource.
       readOnly: true
@@ -844,44 +807,84 @@ components:
       x-ms-enum:
         name: FrontDoorResourceState
         modelAsString: true
-    FrontDoorUpdateParameters:
-      description: The properties needed to update a Front Door
+    FrontendEndpointProperties:
+      description: The JSON object that contains the properties required to create a frontend endpoint.
+      allOf:
+      - $ref: '#/components/schemas/FrontendEndpointUpdateParameters'
       properties:
-        friendlyName:
-          description: A friendly name for the frontDoor
+        resourceState:
+          description: Resource status.
+          $ref: '#/components/schemas/ResourceState'
+        customHttpsProvisioningState:
+          description: Provisioning status of Custom Https of the frontendEndpoint.
+          readOnly: true
+          enum:
+          - Enabling
+          - Enabled
+          - Disabling
+          - Disabled
+          - Failed
           type: string
-        routingRules:
-          description: Routing rules associated with this Front Door.
-          type: array
-          items:
-            description: A routing rule
-            $ref: '#/components/schemas/RoutingRule'
-        loadBalancingSettings:
-          description: Load balancing settings associated with this Front Door instance.
-          type: array
-          items:
-            description: A load balancing settings
-            $ref: '#/components/schemas/LoadBalancingSettingsModel'
-        healthProbeSettings:
-          description: Health probe settings associated with this Front Door instance.
-          type: array
-          items:
-            description: A health probe settings
-            $ref: '#/components/schemas/HealthProbeSettingsModel'
-        backendPools:
-          description: Backend pools available to routing rules.
-          type: array
-          items:
-            description: A backend pool
-            $ref: '#/components/schemas/BackendPool'
-        frontendEndpoints:
-          description: Frontend endpoints available to routing rules.
-          type: array
-          items:
-            description: A frontend endpoint
-            $ref: '#/components/schemas/FrontendEndpoint'
+          x-ms-enum:
+            name: CustomHttpsProvisioningState
+            modelAsString: true
+        customHttpsProvisioningSubstate:
+          description: Provisioning substate shows the progress of custom HTTPS enabling/disabling process step by step.
+          readOnly: true
+          enum:
+          - SubmittingDomainControlValidationRequest
+          - PendingDomainControlValidationREquestApproval
+          - DomainControlValidationRequestApproved
+          - DomainControlValidationRequestRejected
+          - DomainControlValidationRequestTimedOut
+          - IssuingCertificate
+          - DeployingCertificate
+          - CertificateDeployed
+          - DeletingCertificate
+          - CertificateDeleted
+          type: string
+          x-ms-enum:
+            name: CustomHttpsProvisioningSubstate
+            modelAsString: true
+        customHttpsConfiguration:
+          description: The configuration specifying how to enable HTTPS
+          readOnly: true
+          $ref: '#/components/schemas/CustomHttpsConfiguration'
+    LoadBalancingSettingsProperties:
+      description: The JSON object that contains the properties required to create load balancing settings
+      allOf:
+      - $ref: '#/components/schemas/LoadBalancingSettingsUpdateParameters'
+      properties:
+        resourceState:
+          description: Resource status.
+          $ref: '#/components/schemas/ResourceState'
+    RoutingRuleProperties:
+      description: The JSON object that contains the properties required to create a routing rule.
+      allOf:
+      - $ref: '#/components/schemas/RoutingRuleUpdateParameters'
+      properties:
+        resourceState:
+          description: Resource status.
+          $ref: '#/components/schemas/ResourceState'
+    Backend:
+      description: Backend address of a frontDoor load balancer.
+      type: object
+      properties:
+        address:
+          description: Location of the backend (IP address or FQDN)
+          type: string
+        httpPort:
+          description: The HTTP TCP port number. Must be between 1 and 65535.
+          type: integer
+          maximum: 65535
+          minimum: 1
+        httpsPort:
+          description: The HTTPS TCP port number. Must be between 1 and 65535.
+          type: integer
+          maximum: 65535
+          minimum: 1
         enabledState:
-          description: Operational status of the Front Door load balancer. Permitted values are 'Enabled' or 'Disabled'
+          description: Whether to enable use of this backend. Permitted values are 'Enabled' or 'Disabled'
           enum:
           - Enabled
           - Disabled
@@ -889,38 +892,35 @@ components:
           x-ms-enum:
             name: FrontDoorEnabledState
             modelAsString: true
-    BackendPoolProperties:
-      description: The JSON object that contains the properties required to create a routing rule.
+        priority:
+          description: Priority to use for load balancing. Higher priorities will not be used for load balancing if any lower priority backend is healthy.
+          type: integer
+          maximum: 5
+          minimum: 1
+        weight:
+          description: Weight of this endpoint for load balancing purposes.
+          type: integer
+          maximum: 1000
+          minimum: 1
+        backendHostHeader:
+          description: The value to use as the host header sent to the backend. If blank or unspecified, this defaults to the incoming host.
+          type: string
+    FrontendEndpoint:
+      properties:
+        properties:
+          description: Properties of the Frontend endpoint
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/FrontendEndpointProperties'
+        name:
+          type: string
+          description: Resource name.
+        type:
+          type: string
+          readOnly: true
+          description: Resource type.
       allOf:
-      - $ref: '#/components/schemas/BackendPoolUpdateParameters'
-      properties:
-        resourceState:
-          description: Resource status.
-          $ref: '#/components/schemas/ResourceState'
-    FrontDoorListResult:
-      description: Result of the request to list Front Doors. It contains a list of Front Door objects and a URL link to get the next set of results.
-      properties:
-        value:
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/FrontDoor'
-          description: List of Front Doors within a resource group.
-        nextLink:
-          type: string
-          description: URL to get the next set of Front Door objects if there are any.
-    ErrorResponse:
-      description: Error response indicates Front Door service is not able to process the incoming request. The reason is provided in the error message.
-      type: object
-      properties:
-        code:
-          description: Error code.
-          readOnly: true
-          type: string
-        message:
-          description: Error message indicating why the operation failed.
-          readOnly: true
-          type: string
+      - $ref: ./network.json#/definitions/SubResource
+      description: A frontend endpoint used for routing.
   parameters:
     frontDoorNameParameter:
       name: frontDoorName
@@ -934,17 +934,6 @@ components:
         maxLength: 64
         minLength: 5
         pattern: ^[a-zA-Z0-9]+([-a-zA-Z0-9]?[a-zA-Z0-9])*$
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: Name of the Resource group within the Azure subscription.
-      schema:
-        type: string
-        maxLength: 80
-        minLength: 1
-        pattern: ^[a-zA-Z0-9_\-\(\)\.]*[^\.]$
     frontendEndpointNameParameter:
       name: frontendEndpointName
       in: path
@@ -957,6 +946,17 @@ components:
         maxLength: 255
         minLength: 1
         pattern: ^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: Name of the Resource group within the Azure subscription.
+      schema:
+        type: string
+        maxLength: 80
+        minLength: 1
+        pattern: ^[a-zA-Z0-9_\-\(\)\.]*[^\.]$
   securitySchemes:
     azure_auth:
       type: oauth2

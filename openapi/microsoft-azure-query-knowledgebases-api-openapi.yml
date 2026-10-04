@@ -40,16 +40,6 @@ paths:
       - Query Knowledgebases
 components:
   schemas:
-    AnswersResult:
-      type: object
-      description: Represents List of Question Answers.
-      additionalProperties: false
-      properties:
-        answers:
-          type: array
-          description: Represents Answer Result list.
-          items:
-            $ref: '#/components/schemas/KnowledgeBaseAnswer'
     LogicalOperationKind:
       type: string
       description: Set to 'OR' or 'AND' for using corresponding logical operation.
@@ -59,48 +49,6 @@ components:
       enum:
       - AND
       - OR
-    ShortAnswerOptions:
-      type: object
-      description: To configure Answer span prediction feature.
-      additionalProperties: false
-      required:
-      - enable
-      properties:
-        enable:
-          type: boolean
-          description: Enable or disable Answer Span prediction.
-          enum:
-          - true
-          x-ms-enum:
-            name: enable
-            modelAsString: false
-        confidenceScoreThreshold:
-          type: number
-          format: double
-          x-ms-client-name: confidenceThreshold
-          description: Minimum threshold score required to include an answer span, value ranges from 0 to 1.
-          maximum: 1
-          minimum: 0
-        topAnswersWithSpan:
-          type: integer
-          x-ms-client-name: top
-          description: Number of Top answers to be considered for span prediction from 1 to 10.
-          format: int32
-          maximum: 10
-          minimum: 1
-    KnowledgeBaseAnswerDialog:
-      type: object
-      description: Dialog associated with Answer.
-      properties:
-        isContextOnly:
-          type: boolean
-          description: To mark if a prompt is relevant only with a previous question or not. If true, do not include this QnA as search result for queries without context; otherwise, if false, ignores context and includes this QnA in search result.
-        prompts:
-          type: array
-          description: List of prompts associated with the answer.
-          maxItems: 20
-          items:
-            $ref: '#/components/schemas/KnowledgeBaseAnswerPrompt'
     KnowledgeBaseAnswerContext:
       type: object
       description: Context object with previous QnA's information.
@@ -116,22 +64,52 @@ components:
           type: string
           x-ms-client-name: previousQuestion
           description: Previous user query.
-    KnowledgeBaseAnswerPrompt:
+    SourceFilter:
+      type: array
+      description: Find QnAs that are associated with any of the given list of sources in knowledge base.
+      items:
+        type: string
+    KnowledgeBaseAnswer:
       type: object
-      description: Prompt for an answer.
+      description: Represents knowledge base answer.
+      additionalProperties: false
       properties:
-        displayOrder:
-          type: integer
-          description: Index of the prompt - used in ordering of the prompts.
-          format: int32
-        qnaId:
-          type: integer
-          description: QnA ID corresponding to the prompt.
-          format: int32
-        displayText:
+        questions:
+          type: array
+          description: List of questions associated with the answer.
+          items:
+            type: string
+        answer:
           type: string
-          description: Text displayed to represent a follow up question prompt.
-          maxLength: 200
+          description: Answer text.
+        confidenceScore:
+          type: number
+          format: double
+          x-ms-client-name: confidence
+          description: Answer confidence score, value ranges from 0 to 1.
+          maximum: 1
+          minimum: 0
+        id:
+          type: integer
+          x-ms-client-name: qnaId
+          description: ID of the QnA result.
+          format: int32
+        source:
+          type: string
+          description: Source of QnA result.
+        metadata:
+          type: object
+          description: Metadata associated with the answer, useful to categorize or filter question answers.
+          additionalProperties:
+            type: string
+        dialog:
+          type: object
+          $ref: '#/components/schemas/KnowledgeBaseAnswerDialog'
+        answerSpan:
+          type: object
+          x-ms-client-name: shortAnswer
+          description: Answer span object of QnA with respect to user's question.
+          $ref: '#/components/schemas/AnswerSpan'
     AnswersOptions:
       type: object
       description: Parameters to query a knowledge base.
@@ -187,36 +165,16 @@ components:
         includeUnstructuredSources:
           type: boolean
           description: (Optional) Flag to enable Query over Unstructured Sources.
-    QueryFilters:
+    AnswersResult:
       type: object
-      description: filters over knowledge base.
+      description: Represents List of Question Answers.
       additionalProperties: false
       properties:
-        metadataFilter:
-          type: object
-          $ref: '#/components/schemas/MetadataFilter'
-        sourceFilter:
-          type: object
-          $ref: '#/components/schemas/SourceFilter'
-        logicalOperation:
-          type: string
-          description: Logical operation used to join metadata filter with source filter.
-          $ref: '#/components/schemas/LogicalOperationKind'
-          default: AND
-    MetadataRecord:
-      type: object
-      description: Object to provide the key value pair for each metadata.
-      additionalProperties: false
-      required:
-      - key
-      - value
-      properties:
-        key:
-          type: string
-          description: Metadata Key from Metadata dictionary used in the QnA.
-        value:
-          type: string
-          description: Metadata Value from Metadata dictionary used in the QnA.
+        answers:
+          type: array
+          description: Represents Answer Result list.
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseAnswer'
     AnswerSpan:
       type: object
       description: Answer span object of QnA.
@@ -240,6 +198,94 @@ components:
           type: integer
           description: The length of the answer span.
           format: int32
+    MetadataRecord:
+      type: object
+      description: Object to provide the key value pair for each metadata.
+      additionalProperties: false
+      required:
+      - key
+      - value
+      properties:
+        key:
+          type: string
+          description: Metadata Key from Metadata dictionary used in the QnA.
+        value:
+          type: string
+          description: Metadata Value from Metadata dictionary used in the QnA.
+    KnowledgeBaseAnswerDialog:
+      type: object
+      description: Dialog associated with Answer.
+      properties:
+        isContextOnly:
+          type: boolean
+          description: To mark if a prompt is relevant only with a previous question or not. If true, do not include this QnA as search result for queries without context; otherwise, if false, ignores context and includes this QnA in search result.
+        prompts:
+          type: array
+          description: List of prompts associated with the answer.
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseAnswerPrompt'
+    ShortAnswerOptions:
+      type: object
+      description: To configure Answer span prediction feature.
+      additionalProperties: false
+      required:
+      - enable
+      properties:
+        enable:
+          type: boolean
+          description: Enable or disable Answer Span prediction.
+          enum:
+          - true
+          x-ms-enum:
+            name: enable
+            modelAsString: false
+        confidenceScoreThreshold:
+          type: number
+          format: double
+          x-ms-client-name: confidenceThreshold
+          description: Minimum threshold score required to include an answer span, value ranges from 0 to 1.
+          maximum: 1
+          minimum: 0
+        topAnswersWithSpan:
+          type: integer
+          x-ms-client-name: top
+          description: Number of Top answers to be considered for span prediction from 1 to 10.
+          format: int32
+          maximum: 10
+          minimum: 1
+    QueryFilters:
+      type: object
+      description: filters over knowledge base.
+      additionalProperties: false
+      properties:
+        metadataFilter:
+          type: object
+          $ref: '#/components/schemas/MetadataFilter'
+        sourceFilter:
+          type: object
+          $ref: '#/components/schemas/SourceFilter'
+        logicalOperation:
+          type: string
+          description: Logical operation used to join metadata filter with source filter.
+          $ref: '#/components/schemas/LogicalOperationKind'
+          default: AND
+    KnowledgeBaseAnswerPrompt:
+      type: object
+      description: Prompt for an answer.
+      properties:
+        displayOrder:
+          type: integer
+          description: Index of the prompt - used in ordering of the prompts.
+          format: int32
+        qnaId:
+          type: integer
+          description: QnA ID corresponding to the prompt.
+          format: int32
+        displayText:
+          type: string
+          description: Text displayed to represent a follow up question prompt.
+          maxLength: 200
     MetadataFilter:
       type: object
       description: Find QnAs that are associated with the given list of metadata.
@@ -254,52 +300,6 @@ components:
           description: Operation used to join metadata filters.
           $ref: '#/components/schemas/LogicalOperationKind'
           default: AND
-    SourceFilter:
-      type: array
-      description: Find QnAs that are associated with any of the given list of sources in knowledge base.
-      items:
-        type: string
-    KnowledgeBaseAnswer:
-      type: object
-      description: Represents knowledge base answer.
-      additionalProperties: false
-      properties:
-        questions:
-          type: array
-          description: List of questions associated with the answer.
-          items:
-            type: string
-        answer:
-          type: string
-          description: Answer text.
-        confidenceScore:
-          type: number
-          format: double
-          x-ms-client-name: confidence
-          description: Answer confidence score, value ranges from 0 to 1.
-          maximum: 1
-          minimum: 0
-        id:
-          type: integer
-          x-ms-client-name: qnaId
-          description: ID of the QnA result.
-          format: int32
-        source:
-          type: string
-          description: Source of QnA result.
-        metadata:
-          type: object
-          description: Metadata associated with the answer, useful to categorize or filter question answers.
-          additionalProperties:
-            type: string
-        dialog:
-          type: object
-          $ref: '#/components/schemas/KnowledgeBaseAnswerDialog'
-        answerSpan:
-          type: object
-          x-ms-client-name: shortAnswer
-          description: Answer span object of QnA with respect to user's question.
-          $ref: '#/components/schemas/AnswerSpan'
   parameters:
     AnswersOptions:
       name: knowledgeBaseQueryOptions
