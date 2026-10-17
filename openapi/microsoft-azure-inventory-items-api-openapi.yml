@@ -335,6 +335,59 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    ResourceProvisioningState:
+      type: string
+      description: The current deployment state of resource.
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Updating
+      - Deleting
+      - Accepted
+      - Created
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    InventoryType:
+      type: string
+      description: The inventory type.
+      enum:
+      - ResourcePool
+      - VirtualMachine
+      - VirtualMachineTemplate
+      - VirtualNetwork
+      - Cluster
+      - Datastore
+      - Host
+      x-ms-enum:
+        name: InventoryType
+        modelAsString: true
+    InventoryItemProperties:
+      description: Describes the properties of an Inventory Item.
+      required:
+      - inventoryType
+      discriminator:
+        propertyName: inventoryType
+      type: object
+      properties:
+        inventoryType:
+          description: They inventory type.
+          $ref: '#/components/schemas/InventoryType'
+        managedResourceId:
+          description: Gets or sets the tracked resource id corresponding to the inventory resource.
+          type: string
+        moRefId:
+          description: Gets or sets the MoRef (Managed Object Reference) ID for the inventory item.
+          type: string
+        moName:
+          description: Gets or sets the vCenter Managed Object name for the inventory item.
+          type: string
+        provisioningState:
+          $ref: '#/components/schemas/ResourceProvisioningState'
+          description: Gets the provisioning state.
+          readOnly: true
     InventoryItemsList:
       description: List of InventoryItems.
       type: object
@@ -366,76 +419,6 @@ components:
           type: string
           description: Metadata used by portal/tooling/etc to render different UX experiences for resources of the same type; e.g. ApiApps are a kind of Microsoft.Web/sites type.  If supported, the resource provider must validate and persist this value.
       x-ms-azure-resource: true
-    ResourceProvisioningState:
-      type: string
-      description: The current deployment state of resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Updating
-      - Deleting
-      - Accepted
-      - Created
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    InventoryItemProperties:
-      description: Describes the properties of an Inventory Item.
-      required:
-      - inventoryType
-      discriminator:
-        propertyName: inventoryType
-      type: object
-      properties:
-        inventoryType:
-          description: They inventory type.
-          $ref: '#/components/schemas/InventoryType'
-        managedResourceId:
-          description: Gets or sets the tracked resource id corresponding to the inventory resource.
-          type: string
-        moRefId:
-          description: Gets or sets the MoRef (Managed Object Reference) ID for the inventory item.
-          type: string
-        moName:
-          description: Gets or sets the vCenter Managed Object name for the inventory item.
-          type: string
-        provisioningState:
-          $ref: '#/components/schemas/ResourceProvisioningState'
-          description: Gets the provisioning state.
-          readOnly: true
-    InventoryType:
-      type: string
-      description: The inventory type.
-      enum:
-      - ResourcePool
-      - VirtualMachine
-      - VirtualMachineTemplate
-      - VirtualNetwork
-      - Cluster
-      - Datastore
-      - Host
-      x-ms-enum:
-        name: InventoryType
-        modelAsString: true
-    InventoryItem_2:
-      description: Defines the inventory item.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
-        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          description: Resource properties.
-          $ref: '#/components/schemas/InventoryItemProperties_2'
-        kind:
-          type: string
-          description: Metadata used by portal/tooling/etc to render different UX experiences for resources of the same type; e.g. ApiApps are a kind of Microsoft.Web/sites type.  If supported, the resource provider must validate and persist this value.
-      x-ms-azure-resource: true
     ErrorDefinition:
       description: Error definition.
       type: object
@@ -455,13 +438,17 @@ components:
             $ref: '#/components/schemas/ErrorDefinition'
           x-ms-identifiers: []
           readOnly: true
-    ErrorResponse:
-      description: Error response.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDefinition'
-          description: The error details.
+    InventoryType_2:
+      type: string
+      description: The inventory type.
+      enum:
+      - Cloud
+      - VirtualNetwork
+      - VirtualMachineTemplate
+      - VirtualMachine
+      x-ms-enum:
+        name: InventoryType
+        modelAsString: true
     InventoryItemProperties_2:
       description: Defines the resource properties.
       required:
@@ -489,18 +476,38 @@ components:
           description: Gets the provisioning state.
           type: string
           readOnly: true
-    InventoryType_2:
-      type: string
-      description: The inventory type.
-      enum:
-      - Cloud
-      - VirtualNetwork
-      - VirtualMachineTemplate
-      - VirtualMachine
-      x-ms-enum:
-        name: InventoryType
-        modelAsString: true
+    ErrorResponse:
+      description: Error response.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDefinition'
+          description: The error details.
+    InventoryItem_2:
+      description: Defines the inventory item.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
+        description: The resource model definition for an Azure Resource Manager proxy resource. It will have everything other than required location and tags.
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          description: Resource properties.
+          $ref: '#/components/schemas/InventoryItemProperties_2'
+        kind:
+          type: string
+          description: Metadata used by portal/tooling/etc to render different UX experiences for resources of the same type; e.g. ApiApps are a kind of Microsoft.Web/sites type.  If supported, the resource provider must validate and persist this value.
+      x-ms-azure-resource: true
   parameters:
+    api-version:
+      in: query
+      name: api-version
+      description: Client Api Version.
+      required: true
+      schema:
+        type: string
     subscriptionId:
       in: path
       name: subscriptionId
@@ -514,13 +521,6 @@ components:
       description: The Resource Group Name.
       required: true
       x-ms-parameter-location: method
-      schema:
-        type: string
-    api-version:
-      in: query
-      name: api-version
-      description: Client Api Version.
-      required: true
       schema:
         type: string
     ApiVersionParameter:

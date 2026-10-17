@@ -770,37 +770,48 @@ paths:
         required: true
 components:
   schemas:
-    SqlDbOfflineConfiguration:
-      description: Offline configuration
+    SqlConnectionInformation:
+      description: Source SQL Connection
       type: object
       properties:
-        offline:
-          description: Offline migration
+        dataSource:
+          description: Data source.
+          type: string
+        authentication:
+          description: Authentication type.
+          type: string
+        userName:
+          description: User name to connect to source SQL.
+          type: string
+        password:
+          description: Password to connect to source SQL.
+          type: string
+          format: password
+          x-ms-secret: true
+        encryptConnection:
+          description: Whether to encrypt connection or not.
           type: boolean
-          readOnly: true
-    DatabaseMigrationPropertiesSqlDb:
-      x-ms-discriminator-value: SqlDb
+        trustServerCertificate:
+          description: Whether to trust server certificate or not.
+          type: boolean
+    DatabaseMigrationPropertiesCosmosDbMongo:
+      x-ms-discriminator-value: MongoToCosmosDbMongo
       allOf:
-      - $ref: '#/components/schemas/DatabaseMigrationProperties'
-      description: Database Migration Resource properties for SQL database.
+      - $ref: '#/components/schemas/DatabaseMigrationBaseProperties'
+      description: Database Migration Resource properties for CosmosDb for Mongo.
       type: object
       properties:
-        migrationStatusDetails:
-          $ref: '#/components/schemas/SqlDbMigrationStatusDetails'
-          description: Detailed migration status. Not included by default.
-          readOnly: true
-        targetSqlConnection:
-          $ref: '#/components/schemas/SqlConnectionInformation'
-          description: Target SQL DB connection details.
-        offlineConfiguration:
-          $ref: '#/components/schemas/SqlDbOfflineConfiguration'
-          description: Offline configuration.
-          readOnly: true
-        tableList:
-          description: List of tables to copy.
+        sourceMongoConnection:
+          $ref: '#/components/schemas/MongoConnectionInformation'
+          description: Source Mongo connection details.
+        targetMongoConnection:
+          $ref: '#/components/schemas/MongoConnectionInformation'
+          description: Target Cosmos DB Mongo connection details.
+        collectionList:
+          description: List of Mongo Collections to be migrated.
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/MongoMigrationCollection'
     SqlBackupSetInfo:
       description: Information of backup set
       type: object
@@ -857,30 +868,61 @@ components:
           items:
             type: string
           readOnly: true
-    SqlConnectionInformation:
-      description: Source SQL Connection
+    BackupConfiguration:
+      description: Backup Configuration
       type: object
       properties:
-        dataSource:
-          description: Data source.
+        sourceLocation:
+          $ref: '#/components/schemas/SourceLocation'
+          description: Source location of backups.
+        targetLocation:
+          $ref: '#/components/schemas/TargetLocation'
+          description: Target location for copying backups.
+    DatabaseMigrationPropertiesSqlVm:
+      x-ms-discriminator-value: SqlVm
+      allOf:
+      - $ref: '#/components/schemas/DatabaseMigrationProperties'
+      description: Database Migration Resource properties for SQL Virtual Machine.
+      type: object
+      properties:
+        migrationStatusDetails:
+          $ref: '#/components/schemas/MigrationStatusDetails'
+          description: Detailed migration status. Not included by default.
+          readOnly: true
+        backupConfiguration:
+          $ref: '#/components/schemas/BackupConfiguration'
+          description: Backup configuration info.
+        offlineConfiguration:
+          $ref: '#/components/schemas/OfflineConfiguration'
+          description: Offline configuration.
+    MigrationOperationInput:
+      description: Migration Operation Input
+      type: object
+      properties:
+        migrationOperationId:
+          format: uuid
+          description: ID tracking migration operation.
           type: string
-        authentication:
-          description: Authentication type.
+    DatabaseMigrationCosmosDbMongoListResult:
+      description: A list of Database Migrations.
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatabaseMigrationCosmosDbMongo'
+          readOnly: true
+        nextLink:
           type: string
-        userName:
-          description: User name to connect to source SQL.
-          type: string
-        password:
-          description: Password to connect to source SQL.
-          type: string
-          format: password
-          x-ms-secret: true
-        encryptConnection:
-          description: Whether to encrypt connection or not.
+          readOnly: true
+    SqlDbOfflineConfiguration:
+      description: Offline configuration
+      type: object
+      properties:
+        offline:
+          description: Offline migration
           type: boolean
-        trustServerCertificate:
-          description: Whether to trust server certificate or not.
-          type: boolean
+          readOnly: true
     SqlBackupFileInfo:
       description: Information of backup file
       type: object
@@ -923,107 +965,92 @@ components:
           description: Media family sequence number
           type: integer
           readOnly: true
-    SqlFileShare:
-      description: File share
+    MongoConnectionInformation:
+      description: Mongo Connection
       type: object
       properties:
-        path:
-          description: Location as SMB share or local drive where backups are placed.
+        host:
+          description: Host of mongo connection.
           type: string
-        username:
-          description: Username to access the file share location for backups.
+        port:
+          format: int32
+          description: Port of mongo connection.
+          type: integer
+        userName:
+          description: User name to connect to Mongo.
           type: string
+          x-ms-mutability:
+          - create
+          - update
         password:
-          description: Password for username to access file share location.
+          description: Password to connect to Mongo.
           type: string
           format: password
           x-ms-secret: true
           x-ms-mutability:
           - create
           - update
-    DatabaseMigrationPropertiesCosmosDbMongo:
-      x-ms-discriminator-value: MongoToCosmosDbMongo
+        useSsl:
+          description: Whether to UseSsl or UseTls to connect to Mongo. Default is true.
+          type: boolean
+          x-ms-mutability:
+          - create
+          - update
+        connectionString:
+          description: ConnectionString to connect to Mongo.
+          type: string
+          x-ms-secret: true
+          x-ms-mutability:
+          - create
+          - update
+    DatabaseMigrationSqlDb:
+      description: Database Migration Resource for SQL Database.
+      type: object
       allOf:
-      - $ref: '#/components/schemas/DatabaseMigrationBaseProperties'
-      description: Database Migration Resource properties for CosmosDb for Mongo.
+      - $ref: '#/components/schemas/ProxyResource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/DatabaseMigrationPropertiesSqlDb'
+          x-ms-client-flatten: false
+      x-ms-azure-resource: true
+    DatabaseMigrationPropertiesSqlDb:
+      x-ms-discriminator-value: SqlDb
+      allOf:
+      - $ref: '#/components/schemas/DatabaseMigrationProperties'
+      description: Database Migration Resource properties for SQL database.
       type: object
       properties:
-        sourceMongoConnection:
-          $ref: '#/components/schemas/MongoConnectionInformation'
-          description: Source Mongo connection details.
-        targetMongoConnection:
-          $ref: '#/components/schemas/MongoConnectionInformation'
-          description: Target Cosmos DB Mongo connection details.
-        collectionList:
-          description: List of Mongo Collections to be migrated.
+        migrationStatusDetails:
+          $ref: '#/components/schemas/SqlDbMigrationStatusDetails'
+          description: Detailed migration status. Not included by default.
+          readOnly: true
+        targetSqlConnection:
+          $ref: '#/components/schemas/SqlConnectionInformation'
+          description: Target SQL DB connection details.
+        offlineConfiguration:
+          $ref: '#/components/schemas/SqlDbOfflineConfiguration'
+          description: Offline configuration.
+          readOnly: true
+        tableList:
+          description: List of tables to copy.
           type: array
           items:
-            $ref: '#/components/schemas/MongoMigrationCollection'
-    TargetLocation:
-      description: Target Location details for optional copy of backups
+            type: string
+    ProxyResource:
       type: object
       properties:
-        storageAccountResourceId:
-          description: Resource Id of the storage account copying backups.
-          type: string
-        accountKey:
-          description: Storage Account Key.
-          type: string
-    CopyProgressDetails:
-      description: Details on progress of ADF copy activity
-      type: object
-      properties:
-        tableName:
-          description: Table Name
+        id:
           type: string
           readOnly: true
-        status:
-          description: Status of the Copy activity (InProgress, Succeeded, Failed, Canceled).
+        name:
           type: string
           readOnly: true
-        parallelCopyType:
-          description: Type of parallel copy (Dynamic range, Physical partition, none).
+        type:
           type: string
           readOnly: true
-        usedParallelCopies:
-          format: int32
-          description: The degree of parallelization.
-          type: integer
-          readOnly: true
-        dataRead:
-          format: int64
-          description: Bytes read
-          type: integer
-          readOnly: true
-        dataWritten:
-          format: int64
-          description: Bytes written
-          type: integer
-          readOnly: true
-        rowsRead:
-          format: int64
-          description: Rows read
-          type: integer
-          readOnly: true
-        rowsCopied:
-          format: int64
-          description: Rows Copied
-          type: integer
-          readOnly: true
-        copyStart:
-          format: date-time
-          description: Copy Start
-          type: string
-          readOnly: true
-        copyThroughput:
-          format: double
-          description: Copy throughput in KBps
-          type: number
-          readOnly: true
-        copyDuration:
-          format: int32
-          description: Copy Duration in seconds
-          type: integer
+        systemData:
+          $ref: '#/components/schemas/SystemData'
+          description: Metadata pertaining to creation and last modification of the resource.
           readOnly: true
     DatabaseMigrationProperties:
       required:
@@ -1048,6 +1075,64 @@ components:
           type: string
       discriminator:
         propertyName: kind
+    SqlFileShare:
+      description: File share
+      type: object
+      properties:
+        path:
+          description: Location as SMB share or local drive where backups are placed.
+          type: string
+        username:
+          description: Username to access the file share location for backups.
+          type: string
+        password:
+          description: Password for username to access file share location.
+          type: string
+          format: password
+          x-ms-secret: true
+          x-ms-mutability:
+          - create
+          - update
+    OfflineConfiguration:
+      description: Offline configuration
+      type: object
+      properties:
+        offline:
+          description: Offline migration
+          type: boolean
+        lastBackupName:
+          description: Last backup name for offline migration. This is optional for migrations from file share. If it is not provided, then the service will determine the last backup file name based on latest backup files present in file share.
+          type: string
+    MongoMigrationCollection:
+      description: Mongo source and target database and collection details.
+      type: object
+      properties:
+        sourceDatabase:
+          description: Source database name.
+          type: string
+        sourceCollection:
+          description: Source collection name.
+          type: string
+        targetDatabase:
+          description: Target database name.
+          type: string
+        targetCollection:
+          description: Target collection name.
+          type: string
+        migrationProgressDetails:
+          $ref: '#/components/schemas/MongoMigrationProgressDetails'
+          description: Detailed migration status. Not included by default.
+          readOnly: true
+    DatabaseMigrationSqlVm:
+      description: Database Migration Resource for SQL Virtual Machine.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/DatabaseMigrationPropertiesSqlVm'
+          x-ms-client-flatten: false
+      x-ms-azure-resource: true
     SourceLocation:
       description: Source Location details of backups.
       type: object
@@ -1062,142 +1147,6 @@ components:
           description: Backup storage Type.
           type: string
           readOnly: true
-    ProxyResource:
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-        name:
-          type: string
-          readOnly: true
-        type:
-          type: string
-          readOnly: true
-        systemData:
-          $ref: '#/components/schemas/SystemData'
-          description: Metadata pertaining to creation and last modification of the resource.
-          readOnly: true
-    MongoMigrationProgressDetails:
-      description: Detailed status of collection migration.
-      type: object
-      properties:
-        migrationStatus:
-          enum:
-          - NotStarted
-          - InProgress
-          - Completed
-          - Failed
-          - Canceled
-          type: string
-          readOnly: true
-          x-ms-enum:
-            name: MongoMigrationStatus
-            modelAsString: true
-          description: Migration Status
-        migrationError:
-          description: Migration Error
-          type: string
-          readOnly: true
-        sourceDocumentCount:
-          format: int64
-          description: Source Document Count
-          type: integer
-          readOnly: true
-        processedDocumentCount:
-          format: int64
-          description: Processed Document Count
-          type: integer
-          readOnly: true
-        durationInSeconds:
-          format: int32
-          description: Migration duration
-          type: integer
-          readOnly: true
-    SqlDbMigrationStatusDetails:
-      description: Detailed status of current Sql Db migration.
-      type: object
-      properties:
-        migrationState:
-          description: Current State of Migration.
-          type: string
-          readOnly: true
-        sqlDataCopyErrors:
-          description: Sql Data Copy errors, if any.
-          type: array
-          items:
-            type: string
-          readOnly: true
-        listOfCopyProgressDetails:
-          description: Details on progress of ADF copy activities.
-          type: array
-          items:
-            $ref: '#/components/schemas/CopyProgressDetails'
-          x-ms-identifiers: []
-          readOnly: true
-    DatabaseMigrationCosmosDbMongo:
-      description: Database Migration Resource for Mongo to CosmosDb.
-      type: object
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          $ref: '#/components/schemas/DatabaseMigrationPropertiesCosmosDbMongo'
-          x-ms-client-flatten: true
-      x-ms-azure-resource: true
-    AzureBlob:
-      description: Azure Blob Details
-      type: object
-      properties:
-        storageAccountResourceId:
-          description: Resource Id of the storage account where backups are stored.
-          type: string
-        accountKey:
-          description: Storage Account Key.
-          type: string
-          x-ms-secret: true
-        blobContainerName:
-          description: Blob container name where backups are stored.
-          type: string
-    DatabaseMigrationPropertiesSqlMi:
-      x-ms-discriminator-value: SqlMi
-      allOf:
-      - $ref: '#/components/schemas/DatabaseMigrationProperties'
-      description: Database Migration Resource properties for SQL Managed Instance.
-      type: object
-      properties:
-        migrationStatusDetails:
-          $ref: '#/components/schemas/MigrationStatusDetails'
-          description: Detailed migration status. Not included by default.
-          readOnly: true
-        backupConfiguration:
-          $ref: '#/components/schemas/BackupConfiguration'
-          description: Backup configuration info.
-        offlineConfiguration:
-          $ref: '#/components/schemas/OfflineConfiguration'
-          description: Offline configuration.
-    ErrorInfo:
-      description: Error details
-      type: object
-      properties:
-        code:
-          description: Error code.
-          type: string
-          readOnly: true
-        message:
-          description: Error message.
-          type: string
-          readOnly: true
-    DatabaseMigrationSqlVm:
-      description: Database Migration Resource for SQL Virtual Machine.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/DatabaseMigrationPropertiesSqlVm'
-          x-ms-client-flatten: false
-      x-ms-azure-resource: true
     DatabaseMigrationBaseProperties:
       required:
       - kind
@@ -1267,148 +1216,23 @@ components:
           type: string
       discriminator:
         propertyName: kind
-    DatabaseMigrationSqlMi:
-      description: Database Migration Resource for SQL Managed Instance.
-      type: object
+    DatabaseMigrationPropertiesSqlMi:
+      x-ms-discriminator-value: SqlMi
       allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/DatabaseMigrationPropertiesSqlMi'
-          x-ms-client-flatten: false
-      x-ms-azure-resource: true
-    DatabaseMigrationCosmosDbMongoListResult:
-      description: A list of Database Migrations.
+      - $ref: '#/components/schemas/DatabaseMigrationProperties'
+      description: Database Migration Resource properties for SQL Managed Instance.
       type: object
       properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/DatabaseMigrationCosmosDbMongo'
-          readOnly: true
-        nextLink:
-          type: string
-          readOnly: true
-    BackupConfiguration:
-      description: Backup Configuration
-      type: object
-      properties:
-        sourceLocation:
-          $ref: '#/components/schemas/SourceLocation'
-          description: Source location of backups.
-        targetLocation:
-          $ref: '#/components/schemas/TargetLocation'
-          description: Target location for copying backups.
-    SystemData:
-      type: object
-      readOnly: true
-      properties:
-        createdBy:
-          type: string
-        createdByType:
-          enum:
-          - User
-          - Application
-          - ManagedIdentity
-          - Key
-          type: string
-          x-ms-enum:
-            name: createdByType
-            modelAsString: true
-        createdAt:
-          format: date-time
-          type: string
-        lastModifiedBy:
-          type: string
-        lastModifiedByType:
-          enum:
-          - User
-          - Application
-          - ManagedIdentity
-          - Key
-          type: string
-          x-ms-enum:
-            name: createdByType
-            modelAsString: true
-        lastModifiedAt:
-          format: date-time
-          type: string
-    MongoConnectionInformation:
-      description: Mongo Connection
-      type: object
-      properties:
-        host:
-          description: Host of mongo connection.
-          type: string
-        port:
-          format: int32
-          description: Port of mongo connection.
-          type: integer
-        userName:
-          description: User name to connect to Mongo.
-          type: string
-          x-ms-mutability:
-          - create
-          - update
-        password:
-          description: Password to connect to Mongo.
-          type: string
-          format: password
-          x-ms-secret: true
-          x-ms-mutability:
-          - create
-          - update
-        useSsl:
-          description: Whether to UseSsl or UseTls to connect to Mongo. Default is true.
-          type: boolean
-          x-ms-mutability:
-          - create
-          - update
-        connectionString:
-          description: ConnectionString to connect to Mongo.
-          type: string
-          x-ms-secret: true
-          x-ms-mutability:
-          - create
-          - update
-    MongoMigrationCollection:
-      description: Mongo source and target database and collection details.
-      type: object
-      properties:
-        sourceDatabase:
-          description: Source database name.
-          type: string
-        sourceCollection:
-          description: Source collection name.
-          type: string
-        targetDatabase:
-          description: Target database name.
-          type: string
-        targetCollection:
-          description: Target collection name.
-          type: string
-        migrationProgressDetails:
-          $ref: '#/components/schemas/MongoMigrationProgressDetails'
+        migrationStatusDetails:
+          $ref: '#/components/schemas/MigrationStatusDetails'
           description: Detailed migration status. Not included by default.
           readOnly: true
-    MigrationOperationInput:
-      description: Migration Operation Input
-      type: object
-      properties:
-        migrationOperationId:
-          format: uuid
-          description: ID tracking migration operation.
-          type: string
-    DatabaseMigrationSqlDb:
-      description: Database Migration Resource for SQL Database.
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-      properties:
-        properties:
-          $ref: '#/components/schemas/DatabaseMigrationPropertiesSqlDb'
-          x-ms-client-flatten: false
-      x-ms-azure-resource: true
+        backupConfiguration:
+          $ref: '#/components/schemas/BackupConfiguration'
+          description: Backup configuration info.
+        offlineConfiguration:
+          $ref: '#/components/schemas/OfflineConfiguration'
+          description: Offline configuration.
     MigrationStatusDetails:
       description: Detailed status of current migration.
       type: object
@@ -1472,59 +1296,219 @@ components:
           description: Total pending log backups.
           type: integer
           readOnly: true
-    OfflineConfiguration:
-      description: Offline configuration
+    TargetLocation:
+      description: Target Location details for optional copy of backups
       type: object
       properties:
-        offline:
-          description: Offline migration
-          type: boolean
-        lastBackupName:
-          description: Last backup name for offline migration. This is optional for migrations from file share. If it is not provided, then the service will determine the last backup file name based on latest backup files present in file share.
+        storageAccountResourceId:
+          description: Resource Id of the storage account copying backups.
           type: string
-    DatabaseMigrationPropertiesSqlVm:
-      x-ms-discriminator-value: SqlVm
-      allOf:
-      - $ref: '#/components/schemas/DatabaseMigrationProperties'
-      description: Database Migration Resource properties for SQL Virtual Machine.
+        accountKey:
+          description: Storage Account Key.
+          type: string
+    CopyProgressDetails:
+      description: Details on progress of ADF copy activity
       type: object
       properties:
-        migrationStatusDetails:
-          $ref: '#/components/schemas/MigrationStatusDetails'
-          description: Detailed migration status. Not included by default.
+        tableName:
+          description: Table Name
+          type: string
           readOnly: true
-        backupConfiguration:
-          $ref: '#/components/schemas/BackupConfiguration'
-          description: Backup configuration info.
-        offlineConfiguration:
-          $ref: '#/components/schemas/OfflineConfiguration'
-          description: Offline configuration.
+        status:
+          description: Status of the Copy activity (InProgress, Succeeded, Failed, Canceled).
+          type: string
+          readOnly: true
+        parallelCopyType:
+          description: Type of parallel copy (Dynamic range, Physical partition, none).
+          type: string
+          readOnly: true
+        usedParallelCopies:
+          format: int32
+          description: The degree of parallelization.
+          type: integer
+          readOnly: true
+        dataRead:
+          format: int64
+          description: Bytes read
+          type: integer
+          readOnly: true
+        dataWritten:
+          format: int64
+          description: Bytes written
+          type: integer
+          readOnly: true
+        rowsRead:
+          format: int64
+          description: Rows read
+          type: integer
+          readOnly: true
+        rowsCopied:
+          format: int64
+          description: Rows Copied
+          type: integer
+          readOnly: true
+        copyStart:
+          format: date-time
+          description: Copy Start
+          type: string
+          readOnly: true
+        copyThroughput:
+          format: double
+          description: Copy throughput in KBps
+          type: number
+          readOnly: true
+        copyDuration:
+          format: int32
+          description: Copy Duration in seconds
+          type: integer
+          readOnly: true
+    DatabaseMigrationCosmosDbMongo:
+      description: Database Migration Resource for Mongo to CosmosDb.
+      type: object
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          $ref: '#/components/schemas/DatabaseMigrationPropertiesCosmosDbMongo'
+          x-ms-client-flatten: true
+      x-ms-azure-resource: true
+    DatabaseMigrationSqlMi:
+      description: Database Migration Resource for SQL Managed Instance.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/DatabaseMigrationPropertiesSqlMi'
+          x-ms-client-flatten: false
+      x-ms-azure-resource: true
+    ErrorInfo:
+      description: Error details
+      type: object
+      properties:
+        code:
+          description: Error code.
+          type: string
+          readOnly: true
+        message:
+          description: Error message.
+          type: string
+          readOnly: true
+    SqlDbMigrationStatusDetails:
+      description: Detailed status of current Sql Db migration.
+      type: object
+      properties:
+        migrationState:
+          description: Current State of Migration.
+          type: string
+          readOnly: true
+        sqlDataCopyErrors:
+          description: Sql Data Copy errors, if any.
+          type: array
+          items:
+            type: string
+          readOnly: true
+        listOfCopyProgressDetails:
+          description: Details on progress of ADF copy activities.
+          type: array
+          items:
+            $ref: '#/components/schemas/CopyProgressDetails'
+          x-ms-identifiers: []
+          readOnly: true
+    SystemData:
+      type: object
+      readOnly: true
+      properties:
+        createdBy:
+          type: string
+        createdByType:
+          enum:
+          - User
+          - Application
+          - ManagedIdentity
+          - Key
+          type: string
+          x-ms-enum:
+            name: createdByType
+            modelAsString: true
+        createdAt:
+          format: date-time
+          type: string
+        lastModifiedBy:
+          type: string
+        lastModifiedByType:
+          enum:
+          - User
+          - Application
+          - ManagedIdentity
+          - Key
+          type: string
+          x-ms-enum:
+            name: createdByType
+            modelAsString: true
+        lastModifiedAt:
+          format: date-time
+          type: string
+    MongoMigrationProgressDetails:
+      description: Detailed status of collection migration.
+      type: object
+      properties:
+        migrationStatus:
+          enum:
+          - NotStarted
+          - InProgress
+          - Completed
+          - Failed
+          - Canceled
+          type: string
+          readOnly: true
+          x-ms-enum:
+            name: MongoMigrationStatus
+            modelAsString: true
+          description: Migration Status
+        migrationError:
+          description: Migration Error
+          type: string
+          readOnly: true
+        sourceDocumentCount:
+          format: int64
+          description: Source Document Count
+          type: integer
+          readOnly: true
+        processedDocumentCount:
+          format: int64
+          description: Processed Document Count
+          type: integer
+          readOnly: true
+        durationInSeconds:
+          format: int32
+          description: Migration duration
+          type: integer
+          readOnly: true
+    AzureBlob:
+      description: Azure Blob Details
+      type: object
+      properties:
+        storageAccountResourceId:
+          description: Resource Id of the storage account where backups are stored.
+          type: string
+        accountKey:
+          description: Storage Account Key.
+          type: string
+          x-ms-secret: true
+        blobContainerName:
+          description: Blob container name where backups are stored.
+          type: string
   parameters:
-    SubscriptionIdParameter:
-      name: subscriptionId
+    TargetResourceNameParameter:
+      name: targetResourceName
       in: path
-      description: Subscription ID that identifies an Azure subscription.
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-    MigrationNameParameter:
-      name: migrationName
-      in: path
-      description: Name of the migration.
+      description: The name of the target resource/account.
       required: true
       x-ms-parameter-location: method
       schema:
         type: string
         pattern: ^[A-Za-z][A-Za-z0-9_-]*$
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      description: API version to use for the request.
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
     ResourceGroupParameter:
       name: resourceGroupName
       in: path
@@ -1541,15 +1525,31 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    TargetResourceNameParameter:
-      name: targetResourceName
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      description: API version to use for the request.
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    MigrationNameParameter:
+      name: migrationName
       in: path
-      description: The name of the target resource/account.
+      description: Name of the migration.
       required: true
       x-ms-parameter-location: method
       schema:
         type: string
         pattern: ^[A-Za-z][A-Za-z0-9_-]*$
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: Subscription ID that identifies an Azure subscription.
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

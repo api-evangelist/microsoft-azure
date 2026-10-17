@@ -397,6 +397,26 @@ paths:
       - Authorization: []
 components:
   parameters:
+    QuerySkip:
+      name: skip
+      in: query
+      description: The number of result items to skip.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    QueryApiVersion:
+      name: api-version
+      in: query
+      description: The API version to use for this operation.
+      required: true
+      x-ms-parameter-location: method
+      x-ms-client-name: apiVersion
+      schema:
+        type: string
+        minLength: 1
     HeaderOperationId:
       name: Operation-Id
       in: header
@@ -408,26 +428,14 @@ components:
         maxLength: 64
         minLength: 3
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
-    QueryApiVersion:
-      name: api-version
+    QueryFilter:
+      name: filter
       in: query
-      description: The API version to use for this operation.
-      required: true
-      x-ms-parameter-location: method
-      x-ms-client-name: apiVersion
-      schema:
-        type: string
-        minLength: 1
-    QuerySkip:
-      name: skip
-      in: query
-      description: The number of result items to skip.
+      description: "Filter condition.\n  - **Supported properties:** projectId, createdDateTime, locale, kind\n  - **Operators:**\n    - eq, ne are supported for all properties.\n    - gt, ge, lt, le are supported for createdDateTime.\n  - **Example:**\n    - ```filter=projectId eq 'Jessica'``` (filter by project ID)\n    - ```filter=kind eq 'ProfessionalVoice'``` (filter project by kind)\n    - ```filter=locale eq 'en-US'``` (filter training set and model by locale)\n    - ```filter=createdDateTime gt 2022-12-30T23:59:59.99Z``` (filter resource created time after 2023-11-01)"
       required: false
       x-ms-parameter-location: method
       schema:
-        type: integer
-        format: int32
-        default: 0
+        type: string
     QueryMaxPageSize:
       name: maxpagesize
       in: query
@@ -438,14 +446,6 @@ components:
         type: integer
         format: int32
         default: 100
-    QueryFilter:
-      name: filter
-      in: query
-      description: "Filter condition.\n  - **Supported properties:** projectId, createdDateTime, locale, kind\n  - **Operators:**\n    - eq, ne are supported for all properties.\n    - gt, ge, lt, le are supported for createdDateTime.\n  - **Example:**\n    - ```filter=projectId eq 'Jessica'``` (filter by project ID)\n    - ```filter=kind eq 'ProfessionalVoice'``` (filter project by kind)\n    - ```filter=locale eq 'en-US'``` (filter training set and model by locale)\n    - ```filter=createdDateTime gt 2022-12-30T23:59:59.99Z``` (filter resource created time after 2023-11-01)"
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
     PathId:
       name: id
       in: path
@@ -458,12 +458,65 @@ components:
         minLength: 3
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
   schemas:
+    Error:
+      description: Top-level error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains an top-level error with error code, message, details, target and an inner error with more descriptive details.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        target:
+          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
+          type: string
+        message:
+          description: Top-level error message.
+          type: string
+        details:
+          description: Additional supportive details regarding the error and/or expected policies.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     ResourceId:
       description: Resource id
       type: string
       pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
       minLength: 3
       maxLength: 64
+    ErrorCode:
+      description: Top-level error code
+      enum:
+      - BadRequest
+      - BadArgument
+      - Unauthorized
+      - Forbidden
+      - NotFound
+      - UnsupportedMediaType
+      - TooManyRequests
+      - InternalServerError
+      - ServiceUnavailable
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
+    PaginatedConsents:
+      description: Paginated consent list
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: Consent list
+          type: array
+          items:
+            $ref: '#/components/schemas/Consent'
+        nextLink:
+          description: Link to next page.
+          format: uri
+          type: string
     Consent:
       description: Consent object
       required:
@@ -512,21 +565,27 @@ components:
           format: date-time
           type: string
           readOnly: true
-    PaginatedConsents:
-      description: Paginated consent list
+    Status:
+      description: Status of a resource.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      - Disabling
+      - Disabled
+      type: string
+      x-ms-enum:
+        name: Status
+        modelAsString: true
+    ErrorResponse:
+      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
       required:
-      - value
+      - error
       type: object
       properties:
-        value:
-          description: Consent list
-          type: array
-          items:
-            $ref: '#/components/schemas/Consent'
-        nextLink:
-          description: Link to next page.
-          format: uri
-          type: string
+        error:
+          $ref: '#/components/schemas/Error'
     InnerError:
       description: Inner error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains required properties error code, message and optional properties target, inner error(this can be nested).
       type: object
@@ -542,101 +601,13 @@ components:
           type: string
         innererror:
           $ref: '#/components/schemas/InnerError'
-    ErrorCode:
-      description: Top-level error code
-      enum:
-      - BadRequest
-      - BadArgument
-      - Unauthorized
-      - Forbidden
-      - NotFound
-      - UnsupportedMediaType
-      - TooManyRequests
-      - InternalServerError
-      - ServiceUnavailable
+    ConsentStatus:
       type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
-    ErrorResponse:
-      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-    Error:
-      description: Top-level error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains an top-level error with error code, message, details, target and an inner error with more descriptive details.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          $ref: '#/components/schemas/ErrorCode'
-        target:
-          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
-          type: string
-        message:
-          description: Top-level error message.
-          type: string
-        details:
-          description: Additional supportive details regarding the error and/or expected policies.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    Status:
-      description: Status of a resource.
+      description: Status of the consent
       enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      - Disabling
-      - Disabled
-      type: string
-      x-ms-enum:
-        name: Status
-        modelAsString: true
-    Consent_2:
-      type: object
-      properties:
-        operatorId:
-          type: string
-          description: Unique GUID that represents the operator record
-        status:
-          $ref: '#/components/schemas/ConsentStatus'
-        consentedBy:
-          $ref: '#/components/schemas/Contact'
-          description: Contact information of user that granted the consent to operator
-        consentedOn:
-          type: string
-          description: Date/Time when the consent was provided
-          format: date-time
-        lastModifiedBy:
-          $ref: '#/components/schemas/Contact'
-          description: Contact information of user that last modified the consent
-        lastModifiedOn:
-          type: string
-          description: Date/Time when the consent was last updated
-          format: date-time
-        consentedCountries:
-          type: array
-          description: List of 2 character codes of available countries in ISO 3166-1 format
-          items:
-            type: string
-        contacts:
-          type: array
-          items:
-            $ref: '#/components/schemas/Contact'
-          description: List of contact information
-        companyName:
-          type: string
-          description: User company name
-      additionalProperties: false
+      - Active
+      - Suspended
+      - Removed
     Contact:
       type: object
       properties:
@@ -683,13 +654,42 @@ components:
         companyName:
           type: string
       additionalProperties: false
-    ConsentStatus:
-      type: string
-      description: Status of the consent
-      enum:
-      - Active
-      - Suspended
-      - Removed
+    Consent_2:
+      type: object
+      properties:
+        operatorId:
+          type: string
+          description: Unique GUID that represents the operator record
+        status:
+          $ref: '#/components/schemas/ConsentStatus'
+        consentedBy:
+          $ref: '#/components/schemas/Contact'
+          description: Contact information of user that granted the consent to operator
+        consentedOn:
+          type: string
+          description: Date/Time when the consent was provided
+          format: date-time
+        lastModifiedBy:
+          $ref: '#/components/schemas/Contact'
+          description: Contact information of user that last modified the consent
+        lastModifiedOn:
+          type: string
+          description: Date/Time when the consent was last updated
+          format: date-time
+        consentedCountries:
+          type: array
+          description: List of 2 character codes of available countries in ISO 3166-1 format
+          items:
+            type: string
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+          description: List of contact information
+        companyName:
+          type: string
+          description: User company name
+      additionalProperties: false
   securitySchemes:
     subscription_key:
       type: apiKey

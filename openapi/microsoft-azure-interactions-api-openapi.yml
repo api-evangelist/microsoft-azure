@@ -189,78 +189,99 @@ paths:
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ProfileEnumValidValuesFormat:
+    ProvisioningState:
+      type: string
+      enum:
+      - Provisioning
+      - Succeeded
+      - Expiring
+      - Deleting
+      - HumanIntervention
+      - Failed
+      x-ms-enum:
+        name: ProvisioningStates
+        modelAsString: true
+      description: Provisioning state.
+    InteractionTypeDefinition:
+      description: The Interaction Type Definition
+      allOf:
+      - $ref: '#/components/schemas/EntityTypeDefinition'
       properties:
-        value:
-          type: integer
-          description: The integer value of the enum member.
-        localizedValueNames:
-          type: object
-          additionalProperties:
-            type: string
-          description: Localized names of the enum member.
-      description: Valid enum values in case of an enum property.
-    ParticipantPropertyReference:
-      required:
-      - sourcePropertyName
-      - targetPropertyName
-      properties:
-        sourcePropertyName:
-          type: string
-          description: The source property that maps to the target property.
-        targetPropertyName:
-          type: string
-          description: The target property that maps to the source property.
-      description: The participant property reference.
-    EntityTypeDefinition:
-      properties:
-        apiEntitySetName:
-          type: string
-          description: The api entity set name. This becomes the odata entity set name for the entity Type being referred in this object.
-        entityType:
-          type: string
-          enum:
-          - None
-          - Profile
-          - Interaction
-          - Relationship
-          x-ms-enum:
-            name: EntityTypes
-            modelAsString: false
-          description: Type of entity.
-        fields:
+        idPropertyNames:
           type: array
           items:
-            $ref: '#/components/schemas/PropertyDefinition'
-          description: The properties of the Profile.
-        instancesCount:
+            type: string
+          description: The id property names. Properties which uniquely identify an interaction instance.
+        participantProfiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+          description: Profiles that participated in the interaction.
+        primaryParticipantProfilePropertyName:
+          type: string
+          description: The primary participant property name for an interaction ,This is used to logically represent the agent of the interaction, Specify the participant name here from ParticipantName.
+        dataSourcePrecedenceRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSourcePrecedence'
+          readOnly: true
+          description: This is specific to interactions modeled as activities. Data sources are used to determine where data is stored and also in precedence rules.
+        defaultDataSource:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/DataSource'
+          description: Default data source is specifically used in cases where data source is not specified in an instance.
+        isActivity:
+          type: boolean
+          description: An interaction can be tagged as an activity only during create. This enables the interaction to be editable and can enable merging of properties from multiple data sources based on precedence, which is defined at a link level.
+    SuggestRelationshipLinksResponse:
+      properties:
+        interactionName:
+          type: string
+          readOnly: true
+          description: The interaction name.
+        suggestedRelationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/RelationshipsLookup'
+          readOnly: true
+          description: Suggested relationships for the type.
+      description: The response of suggest relationship links operation.
+    DataSourcePrecedence:
+      properties:
+        dataSource:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/DataSource'
+        precedence:
           type: integer
-          description: The instance count.
-        lastChangedUtc:
+          description: the precedence value.
+      description: The data source precedence is a way to know the precedence of each data source.
+    RelationshipsLookup:
+      properties:
+        profileName:
           type: string
           readOnly: true
-          format: date-time
-          description: The last changed time for the type definition.
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
+          description: The relationship profile.
+        profilePropertyReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantProfilePropertyReference'
           readOnly: true
-          description: Provisioning state.
-        schemaItemTypeLink:
-          type: string
-          description: The schema org link. This helps ACI identify and suggest semantic models.
-        tenantId:
+          description: The property references for the profile type.
+        relatedProfileName:
           type: string
           readOnly: true
-          description: The hub name.
-        timestampFieldName:
+          description: The related profile.
+        relatedProfilePropertyReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantProfilePropertyReference'
+          readOnly: true
+          description: The property references for the related profile type.
+        existingRelationshipName:
           type: string
-          description: The timestamp property name. Represents the time when the interaction or profile update happened.
-        typeName:
-          type: string
-          description: The name of the entity.
-      allOf:
-      - $ref: '#/components/schemas/MetadataDefinitionBase'
-      description: Describes an entity.
+          readOnly: true
+          description: The name of existing Relationship.
+      description: The definition of suggested relationship for the type.
     PropertyDefinition:
       required:
       - fieldName
@@ -320,6 +341,103 @@ components:
           readOnly: true
           description: This is specific to interactions modeled as activities. Data sources are used to determine where data is stored and also in precedence rules.
       description: Property definition.
+    DataSource:
+      properties:
+        name:
+          type: string
+          readOnly: true
+          description: The data source name
+        dataSourceType:
+          type: string
+          enum:
+          - Connector
+          - LinkInteraction
+          - SystemDefault
+          x-ms-enum:
+            name: DataSourceType
+            modelAsString: true
+          readOnly: true
+          description: The data source type.
+        status:
+          type: string
+          enum:
+          - None
+          - Active
+          - Deleted
+          x-ms-enum:
+            name: Status
+            modelAsString: true
+          readOnly: true
+          description: The data source status.
+        id:
+          type: integer
+          readOnly: true
+          description: The data source ID.
+        dataSourceReferenceId:
+          type: string
+          readOnly: true
+          description: The data source reference id.
+      description: Data Source is a way for us to know the source of instances. A single type can have data coming in from multiple places. In activities we use this to determine precedence rules.
+    MetadataDefinitionBase:
+      properties:
+        attributes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: The attributes for the Type.
+        description:
+          type: object
+          additionalProperties:
+            type: string
+          description: Localized descriptions for the property.
+        displayName:
+          type: object
+          additionalProperties:
+            type: string
+          description: Localized display names for the property.
+        localizedAttributes:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: string
+          description: Any custom localized attributes for the Type.
+        smallImage:
+          type: string
+          description: Small Image associated with the Property or EntityType.
+        mediumImage:
+          type: string
+          description: Medium Image associated with the Property or EntityType.
+        largeImage:
+          type: string
+          description: Large Image associated with the Property or EntityType.
+      description: The Metadata definition base.
+    ParticipantPropertyReference:
+      required:
+      - sourcePropertyName
+      - targetPropertyName
+      properties:
+        sourcePropertyName:
+          type: string
+          description: The source property that maps to the target property.
+        targetPropertyName:
+          type: string
+          description: The target property that maps to the source property.
+      description: The participant property reference.
+    ParticipantProfilePropertyReference:
+      required:
+      - interactionPropertyName
+      - profilePropertyName
+      properties:
+        interactionPropertyName:
+          type: string
+          description: The source interaction property that maps to the target profile property.
+        profilePropertyName:
+          type: string
+          description: The target profile property that maps to the source interaction property.
+      description: The participant profile property reference.
     InteractionListResult:
       properties:
         value:
@@ -347,6 +465,55 @@ components:
           description: Resource type.
       x-ms-azure-resource: true
       description: Common properties of proxy resource.
+    EntityTypeDefinition:
+      properties:
+        apiEntitySetName:
+          type: string
+          description: The api entity set name. This becomes the odata entity set name for the entity Type being referred in this object.
+        entityType:
+          type: string
+          enum:
+          - None
+          - Profile
+          - Interaction
+          - Relationship
+          x-ms-enum:
+            name: EntityTypes
+            modelAsString: false
+          description: Type of entity.
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/PropertyDefinition'
+          description: The properties of the Profile.
+        instancesCount:
+          type: integer
+          description: The instance count.
+        lastChangedUtc:
+          type: string
+          readOnly: true
+          format: date-time
+          description: The last changed time for the type definition.
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+          readOnly: true
+          description: Provisioning state.
+        schemaItemTypeLink:
+          type: string
+          description: The schema org link. This helps ACI identify and suggest semantic models.
+        tenantId:
+          type: string
+          readOnly: true
+          description: The hub name.
+        timestampFieldName:
+          type: string
+          description: The timestamp property name. Represents the time when the interaction or profile update happened.
+        typeName:
+          type: string
+          description: The name of the entity.
+      allOf:
+      - $ref: '#/components/schemas/MetadataDefinitionBase'
+      description: Describes an entity.
     InteractionResourceFormat:
       description: The interaction resource format.
       properties:
@@ -386,184 +553,17 @@ components:
           type: string
           description: The role that the participant is playing in the interaction.
       description: Describes a profile type participating in an interaction.
-    DataSourcePrecedence:
+    ProfileEnumValidValuesFormat:
       properties:
-        dataSource:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/DataSource'
-        precedence:
+        value:
           type: integer
-          description: the precedence value.
-      description: The data source precedence is a way to know the precedence of each data source.
-    InteractionTypeDefinition:
-      description: The Interaction Type Definition
-      allOf:
-      - $ref: '#/components/schemas/EntityTypeDefinition'
-      properties:
-        idPropertyNames:
-          type: array
-          items:
-            type: string
-          description: The id property names. Properties which uniquely identify an interaction instance.
-        participantProfiles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Participant'
-          description: Profiles that participated in the interaction.
-        primaryParticipantProfilePropertyName:
-          type: string
-          description: The primary participant property name for an interaction ,This is used to logically represent the agent of the interaction, Specify the participant name here from ParticipantName.
-        dataSourcePrecedenceRules:
-          type: array
-          items:
-            $ref: '#/components/schemas/DataSourcePrecedence'
-          readOnly: true
-          description: This is specific to interactions modeled as activities. Data sources are used to determine where data is stored and also in precedence rules.
-        defaultDataSource:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/DataSource'
-          description: Default data source is specifically used in cases where data source is not specified in an instance.
-        isActivity:
-          type: boolean
-          description: An interaction can be tagged as an activity only during create. This enables the interaction to be editable and can enable merging of properties from multiple data sources based on precedence, which is defined at a link level.
-    MetadataDefinitionBase:
-      properties:
-        attributes:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          description: The attributes for the Type.
-        description:
+          description: The integer value of the enum member.
+        localizedValueNames:
           type: object
           additionalProperties:
             type: string
-          description: Localized descriptions for the property.
-        displayName:
-          type: object
-          additionalProperties:
-            type: string
-          description: Localized display names for the property.
-        localizedAttributes:
-          type: object
-          additionalProperties:
-            type: object
-            additionalProperties:
-              type: string
-          description: Any custom localized attributes for the Type.
-        smallImage:
-          type: string
-          description: Small Image associated with the Property or EntityType.
-        mediumImage:
-          type: string
-          description: Medium Image associated with the Property or EntityType.
-        largeImage:
-          type: string
-          description: Large Image associated with the Property or EntityType.
-      description: The Metadata definition base.
-    RelationshipsLookup:
-      properties:
-        profileName:
-          type: string
-          readOnly: true
-          description: The relationship profile.
-        profilePropertyReferences:
-          type: array
-          items:
-            $ref: '#/components/schemas/ParticipantProfilePropertyReference'
-          readOnly: true
-          description: The property references for the profile type.
-        relatedProfileName:
-          type: string
-          readOnly: true
-          description: The related profile.
-        relatedProfilePropertyReferences:
-          type: array
-          items:
-            $ref: '#/components/schemas/ParticipantProfilePropertyReference'
-          readOnly: true
-          description: The property references for the related profile type.
-        existingRelationshipName:
-          type: string
-          readOnly: true
-          description: The name of existing Relationship.
-      description: The definition of suggested relationship for the type.
-    SuggestRelationshipLinksResponse:
-      properties:
-        interactionName:
-          type: string
-          readOnly: true
-          description: The interaction name.
-        suggestedRelationships:
-          type: array
-          items:
-            $ref: '#/components/schemas/RelationshipsLookup'
-          readOnly: true
-          description: Suggested relationships for the type.
-      description: The response of suggest relationship links operation.
-    ParticipantProfilePropertyReference:
-      required:
-      - interactionPropertyName
-      - profilePropertyName
-      properties:
-        interactionPropertyName:
-          type: string
-          description: The source interaction property that maps to the target profile property.
-        profilePropertyName:
-          type: string
-          description: The target profile property that maps to the source interaction property.
-      description: The participant profile property reference.
-    DataSource:
-      properties:
-        name:
-          type: string
-          readOnly: true
-          description: The data source name
-        dataSourceType:
-          type: string
-          enum:
-          - Connector
-          - LinkInteraction
-          - SystemDefault
-          x-ms-enum:
-            name: DataSourceType
-            modelAsString: true
-          readOnly: true
-          description: The data source type.
-        status:
-          type: string
-          enum:
-          - None
-          - Active
-          - Deleted
-          x-ms-enum:
-            name: Status
-            modelAsString: true
-          readOnly: true
-          description: The data source status.
-        id:
-          type: integer
-          readOnly: true
-          description: The data source ID.
-        dataSourceReferenceId:
-          type: string
-          readOnly: true
-          description: The data source reference id.
-      description: Data Source is a way for us to know the source of instances. A single type can have data coming in from multiple places. In activities we use this to determine precedence rules.
-    ProvisioningState:
-      type: string
-      enum:
-      - Provisioning
-      - Succeeded
-      - Expiring
-      - Deleting
-      - HumanIntervention
-      - Failed
-      x-ms-enum:
-        name: ProvisioningStates
-        modelAsString: true
-      description: Provisioning state.
+          description: Localized names of the enum member.
+      description: Valid enum values in case of an enum property.
   parameters:
     ApiVersionParameter:
       name: api-version

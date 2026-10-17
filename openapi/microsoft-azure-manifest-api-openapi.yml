@@ -185,14 +185,42 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
-    JWK:
-      description: A JSON web signature
+    History:
+      description: A list of unstructured historical data for v1 compatibility
       properties:
-        jwk:
-          $ref: '#/components/schemas/JWKHeader'
-        alg:
+        v1Compatibility:
           type: string
-          description: The algorithm used to sign or encrypt the JWT
+          description: The raw v1 compatibility information
+      example:
+        v1Compatibility: v1 compatibility info
+    V2Descriptor:
+      description: Docker V2 image layer descriptor including config and layers
+      properties:
+        mediaType:
+          type: string
+          description: Layer media type
+        size:
+          type: integer
+          description: Layer size
+        digest:
+          type: string
+          description: Layer digest
+      example:
+        mediaType: application/vnd.docker.image.rootfs.diff.tar.gzip
+        size: 2107098
+        digest: sha256:5d20c808ce198565ff70b3ed23a991dd49afac45dece63474b27ce6ed036adc6
+    AcrErrorInfo:
+      description: Error information
+      properties:
+        code:
+          description: Error code
+          type: string
+        message:
+          type: string
+          description: Error message
+        detail:
+          type: object
+          description: Error details
     JWKHeader:
       description: JSON web key parameter
       properties:
@@ -286,50 +314,14 @@ components:
           alg: ES256
         signature: p73LfotMGD8nNXz2g9YX2XtSllb4GI5-b3vjqP5N0nkv8QXg-r5z_omGiVbOZE2BYG1X_4TIN23l1KSEqsXxOg
         protected: eyJmb3JtYXRMZW5ndGgiOjI5ODYsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAxOC0wOS0yMFQyMzo0MTo1MloifQ
-    V2Descriptor:
-      description: Docker V2 image layer descriptor including config and layers
+    JWK:
+      description: A JSON web signature
       properties:
-        mediaType:
+        jwk:
+          $ref: '#/components/schemas/JWKHeader'
+        alg:
           type: string
-          description: Layer media type
-        size:
-          type: integer
-          description: Layer size
-        digest:
-          type: string
-          description: Layer digest
-      example:
-        mediaType: application/vnd.docker.image.rootfs.diff.tar.gzip
-        size: 2107098
-        digest: sha256:5d20c808ce198565ff70b3ed23a991dd49afac45dece63474b27ce6ed036adc6
-    AcrErrorInfo:
-      description: Error information
-      properties:
-        code:
-          description: Error code
-          type: string
-        message:
-          type: string
-          description: Error message
-        detail:
-          type: object
-          description: Error details
-    History:
-      description: A list of unstructured historical data for v1 compatibility
-      properties:
-        v1Compatibility:
-          type: string
-          description: The raw v1 compatibility information
-      example:
-        v1Compatibility: v1 compatibility info
-    AcrErrors:
-      description: Acr error response describing why the operation failed
-      properties:
-        errors:
-          type: array
-          description: Array of detailed error
-          items:
-            $ref: '#/components/schemas/AcrErrorInfo'
+          description: The algorithm used to sign or encrypt the JWT
     FsLayer:
       description: Image layer information
       properties:
@@ -338,6 +330,142 @@ components:
           description: SHA of an image layer
       example:
         blobSum: sha256:1f7d468f830cb0ed4beb8edc9438f18096e8c682e56a35242f60e6c61b718b30
+    AcrErrors:
+      description: Acr error response describing why the operation failed
+      properties:
+        errors:
+          type: array
+          description: Array of detailed error
+          items:
+            $ref: '#/components/schemas/AcrErrorInfo'
+    ResourceProviderManifest:
+      type: object
+      properties:
+        providerAuthentication:
+          allOf:
+          - $ref: '#/components/schemas/ResourceProviderAuthentication'
+        providerAuthorizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceProviderAuthorization'
+        namespace:
+          type: string
+        providerVersion:
+          type: string
+        providerType:
+          enum:
+          - NotSpecified
+          - Internal
+          - External
+          - Hidden
+          - RegistrationFree
+          - LegacyRegistrationRequired
+          - TenantOnly
+          - AuthorizationFree
+          type: string
+          x-ms-enum:
+            name: ResourceProviderType
+            modelAsString: true
+        requiredFeatures:
+          type: array
+          items:
+            type: string
+        featuresRule:
+          allOf:
+          - $ref: '#/components/schemas/FeaturesRule'
+        requestHeaderOptions:
+          allOf:
+          - $ref: '#/components/schemas/RequestHeaderOptions'
+        resourceTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceType'
+        management:
+          allOf:
+          - $ref: '#/components/schemas/ResourceProviderManagement'
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceProviderCapabilities'
+        metadata: {}
+        globalNotificationEndpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceProviderEndpoint'
+        reRegisterSubscriptionMetadata:
+          allOf:
+          - $ref: '#/components/schemas/ReRegisterSubscriptionMetadata'
+    ResourceProviderCapabilities:
+      required:
+      - effect
+      - quotaId
+      type: object
+      properties:
+        quotaId:
+          type: string
+        effect:
+          enum:
+          - NotSpecified
+          - Allow
+          - Disallow
+          type: string
+          x-ms-enum:
+            name: ResourceProviderCapabilitiesEffect
+            modelAsString: true
+        requiredFeatures:
+          type: array
+          items:
+            type: string
+    LinkedOperationRule:
+      required:
+      - linkedAction
+      - linkedOperation
+      type: object
+      properties:
+        linkedOperation:
+          enum:
+          - None
+          - CrossResourceGroupResourceMove
+          - CrossSubscriptionResourceMove
+          type: string
+          x-ms-enum:
+            name: LinkedOperation
+            modelAsString: true
+        linkedAction:
+          enum:
+          - NotSpecified
+          - Blocked
+          - Validate
+          - Enabled
+          type: string
+          x-ms-enum:
+            name: LinkedAction
+            modelAsString: true
+    CheckinManifestInfo:
+      required:
+      - isCheckedIn
+      - statusMessage
+      type: object
+      properties:
+        isCheckedIn:
+          type: boolean
+        statusMessage:
+          type: string
+        pullRequest:
+          type: string
+        commitId:
+          type: string
+    LoggingHiddenPropertyPath:
+      type: object
+      properties:
+        hiddenPathsOnRequest:
+          type: array
+          items:
+            type: string
+        hiddenPathsOnResponse:
+          type: array
+          items:
+            type: string
     ServiceTreeInfo:
       type: object
       properties:
@@ -360,28 +488,20 @@ components:
           x-ms-enum:
             name: Readiness
             modelAsString: true
-    LinkedAccessCheck:
+    RequestHeaderOptions:
       type: object
       properties:
-        actionName:
+        optInHeaders:
+          enum:
+          - NotSpecified
+          - SignedUserToken
+          - ClientGroupMembership
+          - SignedAuxiliaryTokens
+          - UnboundedClientGroupMembership
           type: string
-        linkedProperty:
-          type: string
-        linkedAction:
-          type: string
-        linkedActionVerb:
-          type: string
-        linkedType:
-          type: string
-    ResourceProviderAuthorization:
-      type: object
-      properties:
-        applicationId:
-          type: string
-        roleDefinitionId:
-          type: string
-        managedByRoleDefinitionId:
-          type: string
+          x-ms-enum:
+            name: OptInHeaderType
+            modelAsString: true
     ResourceProviderEndpoint:
       type: object
       properties:
@@ -417,37 +537,79 @@ components:
           x-ms-enum:
             name: EndpointType
             modelAsString: true
-    ResourceProviderCapabilities:
+    ResourceProviderAuthentication:
       required:
-      - effect
-      - quotaId
+      - allowedAudiences
       type: object
       properties:
-        quotaId:
-          type: string
-        effect:
-          enum:
-          - NotSpecified
-          - Allow
-          - Disallow
-          type: string
-          x-ms-enum:
-            name: ResourceProviderCapabilitiesEffect
-            modelAsString: true
-        requiredFeatures:
+        allowedAudiences:
           type: array
           items:
             type: string
-    ReRegisterSubscriptionMetadata:
-      required:
-      - enabled
+    IdentityManagement:
       type: object
       properties:
-        enabled:
-          type: boolean
-        concurrencyLimit:
-          format: int32
-          type: integer
+        type:
+          enum:
+          - NotSpecified
+          - SystemAssigned
+          - UserAssigned
+          - Actor
+          - DelegatedResourceIdentity
+          type: string
+          x-ms-enum:
+            name: IdentityManagementTypes
+            modelAsString: true
+    ResourceProviderManagement:
+      type: object
+      properties:
+        schemaOwners:
+          type: array
+          items:
+            type: string
+        manifestOwners:
+          type: array
+          items:
+            type: string
+        incidentRoutingService:
+          type: string
+        incidentRoutingTeam:
+          type: string
+        incidentContactEmail:
+          type: string
+        serviceTreeInfos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceTreeInfo'
+        resourceAccessPolicy:
+          enum:
+          - NotSpecified
+          - AcisReadAllowed
+          - AcisActionAllowed
+          type: string
+        resourceAccessRoles:
+          type: array
+          items: {}
+    ErrorResponse:
+      description: Standard error response.
+      type: object
+      properties:
+        error:
+          description: Standard error object.
+          allOf:
+          - $ref: '#/components/schemas/Error'
+    CheckinManifestParams:
+      type: object
+      properties:
+        environment:
+          type: string
+          description: The environment supplied to the checkin manifest operation.
+        baselineArmManifestLocation:
+          type: string
+          description: The baseline ARM manifest location supplied to the checkin manifest operation.
+      required:
+      - baselineArmManifestLocation
+      - environment
     TemplateDeploymentPolicy:
       required:
       - capabilities
@@ -473,52 +635,76 @@ components:
           x-ms-enum:
             name: TemplateDeploymentPreflightOptions
             modelAsString: true
-    LinkedOperationRule:
+    Error:
+      description: Standard error object.
+      type: object
+      properties:
+        code:
+          description: Server-defined set of error codes.
+          type: string
+          readOnly: true
+        message:
+          description: Human-readable representation of the error.
+          type: string
+          readOnly: true
+        target:
+          description: Target of the error.
+          type: string
+          readOnly: true
+        details:
+          description: Array of details about specific errors that led to this reported error.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+          readOnly: true
+        innerError:
+          description: Object containing more specific information than  the current object about the error.
+          allOf:
+          - $ref: '#/components/schemas/InnerError'
+          readOnly: true
+    ThrottlingRule:
       required:
-      - linkedAction
-      - linkedOperation
+      - action
+      - metrics
       type: object
       properties:
-        linkedOperation:
-          enum:
-          - None
-          - CrossResourceGroupResourceMove
-          - CrossSubscriptionResourceMove
+        action:
           type: string
-          x-ms-enum:
-            name: LinkedOperation
-            modelAsString: true
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThrottlingMetric'
+        requiredFeatures:
+          type: array
+          items:
+            type: string
+    LinkedAccessCheck:
+      type: object
+      properties:
+        actionName:
+          type: string
+        linkedProperty:
+          type: string
         linkedAction:
-          enum:
-          - NotSpecified
-          - Blocked
-          - Validate
-          - Enabled
           type: string
-          x-ms-enum:
-            name: LinkedAction
-            modelAsString: true
-    RequestHeaderOptions:
+        linkedActionVerb:
+          type: string
+        linkedType:
+          type: string
+    InnerError:
+      description: Inner error containing list of errors.
       type: object
       properties:
-        optInHeaders:
-          enum:
-          - NotSpecified
-          - SignedUserToken
-          - ClientGroupMembership
-          - SignedAuxiliaryTokens
-          - UnboundedClientGroupMembership
+        code:
+          description: Specific error code than was provided by the containing error.
           type: string
-          x-ms-enum:
-            name: OptInHeaderType
-            modelAsString: true
-    ExtendedLocationOptions:
-      type: object
-      properties:
-        type:
-          type: string
-        supportedPolicy:
-          type: string
+          readOnly: true
+        innerError:
+          description: Object containing more specific information than the current object about the error.
+          type: object
+          readOnly: true
+      additionalProperties:
+        type: object
     ThrottlingMetric:
       required:
       - limit
@@ -540,33 +726,39 @@ components:
         interval:
           format: duration
           type: string
-    ErrorResponse:
-      description: Standard error response.
+    ReRegisterSubscriptionMetadata:
+      required:
+      - enabled
       type: object
       properties:
-        error:
-          description: Standard error object.
-          allOf:
-          - $ref: '#/components/schemas/Error'
-    SubscriptionStateRule:
+        enabled:
+          type: boolean
+        concurrencyLimit:
+          format: int32
+          type: integer
+    ResourceProviderAuthorization:
       type: object
       properties:
-        state:
-          enum:
-          - NotDefined
-          - Enabled
-          - Warned
-          - PastDue
-          - Disabled
-          - Deleted
+        applicationId:
           type: string
-          x-ms-enum:
-            name: SubscriptionState
-            modelAsString: true
-        allowedActions:
-          type: array
-          items:
-            type: string
+        roleDefinitionId:
+          type: string
+        managedByRoleDefinitionId:
+          type: string
+    AuthorizationActionMapping:
+      type: object
+      properties:
+        original:
+          type: string
+        desired:
+          type: string
+    ExtendedLocationOptions:
+      type: object
+      properties:
+        type:
+          type: string
+        supportedPolicy:
+          type: string
     ResourceType:
       type: object
       properties:
@@ -677,64 +869,38 @@ components:
           x-ms-enum:
             name: ManifestResourceDeletionPolicy
             modelAsString: true
-    ThrottlingRule:
-      required:
-      - action
-      - metrics
+    SubscriptionStateRule:
       type: object
       properties:
-        action:
+        state:
+          enum:
+          - NotDefined
+          - Enabled
+          - Warned
+          - PastDue
+          - Disabled
+          - Deleted
           type: string
-        metrics:
-          type: array
-          items:
-            $ref: '#/components/schemas/ThrottlingMetric'
-        requiredFeatures:
-          type: array
-          items:
-            type: string
-    CheckinManifestParams:
-      type: object
-      properties:
-        environment:
-          type: string
-          description: The environment supplied to the checkin manifest operation.
-        baselineArmManifestLocation:
-          type: string
-          description: The baseline ARM manifest location supplied to the checkin manifest operation.
-      required:
-      - baselineArmManifestLocation
-      - environment
-    InnerError:
-      description: Inner error containing list of errors.
-      type: object
-      properties:
-        code:
-          description: Specific error code than was provided by the containing error.
-          type: string
-          readOnly: true
-        innerError:
-          description: Object containing more specific information than the current object about the error.
-          type: object
-          readOnly: true
-      additionalProperties:
-        type: object
-    AuthorizationActionMapping:
-      type: object
-      properties:
-        original:
-          type: string
-        desired:
-          type: string
-    ResourceProviderAuthentication:
-      required:
-      - allowedAudiences
-      type: object
-      properties:
-        allowedAudiences:
+          x-ms-enum:
+            name: SubscriptionState
+            modelAsString: true
+        allowedActions:
           type: array
           items:
             type: string
+    FeaturesRule:
+      required:
+      - requiredFeaturesPolicy
+      type: object
+      properties:
+        requiredFeaturesPolicy:
+          enum:
+          - Any
+          - All
+          type: string
+          x-ms-enum:
+            name: FeaturesPolicy
+            modelAsString: true
     LoggingRule:
       required:
       - action
@@ -764,173 +930,15 @@ components:
         hiddenPropertyPaths:
           allOf:
           - $ref: '#/components/schemas/LoggingHiddenPropertyPath'
-    CheckinManifestInfo:
-      required:
-      - isCheckedIn
-      - statusMessage
-      type: object
-      properties:
-        isCheckedIn:
-          type: boolean
-        statusMessage:
-          type: string
-        pullRequest:
-          type: string
-        commitId:
-          type: string
-    IdentityManagement:
-      type: object
-      properties:
-        type:
-          enum:
-          - NotSpecified
-          - SystemAssigned
-          - UserAssigned
-          - Actor
-          - DelegatedResourceIdentity
-          type: string
-          x-ms-enum:
-            name: IdentityManagementTypes
-            modelAsString: true
-    FeaturesRule:
-      required:
-      - requiredFeaturesPolicy
-      type: object
-      properties:
-        requiredFeaturesPolicy:
-          enum:
-          - Any
-          - All
-          type: string
-          x-ms-enum:
-            name: FeaturesPolicy
-            modelAsString: true
-    ResourceProviderManifest:
-      type: object
-      properties:
-        providerAuthentication:
-          allOf:
-          - $ref: '#/components/schemas/ResourceProviderAuthentication'
-        providerAuthorizations:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceProviderAuthorization'
-        namespace:
-          type: string
-        providerVersion:
-          type: string
-        providerType:
-          enum:
-          - NotSpecified
-          - Internal
-          - External
-          - Hidden
-          - RegistrationFree
-          - LegacyRegistrationRequired
-          - TenantOnly
-          - AuthorizationFree
-          type: string
-          x-ms-enum:
-            name: ResourceProviderType
-            modelAsString: true
-        requiredFeatures:
-          type: array
-          items:
-            type: string
-        featuresRule:
-          allOf:
-          - $ref: '#/components/schemas/FeaturesRule'
-        requestHeaderOptions:
-          allOf:
-          - $ref: '#/components/schemas/RequestHeaderOptions'
-        resourceTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceType'
-        management:
-          allOf:
-          - $ref: '#/components/schemas/ResourceProviderManagement'
-        capabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceProviderCapabilities'
-        metadata: {}
-        globalNotificationEndpoints:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceProviderEndpoint'
-        reRegisterSubscriptionMetadata:
-          allOf:
-          - $ref: '#/components/schemas/ReRegisterSubscriptionMetadata'
-    ResourceProviderManagement:
-      type: object
-      properties:
-        schemaOwners:
-          type: array
-          items:
-            type: string
-        manifestOwners:
-          type: array
-          items:
-            type: string
-        incidentRoutingService:
-          type: string
-        incidentRoutingTeam:
-          type: string
-        incidentContactEmail:
-          type: string
-        serviceTreeInfos:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceTreeInfo'
-        resourceAccessPolicy:
-          enum:
-          - NotSpecified
-          - AcisReadAllowed
-          - AcisActionAllowed
-          type: string
-        resourceAccessRoles:
-          type: array
-          items: {}
-    Error:
-      description: Standard error object.
-      type: object
-      properties:
-        code:
-          description: Server-defined set of error codes.
-          type: string
-          readOnly: true
-        message:
-          description: Human-readable representation of the error.
-          type: string
-          readOnly: true
-        target:
-          description: Target of the error.
-          type: string
-          readOnly: true
-        details:
-          description: Array of details about specific errors that led to this reported error.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-          readOnly: true
-        innerError:
-          description: Object containing more specific information than  the current object about the error.
-          allOf:
-          - $ref: '#/components/schemas/InnerError'
-          readOnly: true
-    LoggingHiddenPropertyPath:
-      type: object
-      properties:
-        hiddenPathsOnRequest:
-          type: array
-          items:
-            type: string
-        hiddenPathsOnResponse:
-          type: array
-          items:
-            type: string
   parameters:
+    ImageReference:
+      name: reference
+      in: path
+      description: A tag or a digest, pointing to a specific image
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     ManifestBody:
       description: Manifest body, can take v1 or v2 values depending on accept header
       name: payload
@@ -943,14 +951,6 @@ components:
       name: name
       in: path
       description: Name of the image (including the namespace)
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ImageReference:
-      name: reference
-      in: path
-      description: A tag or a digest, pointing to a specific image
       required: true
       x-ms-parameter-location: method
       schema:

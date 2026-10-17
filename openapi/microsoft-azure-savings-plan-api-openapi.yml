@@ -223,71 +223,10 @@ paths:
                 $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ErrorResponse
       summary: Microsoft Azure Post Providers Microsoft Billingbenefits Validate
 components:
-  parameters:
-    SavingsPlanUpdateRequestParameter:
-      name: body
-      in: body
-      x-ms-parameter-location: method
-      required: true
-      description: Request body for patching a savings plan order alias
-      schema:
-        $ref: '#/components/schemas/SavingsPlanUpdateRequest'
-    SavingsPlanOrderIdParameter:
-      name: savingsPlanOrderId
-      x-ms-parameter-location: method
-      in: path
-      required: true
-      description: Order ID of the savings plan
-      schema:
-        type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      x-ms-parameter-location: client
-      required: true
-      description: The api-version to be used by the service
-      schema:
-        type: string
-    SavingsPlanUpdateValidateRequestParameter:
-      name: body
-      in: body
-      x-ms-parameter-location: method
-      required: true
-      description: Request body for validating a savings plan patch request
-      schema:
-        $ref: '#/components/schemas/SavingsPlanUpdateValidateRequest'
-    SavingsPlanPurchaseValidateRequestParameter:
-      name: body
-      in: body
-      x-ms-parameter-location: method
-      required: true
-      description: Request body for validating the purchase of a savings plan
-      schema:
-        $ref: '#/components/schemas/SavingsPlanPurchaseValidateRequest'
-    ExpandParameter:
-      name: $expand
-      description: May be used to expand the detail information of some properties.
-      in: query
-      x-ms-parameter-location: client
-      required: false
-      schema:
-        type: string
-    SavingsPlanIdParameter:
-      name: savingsPlanId
-      x-ms-parameter-location: method
-      in: path
-      required: true
-      description: ID of the savings plan
-      schema:
-        type: string
   schemas:
-    BillingProfileId:
+    RenewDestination:
       type: string
-      readOnly: true
-      description: Fully-qualified identifier of the billing profile where the savings plan is applied. Present only for Field-led or Customer-led customers.
-    TenantId:
-      type: string
-      description: Tenant ID where the benefit is applied.
+      description: SavingsPlan Id of the SavingsPlan which is purchased because of renew.
     PurchaseRequest:
       type: object
       properties:
@@ -296,10 +235,59 @@ components:
         properties:
           x-ms-client-flatten: true
           $ref: '#/components/schemas/PurchaseRequestProperties'
-    CustomerId:
+    AppliedScopeType:
+      type: string
+      description: Type of the Applied Scope.
+      enum:
+      - Single
+      - Shared
+      - ManagementGroup
+      x-ms-enum:
+        name: AppliedScopeType
+        modelAsString: true
+    BillingProfileId:
       type: string
       readOnly: true
-      description: Fully-qualified identifier of the customer where the savings plan is applied. Present only for Partner-led customers.
+      description: Fully-qualified identifier of the billing profile where the savings plan is applied. Present only for Field-led or Customer-led customers.
+    EffectiveDateTime:
+      type: string
+      format: date-time
+      description: DateTime of the savings plan starts providing benefit from.
+      readOnly: true
+    SavingsPlanModelList:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavingsPlanModel'
+          x-ms-identifiers: []
+        nextLink:
+          type: string
+          description: Url to get the next page.
+    SubscriptionId:
+      type: string
+      description: Fully-qualified identifier of the subscription.
+    UtilizationAggregates:
+      description: The aggregate values of savings plan utilization
+      type: object
+      properties:
+        grain:
+          description: The grain of the aggregate
+          readOnly: true
+          type: number
+        grainUnit:
+          description: The grain unit of the aggregate
+          readOnly: true
+          type: string
+        value:
+          description: The aggregate value
+          readOnly: true
+          type: number
+        valueUnit:
+          description: The aggregate value unit
+          readOnly: true
+          type: string
     ExtendedStatusInfo:
       type: object
       readOnly: true
@@ -310,11 +298,22 @@ components:
         message:
           type: string
           description: The message giving detailed information about the status code.
-    EffectiveDateTime:
-      type: string
-      format: date-time
-      description: DateTime of the savings plan starts providing benefit from.
-      readOnly: true
+    Sku:
+      type: object
+      description: The SKU to be applied for this resource
+      properties:
+        name:
+          type: string
+          description: Name of the SKU to be applied
+    Price:
+      type: object
+      properties:
+        currencyCode:
+          type: string
+          description: The ISO 4217 3-letter currency code for the currency used by this purchase record.
+        amount:
+          type: number
+          format: double
     Commitment:
       type: object
       description: Commitment towards the benefit.
@@ -329,63 +328,60 @@ components:
           x-ms-enum:
             name: CommitmentGrain
             modelAsString: true
-    Renew:
-      type: boolean
-      default: false
-      description: Setting this to true will automatically purchase a new benefit on the expiration date time.
-    SavingsPlanUpdateRequestProperties:
-      type: object
-      description: Savings plan patch request
-      properties:
-        displayName:
-          $ref: '#/components/schemas/DisplayName'
-        appliedScopeType:
-          $ref: '#/components/schemas/AppliedScopeType'
-        appliedScopeProperties:
-          $ref: '#/components/schemas/AppliedScopeProperties'
-        renew:
-          $ref: '#/components/schemas/Renew'
-        renewProperties:
-          $ref: '#/components/schemas/RenewProperties'
-    AppliedScopeProperties:
-      type: object
-      description: Properties specific to applied scope type. Not required if not applicable.
-      properties:
-        tenantId:
-          $ref: '#/components/schemas/TenantId'
-        managementGroupId:
-          $ref: '#/components/schemas/ManagementGroupId'
-        subscriptionId:
-          $ref: '#/components/schemas/SubscriptionId'
-        resourceGroupId:
-          $ref: '#/components/schemas/ResourceGroupId'
-        displayName:
-          type: string
-          description: Display name
-    SavingsPlanModelList:
+    ManagementGroupId:
+      type: string
+      description: Fully-qualified identifier of the management group where the benefit must be applied.
+    PurchaseDateTime:
+      type: string
+      description: Date time when the savings plan was purchased
+      readOnly: true
+      format: date-time
+    BillingScopeId:
+      type: string
+      description: Subscription that will be charged for purchasing the benefit
+    SavingsPlanValidateResponse:
       type: object
       properties:
-        value:
+        benefits:
           type: array
           items:
-            $ref: '#/components/schemas/SavingsPlanModel'
+            $ref: '#/components/schemas/SavingsPlanValidResponseProperty'
           x-ms-identifiers: []
         nextLink:
           type: string
           description: Url to get the next page.
-    SavingsPlanValidResponseProperty:
+    SavingsPlanSummary:
       type: object
-      description: Benefit scope response property
+      description: Savings plans list summary
       properties:
-        valid:
-          type: boolean
-          description: Indicates if the provided input was valid
-        reasonCode:
+        name:
+          description: This property has value 'summary'
+          readOnly: true
           type: string
-          description: Failure reason code if the provided input was invalid
-        reason:
+        value:
+          $ref: '#/components/schemas/SavingsPlanSummaryCount'
+    PurchaseRequestProperties:
+      type: object
+      properties:
+        displayName:
           type: string
-          description: Failure reason if the provided input was invalid
+          description: Friendly name of the savings plan
+        billingScopeId:
+          $ref: '#/components/schemas/BillingScopeId'
+        term:
+          $ref: '#/components/schemas/Term'
+        billingPlan:
+          $ref: '#/components/schemas/BillingPlan'
+        appliedScopeType:
+          $ref: '#/components/schemas/AppliedScopeType'
+        commitment:
+          $ref: '#/components/schemas/Commitment'
+        effectiveDateTime:
+          $ref: '#/components/schemas/EffectiveDateTime'
+        renew:
+          $ref: '#/components/schemas/Renew'
+        appliedScopeProperties:
+          $ref: '#/components/schemas/AppliedScopeProperties'
     SavingsPlanModelProperties:
       type: object
       description: Savings plan properties
@@ -440,59 +436,30 @@ components:
           $ref: '#/components/schemas/RenewDestination'
         renewProperties:
           $ref: '#/components/schemas/RenewProperties'
-    Price:
-      type: object
-      properties:
-        currencyCode:
-          type: string
-          description: The ISO 4217 3-letter currency code for the currency used by this purchase record.
-        amount:
-          type: number
-          format: double
-    SavingsPlanValidateResponse:
-      type: object
-      properties:
-        benefits:
-          type: array
-          items:
-            $ref: '#/components/schemas/SavingsPlanValidResponseProperty'
-          x-ms-identifiers: []
-        nextLink:
-          type: string
-          description: Url to get the next page.
-    Term:
+    ExpiryDateTime:
       type: string
-      description: Represent benefit term in ISO 8601 format.
+      description: Expiry date time
+      readOnly: true
+      format: date-time
+    ProvisioningState:
+      type: string
+      description: Provisioning state
+      readOnly: true
       enum:
-      - P1Y
-      - P3Y
-      - P5Y
+      - Creating
+      - PendingBilling
+      - ConfirmedBilling
+      - Created
+      - Succeeded
+      - Cancelled
+      - Expired
+      - Failed
       x-ms-enum:
-        name: Term
+        name: ProvisioningState
         modelAsString: true
-    SavingsPlanModelListResult:
-      type: object
-      properties:
-        value:
-          description: The list of savings plans.
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/SavingsPlanModel'
-        nextLink:
-          type: string
-          readOnly: true
-          description: Url to get the next page.
-        additionalProperties:
-          description: The roll out count summary of the savings plans
-          type: array
-          readOnly: true
-          items:
-            $ref: '#/components/schemas/SavingsPlanSummary'
-          x-ms-identifiers: []
-    ManagementGroupId:
+    ResourceGroupId:
       type: string
-      description: Fully-qualified identifier of the management group where the benefit must be applied.
+      description: Fully-qualified identifier of the resource group.
     SavingsPlanOrderAliasModel:
       type: object
       description: Savings plan order alias
@@ -512,9 +479,23 @@ components:
           x-ms-client-flatten: true
           $ref: '#/components/schemas/SavingsPlanOrderAliasProperties'
       x-ms-azure-resource: true
-    RenewSource:
+    TenantId:
       type: string
-      description: SavingsPlan Id of the SavingsPlan from which this SavingsPlan is renewed.
+      description: Tenant ID where the benefit is applied.
+    SavingsPlanUpdateRequest:
+      type: object
+      description: Savings plan patch request
+      properties:
+        properties:
+          $ref: '#/components/schemas/SavingsPlanUpdateRequestProperties'
+    BillingPlan:
+      type: string
+      description: Represents the billing plan in ISO 8601 format. Required only for monthly billing plans.
+      enum:
+      - P1M
+      x-ms-enum:
+        name: BillingPlan
+        modelAsString: true
     SavingsPlanPurchaseValidateRequest:
       type: object
       properties:
@@ -537,21 +518,89 @@ components:
           description: Savings plan properties
           x-ms-client-flatten: true
           $ref: '#/components/schemas/SavingsPlanModelProperties'
-    Utilization:
-      readOnly: true
+    SavingsPlanOrderAliasProperties:
       type: object
-      description: Savings plan utilization
+      description: Savings plan properties
       properties:
-        trend:
-          description: The number of days trend for a savings plan
-          readOnly: true
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        savingsPlanOrderId:
           type: string
-        aggregates:
-          description: The array of aggregates of a savings plan's utilization
-          type: array
-          items:
-            $ref: '#/components/schemas/UtilizationAggregates'
-          x-ms-identifiers: []
+          description: Identifier of the savings plan created
+          readOnly: true
+        provisioningState:
+          $ref: '#/components/schemas/ProvisioningState'
+        billingScopeId:
+          $ref: '#/components/schemas/BillingScopeId'
+        term:
+          $ref: '#/components/schemas/Term'
+        billingPlan:
+          $ref: '#/components/schemas/BillingPlan'
+        appliedScopeType:
+          $ref: '#/components/schemas/AppliedScopeType'
+        appliedScopeProperties:
+          $ref: '#/components/schemas/AppliedScopeProperties'
+        commitment:
+          $ref: '#/components/schemas/Commitment'
+        renew:
+          $ref: '#/components/schemas/Renew'
+    DisplayName:
+      type: string
+      description: Display name
+    RenewProperties:
+      type: object
+      properties:
+        purchaseProperties:
+          $ref: '#/components/schemas/PurchaseRequest'
+    Term:
+      type: string
+      description: Represent benefit term in ISO 8601 format.
+      enum:
+      - P1Y
+      - P3Y
+      - P5Y
+      x-ms-enum:
+        name: Term
+        modelAsString: true
+    BenefitStartTime:
+      type: string
+      format: date-time
+      description: This is the DateTime when the savings plan benefit started.
+    RenewSource:
+      type: string
+      description: SavingsPlan Id of the SavingsPlan from which this SavingsPlan is renewed.
+    AppliedScopeProperties:
+      type: object
+      description: Properties specific to applied scope type. Not required if not applicable.
+      properties:
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+        managementGroupId:
+          $ref: '#/components/schemas/ManagementGroupId'
+        subscriptionId:
+          $ref: '#/components/schemas/SubscriptionId'
+        resourceGroupId:
+          $ref: '#/components/schemas/ResourceGroupId'
+        displayName:
+          type: string
+          description: Display name
+    CustomerId:
+      type: string
+      readOnly: true
+      description: Fully-qualified identifier of the customer where the savings plan is applied. Present only for Partner-led customers.
+    SavingsPlanValidResponseProperty:
+      type: object
+      description: Benefit scope response property
+      properties:
+        valid:
+          type: boolean
+          description: Indicates if the provided input was valid
+        reasonCode:
+          type: string
+          description: Failure reason code if the provided input was invalid
+        reason:
+          type: string
+          description: Failure reason if the provided input was invalid
     SavingsPlanUpdateValidateRequest:
       type: object
       properties:
@@ -560,21 +609,6 @@ components:
           items:
             $ref: '#/components/schemas/SavingsPlanUpdateRequestProperties'
           x-ms-identifiers: []
-    SavingsPlanUpdateRequest:
-      type: object
-      description: Savings plan patch request
-      properties:
-        properties:
-          $ref: '#/components/schemas/SavingsPlanUpdateRequestProperties'
-    BenefitStartTime:
-      type: string
-      format: date-time
-      description: This is the DateTime when the savings plan benefit started.
-    RenewProperties:
-      type: object
-      properties:
-        purchaseProperties:
-          $ref: '#/components/schemas/PurchaseRequest'
     SavingsPlanSummaryCount:
       description: The roll up count summary of savings plans in each state
       type: object
@@ -615,154 +649,120 @@ components:
           description: The number of savings plans in Warning state
           readOnly: true
           type: number
-    ExpiryDateTime:
-      type: string
-      description: Expiry date time
-      readOnly: true
-      format: date-time
-    SavingsPlanSummary:
+    SavingsPlanUpdateRequestProperties:
       type: object
-      description: Savings plans list summary
-      properties:
-        name:
-          description: This property has value 'summary'
-          readOnly: true
-          type: string
-        value:
-          $ref: '#/components/schemas/SavingsPlanSummaryCount'
-    SubscriptionId:
-      type: string
-      description: Fully-qualified identifier of the subscription.
-    AppliedScopeType:
-      type: string
-      description: Type of the Applied Scope.
-      enum:
-      - Single
-      - Shared
-      - ManagementGroup
-      x-ms-enum:
-        name: AppliedScopeType
-        modelAsString: true
-    PurchaseRequestProperties:
-      type: object
-      properties:
-        displayName:
-          type: string
-          description: Friendly name of the savings plan
-        billingScopeId:
-          $ref: '#/components/schemas/BillingScopeId'
-        term:
-          $ref: '#/components/schemas/Term'
-        billingPlan:
-          $ref: '#/components/schemas/BillingPlan'
-        appliedScopeType:
-          $ref: '#/components/schemas/AppliedScopeType'
-        commitment:
-          $ref: '#/components/schemas/Commitment'
-        effectiveDateTime:
-          $ref: '#/components/schemas/EffectiveDateTime'
-        renew:
-          $ref: '#/components/schemas/Renew'
-        appliedScopeProperties:
-          $ref: '#/components/schemas/AppliedScopeProperties'
-    RenewDestination:
-      type: string
-      description: SavingsPlan Id of the SavingsPlan which is purchased because of renew.
-    ProvisioningState:
-      type: string
-      description: Provisioning state
-      readOnly: true
-      enum:
-      - Creating
-      - PendingBilling
-      - ConfirmedBilling
-      - Created
-      - Succeeded
-      - Cancelled
-      - Expired
-      - Failed
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    BillingPlan:
-      type: string
-      description: Represents the billing plan in ISO 8601 format. Required only for monthly billing plans.
-      enum:
-      - P1M
-      x-ms-enum:
-        name: BillingPlan
-        modelAsString: true
-    BillingScopeId:
-      type: string
-      description: Subscription that will be charged for purchasing the benefit
-    SavingsPlanOrderAliasProperties:
-      type: object
-      description: Savings plan properties
+      description: Savings plan patch request
       properties:
         displayName:
           $ref: '#/components/schemas/DisplayName'
-        savingsPlanOrderId:
-          type: string
-          description: Identifier of the savings plan created
-          readOnly: true
-        provisioningState:
-          $ref: '#/components/schemas/ProvisioningState'
-        billingScopeId:
-          $ref: '#/components/schemas/BillingScopeId'
-        term:
-          $ref: '#/components/schemas/Term'
-        billingPlan:
-          $ref: '#/components/schemas/BillingPlan'
         appliedScopeType:
           $ref: '#/components/schemas/AppliedScopeType'
         appliedScopeProperties:
           $ref: '#/components/schemas/AppliedScopeProperties'
-        commitment:
-          $ref: '#/components/schemas/Commitment'
         renew:
           $ref: '#/components/schemas/Renew'
-    PurchaseDateTime:
-      type: string
-      description: Date time when the savings plan was purchased
-      readOnly: true
-      format: date-time
-    DisplayName:
-      type: string
-      description: Display name
+        renewProperties:
+          $ref: '#/components/schemas/RenewProperties'
+    Renew:
+      type: boolean
+      default: false
+      description: Setting this to true will automatically purchase a new benefit on the expiration date time.
+    SavingsPlanModelListResult:
+      type: object
+      properties:
+        value:
+          description: The list of savings plans.
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/SavingsPlanModel'
+        nextLink:
+          type: string
+          readOnly: true
+          description: Url to get the next page.
+        additionalProperties:
+          description: The roll out count summary of the savings plans
+          type: array
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/SavingsPlanSummary'
+          x-ms-identifiers: []
     BillingAccountId:
       type: string
       readOnly: true
       description: Fully-qualified identifier of the billing account where the savings plan is applied. Present only for Enterprise Agreement customers.
-    Sku:
+    Utilization:
+      readOnly: true
       type: object
-      description: The SKU to be applied for this resource
+      description: Savings plan utilization
       properties:
-        name:
-          type: string
-          description: Name of the SKU to be applied
-    UtilizationAggregates:
-      description: The aggregate values of savings plan utilization
-      type: object
-      properties:
-        grain:
-          description: The grain of the aggregate
-          readOnly: true
-          type: number
-        grainUnit:
-          description: The grain unit of the aggregate
+        trend:
+          description: The number of days trend for a savings plan
           readOnly: true
           type: string
-        value:
-          description: The aggregate value
-          readOnly: true
-          type: number
-        valueUnit:
-          description: The aggregate value unit
-          readOnly: true
-          type: string
-    ResourceGroupId:
-      type: string
-      description: Fully-qualified identifier of the resource group.
+        aggregates:
+          description: The array of aggregates of a savings plan's utilization
+          type: array
+          items:
+            $ref: '#/components/schemas/UtilizationAggregates'
+          x-ms-identifiers: []
+  parameters:
+    SavingsPlanIdParameter:
+      name: savingsPlanId
+      x-ms-parameter-location: method
+      in: path
+      required: true
+      description: ID of the savings plan
+      schema:
+        type: string
+    SavingsPlanPurchaseValidateRequestParameter:
+      name: body
+      in: body
+      x-ms-parameter-location: method
+      required: true
+      description: Request body for validating the purchase of a savings plan
+      schema:
+        $ref: '#/components/schemas/SavingsPlanPurchaseValidateRequest'
+    SavingsPlanUpdateValidateRequestParameter:
+      name: body
+      in: body
+      x-ms-parameter-location: method
+      required: true
+      description: Request body for validating a savings plan patch request
+      schema:
+        $ref: '#/components/schemas/SavingsPlanUpdateValidateRequest'
+    SavingsPlanOrderIdParameter:
+      name: savingsPlanOrderId
+      x-ms-parameter-location: method
+      in: path
+      required: true
+      description: Order ID of the savings plan
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      x-ms-parameter-location: client
+      required: true
+      description: The api-version to be used by the service
+      schema:
+        type: string
+    ExpandParameter:
+      name: $expand
+      description: May be used to expand the detail information of some properties.
+      in: query
+      x-ms-parameter-location: client
+      required: false
+      schema:
+        type: string
+    SavingsPlanUpdateRequestParameter:
+      name: body
+      in: body
+      x-ms-parameter-location: method
+      required: true
+      description: Request body for patching a savings plan order alias
+      schema:
+        $ref: '#/components/schemas/SavingsPlanUpdateRequest'
   securitySchemes:
     azure_auth:
       type: oauth2

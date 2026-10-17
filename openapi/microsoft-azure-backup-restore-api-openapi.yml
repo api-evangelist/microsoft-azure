@@ -1260,42 +1260,9 @@ components:
           type: integer
           format: int32
           description: Pre Restore pause wait for sync drain time period in seconds.
-    StorageSyncError:
+    StorageSyncApiError:
       type: object
       description: Error type
-      properties:
-        error:
-          $ref: '#/components/schemas/StorageSyncApiError'
-          description: Error details of the given entry.
-        innererror:
-          $ref: '#/components/schemas/StorageSyncApiError'
-          description: Error details of the given entry.
-    PostBackupResponseProperties:
-      type: object
-      description: Post Backup Response Properties object.
-      properties:
-        cloudEndpointName:
-          type: string
-          description: cloud endpoint Name.
-          readOnly: true
-    BackupRequest:
-      type: object
-      description: Backup request
-      properties:
-        azureFileShare:
-          type: string
-          description: Azure File Share.
-    PostBackupResponse:
-      type: object
-      description: Post Backup Response
-      properties:
-        backupMetadata:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/PostBackupResponseProperties'
-          description: Post Backup Response Properties
-    StorageSyncErrorDetails:
-      type: object
-      description: Error Details object.
       properties:
         code:
           type: string
@@ -1305,32 +1272,21 @@ components:
           description: Error message of the given entry.
         target:
           type: string
-          description: Target of the given entry.
-        requestUri:
-          type: string
-          description: Request URI of the given entry.
-        exceptionType:
-          type: string
-          description: Exception type of the given entry.
-        httpMethod:
-          type: string
-          description: HTTP method of the given entry.
-        hashedMessage:
-          type: string
-          description: Hashed message of the given entry.
-        httpErrorCode:
-          type: string
-          description: HTTP error code of the given entry.
-    RestoreFileSpec:
+          description: Target of the given error entry.
+        details:
+          $ref: '#/components/schemas/StorageSyncErrorDetails'
+          description: Error details of the given entry.
+        innererror:
+          $ref: '#/components/schemas/StorageSyncInnerErrorDetails'
+          description: Inner error details of the given entry.
+    PostBackupResponse:
       type: object
-      description: Restore file spec.
+      description: Post Backup Response
       properties:
-        path:
-          type: string
-          description: Restore file spec path
-        isdir:
-          type: boolean
-          description: Restore file spec isdir
+        backupMetadata:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/PostBackupResponseProperties'
+          description: Post Backup Response Properties
     PostRestoreRequest:
       type: object
       description: Post Restore Request
@@ -1380,9 +1336,44 @@ components:
         innerExceptionCallStack:
           type: string
           description: Call stack of the inner error.
-    StorageSyncApiError:
+    BackupRequest:
+      type: object
+      description: Backup request
+      properties:
+        azureFileShare:
+          type: string
+          description: Azure File Share.
+    PostBackupResponseProperties:
+      type: object
+      description: Post Backup Response Properties object.
+      properties:
+        cloudEndpointName:
+          type: string
+          description: cloud endpoint Name.
+          readOnly: true
+    StorageSyncError:
       type: object
       description: Error type
+      properties:
+        error:
+          $ref: '#/components/schemas/StorageSyncApiError'
+          description: Error details of the given entry.
+        innererror:
+          $ref: '#/components/schemas/StorageSyncApiError'
+          description: Error details of the given entry.
+    RestoreFileSpec:
+      type: object
+      description: Restore file spec.
+      properties:
+        path:
+          type: string
+          description: Restore file spec path
+        isdir:
+          type: boolean
+          description: Restore file spec isdir
+    StorageSyncErrorDetails:
+      type: object
+      description: Error Details object.
       properties:
         code:
           type: string
@@ -1392,38 +1383,119 @@ components:
           description: Error message of the given entry.
         target:
           type: string
-          description: Target of the given error entry.
-        details:
-          $ref: '#/components/schemas/StorageSyncErrorDetails'
-          description: Error details of the given entry.
-        innererror:
-          $ref: '#/components/schemas/StorageSyncInnerErrorDetails'
-          description: Inner error details of the given entry.
-    DisableBackupDescription:
-      description: It describes the body parameters while disabling backup of a backup entity(Application/Service/Partition).
+          description: Target of the given entry.
+        requestUri:
+          type: string
+          description: Request URI of the given entry.
+        exceptionType:
+          type: string
+          description: Exception type of the given entry.
+        httpMethod:
+          type: string
+          description: HTTP method of the given entry.
+        hashedMessage:
+          type: string
+          description: Hashed message of the given entry.
+        httpErrorCode:
+          type: string
+          description: HTTP error code of the given entry.
+    BackupStorageDescription:
       required:
-      - CleanBackup
+      - StorageKind
+      discriminator:
+        propertyName: StorageKind
       properties:
-        CleanBackup:
-          type: boolean
-          description: Boolean flag to delete backups. It can be set to true for deleting all the backups which were created for the backup entity that is getting disabled for backup.
-    BackupScheduleKind:
+        StorageKind:
+          $ref: '#/components/schemas/BackupStorageKind'
+          description: The kind of backup storage, where backups are saved.
+        FriendlyName:
+          type: string
+          description: Friendly name for this backup storage.
+      description: Describes the parameters for the backup storage.
+    PagedBackupInfoList:
+      description: The list of backups. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+      properties:
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        Items:
+          type: array
+          description: List of backup information.
+          items:
+            $ref: '#/components/schemas/BackupInfo'
+    ServiceName:
       type: string
-      description: The kind of backup schedule, time based or frequency based.
+      description: The full name of the service with 'fabric:' URI scheme.
+    BackupPolicyDescription:
+      description: Describes a backup policy for configuring periodic backup.
+      required:
+      - Name
+      - AutoRestoreOnDataLoss
+      - Schedule
+      - MaxIncrementalBackups
+      - Storage
+      properties:
+        Name:
+          type: string
+          description: The unique name identifying this backup policy.
+        AutoRestoreOnDataLoss:
+          type: boolean
+          description: Specifies whether to trigger restore automatically using the latest available backup in case the partition experiences a data loss event.
+        MaxIncrementalBackups:
+          type: integer
+          minimum: 0
+          maximum: 255
+          description: 'Defines the maximum number of incremental backups to be taken between two full backups. This is just the upper limit. A full backup may be taken before specified number of incremental backups are completed in one of the following conditions
+
+            - The replica has never taken a full backup since it has become primary,
+
+            - Some of the log records since the last backup has been truncated, or
+
+            - Replica passed the MaxAccumulatedBackupLogSizeInMB limit.'
+        Schedule:
+          $ref: '#/components/schemas/BackupScheduleDescription'
+          description: Describes the backup schedule parameters.
+        Storage:
+          $ref: '#/components/schemas/BackupStorageDescription'
+          description: Describes the details of backup storage where to store the periodic backups.
+        RetentionPolicy:
+          $ref: '#/components/schemas/RetentionPolicyDescription'
+          description: Describes the policy to retain backups in storage.
+    PagedBackupPolicyDescriptionList:
+      description: The list of backup policies configured in the cluster. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+      properties:
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        Items:
+          type: array
+          description: The list of backup policies information.
+          items:
+            $ref: '#/components/schemas/BackupPolicyDescription'
+    PartitionId:
+      type: string
+      format: uuid
+      description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
+    ServicePartitionKind:
+      type: string
+      description: The kind of partitioning scheme used to partition the service.
       enum:
       - Invalid
-      - TimeBased
-      - FrequencyBased
+      - Singleton
+      - Int64Range
+      - Named
       x-ms-enum:
-        name: BackupScheduleKind
+        name: ServicePartitionKind
         modelAsString: true
         values:
         - value: Invalid
-          description: Indicates an invalid backup schedule kind. All Service Fabric enumerations have the invalid type.
-        - value: TimeBased
-          description: Indicates a time-based backup schedule.
-        - value: FrequencyBased
-          description: Indicates a frequency-based backup schedule.
+          description: Indicates the partition kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
+        - value: Singleton
+          description: Indicates that there is only one partition, and SingletonPartitionSchemeDescription was specified while creating the service. The value is 1.
+        - value: Int64Range
+          description: Indicates that the partition is based on Int64 key ranges, and UniformInt64RangePartitionSchemeDescription was specified while creating the service. The value is 2.
+        - value: Named
+          description: Indicates that the partition is based on string names, and NamedPartitionInformation  was specified while creating the service. The value is 3.
     BackupInfo:
       description: Represents a backup point which can be used to trigger a restore.
       properties:
@@ -1466,6 +1538,47 @@ components:
         FailureError:
           $ref: '#/components/schemas/FabricErrorError'
           description: Denotes the failure encountered in getting backup point information.
+    BackupPolicyScope:
+      type: string
+      description: Specifies the scope at which the backup policy is applied.
+      enum:
+      - Invalid
+      - Partition
+      - Service
+      - Application
+      x-ms-enum:
+        name: BackupPolicyScope
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid backup policy scope type. All Service Fabric enumerations have the invalid type.
+        - value: Partition
+          description: Indicates the backup policy is applied at partition level. Hence overriding any policy which may have applied at partition's service or application level.
+        - value: Service
+          description: Indicates the backup policy is applied at service level. All partitions of the service inherit this policy unless explicitly overridden at partition level.
+        - value: Application
+          description: Indicates the backup policy is applied at application level. All services and partitions of the application inherit this policy unless explicitly overridden at service or partition level.
+    BackupEntity:
+      discriminator:
+        propertyName: EntityKind
+      description: Describes the Service Fabric entity that is configured for backup.
+      properties:
+        EntityKind:
+          $ref: '#/components/schemas/BackupEntityKind'
+          description: The entity type of a Service Fabric entity such as Application, Service or a Partition where periodic backups can be enabled.
+      required:
+      - EntityKind
+    PagedBackupEntityList:
+      description: The list of backup entities that are being periodically backed. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+      properties:
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        Items:
+          type: array
+          description: List of backup entity information.
+          items:
+            $ref: '#/components/schemas/BackupEntity'
     PartitionInformation:
       discriminator:
         propertyName: ServicePartitionKind
@@ -1479,16 +1592,6 @@ components:
         Id:
           $ref: '#/components/schemas/PartitionId'
           description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
-    BackupEntity:
-      discriminator:
-        propertyName: EntityKind
-      description: Describes the Service Fabric entity that is configured for backup.
-      properties:
-        EntityKind:
-          $ref: '#/components/schemas/BackupEntityKind'
-          description: The entity type of a Service Fabric entity such as Application, Service or a Partition where periodic backups can be enabled.
-      required:
-      - EntityKind
     RestoreProgressInfo:
       description: Describes the progress of a restore operation on a partition.
       properties:
@@ -1508,76 +1611,41 @@ components:
         FailureError:
           $ref: '#/components/schemas/FabricErrorError'
           description: Denotes the failure encountered in performing restore operation.
-    FabricError:
-      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
-      properties:
-        Error:
-          $ref: '#/components/schemas/FabricErrorError'
-          description: Error object containing error code and error message.
+    RestorePartitionDescription:
+      description: Specifies the parameters needed to trigger a restore of a specific partition.
       required:
-      - Error
-    ServiceName:
-      type: string
-      description: The full name of the service with 'fabric:' URI scheme.
-    BackupStorageDescription:
-      required:
-      - StorageKind
-      discriminator:
-        propertyName: StorageKind
+      - BackupId
+      - BackupLocation
       properties:
-        StorageKind:
-          $ref: '#/components/schemas/BackupStorageKind'
-          description: The kind of backup storage, where backups are saved.
-        FriendlyName:
+        BackupId:
           type: string
-          description: Friendly name for this backup storage.
-      description: Describes the parameters for the backup storage.
-    BackupPolicyDescription:
-      description: Describes a backup policy for configuring periodic backup.
-      required:
-      - Name
-      - AutoRestoreOnDataLoss
-      - Schedule
-      - MaxIncrementalBackups
-      - Storage
-      properties:
-        Name:
+          format: uuid
+          description: Unique backup ID.
+        BackupLocation:
           type: string
-          description: The unique name identifying this backup policy.
-        AutoRestoreOnDataLoss:
-          type: boolean
-          description: Specifies whether to trigger restore automatically using the latest available backup in case the partition experiences a data loss event.
-        MaxIncrementalBackups:
-          type: integer
-          minimum: 0
-          maximum: 255
-          description: 'Defines the maximum number of incremental backups to be taken between two full backups. This is just the upper limit. A full backup may be taken before specified number of incremental backups are completed in one of the following conditions
-
-            - The replica has never taken a full backup since it has become primary,
-
-            - Some of the log records since the last backup has been truncated, or
-
-            - Replica passed the MaxAccumulatedBackupLogSizeInMB limit.'
-        Schedule:
-          $ref: '#/components/schemas/BackupScheduleDescription'
-          description: Describes the backup schedule parameters.
-        Storage:
+          description: Location of the backup relative to the backup storage specified/ configured.
+        BackupStorage:
           $ref: '#/components/schemas/BackupStorageDescription'
-          description: Describes the details of backup storage where to store the periodic backups.
-        RetentionPolicy:
-          $ref: '#/components/schemas/RetentionPolicyDescription'
-          description: Describes the policy to retain backups in storage.
-    PagedBackupInfoList:
-      description: The list of backups. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+          description: Location of the backup from where the partition will be restored.
+    RetentionPolicyDescription:
+      description: Describes the retention policy configured.
+      required:
+      - RetentionPolicyType
+      discriminator:
+        propertyName: RetentionPolicyType
       properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        Items:
-          type: array
-          description: List of backup information.
-          items:
-            $ref: '#/components/schemas/BackupInfo'
+        RetentionPolicyType:
+          $ref: '#/components/schemas/RetentionPolicyType'
+          description: The type of retention policy. Currently only "Basic" retention policy is supported.
+    BackupSuspensionInfo:
+      description: Describes the backup suspension details.
+      properties:
+        IsSuspended:
+          type: boolean
+          description: Indicates whether periodic backup is suspended at this level or not.
+        SuspensionInheritedFrom:
+          $ref: '#/components/schemas/BackupSuspensionScope'
+          description: Specifies the scope at which the backup suspension was applied.
     BackupSuspensionScope:
       type: string
       description: Specifies the scope at which the backup suspension was applied.
@@ -1598,28 +1666,6 @@ components:
           description: Indicates the backup suspension is applied at service level. All partitions of the service are hence suspended for backup.
         - value: Application
           description: Indicates the backup suspension is applied at application level. All services and partitions of the application are hence suspended for backup.
-    FabricErrorError:
-      description: Error object containing error code and error message.
-      properties:
-        Code:
-          $ref: '#/components/schemas/FabricErrorCodes'
-          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
-        Message:
-          type: string
-          description: Error message.
-      required:
-      - Code
-    PagedBackupConfigurationInfoList:
-      description: The list of backup configuration information. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
-      properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        Items:
-          type: array
-          description: List of backup configuration information.
-          items:
-            $ref: '#/components/schemas/BackupConfigurationInfo'
     BackupScheduleDescription:
       description: Describes the backup schedule parameters.
       required:
@@ -1630,51 +1676,6 @@ components:
         ScheduleKind:
           $ref: '#/components/schemas/BackupScheduleKind'
           description: The kind of backup schedule, time based or frequency based.
-    BackupProgressInfo:
-      description: Describes the progress of a partition's backup.
-      properties:
-        BackupState:
-          $ref: '#/components/schemas/BackupState'
-          description: Represents the current state of the partition backup operation.
-        TimeStampUtc:
-          type: string
-          format: date-time
-          description: TimeStamp in UTC when operation succeeded or failed.
-        BackupId:
-          type: string
-          format: uuid
-          description: Unique ID of the newly created backup.
-        BackupLocation:
-          type: string
-          description: Location, relative to the backup store, of the newly created backup.
-        EpochOfLastBackupRecord:
-          $ref: '#/components/schemas/Epoch'
-          description: Specifies the epoch of the last record included in backup.
-        LsnOfLastBackupRecord:
-          type: string
-          description: The LSN of last record included in backup.
-        FailureError:
-          $ref: '#/components/schemas/FabricErrorError'
-          description: Denotes the failure encountered in performing backup operation.
-    BackupConfigurationInfo:
-      discriminator:
-        propertyName: Kind
-      description: Describes the backup configuration information.
-      properties:
-        Kind:
-          $ref: '#/components/schemas/BackupEntityKind'
-          description: The entity type of a Service Fabric entity such as Application, Service or a Partition where periodic backups can be enabled.
-        PolicyName:
-          description: The name of the backup policy which is applicable to this Service Fabric application or service or partition.
-          type: string
-        PolicyInheritedFrom:
-          $ref: '#/components/schemas/BackupPolicyScope'
-          description: Specifies the scope at which the backup policy is applied.
-        SuspensionInfo:
-          $ref: '#/components/schemas/BackupSuspensionInfo'
-          description: Describes the backup suspension details.
-      required:
-      - Kind
     RetentionPolicyType:
       type: string
       description: The type of retention policy. Currently only "Basic" retention policy is supported.
@@ -1689,38 +1690,17 @@ components:
           description: Indicates a basic retention policy type.
         - value: Invalid
           description: Indicates an invalid retention policy type.
-    BackupStorageKind:
-      type: string
-      description: The kind of backup storage, where backups are saved.
-      enum:
-      - Invalid
-      - FileShare
-      - AzureBlobStore
-      - DsmsAzureBlobStore
-      - ManagedIdentityAzureBlobStore
-      x-ms-enum:
-        name: BackupStorageKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid backup storage kind. All Service Fabric enumerations have the invalid type.
-        - value: FileShare
-          description: Indicates file/ SMB share to be used as backup storage.
-        - value: AzureBlobStore
-          description: Indicates Azure blob store to be used as backup storage.
-        - value: DsmsAzureBlobStore
-          description: Indicates Dsms Azure blob store to be used as backup storage.
-        - value: ManagedIdentityAzureBlobStore
-          description: Indicates Azure blob store to be used as backup storage using managed identity.
-    Epoch:
-      description: An Epoch is a configuration number for the partition as a whole. When the configuration of the replica set changes, for example when the Primary replica changes, the operations that are replicated from the new Primary replica are said to be a new Epoch from the ones which were sent by the old Primary replica.
+    FabricErrorError:
+      description: Error object containing error code and error message.
       properties:
-        ConfigurationVersion:
+        Code:
+          $ref: '#/components/schemas/FabricErrorCodes'
+          description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
+        Message:
           type: string
-          description: The current configuration number of this Epoch. The configuration number is an increasing value that is updated whenever the configuration of this replica set changes.
-        DataLossVersion:
-          type: string
-          description: The current data loss number of this Epoch. The data loss number property is an increasing value which is updated whenever data loss is suspected, as when loss of a quorum of replicas in the replica set that includes the Primary replica.
+          description: Error message.
+      required:
+      - Code
     BackupState:
       type: string
       description: Represents the current state of the partition backup operation.
@@ -1747,25 +1727,40 @@ components:
           description: Operation completed with failure.
         - value: Timeout
           description: Operation timed out.
-    ContinuationToken:
-      type: string
-      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-    RestorePartitionDescription:
-      description: Specifies the parameters needed to trigger a restore of a specific partition.
+    EnableBackupDescription:
+      description: Specifies the parameters needed to enable periodic backup.
       required:
-      - BackupId
-      - BackupLocation
+      - BackupPolicyName
       properties:
-        BackupId:
+        BackupPolicyName:
           type: string
-          format: uuid
-          description: Unique backup ID.
-        BackupLocation:
-          type: string
-          description: Location of the backup relative to the backup storage specified/ configured.
-        BackupStorage:
-          $ref: '#/components/schemas/BackupStorageDescription'
-          description: Location of the backup from where the partition will be restored.
+          description: Name of the backup policy to be used for enabling periodic backups.
+    RestoreState:
+      type: string
+      description: Represents the current state of the partition restore operation.
+      enum:
+      - Invalid
+      - Accepted
+      - RestoreInProgress
+      - Success
+      - Failure
+      - Timeout
+      x-ms-enum:
+        name: RestoreState
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid restore state. All Service Fabric enumerations have the invalid type.
+        - value: Accepted
+          description: Operation has been validated and accepted. Restore is yet to be triggered.
+        - value: RestoreInProgress
+          description: Restore operation has been triggered and is under process.
+        - value: Success
+          description: Operation completed with success.
+        - value: Failure
+          description: Operation completed with failure.
+        - value: Timeout
+          description: Operation timed out.
     BackupType:
       type: string
       description: Describes the type of backup, whether its full or incremental.
@@ -1783,6 +1778,54 @@ components:
           description: Indicates a full backup.
         - value: Incremental
           description: Indicates an incremental backup. A backup chain is comprised of a full backup followed by 0 or more incremental backups.
+    BackupEntityKind:
+      type: string
+      description: The entity type of a Service Fabric entity such as Application, Service or a Partition where periodic backups can be enabled.
+      enum:
+      - Invalid
+      - Partition
+      - Service
+      - Application
+      x-ms-enum:
+        name: BackupEntityKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid entity kind. All Service Fabric enumerations have the invalid type.
+        - value: Partition
+          description: Indicates the entity is a Service Fabric partition.
+        - value: Service
+          description: Indicates the entity is a Service Fabric service.
+        - value: Application
+          description: Indicates the entity is a Service Fabric application.
+    FabricError:
+      description: The REST API operations for Service Fabric return standard HTTP status codes. This type defines the additional information returned from the Service Fabric API operations that are not successful.
+      properties:
+        Error:
+          $ref: '#/components/schemas/FabricErrorError'
+          description: Error object containing error code and error message.
+      required:
+      - Error
+    PagedBackupConfigurationInfoList:
+      description: The list of backup configuration information. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+      properties:
+        ContinuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+        Items:
+          type: array
+          description: List of backup configuration information.
+          items:
+            $ref: '#/components/schemas/BackupConfigurationInfo'
+    Epoch:
+      description: An Epoch is a configuration number for the partition as a whole. When the configuration of the replica set changes, for example when the Primary replica changes, the operations that are replicated from the new Primary replica are said to be a new Epoch from the ones which were sent by the old Primary replica.
+      properties:
+        ConfigurationVersion:
+          type: string
+          description: The current configuration number of this Epoch. The configuration number is an increasing value that is updated whenever the configuration of this replica set changes.
+        DataLossVersion:
+          type: string
+          description: The current data loss number of this Epoch. The data loss number property is an increasing value which is updated whenever data loss is suspected, as when loss of a quorum of replicas in the replica set that includes the Primary replica.
     GetBackupByStorageQueryDescription:
       description: Describes additional filters to be applied, while listing backups, and backup storage details from where to fetch the backups.
       required:
@@ -1807,43 +1850,6 @@ components:
         BackupEntity:
           $ref: '#/components/schemas/BackupEntity'
           description: Indicates the entity for which to enumerate backups.
-    PagedBackupPolicyDescriptionList:
-      description: The list of backup policies configured in the cluster. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
-      properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        Items:
-          type: array
-          description: The list of backup policies information.
-          items:
-            $ref: '#/components/schemas/BackupPolicyDescription'
-    BackupPolicyScope:
-      type: string
-      description: Specifies the scope at which the backup policy is applied.
-      enum:
-      - Invalid
-      - Partition
-      - Service
-      - Application
-      x-ms-enum:
-        name: BackupPolicyScope
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid backup policy scope type. All Service Fabric enumerations have the invalid type.
-        - value: Partition
-          description: Indicates the backup policy is applied at partition level. Hence overriding any policy which may have applied at partition's service or application level.
-        - value: Service
-          description: Indicates the backup policy is applied at service level. All partitions of the service inherit this policy unless explicitly overridden at partition level.
-        - value: Application
-          description: Indicates the backup policy is applied at application level. All services and partitions of the application inherit this policy unless explicitly overridden at service or partition level.
-    BackupPartitionDescription:
-      description: Describes the parameters for triggering partition's backup.
-      properties:
-        BackupStorage:
-          $ref: '#/components/schemas/BackupStorageDescription'
-          description: Specifies the details of the backup storage where to save the backup.
     PartitionBackupConfigurationInfo:
       description: Backup configuration information, for a specific partition, specifying what backup policy is being applied and suspend description, if any.
       allOf:
@@ -1856,6 +1862,29 @@ components:
           $ref: '#/components/schemas/PartitionId'
           description: The partition ID identifying the partition.
       x-ms-discriminator-value: Partition
+    BackupScheduleKind:
+      type: string
+      description: The kind of backup schedule, time based or frequency based.
+      enum:
+      - Invalid
+      - TimeBased
+      - FrequencyBased
+      x-ms-enum:
+        name: BackupScheduleKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid backup schedule kind. All Service Fabric enumerations have the invalid type.
+        - value: TimeBased
+          description: Indicates a time-based backup schedule.
+        - value: FrequencyBased
+          description: Indicates a frequency-based backup schedule.
+    BackupPartitionDescription:
+      description: Describes the parameters for triggering partition's backup.
+      properties:
+        BackupStorage:
+          $ref: '#/components/schemas/BackupStorageDescription'
+          description: Specifies the details of the backup storage where to save the backup.
     FabricErrorCodes:
       type: string
       description: "Defines the fabric error codes that be returned as part of the error object in response to Service Fabric API operations that are not successful. Following are the error code values that can be returned for a specific HTTP status code.\n\n  - Possible values of the error code for HTTP status code 400 (Bad Request)\n    - \"FABRIC_E_INVALID_PARTITION_KEY\"\n    - \"FABRIC_E_IMAGEBUILDER_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_ADDRESS\"\n    - \"FABRIC_E_APPLICATION_NOT_UPGRADING\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_FABRIC_NOT_UPGRADING\"\n    - \"FABRIC_E_FABRIC_UPGRADE_VALIDATION_ERROR\"\n    - \"FABRIC_E_INVALID_CONFIGURATION\"\n    - \"FABRIC_E_INVALID_NAME_URI\"\n    - \"FABRIC_E_PATH_TOO_LONG\"\n    - \"FABRIC_E_KEY_TOO_LARGE\"\n    - \"FABRIC_E_SERVICE_AFFINITY_CHAIN_NOT_SUPPORTED\"\n    - \"FABRIC_E_INVALID_ATOMIC_GROUP\"\n    - \"FABRIC_E_VALUE_EMPTY\"\n    - \"FABRIC_E_BACKUP_IS_ENABLED\"\n    - \"FABRIC_E_RESTORE_SOURCE_TARGET_PARTITION_MISMATCH\"\n    - \"FABRIC_E_INVALID_FOR_STATELESS_SERVICES\"\n    - \"FABRIC_E_INVALID_SERVICE_SCALING_POLICY\"\n    - \"E_INVALIDARG\"\n\n  - Possible values of the error code for HTTP status code 404 (Not Found)\n    - \"FABRIC_E_NODE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_TYPE_NOT_FOUND\"\n    - \"FABRIC_E_SERVICE_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_TYPE_TEMPLATE_NOT_FOUND\"\n    - \"FABRIC_E_CONFIGURATION_SECTION_NOT_FOUND\"\n    - \"FABRIC_E_PARTITION_NOT_FOUND\"\n    - \"FABRIC_E_REPLICA_DOES_NOT_EXIST\"\n    - \"FABRIC_E_SERVICE_GROUP_DOES_NOT_EXIST\"\n    - \"FABRIC_E_CONFIGURATION_PARAMETER_NOT_FOUND\"\n    - \"FABRIC_E_DIRECTORY_NOT_FOUND\"\n    - \"FABRIC_E_FABRIC_VERSION_NOT_FOUND\"\n    - \"FABRIC_E_FILE_NOT_FOUND\"\n    - \"FABRIC_E_NAME_DOES_NOT_EXIST\"\n    - \"FABRIC_E_PROPERTY_DOES_NOT_EXIST\"\n    - \"FABRIC_E_ENUMERATION_COMPLETED\"\n    - \"FABRIC_E_SERVICE_MANIFEST_NOT_FOUND\"\n    - \"FABRIC_E_KEY_NOT_FOUND\"\n    - \"FABRIC_E_HEALTH_ENTITY_NOT_FOUND\"\n    - \"FABRIC_E_BACKUP_NOT_ENABLED\"\n    - \"FABRIC_E_BACKUP_POLICY_NOT_EXISTING\"\n    - \"FABRIC_E_FAULT_ANALYSIS_SERVICE_NOT_EXISTING\"\n    - \"FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR\"\n\n  - Possible values of the error code for HTTP status code 409 (Conflict)\n    - \"FABRIC_E_APPLICATION_TYPE_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_APPLICATION_TYPE_PROVISION_IN_PROGRESS\"\n    - \"FABRIC_E_APPLICATION_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_SERVICE_ALREADY_EXISTS\"\n    - \"FABRIC_E_SERVICE_GROUP_ALREADY_EXISTS\"\n    - \"FABRIC_E_APPLICATION_TYPE_IN_USE\"\n    - \"FABRIC_E_FABRIC_ALREADY_IN_TARGET_VERSION\"\n    - \"FABRIC_E_FABRIC_VERSION_ALREADY_EXISTS\"\n    - \"FABRIC_E_FABRIC_VERSION_IN_USE\"\n    - \"FABRIC_E_FABRIC_UPGRADE_IN_PROGRESS\"\n    - \"FABRIC_E_NAME_ALREADY_EXISTS\"\n    - \"FABRIC_E_NAME_NOT_EMPTY\"\n    - \"FABRIC_E_PROPERTY_CHECK_FAILED\"\n    - \"FABRIC_E_SERVICE_METADATA_MISMATCH\"\n    - \"FABRIC_E_SERVICE_TYPE_MISMATCH\"\n    - \"FABRIC_E_HEALTH_STALE_REPORT\"\n    - \"FABRIC_E_SEQUENCE_NUMBER_CHECK_FAILED\"\n    - \"FABRIC_E_NODE_HAS_NOT_STOPPED_YET\"\n    - \"FABRIC_E_INSTANCE_ID_MISMATCH\"\n    - \"FABRIC_E_BACKUP_IN_PROGRESS\"\n    - \"FABRIC_E_RESTORE_IN_PROGRESS\"\n    - \"FABRIC_E_BACKUP_POLICY_ALREADY_EXISTING\"\n\n  - Possible values of the error code for HTTP status code 413 (Request Entity Too Large)\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 500 (Internal Server Error)\n    - \"FABRIC_E_NODE_IS_UP\"\n    - \"E_FAIL\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_ALREADY_EXISTS\"\n    - \"FABRIC_E_SINGLE_INSTANCE_APPLICATION_NOT_FOUND\"\n    - \"FABRIC_E_VOLUME_ALREADY_EXISTS\"\n    - \"FABRIC_E_VOLUME_NOT_FOUND\"\n    - \"SerializationError\"\n\n  - Possible values of the error code for HTTP status code 503 (Service Unavailable)\n    - \"FABRIC_E_NO_WRITE_QUORUM\"\n    - \"FABRIC_E_NOT_PRIMARY\"\n    - \"FABRIC_E_NOT_READY\"\n    - \"FABRIC_E_RECONFIGURATION_PENDING\"\n    - \"FABRIC_E_SERVICE_OFFLINE\"\n    - \"E_ABORT\"\n    - \"FABRIC_E_VALUE_TOO_LARGE\"\n\n  - Possible values of the error code for HTTP status code 504 (Gateway Timeout)\n    - \"FABRIC_E_COMMUNICATION_ERROR\"\n    - \"FABRIC_E_OPERATION_NOT_COMPLETE\"\n    - \"FABRIC_E_TIMEOUT\""
@@ -2032,114 +2061,85 @@ components:
         - value: FABRIC_E_VOLUME_NOT_FOUND
         - value: SerializationError
         - value: FABRIC_E_IMAGEBUILDER_RESERVED_DIRECTORY_ERROR
-    PartitionId:
+    BackupStorageKind:
       type: string
-      format: uuid
-      description: An internal ID used by Service Fabric to uniquely identify a partition. This is a randomly generated GUID when the service was created. The partition ID is unique and does not change for the lifetime of the service. If the same service was deleted and recreated the IDs of its partitions would be different.
-    RetentionPolicyDescription:
-      description: Describes the retention policy configured.
-      required:
-      - RetentionPolicyType
+      description: The kind of backup storage, where backups are saved.
+      enum:
+      - Invalid
+      - FileShare
+      - AzureBlobStore
+      - DsmsAzureBlobStore
+      - ManagedIdentityAzureBlobStore
+      x-ms-enum:
+        name: BackupStorageKind
+        modelAsString: true
+        values:
+        - value: Invalid
+          description: Indicates an invalid backup storage kind. All Service Fabric enumerations have the invalid type.
+        - value: FileShare
+          description: Indicates file/ SMB share to be used as backup storage.
+        - value: AzureBlobStore
+          description: Indicates Azure blob store to be used as backup storage.
+        - value: DsmsAzureBlobStore
+          description: Indicates Dsms Azure blob store to be used as backup storage.
+        - value: ManagedIdentityAzureBlobStore
+          description: Indicates Azure blob store to be used as backup storage using managed identity.
+    ContinuationToken:
+      type: string
+      description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
+    BackupConfigurationInfo:
       discriminator:
-        propertyName: RetentionPolicyType
+        propertyName: Kind
+      description: Describes the backup configuration information.
       properties:
-        RetentionPolicyType:
-          $ref: '#/components/schemas/RetentionPolicyType'
-          description: The type of retention policy. Currently only "Basic" retention policy is supported.
-    BackupEntityKind:
-      type: string
-      description: The entity type of a Service Fabric entity such as Application, Service or a Partition where periodic backups can be enabled.
-      enum:
-      - Invalid
-      - Partition
-      - Service
-      - Application
-      x-ms-enum:
-        name: BackupEntityKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid entity kind. All Service Fabric enumerations have the invalid type.
-        - value: Partition
-          description: Indicates the entity is a Service Fabric partition.
-        - value: Service
-          description: Indicates the entity is a Service Fabric service.
-        - value: Application
-          description: Indicates the entity is a Service Fabric application.
-    BackupSuspensionInfo:
-      description: Describes the backup suspension details.
-      properties:
-        IsSuspended:
-          type: boolean
-          description: Indicates whether periodic backup is suspended at this level or not.
-        SuspensionInheritedFrom:
-          $ref: '#/components/schemas/BackupSuspensionScope'
-          description: Specifies the scope at which the backup suspension was applied.
-    EnableBackupDescription:
-      description: Specifies the parameters needed to enable periodic backup.
-      required:
-      - BackupPolicyName
-      properties:
-        BackupPolicyName:
+        Kind:
+          $ref: '#/components/schemas/BackupEntityKind'
+          description: The entity type of a Service Fabric entity such as Application, Service or a Partition where periodic backups can be enabled.
+        PolicyName:
+          description: The name of the backup policy which is applicable to this Service Fabric application or service or partition.
           type: string
-          description: Name of the backup policy to be used for enabling periodic backups.
-    RestoreState:
-      type: string
-      description: Represents the current state of the partition restore operation.
-      enum:
-      - Invalid
-      - Accepted
-      - RestoreInProgress
-      - Success
-      - Failure
-      - Timeout
-      x-ms-enum:
-        name: RestoreState
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates an invalid restore state. All Service Fabric enumerations have the invalid type.
-        - value: Accepted
-          description: Operation has been validated and accepted. Restore is yet to be triggered.
-        - value: RestoreInProgress
-          description: Restore operation has been triggered and is under process.
-        - value: Success
-          description: Operation completed with success.
-        - value: Failure
-          description: Operation completed with failure.
-        - value: Timeout
-          description: Operation timed out.
-    PagedBackupEntityList:
-      description: The list of backup entities that are being periodically backed. The list is paged when all of the results cannot fit in a single message. The next set of results can be obtained by executing the same query with the continuation token provided in this list.
+        PolicyInheritedFrom:
+          $ref: '#/components/schemas/BackupPolicyScope'
+          description: Specifies the scope at which the backup policy is applied.
+        SuspensionInfo:
+          $ref: '#/components/schemas/BackupSuspensionInfo'
+          description: Describes the backup suspension details.
+      required:
+      - Kind
+    BackupProgressInfo:
+      description: Describes the progress of a partition's backup.
       properties:
-        ContinuationToken:
-          $ref: '#/components/schemas/ContinuationToken'
-          description: The continuation token parameter is used to obtain next set of results. The continuation token is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token is not included in the response.
-        Items:
-          type: array
-          description: List of backup entity information.
-          items:
-            $ref: '#/components/schemas/BackupEntity'
-    ServicePartitionKind:
-      type: string
-      description: The kind of partitioning scheme used to partition the service.
-      enum:
-      - Invalid
-      - Singleton
-      - Int64Range
-      - Named
-      x-ms-enum:
-        name: ServicePartitionKind
-        modelAsString: true
-        values:
-        - value: Invalid
-          description: Indicates the partition kind is invalid. All Service Fabric enumerations have the invalid type. The value is zero.
-        - value: Singleton
-          description: Indicates that there is only one partition, and SingletonPartitionSchemeDescription was specified while creating the service. The value is 1.
-        - value: Int64Range
-          description: Indicates that the partition is based on Int64 key ranges, and UniformInt64RangePartitionSchemeDescription was specified while creating the service. The value is 2.
-        - value: Named
-          description: Indicates that the partition is based on string names, and NamedPartitionInformation  was specified while creating the service. The value is 3.
+        BackupState:
+          $ref: '#/components/schemas/BackupState'
+          description: Represents the current state of the partition backup operation.
+        TimeStampUtc:
+          type: string
+          format: date-time
+          description: TimeStamp in UTC when operation succeeded or failed.
+        BackupId:
+          type: string
+          format: uuid
+          description: Unique ID of the newly created backup.
+        BackupLocation:
+          type: string
+          description: Location, relative to the backup store, of the newly created backup.
+        EpochOfLastBackupRecord:
+          $ref: '#/components/schemas/Epoch'
+          description: Specifies the epoch of the last record included in backup.
+        LsnOfLastBackupRecord:
+          type: string
+          description: The LSN of last record included in backup.
+        FailureError:
+          $ref: '#/components/schemas/FabricErrorError'
+          description: Denotes the failure encountered in performing backup operation.
+    DisableBackupDescription:
+      description: It describes the body parameters while disabling backup of a backup entity(Application/Service/Partition).
+      required:
+      - CleanBackup
+      properties:
+        CleanBackup:
+          type: boolean
+          description: Boolean flag to delete backups. It can be set to true for deleting all the backups which were created for the backup entity that is getting disabled for backup.
   securitySchemes:
     azure_auth:
       type: oauth2
@@ -2150,6 +2150,74 @@ components:
           authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
       description: Azure Active Directory OAuth2 Flow
   parameters:
+    ServiceIdRequiredPathParam:
+      name: serviceId
+      in: path
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      required: true
+      description: 'The identity of the service. This ID is typically the full name of the service without the ''fabric:'' URI scheme.
+
+        Starting from version 6.0, hierarchical names are delimited with the "~" character.
+
+        For example, if the service name is "fabric:/myapp/app1/svc1", the service identity would be "myapp~app1~svc1" in 6.0+ and "myapp/app1/svc1" in previous versions.'
+      schema:
+        type: string
+    BackupPolicyDescriptionRequiredBodyParam:
+      name: BackupPolicyDescription
+      in: body
+      required: true
+      x-ms-parameter-location: method
+      description: Describes the backup policy.
+      schema:
+        $ref: '#/components/schemas/BackupPolicyDescription'
+    ContinuationTokenOptionalQueryParam:
+      name: ContinuationToken
+      in: query
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      required: false
+      description: The continuation token parameter is used to obtain next set of results. A continuation token with a non-empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
+      schema:
+        type: string
+    RestorePartitionDescriptionRequiredBodyParam:
+      name: RestorePartitionDescription
+      in: body
+      description: Describes the parameters to restore the partition.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/RestorePartitionDescription'
+    ValidateConnectionOptionalQueryParam:
+      name: ValidateConnection
+      in: query
+      x-ms-parameter-location: method
+      description: Specifies whether to validate the storage connection and credentials before creating or updating the backup policies.
+      required: false
+      schema:
+        type: boolean
+        default: false
+    LatestOptionalQueryParam:
+      name: Latest
+      in: query
+      x-ms-parameter-location: method
+      description: Specifies whether to get only the most recent backup available for a partition for the specified time range.
+      required: false
+      schema:
+        type: boolean
+        default: false
+    TimeoutOptionalQueryParam:
+      name: timeout
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
+      schema:
+        type: integer
+        format: int64
+        default: 60
+        maximum: 4294967295
+        minimum: 1
     PartitionIdRequiredPathParam:
       name: partitionId
       in: path
@@ -2160,6 +2228,14 @@ components:
       schema:
         type: string
         format: uuid
+    BackupPolicyNameRequiredPathParam:
+      name: backupPolicyName
+      in: path
+      description: The name of the backup policy.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     BackupPartitionDescriptionOptionalBodyParam:
       name: BackupPartitionDescription
       in: body
@@ -2168,6 +2244,23 @@ components:
       description: Describes the parameters to backup the partition now. If not present, backup operation uses default parameters from the backup policy current associated with this partition.
       schema:
         $ref: '#/components/schemas/BackupPartitionDescription'
+    RestoreTimeoutOptionalQueryParam:
+      name: RestoreTimeout
+      description: Specifies the maximum amount of time to wait, in minutes, for the restore operation to complete. Post that, the operation returns back with timeout error. However, in certain corner cases it could be that the restore operation goes through even though it completes with timeout. In case of timeout error, its recommended to invoke this operation again with a greater timeout value. the default value for the same is 10 minutes.
+      in: query
+      x-ms-parameter-location: method
+      required: false
+      schema:
+        type: integer
+        default: 10
+    EnableBackupDescriptionRequiredBodyParam:
+      name: EnableBackupDescription
+      in: body
+      description: Specifies the parameters for enabling backup.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        $ref: '#/components/schemas/EnableBackupDescription'
     ApiVersion_6-4_RequiredQueryParam:
       name: api-version
       in: query
@@ -2191,22 +2284,14 @@ components:
         enum:
         - '6.4'
         default: '6.4'
-    EnableBackupDescriptionRequiredBodyParam:
-      name: EnableBackupDescription
+    DisableBackupDescriptionOptionalBodyParam:
+      name: DisableBackupDescription
       in: body
-      description: Specifies the parameters for enabling backup.
-      required: true
+      description: Specifies the parameters to disable backup for any backup entity.
+      required: false
       x-ms-parameter-location: method
       schema:
-        $ref: '#/components/schemas/EnableBackupDescription'
-    BackupPolicyDescriptionRequiredBodyParam:
-      name: BackupPolicyDescription
-      in: body
-      required: true
-      x-ms-parameter-location: method
-      description: Describes the backup policy.
-      schema:
-        $ref: '#/components/schemas/BackupPolicyDescription'
+        $ref: '#/components/schemas/DisableBackupDescription'
     BackupTimeoutOptionalQueryParam:
       name: BackupTimeout
       in: query
@@ -2216,35 +2301,14 @@ components:
       schema:
         type: integer
         default: 10
-    DisableBackupDescriptionOptionalBodyParam:
-      name: DisableBackupDescription
+    GetBackupByStorageQueryDescriptionRequiredBodyParam:
+      name: GetBackupByStorageQueryDescription
       in: body
-      description: Specifies the parameters to disable backup for any backup entity.
-      required: false
+      required: true
       x-ms-parameter-location: method
+      description: Describes the filters and backup storage details to be used for enumerating backups.
       schema:
-        $ref: '#/components/schemas/DisableBackupDescription'
-    TimeoutOptionalQueryParam:
-      name: timeout
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: The server timeout for performing the operation in seconds. This timeout specifies the time duration that the client is willing to wait for the requested operation to complete. The default value for this parameter is 60 seconds.
-      schema:
-        type: integer
-        format: int64
-        default: 60
-        maximum: 4294967295
-        minimum: 1
-    StartDateTimeFilterOptionalQueryParam:
-      name: StartDateTimeFilter
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      description: Specify the start date time from which to enumerate backups, in datetime format. The date time must be specified in ISO8601 format. This is an optional parameter. If not specified, all backups from the beginning are enumerated.
-      schema:
-        type: string
-        format: date-time
+        $ref: '#/components/schemas/GetBackupByStorageQueryDescription'
     ApplicationIdRequiredPathParam:
       name: applicationId
       in: path
@@ -2258,15 +2322,15 @@ components:
         For example, if the application name is "fabric:/myapp/app1", the application identity would be "myapp~app1" in 6.0+ and "myapp/app1" in previous versions.'
       schema:
         type: string
-    ValidateConnectionOptionalQueryParam:
-      name: ValidateConnection
+    StartDateTimeFilterOptionalQueryParam:
+      name: StartDateTimeFilter
       in: query
       x-ms-parameter-location: method
-      description: Specifies whether to validate the storage connection and credentials before creating or updating the backup policies.
       required: false
+      description: Specify the start date time from which to enumerate backups, in datetime format. The date time must be specified in ISO8601 format. This is an optional parameter. If not specified, all backups from the beginning are enumerated.
       schema:
-        type: boolean
-        default: false
+        type: string
+        format: date-time
     EndDateTimeFilterOptionalQueryParam:
       name: EndDateTimeFilter
       in: query
@@ -2287,67 +2351,3 @@ components:
         format: int64
         default: 0
         minimum: 0
-    BackupPolicyNameRequiredPathParam:
-      name: backupPolicyName
-      in: path
-      description: The name of the backup policy.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ContinuationTokenOptionalQueryParam:
-      name: ContinuationToken
-      in: query
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      required: false
-      description: The continuation token parameter is used to obtain next set of results. A continuation token with a non-empty value is included in the response of the API when the results from the system do not fit in a single response. When this value is passed to the next API call, the API returns next set of results. If there are no further results, then the continuation token does not contain a value. The value of this parameter should not be URL encoded.
-      schema:
-        type: string
-    GetBackupByStorageQueryDescriptionRequiredBodyParam:
-      name: GetBackupByStorageQueryDescription
-      in: body
-      required: true
-      x-ms-parameter-location: method
-      description: Describes the filters and backup storage details to be used for enumerating backups.
-      schema:
-        $ref: '#/components/schemas/GetBackupByStorageQueryDescription'
-    LatestOptionalQueryParam:
-      name: Latest
-      in: query
-      x-ms-parameter-location: method
-      description: Specifies whether to get only the most recent backup available for a partition for the specified time range.
-      required: false
-      schema:
-        type: boolean
-        default: false
-    RestoreTimeoutOptionalQueryParam:
-      name: RestoreTimeout
-      description: Specifies the maximum amount of time to wait, in minutes, for the restore operation to complete. Post that, the operation returns back with timeout error. However, in certain corner cases it could be that the restore operation goes through even though it completes with timeout. In case of timeout error, its recommended to invoke this operation again with a greater timeout value. the default value for the same is 10 minutes.
-      in: query
-      x-ms-parameter-location: method
-      required: false
-      schema:
-        type: integer
-        default: 10
-    RestorePartitionDescriptionRequiredBodyParam:
-      name: RestorePartitionDescription
-      in: body
-      description: Describes the parameters to restore the partition.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        $ref: '#/components/schemas/RestorePartitionDescription'
-    ServiceIdRequiredPathParam:
-      name: serviceId
-      in: path
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      required: true
-      description: 'The identity of the service. This ID is typically the full name of the service without the ''fabric:'' URI scheme.
-
-        Starting from version 6.0, hierarchical names are delimited with the "~" character.
-
-        For example, if the service name is "fabric:/myapp/app1/svc1", the service identity would be "myapp~app1~svc1" in 6.0+ and "myapp/app1/svc1" in previous versions.'
-      schema:
-        type: string

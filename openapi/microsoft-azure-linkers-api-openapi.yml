@@ -388,6 +388,135 @@ paths:
       summary: Microsoft Azure Get Resourceuri Providers Microsoft Servicelinker…
 components:
   schemas:
+    DryrunActionName:
+      description: The name of action for you dryrun job.
+      type: string
+      enum:
+      - createOrUpdate
+      x-ms-enum:
+        name: DryrunActionName
+        modelAsString: true
+    DeleteOrUpdateBehavior:
+      description: The cleanup behavior to indicate whether clean up operation when resource is deleted or updated
+      type: string
+      enum:
+      - Default
+      - ForcedCleanup
+      x-ms-enum:
+        name: DeleteOrUpdateBehavior
+        modelAsString: true
+    ConfigurationResult:
+      description: Configurations for source resource, include appSettings, connectionString and serviceBindings
+      type: object
+      properties:
+        configurations:
+          description: The configuration properties for source resource.
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceConfiguration'
+          x-ms-identifiers:
+          - name
+    AllowType:
+      description: Whether to allow firewall rules.
+      type: string
+      enum:
+      - 'true'
+      - 'false'
+      x-ms-enum:
+        name: allowType
+        modelAsString: true
+    PublicNetworkSolution:
+      type: object
+      description: Indicates public network solution, include firewall rules
+      properties:
+        deleteOrUpdateBehavior:
+          description: Indicates whether to clean up previous operation(such as firewall rules) when Linker is updating or deleting
+          $ref: '#/components/schemas/DeleteOrUpdateBehavior'
+        action:
+          description: Optional. Indicates public network solution. If enable, enable public network access of target service with best try. Default is enable. If optOut, opt out public network access configuration.
+          $ref: '#/components/schemas/ActionType'
+        firewallRules:
+          description: Describe firewall rules of target service to make sure source application could connect to the target.
+          $ref: '#/components/schemas/FirewallRules'
+    DaprConfigurationProperties:
+      type: object
+      properties:
+        targetType:
+          type: string
+          description: Supported target resource type, extract from resource id, uppercase
+        authType:
+          $ref: '#/components/schemas/AuthType'
+        daprProperties:
+          $ref: '#/components/schemas/DaprProperties'
+    DaprConfigurationList:
+      description: Dapr configuration list supported by Service Connector
+      type: object
+      properties:
+        value:
+          description: The list of dapr configurations
+          type: array
+          items:
+            $ref: '#/components/schemas/DaprConfigurationResource'
+          x-ms-identifiers: []
+        nextLink:
+          description: Link to next page of resources.
+          type: string
+          readOnly: true
+    SourceConfiguration:
+      description: A configuration item for source resource
+      type: object
+      properties:
+        name:
+          description: The name of setting.
+          type: string
+        value:
+          description: The value of setting
+          type:
+          - string
+          - 'null'
+        configType:
+          description: The type of setting
+          readOnly: true
+          $ref: '#/components/schemas/LinkerConfigurationType'
+        keyVaultReferenceIdentity:
+          description: The identity for key vault reference, system or user-assigned managed identity ID
+          type:
+          - string
+          - 'null'
+        description:
+          description: Descriptive information for the configuration
+          type:
+          - string
+          - 'null'
+    AuthMode:
+      description: Indicates how to apply the authentication configuration operations.
+      type: string
+      enum:
+      - optInAllAuth
+      - optOutAllAuth
+      x-ms-enum:
+        name: authMode
+        modelAsString: true
+        values:
+        - value: optInAllAuth
+          description: Default authentication configuration according to the authentication type.
+        - value: optOutAllAuth
+          description: Skip all authentication configuration such as enabling managed identity and granting RBAC roles
+    AuthType:
+      description: The authentication type.
+      type: string
+      enum:
+      - systemAssignedIdentity
+      - userAssignedIdentity
+      - servicePrincipalSecret
+      - servicePrincipalCertificate
+      - secret
+      - accessKey
+      - userAccount
+      - easyAuthMicrosoftEntraID
+      x-ms-enum:
+        name: AuthType
+        modelAsString: true
     DryrunPrerequisiteResult:
       description: A result of dryrun
       discriminator:
@@ -398,6 +527,66 @@ components:
           $ref: '#/components/schemas/DryrunPrerequisiteResultType'
       required:
       - type
+    DaprConfigurationResource:
+      description: Represent one resource of the dapr configuration list
+      type: object
+      properties:
+        properties:
+          description: The properties of the dapr configuration.
+          $ref: '#/components/schemas/DaprConfigurationProperties'
+          x-ms-client-flatten: true
+    VNetSolution:
+      type: object
+      description: The VNet solution for linker
+      properties:
+        type:
+          description: Type of VNet solution.
+          type:
+          - string
+          - 'null'
+          enum:
+          - serviceEndpoint
+          - privateLink
+          x-ms-enum:
+            name: vNetSolutionType
+            modelAsString: true
+        deleteOrUpdateBehavior:
+          description: Indicates whether to clean up previous operation when Linker is updating or deleting
+          $ref: '#/components/schemas/DeleteOrUpdateBehavior'
+    LinkerProperties:
+      description: The properties of the Linker.
+      type: object
+      properties:
+        targetService:
+          $ref: '#/components/schemas/TargetServiceBase'
+          description: The target service properties
+        authInfo:
+          description: The authentication type.
+          $ref: '#/components/schemas/AuthInfoBase'
+        clientType:
+          description: The application client type
+          $ref: '#/components/schemas/ClientType'
+        provisioningState:
+          readOnly: true
+          type: string
+          description: 'The provisioning state. '
+        vNetSolution:
+          description: The VNet solution.
+          $ref: '#/components/schemas/VNetSolution'
+        secretStore:
+          description: An option to store secret value in secure place
+          $ref: '#/components/schemas/SecretStore'
+        scope:
+          type:
+          - string
+          - 'null'
+          description: connection scope in source service.
+        publicNetworkSolution:
+          description: The network solution.
+          $ref: '#/components/schemas/PublicNetworkSolution'
+        configurationInfo:
+          description: The connection information consumed by applications, including secrets, connection strings.
+          $ref: '#/components/schemas/ConfigurationInfo'
     DaprMetadata:
       description: The dapr component metadata.
       type: object
@@ -423,24 +612,154 @@ components:
           x-ms-enum:
             name: DaprMetadataRequired
             modelAsString: true
-    ConfigurationStore:
-      type: object
-      description: An option to store configuration into different place
-      properties:
-        appConfigurationId:
-          type:
-          - string
-          - 'null'
-          description: The app configuration id to store configuration
-    LinkerPatch:
-      description: A Linker to be updated.
+    ValidateOperationResult:
+      description: The validation operation result for a Linker.
       type: object
       properties:
         properties:
-          description: Linker properties
-          type: object
+          description: The validation result detail.
           x-ms-client-flatten: true
-          $ref: '#/components/schemas/LinkerProperties'
+          $ref: '#/components/schemas/ValidateResult'
+        resourceId:
+          description: Validated Linker id.
+          type:
+          - string
+          - 'null'
+        status:
+          description: Validation operation status.
+          type:
+          - string
+          - 'null'
+    ClientType:
+      description: The application client type
+      type: string
+      enum:
+      - none
+      - dotnet
+      - java
+      - python
+      - go
+      - php
+      - ruby
+      - django
+      - nodejs
+      - springBoot
+      - kafka-springBoot
+      - jms-springBoot
+      - dapr
+      x-ms-enum:
+        name: clientType
+        modelAsString: true
+    ConfigurationInfo:
+      type: object
+      description: The configuration information, used to generate configurations or save to applications
+      properties:
+        deleteOrUpdateBehavior:
+          description: Indicates whether to clean up previous operation when Linker is updating or deleting
+          $ref: '#/components/schemas/DeleteOrUpdateBehavior'
+        action:
+          description: Optional, indicate whether to apply configurations on source application. If enable, generate configurations and applied to the source application. Default is enable. If optOut, no configuration change will be made on source.
+          $ref: '#/components/schemas/ActionType'
+        customizedKeys:
+          description: Optional. A dictionary of default key name and customized key name mapping. If not specified, default key name will be used for generate configurations
+          type: object
+          additionalProperties:
+            type: string
+        daprProperties:
+          description: Indicates some additional properties for dapr client type
+          $ref: '#/components/schemas/DaprProperties'
+        additionalConfigurations:
+          description: A dictionary of additional configurations to be added. Service will auto generate a set of basic configurations and this property is to full fill more customized configurations
+          type: object
+          additionalProperties:
+            type: string
+        additionalConnectionStringProperties:
+          description: A dictionary of additional properties to be added in the end of connection string.
+          type: object
+          additionalProperties:
+            type: string
+        configurationStore:
+          description: An option to store configuration into different place
+          $ref: '#/components/schemas/ConfigurationStore'
+    LinkerConfigurationType:
+      description: Type of configuration to determine whether the configuration can be modified after creation. KeyvaultSecret means the configuration references a key vault secret, such as App Service/ACA key vault reference. Default means the configuration is real value, such as user name, raw secret, etc.
+      type: string
+      enum:
+      - Default
+      - KeyVaultSecret
+      x-ms-enum:
+        name: LinkerConfigurationType
+        modelAsString: true
+    DryrunList:
+      description: The list of dryrun.
+      type: object
+      properties:
+        nextLink:
+          description: The link used to get the next page of dryrun list.
+          type:
+          - string
+          - 'null'
+        value:
+          description: The list of dryrun.
+          type: array
+          items:
+            $ref: '#/components/schemas/DryrunResource'
+    DryrunParameters:
+      description: The parameters of the dryrun
+      discriminator:
+        propertyName: actionName
+      type: object
+      properties:
+        actionName:
+          $ref: '#/components/schemas/DryrunActionName'
+      required:
+      - actionName
+    ValidateResult:
+      description: The validation result for a Linker.
+      type: object
+      properties:
+        linkerName:
+          description: The linker name.
+          type:
+          - string
+          - 'null'
+        isConnectionAvailable:
+          description: A boolean value indicating whether the connection is available or not
+          type:
+          - boolean
+          - 'null'
+        reportStartTimeUtc:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The start time of the validation report.
+        reportEndTimeUtc:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The end time of the validation report.
+        sourceId:
+          description: The resource id of the Linker source application.
+          type:
+          - string
+          - 'null'
+        targetId:
+          description: The resource Id of target service.
+          type:
+          - string
+          - 'null'
+        authType:
+          description: The authentication type.
+          $ref: '#/components/schemas/AuthType'
+        validationDetail:
+          description: The detail of validation result
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationResultItem'
+          x-ms-identifiers:
+          - name
     DryrunResource:
       type: object
       description: a dryrun job resource
@@ -452,6 +771,92 @@ components:
           description: The properties of the dryrun job.
           $ref: '#/components/schemas/DryrunProperties'
           x-ms-client-flatten: true
+    DryrunOperationPreview:
+      description: The preview of the operations for creation
+      type: object
+      properties:
+        name:
+          description: The operation name
+          type: string
+        operationType:
+          description: The operation type
+          type: string
+          enum:
+          - configConnection
+          - configNetwork
+          - configAuth
+          x-ms-enum:
+            name: DryrunPreviewOperationType
+            modelAsString: true
+        description:
+          description: The description of the operation
+          type: string
+        action:
+          description: The action defined by RBAC, refer https://docs.microsoft.com/azure/role-based-access-control/role-definitions#actions-format
+          type: string
+        scope:
+          description: The scope of the operation, refer https://docs.microsoft.com/azure/role-based-access-control/scope-overview
+          type: string
+    FirewallRules:
+      type: object
+      description: Target service's firewall rules. to allow connections from source service.
+      properties:
+        ipRanges:
+          type: array
+          items:
+            type: string
+          description: This value specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account.
+        azureServices:
+          description: Allow Azure services to access the target service if true.
+          $ref: '#/components/schemas/AllowType'
+        callerClientIP:
+          description: Allow caller client IP to access the target service if true. the property is used when connecting local application to target service.
+          $ref: '#/components/schemas/AllowType'
+    TargetServiceType:
+      description: The target service type.
+      type: string
+      enum:
+      - AzureResource
+      - ConfluentBootstrapServer
+      - ConfluentSchemaRegistry
+      - SelfHostedServer
+      x-ms-enum:
+        name: targetServiceType
+        modelAsString: true
+    SecretStore:
+      type: object
+      description: An option to store secret value in secure place
+      properties:
+        keyVaultId:
+          type:
+          - string
+          - 'null'
+          description: The key vault id to store secret
+        keyVaultSecretName:
+          type:
+          - string
+          - 'null'
+          description: The key vault secret name to store secret, only valid when storing one secret
+    ActionType:
+      description: Indicates how to apply the connector operations, such as opt out network configuration, opt in configuration.
+      type: string
+      enum:
+      - enable
+      - optOut
+      x-ms-enum:
+        name: actionType
+        modelAsString: true
+    TargetServiceBase:
+      description: The target service properties
+      discriminator:
+        propertyName: type
+      type: object
+      properties:
+        type:
+          description: The target service type.
+          $ref: '#/components/schemas/TargetServiceType'
+      required:
+      - type
     DryrunPatch:
       type: object
       description: a dryrun job to be updated.
@@ -460,14 +865,104 @@ components:
           description: The properties of the dryrun job.
           $ref: '#/components/schemas/DryrunProperties'
           x-ms-client-flatten: true
-    DaprConfigurationResource:
-      description: Represent one resource of the dapr configuration list
+    DaprProperties:
+      type: object
+      description: Indicates some additional properties for dapr client type
+      properties:
+        version:
+          type:
+          - string
+          - 'null'
+          description: The dapr component version
+        componentType:
+          type:
+          - string
+          - 'null'
+          description: The dapr component type
+        secretStoreComponent:
+          type:
+          - string
+          - 'null'
+          description: The name of a secret store dapr to retrieve secret
+        metadata:
+          description: Additional dapr metadata
+          type: array
+          items:
+            $ref: '#/components/schemas/DaprMetadata'
+          x-ms-identifiers:
+          - name
+        scopes:
+          description: The dapr component scopes
+          type: array
+          items:
+            type: string
+        runtimeVersion:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          description: The runtime version supported by the properties
+        bindingComponentDirection:
+          type:
+          - string
+          - 'null'
+          enum:
+          - input
+          - output
+          x-ms-enum:
+            name: DaprBindingComponentDirection
+            modelAsString: true
+          readOnly: true
+          description: The direction supported by the dapr binding component
+    DryrunPrerequisiteResultType:
+      description: The type of dryrun result.
+      type: string
+      enum:
+      - basicError
+      - permissionsMissing
+      x-ms-enum:
+        name: DryrunPrerequisiteResultType
+        modelAsString: true
+    AuthInfoBase:
+      description: The authentication info
+      discriminator:
+        propertyName: authType
       type: object
       properties:
+        authType:
+          description: The authentication type.
+          $ref: '#/components/schemas/AuthType'
+        authMode:
+          description: Optional. Indicates how to configure authentication. If optInAllAuth, service linker configures authentication such as enabling identity on source resource and granting RBAC roles. If optOutAllAuth, opt out authentication setup. Default is optInAllAuth.
+          $ref: '#/components/schemas/AuthMode'
+      required:
+      - authType
+    ConfigurationStore:
+      type: object
+      description: An option to store configuration into different place
+      properties:
+        appConfigurationId:
+          type:
+          - string
+          - 'null'
+          description: The app configuration id to store configuration
+    LinkerResource:
+      type: object
+      description: Linker of source and target resource
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
+        description: The resource model definition for an Azure Resource Manager proxy resource.
+      required:
+      - properties
+      properties:
         properties:
-          description: The properties of the dapr configuration.
-          $ref: '#/components/schemas/DaprConfigurationProperties'
+          description: The properties of the Linker.
+          $ref: '#/components/schemas/LinkerProperties'
           x-ms-client-flatten: true
+        systemData:
+          readOnly: true
+          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/systemData
+          description: The system data.
     DryrunProperties:
       description: The properties of the dryrun job
       type: object
@@ -527,525 +1022,30 @@ components:
           type:
           - string
           - 'null'
-    DryrunList:
-      description: The list of dryrun.
+    LinkerPatch:
+      description: A Linker to be updated.
       type: object
-      properties:
-        nextLink:
-          description: The link used to get the next page of dryrun list.
-          type:
-          - string
-          - 'null'
-        value:
-          description: The list of dryrun.
-          type: array
-          items:
-            $ref: '#/components/schemas/DryrunResource'
-    LinkerConfigurationType:
-      description: Type of configuration to determine whether the configuration can be modified after creation. KeyvaultSecret means the configuration references a key vault secret, such as App Service/ACA key vault reference. Default means the configuration is real value, such as user name, raw secret, etc.
-      type: string
-      enum:
-      - Default
-      - KeyVaultSecret
-      x-ms-enum:
-        name: LinkerConfigurationType
-        modelAsString: true
-    DryrunParameters:
-      description: The parameters of the dryrun
-      discriminator:
-        propertyName: actionName
-      type: object
-      properties:
-        actionName:
-          $ref: '#/components/schemas/DryrunActionName'
-      required:
-      - actionName
-    AllowType:
-      description: Whether to allow firewall rules.
-      type: string
-      enum:
-      - 'true'
-      - 'false'
-      x-ms-enum:
-        name: allowType
-        modelAsString: true
-    LinkerResource:
-      type: object
-      description: Linker of source and target resource
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/ProxyResource
-        description: The resource model definition for an Azure Resource Manager proxy resource.
-      required:
-      - properties
       properties:
         properties:
-          description: The properties of the Linker.
+          description: Linker properties
+          type: object
+          x-ms-client-flatten: true
           $ref: '#/components/schemas/LinkerProperties'
-          x-ms-client-flatten: true
-        systemData:
-          readOnly: true
-          $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/systemData
-          description: The system data.
-    DryrunOperationPreview:
-      description: The preview of the operations for creation
-      type: object
-      properties:
-        name:
-          description: The operation name
-          type: string
-        operationType:
-          description: The operation type
-          type: string
-          enum:
-          - configConnection
-          - configNetwork
-          - configAuth
-          x-ms-enum:
-            name: DryrunPreviewOperationType
-            modelAsString: true
-        description:
-          description: The description of the operation
-          type: string
-        action:
-          description: The action defined by RBAC, refer https://docs.microsoft.com/azure/role-based-access-control/role-definitions#actions-format
-          type: string
-        scope:
-          description: The scope of the operation, refer https://docs.microsoft.com/azure/role-based-access-control/scope-overview
-          type: string
-    VNetSolution:
-      type: object
-      description: The VNet solution for linker
-      properties:
-        type:
-          description: Type of VNet solution.
-          type:
-          - string
-          - 'null'
-          enum:
-          - serviceEndpoint
-          - privateLink
-          x-ms-enum:
-            name: vNetSolutionType
-            modelAsString: true
-        deleteOrUpdateBehavior:
-          description: Indicates whether to clean up previous operation when Linker is updating or deleting
-          $ref: '#/components/schemas/DeleteOrUpdateBehavior'
-    TargetServiceType:
-      description: The target service type.
-      type: string
-      enum:
-      - AzureResource
-      - ConfluentBootstrapServer
-      - ConfluentSchemaRegistry
-      - SelfHostedServer
-      x-ms-enum:
-        name: targetServiceType
-        modelAsString: true
-    DaprConfigurationList:
-      description: Dapr configuration list supported by Service Connector
-      type: object
-      properties:
-        value:
-          description: The list of dapr configurations
-          type: array
-          items:
-            $ref: '#/components/schemas/DaprConfigurationResource'
-          x-ms-identifiers: []
-        nextLink:
-          description: Link to next page of resources.
-          type: string
-          readOnly: true
-    ClientType:
-      description: The application client type
-      type: string
-      enum:
-      - none
-      - dotnet
-      - java
-      - python
-      - go
-      - php
-      - ruby
-      - django
-      - nodejs
-      - springBoot
-      - kafka-springBoot
-      - jms-springBoot
-      - dapr
-      x-ms-enum:
-        name: clientType
-        modelAsString: true
-    ValidateResult:
-      description: The validation result for a Linker.
-      type: object
-      properties:
-        linkerName:
-          description: The linker name.
-          type:
-          - string
-          - 'null'
-        isConnectionAvailable:
-          description: A boolean value indicating whether the connection is available or not
-          type:
-          - boolean
-          - 'null'
-        reportStartTimeUtc:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: The start time of the validation report.
-        reportEndTimeUtc:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: The end time of the validation report.
-        sourceId:
-          description: The resource id of the Linker source application.
-          type:
-          - string
-          - 'null'
-        targetId:
-          description: The resource Id of target service.
-          type:
-          - string
-          - 'null'
-        authType:
-          description: The authentication type.
-          $ref: '#/components/schemas/AuthType'
-        validationDetail:
-          description: The detail of validation result
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidationResultItem'
-          x-ms-identifiers:
-          - name
-    AuthMode:
-      description: Indicates how to apply the authentication configuration operations.
-      type: string
-      enum:
-      - optInAllAuth
-      - optOutAllAuth
-      x-ms-enum:
-        name: authMode
-        modelAsString: true
-        values:
-        - value: optInAllAuth
-          description: Default authentication configuration according to the authentication type.
-        - value: optOutAllAuth
-          description: Skip all authentication configuration such as enabling managed identity and granting RBAC roles
-    TargetServiceBase:
-      description: The target service properties
-      discriminator:
-        propertyName: type
-      type: object
-      properties:
-        type:
-          description: The target service type.
-          $ref: '#/components/schemas/TargetServiceType'
-      required:
-      - type
-    ConfigurationInfo:
-      type: object
-      description: The configuration information, used to generate configurations or save to applications
-      properties:
-        deleteOrUpdateBehavior:
-          description: Indicates whether to clean up previous operation when Linker is updating or deleting
-          $ref: '#/components/schemas/DeleteOrUpdateBehavior'
-        action:
-          description: Optional, indicate whether to apply configurations on source application. If enable, generate configurations and applied to the source application. Default is enable. If optOut, no configuration change will be made on source.
-          $ref: '#/components/schemas/ActionType'
-        customizedKeys:
-          description: Optional. A dictionary of default key name and customized key name mapping. If not specified, default key name will be used for generate configurations
-          type: object
-          additionalProperties:
-            type: string
-        daprProperties:
-          description: Indicates some additional properties for dapr client type
-          $ref: '#/components/schemas/DaprProperties'
-        additionalConfigurations:
-          description: A dictionary of additional configurations to be added. Service will auto generate a set of basic configurations and this property is to full fill more customized configurations
-          type: object
-          additionalProperties:
-            type: string
-        additionalConnectionStringProperties:
-          description: A dictionary of additional properties to be added in the end of connection string.
-          type: object
-          additionalProperties:
-            type: string
-        configurationStore:
-          description: An option to store configuration into different place
-          $ref: '#/components/schemas/ConfigurationStore'
-    ActionType:
-      description: Indicates how to apply the connector operations, such as opt out network configuration, opt in configuration.
-      type: string
-      enum:
-      - enable
-      - optOut
-      x-ms-enum:
-        name: actionType
-        modelAsString: true
-    DeleteOrUpdateBehavior:
-      description: The cleanup behavior to indicate whether clean up operation when resource is deleted or updated
-      type: string
-      enum:
-      - Default
-      - ForcedCleanup
-      x-ms-enum:
-        name: DeleteOrUpdateBehavior
-        modelAsString: true
-    LinkerProperties:
-      description: The properties of the Linker.
-      type: object
-      properties:
-        targetService:
-          $ref: '#/components/schemas/TargetServiceBase'
-          description: The target service properties
-        authInfo:
-          description: The authentication type.
-          $ref: '#/components/schemas/AuthInfoBase'
-        clientType:
-          description: The application client type
-          $ref: '#/components/schemas/ClientType'
-        provisioningState:
-          readOnly: true
-          type: string
-          description: 'The provisioning state. '
-        vNetSolution:
-          description: The VNet solution.
-          $ref: '#/components/schemas/VNetSolution'
-        secretStore:
-          description: An option to store secret value in secure place
-          $ref: '#/components/schemas/SecretStore'
-        scope:
-          type:
-          - string
-          - 'null'
-          description: connection scope in source service.
-        publicNetworkSolution:
-          description: The network solution.
-          $ref: '#/components/schemas/PublicNetworkSolution'
-        configurationInfo:
-          description: The connection information consumed by applications, including secrets, connection strings.
-          $ref: '#/components/schemas/ConfigurationInfo'
-    PublicNetworkSolution:
-      type: object
-      description: Indicates public network solution, include firewall rules
-      properties:
-        deleteOrUpdateBehavior:
-          description: Indicates whether to clean up previous operation(such as firewall rules) when Linker is updating or deleting
-          $ref: '#/components/schemas/DeleteOrUpdateBehavior'
-        action:
-          description: Optional. Indicates public network solution. If enable, enable public network access of target service with best try. Default is enable. If optOut, opt out public network access configuration.
-          $ref: '#/components/schemas/ActionType'
-        firewallRules:
-          description: Describe firewall rules of target service to make sure source application could connect to the target.
-          $ref: '#/components/schemas/FirewallRules'
-    SecretStore:
-      type: object
-      description: An option to store secret value in secure place
-      properties:
-        keyVaultId:
-          type:
-          - string
-          - 'null'
-          description: The key vault id to store secret
-        keyVaultSecretName:
-          type:
-          - string
-          - 'null'
-          description: The key vault secret name to store secret, only valid when storing one secret
-    ValidateOperationResult:
-      description: The validation operation result for a Linker.
-      type: object
-      properties:
-        properties:
-          description: The validation result detail.
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ValidateResult'
-        resourceId:
-          description: Validated Linker id.
-          type:
-          - string
-          - 'null'
-        status:
-          description: Validation operation status.
-          type:
-          - string
-          - 'null'
-    SourceConfiguration:
-      description: A configuration item for source resource
-      type: object
-      properties:
-        name:
-          description: The name of setting.
-          type: string
-        value:
-          description: The value of setting
-          type:
-          - string
-          - 'null'
-        configType:
-          description: The type of setting
-          readOnly: true
-          $ref: '#/components/schemas/LinkerConfigurationType'
-        keyVaultReferenceIdentity:
-          description: The identity for key vault reference, system or user-assigned managed identity ID
-          type:
-          - string
-          - 'null'
-        description:
-          description: Descriptive information for the configuration
-          type:
-          - string
-          - 'null'
-    DaprConfigurationProperties:
-      type: object
-      properties:
-        targetType:
-          type: string
-          description: Supported target resource type, extract from resource id, uppercase
-        authType:
-          $ref: '#/components/schemas/AuthType'
-        daprProperties:
-          $ref: '#/components/schemas/DaprProperties'
-    DryrunActionName:
-      description: The name of action for you dryrun job.
-      type: string
-      enum:
-      - createOrUpdate
-      x-ms-enum:
-        name: DryrunActionName
-        modelAsString: true
-    AuthInfoBase:
-      description: The authentication info
-      discriminator:
-        propertyName: authType
-      type: object
-      properties:
-        authType:
-          description: The authentication type.
-          $ref: '#/components/schemas/AuthType'
-        authMode:
-          description: Optional. Indicates how to configure authentication. If optInAllAuth, service linker configures authentication such as enabling identity on source resource and granting RBAC roles. If optOutAllAuth, opt out authentication setup. Default is optInAllAuth.
-          $ref: '#/components/schemas/AuthMode'
-      required:
-      - authType
-    ConfigurationResult:
-      description: Configurations for source resource, include appSettings, connectionString and serviceBindings
-      type: object
-      properties:
-        configurations:
-          description: The configuration properties for source resource.
-          type: array
-          items:
-            $ref: '#/components/schemas/SourceConfiguration'
-          x-ms-identifiers:
-          - name
-    FirewallRules:
-      type: object
-      description: Target service's firewall rules. to allow connections from source service.
-      properties:
-        ipRanges:
-          type: array
-          items:
-            type: string
-          description: This value specifies the set of IP addresses or IP address ranges in CIDR form to be included as the allowed list of client IPs for a given database account.
-        azureServices:
-          description: Allow Azure services to access the target service if true.
-          $ref: '#/components/schemas/AllowType'
-        callerClientIP:
-          description: Allow caller client IP to access the target service if true. the property is used when connecting local application to target service.
-          $ref: '#/components/schemas/AllowType'
-    DryrunPrerequisiteResultType:
-      description: The type of dryrun result.
-      type: string
-      enum:
-      - basicError
-      - permissionsMissing
-      x-ms-enum:
-        name: DryrunPrerequisiteResultType
-        modelAsString: true
-    DaprProperties:
-      type: object
-      description: Indicates some additional properties for dapr client type
-      properties:
-        version:
-          type:
-          - string
-          - 'null'
-          description: The dapr component version
-        componentType:
-          type:
-          - string
-          - 'null'
-          description: The dapr component type
-        secretStoreComponent:
-          type:
-          - string
-          - 'null'
-          description: The name of a secret store dapr to retrieve secret
-        metadata:
-          description: Additional dapr metadata
-          type: array
-          items:
-            $ref: '#/components/schemas/DaprMetadata'
-          x-ms-identifiers:
-          - name
-        scopes:
-          description: The dapr component scopes
-          type: array
-          items:
-            type: string
-        runtimeVersion:
-          type:
-          - string
-          - 'null'
-          readOnly: true
-          description: The runtime version supported by the properties
-        bindingComponentDirection:
-          type:
-          - string
-          - 'null'
-          enum:
-          - input
-          - output
-          x-ms-enum:
-            name: DaprBindingComponentDirection
-            modelAsString: true
-          readOnly: true
-          description: The direction supported by the dapr binding component
-    AuthType:
-      description: The authentication type.
-      type: string
-      enum:
-      - systemAssignedIdentity
-      - userAssignedIdentity
-      - servicePrincipalSecret
-      - servicePrincipalCertificate
-      - secret
-      - accessKey
-      - userAccount
-      - easyAuthMicrosoftEntraID
-      x-ms-enum:
-        name: AuthType
-        modelAsString: true
   parameters:
+    LinkerNameParameter:
+      name: linkerName
+      in: path
+      required: true
+      description: The name Linker resource.
+      x-ms-parameter-location: method
+      schema:
+        type: string
     ResourceUriParameter:
       name: resourceUri
       in: path
       required: true
       description: The fully qualified Azure Resource manager identifier of the resource to be connected.
       x-ms-skip-url-encoding: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    LinkerNameParameter:
-      name: linkerName
-      in: path
-      required: true
-      description: The name Linker resource.
       x-ms-parameter-location: method
       schema:
         type: string

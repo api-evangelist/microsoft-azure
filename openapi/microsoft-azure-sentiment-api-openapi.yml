@@ -158,28 +158,66 @@ components:
           description: The array of assessments for the sentence.
           items:
             $ref: '#/components/schemas/SentenceAssessment'
-    SentimentResponse:
+    SentenceTarget:
       type: object
       required:
-      - documents
-      - errors
-      - modelVersion
+      - confidenceScores
+      - length
+      - offset
+      - relations
+      - sentiment
+      - text
       properties:
-        documents:
-          type: array
-          description: Sentiment analysis per document.
-          items:
-            $ref: '#/components/schemas/DocumentSentiment'
-        errors:
-          type: array
-          description: Errors by document id.
-          items:
-            $ref: '#/components/schemas/DocumentError'
-        statistics:
-          $ref: '#/components/schemas/RequestStatistics'
-        modelVersion:
+        sentiment:
           type: string
-          description: This field indicates which model is used for scoring.
+          enum:
+          - positive
+          - mixed
+          - negative
+          x-ms-enum:
+            name: TokenSentimentValue
+            modelAsString: false
+          description: Targeted sentiment in the sentence.
+        confidenceScores:
+          description: Target sentiment confidence scores for the target in the sentence.
+          $ref: '#/components/schemas/TargetConfidenceScoreLabel'
+        offset:
+          type: integer
+          format: int32
+          description: The target offset from the start of the sentence.
+        length:
+          type: integer
+          format: int32
+          description: The length of the target.
+        text:
+          type: string
+          description: The target text detected.
+        relations:
+          type: array
+          description: The array of either assessment or target objects which is related to the target.
+          items:
+            $ref: '#/components/schemas/TargetRelation'
+    TextAnalyticsWarning:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          enum:
+          - LongWordsInDocument
+          - DocumentTruncated
+          x-ms-enum:
+            name: WarningCodeValue
+            modelAsString: true
+          description: Error code.
+        message:
+          type: string
+          description: Warning message.
+        targetRef:
+          type: string
+          description: A JSON pointer reference indicating the target object.
     DocumentStatistics:
       type: object
       required:
@@ -233,6 +271,64 @@ components:
           description: Warnings encountered while processing document.
           items:
             $ref: '#/components/schemas/TextAnalyticsWarning'
+    SentimentConfidenceScorePerLabel:
+      type: object
+      required:
+      - positive
+      - neutral
+      - negative
+      properties:
+        positive:
+          type: number
+          format: double
+        neutral:
+          type: number
+          format: double
+        negative:
+          type: number
+          format: double
+      description: 'Represents the confidence scores between 0 and 1 across all sentiment classes: positive, neutral, negative.'
+    TextAnalyticsError:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          enum:
+          - InvalidRequest
+          - InvalidArgument
+          - InternalServerError
+          - ServiceUnavailable
+          - NotFound
+          x-ms-enum:
+            name: ErrorCodeValue
+            modelAsString: false
+          description: Error code.
+        message:
+          type: string
+          description: Error message.
+        target:
+          type: string
+          description: Error target.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: Inner error contains more specific information.
+        details:
+          type: array
+          description: Details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/TextAnalyticsError'
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          description: Document Error.
+          $ref: '#/components/schemas/TextAnalyticsError'
     RequestStatistics:
       type: object
       required:
@@ -258,54 +354,6 @@ components:
           format: int64
           description: Number of transactions for the request.
       description: if showStats=true was specified in the request this field will contain information about the request payload.
-    TargetRelation:
-      type: object
-      required:
-      - ref
-      - relationType
-      properties:
-        relationType:
-          type: string
-          enum:
-          - assessment
-          - target
-          x-ms-enum:
-            name: TargetRelationType
-            modelAsString: false
-          description: The type related to the target.
-        ref:
-          type: string
-          description: The JSON pointer indicating the linked object.
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          description: Document Error.
-          $ref: '#/components/schemas/TextAnalyticsError'
-    TextAnalyticsWarning:
-      type: object
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: string
-          enum:
-          - LongWordsInDocument
-          - DocumentTruncated
-          x-ms-enum:
-            name: WarningCodeValue
-            modelAsString: true
-          description: Error code.
-        message:
-          type: string
-          description: Warning message.
-        targetRef:
-          type: string
-          description: A JSON pointer reference indicating the target object.
     InnerError:
       type: object
       required:
@@ -353,62 +401,6 @@ components:
           items:
             $ref: '#/components/schemas/MultiLanguageInput'
       description: Contains a set of input documents to be analyzed by the service.
-    SentenceTarget:
-      type: object
-      required:
-      - confidenceScores
-      - length
-      - offset
-      - relations
-      - sentiment
-      - text
-      properties:
-        sentiment:
-          type: string
-          enum:
-          - positive
-          - mixed
-          - negative
-          x-ms-enum:
-            name: TokenSentimentValue
-            modelAsString: false
-          description: Targeted sentiment in the sentence.
-        confidenceScores:
-          description: Target sentiment confidence scores for the target in the sentence.
-          $ref: '#/components/schemas/TargetConfidenceScoreLabel'
-        offset:
-          type: integer
-          format: int32
-          description: The target offset from the start of the sentence.
-        length:
-          type: integer
-          format: int32
-          description: The length of the target.
-        text:
-          type: string
-          description: The target text detected.
-        relations:
-          type: array
-          description: The array of either assessment or target objects which is related to the target.
-          items:
-            $ref: '#/components/schemas/TargetRelation'
-    SentimentConfidenceScorePerLabel:
-      type: object
-      required:
-      - positive
-      - neutral
-      - negative
-      properties:
-        positive:
-          type: number
-          format: double
-        neutral:
-          type: number
-          format: double
-        negative:
-          type: number
-          format: double
-      description: 'Represents the confidence scores between 0 and 1 across all sentiment classes: positive, neutral, negative.'
     MultiLanguageInput:
       type: object
       required:
@@ -425,38 +417,46 @@ components:
           type: string
           description: (Optional) This is the 2 letter ISO 639-1 representation of a language. For example, use "en" for English; "es" for Spanish etc. If not set, use "en" for English as default.
       description: Contains an input document to be analyzed by the service.
-    TextAnalyticsError:
+    TargetRelation:
       type: object
       required:
-      - code
-      - message
+      - ref
+      - relationType
       properties:
-        code:
+        relationType:
           type: string
           enum:
-          - InvalidRequest
-          - InvalidArgument
-          - InternalServerError
-          - ServiceUnavailable
-          - NotFound
+          - assessment
+          - target
           x-ms-enum:
-            name: ErrorCodeValue
+            name: TargetRelationType
             modelAsString: false
-          description: Error code.
-        message:
+          description: The type related to the target.
+        ref:
           type: string
-          description: Error message.
-        target:
-          type: string
-          description: Error target.
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: Inner error contains more specific information.
-        details:
+          description: The JSON pointer indicating the linked object.
+    SentimentResponse:
+      type: object
+      required:
+      - documents
+      - errors
+      - modelVersion
+      properties:
+        documents:
           type: array
-          description: Details about specific errors that led to this reported error.
+          description: Sentiment analysis per document.
           items:
-            $ref: '#/components/schemas/TextAnalyticsError'
+            $ref: '#/components/schemas/DocumentSentiment'
+        errors:
+          type: array
+          description: Errors by document id.
+          items:
+            $ref: '#/components/schemas/DocumentError'
+        statistics:
+          $ref: '#/components/schemas/RequestStatistics'
+        modelVersion:
+          type: string
+          description: This field indicates which model is used for scoring.
     TargetConfidenceScoreLabel:
       type: object
       required:
@@ -471,6 +471,30 @@ components:
           format: double
       description: 'Represents the confidence scores across all sentiment classes: positive, neutral, negative.'
   parameters:
+    ShowStats:
+      name: showStats
+      in: query
+      description: (Optional) if set to true, response will contain request and document level statistics.
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
+    MultiLanguageInput:
+      in: body
+      name: input
+      description: Collection of documents to analyze.
+      required: true
+      schema:
+        $ref: '#/components/schemas/MultiLanguageBatchInput'
+      x-ms-parameter-location: method
+    ModelVersion:
+      name: model-version
+      in: query
+      description: '(Optional) This value indicates which model will be used for scoring. If a model-version is not specified, the API should default to the latest, non-preview version. '
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: string
     StringIndexType:
       name: stringIndexType
       in: query
@@ -493,30 +517,6 @@ components:
         - UnicodeCodePoint
         - Utf16CodeUnit
         default: TextElements_v8
-    MultiLanguageInput:
-      in: body
-      name: input
-      description: Collection of documents to analyze.
-      required: true
-      schema:
-        $ref: '#/components/schemas/MultiLanguageBatchInput'
-      x-ms-parameter-location: method
-    ShowStats:
-      name: showStats
-      in: query
-      description: (Optional) if set to true, response will contain request and document level statistics.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
-    ModelVersion:
-      name: model-version
-      in: query
-      description: '(Optional) This value indicates which model will be used for scoring. If a model-version is not specified, the API should default to the latest, non-preview version. '
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
   securitySchemes:
     apim_key:
       type: apiKey

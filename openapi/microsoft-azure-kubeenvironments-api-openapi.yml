@@ -237,14 +237,6 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+[^\.]$
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: API Version
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -253,49 +245,147 @@ components:
       x-ms-parameter-location: client
       schema:
         type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: API Version
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
   schemas:
-    ArcConfiguration:
+    AppLogsConfiguration:
       type: object
       properties:
-        artifactsStorageType:
-          enum:
-          - LocalNode
-          - NetworkFileSystem
+        destination:
           type: string
-          x-ms-enum:
-            name: StorageType
-            modelAsString: false
+        logAnalyticsConfiguration:
+          $ref: '#/components/schemas/LogAnalyticsConfiguration'
+    ContainerAppsConfiguration:
+      type: object
+      properties:
+        daprAIInstrumentationKey:
+          type: string
+          description: Azure Monitor instrumentation key used by Dapr to export Service to Service communication telemetry
           x-ms-mutability:
           - create
           - read
-        artifactStorageClassName:
+        platformReservedCidr:
           type: string
+          description: IP range in CIDR notation that can be reserved for environment infrastructure IP addresses. It must not overlap with any other Subnet IP ranges.
           x-ms-mutability:
           - create
           - read
-        artifactStorageMountPath:
+        platformReservedDnsIP:
           type: string
+          description: An IP address from the IP range defined by platformReservedCidr that will be reserved for the internal DNS server
           x-ms-mutability:
           - create
           - read
-        artifactStorageNodeName:
+        controlPlaneSubnetResourceId:
           type: string
+          description: Resource ID of a subnet for control plane infrastructure components. This subnet must be in the same VNET as the subnet defined in appSubnetResourceId. Must not overlap with the IP range defined in platformReservedCidr, if defined.
           x-ms-mutability:
           - create
           - read
-        artifactStorageAccessMode:
+        appSubnetResourceId:
           type: string
+          description: Resource ID of a subnet for control plane infrastructure components. This subnet must be in the same VNET as the subnet defined in appSubnetResourceId. Must not overlap with the IP range defined in platformReservedCidr, if defined.
           x-ms-mutability:
           - create
           - read
-        frontEndServiceConfiguration:
-          $ref: '#/components/schemas/FrontEndConfiguration'
-        kubeConfig:
+        dockerBridgeCidr:
           type: string
+          description: CIDR notation IP range assigned to the Docker bridge network. It must not overlap with any Subnet IP ranges or the IP range defined in platformReservedCidr, if defined.
           x-ms-mutability:
           - create
-          - update
-          x-ms-secret: true
+          - read
+    KubeEnvironmentPatchResource:
+      description: ARM resource for a KubeEnvironment when patching
+      type: object
+      allOf:
+      - $ref: ./CommonDefinitions.json#/definitions/ProxyOnlyResource
+      properties:
+        properties:
+          description: KubeEnvironmentPatchResource resource specific properties
+          type: object
+          properties:
+            provisioningState:
+              description: Provisioning state of the Kubernetes Environment.
+              enum:
+              - Succeeded
+              - Failed
+              - Canceled
+              - Waiting
+              - InitializationInProgress
+              - InfrastructureSetupInProgress
+              - InfrastructureSetupComplete
+              - ScheduledForDelete
+              - UpgradeRequested
+              - UpgradeFailed
+              type: string
+              readOnly: true
+              x-ms-enum:
+                name: KubeEnvironmentProvisioningState
+                modelAsString: false
+            deploymentErrors:
+              description: Any errors that occurred during deployment or deployment validation
+              type: string
+              readOnly: true
+            internalLoadBalancerEnabled:
+              description: Only visible within Vnet/Subnet
+              type: boolean
+              x-ms-mutability:
+              - create
+              - read
+            defaultDomain:
+              description: Default Domain Name for the cluster
+              type: string
+              readOnly: true
+            staticIp:
+              description: Static IP of the KubeEnvironment
+              type: string
+              x-ms-mutability:
+              - create
+              - read
+            arcConfiguration:
+              $ref: '#/components/schemas/ArcConfiguration'
+              description: 'Cluster configuration which determines the ARC cluster
+
+                components types. Eg: Choosing between BuildService kind,
+
+                FrontEnd Service ArtifactsStorageType etc.'
+            appLogsConfiguration:
+              $ref: '#/components/schemas/AppLogsConfiguration'
+              description: 'Cluster configuration which enables the log daemon to export
+
+                app logs to a destination. Currently only "log-analytics" is
+
+                supported'
+            containerAppsConfiguration:
+              $ref: '#/components/schemas/ContainerAppsConfiguration'
+              description: Cluster configuration for Container Apps Environments to configure Dapr Instrumentation Key and VNET Configuration
+            aksResourceID:
+              type: string
+              x-ms-mutability:
+              - create
+              - read
+          x-ms-client-flatten: true
+    KubeEnvironmentCollection:
+      description: Collection of Kubernetes Environments
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: Collection of resources.
+          type: array
+          items:
+            $ref: '#/components/schemas/KubeEnvironment'
+        nextLink:
+          description: Link to next page of resources.
+          type: string
+          readOnly: true
     KubeEnvironment:
       description: A Kubernetes cluster specialized for web workloads by Azure App Service
       type: object
@@ -375,84 +465,6 @@ components:
           x-ms-client-flatten: true
         extendedLocation:
           $ref: ./CommonDefinitions.json#/definitions/ExtendedLocation
-    KubeEnvironmentPatchResource:
-      description: ARM resource for a KubeEnvironment when patching
-      type: object
-      allOf:
-      - $ref: ./CommonDefinitions.json#/definitions/ProxyOnlyResource
-      properties:
-        properties:
-          description: KubeEnvironmentPatchResource resource specific properties
-          type: object
-          properties:
-            provisioningState:
-              description: Provisioning state of the Kubernetes Environment.
-              enum:
-              - Succeeded
-              - Failed
-              - Canceled
-              - Waiting
-              - InitializationInProgress
-              - InfrastructureSetupInProgress
-              - InfrastructureSetupComplete
-              - ScheduledForDelete
-              - UpgradeRequested
-              - UpgradeFailed
-              type: string
-              readOnly: true
-              x-ms-enum:
-                name: KubeEnvironmentProvisioningState
-                modelAsString: false
-            deploymentErrors:
-              description: Any errors that occurred during deployment or deployment validation
-              type: string
-              readOnly: true
-            internalLoadBalancerEnabled:
-              description: Only visible within Vnet/Subnet
-              type: boolean
-              x-ms-mutability:
-              - create
-              - read
-            defaultDomain:
-              description: Default Domain Name for the cluster
-              type: string
-              readOnly: true
-            staticIp:
-              description: Static IP of the KubeEnvironment
-              type: string
-              x-ms-mutability:
-              - create
-              - read
-            arcConfiguration:
-              $ref: '#/components/schemas/ArcConfiguration'
-              description: 'Cluster configuration which determines the ARC cluster
-
-                components types. Eg: Choosing between BuildService kind,
-
-                FrontEnd Service ArtifactsStorageType etc.'
-            appLogsConfiguration:
-              $ref: '#/components/schemas/AppLogsConfiguration'
-              description: 'Cluster configuration which enables the log daemon to export
-
-                app logs to a destination. Currently only "log-analytics" is
-
-                supported'
-            containerAppsConfiguration:
-              $ref: '#/components/schemas/ContainerAppsConfiguration'
-              description: Cluster configuration for Container Apps Environments to configure Dapr Instrumentation Key and VNET Configuration
-            aksResourceID:
-              type: string
-              x-ms-mutability:
-              - create
-              - read
-          x-ms-client-flatten: true
-    AppLogsConfiguration:
-      type: object
-      properties:
-        destination:
-          type: string
-        logAnalyticsConfiguration:
-          $ref: '#/components/schemas/LogAnalyticsConfiguration'
     FrontEndConfiguration:
       type: object
       properties:
@@ -464,66 +476,54 @@ components:
           x-ms-enum:
             name: FrontEndServiceType
             modelAsString: false
-    KubeEnvironmentCollection:
-      description: Collection of Kubernetes Environments
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: Collection of resources.
-          type: array
-          items:
-            $ref: '#/components/schemas/KubeEnvironment'
-        nextLink:
-          description: Link to next page of resources.
-          type: string
-          readOnly: true
-    ContainerAppsConfiguration:
-      type: object
-      properties:
-        daprAIInstrumentationKey:
-          type: string
-          description: Azure Monitor instrumentation key used by Dapr to export Service to Service communication telemetry
-          x-ms-mutability:
-          - create
-          - read
-        platformReservedCidr:
-          type: string
-          description: IP range in CIDR notation that can be reserved for environment infrastructure IP addresses. It must not overlap with any other Subnet IP ranges.
-          x-ms-mutability:
-          - create
-          - read
-        platformReservedDnsIP:
-          type: string
-          description: An IP address from the IP range defined by platformReservedCidr that will be reserved for the internal DNS server
-          x-ms-mutability:
-          - create
-          - read
-        controlPlaneSubnetResourceId:
-          type: string
-          description: Resource ID of a subnet for control plane infrastructure components. This subnet must be in the same VNET as the subnet defined in appSubnetResourceId. Must not overlap with the IP range defined in platformReservedCidr, if defined.
-          x-ms-mutability:
-          - create
-          - read
-        appSubnetResourceId:
-          type: string
-          description: Resource ID of a subnet for control plane infrastructure components. This subnet must be in the same VNET as the subnet defined in appSubnetResourceId. Must not overlap with the IP range defined in platformReservedCidr, if defined.
-          x-ms-mutability:
-          - create
-          - read
-        dockerBridgeCidr:
-          type: string
-          description: CIDR notation IP range assigned to the Docker bridge network. It must not overlap with any Subnet IP ranges or the IP range defined in platformReservedCidr, if defined.
-          x-ms-mutability:
-          - create
-          - read
     LogAnalyticsConfiguration:
       type: object
       properties:
         customerId:
           type: string
         sharedKey:
+          type: string
+          x-ms-mutability:
+          - create
+          - update
+          x-ms-secret: true
+    ArcConfiguration:
+      type: object
+      properties:
+        artifactsStorageType:
+          enum:
+          - LocalNode
+          - NetworkFileSystem
+          type: string
+          x-ms-enum:
+            name: StorageType
+            modelAsString: false
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageClassName:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageMountPath:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageNodeName:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        artifactStorageAccessMode:
+          type: string
+          x-ms-mutability:
+          - create
+          - read
+        frontEndServiceConfiguration:
+          $ref: '#/components/schemas/FrontEndConfiguration'
+        kubeConfig:
           type: string
           x-ms-mutability:
           - create

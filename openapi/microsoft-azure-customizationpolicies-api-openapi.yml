@@ -85,22 +85,58 @@ paths:
           $ref: ./examples/GetCustomizationPolicy.json
 components:
   schemas:
-    CustomizationHostName:
-      description: Host name model
+    CustomizationIPSettings:
       type: object
       properties:
-        name:
-          description: Hostname
+        gateway:
+          description: The list of gateways
+          type: array
+          items:
+            type: string
+        ip:
+          description: Ip address customization settings
+          $ref: '#/components/schemas/CustomizationIPAddress'
+        subnetMask:
+          description: Adapter subnet mask
+          type: string
+    CustomizationIPAddress:
+      type: object
+      properties:
+        argument:
+          description: Argument when Custom ip type is selected
+          type: string
+        ipAddress:
+          description: Defined Ip Address when Fixed ip type is selected
           type: string
         type:
-          description: Type of host name
+          description: Customization Specification ip type
           type: string
           enum:
+          - CUSTOM
+          - DHCP_IP
+          - FIXED_IP
           - USER_DEFINED
-          - PREFIX_BASED
-          - FIXED
-          - VIRTUAL_MACHINE_NAME
-          - CUSTOM_NAME
+    CSRPErrorBody:
+      description: Error properties
+      properties:
+        code:
+          description: Error's code
+          type: string
+          readOnly: true
+        details:
+          description: Error's details
+          type: array
+          items:
+            $ref: '#/components/schemas/CSRPErrorBody'
+          x-ms-identifiers: []
+          readOnly: true
+        message:
+          description: Error's message
+          type: string
+          readOnly: true
+        target:
+          description: Error's target
+          type: string
     CustomizationPolicy:
       description: The virtual machine customization policy
       type: object
@@ -122,6 +158,15 @@ components:
         type:
           type: string
           readOnly: true
+    CustomizationNicSetting:
+      type: object
+      properties:
+        adapter:
+          description: The list of adapters' settings
+          $ref: '#/components/schemas/CustomizationIPSettings'
+        macAddress:
+          description: NIC mac address
+          type: string
     CustomizationPoliciesListResponse:
       description: List of customization polices response model
       properties:
@@ -133,20 +178,44 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomizationPolicy'
-    CustomizationIPSettings:
+    CustomizationPolicyProperties:
+      description: The properties of Customization policy
       type: object
       properties:
-        gateway:
-          description: The list of gateways
-          type: array
-          items:
-            type: string
-        ip:
-          description: Ip address customization settings
-          $ref: '#/components/schemas/CustomizationIPAddress'
-        subnetMask:
-          description: Adapter subnet mask
+        description:
+          description: Policy description
           type: string
+        privateCloudId:
+          description: The Private cloud id
+          type: string
+        specification:
+          description: Detailed customization policy specification
+          $ref: '#/components/schemas/CustomizationSpecification'
+        type:
+          description: The type of customization (Linux or Windows)
+          type: string
+          enum:
+          - LINUX
+          - WINDOWS
+        version:
+          description: Policy version
+          type: string
+    CustomizationHostName:
+      description: Host name model
+      type: object
+      properties:
+        name:
+          description: Hostname
+          type: string
+        type:
+          description: Type of host name
+          type: string
+          enum:
+          - USER_DEFINED
+          - PREFIX_BASED
+          - FIXED
+          - VIRTUAL_MACHINE_NAME
+          - CUSTOM_NAME
     CSRPError:
       description: General error model
       properties:
@@ -177,75 +246,6 @@ components:
               description: Is password predefined in customization policy
               type: boolean
               default: false
-    CSRPErrorBody:
-      description: Error properties
-      properties:
-        code:
-          description: Error's code
-          type: string
-          readOnly: true
-        details:
-          description: Error's details
-          type: array
-          items:
-            $ref: '#/components/schemas/CSRPErrorBody'
-          x-ms-identifiers: []
-          readOnly: true
-        message:
-          description: Error's message
-          type: string
-          readOnly: true
-        target:
-          description: Error's target
-          type: string
-    CustomizationPolicyProperties:
-      description: The properties of Customization policy
-      type: object
-      properties:
-        description:
-          description: Policy description
-          type: string
-        privateCloudId:
-          description: The Private cloud id
-          type: string
-        specification:
-          description: Detailed customization policy specification
-          $ref: '#/components/schemas/CustomizationSpecification'
-        type:
-          description: The type of customization (Linux or Windows)
-          type: string
-          enum:
-          - LINUX
-          - WINDOWS
-        version:
-          description: Policy version
-          type: string
-    CustomizationIPAddress:
-      type: object
-      properties:
-        argument:
-          description: Argument when Custom ip type is selected
-          type: string
-        ipAddress:
-          description: Defined Ip Address when Fixed ip type is selected
-          type: string
-        type:
-          description: Customization Specification ip type
-          type: string
-          enum:
-          - CUSTOM
-          - DHCP_IP
-          - FIXED_IP
-          - USER_DEFINED
-    CustomizationNicSetting:
-      type: object
-      properties:
-        adapter:
-          description: The list of adapters' settings
-          $ref: '#/components/schemas/CustomizationIPSettings'
-        macAddress:
-          description: NIC mac address
-          type: string
     CustomizationSpecification:
       description: The specification for Customization Policy
       type: object
@@ -261,10 +261,16 @@ components:
           x-ms-identifiers:
           - macAddress
   parameters:
-    regionId:
-      x-ms-parameter-location: method
-      description: The region Id (westus, eastus)
-      name: regionId
+    api-version:
+      description: Client API version.
+      name: api-version
+      in: query
+      required: true
+      schema:
+        type: string
+    subscriptionId:
+      description: The subscription ID.
+      name: subscriptionId
       in: path
       required: true
       schema:
@@ -277,17 +283,11 @@ components:
       required: true
       schema:
         type: string
-    subscriptionId:
-      description: The subscription ID.
-      name: subscriptionId
+    regionId:
+      x-ms-parameter-location: method
+      description: The region Id (westus, eastus)
+      name: regionId
       in: path
-      required: true
-      schema:
-        type: string
-    api-version:
-      description: Client API version.
-      name: api-version
-      in: query
       required: true
       schema:
         type: string

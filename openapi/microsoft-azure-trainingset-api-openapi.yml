@@ -167,6 +167,44 @@ paths:
         required: true
 components:
   schemas:
+    AzureBlobContentSource:
+      description: Azure Blob Storage content. With the examples below, it represents files https://contoso.blob.core.windows.net/voicecontainer/jessica/*.wav
+      type: object
+      required:
+      - containerUrl
+      - extensions
+      properties:
+        containerUrl:
+          description: Azure Blob Storage container URL with [SAS](https://learn.microsoft.com/azure/storage/common/storage-sas-overview). Need both read and list permissions.
+          type: string
+          format: url
+          example: https://contoso.blob.core.windows.net/voicecontainer?mySasToken
+        prefix:
+          description: Blob name prefix.
+          type: string
+          example: jessica
+        extensions:
+          description: File name extensions.
+          type: array
+          items:
+            type: string
+            example: .wav
+    ErrorCode:
+      description: Top-level error code
+      enum:
+      - BadRequest
+      - BadArgument
+      - Unauthorized
+      - Forbidden
+      - NotFound
+      - UnsupportedMediaType
+      - TooManyRequests
+      - InternalServerError
+      - ServiceUnavailable
+      type: string
+      x-ms-enum:
+        name: ErrorCode
+        modelAsString: true
     ResourceId:
       description: Resource id
       type: string
@@ -182,6 +220,68 @@ components:
       x-ms-enum:
         name: VoiceKind
         modelAsString: true
+    Status:
+      description: Status of a resource.
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      - Disabling
+      - Disabled
+      type: string
+      x-ms-enum:
+        name: Status
+        modelAsString: true
+    ErrorResponse:
+      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
+      required:
+      - error
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    DatasetKind:
+      description: Dataset kind
+      enum:
+      - AudioAndScript
+      - LongAudio
+      - AudioOnly
+      type: string
+      x-ms-enum:
+        name: DatasetKind
+        modelAsString: true
+    Error:
+      description: Top-level error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains an top-level error with error code, message, details, target and an inner error with more descriptive details.
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        target:
+          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
+          type: string
+        message:
+          description: Top-level error message.
+          type: string
+        details:
+          description: Additional supportive details regarding the error and/or expected policies.
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+    TrainingSetProperties:
+      description: Training set properties
+      type: object
+      properties:
+        utteranceCount:
+          description: Utterance count in this training set
+          format: int32
+          type: integer
+      readOnly: true
     TrainingSet:
       description: Training set
       required:
@@ -220,36 +320,21 @@ components:
           format: date-time
           type: string
           readOnly: true
-    TrainingSetProperties:
-      description: Training set properties
+    InnerError:
+      description: Inner error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains required properties error code, message and optional properties target, inner error(this can be nested).
       type: object
       properties:
-        utteranceCount:
-          description: Utterance count in this training set
-          format: int32
-          type: integer
-      readOnly: true
-    ErrorResponse:
-      description: Error response follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors.
-      required:
-      - error
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-    Status:
-      description: Status of a resource.
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      - Disabling
-      - Disabled
-      type: string
-      x-ms-enum:
-        name: Status
-        modelAsString: true
+        code:
+          description: Detailed error code to help diagnostic.
+          type: string
+        target:
+          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
+          type: string
+        message:
+          description: Detailed error message.
+          type: string
+        innererror:
+          $ref: '#/components/schemas/InnerError'
     Dataset:
       description: Dataset object
       required:
@@ -269,59 +354,6 @@ components:
           $ref: '#/components/schemas/AzureBlobContentSource'
         scripts:
           $ref: '#/components/schemas/AzureBlobContentSource'
-    InnerError:
-      description: Inner error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains required properties error code, message and optional properties target, inner error(this can be nested).
-      type: object
-      properties:
-        code:
-          description: Detailed error code to help diagnostic.
-          type: string
-        target:
-          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
-          type: string
-        message:
-          description: Detailed error message.
-          type: string
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-    ErrorCode:
-      description: Top-level error code
-      enum:
-      - BadRequest
-      - BadArgument
-      - Unauthorized
-      - Forbidden
-      - NotFound
-      - UnsupportedMediaType
-      - TooManyRequests
-      - InternalServerError
-      - ServiceUnavailable
-      type: string
-      x-ms-enum:
-        name: ErrorCode
-        modelAsString: true
-    AzureBlobContentSource:
-      description: Azure Blob Storage content. With the examples below, it represents files https://contoso.blob.core.windows.net/voicecontainer/jessica/*.wav
-      type: object
-      required:
-      - containerUrl
-      - extensions
-      properties:
-        containerUrl:
-          description: Azure Blob Storage container URL with [SAS](https://learn.microsoft.com/azure/storage/common/storage-sas-overview). Need both read and list permissions.
-          type: string
-          format: url
-          example: https://contoso.blob.core.windows.net/voicecontainer?mySasToken
-        prefix:
-          description: Blob name prefix.
-          type: string
-          example: jessica
-        extensions:
-          description: File name extensions.
-          type: array
-          items:
-            type: string
-            example: .wav
     PaginatedTrainingSets:
       description: Paginated training set list
       required:
@@ -337,39 +369,18 @@ components:
           description: Link to next page.
           format: uri
           type: string
-    DatasetKind:
-      description: Dataset kind
-      enum:
-      - AudioAndScript
-      - LongAudio
-      - AudioOnly
-      type: string
-      x-ms-enum:
-        name: DatasetKind
-        modelAsString: true
-    Error:
-      description: Top-level error follows Microsoft Azure REST API Guidelines which is available at https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#handling-errors. This contains an top-level error with error code, message, details, target and an inner error with more descriptive details.
-      required:
-      - code
-      - message
-      type: object
-      properties:
-        code:
-          $ref: '#/components/schemas/ErrorCode'
-        target:
-          description: The source of the error. For example it would be "model" or "model id" in case of invalid model.
-          type: string
-        message:
-          description: Top-level error message.
-          type: string
-        details:
-          description: Additional supportive details regarding the error and/or expected policies.
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-        innererror:
-          $ref: '#/components/schemas/InnerError'
   parameters:
+    PathId:
+      name: id
+      in: path
+      description: The ID of the resource.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 3
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
     QuerySkip:
       name: skip
       in: query
@@ -380,17 +391,6 @@ components:
         type: integer
         format: int32
         default: 0
-    HeaderOperationId:
-      name: Operation-Id
-      in: header
-      description: ID of the status monitor for the operation. If the Operation-Id header matches an existing operation and the request is not identical to the prior request, it will fail with a 400 Bad Request.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 3
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{1,62}[a-zA-Z0-9]$
     QueryApiVersion:
       name: api-version
       in: query
@@ -409,11 +409,11 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    PathId:
-      name: id
-      in: path
-      description: The ID of the resource.
-      required: true
+    HeaderOperationId:
+      name: Operation-Id
+      in: header
+      description: ID of the status monitor for the operation. If the Operation-Id header matches an existing operation and the request is not identical to the prior request, it will fail with a 400 Bad Request.
+      required: false
       x-ms-parameter-location: method
       schema:
         type: string

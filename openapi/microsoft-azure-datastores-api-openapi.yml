@@ -373,6 +373,45 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
+    ResourceProvisioningState:
+      type: string
+      description: The current deployment state of resource.
+      enum:
+      - Succeeded
+      - Failed
+      - Canceled
+      - Provisioning
+      - Updating
+      - Deleting
+      - Accepted
+      - Created
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    ExtendedLocation:
+      type: object
+      description: The extended location.
+      properties:
+        type:
+          type: string
+          description: The extended location type.
+        name:
+          type: string
+          description: The extended location name.
+    DatastoresList:
+      description: List of Datastores.
+      type: object
+      properties:
+        nextLink:
+          description: Url to follow for getting next page of Datastores.
+          type: string
+        value:
+          description: Array of Datastores
+          type: array
+          items:
+            $ref: '#/components/schemas/Datastore'
+      required:
+      - value
     Datastore:
       description: Define the datastore.
       required:
@@ -417,16 +456,44 @@ components:
         kind:
           type: string
           description: Metadata used by portal/tooling/etc to render different UX experiences for resources of the same type; e.g. ApiApps are a kind of Microsoft.Web/sites type.  If supported, the resource provider must validate and persist this value.
-    ExtendedLocation:
+    ResourceStatus:
+      description: The resource status information.
       type: object
-      description: The extended location.
       properties:
         type:
+          description: The type of the condition.
           type: string
-          description: The extended location type.
-        name:
+          readOnly: true
+        status:
+          description: Status of the condition.
           type: string
-          description: The extended location name.
+          readOnly: true
+        reason:
+          description: The reason for the condition's status.
+          type: string
+          readOnly: true
+        message:
+          description: A human readable message indicating details about the status.
+          type: string
+          readOnly: true
+        severity:
+          description: Severity with which to treat failures of this type of condition.
+          type: string
+          readOnly: true
+        lastUpdatedAt:
+          description: The last update time for this condition.
+          type: string
+          format: date-time
+          readOnly: true
+    ResourcePatch:
+      type: object
+      properties:
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource tags.
+      description: Object containing updates for patch operations.
     DatastoreProperties:
       description: Describes the properties of a Datastore.
       type: object
@@ -474,73 +541,6 @@ components:
           $ref: '#/components/schemas/ResourceProvisioningState'
           description: Provisioning state of the resource.
           readOnly: true
-    ResourceProvisioningState:
-      type: string
-      description: The current deployment state of resource.
-      enum:
-      - Succeeded
-      - Failed
-      - Canceled
-      - Provisioning
-      - Updating
-      - Deleting
-      - Accepted
-      - Created
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    ResourcePatch:
-      type: object
-      properties:
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource tags.
-      description: Object containing updates for patch operations.
-    DatastoresList:
-      description: List of Datastores.
-      type: object
-      properties:
-        nextLink:
-          description: Url to follow for getting next page of Datastores.
-          type: string
-        value:
-          description: Array of Datastores
-          type: array
-          items:
-            $ref: '#/components/schemas/Datastore'
-      required:
-      - value
-    ResourceStatus:
-      description: The resource status information.
-      type: object
-      properties:
-        type:
-          description: The type of the condition.
-          type: string
-          readOnly: true
-        status:
-          description: Status of the condition.
-          type: string
-          readOnly: true
-        reason:
-          description: The reason for the condition's status.
-          type: string
-          readOnly: true
-        message:
-          description: A human readable message indicating details about the status.
-          type: string
-          readOnly: true
-        severity:
-          description: Severity with which to treat failures of this type of condition.
-          type: string
-          readOnly: true
-        lastUpdatedAt:
-          description: The last update time for this condition.
-          type: string
-          format: date-time
-          readOnly: true
     DataStore:
       description: Data store.
       required:
@@ -553,43 +553,6 @@ components:
           $ref: '#/components/schemas/DataStoreProperties'
           description: DataStore properties.
           x-ms-client-flatten: true
-    CustomerSecret:
-      description: The pair of customer secret.
-      required:
-      - keyIdentifier
-      - keyValue
-      - algorithm
-      type: object
-      properties:
-        keyIdentifier:
-          description: The identifier to the data service input object which this secret corresponds to.
-          type: string
-        keyValue:
-          description: It contains the encrypted customer secret.
-          type: string
-        algorithm:
-          description: The encryption algorithm used to encrypt data.
-          enum:
-          - None
-          - RSA1_5
-          - RSA_OAEP
-          - PlainText
-          type: string
-          x-ms-enum:
-            name: SupportedAlgorithm
-            modelAsString: false
-    DataStoreList:
-      description: Data Store Collection.
-      type: object
-      properties:
-        value:
-          description: List of data stores.
-          type: array
-          items:
-            $ref: '#/components/schemas/DataStore'
-        nextLink:
-          description: Link for the next set of data stores.
-          type: string
     DmsBaseObject:
       description: Base class for all objects under DataManager Service
       type: object
@@ -637,7 +600,51 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomerSecret'
+    DataStoreList:
+      description: Data Store Collection.
+      type: object
+      properties:
+        value:
+          description: List of data stores.
+          type: array
+          items:
+            $ref: '#/components/schemas/DataStore'
+        nextLink:
+          description: Link for the next set of data stores.
+          type: string
+    CustomerSecret:
+      description: The pair of customer secret.
+      required:
+      - keyIdentifier
+      - keyValue
+      - algorithm
+      type: object
+      properties:
+        keyIdentifier:
+          description: The identifier to the data service input object which this secret corresponds to.
+          type: string
+        keyValue:
+          description: It contains the encrypted customer secret.
+          type: string
+        algorithm:
+          description: The encryption algorithm used to encrypt data.
+          enum:
+          - None
+          - RSA1_5
+          - RSA_OAEP
+          - PlainText
+          type: string
+          x-ms-enum:
+            name: SupportedAlgorithm
+            modelAsString: false
   parameters:
+    api-version:
+      in: query
+      name: api-version
+      description: Client Api Version.
+      required: true
+      schema:
+        type: string
     subscriptionId:
       in: path
       name: subscriptionId
@@ -653,26 +660,12 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    api-version:
-      in: query
-      name: api-version
-      description: Client Api Version.
-      required: true
-      schema:
-        type: string
     resourceGroupNameParameter:
       name: resourceGroupName
       in: path
       description: The Resource Group Name
       required: true
       x-ms-parameter-location: method
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The API Version
-      required: true
       schema:
         type: string
     dataManagerNameParameter:
@@ -690,6 +683,13 @@ components:
       name: subscriptionId
       in: path
       description: The Subscription Id
+      required: true
+      schema:
+        type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The API Version
       required: true
       schema:
         type: string

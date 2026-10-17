@@ -151,6 +151,24 @@ paths:
     - url: https://management.azure.com
 components:
   parameters:
+    AccountNameParameter:
+      name: accountName
+      in: path
+      required: true
+      description: The name of the Batch account.
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        maxLength: 24
+        minLength: 3
+        pattern: ^[a-zA-Z0-9]+$
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: The API version to be used with the HTTP request.
+      schema:
+        type: string
     PrivateLinkResourceNameParameter:
       name: privateLinkResourceName
       in: path
@@ -162,13 +180,6 @@ components:
         maxLength: 101
         minLength: 1
         pattern: ^[a-zA-Z0-9_-]+\.?[a-fA-F0-9-]*$
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: The API version to be used with the HTTP request.
-      schema:
-        type: string
     SubscriptionIdParameter:
       name: subscriptionId
       in: path
@@ -184,17 +195,13 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    AccountNameParameter:
-      name: accountName
-      in: path
+    api-version:
+      name: api-version
+      in: query
+      description: The api version to use.
       required: true
-      description: The name of the Batch account.
-      x-ms-parameter-location: method
       schema:
         type: string
-        maxLength: 24
-        minLength: 3
-        pattern: ^[a-zA-Z0-9]+$
     accountName:
       name: accountName
       in: path
@@ -221,13 +228,6 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    api-version:
-      name: api-version
-      in: query
-      description: The api version to use.
-      required: true
-      schema:
-        type: string
   schemas:
     PrivateLinkResourceProperties:
       type: object
@@ -250,6 +250,14 @@ components:
           title: The list of required zone names for the private DNS resource name
           readOnly: true
       description: Private link resource properties.
+    CloudError:
+      type: object
+      x-ms-external: true
+      properties:
+        error:
+          description: The body of the error response.
+          $ref: '#/components/schemas/CloudErrorBody'
+      description: An error response from the Batch service.
     CloudErrorBody:
       type: object
       x-ms-external: true
@@ -272,6 +280,16 @@ components:
           - target
           description: A list of additional details about the error.
       description: An error response from the Batch service.
+    PrivateLinkResource:
+      type: object
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/PrivateLinkResourceProperties'
+          description: The properties associated with the private link resource.
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+      description: Contains information about a private link resource.
     ProxyResource:
       type: object
       properties:
@@ -293,16 +311,6 @@ components:
           description: The ETag of the resource, used for concurrency statements.
       description: A definition of an Azure resource.
       x-ms-azure-resource: true
-    PrivateLinkResource:
-      type: object
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/PrivateLinkResourceProperties'
-          description: The properties associated with the private link resource.
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-      description: Contains information about a private link resource.
     ListPrivateLinkResourcesResult:
       type: object
       properties:
@@ -315,14 +323,28 @@ components:
           type: string
           description: The continuation token.
       description: Values returned by the List operation.
-    CloudError:
+    PrivateLinkResourceProperties_2:
+      description: A privately linkable resource properties.
       type: object
-      x-ms-external: true
       properties:
-        error:
-          description: The body of the error response.
-          $ref: '#/components/schemas/CloudErrorBody'
-      description: An error response from the Batch service.
+        groupId:
+          description: The private link resource group identifier.
+          type: string
+          readOnly: true
+        requiredMembers:
+          description: This translates to how many Private IPs should be created for each privately linkable resource.
+          uniqueItems: false
+          type: array
+          items:
+            type: string
+          readOnly: true
+        requiredZoneNames:
+          description: The required zone names for private link resource.
+          uniqueItems: false
+          type: array
+          items:
+            type: string
+          readOnly: true
     ErrorModel:
       description: Default error model
       type: object
@@ -345,47 +367,6 @@ components:
         target:
           description: Gets or sets the target.
           type: string
-          readOnly: true
-    PrivateLinkResourceList:
-      description: Paged list of private link resources
-      required:
-      - value
-      type: object
-      properties:
-        count:
-          format: int64
-          description: Total item count.
-          type: integer
-        nextLink:
-          description: The Url of next result page.
-          type: string
-        value:
-          description: Collection of items of type results.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/PrivateLinkResource_2'
-    PrivateLinkResourceProperties_2:
-      description: A privately linkable resource properties.
-      type: object
-      properties:
-        groupId:
-          description: The private link resource group identifier.
-          type: string
-          readOnly: true
-        requiredMembers:
-          description: This translates to how many Private IPs should be created for each privately linkable resource.
-          uniqueItems: false
-          type: array
-          items:
-            type: string
-          readOnly: true
-        requiredZoneNames:
-          description: The required zone names for private link resource.
-          uniqueItems: false
-          type: array
-          items:
-            type: string
           readOnly: true
     PrivateLinkResource_2:
       description: A privately linkable resource.
@@ -416,6 +397,25 @@ components:
           allOf:
           - $ref: '#/components/schemas/ErrorModel'
           readOnly: true
+    PrivateLinkResourceList:
+      description: Paged list of private link resources
+      required:
+      - value
+      type: object
+      properties:
+        count:
+          format: int64
+          description: Total item count.
+          type: integer
+        nextLink:
+          description: The Url of next result page.
+          type: string
+        value:
+          description: Collection of items of type results.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/PrivateLinkResource_2'
   securitySchemes:
     azure_auth:
       type: oauth2

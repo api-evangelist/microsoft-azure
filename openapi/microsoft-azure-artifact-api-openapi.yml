@@ -949,66 +949,29 @@ paths:
     servers:
     - url: https://management.azure.com
 components:
-  parameters:
-    workspaceNameParameter:
-      name: workspaceName
-      in: path
-      description: The name of the workspace.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The Name of the resource group in which the workspace is located.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The Azure Subscription ID.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        format: uuid
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      description: Client API Version.
-      schema:
-        type: string
-    ScopeParameter:
-      name: resourceScope
-      in: path
-      required: true
-      description: 'The scope of the resource. Valid scopes are: management group (format: ''/providers/Microsoft.Management/managementGroups/{managementGroup}''), subscription (format: ''/subscriptions/{subscriptionId}'').'
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    BlueprintNameParameter:
-      name: blueprintName
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: Name of the blueprint definition.
-      schema:
-        type: string
-    ArtifactNameParameter:
-      name: artifactName
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: Name of the blueprint artifact.
-      schema:
-        type: string
   schemas:
+    RootError:
+      description: The root error.
+      type: object
+      properties:
+        code:
+          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
+          type: string
+        message:
+          description: A human-readable representation of the error.
+          type: string
+        target:
+          description: The target of the error (e.g., the name of the property in error).
+          type: string
+        details:
+          description: The related errors that occurred during the request.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     Artifact:
       description: Details of an Artifact.
       required:
@@ -1040,16 +1003,6 @@ components:
           readOnly: true
         dataPath:
           $ref: '#/components/schemas/DataPath'
-    InnerErrorResponse:
-      description: A nested structure of errors.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          type: string
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
     DataPath:
       type: object
       properties:
@@ -1059,25 +1012,22 @@ components:
           type: string
         sqlDataPath:
           $ref: '#/components/schemas/SqlDataPath'
-    StoredProcedureParameter:
+    PaginatedArtifactContentInformationList:
+      description: A paginated list of ArtifactContentInformations.
       type: object
       properties:
-        name:
-          type: string
         value:
+          description: An array of objects of type ArtifactContentInformation.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtifactContentInformation'
+        continuationToken:
+          description: The token used in retrieving the next page.  If null, there are no additional pages.
           type: string
-        type:
-          enum:
-          - String
-          - Int
-          - Decimal
-          - Guid
-          - Boolean
-          - Date
+        nextLink:
+          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
-          x-ms-enum:
-            name: StoredProcedureParameterType
-            modelAsString: false
     ErrorDetails:
       description: The error details.
       type: object
@@ -1091,15 +1041,20 @@ components:
         target:
           description: The target of the error (e.g., the name of the property in error).
           type: string
-    ArtifactPath:
-      description: Details of an Artifact Path.
-      required:
-      - path
+    SqlDataPath:
       type: object
       properties:
-        path:
-          description: The path to the Artifact in a container.
+        sqlTableName:
           type: string
+        sqlQuery:
+          type: string
+        sqlStoredProcedureName:
+          type: string
+        sqlStoredProcedureParams:
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/StoredProcedureParameter'
     ArtifactContainerSas:
       description: Details of the Artifact Container's shared access signature.
       required:
@@ -1119,20 +1074,6 @@ components:
         artifactPrefix:
           description: The Prefix to the Artifact in the Blob.
           type: string
-    SqlDataPath:
-      type: object
-      properties:
-        sqlTableName:
-          type: string
-        sqlQuery:
-          type: string
-        sqlStoredProcedureName:
-          type: string
-        sqlStoredProcedureParams:
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/StoredProcedureParameter'
     ErrorResponse:
       description: The error response.
       type: object
@@ -1155,6 +1096,53 @@ components:
           format: date-time
           description: The time in UTC.
           type: string
+    StoredProcedureParameter:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        type:
+          enum:
+          - String
+          - Int
+          - Decimal
+          - Guid
+          - Boolean
+          - Date
+          type: string
+          x-ms-enum:
+            name: StoredProcedureParameterType
+            modelAsString: false
+    ArtifactIdList:
+      description: Contains list of Artifact Ids.
+      required:
+      - artifactIds
+      type: object
+      properties:
+        artifactIds:
+          description: List of Artifacts Ids.
+          uniqueItems: false
+          type: array
+          items:
+            type: string
+    ArtifactContentInformation:
+      description: Details of an Artifact Content Information.
+      type: object
+      properties:
+        contentUri:
+          description: The URI of the content.
+          type: string
+        origin:
+          description: The origin of the Artifact creation request. Available origins are 'ExperimentRun', 'LocalUpload', 'WebUpload', 'Dataset', 'ComputeRecord', 'Metric', and 'Unknown'.
+          type: string
+        container:
+          description: The name of container. Artifacts can be grouped by container.
+          type: string
+        path:
+          description: The path to the Artifact in a container.
+          type: string
     PaginatedArtifactList:
       description: A paginated list of Artifacts.
       type: object
@@ -1171,6 +1159,37 @@ components:
         nextLink:
           description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
           type: string
+    InnerErrorResponse:
+      description: A nested structure of errors.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          type: string
+        innerError:
+          $ref: '#/components/schemas/InnerErrorResponse'
+          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
+    ArtifactPath:
+      description: Details of an Artifact Path.
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          description: The path to the Artifact in a container.
+          type: string
+    ArtifactPathList:
+      description: Contains list of Artifact Paths.
+      required:
+      - paths
+      type: object
+      properties:
+        paths:
+          description: List of Artifact Paths.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtifactPath'
     BatchArtifactContentInformationResult:
       description: Results of the Batch Artifact Content Information request.
       type: object
@@ -1190,84 +1209,28 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/ErrorResponse'
-    ArtifactIdList:
-      description: Contains list of Artifact Ids.
-      required:
-      - artifactIds
-      type: object
+    CloudError:
+      x-ms-external: true
       properties:
-        artifactIds:
-          description: List of Artifacts Ids.
-          uniqueItems: false
-          type: array
-          items:
-            type: string
-    ArtifactPathList:
-      description: Contains list of Artifact Paths.
-      required:
-      - paths
+        error:
+          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
+    AzureResourceBase:
+      description: Common properties for all Azure resources.
       type: object
+      x-ms-azure-resource: true
       properties:
-        paths:
-          description: List of Artifact Paths.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ArtifactPath'
-    RootError:
-      description: The root error.
-      type: object
-      properties:
-        code:
-          description: 'The service-defined error code. Supported error codes: ServiceError, UserError, ValidationError, AzureStorageError, TransientError, RequestThrottled.'
+        id:
+          readOnly: true
           type: string
-        message:
-          description: A human-readable representation of the error.
+          description: String Id used to locate any resource on Azure.
+        type:
+          readOnly: true
           type: string
-        target:
-          description: The target of the error (e.g., the name of the property in error).
+          description: Type of this resource.
+        name:
+          readOnly: true
           type: string
-        details:
-          description: The related errors that occurred during the request.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorDetails'
-        innerError:
-          $ref: '#/components/schemas/InnerErrorResponse'
-          description: A nested list of inner errors. When evaluating errors, clients MUST traverse through all of the nested “innerErrors” and choose the deepest one that they understand.
-    PaginatedArtifactContentInformationList:
-      description: A paginated list of ArtifactContentInformations.
-      type: object
-      properties:
-        value:
-          description: An array of objects of type ArtifactContentInformation.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/ArtifactContentInformation'
-        continuationToken:
-          description: The token used in retrieving the next page.  If null, there are no additional pages.
-          type: string
-        nextLink:
-          description: The link to the next page constructed using the continuationToken.  If null, there are no additional pages.
-          type: string
-    ArtifactContentInformation:
-      description: Details of an Artifact Content Information.
-      type: object
-      properties:
-        contentUri:
-          description: The URI of the content.
-          type: string
-        origin:
-          description: The origin of the Artifact creation request. Available origins are 'ExperimentRun', 'LocalUpload', 'WebUpload', 'Dataset', 'ComputeRecord', 'Metric', and 'Unknown'.
-          type: string
-        container:
-          description: The name of container. Artifacts can be grouped by container.
-          type: string
-        path:
-          description: The path to the Artifact in a container.
-          type: string
+          description: Name of this resource.
     ArtifactList:
       type: object
       description: List of blueprint artifacts.
@@ -1301,28 +1264,65 @@ components:
             modelAsString: true
       required:
       - kind
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          $ref: ../../../../../common-types/resource-management/v1/types.json#/definitions/ErrorResponse
-    AzureResourceBase:
-      description: Common properties for all Azure resources.
-      type: object
-      x-ms-azure-resource: true
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: String Id used to locate any resource on Azure.
-        type:
-          readOnly: true
-          type: string
-          description: Type of this resource.
-        name:
-          readOnly: true
-          type: string
-          description: Name of this resource.
+  parameters:
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The Azure Subscription ID.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        format: uuid
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The Name of the resource group in which the workspace is located.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    workspaceNameParameter:
+      name: workspaceName
+      in: path
+      description: The name of the workspace.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    BlueprintNameParameter:
+      name: blueprintName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: Name of the blueprint definition.
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      description: Client API Version.
+      schema:
+        type: string
+    ScopeParameter:
+      name: resourceScope
+      in: path
+      required: true
+      description: 'The scope of the resource. Valid scopes are: management group (format: ''/providers/Microsoft.Management/managementGroups/{managementGroup}''), subscription (format: ''/subscriptions/{subscriptionId}'').'
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    ArtifactNameParameter:
+      name: artifactName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: Name of the blueprint artifact.
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2

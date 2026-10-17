@@ -123,51 +123,21 @@ paths:
     - url: /catalog/api
 components:
   schemas:
-    Status_AtlasRelationship:
+    AtlasTermAssignmentStatus:
       type: string
-      title: Status
-      description: The enum of relationship status.
+      title: AtlasTermAssignmentStatus
+      description: The status of terms assignment.
       enum:
-      - ACTIVE
-      - DELETED
+      - DISCOVERED
+      - PROPOSED
+      - IMPORTED
+      - VALIDATED
+      - DEPRECATED
+      - OBSOLETE
+      - OTHER
       x-ms-enum:
-        name: Status_AtlasRelationship
+        name: AtlasTermAssignmentStatus
         modelAsString: true
-    AtlasTermAssignmentHeader:
-      type: object
-      properties:
-        confidence:
-          type: integer
-          format: int32
-          description: The confidence of the term assignment.
-        createdBy:
-          type: string
-          description: The user who created the record.
-        description:
-          type: string
-          description: The description of the term assignment.
-        displayText:
-          type: string
-          description: The display text.
-        expression:
-          type: string
-          description: The expression of the term assignment.
-        relationGuid:
-          type: string
-          description: The GUID of the relationship.
-        source:
-          type: string
-          description: The source of the term.
-        status:
-          $ref: '#/components/schemas/AtlasTermAssignmentStatus'
-        steward:
-          type: string
-          description: The steward of the term.
-        termGuid:
-          type: string
-          description: The GUID of the term.
-      title: AtlasTermAssignmentHeader
-      description: The header for term assignment.
     AtlasEntityHeader:
       type: object
       title: AtlasEntityHeader
@@ -213,24 +183,88 @@ components:
           status:
             $ref: '#/components/schemas/Status'
       description: An instance of an entity - like hive_table, hive_database.
+    Status_AtlasRelationship:
+      type: string
+      title: Status
+      description: The enum of relationship status.
+      enum:
+      - ACTIVE
+      - DELETED
+      x-ms-enum:
+        name: Status_AtlasRelationship
+        modelAsString: true
+    AtlasStruct:
+      type: object
+      properties:
+        attributes:
+          type: object
+          description: The attributes of the struct.
+          additionalProperties: {}
+        typeName:
+          type: string
+          description: The name of the type.
+        lastModifiedTS:
+          $ref: '#/components/schemas/LastModifiedTS'
+      title: AtlasStruct
+      description: Captures details of struct contents. Not instantiated directly, used only via AtlasEntity, AtlasClassification.
     LastModifiedTS:
       type: string
       title: lastModifiedTS
       description: ETag for concurrency control.
-    TimeBoundary:
+    Status:
+      type: string
+      title: Status
+      description: Status of the entity - can be active or deleted. Deleted entities are not removed from Atlas store.
+      enum:
+      - ACTIVE
+      - DELETED
+      x-ms-enum:
+        name: Status
+        modelAsString: true
+    AtlasObjectId:
       type: object
       properties:
-        endTime:
+        guid:
           type: string
-          description: The end of the time boundary.
-        startTime:
+          description: The GUID of the object.
+        typeName:
           type: string
-          description: The start of the time boundary.
-        timeZone:
-          type: string
-          description: The timezone of the time boundary.
-      title: TimeBoundary
-      description: Captures time-boundary details
+          description: The name of the type.
+        uniqueAttributes:
+          type: object
+          description: The unique attributes of the object.
+          additionalProperties: {}
+      title: AtlasObjectId
+      description: Reference to an object-instance of an Atlas type - like entity.
+    AtlasClassification:
+      type: object
+      title: AtlasClassification
+      allOf:
+      - $ref: '#/components/schemas/AtlasStruct'
+      - properties:
+          entityGuid:
+            type: string
+            description: The GUID of the entity.
+          entityStatus:
+            $ref: '#/components/schemas/Status'
+          removePropagationsOnEntityDelete:
+            type: boolean
+            description: Determines if propagations will be removed on entity deletion.
+          validityPeriods:
+            type: array
+            description: An array of time boundaries indicating validity periods.
+            items:
+              $ref: '#/components/schemas/TimeBoundary'
+          source:
+            type: string
+            description: indicate the source who create the classification detail
+          sourceDetails:
+            type: object
+            additionalProperties:
+              type: object
+              properties: {}
+            description: more detail on source information
+      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
     AtlasRelationship:
       type: object
       title: AtlasRelationship
@@ -274,21 +308,18 @@ components:
             type: number
             description: The version of the relationship.
       description: Atlas relationship instance.
-    AtlasObjectId:
+    AtlasRelationshipWithExtInfo:
       type: object
       properties:
-        guid:
-          type: string
-          description: The GUID of the object.
-        typeName:
-          type: string
-          description: The name of the type.
-        uniqueAttributes:
+        referredEntities:
           type: object
-          description: The unique attributes of the object.
-          additionalProperties: {}
-      title: AtlasObjectId
-      description: Reference to an object-instance of an Atlas type - like entity.
+          description: The referred entity header.
+          additionalProperties:
+            $ref: '#/components/schemas/AtlasEntityHeader'
+        relationship:
+          $ref: '#/components/schemas/AtlasRelationship'
+      title: AtlasRelationshipWithExtInfo
+      description: The relationship with extended information.
     ErrorResponse:
       description: An error response from the service
       type: object
@@ -302,87 +333,21 @@ components:
         errorMessage:
           type: string
           description: The error message.
-    Status:
-      type: string
-      title: Status
-      description: Status of the entity - can be active or deleted. Deleted entities are not removed from Atlas store.
-      enum:
-      - ACTIVE
-      - DELETED
-      x-ms-enum:
-        name: Status
-        modelAsString: true
-    AtlasTermAssignmentStatus:
-      type: string
-      title: AtlasTermAssignmentStatus
-      description: The status of terms assignment.
-      enum:
-      - DISCOVERED
-      - PROPOSED
-      - IMPORTED
-      - VALIDATED
-      - DEPRECATED
-      - OBSOLETE
-      - OTHER
-      x-ms-enum:
-        name: AtlasTermAssignmentStatus
-        modelAsString: true
-    AtlasClassification:
-      type: object
-      title: AtlasClassification
-      allOf:
-      - $ref: '#/components/schemas/AtlasStruct'
-      - properties:
-          entityGuid:
-            type: string
-            description: The GUID of the entity.
-          entityStatus:
-            $ref: '#/components/schemas/Status'
-          removePropagationsOnEntityDelete:
-            type: boolean
-            description: Determines if propagations will be removed on entity deletion.
-          validityPeriods:
-            type: array
-            description: An array of time boundaries indicating validity periods.
-            items:
-              $ref: '#/components/schemas/TimeBoundary'
-          source:
-            type: string
-            description: indicate the source who create the classification detail
-          sourceDetails:
-            type: object
-            additionalProperties:
-              type: object
-              properties: {}
-            description: more detail on source information
-      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
-    AtlasStruct:
+    TimeBoundary:
       type: object
       properties:
-        attributes:
-          type: object
-          description: The attributes of the struct.
-          additionalProperties: {}
-        typeName:
+        endTime:
           type: string
-          description: The name of the type.
-        lastModifiedTS:
-          $ref: '#/components/schemas/LastModifiedTS'
-      title: AtlasStruct
-      description: Captures details of struct contents. Not instantiated directly, used only via AtlasEntity, AtlasClassification.
-    AtlasRelationshipWithExtInfo:
-      type: object
-      properties:
-        referredEntities:
-          type: object
-          description: The referred entity header.
-          additionalProperties:
-            $ref: '#/components/schemas/AtlasEntityHeader'
-        relationship:
-          $ref: '#/components/schemas/AtlasRelationship'
-      title: AtlasRelationshipWithExtInfo
-      description: The relationship with extended information.
-    AtlasTermAssignmentHeader_2:
+          description: The end of the time boundary.
+        startTime:
+          type: string
+          description: The start of the time boundary.
+        timeZone:
+          type: string
+          description: The timezone of the time boundary.
+      title: TimeBoundary
+      description: Captures time-boundary details
+    AtlasTermAssignmentHeader:
       type: object
       properties:
         confidence:
@@ -404,6 +369,9 @@ components:
         relationGuid:
           type: string
           description: The GUID of the relationship.
+        source:
+          type: string
+          description: The source of the term.
         status:
           $ref: '#/components/schemas/AtlasTermAssignmentStatus'
         steward:
@@ -459,6 +427,51 @@ components:
       allOf:
       - $ref: '#/components/schemas/AtlasStruct'
       description: An instance of an entity - like hive_table, hive_database.
+    Status_2:
+      type: string
+      title: Status
+      description: Status of the entity - can be active or deleted. Deleted entities are not removed.
+      enum:
+      - ACTIVE
+      - DELETED
+      x-ms-enum:
+        name: Status
+        modelAsString: true
+    AtlasObjectId_2:
+      type: object
+      properties:
+        guid:
+          type: string
+          description: The GUID of the object.
+        typeName:
+          type: string
+          description: The name of the type.
+        uniqueAttributes:
+          type: object
+          description: The unique attributes of the object.
+          additionalProperties: {}
+      title: AtlasObjectId
+      description: Reference to an object-instance of a type - like entity.
+    AtlasClassification_2:
+      type: object
+      title: AtlasClassification
+      properties:
+        entityGuid:
+          type: string
+          description: The GUID of the entity.
+        entityStatus:
+          $ref: '#/components/schemas/Status_2'
+        removePropagationsOnEntityDelete:
+          type: boolean
+          description: Determines if propagations will be removed on entity deletion.
+        validityPeriods:
+          type: array
+          description: An array of time boundaries indicating validity periods.
+          items:
+            $ref: '#/components/schemas/TimeBoundary'
+      allOf:
+      - $ref: '#/components/schemas/AtlasStruct'
+      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
     AtlasRelationship_2:
       type: object
       title: AtlasRelationship
@@ -502,52 +515,47 @@ components:
       allOf:
       - $ref: '#/components/schemas/AtlasStruct'
       description: Atlas relationship instance.
-    AtlasObjectId_2:
+    AtlasTermAssignmentHeader_2:
       type: object
       properties:
-        guid:
+        confidence:
+          type: integer
+          format: int32
+          description: The confidence of the term assignment.
+        createdBy:
           type: string
-          description: The GUID of the object.
-        typeName:
+          description: The user who created the record.
+        description:
           type: string
-          description: The name of the type.
-        uniqueAttributes:
-          type: object
-          description: The unique attributes of the object.
-          additionalProperties: {}
-      title: AtlasObjectId
-      description: Reference to an object-instance of a type - like entity.
-    Status_2:
-      type: string
-      title: Status
-      description: Status of the entity - can be active or deleted. Deleted entities are not removed.
-      enum:
-      - ACTIVE
-      - DELETED
-      x-ms-enum:
-        name: Status
-        modelAsString: true
-    AtlasClassification_2:
-      type: object
-      title: AtlasClassification
-      properties:
-        entityGuid:
+          description: The description of the term assignment.
+        displayText:
           type: string
-          description: The GUID of the entity.
-        entityStatus:
-          $ref: '#/components/schemas/Status_2'
-        removePropagationsOnEntityDelete:
-          type: boolean
-          description: Determines if propagations will be removed on entity deletion.
-        validityPeriods:
-          type: array
-          description: An array of time boundaries indicating validity periods.
-          items:
-            $ref: '#/components/schemas/TimeBoundary'
-      allOf:
-      - $ref: '#/components/schemas/AtlasStruct'
-      description: An instance of a classification; it doesn't have an identity, this object exists only when associated with an entity.
+          description: The display text.
+        expression:
+          type: string
+          description: The expression of the term assignment.
+        relationGuid:
+          type: string
+          description: The GUID of the relationship.
+        status:
+          $ref: '#/components/schemas/AtlasTermAssignmentStatus'
+        steward:
+          type: string
+          description: The steward of the term.
+        termGuid:
+          type: string
+          description: The GUID of the term.
+      title: AtlasTermAssignmentHeader
+      description: The header for term assignment.
   parameters:
+    extendedInfo:
+      name: extendedInfo
+      description: Limits whether includes extended information.
+      in: query
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: boolean
     relationshipGuid:
       name: guid
       description: The globally unique identifier of the relationship.
@@ -558,14 +566,6 @@ components:
         type: string
         maxLength: 4096
         minLength: 1
-    extendedInfo:
-      name: extendedInfo
-      description: Limits whether includes extended information.
-      in: query
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: boolean
   securitySchemes:
     azure_auth:
       type: oauth2

@@ -215,6 +215,53 @@ paths:
       description: Needs a more full description created.
 components:
   schemas:
+    ContainerAppSecret:
+      description: Container App Secret.
+      type: object
+      properties:
+        name:
+          description: Secret Name.
+          type: string
+          readOnly: true
+        value:
+          description: Secret Value.
+          type: string
+          readOnly: true
+    Ingress:
+      description: Container App Ingress configuration.
+      type: object
+      properties:
+        fqdn:
+          description: Hostname.
+          type: string
+          readOnly: true
+        external:
+          description: Bool indicating if app exposes an external http endpoint
+          default: false
+          type: boolean
+        targetPort:
+          format: int32
+          description: Target Port in containers for traffic from ingress
+          type: integer
+        transport:
+          description: Ingress transport protocol
+          enum:
+          - auto
+          - http
+          - http2
+          type: string
+          x-ms-enum:
+            name: IngressTransportMethod
+            modelAsString: true
+        traffic:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrafficWeight'
+          x-ms-identifiers:
+          - revisionName
+        allowInsecure:
+          description: Bool indicating if HTTP connections to is allowed. If set to false HTTP connections are automatically redirected to HTTPS connections
+          type: boolean
     Secret:
       description: Container App Secret.
       type: object
@@ -229,6 +276,79 @@ components:
           - create
           - update
           x-ms-secret: true
+    SecretsCollection:
+      description: Container App Secrets Collection ARM resource.
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: Collection of resources.
+          type: array
+          items:
+            $ref: '#/components/schemas/ContainerAppSecret'
+          x-ms-identifiers:
+          - name
+    RegistryCredentials:
+      description: Container App Private Registry
+      type: object
+      properties:
+        server:
+          description: Container Registry Server
+          type: string
+        username:
+          description: Container Registry Username
+          type: string
+        passwordSecretRef:
+          description: The name of the Secret that contains the registry login password
+          type: string
+    TrafficWeight:
+      description: Traffic weight assigned to a revision
+      type: object
+      properties:
+        revisionName:
+          description: Name of a revision
+          type: string
+        weight:
+          format: int32
+          description: Traffic weight assigned to a revision
+          type: integer
+        latestRevision:
+          description: Indicates that the traffic weight belongs to a latest stable revision
+          default: false
+          type: boolean
+    Configuration:
+      description: Non versioned Container App configuration properties that define the mutable settings of a Container app
+      type: object
+      properties:
+        secrets:
+          description: Collection of secrets used by a Container app
+          type: array
+          items:
+            $ref: '#/components/schemas/Secret'
+          x-ms-identifiers:
+          - name
+        activeRevisionsMode:
+          description: 'ActiveRevisionsMode controls how active revisions are handled for the Container app:
+
+            <list><item>Multiple: multiple revisions can be active. If no value if provided, this is the default</item><item>Single: Only one revision can be active at a time. Revision weights can not be used in this mode</item></list>'
+          enum:
+          - multiple
+          - single
+          type: string
+          x-ms-enum:
+            name: ActiveRevisionsMode
+            modelAsString: true
+        ingress:
+          $ref: '#/components/schemas/Ingress'
+          description: Ingress configurations.
+        registries:
+          description: Collection of private container registry credentials for containers used by the Container app
+          type: array
+          items:
+            $ref: '#/components/schemas/RegistryCredentials'
+          x-ms-identifiers:
+          - server
     ContainerApp:
       description: Container App.
       type: object
@@ -272,98 +392,6 @@ components:
               $ref: ./CommonDefinitions.json#/definitions/Template
               description: Container App versioned application definition.
           x-ms-client-flatten: true
-    Configuration:
-      description: Non versioned Container App configuration properties that define the mutable settings of a Container app
-      type: object
-      properties:
-        secrets:
-          description: Collection of secrets used by a Container app
-          type: array
-          items:
-            $ref: '#/components/schemas/Secret'
-          x-ms-identifiers:
-          - name
-        activeRevisionsMode:
-          description: 'ActiveRevisionsMode controls how active revisions are handled for the Container app:
-
-            <list><item>Multiple: multiple revisions can be active. If no value if provided, this is the default</item><item>Single: Only one revision can be active at a time. Revision weights can not be used in this mode</item></list>'
-          enum:
-          - multiple
-          - single
-          type: string
-          x-ms-enum:
-            name: ActiveRevisionsMode
-            modelAsString: true
-        ingress:
-          $ref: '#/components/schemas/Ingress'
-          description: Ingress configurations.
-        registries:
-          description: Collection of private container registry credentials for containers used by the Container app
-          type: array
-          items:
-            $ref: '#/components/schemas/RegistryCredentials'
-          x-ms-identifiers:
-          - server
-    Ingress:
-      description: Container App Ingress configuration.
-      type: object
-      properties:
-        fqdn:
-          description: Hostname.
-          type: string
-          readOnly: true
-        external:
-          description: Bool indicating if app exposes an external http endpoint
-          default: false
-          type: boolean
-        targetPort:
-          format: int32
-          description: Target Port in containers for traffic from ingress
-          type: integer
-        transport:
-          description: Ingress transport protocol
-          enum:
-          - auto
-          - http
-          - http2
-          type: string
-          x-ms-enum:
-            name: IngressTransportMethod
-            modelAsString: true
-        traffic:
-          type: array
-          items:
-            $ref: '#/components/schemas/TrafficWeight'
-          x-ms-identifiers:
-          - revisionName
-        allowInsecure:
-          description: Bool indicating if HTTP connections to is allowed. If set to false HTTP connections are automatically redirected to HTTPS connections
-          type: boolean
-    ContainerAppSecret:
-      description: Container App Secret.
-      type: object
-      properties:
-        name:
-          description: Secret Name.
-          type: string
-          readOnly: true
-        value:
-          description: Secret Value.
-          type: string
-          readOnly: true
-    SecretsCollection:
-      description: Container App Secrets Collection ARM resource.
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: Collection of resources.
-          type: array
-          items:
-            $ref: '#/components/schemas/ContainerAppSecret'
-          x-ms-identifiers:
-          - name
     ContainerAppCollection:
       description: Container App collection ARM resource.
       required:
@@ -379,34 +407,6 @@ components:
           description: Link to next page of resources.
           type: string
           readOnly: true
-    RegistryCredentials:
-      description: Container App Private Registry
-      type: object
-      properties:
-        server:
-          description: Container Registry Server
-          type: string
-        username:
-          description: Container Registry Username
-          type: string
-        passwordSecretRef:
-          description: The name of the Secret that contains the registry login password
-          type: string
-    TrafficWeight:
-      description: Traffic weight assigned to a revision
-      type: object
-      properties:
-        revisionName:
-          description: Name of a revision
-          type: string
-        weight:
-          format: int32
-          description: Traffic weight assigned to a revision
-          type: integer
-        latestRevision:
-          description: Indicates that the traffic weight belongs to a latest stable revision
-          default: false
-          type: boolean
   parameters:
     resourceGroupNameParameter:
       name: resourceGroupName
@@ -419,18 +419,18 @@ components:
         maxLength: 90
         minLength: 1
         pattern: ^[-\w\._\(\)]+[^\.]$
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: API Version
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
     subscriptionIdParameter:
       name: subscriptionId
       in: path
       description: Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: API Version
       required: true
       x-ms-parameter-location: client
       schema:

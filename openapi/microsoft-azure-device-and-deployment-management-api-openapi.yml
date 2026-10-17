@@ -1138,31 +1138,40 @@ paths:
       summary: Microsoft Azure Get Deviceupdate Instanceid Management Devicediagnostics…
 components:
   schemas:
-    LogCollectionOperationDetailedStatus:
+    ImportType:
+      type: string
+      description: The device import type.
+      enum:
+      - Devices
+      - Modules
+      - All
+      x-ms-enum:
+        name: ImportType
+        modelAsString: true
+        values:
+        - value: Devices
+          name: Devices
+          description: Import only devices but not modules.
+        - value: Modules
+          name: Modules
+          description: Import only modules but not devices.
+        - value: All
+          name: All
+          description: Import both devices and modules.
+    DeviceClassProperties:
       type: object
+      description: The device class properties that are used to calculate the device class Id
       properties:
-        operationId:
-          type: string
-          description: The device diagnostics operation id.
-          x-ms-client-name: logCollectionId
-        createdDateTime:
-          type: string
-          description: The timestamp when the operation was created.
-        lastActionDateTime:
-          type: string
-          description: A timestamp for when the current state was entered.
-        status:
-          $ref: '#/components/schemas/OperationStatusWithoutUndefinedOption'
-          description: Operation status.
-        deviceStatus:
-          type: array
-          items:
-            $ref: '#/components/schemas/LogCollectionOperationDeviceStatus'
-          description: Status of the devices in the operation
-        description:
-          type: string
-          description: Device diagnostics operation description.
-      description: Device diagnostics operation detailed status
+        contractModel:
+          $ref: '#/components/schemas/ContractModel'
+          description: The Device Update agent contract model.
+        compatProperties:
+          type: object
+          additionalProperties:
+            type: string
+          description: The compat properties of the device class. This object can be thought of as a set of key-value pairs where the key is the name of the compatibility property and the value is the value of the compatibility property. There will always be at least 1 compat property
+      required:
+      - compatProperties
     DeploymentState:
       type: string
       enum:
@@ -1191,6 +1200,178 @@ components:
           name: Canceled
           description: The deployment has been canceled and no devices will receive it.
       description: Deployment state.
+    DeploymentDeviceState:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Device identity.
+        moduleId:
+          type: string
+          description: Device module identity.
+        retryCount:
+          type: integer
+          description: The number of times this deployment has been retried on this device.
+          format: int32
+        movedOnToNewDeployment:
+          type: boolean
+          description: Boolean flag indicating whether this device is in a newer deployment and can no longer retry this deployment.
+        deviceState:
+          $ref: '#/components/schemas/DeviceDeploymentState'
+          description: Deployment device state.
+      required:
+      - deviceId
+      - retryCount
+      - movedOnToNewDeployment
+      - deviceState
+      description: Deployment device status.
+    Deployment:
+      type: object
+      properties:
+        deploymentId:
+          type: string
+          description: The caller-provided deployment identifier.
+        startDateTime:
+          type: string
+          description: The deployment start datetime.
+          format: date-time
+        update:
+          $ref: '#/components/schemas/UpdateInfo'
+          description: Update information for the update in the deployment.
+        groupId:
+          type: string
+          description: The group identity for the devices the deployment is intended to update.
+        deviceClassSubgroups:
+          type: array
+          items:
+            type: string
+          description: The device class subgroups the deployment is compatible with and subgroup deployments have been created for. This is not provided by the caller during CreateOrUpdateDeployment but is automatically determined by Device Update
+        isCanceled:
+          type: boolean
+          description: Boolean flag indicating whether the deployment was canceled.
+        isRetried:
+          type: boolean
+          description: Boolean flag indicating whether the deployment has been retried.
+        rollbackPolicy:
+          $ref: '#/components/schemas/CloudInitiatedRollbackPolicy'
+          description: The rollback policy for the deployment.
+        isCloudInitiatedRollback:
+          type: boolean
+          description: Boolean flag indicating whether the deployment is a rollback deployment.
+      required:
+      - deploymentId
+      - startDateTime
+      - update
+      - groupId
+      description: Deployment metadata.
+    UpdateInfo:
+      type: object
+      properties:
+        updateId:
+          $ref: '#/components/schemas/UpdateId'
+          description: Update identifier.
+        description:
+          type: string
+          description: Update description.
+          readOnly: true
+        friendlyName:
+          type: string
+          description: Friendly update name.
+          readOnly: true
+      required:
+      - updateId
+      description: Update information.
+    GroupType:
+      type: string
+      enum:
+      - IoTHubTag
+      - DefaultNoTag
+      x-ms-enum:
+        name: GroupType
+        modelAsString: true
+        values:
+        - value: IoTHubTag
+          name: IoTHubTag
+          description: IoT Hub tag based group, all devices in the group share an ADUGroup tag value.
+        - value: DefaultNoTag
+          name: DefaultNoTag
+          description: Default group for untagged devices.
+      description: Supported group types.
+    DeviceClassesList:
+      description: The list of device classes.
+      type: object
+      properties:
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceClass'
+        nextLink:
+          description: The link to the next page of items.
+          type: string
+      required:
+      - value
+    DeviceDeploymentState:
+      type: string
+      enum:
+      - Succeeded
+      - InProgress
+      - Canceled
+      - Failed
+      x-ms-enum:
+        name: DeviceDeploymentState
+        modelAsString: true
+        values:
+        - value: Succeeded
+          name: Succeeded
+          description: Deployment has completed with success.
+        - value: InProgress
+          name: InProgress
+          description: Deployment is in progress.
+        - value: Canceled
+          name: Canceled
+          description: Deployment was canceled.
+        - value: Failed
+          name: Failed
+          description: Deployment has completed with failure.
+      description: Deployment state.
+    DeviceUpdateAgentId:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Device Id
+        moduleId:
+          type: string
+          description: Module Id
+      required:
+      - deviceId
+      description: Device Update agent id
+    LogCollectionOperationDeviceStatus:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Device id
+        moduleId:
+          type: string
+          description: Module id.
+        status:
+          $ref: '#/components/schemas/OperationStatusWithoutUndefinedOption'
+          description: Log upload status
+        resultCode:
+          type: string
+          description: Log upload result code
+        extendedResultCode:
+          type: string
+          description: Log upload extended result code
+        logLocation:
+          type: string
+          description: Log upload location
+      required:
+      - deviceId
+      - status
+      description: Diagnostics operation device status
     DeviceClassSubgroupDeploymentState:
       type: string
       enum:
@@ -1237,175 +1418,99 @@ components:
       - deploymentState
       - subgroupStatus
       description: Deployment status metadata.
-    UpdateId:
+    DeviceClassSubgroupUpdatableDevices:
       type: object
       properties:
-        provider:
-          type: string
-          description: Update provider.
-        name:
-          type: string
-          description: Update name.
-        version:
-          type: string
-          description: Update version.
-      required:
-      - provider
-      - name
-      - version
-      description: Update identifier.
-    ContractModel:
-      type: object
-      description: The Device Update agent contract model.
-      properties:
-        id:
-          type: string
-          description: The Device Update agent contract model Id of the device class. This is also used to calculate the device class Id.
-        name:
-          type: string
-          description: The Device Update agent contract model name of the device class. Intended to be a more readable form of the contract model Id.
-      required:
-      - id
-      - name
-    DevicesList:
-      description: The list of devices.
-      type: object
-      properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/Device'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
-      required:
-      - value
-    DeviceOperationsList:
-      description: The list of device operations with server paging support.
-      type: object
-      properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/DeviceOperation'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
-      required:
-      - value
-    DeploymentsList:
-      description: The list of deployments.
-      type: object
-      properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/Deployment'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
-      required:
-      - value
-    OperationStatusWithoutUndefinedOption:
-      type: string
-      enum:
-      - NotStarted
-      - Running
-      - Succeeded
-      - Failed
-      x-ms-enum:
-        name: OperationStatus
-        modelAsString: true
-        values:
-        - value: NotStarted
-          name: NotStarted
-          description: Background operation created but not started yet.
-        - value: Running
-          name: Running
-          description: Background operation is currently running.
-        - value: Succeeded
-          name: Succeeded
-          description: Background operation finished with success.
-        - value: Failed
-          name: Failed
-          description: Background operation finished with failure.
-      description: Operation status.
-    PatchBody:
-      type: object
-      properties:
-        friendlyName:
-          type: string
-          description: The device class friendly name.
-      required:
-      - friendlyName
-      description: Device Class JSON Merge Patch request body
-    Device:
-      type: object
-      properties:
-        deviceId:
-          type: string
-          description: Device identity.
-        moduleId:
-          type: string
-          description: Device module identity.
-        deviceClassId:
-          type: string
-          description: Device class identity.
         groupId:
           type: string
-          description: Device group identity.
-        lastAttemptedUpdate:
-          $ref: '#/components/schemas/UpdateInfo'
-          description: The update that device last attempted to install.
-        deploymentStatus:
-          $ref: '#/components/schemas/DeviceDeploymentState'
-          description: State of the device in its last deployment.
-        installedUpdate:
-          $ref: '#/components/schemas/UpdateInfo'
-          description: Currently installed update on device.
-        onLatestUpdate:
-          type: boolean
-          description: Boolean flag indicating whether the latest update is installed on the device
-        lastDeploymentId:
+          description: The group Id
+        deviceClassId:
           type: string
-          description: The deployment identifier for the last deployment to the device
-        lastInstallResult:
-          $ref: '#/components/schemas/InstallResult'
-          description: Last install result.
+          description: The device class subgroup's device class Id
+        update:
+          $ref: '#/components/schemas/UpdateInfo'
+          description: Update information.
+        deviceCount:
+          type: integer
+          description: Total number of devices for which the update is applicable.
       required:
-      - deviceId
+      - groupId
       - deviceClassId
-      - onLatestUpdate
-      description: Device metadata.
-    UpdateInfo:
+      - update
+      - deviceCount
+      description: Device class subgroup, update information, and the number of devices for which the update is applicable.
+    DeviceHealthState:
+      description: Device health states
+      type: string
+      enum:
+      - healthy
+      - unhealthy
+      x-ms-enum:
+        name: DeviceHealthState
+        modelAsString: true
+        values:
+        - value: healthy
+          name: healthy
+          description: Agent is healthy
+        - value: unhealthy
+          name: unhealthy
+          description: Agent is in an unhealthy state
+    HealthCheck:
+      description: Health check
       type: object
       properties:
-        updateId:
-          $ref: '#/components/schemas/UpdateId'
-          description: Update identifier.
-        description:
+        name:
           type: string
-          description: Update description.
-          readOnly: true
+          description: Health check name
+        result:
+          $ref: '#/components/schemas/HealthCheckResult'
+          description: Health check result
+    CloudInitiatedRollbackPolicyFailure:
+      type: object
+      properties:
+        devicesFailedPercentage:
+          type: integer
+          description: Percentage of devices that failed.
+        devicesFailedCount:
+          type: integer
+          description: Number of devices that failed.
+      required:
+      - devicesFailedPercentage
+      - devicesFailedCount
+      description: Failure conditions to initiate rollback policy
+    DeviceClassSubgroupUpdatableDevicesList:
+      description: The list of updatable devices for a device class subgroup.
+      type: object
+      properties:
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceClassSubgroupUpdatableDevices'
+        nextLink:
+          description: The link to the next page of items.
+          type: string
+      required:
+      - value
+    DeviceClass:
+      type: object
+      properties:
+        deviceClassId:
+          type: string
+          description: The device class identifier.
         friendlyName:
           type: string
-          description: Friendly update name.
-          readOnly: true
+          description: The device class friendly name. This can be updated by callers after the device class has been automatically created.
+        deviceClassProperties:
+          $ref: '#/components/schemas/DeviceClassProperties'
+          description: The device class properties that are used to calculate the device class Id
+        bestCompatibleUpdate:
+          $ref: '#/components/schemas/UpdateInfo'
+          description: Update that is best compatible with this device class.
       required:
-      - updateId
-      description: Update information.
-    ErrorResponse:
-      description: Common error response.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/Error'
-          description: The error details.
-      required:
-      - error
+      - deviceClassId
+      - deviceClassProperties
+      description: Device class metadata.
     DeviceClassSubgroupDeploymentStatus:
       type: object
       properties:
@@ -1446,36 +1551,15 @@ components:
       - deviceClassId
       - deploymentState
       description: Device class subgroup deployment status metadata.
-    DeviceHealthState:
-      description: Device health states
-      type: string
-      enum:
-      - healthy
-      - unhealthy
-      x-ms-enum:
-        name: DeviceHealthState
-        modelAsString: true
-        values:
-        - value: healthy
-          name: healthy
-          description: Agent is healthy
-        - value: unhealthy
-          name: unhealthy
-          description: Agent is in an unhealthy state
-    GroupsList:
-      description: The list of groups.
+    ErrorResponse:
+      description: Common error response.
       type: object
       properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/Group'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
+        error:
+          $ref: '#/components/schemas/Error'
+          description: The error details.
       required:
-      - value
+      - error
     OperationStatus:
       type: string
       enum:
@@ -1500,139 +1584,89 @@ components:
           name: Failed
           description: Background operation finished with failure.
       description: Operation status.
-    DeviceClassSubgroupUpdatableDevicesList:
-      description: The list of updatable devices for a device class subgroup.
+    LogCollectionOperationDetailedStatus:
+      type: object
+      properties:
+        operationId:
+          type: string
+          description: The device diagnostics operation id.
+          x-ms-client-name: logCollectionId
+        createdDateTime:
+          type: string
+          description: The timestamp when the operation was created.
+        lastActionDateTime:
+          type: string
+          description: A timestamp for when the current state was entered.
+        status:
+          $ref: '#/components/schemas/OperationStatusWithoutUndefinedOption'
+          description: Operation status.
+        deviceStatus:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogCollectionOperationDeviceStatus'
+          description: Status of the devices in the operation
+        description:
+          type: string
+          description: Device diagnostics operation description.
+      description: Device diagnostics operation detailed status
+    DeploymentsList:
+      description: The list of deployments.
       type: object
       properties:
         value:
           description: The collection of pageable items.
           type: array
           items:
-            $ref: '#/components/schemas/DeviceClassSubgroupUpdatableDevices'
+            $ref: '#/components/schemas/Deployment'
         nextLink:
           description: The link to the next page of items.
           type: string
       required:
       - value
-    ImportType:
-      type: string
-      description: The device import type.
-      enum:
-      - Devices
-      - Modules
-      - All
-      x-ms-enum:
-        name: ImportType
-        modelAsString: true
-        values:
-        - value: Devices
-          name: Devices
-          description: Import only devices but not modules.
-        - value: Modules
-          name: Modules
-          description: Import only modules but not devices.
-        - value: All
-          name: All
-          description: Import both devices and modules.
-    DeviceClassSubgroup:
+    DevicesList:
+      description: The list of devices.
       type: object
       properties:
-        deviceClassId:
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+        nextLink:
+          description: The link to the next page of items.
           type: string
-          description: Device class subgroup identity.
-        groupId:
-          type: string
-          description: Group identity.
-        createdDateTime:
-          type: string
-          description: Date and time when the device class subgroup was created.
-        deviceCount:
-          type: integer
-          description: The number of devices in the device class subgroup.
-        deploymentId:
-          type: string
-          description: The active deployment Id for the device class subgroup.
       required:
-      - deviceClassId
-      - groupId
-      - createdDateTime
-      description: Device class subgroup details. A device class subgroup is a subset of devices in a group that share the same device class id.
-    DeploymentDeviceState:
+      - value
+    CloudInitiatedRollbackPolicy:
       type: object
       properties:
-        deviceId:
-          type: string
-          description: Device identity.
-        moduleId:
-          type: string
-          description: Device module identity.
-        retryCount:
-          type: integer
-          description: The number of times this deployment has been retried on this device.
-          format: int32
-        movedOnToNewDeployment:
-          type: boolean
-          description: Boolean flag indicating whether this device is in a newer deployment and can no longer retry this deployment.
-        deviceState:
-          $ref: '#/components/schemas/DeviceDeploymentState'
-          description: Deployment device state.
+        update:
+          $ref: '#/components/schemas/UpdateInfo'
+          description: Update to rollback to.
+        failure:
+          $ref: '#/components/schemas/CloudInitiatedRollbackPolicyFailure'
+          description: Failure conditions to initiate rollback policy.
       required:
-      - deviceId
-      - retryCount
-      - movedOnToNewDeployment
-      - deviceState
-      description: Deployment device status.
-    InnerError:
+      - update
+      - failure
+      description: Rollback policy for deployment
+    UpdateId:
       type: object
       properties:
-        code:
+        provider:
           type: string
-          description: A more specific error code than what was provided by the containing error.
-        message:
+          description: Update provider.
+        name:
           type: string
-          description: A human-readable representation of the error.
-        errorDetail:
+          description: Update name.
+        version:
           type: string
-          description: The internal error or exception message.
-        innerError:
-          $ref: '#/components/schemas/InnerError'
-          description: An object containing more specific information than the current object about the error.
+          description: Update version.
       required:
-      - code
-      description: An object containing more specific information than the current object about the error.
-    UpdateCompliance:
-      type: object
-      properties:
-        totalDeviceCount:
-          type: integer
-          description: Total number of devices.
-        onLatestUpdateDeviceCount:
-          type: integer
-          description: Number of devices on the latest update.
-        newUpdatesAvailableDeviceCount:
-          type: integer
-          description: Number of devices with a newer update available.
-        updatesInProgressDeviceCount:
-          type: integer
-          description: Number of devices with update in-progress.
-      required:
-      - totalDeviceCount
-      - onLatestUpdateDeviceCount
-      - newUpdatesAvailableDeviceCount
-      - updatesInProgressDeviceCount
-      description: Update compliance information.
-    DeviceUpdateAgentId:
-      type: object
-      properties:
-        deviceId:
-          type: string
-          description: Device Id
-        moduleId:
-          type: string
-          description: Module Id
-      required:
-      - deviceId
-      description: Device Update agent id
+      - provider
+      - name
+      - version
+      description: Update identifier.
     DeviceOperation:
       type: object
       properties:
@@ -1665,20 +1699,6 @@ components:
       - lastActionDateTime
       - createdDateTime
       description: Operation metadata.
-    LogCollectionList:
-      description: The list of log collections with server paging support.
-      type: object
-      properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/LogCollection'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
-      required:
-      - value
     DeploymentDeviceStatesList:
       description: The list of deployment device states.
       type: object
@@ -1693,126 +1713,6 @@ components:
           type: string
       required:
       - value
-    DeviceHealthList:
-      description: Array of Device Health, with server paging support.
-      type: object
-      properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/DeviceHealth'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
-      required:
-      - value
-    CloudInitiatedRollbackPolicyFailure:
-      type: object
-      properties:
-        devicesFailedPercentage:
-          type: integer
-          description: Percentage of devices that failed.
-        devicesFailedCount:
-          type: integer
-          description: Number of devices that failed.
-      required:
-      - devicesFailedPercentage
-      - devicesFailedCount
-      description: Failure conditions to initiate rollback policy
-    LogCollectionOperationDeviceStatus:
-      type: object
-      properties:
-        deviceId:
-          type: string
-          description: Device id
-        moduleId:
-          type: string
-          description: Module id.
-        status:
-          $ref: '#/components/schemas/OperationStatusWithoutUndefinedOption'
-          description: Log upload status
-        resultCode:
-          type: string
-          description: Log upload result code
-        extendedResultCode:
-          type: string
-          description: Log upload extended result code
-        logLocation:
-          type: string
-          description: Log upload location
-      required:
-      - deviceId
-      - status
-      description: Diagnostics operation device status
-    HealthCheckResult:
-      type: string
-      enum:
-      - success
-      - userError
-      x-ms-enum:
-        name: HealthCheckResult
-        modelAsString: true
-        values:
-        - value: success
-          name: success
-          description: Health check succeeded
-        - value: userError
-          name: userError
-          description: Health check failed due to user error
-      description: Health check result
-    DeviceClassesList:
-      description: The list of device classes.
-      type: object
-      properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/DeviceClass'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
-      required:
-      - value
-    UpdateInfoList:
-      type: object
-      properties:
-        value:
-          description: The collection of pageable items.
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdateInfo'
-        nextLink:
-          description: The link to the next page of items.
-          type: string
-      required:
-      - value
-      description: List of update information.
-    DeviceDeploymentState:
-      type: string
-      enum:
-      - Succeeded
-      - InProgress
-      - Canceled
-      - Failed
-      x-ms-enum:
-        name: DeviceDeploymentState
-        modelAsString: true
-        values:
-        - value: Succeeded
-          name: Succeeded
-          description: Deployment has completed with success.
-        - value: InProgress
-          name: InProgress
-          description: Deployment is in progress.
-        - value: Canceled
-          name: Canceled
-          description: Deployment was canceled.
-        - value: Failed
-          name: Failed
-          description: Deployment has completed with failure.
-      description: Deployment state.
     LogCollection:
       type: object
       properties:
@@ -1844,85 +1744,215 @@ components:
       required:
       - deviceList
       description: Diagnostics request body
-    DeviceClassSubgroupUpdatableDevices:
+    Error:
       type: object
       properties:
-        groupId:
+        code:
           type: string
-          description: The group Id
-        deviceClassId:
+          description: Server defined error code.
+        message:
           type: string
-          description: The device class subgroup's device class Id
-        update:
-          $ref: '#/components/schemas/UpdateInfo'
-          description: Update information.
-        deviceCount:
-          type: integer
-          description: Total number of devices for which the update is applicable.
-      required:
-      - groupId
-      - deviceClassId
-      - update
-      - deviceCount
-      description: Device class subgroup, update information, and the number of devices for which the update is applicable.
-    Deployment:
-      type: object
-      properties:
-        deploymentId:
+          description: A human-readable representation of the error.
+        target:
           type: string
-          description: The caller-provided deployment identifier.
-        startDateTime:
-          type: string
-          description: The deployment start datetime.
-          format: date-time
-        update:
-          $ref: '#/components/schemas/UpdateInfo'
-          description: Update information for the update in the deployment.
-        groupId:
-          type: string
-          description: The group identity for the devices the deployment is intended to update.
-        deviceClassSubgroups:
+          description: The target of the error.
+        details:
           type: array
           items:
-            type: string
-          description: The device class subgroups the deployment is compatible with and subgroup deployments have been created for. This is not provided by the caller during CreateOrUpdateDeployment but is automatically determined by Device Update
-        isCanceled:
-          type: boolean
-          description: Boolean flag indicating whether the deployment was canceled.
-        isRetried:
-          type: boolean
-          description: Boolean flag indicating whether the deployment has been retried.
-        rollbackPolicy:
-          $ref: '#/components/schemas/CloudInitiatedRollbackPolicy'
-          description: The rollback policy for the deployment.
-        isCloudInitiatedRollback:
-          type: boolean
-          description: Boolean flag indicating whether the deployment is a rollback deployment.
+            $ref: '#/components/schemas/Error'
+          description: An array of errors that led to the reported error.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+          description: An object containing more specific information than the current object about the error.
+        occurredDateTime:
+          type: string
+          description: Date and time in UTC when the error occurred.
+          format: date-time
       required:
-      - deploymentId
-      - startDateTime
-      - update
-      - groupId
-      description: Deployment metadata.
-    DeviceClass:
+      - code
+      - message
+      description: Error details.
+    DeviceOperationsList:
+      description: The list of device operations with server paging support.
+      type: object
+      properties:
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceOperation'
+        nextLink:
+          description: The link to the next page of items.
+          type: string
+      required:
+      - value
+    DeviceHealthList:
+      description: Array of Device Health, with server paging support.
+      type: object
+      properties:
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceHealth'
+        nextLink:
+          description: The link to the next page of items.
+          type: string
+      required:
+      - value
+    InnerError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: A more specific error code than what was provided by the containing error.
+        message:
+          type: string
+          description: A human-readable representation of the error.
+        errorDetail:
+          type: string
+          description: The internal error or exception message.
+        innerError:
+          $ref: '#/components/schemas/InnerError'
+          description: An object containing more specific information than the current object about the error.
+      required:
+      - code
+      description: An object containing more specific information than the current object about the error.
+    ContractModel:
+      type: object
+      description: The Device Update agent contract model.
+      properties:
+        id:
+          type: string
+          description: The Device Update agent contract model Id of the device class. This is also used to calculate the device class Id.
+        name:
+          type: string
+          description: The Device Update agent contract model name of the device class. Intended to be a more readable form of the contract model Id.
+      required:
+      - id
+      - name
+    UpdateCompliance:
+      type: object
+      properties:
+        totalDeviceCount:
+          type: integer
+          description: Total number of devices.
+        onLatestUpdateDeviceCount:
+          type: integer
+          description: Number of devices on the latest update.
+        newUpdatesAvailableDeviceCount:
+          type: integer
+          description: Number of devices with a newer update available.
+        updatesInProgressDeviceCount:
+          type: integer
+          description: Number of devices with update in-progress.
+      required:
+      - totalDeviceCount
+      - onLatestUpdateDeviceCount
+      - newUpdatesAvailableDeviceCount
+      - updatesInProgressDeviceCount
+      description: Update compliance information.
+    PatchBody:
+      type: object
+      properties:
+        friendlyName:
+          type: string
+          description: The device class friendly name.
+      required:
+      - friendlyName
+      description: Device Class JSON Merge Patch request body
+    LogCollectionList:
+      description: The list of log collections with server paging support.
+      type: object
+      properties:
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/LogCollection'
+        nextLink:
+          description: The link to the next page of items.
+          type: string
+      required:
+      - value
+    HealthCheckResult:
+      type: string
+      enum:
+      - success
+      - userError
+      x-ms-enum:
+        name: HealthCheckResult
+        modelAsString: true
+        values:
+        - value: success
+          name: success
+          description: Health check succeeded
+        - value: userError
+          name: userError
+          description: Health check failed due to user error
+      description: Health check result
+    UpdateInfoList:
+      type: object
+      properties:
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateInfo'
+        nextLink:
+          description: The link to the next page of items.
+          type: string
+      required:
+      - value
+      description: List of update information.
+    DeviceHealth:
+      description: Device Health
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Device id
+        moduleId:
+          type: string
+          description: Module id
+        state:
+          $ref: '#/components/schemas/DeviceHealthState'
+          description: Aggregate device health state
+        digitalTwinModelId:
+          type: string
+          description: Digital twin model Id
+        healthChecks:
+          type: array
+          description: Array of health checks and their results
+          items:
+            $ref: '#/components/schemas/HealthCheck'
+      required:
+      - deviceId
+      - state
+      - healthChecks
+    DeviceClassSubgroup:
       type: object
       properties:
         deviceClassId:
           type: string
-          description: The device class identifier.
-        friendlyName:
+          description: Device class subgroup identity.
+        groupId:
           type: string
-          description: The device class friendly name. This can be updated by callers after the device class has been automatically created.
-        deviceClassProperties:
-          $ref: '#/components/schemas/DeviceClassProperties'
-          description: The device class properties that are used to calculate the device class Id
-        bestCompatibleUpdate:
-          $ref: '#/components/schemas/UpdateInfo'
-          description: Update that is best compatible with this device class.
+          description: Group identity.
+        createdDateTime:
+          type: string
+          description: Date and time when the device class subgroup was created.
+        deviceCount:
+          type: integer
+          description: The number of devices in the device class subgroup.
+        deploymentId:
+          type: string
+          description: The active deployment Id for the device class subgroup.
       required:
       - deviceClassId
-      - deviceClassProperties
-      description: Device class metadata.
+      - groupId
+      - createdDateTime
+      description: Device class subgroup details. A device class subgroup is a subset of devices in a group that share the same device class id.
     Group:
       type: object
       properties:
@@ -1957,118 +1987,44 @@ components:
       - groupType
       - createdDateTime
       description: Group details.
-    DeviceHealth:
-      description: Device Health
-      type: object
-      properties:
-        deviceId:
-          type: string
-          description: Device id
-        moduleId:
-          type: string
-          description: Module id
-        state:
-          $ref: '#/components/schemas/DeviceHealthState'
-          description: Aggregate device health state
-        digitalTwinModelId:
-          type: string
-          description: Digital twin model Id
-        healthChecks:
-          type: array
-          description: Array of health checks and their results
-          items:
-            $ref: '#/components/schemas/HealthCheck'
-      required:
-      - deviceId
-      - state
-      - healthChecks
-    CloudInitiatedRollbackPolicy:
-      type: object
-      properties:
-        update:
-          $ref: '#/components/schemas/UpdateInfo'
-          description: Update to rollback to.
-        failure:
-          $ref: '#/components/schemas/CloudInitiatedRollbackPolicyFailure'
-          description: Failure conditions to initiate rollback policy.
-      required:
-      - update
-      - failure
-      description: Rollback policy for deployment
-    HealthCheck:
-      description: Health check
-      type: object
-      properties:
-        name:
-          type: string
-          description: Health check name
-        result:
-          $ref: '#/components/schemas/HealthCheckResult'
-          description: Health check result
-    InstallResult:
-      type: object
-      properties:
-        resultCode:
-          type: integer
-          description: Install result code.
-        extendedResultCode:
-          type: integer
-          description: Install extended result code
-        resultDetails:
-          type: string
-          description: A string containing further details about the install result
-        stepResults:
-          type: array
-          items:
-            $ref: '#/components/schemas/StepResult'
-            description: Step results
-          description: Array of step results
-      required:
-      - resultCode
-      - extendedResultCode
-      description: The install result of an update and any step results under it.
-    DeviceClassSubgroupsList:
-      description: The list of device class subgroups within a group.
+    OperationStatusWithoutUndefinedOption:
+      type: string
+      enum:
+      - NotStarted
+      - Running
+      - Succeeded
+      - Failed
+      x-ms-enum:
+        name: OperationStatus
+        modelAsString: true
+        values:
+        - value: NotStarted
+          name: NotStarted
+          description: Background operation created but not started yet.
+        - value: Running
+          name: Running
+          description: Background operation is currently running.
+        - value: Succeeded
+          name: Succeeded
+          description: Background operation finished with success.
+        - value: Failed
+          name: Failed
+          description: Background operation finished with failure.
+      description: Operation status.
+    GroupsList:
+      description: The list of groups.
       type: object
       properties:
         value:
           description: The collection of pageable items.
           type: array
           items:
-            $ref: '#/components/schemas/DeviceClassSubgroup'
+            $ref: '#/components/schemas/Group'
         nextLink:
           description: The link to the next page of items.
           type: string
       required:
       - value
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Server defined error code.
-        message:
-          type: string
-          description: A human-readable representation of the error.
-        target:
-          type: string
-          description: The target of the error.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/Error'
-          description: An array of errors that led to the reported error.
-        innererror:
-          $ref: '#/components/schemas/InnerError'
-          description: An object containing more specific information than the current object about the error.
-        occurredDateTime:
-          type: string
-          description: Date and time in UTC when the error occurred.
-          format: date-time
-      required:
-      - code
-      - message
-      description: Error details.
     StepResult:
       type: object
       properties:
@@ -2091,71 +2047,81 @@ components:
       - resultCode
       - extendedResultCode
       description: The step result under an update.
-    GroupType:
-      type: string
-      enum:
-      - IoTHubTag
-      - DefaultNoTag
-      x-ms-enum:
-        name: GroupType
-        modelAsString: true
-        values:
-        - value: IoTHubTag
-          name: IoTHubTag
-          description: IoT Hub tag based group, all devices in the group share an ADUGroup tag value.
-        - value: DefaultNoTag
-          name: DefaultNoTag
-          description: Default group for untagged devices.
-      description: Supported group types.
-    DeviceClassProperties:
+    DeviceClassSubgroupsList:
+      description: The list of device class subgroups within a group.
       type: object
-      description: The device class properties that are used to calculate the device class Id
       properties:
-        contractModel:
-          $ref: '#/components/schemas/ContractModel'
-          description: The Device Update agent contract model.
-        compatProperties:
-          type: object
-          additionalProperties:
-            type: string
-          description: The compat properties of the device class. This object can be thought of as a set of key-value pairs where the key is the name of the compatibility property and the value is the value of the compatibility property. There will always be at least 1 compat property
+        value:
+          description: The collection of pageable items.
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceClassSubgroup'
+        nextLink:
+          description: The link to the next page of items.
+          type: string
       required:
-      - compatProperties
+      - value
+    Device:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          description: Device identity.
+        moduleId:
+          type: string
+          description: Device module identity.
+        deviceClassId:
+          type: string
+          description: Device class identity.
+        groupId:
+          type: string
+          description: Device group identity.
+        lastAttemptedUpdate:
+          $ref: '#/components/schemas/UpdateInfo'
+          description: The update that device last attempted to install.
+        deploymentStatus:
+          $ref: '#/components/schemas/DeviceDeploymentState'
+          description: State of the device in its last deployment.
+        installedUpdate:
+          $ref: '#/components/schemas/UpdateInfo'
+          description: Currently installed update on device.
+        onLatestUpdate:
+          type: boolean
+          description: Boolean flag indicating whether the latest update is installed on the device
+        lastDeploymentId:
+          type: string
+          description: The deployment identifier for the last deployment to the device
+        lastInstallResult:
+          $ref: '#/components/schemas/InstallResult'
+          description: Last install result.
+      required:
+      - deviceId
+      - deviceClassId
+      - onLatestUpdate
+      description: Device metadata.
+    InstallResult:
+      type: object
+      properties:
+        resultCode:
+          type: integer
+          description: Install result code.
+        extendedResultCode:
+          type: integer
+          description: Install extended result code
+        resultDetails:
+          type: string
+          description: A string containing further details about the install result
+        stepResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/StepResult'
+            description: Step results
+          description: Array of step results
+      required:
+      - resultCode
+      - extendedResultCode
+      description: The install result of an update and any step results under it.
   parameters:
-    ModuleIdParameter:
-      name: moduleId
-      in: path
-      description: Device module identifier in Azure IoT Hub.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    DeploymentIdParameter:
-      name: deploymentId
-      in: path
-      description: Deployment identifier.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    GroupIdParameter:
-      name: groupId
-      in: path
-      description: Group identity.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    OperationIdParameter:
-      name: operationId
-      in: path
-      description: Operation identifier.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        maxLength: 256
-        minLength: 1
     IfNoneMatchParameter:
       name: If-None-Match
       in: header
@@ -2166,10 +2132,28 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    DeviceIdParameter:
-      name: deviceId
+    LogCollectionIdParameter:
+      name: operationId
       in: path
-      description: Device identifier in Azure IoT Hub.
+      description: Log collection identifier.
+      required: true
+      x-ms-parameter-location: method
+      x-ms-client-name: logCollectionId
+      schema:
+        type: string
+        maxLength: 256
+        minLength: 1
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: Version of the API to be used with the client request.
+      schema:
+        type: string
+    DeploymentIdParameter:
+      name: deploymentId
+      in: path
+      description: Deployment identifier.
       required: true
       x-ms-parameter-location: method
       schema:
@@ -2185,24 +2169,40 @@ components:
         name: account-options
       schema:
         type: string
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: Version of the API to be used with the client request.
-      schema:
-        type: string
-    LogCollectionIdParameter:
-      name: operationId
+    ModuleIdParameter:
+      name: moduleId
       in: path
-      description: Log collection identifier.
+      description: Device module identifier in Azure IoT Hub.
       required: true
       x-ms-parameter-location: method
-      x-ms-client-name: logCollectionId
+      schema:
+        type: string
+    OperationIdParameter:
+      name: operationId
+      in: path
+      description: Operation identifier.
+      required: true
+      x-ms-parameter-location: method
       schema:
         type: string
         maxLength: 256
         minLength: 1
+    DeviceIdParameter:
+      name: deviceId
+      in: path
+      description: Device identifier in Azure IoT Hub.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    GroupIdParameter:
+      name: groupId
+      in: path
+      description: Group identity.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     DeviceClassIdParameter:
       name: deviceClassId
       in: path

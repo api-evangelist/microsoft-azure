@@ -270,77 +270,144 @@ paths:
         description: The list of address geocoding queries/requests to process. The list can contain a max of 100 queries and must contain at least 1 query.
         required: true
 components:
-  parameters:
-    Top:
-      name: top
-      in: query
-      description: 'Maximum number of responses that will be returned. Default: 5, minimum: 1 and maximum: 20.'
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: integer
-        default: 5
-        maximum: 20
-        minimum: 1
-    View:
-      name: view
-      in: query
-      description: A string that an [ISO 3166-1 Alpha-2 region/country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This will alter Geopolitical disputed borders and labels to align with the specified user region.
-      required: false
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    ApiVersion:
-      name: api-version
-      description: Version number of Azure Maps API.
-      in: query
-      required: true
-      x-ms-parameter-location: client
-      schema:
-        type: string
-        default: 2022-02-01-preview
-    Location:
-      name: location
-      in: query
-      description: 'A point on the earth specified as a latitude and longitude. When you specify this parameter, the user’s location is taken into account and the results returned may be more relevant to the user. Example: &location=lon,lat'
-      required: false
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: number
-          format: double
-        maxItems: 2
-        minItems: 2
-    Bbox:
-      name: bbox
-      in: query
-      description: 'A rectangular area on the earth defined as a bounding box object. The sides of the rectangles are defined by latitude and longitude values. When you specify this parameter, the geographical area is taken into account when computing the results of a location query.
-
-
-        Example: lon1,lat1,lon2,lat2'
-      required: false
-      x-ms-parameter-location: method
-      style: form
-      explode: false
-      schema:
-        type: array
-        items:
-          type: number
-          format: double
-        maxItems: 4
-        minItems: 4
-    Accept-Language:
-      name: Accept-Language
-      in: header
-      description: "Language in which search results should be returned. \n\nPlease refer to [Supported Languages](https://learn.microsoft.com/azure/azure-maps/supported-languages) for details."
-      required: false
-      x-ms-parameter-location: client
-      schema:
-        type: string
   schemas:
+    NextLink:
+      type: string
+      description: The is the link to the next page of the features returned. If it's the last page, no this field.
+    MatchCodes:
+      description: 'One or more match code values that represent the geocoding level for each location in the response.
+
+
+        For example, a geocoded location with match codes of `Good` and `Ambiguous` means that more than one geocode location was found for the location information and that the geocode service did not have search up-hierarchy to find a match.
+
+
+        Similarly, a geocoded location with match codes of `Ambiguous` and `UpHierarchy` implies that a geocode location could not be found that matched all the provided location information, so the geocode service had to search up-hierarchy and found multiple matches at that level. An example of up an `Ambiguous` and `UpHierarchy` result is when you provide complete address information, but the geocode service cannot locate a match for the street address and instead returns information for more than one RoadBlock value.
+
+
+        The possible values are:
+
+
+        `Good`: The location has only one match or all returned matches are considered strong matches. For example, a query for New York returns several Good matches.
+
+
+        `Ambiguous`: The location is one of a set of possible matches. For example, when you query for the street address 128 Main St., the response may return two locations for 128 North Main St. and 128 South Main St. because there is not enough information to determine which option to choose.
+
+
+        `UpHierarchy`: The location represents a move up the geographic hierarchy. This occurs when a match for the location request was not found, so a less precise result is returned. For example, if a match for the requested address cannot be found, then a match code of `UpHierarchy` with a RoadBlock entity type may be returned.'
+      type: array
+      items:
+        type: string
+        enum:
+        - Good
+        - Ambiguous
+        - UpHierarchy
+    GeoJSONPoint:
+      type: object
+      description: A structure for Point Geometry
+      properties:
+        type:
+          description: Specifies the `type` for the geometry. Value should always be equal to "Point".
+          type: string
+          enum:
+          - Point
+          x-ms-enum:
+            name: GeoJSONPointTypeEnum
+            modelAsString: true
+            values:
+            - value: Point
+        coordinates:
+          description: Coordinates for the `Point` geometry.
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            type: number
+            format: double
+    GeocodingBatchRequestBody:
+      description: The list of address geocoding queries/requests to process. The list can contain a max of 100 queries and must contain at least 1 query.
+      type: object
+      properties:
+        batchItems:
+          description: The list of queries to process.
+          type: array
+          items:
+            $ref: '#/components/schemas/GeocodingBatchRequestItem'
+    Bbox:
+      description: Information on the coordinate range for point Geometry.  Please refer to [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946#section-5) for details.
+      type: array
+      minItems: 4
+      maxItems: 4
+      items:
+        type: number
+        format: double
+    GeocodingResponse:
+      description: This object is returned from a successful Geocoding call
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/FeatureType'
+        features:
+          $ref: '#/components/schemas/Features'
+        nextLink:
+          $ref: '#/components/schemas/NextLink'
+    FeatureType:
+      type: string
+      enum:
+      - FeatureCollection
+    GeocodingBatchResponseItem:
+      type: object
+      properties:
+        optionalId:
+          description: id of the batchItem which would be the same as the id in the request
+          type: string
+        type:
+          $ref: '#/components/schemas/FeatureType'
+        features:
+          $ref: '#/components/schemas/Features'
+        nextLink:
+          $ref: '#/components/schemas/NextLink'
+        error:
+          $ref: ../../../../../common-types/data-plane/v1/types.json#/definitions/ErrorDetail
+    FeaturesItem:
+      type: object
+      properties:
+        type:
+          type: string
+          description: must be Feature
+          enum:
+          - Feature
+          x-ms-enum:
+            name: FeaturesItemTypeEnum
+            modelAsString: true
+            values:
+            - value: Feature
+        id:
+          type: string
+          description: ID for feature returned
+        properties:
+          type: object
+          properties:
+            type:
+              type: string
+              description: "One of: \n* Address\n* RoadBlock\n* RoadIntersection"
+              readOnly: true
+            confidence:
+              $ref: '#/components/schemas/Confidence'
+            matchCodes:
+              $ref: '#/components/schemas/MatchCodes'
+            address:
+              $ref: '#/components/schemas/Address'
+            geocodePoints:
+              $ref: '#/components/schemas/GeocodePoints'
+        geometry:
+          $ref: '#/components/schemas/GeoJSONPoint'
+        bbox:
+          $ref: '#/components/schemas/Bbox'
+    UsageType:
+      type: string
+      enum:
+      - Display
+      - Route
     GeocodePoints:
       description: A collection of geocode points that differ in how they were calculated and their suggested use.
       type: array
@@ -374,51 +441,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/UsageType'
-    GeocodingResponse:
-      description: This object is returned from a successful Geocoding call
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/FeatureType'
-        features:
-          $ref: '#/components/schemas/Features'
-        nextLink:
-          $ref: '#/components/schemas/NextLink'
-    GeocodingBatchRequestBody:
-      description: The list of address geocoding queries/requests to process. The list can contain a max of 100 queries and must contain at least 1 query.
-      type: object
-      properties:
-        batchItems:
-          description: The list of queries to process.
-          type: array
-          items:
-            $ref: '#/components/schemas/GeocodingBatchRequestItem'
-    FeatureType:
-      type: string
-      enum:
-      - FeatureCollection
-    GeocodingBatchResponse:
-      description: This object is returned from a successful Geocoding Batch service call.
-      type: object
-      properties:
-        summary:
-          description: Summary for the batch request
-          type: object
-          readOnly: true
-          properties:
-            successfulRequests:
-              description: Number of successful requests in the batch
-              type: integer
-              readOnly: true
-            totalRequests:
-              description: Total number of requests in the batch
-              type: integer
-              readOnly: true
-        batchItems:
-          description: Array containing the batch results.
-          type: array
-          items:
-            $ref: '#/components/schemas/GeocodingBatchResponseItem'
     Confidence:
       description: 'The level of confidence that the geocoded location result is a match. Use this value with the match code to determine for more complete information about the match.
 
@@ -444,36 +466,79 @@ components:
       - High
       - Medium
       - Low
-    NextLink:
-      type: string
-      description: The is the link to the next page of the features returned. If it's the last page, no this field.
-    UsageType:
-      type: string
-      enum:
-      - Display
-      - Route
-    GeoJSONPoint:
+    GeocodingBatchResponse:
+      description: This object is returned from a successful Geocoding Batch service call.
       type: object
-      description: A structure for Point Geometry
       properties:
-        type:
-          description: Specifies the `type` for the geometry. Value should always be equal to "Point".
-          type: string
-          enum:
-          - Point
-          x-ms-enum:
-            name: GeoJSONPointTypeEnum
-            modelAsString: true
-            values:
-            - value: Point
-        coordinates:
-          description: Coordinates for the `Point` geometry.
+        summary:
+          description: Summary for the batch request
+          type: object
+          readOnly: true
+          properties:
+            successfulRequests:
+              description: Number of successful requests in the batch
+              type: integer
+              readOnly: true
+            totalRequests:
+              description: Total number of requests in the batch
+              type: integer
+              readOnly: true
+        batchItems:
+          description: Array containing the batch results.
           type: array
-          minItems: 2
-          maxItems: 2
           items:
-            type: number
-            format: double
+            $ref: '#/components/schemas/GeocodingBatchResponseItem'
+    Features:
+      type: array
+      items:
+        $ref: '#/components/schemas/FeaturesItem'
+    Address:
+      description: The address of the result
+      type: object
+      properties:
+        addressLine:
+          description: AddressLine that includes Street Name and Number
+          type: string
+          readOnly: true
+        locality:
+          description: locality property
+          type: string
+          readOnly: true
+        neighborhood:
+          description: neighborhood property
+          type: string
+          readOnly: true
+        adminDistricts:
+          description: The subdivision name in the country or region for an address. This element is typically treated as the first order administrative subdivision, but in some cases it also contains the second, third, or fourth order subdivision in a country, dependency, or region.
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: "The name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be full name of state such as Washington, \nFor adminDistrict[1], this could be the full name of the county"
+              shortName:
+                type: string
+                description: "The short name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be short name of state such as WA, \nFor adminDistrict[1], this could be the short name of the county"
+        postalCode:
+          description: Postal Code property
+          type: string
+          readOnly: true
+        countryRegion:
+          type: object
+          properties:
+            ISO:
+              description: ISO of country/region
+              type: string
+              readOnly: true
+            name:
+              description: name of country/region
+              type: string
+              readOnly: true
+        formattedAddress:
+          description: Formatted Address property
+          type: string
+          readOnly: true
     GeocodingBatchRequestItem:
       description: Batch Query object
       type: object
@@ -547,141 +612,76 @@ components:
               description: Do not restrict results to the specified countryRegion and adminDistrict.
             - value: strict
               description: Restrict results to the specified countryRegion and adminDistrict.
-    GeocodingBatchResponseItem:
-      type: object
-      properties:
-        optionalId:
-          description: id of the batchItem which would be the same as the id in the request
-          type: string
-        type:
-          $ref: '#/components/schemas/FeatureType'
-        features:
-          $ref: '#/components/schemas/Features'
-        nextLink:
-          $ref: '#/components/schemas/NextLink'
-        error:
-          $ref: ../../../../../common-types/data-plane/v1/types.json#/definitions/ErrorDetail
-    Features:
-      type: array
-      items:
-        $ref: '#/components/schemas/FeaturesItem'
-    Address:
-      description: The address of the result
-      type: object
-      properties:
-        addressLine:
-          description: AddressLine that includes Street Name and Number
-          type: string
-          readOnly: true
-        locality:
-          description: locality property
-          type: string
-          readOnly: true
-        neighborhood:
-          description: neighborhood property
-          type: string
-          readOnly: true
-        adminDistricts:
-          description: The subdivision name in the country or region for an address. This element is typically treated as the first order administrative subdivision, but in some cases it also contains the second, third, or fourth order subdivision in a country, dependency, or region.
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-                description: "The name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be full name of state such as Washington, \nFor adminDistrict[1], this could be the full name of the county"
-              shortName:
-                type: string
-                description: "The short name for the corresponding adminDistrict field, \nFor adminDistrict[0], this could be short name of state such as WA, \nFor adminDistrict[1], this could be the short name of the county"
-        postalCode:
-          description: Postal Code property
-          type: string
-          readOnly: true
-        countryRegion:
-          type: object
-          properties:
-            ISO:
-              description: ISO of country/region
-              type: string
-              readOnly: true
-            name:
-              description: name of country/region
-              type: string
-              readOnly: true
-        formattedAddress:
-          description: Formatted Address property
-          type: string
-          readOnly: true
-    FeaturesItem:
-      type: object
-      properties:
-        type:
-          type: string
-          description: must be Feature
-          enum:
-          - Feature
-          x-ms-enum:
-            name: FeaturesItemTypeEnum
-            modelAsString: true
-            values:
-            - value: Feature
-        id:
-          type: string
-          description: ID for feature returned
-        properties:
-          type: object
-          properties:
-            type:
-              type: string
-              description: "One of: \n* Address\n* RoadBlock\n* RoadIntersection"
-              readOnly: true
-            confidence:
-              $ref: '#/components/schemas/Confidence'
-            matchCodes:
-              $ref: '#/components/schemas/MatchCodes'
-            address:
-              $ref: '#/components/schemas/Address'
-            geocodePoints:
-              $ref: '#/components/schemas/GeocodePoints'
-        geometry:
-          $ref: '#/components/schemas/GeoJSONPoint'
-        bbox:
-          $ref: '#/components/schemas/Bbox'
-    Bbox:
-      description: Information on the coordinate range for point Geometry.  Please refer to [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946#section-5) for details.
-      type: array
-      minItems: 4
-      maxItems: 4
-      items:
-        type: number
-        format: double
-    MatchCodes:
-      description: 'One or more match code values that represent the geocoding level for each location in the response.
-
-
-        For example, a geocoded location with match codes of `Good` and `Ambiguous` means that more than one geocode location was found for the location information and that the geocode service did not have search up-hierarchy to find a match.
-
-
-        Similarly, a geocoded location with match codes of `Ambiguous` and `UpHierarchy` implies that a geocode location could not be found that matched all the provided location information, so the geocode service had to search up-hierarchy and found multiple matches at that level. An example of up an `Ambiguous` and `UpHierarchy` result is when you provide complete address information, but the geocode service cannot locate a match for the street address and instead returns information for more than one RoadBlock value.
-
-
-        The possible values are:
-
-
-        `Good`: The location has only one match or all returned matches are considered strong matches. For example, a query for New York returns several Good matches.
-
-
-        `Ambiguous`: The location is one of a set of possible matches. For example, when you query for the street address 128 Main St., the response may return two locations for 128 North Main St. and 128 South Main St. because there is not enough information to determine which option to choose.
-
-
-        `UpHierarchy`: The location represents a move up the geographic hierarchy. This occurs when a match for the location request was not found, so a less precise result is returned. For example, if a match for the requested address cannot be found, then a match code of `UpHierarchy` with a RoadBlock entity type may be returned.'
-      type: array
-      items:
+  parameters:
+    View:
+      name: view
+      in: query
+      description: A string that an [ISO 3166-1 Alpha-2 region/country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This will alter Geopolitical disputed borders and labels to align with the specified user region.
+      required: false
+      x-ms-parameter-location: method
+      schema:
         type: string
-        enum:
-        - Good
-        - Ambiguous
-        - UpHierarchy
+    Top:
+      name: top
+      in: query
+      description: 'Maximum number of responses that will be returned. Default: 5, minimum: 1 and maximum: 20.'
+      required: false
+      x-ms-parameter-location: method
+      schema:
+        type: integer
+        default: 5
+        maximum: 20
+        minimum: 1
+    Location:
+      name: location
+      in: query
+      description: 'A point on the earth specified as a latitude and longitude. When you specify this parameter, the user’s location is taken into account and the results returned may be more relevant to the user. Example: &location=lon,lat'
+      required: false
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: number
+          format: double
+        maxItems: 2
+        minItems: 2
+    Accept-Language:
+      name: Accept-Language
+      in: header
+      description: "Language in which search results should be returned. \n\nPlease refer to [Supported Languages](https://learn.microsoft.com/azure/azure-maps/supported-languages) for details."
+      required: false
+      x-ms-parameter-location: client
+      schema:
+        type: string
+    ApiVersion:
+      name: api-version
+      description: Version number of Azure Maps API.
+      in: query
+      required: true
+      x-ms-parameter-location: client
+      schema:
+        type: string
+        default: 2022-02-01-preview
+    Bbox:
+      name: bbox
+      in: query
+      description: 'A rectangular area on the earth defined as a bounding box object. The sides of the rectangles are defined by latitude and longitude values. When you specify this parameter, the geographical area is taken into account when computing the results of a location query.
+
+
+        Example: lon1,lat1,lon2,lat2'
+      required: false
+      x-ms-parameter-location: method
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: number
+          format: double
+        maxItems: 4
+        minItems: 4
   securitySchemes:
     AADToken:
       type: oauth2

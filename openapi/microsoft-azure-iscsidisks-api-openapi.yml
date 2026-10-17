@@ -345,48 +345,67 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ISCSIDisk:
-      description: The iSCSI disk.
+    ISCSIDiskProperties:
+      description: The iSCSI disk properties.
       required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel'
-      properties:
-        properties:
-          $ref: '#/components/schemas/ISCSIDiskProperties'
-          description: The properties.
-          x-ms-client-flatten: true
-    Item:
-      required:
-      - key
-      - value
+      - diskStatus
+      - accessControlRecords
+      - dataPolicy
+      - provisionedCapacityInBytes
+      - monitoringStatus
       type: object
       properties:
-        key:
+        description:
+          description: The description.
           type: string
-        value:
+        diskStatus:
+          description: The disk status.
+          enum:
+          - Online
+          - Offline
           type: string
-    Message:
-      type: object
-      properties:
-        language:
+          x-ms-enum:
+            name: DiskStatus
+            modelAsString: false
+        accessControlRecords:
+          description: The access control records.
+          type: array
+          items:
+            type: string
+        dataPolicy:
+          description: The data policy.
+          enum:
+          - Invalid
+          - Local
+          - Tiered
+          - Cloud
           type: string
-        value:
+          x-ms-enum:
+            name: DataPolicy
+            modelAsString: false
+        provisionedCapacityInBytes:
+          format: int64
+          description: The provisioned capacity in bytes.
+          type: integer
+        usedCapacityInBytes:
+          format: int64
+          description: The used capacity in bytes.
+          type: integer
+          readOnly: true
+        localUsedCapacityInBytes:
+          format: int64
+          description: The local used capacity in bytes.
+          type: integer
+          readOnly: true
+        monitoringStatus:
+          description: The monitoring.
+          enum:
+          - Enabled
+          - Disabled
           type: string
-    MetricName:
-      description: The name of the metric
-      required:
-      - value
-      - localizedValue
-      type: object
-      properties:
-        value:
-          description: Name of the metric
-          type: string
-        localizedValue:
-          description: Localized name of the metric
-          type: string
+          x-ms-enum:
+            name: MonitoringStatus
+            modelAsString: false
     MetricList:
       description: Collection of metrics
       required:
@@ -399,18 +418,15 @@ components:
           items:
             $ref: '#/components/schemas/Metrics'
           x-ms-identifiers: []
-    MetricAvailablity:
-      description: Metric availability specifies the time grain (aggregation interval or frequency) and the retention period for that time grain
+    Item:
       required:
-      - timeGrain
-      - retention
+      - key
+      - value
       type: object
       properties:
-        timeGrain:
-          description: The time grain, specifies the aggregation interval for the metric.
+        key:
           type: string
-        retention:
-          description: The retention period for the metric at the specified timegrain
+        value:
           type: string
     ISCSIDiskList:
       description: Collection of Iscsi disk
@@ -423,48 +439,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ISCSIDisk'
-    MetricDefinitionList:
-      description: List of metric definition
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: The list of metric definition
-          type: array
-          items:
-            $ref: '#/components/schemas/MetricDefinition'
-          x-ms-identifiers:
-          - name
-    MetricDimension:
-      description: Metric dimension
-      required:
-      - name
-      - value
-      type: object
-      properties:
-        name:
-          description: Metric dimension name
-          type: string
-        value:
-          description: Metric dimension values
-          type: string
-    BaseModel:
-      description: Base class for models
-      type: object
-      properties:
-        id:
-          description: The identifier.
-          type: string
-          readOnly: true
-        name:
-          description: The name.
-          type: string
-          readOnly: true
-        type:
-          description: The type.
-          type: string
-          readOnly: true
     Metrics:
       description: Monitoring metric
       required:
@@ -540,6 +514,82 @@ components:
             $ref: '#/components/schemas/MetricData'
           x-ms-identifiers:
           - timeStamp
+    ISCSIDisk:
+      description: The iSCSI disk.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      properties:
+        properties:
+          $ref: '#/components/schemas/ISCSIDiskProperties'
+          description: The properties.
+          x-ms-client-flatten: true
+    MetricData:
+      description: The metric data.
+      required:
+      - timeStamp
+      - sum
+      - count
+      - average
+      - minimum
+      - maximum
+      type: object
+      properties:
+        timeStamp:
+          format: date-time
+          description: The time when the metric data is fetched
+          type: string
+        sum:
+          format: double
+          description: The sum of all the samples available in the given instance of time for the specific metric data
+          type: number
+        count:
+          format: int32
+          description: The count of samples of the metric data available for the given instance
+          type: integer
+        average:
+          format: double
+          description: The average of all sample for the given instance
+          type: number
+        minimum:
+          format: double
+          description: The minimum of all samples available
+          type: number
+        maximum:
+          format: double
+          description: The maximum of all samples available
+          type: number
+    MetricName:
+      description: The name of the metric
+      required:
+      - value
+      - localizedValue
+      type: object
+      properties:
+        value:
+          description: Name of the metric
+          type: string
+        localizedValue:
+          description: Localized name of the metric
+          type: string
+    Error:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          $ref: '#/components/schemas/Message'
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+          x-ms-identifiers:
+          - key
     MetricDefinition:
       description: Monitoring metric definition represents the metadata of the metrics.
       required:
@@ -601,119 +651,84 @@ components:
         type:
           description: The metric definition type
           type: string
-    MetricData:
-      description: The metric data.
+    MetricAvailablity:
+      description: Metric availability specifies the time grain (aggregation interval or frequency) and the retention period for that time grain
       required:
-      - timeStamp
-      - sum
-      - count
-      - average
-      - minimum
-      - maximum
+      - timeGrain
+      - retention
       type: object
       properties:
-        timeStamp:
-          format: date-time
-          description: The time when the metric data is fetched
+        timeGrain:
+          description: The time grain, specifies the aggregation interval for the metric.
           type: string
-        sum:
-          format: double
-          description: The sum of all the samples available in the given instance of time for the specific metric data
-          type: number
-        count:
-          format: int32
-          description: The count of samples of the metric data available for the given instance
-          type: integer
-        average:
-          format: double
-          description: The average of all sample for the given instance
-          type: number
-        minimum:
-          format: double
-          description: The minimum of all samples available
-          type: number
-        maximum:
-          format: double
-          description: The maximum of all samples available
-          type: number
-    ISCSIDiskProperties:
-      description: The iSCSI disk properties.
-      required:
-      - diskStatus
-      - accessControlRecords
-      - dataPolicy
-      - provisionedCapacityInBytes
-      - monitoringStatus
+        retention:
+          description: The retention period for the metric at the specified timegrain
+          type: string
+    Message:
       type: object
       properties:
-        description:
-          description: The description.
+        language:
           type: string
-        diskStatus:
-          description: The disk status.
-          enum:
-          - Online
-          - Offline
+        value:
           type: string
-          x-ms-enum:
-            name: DiskStatus
-            modelAsString: false
-        accessControlRecords:
-          description: The access control records.
+    BaseModel:
+      description: Base class for models
+      type: object
+      properties:
+        id:
+          description: The identifier.
+          type: string
+          readOnly: true
+        name:
+          description: The name.
+          type: string
+          readOnly: true
+        type:
+          description: The type.
+          type: string
+          readOnly: true
+    MetricDefinitionList:
+      description: List of metric definition
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The list of metric definition
           type: array
           items:
-            type: string
-        dataPolicy:
-          description: The data policy.
-          enum:
-          - Invalid
-          - Local
-          - Tiered
-          - Cloud
-          type: string
-          x-ms-enum:
-            name: DataPolicy
-            modelAsString: false
-        provisionedCapacityInBytes:
-          format: int64
-          description: The provisioned capacity in bytes.
-          type: integer
-        usedCapacityInBytes:
-          format: int64
-          description: The used capacity in bytes.
-          type: integer
-          readOnly: true
-        localUsedCapacityInBytes:
-          format: int64
-          description: The local used capacity in bytes.
-          type: integer
-          readOnly: true
-        monitoringStatus:
-          description: The monitoring.
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: MonitoringStatus
-            modelAsString: false
-    Error:
-      required:
-      - errorCode
-      - message
-      type: object
-      properties:
-        errorCode:
-          type: string
-        message:
-          $ref: '#/components/schemas/Message'
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/Item'
+            $ref: '#/components/schemas/MetricDefinition'
           x-ms-identifiers:
-          - key
+          - name
+    MetricDimension:
+      description: Metric dimension
+      required:
+      - name
+      - value
+      type: object
+      properties:
+        name:
+          description: Metric dimension name
+          type: string
+        value:
+          description: Metric dimension values
+          type: string
   parameters:
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The subscription id
+      required: true
+      schema:
+        type: string
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The resource group name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     managerNameParameter:
       name: managerName
       in: path
@@ -728,21 +743,6 @@ components:
       name: api-version
       in: query
       description: The api version
-      required: true
-      schema:
-        type: string
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The resource group name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The subscription id
       required: true
       schema:
         type: string

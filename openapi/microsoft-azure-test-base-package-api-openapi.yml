@@ -556,39 +556,46 @@ paths:
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    PackageUpdateParameters:
-      description: Parameters supplied to update a Test Base Package.
-      properties:
-        properties:
-          $ref: '#/components/schemas/PackageUpdateParameterProperties'
-          x-ms-client-flatten: true
-          description: Test Base Package update parameters.
-        tags:
-          description: The tags of the Package.
-          $ref: '#/components/schemas/Tags'
-    FlightingRingProperties:
-      description: The Flighting Ring properties.
-      properties:
-        actualFlightingRingName:
-          type: string
-          description: The actual name of a flighting ring of a Test Base Account.
-    Tags:
-      type: object
-      additionalProperties:
-        type: string
-      description: Resource tags.
-    FlightingRingResource:
-      description: The flighting ring resource.
+    PackageResource:
+      description: The Test Base Package resource.
       properties:
         systemData:
           description: The system metadata relating to this resource
           $ref: '#/components/schemas/SystemData'
         properties:
-          $ref: '#/components/schemas/FlightingRingProperties'
+          $ref: '#/components/schemas/PackageProperties'
           x-ms-client-flatten: true
-          description: Flighting Ring properties.
+          description: Test Base Package properties.
       allOf:
-      - $ref: '#/components/schemas/ProxyResource'
+      - $ref: '#/components/schemas/TrackedResource'
+    TestTypeProperties:
+      description: The Test Type properties.
+      properties:
+        actualTestTypeName:
+          type: string
+          description: The actual name of a test type of a Test Base Account.
+    PackageUpdateParameterProperties:
+      description: Parameters supplied to update a Test Base Package.
+      properties:
+        targetOSList:
+          type: array
+          items:
+            $ref: '#/components/schemas/TargetOSInfo'
+          description: Specifies the target OSs of specific OS Update types.
+        flightingRing:
+          type: string
+          description: The flighting ring for feature update.
+        isEnabled:
+          type: boolean
+          description: Specifies whether the package is enabled. It doesn't schedule test for package which is not enabled.
+        blobPath:
+          type: string
+          description: The file name of the package.
+        tests:
+          type: array
+          items:
+            $ref: '#/components/schemas/Test'
+          description: The detailed test information.
     Command:
       description: The command used in the test
       properties:
@@ -644,27 +651,34 @@ components:
       - action
       - contentType
       - content
-    ErrorDefinition:
-      description: Error definition.
+    TargetOSInfo:
+      description: The information of the target OS to be tested.
       properties:
-        code:
-          description: The error code.
+        osUpdateType:
           type: string
-          readOnly: true
-        message:
-          description: The error message.
-          type: string
-          readOnly: true
-        target:
-          type: string
-          description: The target of the particular error.
-          readOnly: true
-        details:
-          description: The error details.
+          description: Specifies the OS update type to test against, e.g., 'Security updates' or 'Feature updates'.
+        targetOSs:
           type: array
           items:
-            $ref: '#/components/schemas/ErrorDefinition'
-          readOnly: true
+            type: string
+          description: Specifies the target OSs to be tested.
+      required:
+      - osUpdateType
+      - targetOSs
+    ProvisioningState:
+      type: string
+      description: ARM provisioning state, see https://github.com/Azure/azure-resource-manager-rpc/blob/master/v1.0/Addendum.md#provisioningstate-property
+      enum:
+      - Succeeded
+      - Failed
+      - Cancelled
+      - Creating
+      - Deleting
+      - Updating
+      readOnly: true
+      x-ms-enum:
+        name: provisioningState
+        modelAsString: true
     PackageProperties:
       description: The properties of the Test Base Package.
       properties:
@@ -738,6 +752,221 @@ components:
       - flightingRing
       - blobPath
       - tests
+    Test:
+      description: The definition of a Test.
+      properties:
+        testType:
+          $ref: '#/components/schemas/TestType'
+          description: The type of the test.
+        validationRunStatus:
+          readOnly: true
+          type: string
+          description: The status of the validation run of the package.
+          enum:
+          - Unknown
+          - Pending
+          - Passed
+          - Failed
+          x-ms-enum:
+            name: validationRunStatus
+            modelAsString: true
+        isActive:
+          type: boolean
+          description: Indicates if this test is active.It doesn't schedule test for not active Test.
+        commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Command'
+          description: The commands used in the test.
+      required:
+      - testType
+      - commands
+    GetFileUploadURLParameters:
+      description: The parameters supplied to the Test Base Account GetFileUploadURL action.
+      properties:
+        blobName:
+          type: string
+          description: The custom file name of the uploaded blob.
+    TestTypeResource:
+      description: The test type resource.
+      properties:
+        systemData:
+          description: The system metadata relating to this resource
+          $ref: '#/components/schemas/SystemData'
+        properties:
+          $ref: '#/components/schemas/TestTypeProperties'
+          x-ms-client-flatten: true
+          description: Test Type properties.
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+    FileUploadURLResponse:
+      description: The URL response
+      properties:
+        uploadUrl:
+          type: string
+          readOnly: true
+          description: The URL used for uploading the package.
+        blobPath:
+          type: string
+          readOnly: true
+          description: The blob path of the uploaded package. It will be used as the 'blobPath' property of PackageResource.
+    ProxyResource:
+      description: The resource model definition for an ARM proxy resource. It will have everything other than required location and tags
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+    CheckNameAvailabilityResult:
+      properties:
+        nameAvailable:
+          type: boolean
+          description: 'Value indicating the availability of the name: true if the name is available; otherwise, false.'
+        reason:
+          type: string
+          description: The reason for unavailability of a name. Required if nameAvailable == false.
+          enum:
+          - Invalid
+          - AlreadyExists
+          x-ms-enum:
+            name: reason
+            modelAsString: true
+        message:
+          type: string
+          readOnly: true
+          description: The detailed info regarding the reason associated with the name. Required if nameAvailable == false.
+      description: Description of a Check Name availability response properties.
+    TestType:
+      type: string
+      description: The test type.
+      enum:
+      - OutOfBoxTest
+      - FunctionalTest
+      x-ms-enum:
+        name: testType
+        modelAsString: true
+    AvailableOSResource:
+      description: The Available OS resource.
+      properties:
+        systemData:
+          description: The system metadata relating to this resource
+          $ref: '#/components/schemas/SystemData'
+        properties:
+          $ref: '#/components/schemas/AvailableOSProperties'
+          x-ms-client-flatten: true
+          description: Available OS properties.
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+    ErrorResponse:
+      description: The error response send when an operation fails.
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDefinition'
+          description: The error details.
+    Resource:
+      description: The Resource definition.
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Resource ID.
+        name:
+          readOnly: true
+          type: string
+          description: Resource name.
+        type:
+          readOnly: true
+          type: string
+          description: Resource type.
+      x-ms-azure-resource: true
+    FlightingRingProperties:
+      description: The Flighting Ring properties.
+      properties:
+        actualFlightingRingName:
+          type: string
+          description: The actual name of a flighting ring of a Test Base Account.
+    ErrorDefinition:
+      description: Error definition.
+      properties:
+        code:
+          description: The error code.
+          type: string
+          readOnly: true
+        message:
+          description: The error message.
+          type: string
+          readOnly: true
+        target:
+          type: string
+          description: The target of the particular error.
+          readOnly: true
+        details:
+          description: The error details.
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDefinition'
+          readOnly: true
+    DownloadURLResponse:
+      description: The response of getting a download URL.
+      properties:
+        downloadUrl:
+          type: string
+          readOnly: true
+          x-ms-secret: true
+          description: The download URL.
+        expirationTime:
+          type: string
+          readOnly: true
+          format: date-time
+          description: Expiry date of the download URL.
+    PackageValidationResult:
+      description: The validation results. There's validation on package when it's created or updated.
+      properties:
+        validationName:
+          type: string
+          readOnly: true
+          description: Validation name.
+        isValid:
+          type: boolean
+          readOnly: true
+          description: Indicates whether the package passed the validation.
+        errors:
+          type: array
+          readOnly: true
+          items:
+            type: string
+          description: Error information.
+    PackageUpdateParameters:
+      description: Parameters supplied to update a Test Base Package.
+      properties:
+        properties:
+          $ref: '#/components/schemas/PackageUpdateParameterProperties'
+          x-ms-client-flatten: true
+          description: Test Base Package update parameters.
+        tags:
+          description: The tags of the Package.
+          $ref: '#/components/schemas/Tags'
+    FlightingRingResource:
+      description: The flighting ring resource.
+      properties:
+        systemData:
+          description: The system metadata relating to this resource
+          $ref: '#/components/schemas/SystemData'
+        properties:
+          $ref: '#/components/schemas/FlightingRingProperties'
+          x-ms-client-flatten: true
+          description: Flighting Ring properties.
+      allOf:
+      - $ref: '#/components/schemas/ProxyResource'
+    AvailableOSListResult:
+      description: A list of available OSs.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableOSResource'
+          description: The list of available OSs.
+        nextLink:
+          type: string
+          readOnly: true
+          description: Link to the next set of results. Not empty if value contains incomplete list of results.
     TrackedResource:
       description: The resource model definition for an ARM tracked top level resource
       properties:
@@ -758,112 +987,18 @@ components:
       - location
       allOf:
       - $ref: '#/components/schemas/Resource'
-    DownloadURLResponse:
-      description: The response of getting a download URL.
-      properties:
-        downloadUrl:
-          type: string
-          readOnly: true
-          x-ms-secret: true
-          description: The download URL.
-        expirationTime:
-          type: string
-          readOnly: true
-          format: date-time
-          description: Expiry date of the download URL.
-    TargetOSInfo:
-      description: The information of the target OS to be tested.
-      properties:
-        osUpdateType:
-          type: string
-          description: Specifies the OS update type to test against, e.g., 'Security updates' or 'Feature updates'.
-        targetOSs:
-          type: array
-          items:
-            type: string
-          description: Specifies the target OSs to be tested.
-      required:
-      - osUpdateType
-      - targetOSs
-    PackageValidationResult:
-      description: The validation results. There's validation on package when it's created or updated.
-      properties:
-        validationName:
-          type: string
-          readOnly: true
-          description: Validation name.
-        isValid:
-          type: boolean
-          readOnly: true
-          description: Indicates whether the package passed the validation.
-        errors:
-          type: array
-          readOnly: true
-          items:
-            type: string
-          description: Error information.
-    TestTypeResource:
-      description: The test type resource.
-      properties:
-        systemData:
-          description: The system metadata relating to this resource
-          $ref: '#/components/schemas/SystemData'
-        properties:
-          $ref: '#/components/schemas/TestTypeProperties'
-          x-ms-client-flatten: true
-          description: Test Type properties.
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
-    PackageUpdateParameterProperties:
-      description: Parameters supplied to update a Test Base Package.
-      properties:
-        targetOSList:
-          type: array
-          items:
-            $ref: '#/components/schemas/TargetOSInfo'
-          description: Specifies the target OSs of specific OS Update types.
-        flightingRing:
-          type: string
-          description: The flighting ring for feature update.
-        isEnabled:
-          type: boolean
-          description: Specifies whether the package is enabled. It doesn't schedule test for package which is not enabled.
-        blobPath:
-          type: string
-          description: The file name of the package.
-        tests:
-          type: array
-          items:
-            $ref: '#/components/schemas/Test'
-          description: The detailed test information.
-    ProxyResource:
-      description: The resource model definition for an ARM proxy resource. It will have everything other than required location and tags
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-    ErrorResponse:
-      description: The error response send when an operation fails.
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDefinition'
-          description: The error details.
-    PackageListResult:
-      description: A list of Test Base Packages.
+    FlightingRingListResult:
+      description: A list of flighting rings.
       properties:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/PackageResource'
-          description: The list of Test Base Packages.
+            $ref: '#/components/schemas/FlightingRingResource'
+          description: The list of flighting rings.
         nextLink:
           type: string
           readOnly: true
           description: Link to the next set of results. Not empty if value contains incomplete list of results.
-    GetFileUploadURLParameters:
-      description: The parameters supplied to the Test Base Account GetFileUploadURL action.
-      properties:
-        blobName:
-          type: string
-          description: The custom file name of the uploaded blob.
     PackageCheckNameAvailabilityParameters:
       description: Parameters body to pass for Test Base Package name availability check.
       properties:
@@ -884,40 +1019,56 @@ components:
       - applicationName
       - version
       - type
-    Resource:
-      description: The Resource definition.
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Resource ID.
-        name:
-          readOnly: true
-          type: string
-          description: Resource name.
-        type:
-          readOnly: true
-          type: string
-          description: Resource type.
-      x-ms-azure-resource: true
-    AvailableOSListResult:
-      description: A list of available OSs.
+    TestTypeListResult:
+      description: A list of test types.
       properties:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/AvailableOSResource'
-          description: The list of available OSs.
+            $ref: '#/components/schemas/TestTypeResource'
+          description: The list of test types.
         nextLink:
           type: string
           readOnly: true
           description: Link to the next set of results. Not empty if value contains incomplete list of results.
-    TestTypeProperties:
-      description: The Test Type properties.
+    Tags:
+      type: object
+      additionalProperties:
+        type: string
+      description: Resource tags.
+    AvailableOSProperties:
+      description: The Available OS properties.
       properties:
-        actualTestTypeName:
+        osId:
           type: string
-          description: The actual name of a test type of a Test Base Account.
+          description: The Id of an Available OS of a Test Base Account.
+        osName:
+          type: string
+          description: The name of an Available OS of a Test Base Account.
+        osVersion:
+          type: string
+          description: The version of an Available OS of a Test Base Account.
+        insiderChannel:
+          type: string
+          description: The insider channel of an Available OS of a Test Base Account.
+        osUpdateType:
+          type: string
+          description: The OS update type of an Available OS of a Test Base Account.
+        osPlatform:
+          type: string
+          description: The Platform of an Available OS of a Test Base Account.
+    PackageListResult:
+      description: A list of Test Base Packages.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackageResource'
+          description: The list of Test Base Packages.
+        nextLink:
+          type: string
+          readOnly: true
+          description: Link to the next set of results. Not empty if value contains incomplete list of results.
     SystemData:
       description: Metadata pertaining to creation and last modification of the resource.
       type: object
@@ -959,166 +1110,7 @@ components:
           type: string
           format: date-time
           description: The type of identity that last modified the resource.
-    ProvisioningState:
-      type: string
-      description: ARM provisioning state, see https://github.com/Azure/azure-resource-manager-rpc/blob/master/v1.0/Addendum.md#provisioningstate-property
-      enum:
-      - Succeeded
-      - Failed
-      - Cancelled
-      - Creating
-      - Deleting
-      - Updating
-      readOnly: true
-      x-ms-enum:
-        name: provisioningState
-        modelAsString: true
-    PackageResource:
-      description: The Test Base Package resource.
-      properties:
-        systemData:
-          description: The system metadata relating to this resource
-          $ref: '#/components/schemas/SystemData'
-        properties:
-          $ref: '#/components/schemas/PackageProperties'
-          x-ms-client-flatten: true
-          description: Test Base Package properties.
-      allOf:
-      - $ref: '#/components/schemas/TrackedResource'
-    FileUploadURLResponse:
-      description: The URL response
-      properties:
-        uploadUrl:
-          type: string
-          readOnly: true
-          description: The URL used for uploading the package.
-        blobPath:
-          type: string
-          readOnly: true
-          description: The blob path of the uploaded package. It will be used as the 'blobPath' property of PackageResource.
-    AvailableOSProperties:
-      description: The Available OS properties.
-      properties:
-        osId:
-          type: string
-          description: The Id of an Available OS of a Test Base Account.
-        osName:
-          type: string
-          description: The name of an Available OS of a Test Base Account.
-        osVersion:
-          type: string
-          description: The version of an Available OS of a Test Base Account.
-        insiderChannel:
-          type: string
-          description: The insider channel of an Available OS of a Test Base Account.
-        osUpdateType:
-          type: string
-          description: The OS update type of an Available OS of a Test Base Account.
-        osPlatform:
-          type: string
-          description: The Platform of an Available OS of a Test Base Account.
-    TestTypeListResult:
-      description: A list of test types.
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/TestTypeResource'
-          description: The list of test types.
-        nextLink:
-          type: string
-          readOnly: true
-          description: Link to the next set of results. Not empty if value contains incomplete list of results.
-    Test:
-      description: The definition of a Test.
-      properties:
-        testType:
-          $ref: '#/components/schemas/TestType'
-          description: The type of the test.
-        validationRunStatus:
-          readOnly: true
-          type: string
-          description: The status of the validation run of the package.
-          enum:
-          - Unknown
-          - Pending
-          - Passed
-          - Failed
-          x-ms-enum:
-            name: validationRunStatus
-            modelAsString: true
-        isActive:
-          type: boolean
-          description: Indicates if this test is active.It doesn't schedule test for not active Test.
-        commands:
-          type: array
-          items:
-            $ref: '#/components/schemas/Command'
-          description: The commands used in the test.
-      required:
-      - testType
-      - commands
-    FlightingRingListResult:
-      description: A list of flighting rings.
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/FlightingRingResource'
-          description: The list of flighting rings.
-        nextLink:
-          type: string
-          readOnly: true
-          description: Link to the next set of results. Not empty if value contains incomplete list of results.
-    CheckNameAvailabilityResult:
-      properties:
-        nameAvailable:
-          type: boolean
-          description: 'Value indicating the availability of the name: true if the name is available; otherwise, false.'
-        reason:
-          type: string
-          description: The reason for unavailability of a name. Required if nameAvailable == false.
-          enum:
-          - Invalid
-          - AlreadyExists
-          x-ms-enum:
-            name: reason
-            modelAsString: true
-        message:
-          type: string
-          readOnly: true
-          description: The detailed info regarding the reason associated with the name. Required if nameAvailable == false.
-      description: Description of a Check Name availability response properties.
-    TestType:
-      type: string
-      description: The test type.
-      enum:
-      - OutOfBoxTest
-      - FunctionalTest
-      x-ms-enum:
-        name: testType
-        modelAsString: true
-    AvailableOSResource:
-      description: The Available OS resource.
-      properties:
-        systemData:
-          description: The system metadata relating to this resource
-          $ref: '#/components/schemas/SystemData'
-        properties:
-          $ref: '#/components/schemas/AvailableOSProperties'
-          x-ms-client-flatten: true
-          description: Available OS properties.
-      allOf:
-      - $ref: '#/components/schemas/ProxyResource'
   parameters:
-    PackageNameParameter:
-      name: packageName
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      description: The resource name of the Test Base Package.
-      schema:
-        type: string
     TestBaseAccountNameParameter:
       name: testBaseAccountName
       in: path
@@ -1127,11 +1119,27 @@ components:
       description: The resource name of the Test Base Account.
       schema:
         type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
+    ResourceGroupParameter:
+      name: resourceGroupName
       in: path
       required: true
-      description: The Azure subscription ID. This is a GUID-formatted string.
+      x-ms-parameter-location: method
+      description: The name of the resource group that contains the resource.
+      schema:
+        type: string
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: The API version to be used with the HTTP request.
+      schema:
+        type: string
+    PackageNameParameter:
+      name: packageName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: The resource name of the Test Base Package.
       schema:
         type: string
     OSUpdateTypeParameter:
@@ -1148,19 +1156,11 @@ components:
         enum:
         - SecurityUpdate
         - FeatureUpdate
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: The API version to be used with the HTTP request.
-      schema:
-        type: string
-    ResourceGroupParameter:
-      name: resourceGroupName
+    SubscriptionIdParameter:
+      name: subscriptionId
       in: path
       required: true
-      x-ms-parameter-location: method
-      description: The name of the resource group that contains the resource.
+      description: The Azure subscription ID. This is a GUID-formatted string.
       schema:
         type: string
   securitySchemes:

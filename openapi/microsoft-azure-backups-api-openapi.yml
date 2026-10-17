@@ -754,18 +754,21 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
-    BackupList:
+    RoleOperationStatusList:
+      description: object
+      type: array
+      items:
+        $ref: '#/components/schemas/RoleOperationStatus'
+    RoleOperationStatus:
+      description: Backup status for a role.
       type: object
-      description: List of backups.
       properties:
-        value:
-          description: List of backups.
-          type: array
-          items:
-            $ref: '#/components/schemas/Backup'
-        nextLink:
-          description: URI to the next page.
+        roleName:
+          description: Name of the role.
           type: string
+        status:
+          description: Status of the role.
+          $ref: '#/components/schemas/OperationStatus'
     BackupInfo:
       type: object
       description: Holds information for a backup.
@@ -811,21 +814,37 @@ components:
           description: The thumbprint of the certificate used to encrypt the backup encryption key.
           type: string
           readOnly: true
-    RoleOperationStatus:
-      description: Backup status for a role.
+    BackupList:
       type: object
+      description: List of backups.
+      properties:
+        value:
+          description: List of backups.
+          type: array
+          items:
+            $ref: '#/components/schemas/Backup'
+        nextLink:
+          description: URI to the next page.
+          type: string
+    BackupModel:
+      description: Properties for a backup.
+      properties:
+        backupInfo:
+          description: Holds information for a backup.
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/BackupInfo'
+    RestoreOptions:
+      description: Properties for restore options.
       properties:
         roleName:
-          description: Name of the role.
+          description: The Azure Stack role name for restore, set it to empty for all infrastructure role
           type: string
-        status:
-          description: Status of the role.
-          $ref: '#/components/schemas/OperationStatus'
-    RoleOperationStatusList:
-      description: object
-      type: array
-      items:
-        $ref: '#/components/schemas/RoleOperationStatus'
+        decryptionCertBase64:
+          description: The certificate file raw data in Base64 string. This should be the .pfx file with the private key.
+          type: string
+        decryptionCertPassword:
+          description: The password for the decryption certificate.
+          type: string
     OperationStatus:
       description: Status of an operation.
       type: string
@@ -850,32 +869,6 @@ components:
           x-ms-client-flatten: true
       allOf:
       - $ref: Backup.json#/definitions/Resource
-    BackupModel:
-      description: Properties for a backup.
-      properties:
-        backupInfo:
-          description: Holds information for a backup.
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/BackupInfo'
-    RestoreOptions:
-      description: Properties for restore options.
-      properties:
-        roleName:
-          description: The Azure Stack role name for restore, set it to empty for all infrastructure role
-          type: string
-        decryptionCertBase64:
-          description: The certificate file raw data in Base64 string. This should be the .pfx file with the private key.
-          type: string
-        decryptionCertPassword:
-          description: The password for the decryption certificate.
-          type: string
-    backupPatchProperties:
-      description: Backup patch properties
-      type: object
-      properties:
-        label:
-          type: string
-          description: Label for backup
     backupStatus:
       description: Backup status
       type: object
@@ -934,17 +927,6 @@ components:
           format: int64
           readOnly: true
           description: Displays the total number of bytes transferred for the ongoing operation
-    backupsMigrationRequest:
-      description: Migrate Backups Request
-      type: object
-      x-ms-azure-resource: true
-      required:
-      - backupVaultId
-      properties:
-        backupVaultId:
-          type: string
-          description: The ResourceId of the Backup Vault
-          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.NetApp/netAppAccounts/account1/backupVaults/backupVault1
     backupPatch:
       description: Backup patch
       type: object
@@ -952,58 +934,6 @@ components:
         properties:
           description: Backup Patch Properties
           $ref: '#/components/schemas/backupPatchProperties'
-          x-ms-client-flatten: true
-    backupsList:
-      description: List of Backups
-      type: object
-      properties:
-        value:
-          description: A list of Backups
-          type: array
-          items:
-            $ref: '#/components/schemas/backup'
-        nextLink:
-          type: string
-          description: URL to get the next set of results.
-    backupRestoreFiles:
-      description: Restore payload for Single File Backup Restore
-      type: object
-      required:
-      - fileList
-      - destinationVolumeId
-      properties:
-        fileList:
-          description: List of files to be restored
-          type: array
-          minItems: 1
-          maxItems: 8
-          items:
-            type: string
-            maxLength: 1024
-            minLength: 1
-          example:
-          - /dir1/customer1.db
-          - /dir1/customer2.db
-        restoreFilePath:
-          description: Destination folder where the files will be restored. The path name should start with a forward slash. If it is omitted from request then restore is done at the root folder of the destination volume by default
-          type: string
-          pattern: ^\/.*$
-          example: /AVSdataStore
-        destinationVolumeId:
-          description: Resource Id of the destination volume on which the files need to be restored
-          type: string
-          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.NetApp/netAppAccounts/account1/capacityPools/pool1/volumes/volume1
-    backup:
-      description: Backup under a Backup Vault
-      type: object
-      required:
-      - properties
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
-      properties:
-        properties:
-          description: Backup Properties
-          $ref: '#/components/schemas/backupProperties'
           x-ms-client-flatten: true
     backupProperties:
       description: Backup properties
@@ -1084,45 +1014,84 @@ components:
           type: string
           readOnly: true
           description: ResourceId used to identify the backup policy
-    Resource:
-      description: ARM Resource.
+    backupsList:
+      description: List of Backups
       type: object
       properties:
-        id:
-          description: Resource Id represents the complete path to the resource.
+        value:
+          description: A list of Backups
+          type: array
+          items:
+            $ref: '#/components/schemas/backup'
+        nextLink:
           type: string
-          readOnly: true
-        name:
-          description: Resource name associated with the resource.
-          type: string
-          readOnly: true
-        type:
-          description: Resource type represents the complete path of the form Namespace/ResourceType/ResourceType/...
-          type: string
-          readOnly: true
-        location:
-          description: Resource location.
-          type: string
-        tags:
-          description: Resource tags.
-          type: object
-          additionalProperties:
-            type: string
-        eTag:
-          description: Optional ETag.
-          type: string
-      x-ms-azure-resource: true
-    BackupRequest:
-      description: Base class for backup request. Workload-specific backup requests are derived from this class.
+          description: URL to get the next set of results.
+    backupRestoreFiles:
+      description: Restore payload for Single File Backup Restore
+      type: object
       required:
-      - objectType
+      - fileList
+      - destinationVolumeId
+      properties:
+        fileList:
+          description: List of files to be restored
+          type: array
+          minItems: 1
+          maxItems: 8
+          items:
+            type: string
+            maxLength: 1024
+            minLength: 1
+          example:
+          - /dir1/customer1.db
+          - /dir1/customer2.db
+        restoreFilePath:
+          description: Destination folder where the files will be restored. The path name should start with a forward slash. If it is omitted from request then restore is done at the root folder of the destination volume by default
+          type: string
+          pattern: ^\/.*$
+          example: /AVSdataStore
+        destinationVolumeId:
+          description: Resource Id of the destination volume on which the files need to be restored
+          type: string
+          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.NetApp/netAppAccounts/account1/capacityPools/pool1/volumes/volume1
+    backup:
+      description: Backup under a Backup Vault
+      type: object
+      required:
+      - properties
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v5/types.json#/definitions/ProxyResource
+      properties:
+        properties:
+          description: Backup Properties
+          $ref: '#/components/schemas/backupProperties'
+          x-ms-client-flatten: true
+    backupsMigrationRequest:
+      description: Migrate Backups Request
+      type: object
+      x-ms-azure-resource: true
+      required:
+      - backupVaultId
+      properties:
+        backupVaultId:
+          type: string
+          description: The ResourceId of the Backup Vault
+          example: /subscriptions/D633CC2E-722B-4AE1-B636-BBD9E4C60ED9/resourceGroups/myRG/providers/Microsoft.NetApp/netAppAccounts/account1/backupVaults/backupVault1
+    backupPatchProperties:
+      description: Backup patch properties
       type: object
       properties:
-        objectType:
-          description: This property will be used as the discriminator for deciding the specific types in the polymorphic chain of types.
+        label:
           type: string
-      discriminator:
-        propertyName: objectType
+          description: Label for backup
+    CloudError:
+      x-ms-external: true
+      properties:
+        error:
+          type: object
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: The error object.
+      description: An error response from the Container Instance service.
     CloudErrorBody:
       x-ms-external: true
       properties:
@@ -1154,6 +1123,17 @@ components:
           x-ms-identifiers: []
           description: The error additional info.
       description: An error response from the Container Instance service.
+    BackupRequest:
+      description: Base class for backup request. Workload-specific backup requests are derived from this class.
+      required:
+      - objectType
+      type: object
+      properties:
+        objectType:
+          description: This property will be used as the discriminator for deciding the specific types in the polymorphic chain of types.
+          type: string
+      discriminator:
+        propertyName: objectType
     BackupRequestResource:
       description: Base class for backup request. Workload-specific backup requests are derived from this class.
       allOf:
@@ -1162,28 +1142,46 @@ components:
         properties:
           $ref: '#/components/schemas/BackupRequest'
           description: BackupRequestResource properties
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          type: object
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: The error object.
-      description: An error response from the Container Instance service.
-    BackupList_2:
-      description: The collection of backups.
-      required:
-      - value
+    Resource:
+      description: ARM Resource.
       type: object
       properties:
-        value:
-          description: The value.
-          type: array
-          items:
-            $ref: '#/components/schemas/Backup_2'
-        nextLink:
-          description: The NextLink.
+        id:
+          description: Resource Id represents the complete path to the resource.
           type: string
+          readOnly: true
+        name:
+          description: Resource name associated with the resource.
+          type: string
+          readOnly: true
+        type:
+          description: Resource type represents the complete path of the form Namespace/ResourceType/ResourceType/...
+          type: string
+          readOnly: true
+        location:
+          description: Resource location.
+          type: string
+        tags:
+          description: Resource tags.
+          type: object
+          additionalProperties:
+            type: string
+        eTag:
+          description: Optional ETag.
+          type: string
+      x-ms-azure-resource: true
+    Backup_2:
+      description: The backup.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      properties:
+        properties:
+          $ref: '#/components/schemas/BackupProperties'
+          description: The properties of the backup.
+          x-ms-client-flatten: true
     BackupElement:
       description: The backup element.
       required:
@@ -1247,6 +1245,20 @@ components:
         backupElement:
           $ref: '#/components/schemas/BackupElement'
           description: The backup element that is cloned.
+    BackupList_2:
+      description: The collection of backups.
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Backup_2'
+        nextLink:
+          description: The NextLink.
+          type: string
     BaseModel:
       description: Represents the base class for all other ARM object models
       type: object
@@ -1320,237 +1332,6 @@ components:
           x-ms-identifiers:
           - elementId
           - volumeContainerId
-    Backup_2:
-      description: The backup.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel'
-      properties:
-        properties:
-          $ref: '#/components/schemas/BackupProperties'
-          description: The properties of the backup.
-          x-ms-client-flatten: true
-    BackupElement_2:
-      description: Class represents BackupElement
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel_2'
-      properties:
-        properties:
-          $ref: '#/components/schemas/BackupElementProperties'
-          description: The Properties of backup element
-          x-ms-client-flatten: true
-    Item:
-      required:
-      - key
-      - value
-      type: object
-      properties:
-        key:
-          type: string
-        value:
-          type: string
-    ISCSIDisk:
-      description: The iSCSI disk.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel_2'
-      properties:
-        properties:
-          $ref: '#/components/schemas/ISCSIDiskProperties'
-          description: The properties.
-          x-ms-client-flatten: true
-    Message:
-      type: object
-      properties:
-        language:
-          type: string
-        value:
-          type: string
-    CloneRequestProperties:
-      description: Properties of CloneRequest
-      required:
-      - targetDeviceId
-      - targetAccessPointId
-      - newEndpointName
-      type: object
-      properties:
-        targetDeviceId:
-          description: DeviceId of the device which will act as the Clone target
-          type: string
-        targetAccessPointId:
-          description: Access point Id on which clone job will performed.
-          type: string
-        newEndpointName:
-          description: Name of new endpoint which will created as part of clone job.
-          type: string
-        share:
-          $ref: '#/components/schemas/FileShare'
-          description: Share Object.
-        disk:
-          $ref: '#/components/schemas/ISCSIDisk'
-          description: Disk Object
-    CloneRequest_2:
-      description: Clone Job Request Model.
-      required:
-      - properties
-      type: object
-      properties:
-        properties:
-          $ref: '#/components/schemas/CloneRequestProperties'
-          description: CloneJob Properties are encapsulated in this object.
-          x-ms-client-flatten: true
-    FileShare:
-      description: The File Share.
-      required:
-      - properties
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseModel_2'
-      properties:
-        properties:
-          $ref: '#/components/schemas/FileShareProperties'
-          description: The properties.
-          x-ms-client-flatten: true
-    FileShareProperties:
-      description: The File Share.
-      required:
-      - shareStatus
-      - dataPolicy
-      - adminUser
-      - provisionedCapacityInBytes
-      - monitoringStatus
-      type: object
-      properties:
-        description:
-          description: Description for file share
-          type: string
-        shareStatus:
-          description: The Share Status
-          enum:
-          - Online
-          - Offline
-          type: string
-          x-ms-enum:
-            name: ShareStatus
-            modelAsString: false
-        dataPolicy:
-          description: The data policy
-          enum:
-          - Invalid
-          - Local
-          - Tiered
-          - Cloud
-          type: string
-          x-ms-enum:
-            name: DataPolicy
-            modelAsString: false
-        adminUser:
-          description: 'The user/group who will have full permission in this share. Active directory email address. Example: xyz@contoso.com or Contoso\xyz.'
-          type: string
-        provisionedCapacityInBytes:
-          format: int64
-          description: The total provisioned capacity in Bytes
-          type: integer
-        usedCapacityInBytes:
-          format: int64
-          description: The used capacity in Bytes.
-          type: integer
-          readOnly: true
-        localUsedCapacityInBytes:
-          format: int64
-          description: The local used capacity in Bytes.
-          type: integer
-          readOnly: true
-        monitoringStatus:
-          description: The monitoring status
-          enum:
-          - Enabled
-          - Disabled
-          type: string
-          x-ms-enum:
-            name: MonitoringStatus
-            modelAsString: false
-    BackupProperties_2:
-      description: Class represents Backup properties
-      required:
-      - sizeInBytes
-      - initiatedBy
-      - deviceId
-      - elements
-      type: object
-      properties:
-        targetId:
-          description: The path id of the target FileServer or IscsiServer for which the backup was taken.
-          type: string
-        targetType:
-          description: Type of target, FileServer or IscsiServer
-          type: string
-        sizeInBytes:
-          format: int64
-          description: The backup size in bytes.
-          type: integer
-        createdTime:
-          format: date-time
-          description: The time when the backup was created.
-          type: string
-        expirationTime:
-          format: date-time
-          description: The time when the backup will expire.
-          type: string
-        initiatedBy:
-          description: Indicates how the backup was initiated "Manual | Scheduled".
-          enum:
-          - Manual
-          - Scheduled
-          type: string
-          x-ms-enum:
-            name: InitiatedBy
-            modelAsString: false
-        deviceId:
-          description: The Device Identifier.
-          type: string
-        elements:
-          description: The backup elements.
-          type: array
-          items:
-            $ref: '#/components/schemas/BackupElement_2'
-    BaseModel_2:
-      description: Base class for models
-      type: object
-      properties:
-        id:
-          description: The identifier.
-          type: string
-          readOnly: true
-        name:
-          description: The name.
-          type: string
-          readOnly: true
-        type:
-          description: The type.
-          type: string
-          readOnly: true
-    BackupList_3:
-      description: Collection of backups
-      required:
-      - value
-      type: object
-      properties:
-        value:
-          description: The value.
-          type: array
-          items:
-            $ref: '#/components/schemas/Backup_3'
-        nextLink:
-          description: The NextLink.
-          type: string
     ISCSIDiskProperties:
       description: The iSCSI disk properties.
       required:
@@ -1612,24 +1393,8 @@ components:
           x-ms-enum:
             name: MonitoringStatus
             modelAsString: false
-    Error:
-      required:
-      - errorCode
-      - message
-      type: object
-      properties:
-        errorCode:
-          type: string
-        message:
-          $ref: '#/components/schemas/Message'
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/Item'
-          x-ms-identifiers:
-          - key
-    Backup_3:
-      description: The backup.
+    FileShare:
+      description: The File Share.
       required:
       - properties
       type: object
@@ -1637,8 +1402,30 @@ components:
       - $ref: '#/components/schemas/BaseModel_2'
       properties:
         properties:
-          $ref: '#/components/schemas/BackupProperties_2'
-          description: Properties of backup
+          $ref: '#/components/schemas/FileShareProperties'
+          description: The properties.
+          x-ms-client-flatten: true
+    Item:
+      required:
+      - key
+      - value
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+    ISCSIDisk:
+      description: The iSCSI disk.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel_2'
+      properties:
+        properties:
+          $ref: '#/components/schemas/ISCSIDiskProperties'
+          description: The properties.
           x-ms-client-flatten: true
     BackupElementProperties:
       description: The backup element properties
@@ -1666,6 +1453,219 @@ components:
           x-ms-enum:
             name: DataPolicy
             modelAsString: false
+    BackupList_3:
+      description: Collection of backups
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          description: The value.
+          type: array
+          items:
+            $ref: '#/components/schemas/Backup_3'
+        nextLink:
+          description: The NextLink.
+          type: string
+    CloneRequest_2:
+      description: Clone Job Request Model.
+      required:
+      - properties
+      type: object
+      properties:
+        properties:
+          $ref: '#/components/schemas/CloneRequestProperties'
+          description: CloneJob Properties are encapsulated in this object.
+          x-ms-client-flatten: true
+    Backup_3:
+      description: The backup.
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel_2'
+      properties:
+        properties:
+          $ref: '#/components/schemas/BackupProperties_2'
+          description: Properties of backup
+          x-ms-client-flatten: true
+    CloneRequestProperties:
+      description: Properties of CloneRequest
+      required:
+      - targetDeviceId
+      - targetAccessPointId
+      - newEndpointName
+      type: object
+      properties:
+        targetDeviceId:
+          description: DeviceId of the device which will act as the Clone target
+          type: string
+        targetAccessPointId:
+          description: Access point Id on which clone job will performed.
+          type: string
+        newEndpointName:
+          description: Name of new endpoint which will created as part of clone job.
+          type: string
+        share:
+          $ref: '#/components/schemas/FileShare'
+          description: Share Object.
+        disk:
+          $ref: '#/components/schemas/ISCSIDisk'
+          description: Disk Object
+    Error:
+      required:
+      - errorCode
+      - message
+      type: object
+      properties:
+        errorCode:
+          type: string
+        message:
+          $ref: '#/components/schemas/Message'
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+          x-ms-identifiers:
+          - key
+    BackupProperties_2:
+      description: Class represents Backup properties
+      required:
+      - sizeInBytes
+      - initiatedBy
+      - deviceId
+      - elements
+      type: object
+      properties:
+        targetId:
+          description: The path id of the target FileServer or IscsiServer for which the backup was taken.
+          type: string
+        targetType:
+          description: Type of target, FileServer or IscsiServer
+          type: string
+        sizeInBytes:
+          format: int64
+          description: The backup size in bytes.
+          type: integer
+        createdTime:
+          format: date-time
+          description: The time when the backup was created.
+          type: string
+        expirationTime:
+          format: date-time
+          description: The time when the backup will expire.
+          type: string
+        initiatedBy:
+          description: Indicates how the backup was initiated "Manual | Scheduled".
+          enum:
+          - Manual
+          - Scheduled
+          type: string
+          x-ms-enum:
+            name: InitiatedBy
+            modelAsString: false
+        deviceId:
+          description: The Device Identifier.
+          type: string
+        elements:
+          description: The backup elements.
+          type: array
+          items:
+            $ref: '#/components/schemas/BackupElement_2'
+    Message:
+      type: object
+      properties:
+        language:
+          type: string
+        value:
+          type: string
+    FileShareProperties:
+      description: The File Share.
+      required:
+      - shareStatus
+      - dataPolicy
+      - adminUser
+      - provisionedCapacityInBytes
+      - monitoringStatus
+      type: object
+      properties:
+        description:
+          description: Description for file share
+          type: string
+        shareStatus:
+          description: The Share Status
+          enum:
+          - Online
+          - Offline
+          type: string
+          x-ms-enum:
+            name: ShareStatus
+            modelAsString: false
+        dataPolicy:
+          description: The data policy
+          enum:
+          - Invalid
+          - Local
+          - Tiered
+          - Cloud
+          type: string
+          x-ms-enum:
+            name: DataPolicy
+            modelAsString: false
+        adminUser:
+          description: 'The user/group who will have full permission in this share. Active directory email address. Example: xyz@contoso.com or Contoso\xyz.'
+          type: string
+        provisionedCapacityInBytes:
+          format: int64
+          description: The total provisioned capacity in Bytes
+          type: integer
+        usedCapacityInBytes:
+          format: int64
+          description: The used capacity in Bytes.
+          type: integer
+          readOnly: true
+        localUsedCapacityInBytes:
+          format: int64
+          description: The local used capacity in Bytes.
+          type: integer
+          readOnly: true
+        monitoringStatus:
+          description: The monitoring status
+          enum:
+          - Enabled
+          - Disabled
+          type: string
+          x-ms-enum:
+            name: MonitoringStatus
+            modelAsString: false
+    BackupElement_2:
+      description: Class represents BackupElement
+      required:
+      - properties
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseModel_2'
+      properties:
+        properties:
+          $ref: '#/components/schemas/BackupElementProperties'
+          description: The Properties of backup element
+          x-ms-client-flatten: true
+    BaseModel_2:
+      description: Base class for models
+      type: object
+      properties:
+        id:
+          description: The identifier.
+          type: string
+          readOnly: true
+        name:
+          description: The name.
+          type: string
+          readOnly: true
+        type:
+          description: The type.
+          type: string
+          readOnly: true
   parameters:
     BackupParameter:
       name: backup
@@ -1683,15 +1683,6 @@ components:
       schema:
         $ref: '#/components/schemas/RestoreOptions'
       x-ms-parameter-location: method
-    BackupVaultName:
-      name: backupVaultName
-      in: path
-      required: true
-      description: The name of the Backup Vault
-      x-ms-parameter-location: method
-      schema:
-        type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
     BackupName:
       name: backupName
       in: path
@@ -1701,15 +1692,15 @@ components:
       schema:
         type: string
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_.]{0,255}$
-    AccountName:
-      name: accountName
+    BackupVaultName:
+      name: backupVaultName
       in: path
       required: true
-      description: The name of the NetApp account
+      description: The name of the Backup Vault
       x-ms-parameter-location: method
       schema:
         type: string
-        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
     VolumeName:
       name: volumeName
       in: path
@@ -1732,11 +1723,21 @@ components:
         maxLength: 64
         minLength: 1
         pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$
-    SubscriptionId:
-      name: subscriptionId
+    AccountName:
+      name: accountName
       in: path
-      description: The subscription Id.
       required: true
+      description: The name of the NetApp account
+      x-ms-parameter-location: method
+      schema:
+        type: string
+        pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$
+    ResourceGroupName:
+      name: resourceGroupName
+      in: path
+      description: The name of the resource group where the recovery services vault is present.
+      required: true
+      x-ms-parameter-location: method
       schema:
         type: string
     VaultName:
@@ -1747,12 +1748,11 @@ components:
       x-ms-parameter-location: method
       schema:
         type: string
-    ResourceGroupName:
-      name: resourceGroupName
+    SubscriptionId:
+      name: subscriptionId
       in: path
-      description: The name of the resource group where the recovery services vault is present.
+      description: The subscription Id.
       required: true
-      x-ms-parameter-location: method
       schema:
         type: string
     ApiVersion:
@@ -1768,23 +1768,6 @@ components:
       description: The resource group name
       required: true
       x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    deviceNameParameter:
-      name: deviceName
-      in: path
-      description: The device name
-      required: true
-      x-ms-parameter-location: method
-      x-ms-skip-url-encoding: true
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The api version
-      required: true
       x-ms-skip-url-encoding: true
       schema:
         type: string
@@ -1807,6 +1790,38 @@ components:
       x-ms-skip-url-encoding: true
       schema:
         type: string
+    deviceNameParameter:
+      name: deviceName
+      in: path
+      description: The device name
+      required: true
+      x-ms-parameter-location: method
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The api version
+      required: true
+      x-ms-skip-url-encoding: true
+      schema:
+        type: string
+    subscriptionIdParameter_2:
+      name: subscriptionId
+      in: path
+      description: The subscription id
+      required: true
+      schema:
+        type: string
+    resourceGroupNameParameter_2:
+      name: resourceGroupName
+      in: path
+      description: The resource group name
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
     managerNameParameter_2:
       name: managerName
       in: path
@@ -1821,21 +1836,6 @@ components:
       name: api-version
       in: query
       description: The api version
-      required: true
-      schema:
-        type: string
-    resourceGroupNameParameter_2:
-      name: resourceGroupName
-      in: path
-      description: The resource group name
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionIdParameter_2:
-      name: subscriptionId
-      in: path
-      description: The subscription id
       required: true
       schema:
         type: string

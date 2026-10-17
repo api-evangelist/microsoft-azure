@@ -180,11 +180,36 @@ paths:
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    TrackedResource:
+    ReferenceDataSetKeyProperty:
+      properties:
+        name:
+          type: string
+          description: The name of the key property.
+        type:
+          type: string
+          description: The type of the key property.
+          enum:
+          - String
+          - Double
+          - Bool
+          - DateTime
+          x-ms-enum:
+            name: ReferenceDataKeyPropertyType
+            modelAsString: true
+      description: A key property for the reference data set. A reference data set can have multiple key properties.
+    CloudError:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: Describes a particular API error with an error code and a message.
+      description: Contains information about an API error.
+      x-ms-external: true
+    CreateOrUpdateTrackedResourceProperties:
       properties:
         location:
           type: string
-          description: Resource location
+          description: The location of the resource.
           x-ms-mutability:
           - read
           - create
@@ -192,12 +217,64 @@ components:
           type: object
           additionalProperties:
             type: string
-          description: Resource tags
-      allOf:
-      - $ref: '#/components/schemas/Resource'
+          description: Key-value pairs of additional properties for the resource.
       required:
       - location
-      description: Time Series Insights resource that is tracked by Azure Resource Manager.
+      description: Properties required to create any resource tracked by Azure Resource Manager.
+    ReferenceDataSetCreateOrUpdateParameters:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ReferenceDataSetCreationProperties'
+      required:
+      - properties
+      allOf:
+      - $ref: '#/components/schemas/CreateOrUpdateTrackedResourceProperties'
+    ProvisioningState:
+      readOnly: true
+      type: string
+      description: Provisioning state of the resource.
+      enum:
+      - Accepted
+      - Creating
+      - Updating
+      - Succeeded
+      - Failed
+      - Deleting
+      x-ms-enum:
+        name: ProvisioningState
+        modelAsString: true
+    ReferenceDataSetResource:
+      properties:
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/ReferenceDataSetResourceProperties'
+      allOf:
+      - $ref: '#/components/schemas/TrackedResource'
+      description: A reference data set provides metadata about the events in an environment. Metadata in the reference data set will be joined with events as they are read from event sources. The metadata that makes up the reference data set is uploaded or modified through the Time Series Insights data plane APIs.
+    Resource:
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: Resource Id
+        name:
+          readOnly: true
+          type: string
+          description: Resource name
+        type:
+          readOnly: true
+          type: string
+          description: Resource type
+      description: Time Series Insights resource
+      x-ms-azure-resource: true
+    ReferenceDataSetResourceProperties:
+      allOf:
+      - $ref: '#/components/schemas/ReferenceDataSetCreationProperties'
+      - $ref: '#/components/schemas/ResourceProperties'
+      required:
+      - keyProperties
+      description: Properties of the reference data set.
     ReferenceDataSetCreationProperties:
       properties:
         keyProperties:
@@ -227,32 +304,24 @@ components:
             $ref: '#/components/schemas/ReferenceDataSetResource'
           description: Result of the List Reference Data Sets operation.
       description: The response of the List Reference Data Sets operation.
-    ReferenceDataSetUpdateParameters:
-      type: object
+    TrackedResource:
       properties:
+        location:
+          type: string
+          description: Resource location
+          x-ms-mutability:
+          - read
+          - create
         tags:
           type: object
           additionalProperties:
             type: string
-          description: Key-value pairs of additional properties for the reference data set.
-      description: Parameters supplied to the Update Reference Data Set operation.
-    ReferenceDataSetKeyProperty:
-      properties:
-        name:
-          type: string
-          description: The name of the key property.
-        type:
-          type: string
-          description: The type of the key property.
-          enum:
-          - String
-          - Double
-          - Bool
-          - DateTime
-          x-ms-enum:
-            name: ReferenceDataKeyPropertyType
-            modelAsString: true
-      description: A key property for the reference data set. A reference data set can have multiple key properties.
+          description: Resource tags
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      required:
+      - location
+      description: Time Series Insights resource that is tracked by Azure Resource Manager.
     CloudErrorBody:
       type: object
       description: Describes a particular API error with an error code and a message.
@@ -274,61 +343,15 @@ components:
           x-ms-identifiers: []
           description: Contains nested errors that are related to this error.
       x-ms-external: true
-    ReferenceDataSetResourceProperties:
-      allOf:
-      - $ref: '#/components/schemas/ReferenceDataSetCreationProperties'
-      - $ref: '#/components/schemas/ResourceProperties'
-      required:
-      - keyProperties
-      description: Properties of the reference data set.
-    CloudError:
+    ReferenceDataSetUpdateParameters:
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: Describes a particular API error with an error code and a message.
-      description: Contains information about an API error.
-      x-ms-external: true
-    CreateOrUpdateTrackedResourceProperties:
-      properties:
-        location:
-          type: string
-          description: The location of the resource.
-          x-ms-mutability:
-          - read
-          - create
         tags:
           type: object
           additionalProperties:
             type: string
-          description: Key-value pairs of additional properties for the resource.
-      required:
-      - location
-      description: Properties required to create any resource tracked by Azure Resource Manager.
-    Resource:
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: Resource Id
-        name:
-          readOnly: true
-          type: string
-          description: Resource name
-        type:
-          readOnly: true
-          type: string
-          description: Resource type
-      description: Time Series Insights resource
-      x-ms-azure-resource: true
-    ReferenceDataSetResource:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ReferenceDataSetResourceProperties'
-      allOf:
-      - $ref: '#/components/schemas/TrackedResource'
-      description: A reference data set provides metadata about the events in an environment. Metadata in the reference data set will be joined with events as they are read from event sources. The metadata that makes up the reference data set is uploaded or modified through the Time Series Insights data plane APIs.
+          description: Key-value pairs of additional properties for the reference data set.
+      description: Parameters supplied to the Update Reference Data Set operation.
     ResourceProperties:
       properties:
         provisioningState:
@@ -340,50 +363,20 @@ components:
           format: date-time
           description: The time the resource was created.
       description: Properties that are common to all tracked resources.
-    ProvisioningState:
-      readOnly: true
-      type: string
-      description: Provisioning state of the resource.
-      enum:
-      - Accepted
-      - Creating
-      - Updating
-      - Succeeded
-      - Failed
-      - Deleting
-      x-ms-enum:
-        name: ProvisioningState
-        modelAsString: true
-    ReferenceDataSetCreateOrUpdateParameters:
-      properties:
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/ReferenceDataSetCreationProperties'
-      required:
-      - properties
-      allOf:
-      - $ref: '#/components/schemas/CreateOrUpdateTrackedResourceProperties'
   parameters:
+    ResourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      description: Name of an Azure Resource group.
+      schema:
+        type: string
     ReferenceDataSetNameParameter:
       name: referenceDataSetName
       in: path
       required: true
       description: The name of the Time Series Insights reference data set associated with the specified environment.
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: Azure Subscription ID.
-      required: true
-      schema:
-        type: string
-    EnvironmentNameParameter:
-      name: environmentName
-      in: path
-      required: true
-      description: The name of the Time Series Insights environment associated with the specified resource group.
       x-ms-parameter-location: method
       schema:
         type: string
@@ -394,12 +387,19 @@ components:
       description: Version of the API to be used with the client request.
       schema:
         type: string
-    ResourceGroupNameParameter:
-      name: resourceGroupName
+    EnvironmentNameParameter:
+      name: environmentName
       in: path
       required: true
+      description: The name of the Time Series Insights environment associated with the specified resource group.
       x-ms-parameter-location: method
-      description: Name of an Azure Resource group.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: Azure Subscription ID.
+      required: true
       schema:
         type: string
   securitySchemes:

@@ -345,19 +345,49 @@ paths:
       summary: Microsoft Azure Post Subscriptions Subscriptionid Resourcegroups…
 components:
   schemas:
-    ReferenceVmCreationParameters:
-      description: Creation parameters for Reference Vm
-      required:
-      - userName
-      - password
+    SizeAvailability:
+      description: Represents the size information
       type: object
       properties:
-        userName:
-          description: The username of the virtual machine
+        sizeCategory:
+          description: The category of the size (Basic, Standard, Performance).
+          enum:
+          - Basic
+          - Standard
+          - Performance
           type: string
-        password:
-          description: The password of the virtual machine.
+          x-ms-enum:
+            name: ManagedLabVmSize
+            modelAsString: true
+            values:
+            - value: Basic
+              description: The base VM size
+            - value: Standard
+              description: The standard or default VM size
+            - value: Performance
+              description: The most performant VM size
+        isAvailable:
+          description: Whether or not this size category is available
+          type: boolean
+    CloudError:
+      description: Error from a REST request.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+      x-ms-external: true
+    RegionalAvailability:
+      description: The availability information of sizes across regions
+      type: object
+      properties:
+        region:
+          description: Corresponding region
           type: string
+        sizeAvailabilities:
+          description: List of all the size information for the region
+          type: array
+          items:
+            $ref: '#/components/schemas/SizeAvailability'
     CreateLabProperties:
       description: Properties for creating a managed lab and a default environment setting
       required:
@@ -382,40 +412,14 @@ components:
           type: object
           additionalProperties:
             type: string
-    RegionalAvailability:
-      description: The availability information of sizes across regions
+    LabCreationParameters:
+      description: Settings related to creating a lab
       type: object
       properties:
-        region:
-          description: Corresponding region
-          type: string
-        sizeAvailabilities:
-          description: List of all the size information for the region
-          type: array
-          items:
-            $ref: '#/components/schemas/SizeAvailability'
-    LabAccountPropertiesFragment:
-      description: Properties of a Lab Account.
-      type: object
-      properties:
-        enabledRegionSelection:
-          description: Represents if region selection is enabled
-          type: boolean
-        provisioningState:
-          description: The provisioning status of the resource.
-          type: string
-        uniqueIdentifier:
-          description: The unique immutable identifier of a resource (Guid).
-          type: string
-    SizeConfigurationProperties:
-      description: Represents the size configuration under the lab account
-      type: object
-      properties:
-        environmentSizes:
-          description: Represents a list of size categories supported by this Lab Account (Small, Medium, Large)
-          type: array
-          items:
-            $ref: '#/components/schemas/EnvironmentSize'
+        maxUsersInLab:
+          format: int32
+          description: Maximum number of users allowed in the lab.
+          type: integer
     SizeInfo:
       description: Contains detailed information about a size
       type: object
@@ -435,71 +439,6 @@ components:
           format: double
           description: The amount of memory available (in GB).
           type: number
-    LabCreationParameters:
-      description: Settings related to creating a lab
-      type: object
-      properties:
-        maxUsersInLab:
-          format: int32
-          description: Maximum number of users allowed in the lab.
-          type: integer
-    CloudErrorBody:
-      description: Body of an error from a REST request.
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        target:
-          type: string
-        details:
-          description: Inner errors.
-          type: array
-          items:
-            $ref: '#/components/schemas/CloudErrorBody'
-      x-ms-external: true
-    GetRegionalAvailabilityResponse:
-      description: The response model from the GetRegionalAvailability action
-      type: object
-      properties:
-        regionalAvailability:
-          description: Availability information for different size categories per region
-          type: array
-          items:
-            $ref: '#/components/schemas/RegionalAvailability'
-    CloudError:
-      description: Error from a REST request.
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-      x-ms-external: true
-    Resource:
-      description: An Azure resource.
-      type: object
-      properties:
-        id:
-          description: The identifier of the resource.
-          type: string
-          readOnly: true
-        name:
-          description: The name of the resource.
-          type: string
-          readOnly: true
-        type:
-          description: The type of the resource.
-          type: string
-          readOnly: true
-        location:
-          description: The location of the resource.
-          type: string
-        tags:
-          description: The tags of the resource.
-          type: object
-          additionalProperties:
-            type: string
-      x-ms-azure-resource: true
     LabAccount:
       description: Represents a lab account.
       type: object
@@ -510,6 +449,43 @@ components:
           $ref: '#/components/schemas/LabAccountProperties'
           description: The properties of the resource.
           x-ms-client-flatten: true
+    GetRegionalAvailabilityResponse:
+      description: The response model from the GetRegionalAvailability action
+      type: object
+      properties:
+        regionalAvailability:
+          description: Availability information for different size categories per region
+          type: array
+          items:
+            $ref: '#/components/schemas/RegionalAvailability'
+    LatestOperationResult:
+      description: Details of the status of an operation.
+      type: object
+      properties:
+        status:
+          description: The current status of the operation.
+          type: string
+          readOnly: true
+        errorCode:
+          description: Error code on failure.
+          type: string
+          readOnly: true
+        errorMessage:
+          description: The error message.
+          type: string
+          readOnly: true
+        requestUri:
+          description: Request URI of the operation.
+          type: string
+          readOnly: true
+        httpMethod:
+          description: The HttpMethod - PUT/POST/DELETE for the operation.
+          type: string
+          readOnly: true
+        operationUrl:
+          description: The URL to use to check long-running operation status
+          type: string
+          readOnly: true
     EnvironmentSize:
       description: Represents a size category supported by this Lab Account (small, medium or large)
       type: object
@@ -551,6 +527,62 @@ components:
           description: The amount of memory available (in GB). This is the minimum amount of memory within this tier.
           type: number
           readOnly: true
+    Resource:
+      description: An Azure resource.
+      type: object
+      properties:
+        id:
+          description: The identifier of the resource.
+          type: string
+          readOnly: true
+        name:
+          description: The name of the resource.
+          type: string
+          readOnly: true
+        type:
+          description: The type of the resource.
+          type: string
+          readOnly: true
+        location:
+          description: The location of the resource.
+          type: string
+        tags:
+          description: The tags of the resource.
+          type: object
+          additionalProperties:
+            type: string
+      x-ms-azure-resource: true
+    ReferenceVmCreationParameters:
+      description: Creation parameters for Reference Vm
+      required:
+      - userName
+      - password
+      type: object
+      properties:
+        userName:
+          description: The username of the virtual machine
+          type: string
+        password:
+          description: The password of the virtual machine.
+          type: string
+    SizeConfigurationProperties:
+      description: Represents the size configuration under the lab account
+      type: object
+      properties:
+        environmentSizes:
+          description: Represents a list of size categories supported by this Lab Account (Small, Medium, Large)
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentSize'
+    EnvironmentSettingCreationParameters:
+      description: Settings related to creating an environment setting
+      required:
+      - resourceSettingCreationParameters
+      type: object
+      properties:
+        resourceSettingCreationParameters:
+          $ref: '#/components/schemas/ResourceSettingCreationParameters'
+          description: The resource specific settings
     ResponseWithContinuation_LabAccount:
       description: The response of a list operation.
       type: object
@@ -563,6 +595,16 @@ components:
         nextLink:
           description: Link for next set of results.
           type: string
+    LabAccountFragment:
+      description: Represents a lab account.
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      properties:
+        properties:
+          $ref: '#/components/schemas/LabAccountPropertiesFragment'
+          description: The properties of the resource.
+          x-ms-client-flatten: true
     ResourceSettingCreationParameters:
       description: Represents resource specific settings
       required:
@@ -599,67 +641,19 @@ components:
         referenceVmCreationParameters:
           $ref: '#/components/schemas/ReferenceVmCreationParameters'
           description: Creation parameters for Reference Vm
-    EnvironmentSettingCreationParameters:
-      description: Settings related to creating an environment setting
-      required:
-      - resourceSettingCreationParameters
+    LabAccountPropertiesFragment:
+      description: Properties of a Lab Account.
       type: object
       properties:
-        resourceSettingCreationParameters:
-          $ref: '#/components/schemas/ResourceSettingCreationParameters'
-          description: The resource specific settings
-    SizeAvailability:
-      description: Represents the size information
-      type: object
-      properties:
-        sizeCategory:
-          description: The category of the size (Basic, Standard, Performance).
-          enum:
-          - Basic
-          - Standard
-          - Performance
-          type: string
-          x-ms-enum:
-            name: ManagedLabVmSize
-            modelAsString: true
-            values:
-            - value: Basic
-              description: The base VM size
-            - value: Standard
-              description: The standard or default VM size
-            - value: Performance
-              description: The most performant VM size
-        isAvailable:
-          description: Whether or not this size category is available
+        enabledRegionSelection:
+          description: Represents if region selection is enabled
           type: boolean
-    LatestOperationResult:
-      description: Details of the status of an operation.
-      type: object
-      properties:
-        status:
-          description: The current status of the operation.
+        provisioningState:
+          description: The provisioning status of the resource.
           type: string
-          readOnly: true
-        errorCode:
-          description: Error code on failure.
+        uniqueIdentifier:
+          description: The unique immutable identifier of a resource (Guid).
           type: string
-          readOnly: true
-        errorMessage:
-          description: The error message.
-          type: string
-          readOnly: true
-        requestUri:
-          description: Request URI of the operation.
-          type: string
-          readOnly: true
-        httpMethod:
-          description: The HttpMethod - PUT/POST/DELETE for the operation.
-          type: string
-          readOnly: true
-        operationUrl:
-          description: The URL to use to check long-running operation status
-          type: string
-          readOnly: true
     LabAccountProperties:
       description: Properties of a Lab Account.
       type: object
@@ -681,16 +675,22 @@ components:
           $ref: '#/components/schemas/LatestOperationResult'
           description: 'The details of the latest operation. ex: status, error'
           readOnly: true
-    LabAccountFragment:
-      description: Represents a lab account.
+    CloudErrorBody:
+      description: Body of an error from a REST request.
       type: object
-      allOf:
-      - $ref: '#/components/schemas/Resource'
       properties:
-        properties:
-          $ref: '#/components/schemas/LabAccountPropertiesFragment'
-          description: The properties of the resource.
-          x-ms-client-flatten: true
+        code:
+          type: string
+        message:
+          type: string
+        target:
+          type: string
+        details:
+          description: Inner errors.
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody'
+      x-ms-external: true
   parameters:
     api-version:
       name: api-version

@@ -44,7 +44,59 @@ paths:
           $ref: ./examples/DeviceCapacityGet.json
       summary: Microsoft Azure Get Subscriptions Subscriptionid Resourcegroups…
 components:
+  parameters:
+    resourceGroupNameParameter:
+      name: resourceGroupName
+      in: path
+      description: The resource group name.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    subscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      description: The subscription ID.
+      required: true
+      schema:
+        type: string
+    apiVersionParameter:
+      name: api-version
+      in: query
+      description: The API version.
+      required: true
+      schema:
+        type: string
   schemas:
+    CloudError:
+      description: An error response from the service.
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CloudErrorBody'
+          description: The error details.
+      x-ms-external: true
+    ClusterCapacityViewData:
+      description: Cluster Compute Data.
+      type: object
+      properties:
+        fqdn:
+          description: The FQDN of the cluster.
+          type: string
+        gpuCapacity:
+          $ref: '#/components/schemas/ClusterGpuCapacity'
+          description: The cluster's GPU capacity.
+        memoryCapacity:
+          $ref: '#/components/schemas/ClusterMemoryCapacity'
+          description: The cluster's memory capacity.
+        lastRefreshedTime:
+          format: date-time
+          description: The last time at which the ClusterCapacityViewData was set.
+          type: string
+        totalProvisionedNonHpnCores:
+          format: int64
+          description: 'The total # of vCPUs provisioned by non-HPN VM per appliance.'
+          type: integer
     DeviceCapacityInfoProperties:
       description: The properties of Device Capacity Info
       type: object
@@ -64,6 +116,48 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/HostCapacity'
+    ClusterStorageViewData:
+      description: Cluster Storage Data.
+      type: object
+      properties:
+        clusterTotalStorageMb:
+          format: double
+          description: Total storage on the cluster in MB.
+          type: number
+        clusterFreeStorageMb:
+          format: double
+          description: The available or free storage on the cluster in MB.
+          type: number
+    HostCapacity:
+      description: Host Capacity Data.
+      type: object
+      properties:
+        hostName:
+          description: The name of the host.
+          type: string
+        effectiveAvailableMemoryMbOnHost:
+          format: int64
+          description: The available memory on the host accounting for VM placement size and any host VM reservations.
+          type: integer
+        availableGpuCount:
+          format: int32
+          description: The available amount of GPUs on the host to use after accounting for GPUS used by reservations on the host.
+          type: integer
+        vmUsedMemory:
+          description: The VM used memory per VmId.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/VmMemory'
+        gpuType:
+          description: The GPU type of the VM.
+          type: string
+        numaNodesData:
+          description: The numa nodes information for Hpn VMs.
+          uniqueItems: false
+          type: array
+          items:
+            $ref: '#/components/schemas/NumaNodeData'
+          x-ms-identifiers: []
     ClusterMemoryCapacity:
       description: NodeCapacityInfo defines the required information to determine the placement of a VM.
       type: object
@@ -104,32 +198,6 @@ components:
           format: double
           description: The memory used by VMs in the cluster in MB.
           type: number
-    VmMemory:
-      description: VmMemory Data.
-      type: object
-      properties:
-        startupMemoryMB:
-          format: int64
-          description: The total amount of RAM in the virtual machine, as seen by the guest  operating system. For a virtual machine with dynamic memory enabled, this represents the initial memory available at startup.
-          type: integer
-        currentMemoryUsageMB:
-          format: int64
-          description: The current memory used by the virtual machine.
-          type: integer
-    DeviceCapacityInfo:
-      description: Object for Capturing DeviceCapacityInfo
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ARMBaseModel'
-      properties:
-        properties:
-          $ref: '#/components/schemas/DeviceCapacityInfoProperties'
-          description: The device capacity properties.
-          x-ms-client-flatten: true
-        systemData:
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-          description: Metadata pertaining to device capacity info.
-          readOnly: true
     CloudErrorBody:
       description: An error response from the service.
       type: object
@@ -164,49 +232,17 @@ components:
           type: string
           readOnly: true
       x-ms-azure-resource: true
-    ClusterCapacityViewData:
-      description: Cluster Compute Data.
+    VmMemory:
+      description: VmMemory Data.
       type: object
       properties:
-        fqdn:
-          description: The FQDN of the cluster.
-          type: string
-        gpuCapacity:
-          $ref: '#/components/schemas/ClusterGpuCapacity'
-          description: The cluster's GPU capacity.
-        memoryCapacity:
-          $ref: '#/components/schemas/ClusterMemoryCapacity'
-          description: The cluster's memory capacity.
-        lastRefreshedTime:
-          format: date-time
-          description: The last time at which the ClusterCapacityViewData was set.
-          type: string
-        totalProvisionedNonHpnCores:
+        startupMemoryMB:
           format: int64
-          description: 'The total # of vCPUs provisioned by non-HPN VM per appliance.'
+          description: The total amount of RAM in the virtual machine, as seen by the guest  operating system. For a virtual machine with dynamic memory enabled, this represents the initial memory available at startup.
           type: integer
-    ClusterGpuCapacity:
-      description: Cluster GPU Data.
-      type: object
-      properties:
-        gpuType:
-          description: The cluster GPU Type.
-          type: string
-        gpuUsedUnitsCount:
-          format: int32
-          description: The used GPU units count in the cluster.
-          type: integer
-        gpuFreeUnitsCount:
-          format: int32
-          description: The free GPU units count in the cluster.
-          type: integer
-        gpuReservedForFailoverUnitsCount:
-          format: int32
-          description: The GPU units count reserved for failover in the cluster.
-          type: integer
-        gpuTotalUnitsCount:
-          format: int32
-          description: The total GPU units count in the cluster.
+        currentMemoryUsageMB:
+          format: int64
+          description: The current memory used by the virtual machine.
           type: integer
     NumaNodeData:
       description: NUMA node data.
@@ -249,79 +285,43 @@ components:
           items:
             format: int32
             type: integer
-    CloudError:
-      description: An error response from the service.
+    DeviceCapacityInfo:
+      description: Object for Capturing DeviceCapacityInfo
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ARMBaseModel'
+      properties:
+        properties:
+          $ref: '#/components/schemas/DeviceCapacityInfoProperties'
+          description: The device capacity properties.
+          x-ms-client-flatten: true
+        systemData:
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+          description: Metadata pertaining to device capacity info.
+          readOnly: true
+    ClusterGpuCapacity:
+      description: Cluster GPU Data.
       type: object
       properties:
-        error:
-          $ref: '#/components/schemas/CloudErrorBody'
-          description: The error details.
-      x-ms-external: true
-    HostCapacity:
-      description: Host Capacity Data.
-      type: object
-      properties:
-        hostName:
-          description: The name of the host.
-          type: string
-        effectiveAvailableMemoryMbOnHost:
-          format: int64
-          description: The available memory on the host accounting for VM placement size and any host VM reservations.
-          type: integer
-        availableGpuCount:
-          format: int32
-          description: The available amount of GPUs on the host to use after accounting for GPUS used by reservations on the host.
-          type: integer
-        vmUsedMemory:
-          description: The VM used memory per VmId.
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/VmMemory'
         gpuType:
-          description: The GPU type of the VM.
+          description: The cluster GPU Type.
           type: string
-        numaNodesData:
-          description: The numa nodes information for Hpn VMs.
-          uniqueItems: false
-          type: array
-          items:
-            $ref: '#/components/schemas/NumaNodeData'
-          x-ms-identifiers: []
-    ClusterStorageViewData:
-      description: Cluster Storage Data.
-      type: object
-      properties:
-        clusterTotalStorageMb:
-          format: double
-          description: Total storage on the cluster in MB.
-          type: number
-        clusterFreeStorageMb:
-          format: double
-          description: The available or free storage on the cluster in MB.
-          type: number
-  parameters:
-    resourceGroupNameParameter:
-      name: resourceGroupName
-      in: path
-      description: The resource group name.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    apiVersionParameter:
-      name: api-version
-      in: query
-      description: The API version.
-      required: true
-      schema:
-        type: string
-    subscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      description: The subscription ID.
-      required: true
-      schema:
-        type: string
+        gpuUsedUnitsCount:
+          format: int32
+          description: The used GPU units count in the cluster.
+          type: integer
+        gpuFreeUnitsCount:
+          format: int32
+          description: The free GPU units count in the cluster.
+          type: integer
+        gpuReservedForFailoverUnitsCount:
+          format: int32
+          description: The GPU units count reserved for failover in the cluster.
+          type: integer
+        gpuTotalUnitsCount:
+          format: int32
+          description: The total GPU units count in the cluster.
+          type: integer
   securitySchemes:
     azure_auth:
       type: oauth2

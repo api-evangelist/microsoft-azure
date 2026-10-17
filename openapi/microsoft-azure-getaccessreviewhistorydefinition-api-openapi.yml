@@ -44,7 +44,73 @@ paths:
                 $ref: '#/components/schemas/ErrorDefinition'
       summary: Microsoft Azure Get Subscriptions Subscriptionid Providers Microsoft…
 components:
+  parameters:
+    ApiVersionParameter:
+      name: api-version
+      in: query
+      required: true
+      description: The API version to be used with the HTTP request.
+      schema:
+        type: string
+    SubscriptionIdParameter:
+      name: subscriptionId
+      in: path
+      required: true
+      description: The ID of the target subscription.
+      schema:
+        type: string
   schemas:
+    AccessReviewHistoryInstanceProperties:
+      type: object
+      properties:
+        reviewHistoryPeriodStartDateTime:
+          type: string
+          format: date-time
+          readOnly: false
+          description: Date time used when selecting review data, all reviews included in data start on or after this date. For use only with one-time/non-recurring reports.
+        reviewHistoryPeriodEndDateTime:
+          type: string
+          format: date-time
+          readOnly: false
+          description: Date time used when selecting review data, all reviews included in data end on or before this date. For use only with one-time/non-recurring reports.
+        displayName:
+          type: string
+          description: The display name for the parent history definition.
+        status:
+          type: string
+          readOnly: true
+          description: Status of the requested review history instance data. This is either requested, in-progress, done or error. The state transitions are as follows - Requested -> InProgress -> Done -> Expired
+          enum:
+          - Requested
+          - InProgress
+          - Done
+          - Error
+          x-ms-enum:
+            name: AccessReviewHistoryDefinitionStatus
+            modelAsString: true
+        runDateTime:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Date time when the history data report is scheduled to be generated.
+        fulfilledDateTime:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Date time when the history data report is scheduled to be generated.
+        downloadUri:
+          readOnly: true
+          type: string
+          description: Uri which can be used to retrieve review history data. To generate this Uri, generateDownloadUri() must be called for a specific accessReviewHistoryDefinitionInstance. The link expires after a 24 hour period. Callers can see the expiration date time by looking at the 'se' parameter in the generated uri.
+        expiration:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Date time when history data report expires and the associated data is deleted.
+      description: Access Review History Definition Instance properties.
     ErrorDefinitionProperties:
       type: object
       title: Error
@@ -57,6 +123,65 @@ components:
         code:
           type: string
           description: Error code of list gateway.
+    AccessReviewRecurrencePattern:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'The recurrence type : weekly, monthly, etc.'
+          enum:
+          - weekly
+          - absoluteMonthly
+          x-ms-enum:
+            name: AccessReviewRecurrencePatternType
+            modelAsString: true
+        interval:
+          type: integer
+          format: int32
+          description: 'The interval for recurrence. For a quarterly review, the interval is 3 for type : absoluteMonthly.'
+      description: Recurrence Pattern of an Access Review Schedule Definition.
+    AccessReviewHistoryDefinition:
+      x-ms-azure-resource: true
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: The access review history definition id.
+        name:
+          type: string
+          readOnly: true
+          description: The access review history definition unique id.
+        type:
+          type: string
+          readOnly: true
+          description: The resource type.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/AccessReviewHistoryDefinitionProperties'
+          description: Access Review History Definition properties.
+      description: Access Review History Definition.
+    AccessReviewHistoryInstance:
+      x-ms-azure-resource: true
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: The access review history definition instance id.
+        name:
+          type: string
+          readOnly: true
+          description: The access review history definition instance unique id.
+        type:
+          type: string
+          readOnly: true
+          description: The resource type.
+        properties:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/AccessReviewHistoryInstanceProperties'
+          description: Access Review History Definition Instance properties.
+      description: Access Review History Definition Instance.
     AccessReviewHistoryDefinitionProperties:
       type: object
       properties:
@@ -134,64 +259,6 @@ components:
             $ref: '#/components/schemas/AccessReviewHistoryInstance'
           description: Set of access review history instances for this history definition.
       description: Access Review History Instances.
-    AccessReviewRecurrencePattern:
-      type: object
-      properties:
-        type:
-          type: string
-          description: 'The recurrence type : weekly, monthly, etc.'
-          enum:
-          - weekly
-          - absoluteMonthly
-          x-ms-enum:
-            name: AccessReviewRecurrencePatternType
-            modelAsString: true
-        interval:
-          type: integer
-          format: int32
-          description: 'The interval for recurrence. For a quarterly review, the interval is 3 for type : absoluteMonthly.'
-      description: Recurrence Pattern of an Access Review Schedule Definition.
-    ErrorDefinition:
-      type: object
-      title: Error
-      description: Error description and code explaining why an operation failed.
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDefinitionProperties'
-          description: Error of the list gateway status.
-    AccessReviewHistoryInstance:
-      x-ms-azure-resource: true
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: The access review history definition instance id.
-        name:
-          type: string
-          readOnly: true
-          description: The access review history definition instance unique id.
-        type:
-          type: string
-          readOnly: true
-          description: The resource type.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/AccessReviewHistoryInstanceProperties'
-          description: Access Review History Definition Instance properties.
-      description: Access Review History Definition Instance.
-    AccessReviewHistoryScheduleSettings:
-      type: object
-      properties:
-        pattern:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/AccessReviewRecurrencePattern'
-          description: Access Review History Definition recurrence settings.
-        range:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/AccessReviewRecurrenceRange'
-          description: Access Review History Definition recurrence settings.
-      description: Recurrence settings of an Access Review History Definition.
     AccessReviewActorIdentity:
       type: object
       properties:
@@ -218,6 +285,48 @@ components:
           readOnly: true
           description: The user principal name(if valid)
       description: Details of the actor identity
+    AccessReviewRecurrenceRange:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'The recurrence range type. The possible values are: endDate, noEnd, numbered.'
+          enum:
+          - endDate
+          - noEnd
+          - numbered
+          x-ms-enum:
+            name: AccessReviewRecurrenceRangeType
+            modelAsString: true
+        numberOfOccurrences:
+          type: integer
+          format: int32
+          description: The number of times to repeat the access review. Required and must be positive if type is numbered.
+        startDate:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The DateTime when the review is scheduled to be start. This could be a date in the future. Required on create.
+        endDate:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: The DateTime when the review is scheduled to end. Required if type is endDate
+      description: Recurrence Range of an Access Review Schedule Definition.
+    AccessReviewHistoryScheduleSettings:
+      type: object
+      properties:
+        pattern:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/AccessReviewRecurrencePattern'
+          description: Access Review History Definition recurrence settings.
+        range:
+          x-ms-client-flatten: true
+          $ref: '#/components/schemas/AccessReviewRecurrenceRange'
+          description: Access Review History Definition recurrence settings.
+      description: Recurrence settings of an Access Review History Definition.
     AccessReviewScope:
       type: object
       properties:
@@ -260,123 +369,14 @@ components:
           type: boolean
           description: Flag to indicate whether to expand nested memberships or not.
       description: Descriptor for what needs to be reviewed
-    AccessReviewRecurrenceRange:
+    ErrorDefinition:
       type: object
+      title: Error
+      description: Error description and code explaining why an operation failed.
       properties:
-        type:
-          type: string
-          description: 'The recurrence range type. The possible values are: endDate, noEnd, numbered.'
-          enum:
-          - endDate
-          - noEnd
-          - numbered
-          x-ms-enum:
-            name: AccessReviewRecurrenceRangeType
-            modelAsString: true
-        numberOfOccurrences:
-          type: integer
-          format: int32
-          description: The number of times to repeat the access review. Required and must be positive if type is numbered.
-        startDate:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: The DateTime when the review is scheduled to be start. This could be a date in the future. Required on create.
-        endDate:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: The DateTime when the review is scheduled to end. Required if type is endDate
-      description: Recurrence Range of an Access Review Schedule Definition.
-    AccessReviewHistoryInstanceProperties:
-      type: object
-      properties:
-        reviewHistoryPeriodStartDateTime:
-          type: string
-          format: date-time
-          readOnly: false
-          description: Date time used when selecting review data, all reviews included in data start on or after this date. For use only with one-time/non-recurring reports.
-        reviewHistoryPeriodEndDateTime:
-          type: string
-          format: date-time
-          readOnly: false
-          description: Date time used when selecting review data, all reviews included in data end on or before this date. For use only with one-time/non-recurring reports.
-        displayName:
-          type: string
-          description: The display name for the parent history definition.
-        status:
-          type: string
-          readOnly: true
-          description: Status of the requested review history instance data. This is either requested, in-progress, done or error. The state transitions are as follows - Requested -> InProgress -> Done -> Expired
-          enum:
-          - Requested
-          - InProgress
-          - Done
-          - Error
-          x-ms-enum:
-            name: AccessReviewHistoryDefinitionStatus
-            modelAsString: true
-        runDateTime:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Date time when the history data report is scheduled to be generated.
-        fulfilledDateTime:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Date time when the history data report is scheduled to be generated.
-        downloadUri:
-          readOnly: true
-          type: string
-          description: Uri which can be used to retrieve review history data. To generate this Uri, generateDownloadUri() must be called for a specific accessReviewHistoryDefinitionInstance. The link expires after a 24 hour period. Callers can see the expiration date time by looking at the 'se' parameter in the generated uri.
-        expiration:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Date time when history data report expires and the associated data is deleted.
-      description: Access Review History Definition Instance properties.
-    AccessReviewHistoryDefinition:
-      x-ms-azure-resource: true
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          description: The access review history definition id.
-        name:
-          type: string
-          readOnly: true
-          description: The access review history definition unique id.
-        type:
-          type: string
-          readOnly: true
-          description: The resource type.
-        properties:
-          x-ms-client-flatten: true
-          $ref: '#/components/schemas/AccessReviewHistoryDefinitionProperties'
-          description: Access Review History Definition properties.
-      description: Access Review History Definition.
-  parameters:
-    ApiVersionParameter:
-      name: api-version
-      in: query
-      required: true
-      description: The API version to be used with the HTTP request.
-      schema:
-        type: string
-    SubscriptionIdParameter:
-      name: subscriptionId
-      in: path
-      required: true
-      description: The ID of the target subscription.
-      schema:
-        type: string
+        error:
+          $ref: '#/components/schemas/ErrorDefinitionProperties'
+          description: Error of the list gateway status.
   securitySchemes:
     azure_auth:
       type: oauth2

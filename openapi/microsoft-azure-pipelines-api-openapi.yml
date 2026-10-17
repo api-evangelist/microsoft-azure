@@ -484,31 +484,95 @@ paths:
     - url: https://management.azure.com
 components:
   schemas:
-    Resource:
+    PipelineProperties:
       type: object
-      description: An Azure Resource Manager (ARM) resource.
+      description: Custom properties of a Pipeline.
+      discriminator:
+        propertyName: pipelineType
       properties:
-        id:
-          type: string
+        pipelineId:
+          type: integer
           readOnly: true
-          description: Resource Id
-        type:
+          description: Unique identifier of the Pipeline
+        pipelineType:
           type: string
+          enum:
+          - githubWorkflow
+          - azurePipeline
+          x-ms-enum:
+            name: pipelineTypeEnum
+            modelAsString: true
+          description: Specifies which CI/CD provider to use. Valid options are 'azurePipeline', 'githubWorkflow'.
+        bootstrapConfiguration:
+          $ref: '#/components/schemas/BootstrapConfiguration'
+          description: Configuration used to bootstrap the Pipeline.
+      required:
+      - pipelineType
+      - bootstrapConfiguration
+    BootstrapConfiguration:
+      type: object
+      description: Configuration used to bootstrap a Pipeline.
+      properties:
+        sourceRepository:
+          $ref: '#/components/schemas/CodeRepository'
+          description: Repository containing the source code for the pipeline. Currently only 'azurePipeline' pipeline type supports this.
+        template:
+          $ref: '#/components/schemas/PipelineTemplate'
+          description: Template used to bootstrap the pipeline.
+      required:
+      - template
+    CloudError:
+      x-ms-external: true
+      properties:
+        error:
+          description: Details of the error from the Pipelines Resource Provider.
+          $ref: '#/components/schemas/CloudErrorBody'
+      description: An error response from the Pipelines Resource Provider.
+    Pipeline:
+      type: object
+      description: Pipeline used to configure Continuous Integration (CI) & Continuous Delivery (CD) for Azure resources.
+      properties:
+        properties:
+          $ref: '#/components/schemas/PipelineProperties'
+          description: Custom properties of the Pipeline.
+          x-ms-client-flatten: true
+        systemData:
           readOnly: true
-          description: Resource Type
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: Resource Tags
-        location:
+          description: The system metadata pertaining to this resource.
+          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
+      allOf:
+      - $ref: '#/components/schemas/Resource'
+      required:
+      - properties
+    PipelineListResult:
+      description: Result of a request to list all Pipelines under a given scope.
+      properties:
+        value:
+          description: List of pipelines.
+          type: array
+          items:
+            $ref: '#/components/schemas/Pipeline'
+        nextLink:
           type: string
-          description: Resource Location
-        name:
+          description: URL to get the next set of Pipelines, if there are any.
+    CloudErrorBody:
+      x-ms-external: true
+      properties:
+        code:
           type: string
-          readOnly: true
-          description: Resource Name
-      x-ms-azure-resource: true
+          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
+        message:
+          type: string
+          description: A message describing the error, intended to be suitable for display in a user interface.
+        target:
+          type: string
+          description: The target of the particular error. For example, the name of the property in error or the method where the error occurred.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudErrorBody'
+          description: A list of additional details about the error.
+      description: An error response from the Pipelines Resource Provider.
     CodeRepository:
       type: object
       description: Repository containing the source code for a pipeline.
@@ -541,106 +605,6 @@ components:
       - repositoryType
       - id
       - defaultBranch
-    CloudErrorBody:
-      x-ms-external: true
-      properties:
-        code:
-          type: string
-          description: An identifier for the error. Codes are invariant and are intended to be consumed programmatically.
-        message:
-          type: string
-          description: A message describing the error, intended to be suitable for display in a user interface.
-        target:
-          type: string
-          description: The target of the particular error. For example, the name of the property in error or the method where the error occurred.
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/CloudErrorBody'
-          description: A list of additional details about the error.
-      description: An error response from the Pipelines Resource Provider.
-    PipelineProperties:
-      type: object
-      description: Custom properties of a Pipeline.
-      discriminator:
-        propertyName: pipelineType
-      properties:
-        pipelineId:
-          type: integer
-          readOnly: true
-          description: Unique identifier of the Pipeline
-        pipelineType:
-          type: string
-          enum:
-          - githubWorkflow
-          - azurePipeline
-          x-ms-enum:
-            name: pipelineTypeEnum
-            modelAsString: true
-          description: Specifies which CI/CD provider to use. Valid options are 'azurePipeline', 'githubWorkflow'.
-        bootstrapConfiguration:
-          $ref: '#/components/schemas/BootstrapConfiguration'
-          description: Configuration used to bootstrap the Pipeline.
-      required:
-      - pipelineType
-      - bootstrapConfiguration
-    Pipeline:
-      type: object
-      description: Pipeline used to configure Continuous Integration (CI) & Continuous Delivery (CD) for Azure resources.
-      properties:
-        properties:
-          $ref: '#/components/schemas/PipelineProperties'
-          description: Custom properties of the Pipeline.
-          x-ms-client-flatten: true
-        systemData:
-          readOnly: true
-          description: The system metadata pertaining to this resource.
-          $ref: ../../../../../common-types/resource-management/v2/types.json#/definitions/systemData
-      allOf:
-      - $ref: '#/components/schemas/Resource'
-      required:
-      - properties
-    PipelineListResult:
-      description: Result of a request to list all Pipelines under a given scope.
-      properties:
-        value:
-          description: List of pipelines.
-          type: array
-          items:
-            $ref: '#/components/schemas/Pipeline'
-        nextLink:
-          type: string
-          description: URL to get the next set of Pipelines, if there are any.
-    PipelineTemplate:
-      type: object
-      description: Template used to bootstrap the pipeline.
-      properties:
-        id:
-          type: string
-          description: Unique identifier of the pipeline template.
-        parameters:
-          type: object
-          description: Dictionary of input parameters used in the pipeline template.
-          additionalProperties:
-            type: string
-      required:
-      - id
-    PipelineUpdateParameters:
-      type: object
-      description: Request payload used to update an existing Azure Pipeline.
-      properties:
-        tags:
-          type: object
-          description: Dictionary of key-value pairs to be set as tags on the Azure Pipeline. This will overwrite any existing tags.
-          additionalProperties:
-            type: string
-    CloudError:
-      x-ms-external: true
-      properties:
-        error:
-          description: Details of the error from the Pipelines Resource Provider.
-          $ref: '#/components/schemas/CloudErrorBody'
-      description: An error response from the Pipelines Resource Provider.
     Authorization:
       description: Authorization info used to access a resource (like code repository).
       type: object
@@ -660,31 +624,54 @@ components:
             type: string
       required:
       - authorizationType
-    BootstrapConfiguration:
+    PipelineUpdateParameters:
       type: object
-      description: Configuration used to bootstrap a Pipeline.
+      description: Request payload used to update an existing Azure Pipeline.
       properties:
-        sourceRepository:
-          $ref: '#/components/schemas/CodeRepository'
-          description: Repository containing the source code for the pipeline. Currently only 'azurePipeline' pipeline type supports this.
-        template:
-          $ref: '#/components/schemas/PipelineTemplate'
-          description: Template used to bootstrap the pipeline.
-      required:
-      - template
-    ExtendedLocation:
+        tags:
+          type: object
+          description: Dictionary of key-value pairs to be set as tags on the Azure Pipeline. This will overwrite any existing tags.
+          additionalProperties:
+            type: string
+    PipelineTemplate:
       type: object
-      description: Extended location is an extension of Azure locations. They provide a way to use their Azure ARC enabled Kubernetes clusters as target locations for deploying Azure services instances.
+      description: Template used to bootstrap the pipeline.
       properties:
-        name:
+        id:
           type: string
-          description: The name of the extended location.
+          description: Unique identifier of the pipeline template.
+        parameters:
+          type: object
+          description: Dictionary of input parameters used in the pipeline template.
+          additionalProperties:
+            type: string
+      required:
+      - id
+    Resource:
+      type: object
+      description: An Azure Resource Manager (ARM) resource.
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Resource Id
         type:
           type: string
-          description: The type of the extended location.
-      required:
-      - name
-      - type
+          readOnly: true
+          description: Resource Type
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: Resource Tags
+        location:
+          type: string
+          description: Resource Location
+        name:
+          type: string
+          readOnly: true
+          description: Resource Name
+      x-ms-azure-resource: true
     PipelineProperties_2:
       type: object
       description: The properties of a Pipeline resource.
@@ -711,79 +698,6 @@ components:
       - enabled
       - input
       - stages
-    Pipeline_2:
-      type: object
-      description: A Pipeline resource belonging to an Instance resource.
-      properties:
-        properties:
-          $ref: '#/components/schemas/PipelineProperties_2'
-          description: The resource-specific properties for this resource.
-          x-ms-client-flatten: true
-          x-ms-mutability:
-          - read
-          - create
-        extendedLocation:
-          $ref: '#/components/schemas/ExtendedLocation'
-          description: Edge location of the resource.
-          x-ms-mutability:
-          - read
-          - create
-      required:
-      - extendedLocation
-      allOf:
-      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
-    PipelineStage:
-      type: object
-      description: Stage configurations for all Pipeline processing and output stages.
-      properties:
-        type:
-          type: string
-          description: ARM resource type.
-        description:
-          type: string
-          description: Description for stage.
-        next:
-          type: array
-          description: Next stage in the pipeline. Not required if output stage.
-          items:
-            type: string
-      required:
-      - type
-      additionalProperties: {}
-    PipelineListResult_2:
-      type: object
-      description: The response of a Pipeline list operation.
-      properties:
-        value:
-          type: array
-          description: The Pipeline items on this page
-          items:
-            $ref: '#/components/schemas/Pipeline_2'
-        nextLink:
-          type: string
-          format: uri
-          description: The link to the next page of items
-      required:
-      - value
-    PipelineInput:
-      type: object
-      description: Stage configuration for Pipeline input stage.
-      properties:
-        type:
-          type: string
-          description: ARM resource type.
-        description:
-          type: string
-          description: Description for stage.
-        next:
-          type: array
-          description: Next stage in the pipeline.
-          items:
-            type: string
-      required:
-      - type
-      - next
-      additionalProperties: {}
     ProvisioningState:
       type: string
       description: The provisioning status of the resource.
@@ -820,6 +734,74 @@ components:
         - name: Accepted
           value: Accepted
           description: The resource was accepted by the server.
+    ExtendedLocation:
+      type: object
+      description: Extended location is an extension of Azure locations. They provide a way to use their Azure ARC enabled Kubernetes clusters as target locations for deploying Azure services instances.
+      properties:
+        name:
+          type: string
+          description: The name of the extended location.
+        type:
+          type: string
+          description: The type of the extended location.
+      required:
+      - name
+      - type
+    Pipeline_2:
+      type: object
+      description: A Pipeline resource belonging to an Instance resource.
+      properties:
+        properties:
+          $ref: '#/components/schemas/PipelineProperties_2'
+          description: The resource-specific properties for this resource.
+          x-ms-client-flatten: true
+          x-ms-mutability:
+          - read
+          - create
+        extendedLocation:
+          $ref: '#/components/schemas/ExtendedLocation'
+          description: Edge location of the resource.
+          x-ms-mutability:
+          - read
+          - create
+      required:
+      - extendedLocation
+      allOf:
+      - $ref: ../../../../../common-types/resource-management/v3/types.json#/definitions/TrackedResource
+    PipelineInput:
+      type: object
+      description: Stage configuration for Pipeline input stage.
+      properties:
+        type:
+          type: string
+          description: ARM resource type.
+        description:
+          type: string
+          description: Description for stage.
+        next:
+          type: array
+          description: Next stage in the pipeline.
+          items:
+            type: string
+      required:
+      - type
+      - next
+      additionalProperties: {}
+    PipelineListResult_2:
+      type: object
+      description: The response of a Pipeline list operation.
+      properties:
+        value:
+          type: array
+          description: The Pipeline items on this page
+          items:
+            $ref: '#/components/schemas/Pipeline_2'
+        nextLink:
+          type: string
+          format: uri
+          description: The link to the next page of items
+      required:
+      - value
     PipelineTagsUpdate:
       type: object
       description: The type used for updating tags in Pipeline resources.
@@ -829,6 +811,24 @@ components:
           description: Resource tags.
           additionalProperties:
             type: string
+    PipelineStage:
+      type: object
+      description: Stage configurations for all Pipeline processing and output stages.
+      properties:
+        type:
+          type: string
+          description: ARM resource type.
+        description:
+          type: string
+          description: Description for stage.
+        next:
+          type: array
+          description: Next stage in the pipeline. Not required if output stage.
+          items:
+            type: string
+      required:
+      - type
+      additionalProperties: {}
   parameters:
     ApiVersionParameter:
       name: api-version

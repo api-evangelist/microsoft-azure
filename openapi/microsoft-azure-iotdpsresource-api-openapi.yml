@@ -666,63 +666,38 @@ paths:
                 $ref: '#/components/schemas/ErrorDetails'
       deprecated: false
 components:
-  parameters:
-    resourceName:
-      name: resourceName
-      in: path
-      description: The name of the provisioning service.
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    groupId:
-      name: groupId
-      in: path
-      description: The name of the private link resource
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    api-version:
-      name: api-version
-      in: query
-      description: The version of the API.
-      required: true
-      schema:
-        type: string
-    privateEndpointConnectionName:
-      name: privateEndpointConnectionName
-      in: path
-      description: The name of the private endpoint connection
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
-    subscriptionId:
-      name: subscriptionId
-      in: path
-      description: The subscription identifier.
-      required: true
-      schema:
-        type: string
-    resourceGroupName:
-      name: resourceGroupName
-      description: The name of the resource group that contains the provisioning service.
-      in: path
-      required: true
-      x-ms-parameter-location: method
-      schema:
-        type: string
   schemas:
-    OperationInputs:
-      description: Input values for operation results call.
+    IotHubDefinitionDescription:
       type: object
+      description: Description of the IoT hub.
       properties:
+        applyAllocationPolicy:
+          description: flag for applying allocationPolicy or not for a given iot hub.
+          type: boolean
+        allocationWeight:
+          description: weight to apply for a given iot h.
+          format: int32
+          type: integer
         name:
-          description: The name of the Provisioning Service to check.
           type: string
+          readOnly: true
+          description: Host name of the IoT hub.
+        connectionString:
+          type: string
+          description: Connection string of the IoT hub.
+        location:
+          type: string
+          description: ARM region of the IoT hub.
       required:
-      - name
+      - connectionString
+      - location
+    TagsResource:
+      properties:
+        tags:
+          additionalProperties:
+            type: string
+          description: Resource tags
+      description: A container holding only the Tags for a resource, allowing the user to update the tags on a Provisioning Service instance.
     GroupIdInformationProperties:
       description: The properties for a group information object
       type: object
@@ -740,26 +715,135 @@ components:
           type: array
           items:
             type: string
-    IotDpsSkuInfo:
+    NameAvailabilityInfo:
       type: object
-      description: List of possible provisioning service SKUs.
+      description: Description of name availability.
       properties:
-        name:
-          description: Sku name.
+        nameAvailable:
+          description: specifies if a name is available or not
+          type: boolean
+        reason:
+          description: specifies the reason a name is unavailable
           enum:
-          - S1
+          - Invalid
+          - AlreadyExists
           type: string
           x-ms-enum:
-            name: IotDpsSku
+            name: NameUnavailabilityReason
             modelAsString: true
-        tier:
+        message:
+          description: message containing a detailed reason name is unavailable
+          type: string
+    ProvisioningServiceDescriptionListResult:
+      type: object
+      description: List of provisioning service descriptions.
+      properties:
+        value:
+          description: List of provisioning service descriptions.
+          type: array
+          items:
+            $ref: '#/components/schemas/ProvisioningServiceDescription'
+        nextLink:
+          description: the next link
           type: string
           readOnly: true
-          description: Pricing tier name of the provisioning service.
-        capacity:
-          format: int64
+    SharedAccessSignatureAuthorizationRule_AccessRightsDescription:
+      type: object
+      description: Description of the shared access key.
+      properties:
+        keyName:
+          type: string
+          description: Name of the key.
+        primaryKey:
+          type: string
+          description: Primary SAS key value.
+        secondaryKey:
+          type: string
+          description: Secondary SAS key value.
+        rights:
+          description: Rights that this key has.
+          enum:
+          - ServiceConfig
+          - EnrollmentRead
+          - EnrollmentWrite
+          - DeviceConnect
+          - RegistrationStatusRead
+          - RegistrationStatusWrite
+          type: string
+          x-ms-enum:
+            name: AccessRightsDescription
+            modelAsString: true
+      required:
+      - keyName
+      - rights
+    ErrorDetails:
+      description: Error details.
+      type: object
+      properties:
+        code:
+          description: The error code.
+          format: int32
           type: integer
-          description: The number of units to provision
+          readOnly: true
+        httpStatusCode:
+          description: The HTTP status code.
+          type: string
+          readOnly: true
+        message:
+          description: The error message.
+          type: string
+          readOnly: true
+        details:
+          description: The error details.
+          type: string
+          readOnly: true
+    PrivateLinkResources:
+      description: The available private link resources for a provisioning service
+      type: object
+      properties:
+        value:
+          description: The list of available private link resources for a provisioning service
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupIdInformation'
+    PrivateEndpointConnectionsList:
+      description: The list of private endpoint connections for a provisioning service
+      type: array
+      items:
+        $ref: '#/components/schemas/PrivateEndpointConnection'
+    Resource:
+      description: The common properties of an Azure resource.
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: The resource identifier.
+        name:
+          readOnly: true
+          type: string
+          description: The resource name.
+          pattern: ^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{2,49}[a-zA-Z0-9]$
+        type:
+          readOnly: true
+          type: string
+          description: The resource type.
+        location:
+          type: string
+          description: The resource location.
+        resourcegroup:
+          type: string
+          description: The resource group of the resource.
+        subscriptionid:
+          type: string
+          description: The subscription id of the resource.
+        tags:
+          type: object
+          additionalProperties:
+            type: string
+          description: The resource tags.
+      x-ms-azure-resource: true
+      required:
+      - location
     PrivateEndpointConnection:
       description: The private endpoint connection of a provisioning service
       x-ms-azure-resource: true
@@ -786,94 +870,6 @@ components:
           readOnly: true
       required:
       - properties
-    AsyncOperationResult:
-      type: object
-      description: Result of a long running operation.
-      properties:
-        status:
-          description: current status of a long running operation.
-          type: string
-        error:
-          description: Error message containing code, description and details
-          $ref: '#/components/schemas/ErrorMessage'
-    IpFilterRule:
-      description: The IP filter rules for a provisioning Service.
-      type: object
-      properties:
-        filterName:
-          description: The name of the IP filter rule.
-          type: string
-        action:
-          description: The desired action for requests captured by this rule.
-          enum:
-          - Accept
-          - Reject
-          type: string
-          x-ms-enum:
-            name: IpFilterActionType
-            modelAsString: false
-        ipMask:
-          description: A string that contains the IP address range in CIDR notation for the rule.
-          type: string
-        target:
-          description: Target for requests captured by this rule.
-          enum:
-          - all
-          - serviceApi
-          - deviceApi
-          type: string
-          x-ms-enum:
-            name: IpFilterTargetType
-            modelAsString: false
-      required:
-      - filterName
-      - action
-      - ipMask
-    PrivateLinkServiceConnectionState:
-      description: The current state of a private endpoint connection
-      type: object
-      properties:
-        status:
-          description: The status of a private endpoint connection
-          enum:
-          - Pending
-          - Approved
-          - Rejected
-          - Disconnected
-          type: string
-          x-ms-enum:
-            name: PrivateLinkServiceConnectionStatus
-            modelAsString: true
-        description:
-          type: string
-          description: The description for the current state of a private endpoint connection
-        actionsRequired:
-          type: string
-          description: Actions required for a private endpoint connection
-      required:
-      - status
-      - description
-    ErrorDetails:
-      description: Error details.
-      type: object
-      properties:
-        code:
-          description: The error code.
-          format: int32
-          type: integer
-          readOnly: true
-        httpStatusCode:
-          description: The HTTP status code.
-          type: string
-          readOnly: true
-        message:
-          description: The error message.
-          type: string
-          readOnly: true
-        details:
-          description: The error details.
-          type: string
-          readOnly: true
     IotDpsPropertiesDescription:
       description: the service specific properties of a provisioning service, including keys, linked iot hubs, current state, and system generated properties such as hostname and idScope
       type: object
@@ -959,46 +955,9 @@ components:
         portalOperationsHostName:
           type: string
           description: Portal endpoint to enable CORS for this provisioning service.
-    ErrorMessage:
-      description: Error response containing message and code.
+    GroupIdInformation:
+      description: The group information for creating a private endpoint on a provisioning service
       type: object
-      properties:
-        code:
-          description: standard error code
-          type: string
-        message:
-          description: standard error description
-          type: string
-        details:
-          description: detailed summary of error
-          type: string
-    IotDpsSkuDefinition:
-      type: object
-      description: Available SKUs of tier and units.
-      properties:
-        name:
-          description: Sku name.
-          enum:
-          - S1
-          type: string
-          x-ms-enum:
-            name: IotDpsSku
-            modelAsString: true
-    PrivateEndpoint:
-      description: The private endpoint property of a private endpoint connection
-      type: object
-      properties:
-        id:
-          readOnly: true
-          type: string
-          description: The resource identifier.
-    PrivateEndpointConnectionsList:
-      description: The list of private endpoint connections for a provisioning service
-      type: array
-      items:
-        $ref: '#/components/schemas/PrivateEndpointConnection'
-    Resource:
-      description: The common properties of an Azure resource.
       properties:
         id:
           readOnly: true
@@ -1013,128 +972,31 @@ components:
           readOnly: true
           type: string
           description: The resource type.
-        location:
-          type: string
-          description: The resource location.
-        resourcegroup:
-          type: string
-          description: The resource group of the resource.
-        subscriptionid:
-          type: string
-          description: The subscription id of the resource.
-        tags:
-          type: object
-          additionalProperties:
-            type: string
-          description: The resource tags.
-      x-ms-azure-resource: true
+        properties:
+          description: The properties for a group information object
+          $ref: '#/components/schemas/GroupIdInformationProperties'
       required:
-      - location
-    IotHubDefinitionDescription:
+      - properties
+    IotDpsSkuInfo:
       type: object
-      description: Description of the IoT hub.
+      description: List of possible provisioning service SKUs.
       properties:
-        applyAllocationPolicy:
-          description: flag for applying allocationPolicy or not for a given iot hub.
-          type: boolean
-        allocationWeight:
-          description: weight to apply for a given iot h.
-          format: int32
-          type: integer
         name:
-          type: string
-          readOnly: true
-          description: Host name of the IoT hub.
-        connectionString:
-          type: string
-          description: Connection string of the IoT hub.
-        location:
-          type: string
-          description: ARM region of the IoT hub.
-      required:
-      - connectionString
-      - location
-    IotDpsSkuDefinitionListResult:
-      type: object
-      description: List of available SKUs.
-      properties:
-        value:
-          description: The list of SKUs
-          type: array
-          items:
-            $ref: '#/components/schemas/IotDpsSkuDefinition'
-        nextLink:
-          description: The next link.
-          type: string
-          readOnly: true
-    ProvisioningServiceDescriptionListResult:
-      type: object
-      description: List of provisioning service descriptions.
-      properties:
-        value:
-          description: List of provisioning service descriptions.
-          type: array
-          items:
-            $ref: '#/components/schemas/ProvisioningServiceDescription'
-        nextLink:
-          description: the next link
-          type: string
-          readOnly: true
-    NameAvailabilityInfo:
-      type: object
-      description: Description of name availability.
-      properties:
-        nameAvailable:
-          description: specifies if a name is available or not
-          type: boolean
-        reason:
-          description: specifies the reason a name is unavailable
+          description: Sku name.
           enum:
-          - Invalid
-          - AlreadyExists
+          - S1
           type: string
           x-ms-enum:
-            name: NameUnavailabilityReason
+            name: IotDpsSku
             modelAsString: true
-        message:
-          description: message containing a detailed reason name is unavailable
+        tier:
           type: string
-    TagsResource:
-      properties:
-        tags:
-          additionalProperties:
-            type: string
-          description: Resource tags
-      description: A container holding only the Tags for a resource, allowing the user to update the tags on a Provisioning Service instance.
-    SharedAccessSignatureAuthorizationRule_AccessRightsDescription:
-      type: object
-      description: Description of the shared access key.
-      properties:
-        keyName:
-          type: string
-          description: Name of the key.
-        primaryKey:
-          type: string
-          description: Primary SAS key value.
-        secondaryKey:
-          type: string
-          description: Secondary SAS key value.
-        rights:
-          description: Rights that this key has.
-          enum:
-          - ServiceConfig
-          - EnrollmentRead
-          - EnrollmentWrite
-          - DeviceConnect
-          - RegistrationStatusRead
-          - RegistrationStatusWrite
-          type: string
-          x-ms-enum:
-            name: AccessRightsDescription
-            modelAsString: true
-      required:
-      - keyName
-      - rights
+          readOnly: true
+          description: Pricing tier name of the provisioning service.
+        capacity:
+          format: int64
+          type: integer
+          description: The number of units to provision
     ProvisioningServiceDescription:
       description: The description of the provisioning service.
       type: object
@@ -1159,6 +1021,47 @@ components:
       required:
       - sku
       - properties
+    PrivateEndpoint:
+      description: The private endpoint property of a private endpoint connection
+      type: object
+      properties:
+        id:
+          readOnly: true
+          type: string
+          description: The resource identifier.
+    IpFilterRule:
+      description: The IP filter rules for a provisioning Service.
+      type: object
+      properties:
+        filterName:
+          description: The name of the IP filter rule.
+          type: string
+        action:
+          description: The desired action for requests captured by this rule.
+          enum:
+          - Accept
+          - Reject
+          type: string
+          x-ms-enum:
+            name: IpFilterActionType
+            modelAsString: false
+        ipMask:
+          description: A string that contains the IP address range in CIDR notation for the rule.
+          type: string
+        target:
+          description: Target for requests captured by this rule.
+          enum:
+          - all
+          - serviceApi
+          - deviceApi
+          type: string
+          x-ms-enum:
+            name: IpFilterTargetType
+            modelAsString: false
+      required:
+      - filterName
+      - action
+      - ipMask
     SharedAccessSignatureAuthorizationRuleListResult:
       type: object
       description: List of shared access keys.
@@ -1172,6 +1075,18 @@ components:
           description: The next link.
           type: string
           readOnly: true
+    IotDpsSkuDefinition:
+      type: object
+      description: Available SKUs of tier and units.
+      properties:
+        name:
+          description: Sku name.
+          enum:
+          - S1
+          type: string
+          x-ms-enum:
+            name: IotDpsSku
+            modelAsString: true
     PrivateEndpointConnectionProperties:
       description: The properties of a private endpoint connection
       type: object
@@ -1184,37 +1099,122 @@ components:
           $ref: '#/components/schemas/PrivateLinkServiceConnectionState'
       required:
       - privateLinkServiceConnectionState
-    PrivateLinkResources:
-      description: The available private link resources for a provisioning service
+    ErrorMessage:
+      description: Error response containing message and code.
       type: object
+      properties:
+        code:
+          description: standard error code
+          type: string
+        message:
+          description: standard error description
+          type: string
+        details:
+          description: detailed summary of error
+          type: string
+    IotDpsSkuDefinitionListResult:
+      type: object
+      description: List of available SKUs.
       properties:
         value:
-          description: The list of available private link resources for a provisioning service
+          description: The list of SKUs
           type: array
           items:
-            $ref: '#/components/schemas/GroupIdInformation'
-    GroupIdInformation:
-      description: The group information for creating a private endpoint on a provisioning service
+            $ref: '#/components/schemas/IotDpsSkuDefinition'
+        nextLink:
+          description: The next link.
+          type: string
+          readOnly: true
+    OperationInputs:
+      description: Input values for operation results call.
       type: object
       properties:
-        id:
-          readOnly: true
-          type: string
-          description: The resource identifier.
         name:
-          readOnly: true
+          description: The name of the Provisioning Service to check.
           type: string
-          description: The resource name.
-          pattern: ^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{2,49}[a-zA-Z0-9]$
-        type:
-          readOnly: true
-          type: string
-          description: The resource type.
-        properties:
-          description: The properties for a group information object
-          $ref: '#/components/schemas/GroupIdInformationProperties'
       required:
-      - properties
+      - name
+    PrivateLinkServiceConnectionState:
+      description: The current state of a private endpoint connection
+      type: object
+      properties:
+        status:
+          description: The status of a private endpoint connection
+          enum:
+          - Pending
+          - Approved
+          - Rejected
+          - Disconnected
+          type: string
+          x-ms-enum:
+            name: PrivateLinkServiceConnectionStatus
+            modelAsString: true
+        description:
+          type: string
+          description: The description for the current state of a private endpoint connection
+        actionsRequired:
+          type: string
+          description: Actions required for a private endpoint connection
+      required:
+      - status
+      - description
+    AsyncOperationResult:
+      type: object
+      description: Result of a long running operation.
+      properties:
+        status:
+          description: current status of a long running operation.
+          type: string
+        error:
+          description: Error message containing code, description and details
+          $ref: '#/components/schemas/ErrorMessage'
+  parameters:
+    resourceName:
+      name: resourceName
+      in: path
+      description: The name of the provisioning service.
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    api-version:
+      name: api-version
+      in: query
+      description: The version of the API.
+      required: true
+      schema:
+        type: string
+    privateEndpointConnectionName:
+      name: privateEndpointConnectionName
+      in: path
+      description: The name of the private endpoint connection
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    subscriptionId:
+      name: subscriptionId
+      in: path
+      description: The subscription identifier.
+      required: true
+      schema:
+        type: string
+    groupId:
+      name: groupId
+      in: path
+      description: The name of the private link resource
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
+    resourceGroupName:
+      name: resourceGroupName
+      description: The name of the resource group that contains the provisioning service.
+      in: path
+      required: true
+      x-ms-parameter-location: method
+      schema:
+        type: string
   securitySchemes:
     azure_auth:
       type: oauth2
