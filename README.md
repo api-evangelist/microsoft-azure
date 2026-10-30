@@ -1,4 +1,4 @@
-# Microsoft Azure (microsoft-azure)
+# Microsoft Azure
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -66,5442 +66,1983 @@
 
 Microsoft Azure is a cloud computing platform and infrastructure for building, deploying, and managing applications and services through Microsoft-managed data centers.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-search/cloud/main/_apis/microsoft-azure-2/apis.md](https://raw.githubusercontent.com/api-search/cloud/main/_apis/microsoft-azure-2/apis.md)
+**Areas:** Microsoft Azure · Cloud · Cloud Computing · Enterprise · Infrastructure-as-a-Service · Platform-as-a-Service · T1
 
-## Scope
+## Microsoft Azure on APIs.io
 
-- **Position:** Consuming
-- **Access:** 3rd-Party
+Everything profiled for Microsoft Azure is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/microsoft-azure/](https://apis.io/providers/microsoft-azure/)** — or go straight to one of the APIs or properties below.
 
-## Tags
+### APIs (1644)
 
-- API Management
-- Cloud
-- Cloud Computing
-- Enterprise
-- Infrastructure as a Service
-- Platform as a Service
-- T1
+- [Microsoft Azure AI Search API](https://apis.io/apis/microsoft-azure/azure-ai-search-api/) — Azure AI Search is an enterprise-ready information retrieval system for building search experiences over private, heterogeneous content in web, mobile, and…
+- [Microsoft Azure Communication Services API](https://apis.io/apis/microsoft-azure/azure-communication-services-api/) — Azure Communication Services provides multichannel communication APIs that enable developers to add voice, video, chat, text messaging and SMS, email, and…
+- [Microsoft Azure Event Grid API](https://apis.io/apis/microsoft-azure/azure-event-grid-api/) — Azure Event Grid is a fully managed event routing service that enables developers to build event-driven architectures. It provides reliable delivery of…
+- [Microsoft Azure Functions API](https://apis.io/apis/microsoft-azure/azure-functions-api/) — Azure Functions is an event-driven serverless compute platform that enables developers to build and run applications without managing infrastructure. It…
+- [Microsoft Azure DevOps REST API](https://apis.io/apis/microsoft-azure/azure-devops-rest-api/) — Azure DevOps provides developer services for allowing teams to plan work, collaborate on code development, and build and deploy applications. The REST API…
+- [Microsoft Azure AI Foundry API](https://apis.io/apis/microsoft-azure/azure-ai-foundry-api/) — Microsoft Foundry is a unified Azure platform-as-a-service offering for enterprise AI operations, model builders, and application development. It combines…
+- [Microsoft Azure Resource JSON Schema](https://apis.io/apis/microsoft-azure/azure-resource-schema/) — JSON Schema definitions for core Azure Resource Manager data models including the base Resource type, Resource Groups, Subscriptions, Deployments, Managed…
+- [Microsoft Azure JSON-LD Context](https://apis.io/apis/microsoft-azure/azure-json-ld-context/) — JSON-LD context definitions for Microsoft Azure resource types, providing semantic annotations and linked data mappings for Azure Resource Manager…
+- [Microsoft Azure AccessConnector API](https://apis.io/apis/microsoft-azure/microsoft-azure-accessconnector-api/) — The AccessConnector API from Microsoft Azure — 3 operation(s) for accessconnector.
+- [Microsoft Azure AccessReviewInstanceAcceptRecommmendations API](https://apis.io/apis/microsoft-azure/microsoft-azure-accessreviewinstanceacceptrecommmendations-api/) — The AccessReviewInstanceAcceptRecommmendations API from Microsoft Azure — 1 operation(s) for accessreviewinstanceacceptrecommmendations.
+- [Microsoft Azure AccessReviewInstanceApplyDecisions API](https://apis.io/apis/microsoft-azure/microsoft-azure-accessreviewinstanceapplydecisions-api/) — The AccessReviewInstanceApplyDecisions API from Microsoft Azure — 1 operation(s) for accessreviewinstanceapplydecisions.
+- [Microsoft Azure AccessReviewInstanceResetDecisions API](https://apis.io/apis/microsoft-azure/microsoft-azure-accessreviewinstanceresetdecisions-api/) — The AccessReviewInstanceResetDecisions API from Microsoft Azure — 1 operation(s) for accessreviewinstanceresetdecisions.
+- [Microsoft Azure AccessReviewInstanceSendReminders API](https://apis.io/apis/microsoft-azure/microsoft-azure-accessreviewinstancesendreminders-api/) — The AccessReviewInstanceSendReminders API from Microsoft Azure — 1 operation(s) for accessreviewinstancesendreminders.
+- [Microsoft Azure AccessReviewInstanceStop API](https://apis.io/apis/microsoft-azure/microsoft-azure-accessreviewinstancestop-api/) — The AccessReviewInstanceStop API from Microsoft Azure — 1 operation(s) for accessreviewinstancestop.
+- [Microsoft Azure AccessReviewScheduleDefinitionStop API](https://apis.io/apis/microsoft-azure/microsoft-azure-accessreviewscheduledefinitionstop-api/) — The AccessReviewScheduleDefinitionStop API from Microsoft Azure — 1 operation(s) for accessreviewscheduledefinitionstop.
+- [Microsoft Azure Account API](https://apis.io/apis/microsoft-azure/microsoft-azure-account-api/) — The Account API from Microsoft Azure — 12 operation(s) for account.
+- [Microsoft Azure Account Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-account-operations-api/) — The Account Operations API from Microsoft Azure — 1 operation(s) for account operations.
+- [Microsoft Azure AccountQuotas API](https://apis.io/apis/microsoft-azure/microsoft-azure-accountquotas-api/) — The AccountQuotas API from Microsoft Azure — 2 operation(s) for accountquotas.
+- [Microsoft Azure Accounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-accounts-api/) — The Accounts API from Microsoft Azure — 52 operation(s) for accounts.
+- [Microsoft Azure AcrManifest API](https://apis.io/apis/microsoft-azure/microsoft-azure-acrmanifest-api/) — ACR APIs related to manifests
+- [Microsoft Azure AcrMetadata API](https://apis.io/apis/microsoft-azure/microsoft-azure-acrmetadata-api/) — The AcrMetadata API from Microsoft Azure — 5 operation(s) for acrmetadata.
+- [Microsoft Azure AcrRepository API](https://apis.io/apis/microsoft-azure/microsoft-azure-acrrepository-api/) — ACR APIs related to repositories
+- [Microsoft Azure AcrToken API](https://apis.io/apis/microsoft-azure/microsoft-azure-acrtoken-api/) — The AcrToken API from Microsoft Azure — 2 operation(s) for acrtoken.
+- [Microsoft Azure Actions API](https://apis.io/apis/microsoft-azure/microsoft-azure-actions-api/) — The Actions API from Microsoft Azure — 10 operation(s) for actions.
+- [Microsoft Azure ActiveSessionHostConfiguration API](https://apis.io/apis/microsoft-azure/microsoft-azure-activesessionhostconfiguration-api/) — The ActiveSessionHostConfiguration API from Microsoft Azure — 2 operation(s) for activesessionhostconfiguration.
+- [Microsoft Azure AddonDetails API](https://apis.io/apis/microsoft-azure/microsoft-azure-addondetails-api/) — The AddonDetails API from Microsoft Azure — 1 operation(s) for addondetails.
+- [Microsoft Azure AddonStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-addonstatus-api/) — The AddonStatus API from Microsoft Azure — 1 operation(s) for addonstatus.
+- [Microsoft Azure Addresses API](https://apis.io/apis/microsoft-azure/microsoft-azure-addresses-api/) — The Addresses API from Microsoft Azure — 3 operation(s) for addresses.
+- [Microsoft Azure Adds API](https://apis.io/apis/microsoft-azure/microsoft-azure-adds-api/) — The Adds API from Microsoft Azure — 21 operation(s) for adds.
+- [Microsoft Azure Admin API](https://apis.io/apis/microsoft-azure/microsoft-azure-admin-api/) — The Admin API from Microsoft Azure — 1 operation(s) for admin.
+- [Microsoft Azure AdminRuleCollections API](https://apis.io/apis/microsoft-azure/microsoft-azure-adminrulecollections-api/) — The AdminRuleCollections API from Microsoft Azure — 2 operation(s) for adminrulecollections.
+- [Microsoft Azure AdminRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-adminrules-api/) — The AdminRules API from Microsoft Azure — 2 operation(s) for adminrules.
+- [Microsoft Azure Advisors API](https://apis.io/apis/microsoft-azure/microsoft-azure-advisors-api/) — The Advisors API from Microsoft Azure — 2 operation(s) for advisors.
+- [Microsoft Azure Agent Pools API](https://apis.io/apis/microsoft-azure/microsoft-azure-agent-pools-api/) — Operations for managing node pools within a cluster
+- [Microsoft Azure Agents API](https://apis.io/apis/microsoft-azure/microsoft-azure-agents-api/) — The Agents API from Microsoft Azure — 2 operation(s) for agents.
+- [Microsoft Azure AggregatedCost API](https://apis.io/apis/microsoft-azure/microsoft-azure-aggregatedcost-api/) — The AggregatedCost API from Microsoft Azure — 2 operation(s) for aggregatedcost.
+- [Microsoft Azure Agreements API](https://apis.io/apis/microsoft-azure/microsoft-azure-agreements-api/) — The Agreements API from Microsoft Azure — 4 operation(s) for agreements.
+- [Microsoft Azure AKSAssessmentOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-aksassessmentoperations-api/) — The AKSAssessmentOperations API from Microsoft Azure — 3 operation(s) for aksassessmentoperations.
+- [Microsoft Azure AKSClusterOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-aksclusteroperations-api/) — The AKSClusterOperations API from Microsoft Azure — 2 operation(s) for aksclusteroperations.
+- [Microsoft Azure AKSCostDetailOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-akscostdetailoperations-api/) — The AKSCostDetailOperations API from Microsoft Azure — 1 operation(s) for akscostdetailoperations.
+- [Microsoft Azure AKSOptionsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-aksoptionsoperations-api/) — The AKSOptionsOperations API from Microsoft Azure — 2 operation(s) for aksoptionsoperations.
+- [Microsoft Azure AKSSummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-akssummaryoperations-api/) — The AKSSummaryOperations API from Microsoft Azure — 2 operation(s) for akssummaryoperations.
+- [Microsoft Azure Alerts API](https://apis.io/apis/microsoft-azure/microsoft-azure-alerts-api/) — The Alerts API from Microsoft Azure — 7 operation(s) for alerts.
+- [Microsoft Azure Aliases API](https://apis.io/apis/microsoft-azure/microsoft-azure-aliases-api/) — The Aliases API from Microsoft Azure — 2 operation(s) for aliases.
+- [Microsoft Azure Alterations API](https://apis.io/apis/microsoft-azure/microsoft-azure-alterations-api/) — The Alterations API from Microsoft Azure — 2 operation(s) for alterations.
+- [Microsoft Azure AmfDeployments API](https://apis.io/apis/microsoft-azure/microsoft-azure-amfdeployments-api/) — The AmfDeployments API from Microsoft Azure — 3 operation(s) for amfdeployments.
+- [Microsoft Azure Aml Filesystems API](https://apis.io/apis/microsoft-azure/microsoft-azure-amlfilesystems-api/) — The amlFilesystems API from Microsoft Azure — 7 operation(s) for amlfilesystems.
+- [Microsoft Azure Analyze API](https://apis.io/apis/microsoft-azure/microsoft-azure-analyze-api/) — The Analyze API from Microsoft Azure — 2 operation(s) for analyze.
+- [Microsoft Azure :Analyze Conversations API](https://apis.io/apis/microsoft-azure/microsoft-azure-analyze-conversations-api/) — The :Analyze Conversations API from Microsoft Azure — 4 operation(s) for :analyze conversations.
+- [Microsoft Azure :Analyze Text API](https://apis.io/apis/microsoft-azure/microsoft-azure-analyze-text-api/) — The :Analyze Text API from Microsoft Azure — 4 operation(s) for :analyze text.
+- [Microsoft Azure AnomalyAlerting API](https://apis.io/apis/microsoft-azure/microsoft-azure-anomalyalerting-api/) — The AnomalyAlerting API from Microsoft Azure — 5 operation(s) for anomalyalerting.
+- [Microsoft Azure ApiOperation API](https://apis.io/apis/microsoft-azure/microsoft-azure-apioperation-api/) — The ApiOperation API from Microsoft Azure — 2 operation(s) for apioperation.
+- [Microsoft Azure ApiOperationPolicy API](https://apis.io/apis/microsoft-azure/microsoft-azure-apioperationpolicy-api/) — The ApiOperationPolicy API from Microsoft Azure — 2 operation(s) for apioperationpolicy.
+- [Microsoft Azure ApiPolicy API](https://apis.io/apis/microsoft-azure/microsoft-azure-apipolicy-api/) — The ApiPolicy API from Microsoft Azure — 2 operation(s) for apipolicy.
+- [Microsoft Azure ApiRelease API](https://apis.io/apis/microsoft-azure/microsoft-azure-apirelease-api/) — The ApiRelease API from Microsoft Azure — 2 operation(s) for apirelease.
+- [Microsoft Azure ApiRevision API](https://apis.io/apis/microsoft-azure/microsoft-azure-apirevision-api/) — The ApiRevision API from Microsoft Azure — 1 operation(s) for apirevision.
+- [Microsoft Azure ApiSchema API](https://apis.io/apis/microsoft-azure/microsoft-azure-apischema-api/) — The ApiSchema API from Microsoft Azure — 2 operation(s) for apischema.
+- [Microsoft Azure ApiVersionSet API](https://apis.io/apis/microsoft-azure/microsoft-azure-apiversionset-api/) — The ApiVersionSet API from Microsoft Azure — 2 operation(s) for apiversionset.
+- [Microsoft Azure ApiVersionSets API](https://apis.io/apis/microsoft-azure/microsoft-azure-apiversionsets-api/) — The ApiVersionSets API from Microsoft Azure — 1 operation(s) for apiversionsets.
+- [Microsoft Azure App API](https://apis.io/apis/microsoft-azure/microsoft-azure-app-api/) — The App API from Microsoft Azure — 10 operation(s) for app.
+- [Microsoft Azure AppAttachPackage API](https://apis.io/apis/microsoft-azure/microsoft-azure-appattachpackage-api/) — The AppAttachPackage API from Microsoft Azure — 3 operation(s) for appattachpackage.
+- [Microsoft Azure AppAttachPackageInfo API](https://apis.io/apis/microsoft-azure/microsoft-azure-appattachpackageinfo-api/) — The AppAttachPackageInfo API from Microsoft Azure — 1 operation(s) for appattachpackageinfo.
+- [Microsoft Azure AppComplianceAutomation API](https://apis.io/apis/microsoft-azure/microsoft-azure-appcomplianceautomation-api/) — The AppComplianceAutomation API from Microsoft Azure — 6 operation(s) for appcomplianceautomation.
+- [Microsoft Azure AppComponent API](https://apis.io/apis/microsoft-azure/microsoft-azure-appcomponent-api/) — The AppComponent API from Microsoft Azure — 2 operation(s) for appcomponent.
+- [Microsoft Azure ApplianceDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-appliancedefinitions-api/) — The ApplianceDefinitions API from Microsoft Azure — 3 operation(s) for appliancedefinitions.
+- [Microsoft Azure Appliances API](https://apis.io/apis/microsoft-azure/microsoft-azure-appliances-api/) — The Appliances API from Microsoft Azure — 11 operation(s) for appliances.
+- [Microsoft Azure Application API](https://apis.io/apis/microsoft-azure/microsoft-azure-application-api/) — The Application API from Microsoft Azure — 24 operation(s) for application.
+- [Microsoft Azure ApplicationData API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationdata-api/) — The ApplicationData API from Microsoft Azure — 5 operation(s) for applicationdata.
+- [Microsoft Azure ApplicationDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationdefinitions-api/) — The ApplicationDefinitions API from Microsoft Azure — 3 operation(s) for applicationdefinitions.
+- [Microsoft Azure ApplicationGroup API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationgroup-api/) — The ApplicationGroup API from Microsoft Azure — 3 operation(s) for applicationgroup.
+- [Microsoft Azure ApplicationKeyCredentials API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationkeycredentials-api/) — The ApplicationKeyCredentials API from Microsoft Azure — 1 operation(s) for applicationkeycredentials.
+- [Microsoft Azure ApplicationOwners API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationowners-api/) — The ApplicationOwners API from Microsoft Azure — 3 operation(s) for applicationowners.
+- [Microsoft Azure ApplicationPackage API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationpackage-api/) — The ApplicationPackage API from Microsoft Azure — 3 operation(s) for applicationpackage.
+- [Microsoft Azure ApplicationPasswordCredentials API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationpasswordcredentials-api/) — The ApplicationPasswordCredentials API from Microsoft Azure — 1 operation(s) for applicationpasswordcredentials.
+- [Microsoft Azure Applications API](https://apis.io/apis/microsoft-azure/microsoft-azure-applications-api/) — The Applications API from Microsoft Azure — 24 operation(s) for applications.
+- [Microsoft Azure ApplicationType API](https://apis.io/apis/microsoft-azure/microsoft-azure-applicationtype-api/) — The ApplicationType API from Microsoft Azure — 5 operation(s) for applicationtype.
+- [Microsoft Azure ApplyUpdate API](https://apis.io/apis/microsoft-azure/microsoft-azure-applyupdate-api/) — The ApplyUpdate API from Microsoft Azure — 2 operation(s) for applyupdate.
+- [Microsoft Azure ApplyUpdates API](https://apis.io/apis/microsoft-azure/microsoft-azure-applyupdates-api/) — The ApplyUpdates API from Microsoft Azure — 4 operation(s) for applyupdates.
+- [Microsoft Azure AppPlatform API](https://apis.io/apis/microsoft-azure/microsoft-azure-appplatform-api/) — The AppPlatform API from Microsoft Azure — 109 operation(s) for appplatform.
+- [Microsoft Azure Apps API](https://apis.io/apis/microsoft-azure/microsoft-azure-apps-api/) — The Apps API from Microsoft Azure — 93 operation(s) for apps.
+- [Microsoft Azure AppServiceCertificateOrders API](https://apis.io/apis/microsoft-azure/microsoft-azure-appservicecertificateorders-api/) — The AppServiceCertificateOrders API from Microsoft Azure — 14 operation(s) for appservicecertificateorders.
+- [Microsoft Azure AppServiceEnvironments API](https://apis.io/apis/microsoft-azure/microsoft-azure-appserviceenvironments-api/) — The AppServiceEnvironments API from Microsoft Azure — 36 operation(s) for appserviceenvironments.
+- [Microsoft Azure AppServicePlans API](https://apis.io/apis/microsoft-azure/microsoft-azure-appserviceplans-api/) — The AppServicePlans API from Microsoft Azure — 19 operation(s) for appserviceplans.
+- [Microsoft Azure ArmTemplates API](https://apis.io/apis/microsoft-azure/microsoft-azure-armtemplates-api/) — The ArmTemplates API from Microsoft Azure — 2 operation(s) for armtemplates.
+- [Microsoft Azure Artifact API](https://apis.io/apis/microsoft-azure/microsoft-azure-artifact-api/) — The Artifact API from Microsoft Azure — 18 operation(s) for artifact.
+- [Microsoft Azure Artifacts API](https://apis.io/apis/microsoft-azure/microsoft-azure-artifacts-api/) — The Artifacts API from Microsoft Azure — 4 operation(s) for artifacts.
+- [Microsoft Azure ArtifactSources API](https://apis.io/apis/microsoft-azure/microsoft-azure-artifactsources-api/) — The ArtifactSources API from Microsoft Azure — 2 operation(s) for artifactsources.
+- [Microsoft Azure AscOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-ascoperations-api/) — The AscOperations API from Microsoft Azure — 1 operation(s) for ascoperations.
+- [Microsoft Azure AscUsages API](https://apis.io/apis/microsoft-azure/microsoft-azure-ascusages-api/) — The AscUsages API from Microsoft Azure — 1 operation(s) for ascusages.
+- [Microsoft Azure AssessedMachinesOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessedmachinesoperations-api/) — The AssessedMachinesOperations API from Microsoft Azure — 2 operation(s) for assessedmachinesoperations.
+- [Microsoft Azure AssessedSqlDatabaseV2Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessedsqldatabasev2operations-api/) — The AssessedSqlDatabaseV2Operations API from Microsoft Azure — 2 operation(s) for assessedsqldatabasev2operations.
+- [Microsoft Azure AssessedSqlInstanceV2Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessedsqlinstancev2operations-api/) — The AssessedSqlInstanceV2Operations API from Microsoft Azure — 2 operation(s) for assessedsqlinstancev2operations.
+- [Microsoft Azure AssessedSqlMachinesOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessedsqlmachinesoperations-api/) — The AssessedSqlMachinesOperations API from Microsoft Azure — 2 operation(s) for assessedsqlmachinesoperations.
+- [Microsoft Azure AssessedSqlRecommendedEntityOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessedsqlrecommendedentityoperations-api/) — The AssessedSqlRecommendedEntityOperations API from Microsoft Azure — 2 operation(s) for assessedsqlrecommendedentityoperations.
+- [Microsoft Azure AssessedWebApplicationOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessedwebapplicationoperations-api/) — The AssessedWebApplicationOperations API from Microsoft Azure — 2 operation(s) for assessedwebapplicationoperations.
+- [Microsoft Azure AssessedWebAppV2Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessedwebappv2operations-api/) — The AssessedWebAppV2Operations API from Microsoft Azure — 2 operation(s) for assessedwebappv2operations.
+- [Microsoft Azure AssessmentOptionsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessmentoptionsoperations-api/) — The AssessmentOptionsOperations API from Microsoft Azure — 2 operation(s) for assessmentoptionsoperations.
+- [Microsoft Azure AssessmentProjectsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessmentprojectsoperations-api/) — The AssessmentProjectsOperations API from Microsoft Azure — 3 operation(s) for assessmentprojectsoperations.
+- [Microsoft Azure AssessmentProjectSummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessmentprojectsummaryoperations-api/) — The AssessmentProjectSummaryOperations API from Microsoft Azure — 2 operation(s) for assessmentprojectsummaryoperations.
+- [Microsoft Azure AssessmentsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-assessmentsoperations-api/) — The AssessmentsOperations API from Microsoft Azure — 3 operation(s) for assessmentsoperations.
+- [Microsoft Azure Asset API](https://apis.io/apis/microsoft-azure/microsoft-azure-asset-api/) — The Asset API from Microsoft Azure — 2 operation(s) for asset.
+- [Microsoft Azure AssetEndpointProfiles API](https://apis.io/apis/microsoft-azure/microsoft-azure-assetendpointprofiles-api/) — The AssetEndpointProfiles API from Microsoft Azure — 3 operation(s) for assetendpointprofiles.
+- [Microsoft Azure Assets API](https://apis.io/apis/microsoft-azure/microsoft-azure-assets-api/) — Provides access to inventory assets.
+- [Microsoft Azure Assistant API](https://apis.io/apis/microsoft-azure/microsoft-azure-assistant-api/) — The Assistant API from Microsoft Azure — 1 operation(s) for assistant.
+- [Microsoft Azure Assistants API](https://apis.io/apis/microsoft-azure/microsoft-azure-assistants-api/) — The Assistants API from Microsoft Azure — 20 operation(s) for assistants.
+- [Microsoft Azure Associations API](https://apis.io/apis/microsoft-azure/microsoft-azure-associations-api/) — The Associations API from Microsoft Azure — 2 operation(s) for associations.
+- [Microsoft Azure AssociationsInterface API](https://apis.io/apis/microsoft-azure/microsoft-azure-associationsinterface-api/) — The AssociationsInterface API from Microsoft Azure — 2 operation(s) for associationsinterface.
+- [Microsoft Azure Atlas API](https://apis.io/apis/microsoft-azure/microsoft-azure-atlas-api/) — The Atlas API from Microsoft Azure — 58 operation(s) for atlas.
+- [Microsoft Azure Attachments API](https://apis.io/apis/microsoft-azure/microsoft-azure-attachments-api/) — The Attachments API from Microsoft Azure — 3 operation(s) for attachments.
+- [Microsoft Azure Attestation API](https://apis.io/apis/microsoft-azure/microsoft-azure-attestation-api/) — The Attestation API from Microsoft Azure — 4 operation(s) for attestation.
+- [Microsoft Azure AttestationProviders API](https://apis.io/apis/microsoft-azure/microsoft-azure-attestationproviders-api/) — The AttestationProviders API from Microsoft Azure — 5 operation(s) for attestationproviders.
+- [Microsoft Azure Attested API](https://apis.io/apis/microsoft-azure/microsoft-azure-attested-api/) — The Attested API from Microsoft Azure — 1 operation(s) for attested.
+- [Microsoft Azure Audio API](https://apis.io/apis/microsoft-azure/microsoft-azure-audio-api/) — Operations for audio transcription and translation
+- [Microsoft Azure Audit API](https://apis.io/apis/microsoft-azure/microsoft-azure-audit-api/) — The Audit API from Microsoft Azure — 1 operation(s) for audit.
+- [Microsoft Azure Authoring API](https://apis.io/apis/microsoft-azure/microsoft-azure-authoring-api/) — The Authoring API from Microsoft Azure — 96 operation(s) for authoring.
+- [Microsoft Azure Authorizations API](https://apis.io/apis/microsoft-azure/microsoft-azure-authorizations-api/) — The Authorizations API from Microsoft Azure — 2 operation(s) for authorizations.
+- [Microsoft Azure AutoQuotaIncrease API](https://apis.io/apis/microsoft-azure/microsoft-azure-autoquotaincrease-api/) — The AutoQuotaIncrease API from Microsoft Azure — 1 operation(s) for autoquotaincrease.
+- [Microsoft Azure AutoSuggest API](https://apis.io/apis/microsoft-azure/microsoft-azure-autosuggest-api/) — The AutoSuggest API from Microsoft Azure — 1 operation(s) for autosuggest.
+- [Microsoft Azure AvailabilityGroupListeners API](https://apis.io/apis/microsoft-azure/microsoft-azure-availabilitygrouplisteners-api/) — The AvailabilityGroupListeners API from Microsoft Azure — 2 operation(s) for availabilitygrouplisteners.
+- [Microsoft Azure AvailabilitySets API](https://apis.io/apis/microsoft-azure/microsoft-azure-availabilitysets-api/) — The AvailabilitySets API from Microsoft Azure — 3 operation(s) for availabilitysets.
+- [Microsoft Azure AvailabilityStatuses API](https://apis.io/apis/microsoft-azure/microsoft-azure-availabilitystatuses-api/) — The AvailabilityStatuses API from Microsoft Azure — 4 operation(s) for availabilitystatuses.
+- [Microsoft Azure AvailabilityUsages API](https://apis.io/apis/microsoft-azure/microsoft-azure-availabilityusages-api/) — operations related to availability and usage
+- [Microsoft Azure AvailableProviderOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-availableprovideroperations-api/) — The AvailableProviderOperations API from Microsoft Azure — 1 operation(s) for availableprovideroperations.
+- [Microsoft Azure AvailableSkus API](https://apis.io/apis/microsoft-azure/microsoft-azure-availableskus-api/) — The AvailableSkus API from Microsoft Azure — 1 operation(s) for availableskus.
+- [Microsoft Azure AvsAssessedMachinesOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-avsassessedmachinesoperations-api/) — The AvsAssessedMachinesOperations API from Microsoft Azure — 2 operation(s) for avsassessedmachinesoperations.
+- [Microsoft Azure AvsAssessmentOptionsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-avsassessmentoptionsoperations-api/) — The AvsAssessmentOptionsOperations API from Microsoft Azure — 2 operation(s) for avsassessmentoptionsoperations.
+- [Microsoft Azure AvsAssessmentsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-avsassessmentsoperations-api/) — The AvsAssessmentsOperations API from Microsoft Azure — 3 operation(s) for avsassessmentsoperations.
+- [Microsoft Azure Azureaccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-azureaccounts-api/) — The Azureaccounts API from Microsoft Azure — 1 operation(s) for azureaccounts.
+- [Microsoft Azure AzureBackupJob API](https://apis.io/apis/microsoft-azure/microsoft-azure-azurebackupjob-api/) — The AzureBackupJob API from Microsoft Azure — 5 operation(s) for azurebackupjob.
+- [Microsoft Azure AzureBackupJobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-azurebackupjobs-api/) — The AzureBackupJobs API from Microsoft Azure — 1 operation(s) for azurebackupjobs.
+- [Microsoft Azure AzureBareMetal API](https://apis.io/apis/microsoft-azure/microsoft-azure-azurebaremetal-api/) — The AzureBareMetal API from Microsoft Azure — 1 operation(s) for azurebaremetal.
+- [Microsoft Azure AzureDataCatalog API](https://apis.io/apis/microsoft-azure/microsoft-azure-azuredatacatalog-api/) — The AzureDataCatalog API from Microsoft Azure — 3 operation(s) for azuredatacatalog.
+- [Microsoft Azure AzureKeyVaults API](https://apis.io/apis/microsoft-azure/microsoft-azure-azurekeyvaults-api/) — The AzureKeyVaults API from Microsoft Azure — 2 operation(s) for azurekeyvaults.
+- [Microsoft Azure AzureLargeInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-azurelargeinstances-api/) — The AzureLargeInstances API from Microsoft Azure — 6 operation(s) for azurelargeinstances.
+- [Microsoft Azure AzureLargeStorageInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-azurelargestorageinstances-api/) — The AzureLargeStorageInstances API from Microsoft Azure — 3 operation(s) for azurelargestorageinstances.
+- [Microsoft Azure AzureTrafficCollectors API](https://apis.io/apis/microsoft-azure/microsoft-azure-azuretrafficcollectors-api/) — The AzureTrafficCollectors API from Microsoft Azure — 3 operation(s) for azuretrafficcollectors.
+- [Microsoft Azure B2CTenants API](https://apis.io/apis/microsoft-azure/microsoft-azure-b2ctenants-api/) — The B2CTenants API from Microsoft Azure — 4 operation(s) for b2ctenants.
+- [Microsoft Azure Backup Policy API](https://apis.io/apis/microsoft-azure/microsoft-azure-backup-policy-api/) — The Backup Policy API from Microsoft Azure — 2 operation(s) for backup policy.
+- [Microsoft Azure Backup Restore API](https://apis.io/apis/microsoft-azure/microsoft-azure-backup-restore-api/) — The Backup Restore API from Microsoft Azure — 6 operation(s) for backup restore.
+- [Microsoft Azure Backup Vaults API](https://apis.io/apis/microsoft-azure/microsoft-azure-backup-vaults-api/) — The Backup Vaults API from Microsoft Azure — 2 operation(s) for backup vaults.
+- [Microsoft Azure BackupEngines API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupengines-api/) — The BackupEngines API from Microsoft Azure — 2 operation(s) for backupengines.
+- [Microsoft Azure BackupInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupinstances-api/) — The BackupInstances API from Microsoft Azure — 16 operation(s) for backupinstances.
+- [Microsoft Azure BackupInstancesExtensionRouting API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupinstancesextensionrouting-api/) — The BackupInstancesExtensionRouting API from Microsoft Azure — 1 operation(s) for backupinstancesextensionrouting.
+- [Microsoft Azure BackupOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupoperationresults-api/) — The BackupOperationResults API from Microsoft Azure — 1 operation(s) for backupoperationresults.
+- [Microsoft Azure BackupOperationStatuses API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupoperationstatuses-api/) — The BackupOperationStatuses API from Microsoft Azure — 1 operation(s) for backupoperationstatuses.
+- [Microsoft Azure BackupProtectableItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupprotectableitems-api/) — The BackupProtectableItems API from Microsoft Azure — 1 operation(s) for backupprotectableitems.
+- [Microsoft Azure BackupProtectedItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupprotecteditems-api/) — The BackupProtectedItems API from Microsoft Azure — 1 operation(s) for backupprotecteditems.
+- [Microsoft Azure BackupProtectionContainers API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupprotectioncontainers-api/) — The BackupProtectionContainers API from Microsoft Azure — 1 operation(s) for backupprotectioncontainers.
+- [Microsoft Azure BackupProtectionIntent API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupprotectionintent-api/) — The BackupProtectionIntent API from Microsoft Azure — 1 operation(s) for backupprotectionintent.
+- [Microsoft Azure BackupResourceEncryptionConfigs API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupresourceencryptionconfigs-api/) — The BackupResourceEncryptionConfigs API from Microsoft Azure — 1 operation(s) for backupresourceencryptionconfigs.
+- [Microsoft Azure BackupResourceStorageConfigsNonCRR API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupresourcestorageconfigsnoncrr-api/) — The BackupResourceStorageConfigsNonCRR API from Microsoft Azure — 1 operation(s) for backupresourcestorageconfigsnoncrr.
+- [Microsoft Azure BackupResourceVaultConfigs API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupresourcevaultconfigs-api/) — The BackupResourceVaultConfigs API from Microsoft Azure — 1 operation(s) for backupresourcevaultconfigs.
+- [Microsoft Azure Backups API](https://apis.io/apis/microsoft-azure/microsoft-azure-backups-api/) — The Backups API from Microsoft Azure — 16 operation(s) for backups.
+- [Microsoft Azure BackupScheduleGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupschedulegroups-api/) — The BackupScheduleGroups API from Microsoft Azure — 2 operation(s) for backupschedulegroups.
+- [Microsoft Azure BackupSchedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupschedules-api/) — The BackupSchedules API from Microsoft Azure — 2 operation(s) for backupschedules.
+- [Microsoft Azure BackupStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupstatus-api/) — The BackupStatus API from Microsoft Azure — 1 operation(s) for backupstatus.
+- [Microsoft Azure BackupUsageSummaries API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupusagesummaries-api/) — The BackupUsageSummaries API from Microsoft Azure — 1 operation(s) for backupusagesummaries.
+- [Microsoft Azure BackupWorkloadItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-backupworkloaditems-api/) — The BackupWorkloadItems API from Microsoft Azure — 1 operation(s) for backupworkloaditems.
+- [Microsoft Azure Balances API](https://apis.io/apis/microsoft-azure/microsoft-azure-balances-api/) — The Balances API from Microsoft Azure — 2 operation(s) for balances.
+- [Microsoft Azure BandwidthSchedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-bandwidthschedules-api/) — The BandwidthSchedules API from Microsoft Azure — 2 operation(s) for bandwidthschedules.
+- [Microsoft Azure BandwidthSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-bandwidthsettings-api/) — The BandwidthSettings API from Microsoft Azure — 2 operation(s) for bandwidthsettings.
+- [Microsoft Azure BareMetalInfrastructure API](https://apis.io/apis/microsoft-azure/microsoft-azure-baremetalinfrastructure-api/) — The BareMetalInfrastructure API from Microsoft Azure — 2 operation(s) for baremetalinfrastructure.
+- [Microsoft Azure BaseModel API](https://apis.io/apis/microsoft-azure/microsoft-azure-basemodel-api/) — The BaseModel API from Microsoft Azure — 1 operation(s) for basemodel.
+- [Microsoft Azure $Batch API](https://apis.io/apis/microsoft-azure/microsoft-azure-batch-api/) — The $Batch API from Microsoft Azure — 1 operation(s) for $batch.
+- [Microsoft Azure BatchAccount API](https://apis.io/apis/microsoft-azure/microsoft-azure-batchaccount-api/) — The BatchAccount API from Microsoft Azure — 7 operation(s) for batchaccount.
+- [Microsoft Azure BatchNumbers API](https://apis.io/apis/microsoft-azure/microsoft-azure-batchnumbers-api/) — The BatchNumbers API from Microsoft Azure — 3 operation(s) for batchnumbers.
+- [Microsoft Azure BatchSynthesis API](https://apis.io/apis/microsoft-azure/microsoft-azure-batchsynthesis-api/) — The BatchSynthesis API from Microsoft Azure — 2 operation(s) for batchsynthesis.
+- [Microsoft Azure Benefits Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-benefits-operations-api/) — The Benefits Operations API from Microsoft Azure — 1 operation(s) for benefits operations.
+- [Microsoft Azure BestPracticesVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-bestpracticesversions-api/) — The BestPracticesVersions API from Microsoft Azure — 2 operation(s) for bestpracticesversions.
+- [Microsoft Azure BgpPeers API](https://apis.io/apis/microsoft-azure/microsoft-azure-bgppeers-api/) — The BgpPeers API from Microsoft Azure — 2 operation(s) for bgppeers.
+- [Microsoft Azure BicepClient API](https://apis.io/apis/microsoft-azure/microsoft-azure-bicepclient-api/) — The BicepClient API from Microsoft Azure — 1 operation(s) for bicepclient.
+- [Microsoft Azure Blobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-blobs-api/) — Operations on blobs
+- [Microsoft Azure BlockchainMember API](https://apis.io/apis/microsoft-azure/microsoft-azure-blockchainmember-api/) — The BlockchainMember API from Microsoft Azure — 6 operation(s) for blockchainmember.
+- [Microsoft Azure BlockchainMemberOperationResult API](https://apis.io/apis/microsoft-azure/microsoft-azure-blockchainmemberoperationresult-api/) — The BlockchainMemberOperationResult API from Microsoft Azure — 1 operation(s) for blockchainmemberoperationresult.
+- [Microsoft Azure Blueprint API](https://apis.io/apis/microsoft-azure/microsoft-azure-blueprint-api/) — The Blueprint API from Microsoft Azure — 2 operation(s) for blueprint.
+- [Microsoft Azure BMSPrepareDataMoveOperationResult API](https://apis.io/apis/microsoft-azure/microsoft-azure-bmspreparedatamoveoperationresult-api/) — The BMSPrepareDataMoveOperationResult API from Microsoft Azure — 1 operation(s) for bmspreparedatamoveoperationresult.
+- [Microsoft Azure Bot API](https://apis.io/apis/microsoft-azure/microsoft-azure-bot-api/) — The Bot API from Microsoft Azure — 4 operation(s) for bot.
+- [Microsoft Azure BotConnection API](https://apis.io/apis/microsoft-azure/microsoft-azure-botconnection-api/) — The BotConnection API from Microsoft Azure — 3 operation(s) for botconnection.
+- [Microsoft Azure BotHostSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-bothostsettings-api/) — The BotHostSettings API from Microsoft Azure — 1 operation(s) for bothostsettings.
+- [Microsoft Azure Boundaries API](https://apis.io/apis/microsoft-azure/microsoft-azure-boundaries-api/) — The Boundaries API from Microsoft Azure — 5 operation(s) for boundaries.
+- [Microsoft Azure Breaksentence API](https://apis.io/apis/microsoft-azure/microsoft-azure-breaksentence-api/) — The Breaksentence API from Microsoft Azure — 2 operation(s) for breaksentence.
+- [Microsoft Azure Broker API](https://apis.io/apis/microsoft-azure/microsoft-azure-broker-api/) — The Broker API from Microsoft Azure — 2 operation(s) for broker.
+- [Microsoft Azure BrokerAuthentication API](https://apis.io/apis/microsoft-azure/microsoft-azure-brokerauthentication-api/) — The BrokerAuthentication API from Microsoft Azure — 2 operation(s) for brokerauthentication.
+- [Microsoft Azure BrokerAuthorization API](https://apis.io/apis/microsoft-azure/microsoft-azure-brokerauthorization-api/) — The BrokerAuthorization API from Microsoft Azure — 2 operation(s) for brokerauthorization.
+- [Microsoft Azure BrokerListener API](https://apis.io/apis/microsoft-azure/microsoft-azure-brokerlistener-api/) — The BrokerListener API from Microsoft Azure — 2 operation(s) for brokerlistener.
+- [Microsoft Azure Budgets API](https://apis.io/apis/microsoft-azure/microsoft-azure-budgets-api/) — The Budgets API from Microsoft Azure — 2 operation(s) for budgets.
+- [Microsoft Azure BusinessCaseAvsSummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-businesscaseavssummaryoperations-api/) — The BusinessCaseAvsSummaryOperations API from Microsoft Azure — 2 operation(s) for businesscaseavssummaryoperations.
+- [Microsoft Azure BusinessCaseIaasSummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-businesscaseiaassummaryoperations-api/) — The BusinessCaseIaasSummaryOperations API from Microsoft Azure — 2 operation(s) for businesscaseiaassummaryoperations.
+- [Microsoft Azure BusinessCaseOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-businesscaseoperations-api/) — The BusinessCaseOperations API from Microsoft Azure — 4 operation(s) for businesscaseoperations.
+- [Microsoft Azure BusinessCaseOverviewSummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-businesscaseoverviewsummaryoperations-api/) — The BusinessCaseOverviewSummaryOperations API from Microsoft Azure — 2 operation(s) for businesscaseoverviewsummaryoperations.
+- [Microsoft Azure BusinessCasePaasSummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-businesscasepaassummaryoperations-api/) — The BusinessCasePaasSummaryOperations API from Microsoft Azure — 2 operation(s) for businesscasepaassummaryoperations.
+- [Microsoft Azure BusinessProcessVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-businessprocessversions-api/) — The BusinessProcessVersions API from Microsoft Azure — 2 operation(s) for businessprocessversions.
+- [Microsoft Azure Caches API](https://apis.io/apis/microsoft-azure/microsoft-azure-caches-api/) — The Caches API from Microsoft Azure — 13 operation(s) for caches.
+- [Microsoft Azure CallConnection API](https://apis.io/apis/microsoft-azure/microsoft-azure-callconnection-api/) — The CallConnection API from Microsoft Azure — 6 operation(s) for callconnection.
+- [Microsoft Azure Capabilities API](https://apis.io/apis/microsoft-azure/microsoft-azure-capabilities-api/) — The Capabilities API from Microsoft Azure — 1 operation(s) for capabilities.
+- [Microsoft Azure Capacities API](https://apis.io/apis/microsoft-azure/microsoft-azure-capacities-api/) — The Capacities API from Microsoft Azure — 7 operation(s) for capacities.
+- [Microsoft Azure Capacity Pools API](https://apis.io/apis/microsoft-azure/microsoft-azure-capacity-pools-api/) — The Capacity Pools API from Microsoft Azure — 2 operation(s) for capacity pools.
+- [Microsoft Azure Catalog API](https://apis.io/apis/microsoft-azure/microsoft-azure-catalog-api/) — Operations for listing the registry catalog
+- [Microsoft Azure Catalogs API](https://apis.io/apis/microsoft-azure/microsoft-azure-catalogs-api/) — The Catalogs API from Microsoft Azure — 10 operation(s) for catalogs.
+- [Microsoft Azure Certificate API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificate-api/) — The Certificate API from Microsoft Azure — 3 operation(s) for certificate.
+- [Microsoft Azure CertificateObjectGlobalRulestack API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificateobjectglobalrulestack-api/) — The CertificateObjectGlobalRulestack API from Microsoft Azure — 2 operation(s) for certificateobjectglobalrulestack.
+- [Microsoft Azure CertificateObjectLocalRulestack API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificateobjectlocalrulestack-api/) — The CertificateObjectLocalRulestack API from Microsoft Azure — 2 operation(s) for certificateobjectlocalrulestack.
+- [Microsoft Azure CertificateOrders API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificateorders-api/) — The CertificateOrders API from Microsoft Azure — 10 operation(s) for certificateorders.
+- [Microsoft Azure CertificateOrdersDiagnostics API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificateordersdiagnostics-api/) — The CertificateOrdersDiagnostics API from Microsoft Azure — 2 operation(s) for certificateordersdiagnostics.
+- [Microsoft Azure CertificateRegistrationProvider API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificateregistrationprovider-api/) — The CertificateRegistrationProvider API from Microsoft Azure — 1 operation(s) for certificateregistrationprovider.
+- [Microsoft Azure Certificates API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificates-api/) — The Certificates API from Microsoft Azure — 17 operation(s) for certificates.
+- [Microsoft Azure certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint}) API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificates-thumbprintalgorithm-thumbprintalgorithm-thumbprint-thumbprint-api/) — The certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint}) API from Microsoft Azure — 2 operation(s) for…
+- [Microsoft Azure Change Detection API](https://apis.io/apis/microsoft-azure/microsoft-azure-change-detection-api/) — The Change Detection API from Microsoft Azure — 1 operation(s) for change detection.
+- [Microsoft Azure Changes API](https://apis.io/apis/microsoft-azure/microsoft-azure-changes-api/) — The Changes API from Microsoft Azure — 2 operation(s) for changes.
+- [Microsoft Azure ChangeSnapshots API](https://apis.io/apis/microsoft-azure/microsoft-azure-changesnapshots-api/) — The ChangeSnapshots API from Microsoft Azure — 1 operation(s) for changesnapshots.
+- [Microsoft Azure Channel API](https://apis.io/apis/microsoft-azure/microsoft-azure-channel-api/) — The Channel API from Microsoft Azure — 5 operation(s) for channel.
+- [Microsoft Azure Channels API](https://apis.io/apis/microsoft-azure/microsoft-azure-channels-api/) — The Channels API from Microsoft Azure — 5 operation(s) for channels.
+- [Microsoft Azure Chaos API](https://apis.io/apis/microsoft-azure/microsoft-azure-chaos-api/) — The Chaos API from Microsoft Azure — 5 operation(s) for chaos.
+- [Microsoft Azure ChapSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-chapsettings-api/) — The ChapSettings API from Microsoft Azure — 2 operation(s) for chapsettings.
+- [Microsoft Azure Charges API](https://apis.io/apis/microsoft-azure/microsoft-azure-charges-api/) — The Charges API from Microsoft Azure — 1 operation(s) for charges.
+- [Microsoft Azure Chat Completions API](https://apis.io/apis/microsoft-azure/microsoft-azure-chat-completions-api/) — Operations for chat-based completions
+- [Microsoft Azure ChatTranscripts API](https://apis.io/apis/microsoft-azure/microsoft-azure-chattranscripts-api/) — The ChatTranscripts API from Microsoft Azure — 4 operation(s) for chattranscripts.
+- [Microsoft Azure CheckDeviceServiceNameAvailability API](https://apis.io/apis/microsoft-azure/microsoft-azure-checkdeviceservicenameavailability-api/) — The CheckDeviceServiceNameAvailability API from Microsoft Azure — 1 operation(s) for checkdeviceservicenameavailability.
+- [Microsoft Azure CheckFrontDoorNameAvailability API](https://apis.io/apis/microsoft-azure/microsoft-azure-checkfrontdoornameavailability-api/) — The CheckFrontDoorNameAvailability API from Microsoft Azure — 1 operation(s) for checkfrontdoornameavailability.
+- [Microsoft Azure CheckFrontDoorNameAvailabilityWithSubscription API](https://apis.io/apis/microsoft-azure/microsoft-azure-checkfrontdoornameavailabilitywithsubscription-api/) — The CheckFrontDoorNameAvailabilityWithSubscription API from Microsoft Azure — 1 operation(s) for checkfrontdoornameavailabilitywithsubscription.
+- [Microsoft Azure CheckNameAvailability API](https://apis.io/apis/microsoft-azure/microsoft-azure-checknameavailability-api/) — The CheckNameAvailability API from Microsoft Azure — 8 operation(s) for checknameavailability.
+- [Microsoft Azure CheckNameAvailabilityWithSubscription API](https://apis.io/apis/microsoft-azure/microsoft-azure-checknameavailabilitywithsubscription-api/) — The CheckNameAvailabilityWithSubscription API from Microsoft Azure — 1 operation(s) for checknameavailabilitywithsubscription.
+- [Microsoft Azure CheckResourceUsage API](https://apis.io/apis/microsoft-azure/microsoft-azure-checkresourceusage-api/) — The CheckResourceUsage API from Microsoft Azure — 1 operation(s) for checkresourceusage.
+- [Microsoft Azure CheckServiceProviderAvailability API](https://apis.io/apis/microsoft-azure/microsoft-azure-checkserviceprovideravailability-api/) — The CheckServiceProviderAvailability API from Microsoft Azure — 1 operation(s) for checkserviceprovideravailability.
+- [Microsoft Azure CheckVirtualNetworkSubnetUsage API](https://apis.io/apis/microsoft-azure/microsoft-azure-checkvirtualnetworksubnetusage-api/) — The CheckVirtualNetworkSubnetUsage API from Microsoft Azure — 1 operation(s) for checkvirtualnetworksubnetusage.
+- [Microsoft Azure ChemicalProducts API](https://apis.io/apis/microsoft-azure/microsoft-azure-chemicalproducts-api/) — The ChemicalProducts API from Microsoft Azure — 2 operation(s) for chemicalproducts.
+- [Microsoft Azure ChildAvailabilityStatuses API](https://apis.io/apis/microsoft-azure/microsoft-azure-childavailabilitystatuses-api/) — The ChildAvailabilityStatuses API from Microsoft Azure — 2 operation(s) for childavailabilitystatuses.
+- [Microsoft Azure ChildResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-childresources-api/) — The ChildResources API from Microsoft Azure — 1 operation(s) for childresources.
+- [Microsoft Azure CIAMTenants API](https://apis.io/apis/microsoft-azure/microsoft-azure-ciamtenants-api/) — The CIAMTenants API from Microsoft Azure — 4 operation(s) for ciamtenants.
+- [Microsoft Azure ClassicMobileServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-classicmobileservices-api/) — The ClassicMobileServices API from Microsoft Azure — 2 operation(s) for classicmobileservices.
+- [Microsoft Azure Client Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-client-groups-api/) — The Client Groups API from Microsoft Azure — 3 operation(s) for client groups.
+- [Microsoft Azure CloudAppliances API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloudappliances-api/) — The CloudAppliances API from Microsoft Azure — 2 operation(s) for cloudappliances.
+- [Microsoft Azure CloudEndpoint Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloudendpoint-resource-api/) — The CloudEndpoint Resource API from Microsoft Azure — 9 operation(s) for cloudendpoint resource.
+- [Microsoft Azure Clouds API](https://apis.io/apis/microsoft-azure/microsoft-azure-clouds-api/) — The Clouds API from Microsoft Azure — 3 operation(s) for clouds.
+- [Microsoft Azure CloudServiceOperatingSystems API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloudserviceoperatingsystems-api/) — The CloudServiceOperatingSystems API from Microsoft Azure — 4 operation(s) for cloudserviceoperatingsystems.
+- [Microsoft Azure CloudServiceRoleInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloudserviceroleinstances-api/) — The CloudServiceRoleInstances API from Microsoft Azure — 7 operation(s) for cloudserviceroleinstances.
+- [Microsoft Azure CloudServiceRoles API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloudserviceroles-api/) — The CloudServiceRoles API from Microsoft Azure — 2 operation(s) for cloudserviceroles.
+- [Microsoft Azure CloudServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloudservices-api/) — The CloudServices API from Microsoft Azure — 10 operation(s) for cloudservices.
+- [Microsoft Azure CloudServicesUpdateDomain API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloudservicesupdatedomain-api/) — The CloudServicesUpdateDomain API from Microsoft Azure — 2 operation(s) for cloudservicesupdatedomain.
+- [Microsoft Azure Cluster API](https://apis.io/apis/microsoft-azure/microsoft-azure-cluster-api/) — The Cluster API from Microsoft Azure — 23 operation(s) for cluster.
+- [Microsoft Azure ClusterExtensions API](https://apis.io/apis/microsoft-azure/microsoft-azure-clusterextensions-api/) — The ClusterExtensions API from Microsoft Azure — 2 operation(s) for clusterextensions.
+- [Microsoft Azure ClusterExtensionTypes API](https://apis.io/apis/microsoft-azure/microsoft-azure-clusterextensiontypes-api/) — The ClusterExtensionTypes API from Microsoft Azure — 8 operation(s) for clusterextensiontypes.
+- [Microsoft Azure ClusterOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-clusteroperations-api/) — The ClusterOperations API from Microsoft Azure — 4 operation(s) for clusteroperations.
+- [Microsoft Azure Clusters API](https://apis.io/apis/microsoft-azure/microsoft-azure-clusters-api/) — The Clusters API from Microsoft Azure — 16 operation(s) for clusters.
+- [Microsoft Azure ClusterServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-clusterservices-api/) — The ClusterServices API from Microsoft Azure — 3 operation(s) for clusterservices.
+- [Microsoft Azure Code Package API](https://apis.io/apis/microsoft-azure/microsoft-azure-code-package-api/) — The Code Package API from Microsoft Azure — 4 operation(s) for code package.
+- [Microsoft Azure Codesigningaccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-codesigningaccounts-api/) — The Codesigningaccounts API from Microsoft Azure — 8 operation(s) for codesigningaccounts.
+- [Microsoft Azure CognitiveServicesAccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-cognitiveservicesaccounts-api/) — The CognitiveServicesAccounts API from Microsoft Azure — 6 operation(s) for cognitiveservicesaccounts.
+- [Microsoft Azure Collection API](https://apis.io/apis/microsoft-azure/microsoft-azure-collection-api/) — The Collection API from Microsoft Azure — 14 operation(s) for collection.
+- [Microsoft Azure CollectorPolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-collectorpolicies-api/) — The CollectorPolicies API from Microsoft Azure — 2 operation(s) for collectorpolicies.
+- [Microsoft Azure Commerce API](https://apis.io/apis/microsoft-azure/microsoft-azure-commerce-api/) — The Commerce API from Microsoft Azure — 3 operation(s) for commerce.
+- [Microsoft Azure CommitmentAssociations API](https://apis.io/apis/microsoft-azure/microsoft-azure-commitmentassociations-api/) — The CommitmentAssociations API from Microsoft Azure — 3 operation(s) for commitmentassociations.
+- [Microsoft Azure Communications API](https://apis.io/apis/microsoft-azure/microsoft-azure-communications-api/) — The Communications API from Microsoft Azure — 6 operation(s) for communications.
+- [Microsoft Azure CommunicationsGateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-communicationsgateways-api/) — The CommunicationsGateways API from Microsoft Azure — 3 operation(s) for communicationsgateways.
+- [Microsoft Azure CommunityGalleries API](https://apis.io/apis/microsoft-azure/microsoft-azure-communitygalleries-api/) — The CommunityGalleries API from Microsoft Azure — 1 operation(s) for communitygalleries.
+- [Microsoft Azure CommunityGalleryImages API](https://apis.io/apis/microsoft-azure/microsoft-azure-communitygalleryimages-api/) — The CommunityGalleryImages API from Microsoft Azure — 1 operation(s) for communitygalleryimages.
+- [Microsoft Azure CommunityGalleryImageVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-communitygalleryimageversions-api/) — The CommunityGalleryImageVersions API from Microsoft Azure — 1 operation(s) for communitygalleryimageversions.
+- [Microsoft Azure CommunityTrainings API](https://apis.io/apis/microsoft-azure/microsoft-azure-communitytrainings-api/) — The CommunityTrainings API from Microsoft Azure — 3 operation(s) for communitytrainings.
+- [Microsoft Azure Completions API](https://apis.io/apis/microsoft-azure/microsoft-azure-completions-api/) — Operations for text completions
+- [Microsoft Azure Compose Deployment API](https://apis.io/apis/microsoft-azure/microsoft-azure-compose-deployment-api/) — The Compose Deployment API from Microsoft Azure — 7 operation(s) for compose deployment.
+- [Microsoft Azure ComputeNodes API](https://apis.io/apis/microsoft-azure/microsoft-azure-computenodes-api/) — The ComputeNodes API from Microsoft Azure — 14 operation(s) for computenodes.
+- [Microsoft Azure ComputePolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-computepolicies-api/) — The ComputePolicies API from Microsoft Azure — 2 operation(s) for computepolicies.
+- [Microsoft Azure Configuration API](https://apis.io/apis/microsoft-azure/microsoft-azure-configuration-api/) — The Configuration API from Microsoft Azure — 3 operation(s) for configuration.
+- [Microsoft Azure ConfigurationAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationassignments-api/) — The ConfigurationAssignments API from Microsoft Azure — 7 operation(s) for configurationassignments.
+- [Microsoft Azure ConfigurationNames API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationnames-api/) — The ConfigurationNames API from Microsoft Azure — 1 operation(s) for configurationnames.
+- [Microsoft Azure ConfigurationProfileAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationprofileassignments-api/) — The ConfigurationProfileAssignments API from Microsoft Azure — 6 operation(s) for configurationprofileassignments.
+- [Microsoft Azure ConfigurationProfileHCIAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationprofilehciassignments-api/) — The ConfigurationProfileHCIAssignments API from Microsoft Azure — 1 operation(s) for configurationprofilehciassignments.
+- [Microsoft Azure ConfigurationProfileHCRPAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationprofilehcrpassignments-api/) — The ConfigurationProfileHCRPAssignments API from Microsoft Azure — 1 operation(s) for configurationprofilehcrpassignments.
+- [Microsoft Azure ConfigurationProfilesVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationprofilesversions-api/) — The ConfigurationProfilesVersions API from Microsoft Azure — 2 operation(s) for configurationprofilesversions.
+- [Microsoft Azure Configurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurations-api/) — The Configurations API from Microsoft Azure — 10 operation(s) for configurations.
+- [Microsoft Azure Configurations20220901Preview API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurations20220901preview-api/) — Manages configuration operations.
+- [Microsoft Azure ConfigurationStores API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationstores-api/) — The ConfigurationStores API from Microsoft Azure — 5 operation(s) for configurationstores.
+- [Microsoft Azure ConfigurationsV1Dot1Preview1 API](https://apis.io/apis/microsoft-azure/microsoft-azure-configurationsv1dot1preview1-api/) — Manages configuration operations.
+- [Microsoft Azure ConnectedResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-connectedresources-api/) — The ConnectedResources API from Microsoft Azure — 4 operation(s) for connectedresources.
+- [Microsoft Azure Connection Gateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-connection-gateways-api/) — The Connection Gateways API from Microsoft Azure — 5 operation(s) for connection gateways.
+- [Microsoft Azure ConnectionPolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-connectionpolicies-api/) — The ConnectionPolicies API from Microsoft Azure — 1 operation(s) for connectionpolicies.
+- [Microsoft Azure Connections API](https://apis.io/apis/microsoft-azure/microsoft-azure-connections-api/) — The Connections API from Microsoft Azure — 4 operation(s) for connections.
+- [Microsoft Azure ConnectivityConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-connectivityconfigurations-api/) — The ConnectivityConfigurations API from Microsoft Azure — 2 operation(s) for connectivityconfigurations.
+- [Microsoft Azure Connector API](https://apis.io/apis/microsoft-azure/microsoft-azure-connector-api/) — The Connector API from Microsoft Azure — 5 operation(s) for connector.
+- [Microsoft Azure ConnectorMappings API](https://apis.io/apis/microsoft-azure/microsoft-azure-connectormappings-api/) — The ConnectorMappings API from Microsoft Azure — 2 operation(s) for connectormappings.
+- [Microsoft Azure Connectors API](https://apis.io/apis/microsoft-azure/microsoft-azure-connectors-api/) — The Connectors API from Microsoft Azure — 2 operation(s) for connectors.
+- [Microsoft Azure Consent API](https://apis.io/apis/microsoft-azure/microsoft-azure-consent-api/) — The Consent API from Microsoft Azure — 4 operation(s) for consent.
+- [Microsoft Azure ConsumerInvitation API](https://apis.io/apis/microsoft-azure/microsoft-azure-consumerinvitation-api/) — The ConsumerInvitation API from Microsoft Azure — 3 operation(s) for consumerinvitation.
+- [Microsoft Azure ContactAssignment API](https://apis.io/apis/microsoft-azure/microsoft-azure-contactassignment-api/) — The ContactAssignment API from Microsoft Azure — 3 operation(s) for contactassignment.
+- [Microsoft Azure ContactGroupDefinition API](https://apis.io/apis/microsoft-azure/microsoft-azure-contactgroupdefinition-api/) — The ContactGroupDefinition API from Microsoft Azure — 2 operation(s) for contactgroupdefinition.
+- [Microsoft Azure Contacts API](https://apis.io/apis/microsoft-azure/microsoft-azure-contacts-api/) — The Contacts API from Microsoft Azure — 2 operation(s) for contacts.
+- [Microsoft Azure ContainerAppsRevisions API](https://apis.io/apis/microsoft-azure/microsoft-azure-containerappsrevisions-api/) — The ContainerAppsRevisions API from Microsoft Azure — 5 operation(s) for containerappsrevisions.
+- [Microsoft Azure ContainerHostMappings API](https://apis.io/apis/microsoft-azure/microsoft-azure-containerhostmappings-api/) — The ContainerHostMappings API from Microsoft Azure — 1 operation(s) for containerhostmappings.
+- [Microsoft Azure ContainerRegistrySetupStart API](https://apis.io/apis/microsoft-azure/microsoft-azure-containerregistrysetupstart-api/) — The ContainerRegistrySetupStart API from Microsoft Azure — 1 operation(s) for containerregistrysetupstart.
+- [Microsoft Azure ContainerRegistrySetupStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-containerregistrysetupstatus-api/) — The ContainerRegistrySetupStatus API from Microsoft Azure — 1 operation(s) for containerregistrysetupstatus.
+- [Microsoft Azure Containers API](https://apis.io/apis/microsoft-azure/microsoft-azure-containers-api/) — Operations on blob containers
+- [Microsoft Azure ContainerServiceQuotas API](https://apis.io/apis/microsoft-azure/microsoft-azure-containerservicequotas-api/) — The ContainerServiceQuotas API from Microsoft Azure — 1 operation(s) for containerservicequotas.
+- [Microsoft Azure Content_Recording API](https://apis.io/apis/microsoft-azure/microsoft-azure-content-recording-api/) — The Content_Recording API from Microsoft Azure — 4 operation(s) for content_recording.
+- [Microsoft Azure Controllers API](https://apis.io/apis/microsoft-azure/microsoft-azure-controllers-api/) — The Controllers API from Microsoft Azure — 4 operation(s) for controllers.
+- [Microsoft Azure Conversion API](https://apis.io/apis/microsoft-azure/microsoft-azure-conversion-api/) — The Conversion API from Microsoft Azure — 2 operation(s) for conversion.
+- [Microsoft Azure Conversions API](https://apis.io/apis/microsoft-azure/microsoft-azure-conversions-api/) — The Conversions API from Microsoft Azure — 3 operation(s) for conversions.
+- [Microsoft Azure Costs API](https://apis.io/apis/microsoft-azure/microsoft-azure-costs-api/) — The Costs API from Microsoft Azure — 1 operation(s) for costs.
+- [Microsoft Azure CreateApiKey API](https://apis.io/apis/microsoft-azure/microsoft-azure-createapikey-api/) — The CreateApiKey API from Microsoft Azure — 1 operation(s) for createapikey.
+- [Microsoft Azure Creators API](https://apis.io/apis/microsoft-azure/microsoft-azure-creators-api/) — The Creators API from Microsoft Azure — 2 operation(s) for creators.
+- [Microsoft Azure Credential API](https://apis.io/apis/microsoft-azure/microsoft-azure-credential-api/) — The Credential API from Microsoft Azure — 3 operation(s) for credential.
+- [Microsoft Azure CropProducts API](https://apis.io/apis/microsoft-azure/microsoft-azure-cropproducts-api/) — The CropProducts API from Microsoft Azure — 2 operation(s) for cropproducts.
+- [Microsoft Azure Crops API](https://apis.io/apis/microsoft-azure/microsoft-azure-crops-api/) — The Crops API from Microsoft Azure — 2 operation(s) for crops.
+- [Microsoft Azure Custom API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-api/) — The Custom API from Microsoft Azure — 7 operation(s) for custom.
+- [Microsoft Azure Custom APIs API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-apis-api/) — The Custom APIs API from Microsoft Azure — 6 operation(s) for custom apis.
+- [Microsoft Azure Custom Speech Accuracy Tests: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-accuracy-tests-api/) — The Custom Speech Accuracy Tests: API from Microsoft Azure — 2 operation(s) for custom speech accuracy tests:.
+- [Microsoft Azure Custom Speech Datasets for Model Adaptation: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-datasets-for-model-adaptation-api/) — The Custom Speech Datasets for Model Adaptation: API from Microsoft Azure — 8 operation(s) for custom speech datasets for model adaptation:.
+- [Microsoft Azure Custom Speech Endpoints: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-endpoints-api/) — The Custom Speech Endpoints: API from Microsoft Azure — 9 operation(s) for custom speech endpoints:.
+- [Microsoft Azure Custom Speech Model Evaluations: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-model-evaluations-api/) — The Custom Speech Model Evaluations: API from Microsoft Azure — 5 operation(s) for custom speech model evaluations:.
+- [Microsoft Azure Custom Speech Models: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-models-api/) — The Custom Speech Models: API from Microsoft Azure — 13 operation(s) for custom speech models:.
+- [Microsoft Azure Custom Speech Operations: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-operations-api/) — The Custom Speech Operations: API from Microsoft Azure — 1 operation(s) for custom speech operations:.
+- [Microsoft Azure Custom Speech Projects: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-projects-api/) — The Custom Speech Projects: API from Microsoft Azure — 8 operation(s) for custom speech projects:.
+- [Microsoft Azure Custom Speech Transcriptions: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-transcriptions-api/) — The Custom Speech Transcriptions: API from Microsoft Azure — 5 operation(s) for custom speech transcriptions:.
+- [Microsoft Azure Custom Speech Web Hooks: API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-speech-web-hooks-api/) — The Custom Speech Web Hooks: API from Microsoft Azure — 6 operation(s) for custom speech web hooks:.
+- [Microsoft Azure CustomImages API](https://apis.io/apis/microsoft-azure/microsoft-azure-customimages-api/) — The CustomImages API from Microsoft Azure — 2 operation(s) for customimages.
+- [Microsoft Azure Customization Policies API](https://apis.io/apis/microsoft-azure/microsoft-azure-customizationpolicies-api/) — Customization policies operations
+- [Microsoft Azure Custom Locations API](https://apis.io/apis/microsoft-azure/microsoft-azure-customlocations-api/) — The customLocations API from Microsoft Azure — 6 operation(s) for customlocations.
+- [Microsoft Azure CustomResourceProvider API](https://apis.io/apis/microsoft-azure/microsoft-azure-customresourceprovider-api/) — The CustomResourceProvider API from Microsoft Azure — 3 operation(s) for customresourceprovider.
+- [Microsoft Azure CustomRollouts API](https://apis.io/apis/microsoft-azure/microsoft-azure-customrollouts-api/) — The CustomRollouts API from Microsoft Azure — 2 operation(s) for customrollouts.
+- [Microsoft Azure Dashboards API](https://apis.io/apis/microsoft-azure/microsoft-azure-dashboards-api/) — The Dashboards API from Microsoft Azure — 2 operation(s) for dashboards.
+- [Microsoft Azure Data Collection Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-collection-rules-api/) — The Data Collection Rules API from Microsoft Azure — 1 operation(s) for data collection rules.
+- [Microsoft Azure Data Connections API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-connections-api/) — The Data Connections API from Microsoft Azure — 3 operation(s) for data connections.
+- [Microsoft Azure DatabaseBackup API](https://apis.io/apis/microsoft-azure/microsoft-azure-databasebackup-api/) — The DatabaseBackup API from Microsoft Azure — 1 operation(s) for databasebackup.
+- [Microsoft Azure DatabaseInstancesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-databaseinstancescontroller-api/) — The DatabaseInstancesController API from Microsoft Azure — 2 operation(s) for databaseinstancescontroller.
+- [Microsoft Azure DatabaseMigrations API](https://apis.io/apis/microsoft-azure/microsoft-azure-databasemigrations-api/) — The DatabaseMigrations API from Microsoft Azure — 12 operation(s) for databasemigrations.
+- [Microsoft Azure DatabaseReplicationLinks API](https://apis.io/apis/microsoft-azure/microsoft-azure-databasereplicationlinks-api/) — The DatabaseReplicationLinks API from Microsoft Azure — 5 operation(s) for databasereplicationlinks.
+- [Microsoft Azure Databases API](https://apis.io/apis/microsoft-azure/microsoft-azure-databases-api/) — Operations for managing Cosmos DB databases
+- [Microsoft Azure DatabasesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-databasescontroller-api/) — The DatabasesController API from Microsoft Azure — 2 operation(s) for databasescontroller.
+- [Microsoft Azure DataCollectionRuleAssociations API](https://apis.io/apis/microsoft-azure/microsoft-azure-datacollectionruleassociations-api/) — The DataCollectionRuleAssociations API from Microsoft Azure — 4 operation(s) for datacollectionruleassociations.
+- [Microsoft Azure DataLakeConnector API](https://apis.io/apis/microsoft-azure/microsoft-azure-datalakeconnector-api/) — The DataLakeConnector API from Microsoft Azure — 2 operation(s) for datalakeconnector.
+- [Microsoft Azure DataLakeConnectorTopicMap API](https://apis.io/apis/microsoft-azure/microsoft-azure-datalakeconnectortopicmap-api/) — The DataLakeConnectorTopicMap API from Microsoft Azure — 2 operation(s) for datalakeconnectortopicmap.
+- [Microsoft Azure DataLakeStoreAccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-datalakestoreaccounts-api/) — The DataLakeStoreAccounts API from Microsoft Azure — 2 operation(s) for datalakestoreaccounts.
+- [Microsoft Azure DataManagerForAgricultureExtensions API](https://apis.io/apis/microsoft-azure/microsoft-azure-datamanagerforagricultureextensions-api/) — The DataManagerForAgricultureExtensions API from Microsoft Azure — 2 operation(s) for datamanagerforagricultureextensions.
+- [Microsoft Azure DataManagerForAgricultureResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-datamanagerforagricultureresources-api/) — The DataManagerForAgricultureResources API from Microsoft Azure — 3 operation(s) for datamanagerforagricultureresources.
+- [Microsoft Azure DataManagers API](https://apis.io/apis/microsoft-azure/microsoft-azure-datamanagers-api/) — The DataManagers API from Microsoft Azure — 3 operation(s) for datamanagers.
+- [Microsoft Azure DataMaskingPolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-datamaskingpolicies-api/) — The DataMaskingPolicies API from Microsoft Azure — 1 operation(s) for datamaskingpolicies.
+- [Microsoft Azure DataMaskingRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-datamaskingrules-api/) — The DataMaskingRules API from Microsoft Azure — 2 operation(s) for datamaskingrules.
+- [Microsoft Azure DataMove API](https://apis.io/apis/microsoft-azure/microsoft-azure-datamove-api/) — The DataMove API from Microsoft Azure — 3 operation(s) for datamove.
+- [Microsoft Azure DataProductsCatalogs API](https://apis.io/apis/microsoft-azure/microsoft-azure-dataproductscatalogs-api/) — The DataProductsCatalogs API from Microsoft Azure — 3 operation(s) for dataproductscatalogs.
+- [Microsoft Azure Data Registries API](https://apis.io/apis/microsoft-azure/microsoft-azure-dataregistries-api/) — The dataRegistries API from Microsoft Azure — 3 operation(s) for dataregistries.
+- [Microsoft Azure DataSet API](https://apis.io/apis/microsoft-azure/microsoft-azure-dataset-api/) — The DataSet API from Microsoft Azure — 2 operation(s) for dataset.
+- [Microsoft Azure DataSetMapping API](https://apis.io/apis/microsoft-azure/microsoft-azure-datasetmapping-api/) — The DataSetMapping API from Microsoft Azure — 2 operation(s) for datasetmapping.
+- [Microsoft Azure DatasetRecords API](https://apis.io/apis/microsoft-azure/microsoft-azure-datasetrecords-api/) — The DatasetRecords API from Microsoft Azure — 2 operation(s) for datasetrecords.
+- [Microsoft Azure Datasets API](https://apis.io/apis/microsoft-azure/microsoft-azure-datasets-api/) — The Datasets API from Microsoft Azure — 9 operation(s) for datasets.
+- [Microsoft Azure DatasourcePreferences API](https://apis.io/apis/microsoft-azure/microsoft-azure-datasourcepreferences-api/) — The DatasourcePreferences API from Microsoft Azure — 1 operation(s) for datasourcepreferences.
+- [Microsoft Azure DataStore API](https://apis.io/apis/microsoft-azure/microsoft-azure-datastore-api/) — The DataStore API from Microsoft Azure — 2 operation(s) for datastore.
+- [Microsoft Azure DataStoreDefault API](https://apis.io/apis/microsoft-azure/microsoft-azure-datastoredefault-api/) — The DataStoreDefault API from Microsoft Azure — 2 operation(s) for datastoredefault.
+- [Microsoft Azure Datastores API](https://apis.io/apis/microsoft-azure/microsoft-azure-datastores-api/) — The Datastores API from Microsoft Azure — 5 operation(s) for datastores.
+- [Microsoft Azure DataStoreTypes API](https://apis.io/apis/microsoft-azure/microsoft-azure-datastoretypes-api/) — The DataStoreTypes API from Microsoft Azure — 2 operation(s) for datastoretypes.
+- [Microsoft Azure DedicatedCloudNodes API](https://apis.io/apis/microsoft-azure/microsoft-azure-dedicatedcloudnodes-api/) — dedicated cloud nodes operations
+- [Microsoft Azure DedicatedCloudServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-dedicatedcloudservices-api/) — The DedicatedCloudServices API from Microsoft Azure — 3 operation(s) for dedicatedcloudservices.
+- [Microsoft Azure DedicatedHsmOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-dedicatedhsmoperations-api/) — The DedicatedHsmOperations API from Microsoft Azure — 1 operation(s) for dedicatedhsmoperations.
+- [Microsoft Azure DedicatedHsms API](https://apis.io/apis/microsoft-azure/microsoft-azure-dedicatedhsms-api/) — The DedicatedHsms API from Microsoft Azure — 3 operation(s) for dedicatedhsms.
+- [Microsoft Azure DefaultAccount API](https://apis.io/apis/microsoft-azure/microsoft-azure-defaultaccount-api/) — The DefaultAccount API from Microsoft Azure — 3 operation(s) for defaultaccount.
+- [Microsoft Azure DefaultRollouts API](https://apis.io/apis/microsoft-azure/microsoft-azure-defaultrollouts-api/) — The DefaultRollouts API from Microsoft Azure — 3 operation(s) for defaultrollouts.
+- [Microsoft Azure DELETE API](https://apis.io/apis/microsoft-azure/microsoft-azure-delete-api/) — The DELETE API from Microsoft Azure — 7 operation(s) for delete.
+- [Microsoft Azure DeleteAccessReviewHistoryDefinition API](https://apis.io/apis/microsoft-azure/microsoft-azure-deleteaccessreviewhistorydefinition-api/) — The DeleteAccessReviewHistoryDefinition API from Microsoft Azure — 1 operation(s) for deleteaccessreviewhistorydefinition.
+- [Microsoft Azure DeleteAccessReviewScheduleDefinition API](https://apis.io/apis/microsoft-azure/microsoft-azure-deleteaccessreviewscheduledefinition-api/) — The DeleteAccessReviewScheduleDefinition API from Microsoft Azure — 1 operation(s) for deleteaccessreviewscheduledefinition.
+- [Microsoft Azure Deleted Applications API](https://apis.io/apis/microsoft-azure/microsoft-azure-deletedapplications-api/) — The deletedApplications API from Microsoft Azure — 2 operation(s) for deletedapplications.
+- [Microsoft Azure DeletedBackupInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-deletedbackupinstances-api/) — The DeletedBackupInstances API from Microsoft Azure — 3 operation(s) for deletedbackupinstances.
+- [Microsoft Azure DeletedConfigurationStores API](https://apis.io/apis/microsoft-azure/microsoft-azure-deletedconfigurationstores-api/) — The DeletedConfigurationStores API from Microsoft Azure — 3 operation(s) for deletedconfigurationstores.
+- [Microsoft Azure DeletedStorage API](https://apis.io/apis/microsoft-azure/microsoft-azure-deletedstorage-api/) — The DeletedStorage API from Microsoft Azure — 6 operation(s) for deletedstorage.
+- [Microsoft Azure DeletedWebApps API](https://apis.io/apis/microsoft-azure/microsoft-azure-deletedwebapps-api/) — The DeletedWebApps API from Microsoft Azure — 3 operation(s) for deletedwebapps.
+- [Microsoft Azure DependencyMapController API](https://apis.io/apis/microsoft-azure/microsoft-azure-dependencymapcontroller-api/) — The DependencyMapController API from Microsoft Azure — 5 operation(s) for dependencymapcontroller.
+- [Microsoft Azure DeployedResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-deployedresource-api/) — Deployed resources controller.
+- [Microsoft Azure Deployment Management API](https://apis.io/apis/microsoft-azure/microsoft-azure-deployment-management-api/) — The Deployment Management API from Microsoft Azure — 2 operation(s) for deployment management.
+- [Microsoft Azure Deployment Manifests API](https://apis.io/apis/microsoft-azure/microsoft-azure-deploymentmanifests-api/) — The deploymentManifests API from Microsoft Azure — 2 operation(s) for deploymentmanifests.
+- [Microsoft Azure Deployments API](https://apis.io/apis/microsoft-azure/microsoft-azure-deployments-api/) — Operations for managing model deployments
+- [Microsoft Azure DeploymentScripts API](https://apis.io/apis/microsoft-azure/microsoft-azure-deploymentscripts-api/) — The DeploymentScripts API from Microsoft Azure — 5 operation(s) for deploymentscripts.
+- [Microsoft Azure DeploymentStacks API](https://apis.io/apis/microsoft-azure/microsoft-azure-deploymentstacks-api/) — The DeploymentStacks API from Microsoft Azure — 9 operation(s) for deploymentstacks.
+- [Microsoft Azure DeploymentUpdate API](https://apis.io/apis/microsoft-azure/microsoft-azure-deploymentupdate-api/) — The DeploymentUpdate API from Microsoft Azure — 1 operation(s) for deploymentupdate.
+- [Microsoft Azure Describe API](https://apis.io/apis/microsoft-azure/microsoft-azure-describe-api/) — The Describe API from Microsoft Azure — 1 operation(s) for describe.
+- [Microsoft Azure Desktop API](https://apis.io/apis/microsoft-azure/microsoft-azure-desktop-api/) — The Desktop API from Microsoft Azure — 2 operation(s) for desktop.
+- [Microsoft Azure Detect API](https://apis.io/apis/microsoft-azure/microsoft-azure-detect-api/) — The Detect API from Microsoft Azure — 2 operation(s) for detect.
+- [Microsoft Azure Device and Deployment Management API](https://apis.io/apis/microsoft-azure/microsoft-azure-device-and-deployment-management-api/) — The Device and Deployment Management API from Microsoft Azure — 31 operation(s) for device and deployment management.
+- [Microsoft Azure Device Location API](https://apis.io/apis/microsoft-azure/microsoft-azure-device-location-api/) — The Device Location API from Microsoft Azure — 1 operation(s) for device location.
+- [Microsoft Azure Device Network API](https://apis.io/apis/microsoft-azure/microsoft-azure-device-network-api/) — The Device Network API from Microsoft Azure — 1 operation(s) for device network.
+- [Microsoft Azure DeviceCapacityCheck API](https://apis.io/apis/microsoft-azure/microsoft-azure-devicecapacitycheck-api/) — The DeviceCapacityCheck API from Microsoft Azure — 1 operation(s) for devicecapacitycheck.
+- [Microsoft Azure DeviceCapacityInfo API](https://apis.io/apis/microsoft-azure/microsoft-azure-devicecapacityinfo-api/) — The DeviceCapacityInfo API from Microsoft Azure — 1 operation(s) for devicecapacityinfo.
+- [Microsoft Azure DeviceDataModels API](https://apis.io/apis/microsoft-azure/microsoft-azure-devicedatamodels-api/) — The DeviceDataModels API from Microsoft Azure — 2 operation(s) for devicedatamodels.
+- [Microsoft Azure DeviceRegistrationState API](https://apis.io/apis/microsoft-azure/microsoft-azure-deviceregistrationstate-api/) — The DeviceRegistrationState API from Microsoft Azure — 2 operation(s) for deviceregistrationstate.
+- [Microsoft Azure Devices API](https://apis.io/apis/microsoft-azure/microsoft-azure-devices-api/) — The Devices API from Microsoft Azure — 61 operation(s) for devices.
+- [Microsoft Azure DeviceServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-deviceservices-api/) — The DeviceServices API from Microsoft Azure — 3 operation(s) for deviceservices.
+- [Microsoft Azure DeviceSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-devicesettings-api/) — The DeviceSettings API from Microsoft Azure — 5 operation(s) for devicesettings.
+- [Microsoft Azure DevopsPolicy API](https://apis.io/apis/microsoft-azure/microsoft-azure-devopspolicy-api/) — The DevopsPolicy API from Microsoft Azure — 3 operation(s) for devopspolicy.
+- [Microsoft Azure Diagnostic Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-diagnosticoperations-api/) — The diagnosticOperations API from Microsoft Azure — 1 operation(s) for diagnosticoperations.
+- [Microsoft Azure Diagnostics API](https://apis.io/apis/microsoft-azure/microsoft-azure-diagnostics-api/) — The Diagnostics API from Microsoft Azure — 25 operation(s) for diagnostics.
+- [Microsoft Azure Diagnostics Disk Inspection API](https://apis.io/apis/microsoft-azure/microsoft-azure-diagnostics-diskinspection-api/) — The diagnostics_DiskInspection API from Microsoft Azure — 1 operation(s) for diagnostics_diskinspection.
+- [Microsoft Azure Diagnostics Spot Placement Recommender API](https://apis.io/apis/microsoft-azure/microsoft-azure-diagnostics-spotplacementrecommender-api/) — The diagnostics_SpotPlacementRecommender API from Microsoft Azure — 1 operation(s) for diagnostics_spotplacementrecommender.
+- [Microsoft Azure DiagnosticService API](https://apis.io/apis/microsoft-azure/microsoft-azure-diagnosticservice-api/) — The DiagnosticService API from Microsoft Azure — 2 operation(s) for diagnosticservice.
+- [Microsoft Azure Dictionary API](https://apis.io/apis/microsoft-azure/microsoft-azure-dictionary-api/) — The Dictionary API from Microsoft Azure — 2 operation(s) for dictionary.
+- [Microsoft Azure Dictionary/Lookup API](https://apis.io/apis/microsoft-azure/microsoft-azure-dictionary-lookup-api/) — The Dictionary/Lookup API from Microsoft Azure — 1 operation(s) for dictionary/lookup.
+- [Microsoft Azure DictionaryExamples API](https://apis.io/apis/microsoft-azure/microsoft-azure-dictionaryexamples-api/) — The DictionaryExamples API from Microsoft Azure — 1 operation(s) for dictionaryexamples.
+- [Microsoft Azure DigitalTwinsInstance API](https://apis.io/apis/microsoft-azure/microsoft-azure-digitaltwinsinstance-api/) — The DigitalTwinsInstance API from Microsoft Azure — 3 operation(s) for digitaltwinsinstance.
+- [Microsoft Azure DisasterRecoveryConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-disasterrecoveryconfigurations-api/) — The DisasterRecoveryConfigurations API from Microsoft Azure — 4 operation(s) for disasterrecoveryconfigurations.
+- [Microsoft Azure Disco Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-disco-groups-api/) — Provides access to discovery resources.
+- [Microsoft Azure Disco Templates API](https://apis.io/apis/microsoft-azure/microsoft-azure-disco-templates-api/) — Provides access to disco template resources.
+- [Microsoft Azure Discover Solutions API](https://apis.io/apis/microsoft-azure/microsoft-azure-discoversolutions-api/) — The discoverSolutions API from Microsoft Azure — 2 operation(s) for discoversolutions.
+- [Microsoft Azure Discovery API](https://apis.io/apis/microsoft-azure/microsoft-azure-discovery-api/) — The Discovery API from Microsoft Azure — 4 operation(s) for discovery.
+- [Microsoft Azure Discovery Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-discovery-groups-api/) — The Discovery Groups API from Microsoft Azure — 5 operation(s) for discovery groups.
+- [Microsoft Azure Discovery Templates API](https://apis.io/apis/microsoft-azure/microsoft-azure-discovery-templates-api/) — The Discovery Templates API from Microsoft Azure — 2 operation(s) for discovery templates.
+- [Microsoft Azure Discovery Solutions API](https://apis.io/apis/microsoft-azure/microsoft-azure-discoverysolutions-api/) — The discoverySolutions API from Microsoft Azure — 1 operation(s) for discoverysolutions.
+- [Microsoft Azure DiskPools API](https://apis.io/apis/microsoft-azure/microsoft-azure-diskpools-api/) — APIs for Disk pool operations.
+- [Microsoft Azure DiskPoolZones API](https://apis.io/apis/microsoft-azure/microsoft-azure-diskpoolzones-api/) — The DiskPoolZones API from Microsoft Azure — 1 operation(s) for diskpoolzones.
+- [Microsoft Azure Disks API](https://apis.io/apis/microsoft-azure/microsoft-azure-disks-api/) — The Disks API from Microsoft Azure — 6 operation(s) for disks.
+- [Microsoft Azure DnsForwardingRulesets API](https://apis.io/apis/microsoft-azure/microsoft-azure-dnsforwardingrulesets-api/) — The DnsForwardingRulesets API from Microsoft Azure — 4 operation(s) for dnsforwardingrulesets.
+- [Microsoft Azure DnsResolvers API](https://apis.io/apis/microsoft-azure/microsoft-azure-dnsresolvers-api/) — The DnsResolvers API from Microsoft Azure — 4 operation(s) for dnsresolvers.
+- [Microsoft Azure DnssecConfigs API](https://apis.io/apis/microsoft-azure/microsoft-azure-dnssecconfigs-api/) — The DnssecConfigs API from Microsoft Azure — 2 operation(s) for dnssecconfigs.
+- [Microsoft Azure Document:translate API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-translate-api/) — The Document:translate API from Microsoft Azure — 1 operation(s) for document:translate.
+- [Microsoft Azure Document Translation API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-translation-api/) — The Document Translation API from Microsoft Azure — 7 operation(s) for document translation.
+- [Microsoft Azure Documents API](https://apis.io/apis/microsoft-azure/microsoft-azure-documents-api/) — The Documents API from Microsoft Azure — 9 operation(s) for documents.
+- [Microsoft Azure Domain API](https://apis.io/apis/microsoft-azure/microsoft-azure-domain-api/) — The Domain API from Microsoft Azure — 4 operation(s) for domain.
+- [Microsoft Azure DomainRegistrationProvider API](https://apis.io/apis/microsoft-azure/microsoft-azure-domainregistrationprovider-api/) — The DomainRegistrationProvider API from Microsoft Azure — 1 operation(s) for domainregistrationprovider.
+- [Microsoft Azure Domains API](https://apis.io/apis/microsoft-azure/microsoft-azure-domains-api/) — The Domains API from Microsoft Azure — 16 operation(s) for domains.
+- [Microsoft Azure DomainTopics API](https://apis.io/apis/microsoft-azure/microsoft-azure-domaintopics-api/) — The DomainTopics API from Microsoft Azure — 2 operation(s) for domaintopics.
+- [Microsoft Azure DppFeatureSupport API](https://apis.io/apis/microsoft-azure/microsoft-azure-dppfeaturesupport-api/) — The DppFeatureSupport API from Microsoft Azure — 1 operation(s) for dppfeaturesupport.
+- [Microsoft Azure DppJob API](https://apis.io/apis/microsoft-azure/microsoft-azure-dppjob-api/) — The DppJob API from Microsoft Azure — 2 operation(s) for dppjob.
+- [Microsoft Azure DppResourceGuardProxies API](https://apis.io/apis/microsoft-azure/microsoft-azure-dppresourceguardproxies-api/) — The DppResourceGuardProxies API from Microsoft Azure — 3 operation(s) for dppresourceguardproxies.
+- [Microsoft Azure DpsCertificate API](https://apis.io/apis/microsoft-azure/microsoft-azure-dpscertificate-api/) — The DpsCertificate API from Microsoft Azure — 4 operation(s) for dpscertificate.
+- [Microsoft Azure Dra API](https://apis.io/apis/microsoft-azure/microsoft-azure-dra-api/) — Data replication agent (Dra) Controller.
+- [Microsoft Azure Edge Site API](https://apis.io/apis/microsoft-azure/microsoft-azure-edge-site-api/) — The Edge Site API from Microsoft Azure — 3 operation(s) for edge site.
+- [Microsoft Azure EdgeDevices API](https://apis.io/apis/microsoft-azure/microsoft-azure-edgedevices-api/) — The EdgeDevices API from Microsoft Azure — 3 operation(s) for edgedevices.
+- [Microsoft Azure Elastic San Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-elastic-san-operations-api/) — The Elastic San Operations API from Microsoft Azure — 1 operation(s) for elastic san operations.
+- [Microsoft Azure Elastic San Skus API](https://apis.io/apis/microsoft-azure/microsoft-azure-elastic-san-skus-api/) — The Elastic San Skus API from Microsoft Azure — 1 operation(s) for elastic san skus.
+- [Microsoft Azure ElasticSan API](https://apis.io/apis/microsoft-azure/microsoft-azure-elasticsan-api/) — The ElasticSan API from Microsoft Azure — 1 operation(s) for elasticsan.
+- [Microsoft Azure ElasticSans API](https://apis.io/apis/microsoft-azure/microsoft-azure-elasticsans-api/) — APIs for ElasticSan operations.
+- [Microsoft Azure ElasticVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-elasticversions-api/) — The ElasticVersions API from Microsoft Azure — 1 operation(s) for elasticversions.
+- [Microsoft Azure Elevation API](https://apis.io/apis/microsoft-azure/microsoft-azure-elevation-api/) — The Elevation API from Microsoft Azure — 3 operation(s) for elevation.
+- [Microsoft Azure EmailGetSendResult API](https://apis.io/apis/microsoft-azure/microsoft-azure-emailgetsendresult-api/) — The EmailGetSendResult API from Microsoft Azure — 1 operation(s) for emailgetsendresult.
+- [Microsoft Azure EmailGetSendStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-emailgetsendstatus-api/) — The EmailGetSendStatus API from Microsoft Azure — 1 operation(s) for emailgetsendstatus.
+- [Microsoft Azure EmailSend API](https://apis.io/apis/microsoft-azure/microsoft-azure-emailsend-api/) — The EmailSend API from Microsoft Azure — 1 operation(s) for emailsend.
+- [Microsoft Azure Embeddings API](https://apis.io/apis/microsoft-azure/microsoft-azure-embeddings-api/) — Operations for generating text embeddings
+- [Microsoft Azure EmergingIssues API](https://apis.io/apis/microsoft-azure/microsoft-azure-emergingissues-api/) — The EmergingIssues API from Microsoft Azure — 2 operation(s) for emergingissues.
+- [Microsoft Azure Endpoint API](https://apis.io/apis/microsoft-azure/microsoft-azure-endpoint-api/) — The Endpoint API from Microsoft Azure — 12 operation(s) for endpoint.
+- [Microsoft Azure EndpointKeys API](https://apis.io/apis/microsoft-azure/microsoft-azure-endpointkeys-api/) — The EndpointKeys API from Microsoft Azure — 3 operation(s) for endpointkeys.
+- [Microsoft Azure Endpoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-endpoints-api/) — The Endpoints API from Microsoft Azure — 16 operation(s) for endpoints.
+- [Microsoft Azure EnrollmentAccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-enrollmentaccounts-api/) — The EnrollmentAccounts API from Microsoft Azure — 2 operation(s) for enrollmentaccounts.
+- [Microsoft Azure EnrollmentGroup API](https://apis.io/apis/microsoft-azure/microsoft-azure-enrollmentgroup-api/) — The EnrollmentGroup API from Microsoft Azure — 4 operation(s) for enrollmentgroup.
+- [Microsoft Azure Enrollment Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-enrollmentgroups-api/) — The enrollmentGroups API from Microsoft Azure — 5 operation(s) for enrollmentgroups.
+- [Microsoft Azure EnterpriseKnowledgeGraph API](https://apis.io/apis/microsoft-azure/microsoft-azure-enterpriseknowledgegraph-api/) — The EnterpriseKnowledgeGraph API from Microsoft Azure — 3 operation(s) for enterpriseknowledgegraph.
+- [Microsoft Azure Entities API](https://apis.io/apis/microsoft-azure/microsoft-azure-entities-api/) — A list of entities that belong to the Management Groups.
+- [Microsoft Azure Entity API](https://apis.io/apis/microsoft-azure/microsoft-azure-entity-api/) — The Entity API from Microsoft Azure — 21 operation(s) for entity.
+- [Microsoft Azure Entries API](https://apis.io/apis/microsoft-azure/microsoft-azure-entries-api/) — The Entries API from Microsoft Azure — 4 operation(s) for entries.
+- [Microsoft Azure Environment Definitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-environment-definitions-api/) — The Environment Definitions API from Microsoft Azure — 3 operation(s) for environment definitions.
+- [Microsoft Azure Environment Types API](https://apis.io/apis/microsoft-azure/microsoft-azure-environment-types-api/) — The Environment Types API from Microsoft Azure — 1 operation(s) for environment types.
+- [Microsoft Azure Environments API](https://apis.io/apis/microsoft-azure/microsoft-azure-environments-api/) — The Environments API from Microsoft Azure — 18 operation(s) for environments.
+- [Microsoft Azure ErrorSummaries API](https://apis.io/apis/microsoft-azure/microsoft-azure-errorsummaries-api/) — The ErrorSummaries API from Microsoft Azure — 2 operation(s) for errorsummaries.
+- [Microsoft Azure EvaluatedAvsMachinesOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-evaluatedavsmachinesoperations-api/) — The EvaluatedAvsMachinesOperations API from Microsoft Azure — 2 operation(s) for evaluatedavsmachinesoperations.
+- [Microsoft Azure EvaluatedMachinesOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-evaluatedmachinesoperations-api/) — The EvaluatedMachinesOperations API from Microsoft Azure — 2 operation(s) for evaluatedmachinesoperations.
+- [Microsoft Azure EvaluatedSqlEntitiesOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-evaluatedsqlentitiesoperations-api/) — The EvaluatedSqlEntitiesOperations API from Microsoft Azure — 2 operation(s) for evaluatedsqlentitiesoperations.
+- [Microsoft Azure EvaluatedWebAppsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-evaluatedwebappsoperations-api/) — The EvaluatedWebAppsOperations API from Microsoft Azure — 2 operation(s) for evaluatedwebappsoperations.
+- [Microsoft Azure Evaluations20220901Preview API](https://apis.io/apis/microsoft-azure/microsoft-azure-evaluations20220901preview-api/) — Manages evaluations operations.
+- [Microsoft Azure EvaluationsV1Dot1Preview1 API](https://apis.io/apis/microsoft-azure/microsoft-azure-evaluationsv1dot1preview1-api/) — Manages counterfactual evaluation operations.
+- [Microsoft Azure Event API](https://apis.io/apis/microsoft-azure/microsoft-azure-event-api/) — Event Controller.
+- [Microsoft Azure Event Hubs Clusters Configuration API](https://apis.io/apis/microsoft-azure/microsoft-azure-event-hubs-clusters-configuration-api/) — The Event Hubs Clusters Configuration API from Microsoft Azure — 1 operation(s) for event hubs clusters configuration.
+- [Microsoft Azure EventChannels API](https://apis.io/apis/microsoft-azure/microsoft-azure-eventchannels-api/) — The EventChannels API from Microsoft Azure — 2 operation(s) for eventchannels.
+- [Microsoft Azure EventHubConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-eventhubconnections-api/) — The EventHubConnections API from Microsoft Azure — 3 operation(s) for eventhubconnections.
+- [Microsoft Azure EventImpactedResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-eventimpactedresources-api/) — The EventImpactedResources API from Microsoft Azure — 4 operation(s) for eventimpactedresources.
+- [Microsoft Azure EventRoutes API](https://apis.io/apis/microsoft-azure/microsoft-azure-eventroutes-api/) — The EventRoutes API from Microsoft Azure — 2 operation(s) for eventroutes.
+- [Microsoft Azure Events API](https://apis.io/apis/microsoft-azure/microsoft-azure-events-api/) — The Events API from Microsoft Azure — 9 operation(s) for events.
+- [Microsoft Azure EventsStore API](https://apis.io/apis/microsoft-azure/microsoft-azure-eventsstore-api/) — The EventsStore API from Microsoft Azure — 13 operation(s) for eventsstore.
+- [Microsoft Azure Execution API](https://apis.io/apis/microsoft-azure/microsoft-azure-execution-api/) — The Execution API from Microsoft Azure — 4 operation(s) for execution.
+- [Microsoft Azure Experiments API](https://apis.io/apis/microsoft-azure/microsoft-azure-experiments-api/) — The configuration of the Network Experiment experiments
+- [Microsoft Azure ExportJobsOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-exportjobsoperationresults-api/) — The ExportJobsOperationResults API from Microsoft Azure — 1 operation(s) for exportjobsoperationresults.
+- [Microsoft Azure ExposureControl API](https://apis.io/apis/microsoft-azure/microsoft-azure-exposurecontrol-api/) — The ExposureControl API from Microsoft Azure — 1 operation(s) for exposurecontrol.
+- [Microsoft Azure ExpressRouteCircuitAuthorizations API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutecircuitauthorizations-api/) — The ExpressRouteCircuitAuthorizations API from Microsoft Azure — 2 operation(s) for expressroutecircuitauthorizations.
+- [Microsoft Azure ExpressRouteCircuitPeerings API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutecircuitpeerings-api/) — The ExpressRouteCircuitPeerings API from Microsoft Azure — 2 operation(s) for expressroutecircuitpeerings.
+- [Microsoft Azure ExpressRouteConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressrouteconnections-api/) — The ExpressRouteConnections API from Microsoft Azure — 2 operation(s) for expressrouteconnections.
+- [Microsoft Azure ExpressRouteCrossConnectionArpTable API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutecrossconnectionarptable-api/) — The ExpressRouteCrossConnectionArpTable API from Microsoft Azure — 1 operation(s) for expressroutecrossconnectionarptable.
+- [Microsoft Azure ExpressRouteCrossConnectionPeerings API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutecrossconnectionpeerings-api/) — The ExpressRouteCrossConnectionPeerings API from Microsoft Azure — 2 operation(s) for expressroutecrossconnectionpeerings.
+- [Microsoft Azure ExpressRouteCrossConnectionRouteTable API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutecrossconnectionroutetable-api/) — The ExpressRouteCrossConnectionRouteTable API from Microsoft Azure — 1 operation(s) for expressroutecrossconnectionroutetable.
+- [Microsoft Azure ExpressRouteCrossConnectionRouteTableSummary API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutecrossconnectionroutetablesummary-api/) — The ExpressRouteCrossConnectionRouteTableSummary API from Microsoft Azure — 1 operation(s) for expressroutecrossconnectionroutetablesummary.
+- [Microsoft Azure ExpressRouteCrossConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutecrossconnections-api/) — The ExpressRouteCrossConnections API from Microsoft Azure — 3 operation(s) for expressroutecrossconnections.
+- [Microsoft Azure ExpressRouteGateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroutegateways-api/) — The ExpressRouteGateways API from Microsoft Azure — 3 operation(s) for expressroutegateways.
+- [Microsoft Azure ExpressRouteServiceProviders API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressrouteserviceproviders-api/) — The ExpressRouteServiceProviders API from Microsoft Azure — 1 operation(s) for expressrouteserviceproviders.
+- [Microsoft Azure ExtendedZones API](https://apis.io/apis/microsoft-azure/microsoft-azure-extendedzones-api/) — The ExtendedZones API from Microsoft Azure — 4 operation(s) for extendedzones.
+- [Microsoft Azure Extension Operation Status API](https://apis.io/apis/microsoft-azure/microsoft-azure-extension-operation-status-api/) — The Extension Operation Status API from Microsoft Azure — 1 operation(s) for extension operation status.
+- [Microsoft Azure Extensions API](https://apis.io/apis/microsoft-azure/microsoft-azure-extensions-api/) — The Extensions API from Microsoft Azure — 8 operation(s) for extensions.
+- [Microsoft Azure Fabric API](https://apis.io/apis/microsoft-azure/microsoft-azure-fabric-api/) — Fabric Controller.
+- [Microsoft Azure Facelists API](https://apis.io/apis/microsoft-azure/microsoft-azure-facelists-api/) — The Facelists API from Microsoft Azure — 4 operation(s) for facelists.
+- [Microsoft Azure FarmBeatsExtensions API](https://apis.io/apis/microsoft-azure/microsoft-azure-farmbeatsextensions-api/) — The FarmBeatsExtensions API from Microsoft Azure — 2 operation(s) for farmbeatsextensions.
+- [Microsoft Azure FarmBeatsModels API](https://apis.io/apis/microsoft-azure/microsoft-azure-farmbeatsmodels-api/) — The FarmBeatsModels API from Microsoft Azure — 3 operation(s) for farmbeatsmodels.
+- [Microsoft Azure FarmEquipments API](https://apis.io/apis/microsoft-azure/microsoft-azure-farmequipments-api/) — The FarmEquipments API from Microsoft Azure — 2 operation(s) for farmequipments.
+- [Microsoft Azure FarmOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-farmoperations-api/) — The FarmOperations API from Microsoft Azure — 1 operation(s) for farmoperations.
+- [Microsoft Azure Farms API](https://apis.io/apis/microsoft-azure/microsoft-azure-farms-api/) — The Farms API from Microsoft Azure — 4 operation(s) for farms.
+- [Microsoft Azure Faults API](https://apis.io/apis/microsoft-azure/microsoft-azure-faults-api/) — The Faults API from Microsoft Azure — 10 operation(s) for faults.
+- [Microsoft Azure FeatureImportances20220901Preview API](https://apis.io/apis/microsoft-azure/microsoft-azure-featureimportances20220901preview-api/) — Manages feature importance operations.
+- [Microsoft Azure Features API](https://apis.io/apis/microsoft-azure/microsoft-azure-features-api/) — The Features API from Microsoft Azure — 13 operation(s) for features.
+- [Microsoft Azure Feature State Sets API](https://apis.io/apis/microsoft-azure/microsoft-azure-featurestatesets-api/) — The featureStateSets API from Microsoft Azure — 3 operation(s) for featurestatesets.
+- [Microsoft Azure FeatureSupport API](https://apis.io/apis/microsoft-azure/microsoft-azure-featuresupport-api/) — The FeatureSupport API from Microsoft Azure — 1 operation(s) for featuresupport.
+- [Microsoft Azure Feedback API](https://apis.io/apis/microsoft-azure/microsoft-azure-feedback-api/) — The Feedback API from Microsoft Azure — 5 operation(s) for feedback.
+- [Microsoft Azure FetchSecondaryRecoveryPoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-fetchsecondaryrecoverypoints-api/) — The FetchSecondaryRecoveryPoints API from Microsoft Azure — 1 operation(s) for fetchsecondaryrecoverypoints.
+- [Microsoft Azure Fields API](https://apis.io/apis/microsoft-azure/microsoft-azure-fields-api/) — The Fields API from Microsoft Azure — 5 operation(s) for fields.
+- [Microsoft Azure File and Directory Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-file-and-directory-operations-api/) — The File and Directory Operations API from Microsoft Azure — 1 operation(s) for file and directory operations.
+- [Microsoft Azure File API](https://apis.io/apis/microsoft-azure/microsoft-azure-file-api/) — The File API from Microsoft Azure — 1 operation(s) for file.
+- [Microsoft Azure File Locks API](https://apis.io/apis/microsoft-azure/microsoft-azure-file-locks-api/) — The File Locks API from Microsoft Azure — 1 operation(s) for file locks.
+- [Microsoft Azure Files: API](https://apis.io/apis/microsoft-azure/microsoft-azure-files-api/) — The Files: API from Microsoft Azure — 17 operation(s) for files:.
+- [Microsoft Azure FileSystem API](https://apis.io/apis/microsoft-azure/microsoft-azure-filesystem-api/) — The FileSystem API from Microsoft Azure — 2 operation(s) for filesystem.
+- [Microsoft Azure Filesystem Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-filesystem-operations-api/) — The Filesystem Operations API from Microsoft Azure — 1 operation(s) for filesystem operations.
+- [Microsoft Azure FileSystems API](https://apis.io/apis/microsoft-azure/microsoft-azure-filesystems-api/) — The FileSystems API from Microsoft Azure — 3 operation(s) for filesystems.
+- [Microsoft Azure FileWorkspaces API](https://apis.io/apis/microsoft-azure/microsoft-azure-fileworkspaces-api/) — The FileWorkspaces API from Microsoft Azure — 2 operation(s) for fileworkspaces.
+- [Microsoft Azure Filters API](https://apis.io/apis/microsoft-azure/microsoft-azure-filters-api/) — The Filters API from Microsoft Azure — 1 operation(s) for filters.
+- [Microsoft Azure Find and Purchase Available Phone Numbers API](https://apis.io/apis/microsoft-azure/microsoft-azure-find-and-purchase-available-phone-numbers-api/) — The Find and Purchase Available Phone Numbers API from Microsoft Azure — 3 operation(s) for find and purchase available phone numbers.
+- [Microsoft Azure FindRestorableTimeRanges API](https://apis.io/apis/microsoft-azure/microsoft-azure-findrestorabletimeranges-api/) — The FindRestorableTimeRanges API from Microsoft Azure — 1 operation(s) for findrestorabletimeranges.
+- [Microsoft Azure Findsimilars API](https://apis.io/apis/microsoft-azure/microsoft-azure-findsimilars-api/) — The Findsimilars API from Microsoft Azure — 1 operation(s) for findsimilars.
+- [Microsoft Azure Fine-Tunes: API](https://apis.io/apis/microsoft-azure/microsoft-azure-fine-tunes-api/) — The Fine-Tunes: API from Microsoft Azure — 7 operation(s) for fine-tunes:.
+- [Microsoft Azure Fine-Tuning: API](https://apis.io/apis/microsoft-azure/microsoft-azure-fine-tuning-api/) — The Fine-Tuning: API from Microsoft Azure — 4 operation(s) for fine-tuning:.
+- [Microsoft Azure Firewalls API](https://apis.io/apis/microsoft-azure/microsoft-azure-firewalls-api/) — The Firewalls API from Microsoft Azure — 7 operation(s) for firewalls.
+- [Microsoft Azure FirewallStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-firewallstatus-api/) — The FirewallStatus API from Microsoft Azure — 2 operation(s) for firewallstatus.
+- [Microsoft Azure FleetMembers API](https://apis.io/apis/microsoft-azure/microsoft-azure-fleetmembers-api/) — The FleetMembers API from Microsoft Azure — 2 operation(s) for fleetmembers.
+- [Microsoft Azure Fleets API](https://apis.io/apis/microsoft-azure/microsoft-azure-fleets-api/) — The Fleets API from Microsoft Azure — 4 operation(s) for fleets.
+- [Microsoft Azure FleetUpdateStrategies API](https://apis.io/apis/microsoft-azure/microsoft-azure-fleetupdatestrategies-api/) — The FleetUpdateStrategies API from Microsoft Azure — 2 operation(s) for fleetupdatestrategies.
+- [Microsoft Azure FluidRelayContainers API](https://apis.io/apis/microsoft-azure/microsoft-azure-fluidrelaycontainers-api/) — The FluidRelayContainers API from Microsoft Azure — 2 operation(s) for fluidrelaycontainers.
+- [Microsoft Azure FluidRelayOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-fluidrelayoperations-api/) — The FluidRelayOperations API from Microsoft Azure — 1 operation(s) for fluidrelayoperations.
+- [Microsoft Azure FluidRelayServers API](https://apis.io/apis/microsoft-azure/microsoft-azure-fluidrelayservers-api/) — The FluidRelayServers API from Microsoft Azure — 5 operation(s) for fluidrelayservers.
+- [Microsoft Azure Flux API](https://apis.io/apis/microsoft-azure/microsoft-azure-flux-api/) — The Flux API from Microsoft Azure — 2 operation(s) for flux.
+- [Microsoft Azure FluxConfiguration Operation Status API](https://apis.io/apis/microsoft-azure/microsoft-azure-fluxconfiguration-operation-status-api/) — The FluxConfiguration Operation Status API from Microsoft Azure — 1 operation(s) for fluxconfiguration operation status.
+- [Microsoft Azure Forecasts API](https://apis.io/apis/microsoft-azure/microsoft-azure-forecasts-api/) — The Forecasts API from Microsoft Azure — 1 operation(s) for forecasts.
+- [Microsoft Azure Form API](https://apis.io/apis/microsoft-azure/microsoft-azure-form-api/) — The Form API from Microsoft Azure — 1 operation(s) for form.
+- [Microsoft Azure Formulas API](https://apis.io/apis/microsoft-azure/microsoft-azure-formulas-api/) — The Formulas API from Microsoft Azure — 2 operation(s) for formulas.
+- [Microsoft Azure FqdnListGlobalRulestack API](https://apis.io/apis/microsoft-azure/microsoft-azure-fqdnlistglobalrulestack-api/) — The FqdnListGlobalRulestack API from Microsoft Azure — 2 operation(s) for fqdnlistglobalrulestack.
+- [Microsoft Azure FqdnListLocalRulestack API](https://apis.io/apis/microsoft-azure/microsoft-azure-fqdnlistlocalrulestack-api/) — The FqdnListLocalRulestack API from Microsoft Azure — 2 operation(s) for fqdnlistlocalrulestack.
+- [Microsoft Azure FrontDoors API](https://apis.io/apis/microsoft-azure/microsoft-azure-frontdoors-api/) — The FrontDoors API from Microsoft Azure — 9 operation(s) for frontdoors.
+- [Microsoft Azure FrontendsInterface API](https://apis.io/apis/microsoft-azure/microsoft-azure-frontendsinterface-api/) — The FrontendsInterface API from Microsoft Azure — 2 operation(s) for frontendsinterface.
+- [Microsoft Azure Galleries API](https://apis.io/apis/microsoft-azure/microsoft-azure-galleries-api/) — The Galleries API from Microsoft Azure — 3 operation(s) for galleries.
+- [Microsoft Azure GalleryApplications API](https://apis.io/apis/microsoft-azure/microsoft-azure-galleryapplications-api/) — The GalleryApplications API from Microsoft Azure — 2 operation(s) for galleryapplications.
+- [Microsoft Azure GalleryApplicationVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-galleryapplicationversions-api/) — The GalleryApplicationVersions API from Microsoft Azure — 2 operation(s) for galleryapplicationversions.
+- [Microsoft Azure GalleryImages API](https://apis.io/apis/microsoft-azure/microsoft-azure-galleryimages-api/) — The GalleryImages API from Microsoft Azure — 5 operation(s) for galleryimages.
+- [Microsoft Azure GalleryImageVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-galleryimageversions-api/) — The GalleryImageVersions API from Microsoft Azure — 2 operation(s) for galleryimageversions.
+- [Microsoft Azure GalleryItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-galleryitems-api/) — The GalleryItems API from Microsoft Azure — 2 operation(s) for galleryitems.
+- [Microsoft Azure GallerySharingUpdate API](https://apis.io/apis/microsoft-azure/microsoft-azure-gallerysharingupdate-api/) — The GallerySharingUpdate API from Microsoft Azure — 1 operation(s) for gallerysharingupdate.
+- [Microsoft Azure General API](https://apis.io/apis/microsoft-azure/microsoft-azure-general-api/) — The General API from Microsoft Azure — 1 operation(s) for general.
+- [Microsoft Azure Geocode API](https://apis.io/apis/microsoft-azure/microsoft-azure-geocode-api/) — The Geocode API from Microsoft Azure — 2 operation(s) for geocode.
+- [Microsoft Azure Geolocation API](https://apis.io/apis/microsoft-azure/microsoft-azure-geolocation-api/) — The Geolocation API from Microsoft Azure — 1 operation(s) for geolocation.
+- [Microsoft Azure GET API](https://apis.io/apis/microsoft-azure/microsoft-azure-get-api/) — The GET API from Microsoft Azure — 19 operation(s) for get.
+- [Microsoft Azure Get Metadata Information API](https://apis.io/apis/microsoft-azure/microsoft-azure-get-metadata-information-api/) — The Get Metadata Information API from Microsoft Azure — 1 operation(s) for get metadata information.
+- [Microsoft Azure Get Token API](https://apis.io/apis/microsoft-azure/microsoft-azure-get-token-api/) — The Get Token API from Microsoft Azure — 1 operation(s) for get token.
+- [Microsoft Azure GetAccessReviewDefaultSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewdefaultsettings-api/) — The GetAccessReviewDefaultSettings API from Microsoft Azure — 1 operation(s) for getaccessreviewdefaultsettings.
+- [Microsoft Azure GetAccessReviewHistoryDefinition API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewhistorydefinition-api/) — The GetAccessReviewHistoryDefinition API from Microsoft Azure — 1 operation(s) for getaccessreviewhistorydefinition.
+- [Microsoft Azure GetAccessReviewHistoryDefinitionInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewhistorydefinitioninstances-api/) — The GetAccessReviewHistoryDefinitionInstances API from Microsoft Azure — 1 operation(s) for getaccessreviewhistorydefinitioninstances.
+- [Microsoft Azure GetAccessReviewHistoryDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewhistorydefinitions-api/) — The GetAccessReviewHistoryDefinitions API from Microsoft Azure — 1 operation(s) for getaccessreviewhistorydefinitions.
+- [Microsoft Azure GetAccessReviewInstance API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewinstance-api/) — The GetAccessReviewInstance API from Microsoft Azure — 2 operation(s) for getaccessreviewinstance.
+- [Microsoft Azure GetAccessReviewInstanceContactedReviewers API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewinstancecontactedreviewers-api/) — The GetAccessReviewInstanceContactedReviewers API from Microsoft Azure — 1 operation(s) for getaccessreviewinstancecontactedreviewers.
+- [Microsoft Azure GetAccessReviewInstanceDecisions API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewinstancedecisions-api/) — The GetAccessReviewInstanceDecisions API from Microsoft Azure — 1 operation(s) for getaccessreviewinstancedecisions.
+- [Microsoft Azure GetAccessReviewInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewinstances-api/) — The GetAccessReviewInstances API from Microsoft Azure — 1 operation(s) for getaccessreviewinstances.
+- [Microsoft Azure GetAccessReviewInstancesAssignedForMyApproval API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewinstancesassignedformyapproval-api/) — The GetAccessReviewInstancesAssignedForMyApproval API from Microsoft Azure — 1 operation(s) for getaccessreviewinstancesassignedformyapproval.
+- [Microsoft Azure GetAccessReviewMyInstanceDecision API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewmyinstancedecision-api/) — The GetAccessReviewMyInstanceDecision API from Microsoft Azure — 1 operation(s) for getaccessreviewmyinstancedecision.
+- [Microsoft Azure GetAccessReviewMyInstanceDecisions API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewmyinstancedecisions-api/) — The GetAccessReviewMyInstanceDecisions API from Microsoft Azure — 1 operation(s) for getaccessreviewmyinstancedecisions.
+- [Microsoft Azure GetAccessReviewScheduleDefinition API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewscheduledefinition-api/) — The GetAccessReviewScheduleDefinition API from Microsoft Azure — 1 operation(s) for getaccessreviewscheduledefinition.
+- [Microsoft Azure GetAccessReviewScheduleDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewscheduledefinitions-api/) — The GetAccessReviewScheduleDefinitions API from Microsoft Azure — 1 operation(s) for getaccessreviewscheduledefinitions.
+- [Microsoft Azure GetAccessReviewScheduleDefinitionsAssignedForMyApproval API](https://apis.io/apis/microsoft-azure/microsoft-azure-getaccessreviewscheduledefinitionsassignedformyapproval-api/) — The GetAccessReviewScheduleDefinitionsAssignedForMyApproval API from Microsoft Azure — 1 operation(s) for…
+- [Microsoft Azure GetApiKeys API](https://apis.io/apis/microsoft-azure/microsoft-azure-getapikeys-api/) — The GetApiKeys API from Microsoft Azure — 1 operation(s) for getapikeys.
+- [Microsoft Azure GetChange API](https://apis.io/apis/microsoft-azure/microsoft-azure-getchange-api/) — The GetChange API from Microsoft Azure — 1 operation(s) for getchange.
+- [Microsoft Azure GetOperationResult API](https://apis.io/apis/microsoft-azure/microsoft-azure-getoperationresult-api/) — The GetOperationResult API from Microsoft Azure — 1 operation(s) for getoperationresult.
+- [Microsoft Azure GetPrivateDnsZoneSuffix API](https://apis.io/apis/microsoft-azure/microsoft-azure-getprivatednszonesuffix-api/) — The GetPrivateDnsZoneSuffix API from Microsoft Azure — 2 operation(s) for getprivatednszonesuffix.
+- [Microsoft Azure GetSnapshot API](https://apis.io/apis/microsoft-azure/microsoft-azure-getsnapshot-api/) — The GetSnapshot API from Microsoft Azure — 1 operation(s) for getsnapshot.
+- [Microsoft Azure GitHubOAuth API](https://apis.io/apis/microsoft-azure/microsoft-azure-githuboauth-api/) — The GitHubOAuth API from Microsoft Azure — 3 operation(s) for githuboauth.
+- [Microsoft Azure Global API](https://apis.io/apis/microsoft-azure/microsoft-azure-global-api/) — The Global API from Microsoft Azure — 15 operation(s) for global.
+- [Microsoft Azure Global Communications Site API](https://apis.io/apis/microsoft-azure/microsoft-azure-global-communications-site-api/) — The Global Communications Site API from Microsoft Azure — 2 operation(s) for global communications site.
+- [Microsoft Azure GlobalCertificateOrder API](https://apis.io/apis/microsoft-azure/microsoft-azure-globalcertificateorder-api/) — The GlobalCertificateOrder API from Microsoft Azure — 2 operation(s) for globalcertificateorder.
+- [Microsoft Azure GlobalDomainRegistration API](https://apis.io/apis/microsoft-azure/microsoft-azure-globaldomainregistration-api/) — The GlobalDomainRegistration API from Microsoft Azure — 5 operation(s) for globaldomainregistration.
+- [Microsoft Azure GlobalReachConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-globalreachconnections-api/) — The GlobalReachConnections API from Microsoft Azure — 2 operation(s) for globalreachconnections.
+- [Microsoft Azure GlobalResourceGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-globalresourcegroups-api/) — The GlobalResourceGroups API from Microsoft Azure — 1 operation(s) for globalresourcegroups.
+- [Microsoft Azure GlobalRulestack API](https://apis.io/apis/microsoft-azure/microsoft-azure-globalrulestack-api/) — The GlobalRulestack API from Microsoft Azure — 11 operation(s) for globalrulestack.
+- [Microsoft Azure GlobalSchedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-globalschedules-api/) — The GlobalSchedules API from Microsoft Azure — 5 operation(s) for globalschedules.
+- [Microsoft Azure GlobalUsers API](https://apis.io/apis/microsoft-azure/microsoft-azure-globalusers-api/) — The GlobalUsers API from Microsoft Azure — 10 operation(s) for globalusers.
+- [Microsoft Azure Glossary API](https://apis.io/apis/microsoft-azure/microsoft-azure-glossary-api/) — The Glossary API from Microsoft Azure — 28 operation(s) for glossary.
+- [Microsoft Azure Gov API](https://apis.io/apis/microsoft-azure/microsoft-azure-gov-api/) — The Gov API from Microsoft Azure — 23 operation(s) for gov.
+- [Microsoft Azure GrafanaResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-grafanaresource-api/) — The GrafanaResource API from Microsoft Azure — 4 operation(s) for grafanaresource.
+- [Microsoft Azure Grants API](https://apis.io/apis/microsoft-azure/microsoft-azure-grants-api/) — The Grants API from Microsoft Azure — 3 operation(s) for grants.
+- [Microsoft Azure Group API](https://apis.io/apis/microsoft-azure/microsoft-azure-group-api/) — The Group API from Microsoft Azure — 10 operation(s) for group.
+- [Microsoft Azure Group ID List for LDAP User API](https://apis.io/apis/microsoft-azure/microsoft-azure-group-id-list-for-ldap-user-api/) — The Group ID List for LDAP User API from Microsoft Azure — 1 operation(s) for group id list for ldap user.
+- [Microsoft Azure GroupOwners API](https://apis.io/apis/microsoft-azure/microsoft-azure-groupowners-api/) — The GroupOwners API from Microsoft Azure — 1 operation(s) for groupowners.
+- [Microsoft Azure GroupsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-groupsoperations-api/) — The GroupsOperations API from Microsoft Azure — 3 operation(s) for groupsoperations.
+- [Microsoft Azure GroupsOwners API](https://apis.io/apis/microsoft-azure/microsoft-azure-groupsowners-api/) — The GroupsOwners API from Microsoft Azure — 2 operation(s) for groupsowners.
+- [Microsoft Azure GuestAgents API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestagents-api/) — The GuestAgents API from Microsoft Azure — 4 operation(s) for guestagents.
+- [Microsoft Azure GuestConfigurationAssignmentHCRPReports API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestconfigurationassignmenthcrpreports-api/) — The GuestConfigurationAssignmentHCRPReports API from Microsoft Azure — 2 operation(s) for guestconfigurationassignmenthcrpreports.
+- [Microsoft Azure GuestConfigurationAssignmentReports API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestconfigurationassignmentreports-api/) — The GuestConfigurationAssignmentReports API from Microsoft Azure — 4 operation(s) for guestconfigurationassignmentreports.
+- [Microsoft Azure GuestConfigurationAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestconfigurationassignments-api/) — The GuestConfigurationAssignments API from Microsoft Azure — 6 operation(s) for guestconfigurationassignments.
+- [Microsoft Azure GuestConfigurationConnectedVMwarevSphereAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestconfigurationconnectedvmwarevsphereassignments-api/) — The GuestConfigurationConnectedVMwarevSphereAssignments API from Microsoft Azure — 2 operation(s) for guestconfigurationconnectedvmwarevsphereassignments.
+- [Microsoft Azure GuestConfigurationConnectedVMwarevSphereAssignmentsReports API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestconfigurationconnectedvmwarevsphereassignmentsreports-api/) — The GuestConfigurationConnectedVMwarevSphereAssignmentsReports API from Microsoft Azure — 2 operation(s) for…
+- [Microsoft Azure GuestConfigurationHCRPAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestconfigurationhcrpassignments-api/) — The GuestConfigurationHCRPAssignments API from Microsoft Azure — 2 operation(s) for guestconfigurationhcrpassignments.
+- [Microsoft Azure GuestDiagnosticsSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestdiagnosticssettings-api/) — The GuestDiagnosticsSettings API from Microsoft Azure — 1 operation(s) for guestdiagnosticssettings.
+- [Microsoft Azure GuestDiagnosticsSettingsAssociation API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestdiagnosticssettingsassociation-api/) — The GuestDiagnosticsSettingsAssociation API from Microsoft Azure — 1 operation(s) for guestdiagnosticssettingsassociation.
+- [Microsoft Azure GuestUsages API](https://apis.io/apis/microsoft-azure/microsoft-azure-guestusages-api/) — The GuestUsages API from Microsoft Azure — 3 operation(s) for guestusages.
+- [Microsoft Azure HanaOnAzure API](https://apis.io/apis/microsoft-azure/microsoft-azure-hanaonazure-api/) — The HanaOnAzure API from Microsoft Azure — 5 operation(s) for hanaonazure.
+- [Microsoft Azure HardwareComponentGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-hardwarecomponentgroups-api/) — The HardwareComponentGroups API from Microsoft Azure — 2 operation(s) for hardwarecomponentgroups.
+- [Microsoft Azure HarvestData API](https://apis.io/apis/microsoft-azure/microsoft-azure-harvestdata-api/) — The HarvestData API from Microsoft Azure — 5 operation(s) for harvestdata.
+- [Microsoft Azure HCIReports API](https://apis.io/apis/microsoft-azure/microsoft-azure-hcireports-api/) — The HCIReports API from Microsoft Azure — 2 operation(s) for hcireports.
+- [Microsoft Azure HCRPReports API](https://apis.io/apis/microsoft-azure/microsoft-azure-hcrpreports-api/) — The HCRPReports API from Microsoft Azure — 2 operation(s) for hcrpreports.
+- [Microsoft Azure HcxEnterpriseSites API](https://apis.io/apis/microsoft-azure/microsoft-azure-hcxenterprisesites-api/) — The HcxEnterpriseSites API from Microsoft Azure — 2 operation(s) for hcxenterprisesites.
+- [Microsoft Azure Hook API](https://apis.io/apis/microsoft-azure/microsoft-azure-hook-api/) — The Hook API from Microsoft Azure — 2 operation(s) for hook.
+- [Microsoft Azure HostingEnvironments API](https://apis.io/apis/microsoft-azure/microsoft-azure-hostingenvironments-api/) — The HostingEnvironments API from Microsoft Azure — 33 operation(s) for hostingenvironments.
+- [Microsoft Azure HostPool API](https://apis.io/apis/microsoft-azure/microsoft-azure-hostpool-api/) — The HostPool API from Microsoft Azure — 4 operation(s) for hostpool.
+- [Microsoft Azure Hosts API](https://apis.io/apis/microsoft-azure/microsoft-azure-hosts-api/) — The Hosts API from Microsoft Azure — 4 operation(s) for hosts.
+- [Microsoft Azure Hubs API](https://apis.io/apis/microsoft-azure/microsoft-azure-hubs-api/) — The Hubs API from Microsoft Azure — 12 operation(s) for hubs.
+- [Microsoft Azure Hybrid Use Benefit API](https://apis.io/apis/microsoft-azure/microsoft-azure-hybrid-use-benefit-api/) — The Hybrid Use Benefit API from Microsoft Azure — 1 operation(s) for hybrid use benefit.
+- [Microsoft Azure Hybrid Use Benefit Revisions API](https://apis.io/apis/microsoft-azure/microsoft-azure-hybrid-use-benefit-revisions-api/) — The Hybrid Use Benefit Revisions API from Microsoft Azure — 1 operation(s) for hybrid use benefit revisions.
+- [Microsoft Azure Hybrid Use Benefits API](https://apis.io/apis/microsoft-azure/microsoft-azure-hybrid-use-benefits-api/) — The Hybrid Use Benefits API from Microsoft Azure — 1 operation(s) for hybrid use benefits.
+- [Microsoft Azure HybridIdentityMetadata API](https://apis.io/apis/microsoft-azure/microsoft-azure-hybrididentitymetadata-api/) — The HybridIdentityMetadata API from Microsoft Azure — 4 operation(s) for hybrididentitymetadata.
+- [Microsoft Azure HyperDriveExperiment API](https://apis.io/apis/microsoft-azure/microsoft-azure-hyperdriveexperiment-api/) — The HyperDriveExperiment API from Microsoft Azure — 2 operation(s) for hyperdriveexperiment.
+- [Microsoft Azure HypervClusterController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervclustercontroller-api/) — The HypervClusterController API from Microsoft Azure — 2 operation(s) for hypervclustercontroller.
+- [Microsoft Azure HypervCollectorsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervcollectorsoperations-api/) — The HypervCollectorsOperations API from Microsoft Azure — 2 operation(s) for hypervcollectorsoperations.
+- [Microsoft Azure HypervDependencyMapController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervdependencymapcontroller-api/) — The HypervDependencyMapController API from Microsoft Azure — 6 operation(s) for hypervdependencymapcontroller.
+- [Microsoft Azure HypervHostController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervhostcontroller-api/) — The HypervHostController API from Microsoft Azure — 2 operation(s) for hypervhostcontroller.
+- [Microsoft Azure HypervJobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervjobs-api/) — The HypervJobs API from Microsoft Azure — 2 operation(s) for hypervjobs.
+- [Microsoft Azure HypervJobsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervjobscontroller-api/) — The HypervJobsController API from Microsoft Azure — 2 operation(s) for hypervjobscontroller.
+- [Microsoft Azure HypervMachinesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervmachinescontroller-api/) — The HypervMachinesController API from Microsoft Azure — 3 operation(s) for hypervmachinescontroller.
+- [Microsoft Azure HypervOperationsStatusController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervoperationsstatuscontroller-api/) — The HypervOperationsStatusController API from Microsoft Azure — 1 operation(s) for hypervoperationsstatuscontroller.
+- [Microsoft Azure HypervRunAsAccountsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervrunasaccountscontroller-api/) — The HypervRunAsAccountsController API from Microsoft Azure — 2 operation(s) for hypervrunasaccountscontroller.
+- [Microsoft Azure HypervSites API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervsites-api/) — The HypervSites API from Microsoft Azure — 2 operation(s) for hypervsites.
+- [Microsoft Azure HypervSitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervsitescontroller-api/) — The HypervSitesController API from Microsoft Azure — 7 operation(s) for hypervsitescontroller.
+- [Microsoft Azure HypervSoftwareInventoriesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-hypervsoftwareinventoriescontroller-api/) — The HypervSoftwareInventoriesController API from Microsoft Azure — 2 operation(s) for hypervsoftwareinventoriescontroller.
+- [Microsoft Azure Identify API](https://apis.io/apis/microsoft-azure/microsoft-azure-identify-api/) — The Identify API from Microsoft Azure — 1 operation(s) for identify.
+- [Microsoft Azure Identity API](https://apis.io/apis/microsoft-azure/microsoft-azure-identity-api/) — The Identity API from Microsoft Azure — 3 operation(s) for identity.
+- [Microsoft Azure IisWebApplicationsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-iiswebapplicationscontroller-api/) — The IisWebApplicationsController API from Microsoft Azure — 2 operation(s) for iiswebapplicationscontroller.
+- [Microsoft Azure IisWebServersController API](https://apis.io/apis/microsoft-azure/microsoft-azure-iiswebserverscontroller-api/) — The IisWebServersController API from Microsoft Azure — 2 operation(s) for iiswebserverscontroller.
+- [Microsoft Azure Image:analyze API](https://apis.io/apis/microsoft-azure/microsoft-azure-image-analyze-api/) — The Image:analyze API from Microsoft Azure — 1 operation(s) for image:analyze.
+- [Microsoft Azure ImageDetailSearch API](https://apis.io/apis/microsoft-azure/microsoft-azure-imagedetailsearch-api/) — The ImageDetailSearch API from Microsoft Azure — 1 operation(s) for imagedetailsearch.
+- [Microsoft Azure ImageModeration API](https://apis.io/apis/microsoft-azure/microsoft-azure-imagemoderation-api/) — The ImageModeration API from Microsoft Azure — 4 operation(s) for imagemoderation.
+- [Microsoft Azure ImagePredictionApi API](https://apis.io/apis/microsoft-azure/microsoft-azure-imagepredictionapi-api/) — The ImagePredictionApi API from Microsoft Azure — 12 operation(s) for imagepredictionapi.
+- [Microsoft Azure ImageRegionProposalApi API](https://apis.io/apis/microsoft-azure/microsoft-azure-imageregionproposalapi-api/) — The ImageRegionProposalApi API from Microsoft Azure — 2 operation(s) for imageregionproposalapi.
+- [Microsoft Azure ImageRetrieval API](https://apis.io/apis/microsoft-azure/microsoft-azure-imageretrieval-api/) — The ImageRetrieval API from Microsoft Azure — 2 operation(s) for imageretrieval.
+- [Microsoft Azure Images API](https://apis.io/apis/microsoft-azure/microsoft-azure-images-api/) — The Images API from Microsoft Azure — 10 operation(s) for images.
+- [Microsoft Azure ImageStore API](https://apis.io/apis/microsoft-azure/microsoft-azure-imagestore-api/) — The ImageStore API from Microsoft Azure — 11 operation(s) for imagestore.
+- [Microsoft Azure ImageTrendingSearch API](https://apis.io/apis/microsoft-azure/microsoft-azure-imagetrendingsearch-api/) — The ImageTrendingSearch API from Microsoft Azure — 1 operation(s) for imagetrendingsearch.
+- [Microsoft Azure ImageVisualSearch API](https://apis.io/apis/microsoft-azure/microsoft-azure-imagevisualsearch-api/) — The ImageVisualSearch API from Microsoft Azure — 1 operation(s) for imagevisualsearch.
+- [Microsoft Azure ImportCollectorsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-importcollectorsoperations-api/) — The ImportCollectorsOperations API from Microsoft Azure — 2 operation(s) for importcollectorsoperations.
+- [Microsoft Azure ImportJobsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-importjobscontroller-api/) — The ImportJobsController API from Microsoft Azure — 8 operation(s) for importjobscontroller.
+- [Microsoft Azure ImportMachinesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-importmachinescontroller-api/) — The ImportMachinesController API from Microsoft Azure — 2 operation(s) for importmachinescontroller.
+- [Microsoft Azure ImportSitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-importsitescontroller-api/) — The ImportSitesController API from Microsoft Azure — 6 operation(s) for importsitescontroller.
+- [Microsoft Azure InboundEndpoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-inboundendpoints-api/) — The InboundEndpoints API from Microsoft Azure — 2 operation(s) for inboundendpoints.
+- [Microsoft Azure Indexers API](https://apis.io/apis/microsoft-azure/microsoft-azure-indexers-api/) — The Indexers API from Microsoft Azure — 5 operation(s) for indexers.
+- [Microsoft Azure Indexes API](https://apis.io/apis/microsoft-azure/microsoft-azure-indexes-api/) — The Indexes API from Microsoft Azure — 8 operation(s) for indexes.
+- [Microsoft Azure IndividualEnrollment API](https://apis.io/apis/microsoft-azure/microsoft-azure-individualenrollment-api/) — The IndividualEnrollment API from Microsoft Azure — 4 operation(s) for individualenrollment.
+- [Microsoft Azure Info API](https://apis.io/apis/microsoft-azure/microsoft-azure-info-api/) — The Info API from Microsoft Azure — 1 operation(s) for info.
+- [Microsoft Azure Infrastructure API](https://apis.io/apis/microsoft-azure/microsoft-azure-infrastructure-api/) — The Infrastructure API from Microsoft Azure — 2 operation(s) for infrastructure.
+- [Microsoft Azure Ingestion: API](https://apis.io/apis/microsoft-azure/microsoft-azure-ingestion-api/) — The Ingestion: API from Microsoft Azure — 2 operation(s) for ingestion:.
+- [Microsoft Azure IngestionJob API](https://apis.io/apis/microsoft-azure/microsoft-azure-ingestionjob-api/) — The IngestionJob API from Microsoft Azure — 1 operation(s) for ingestionjob.
+- [Microsoft Azure InsightAttachments API](https://apis.io/apis/microsoft-azure/microsoft-azure-insightattachments-api/) — The InsightAttachments API from Microsoft Azure — 3 operation(s) for insightattachments.
+- [Microsoft Azure Insights API](https://apis.io/apis/microsoft-azure/microsoft-azure-insights-api/) — The Insights API from Microsoft Azure — 3 operation(s) for insights.
+- [Microsoft Azure Instance API](https://apis.io/apis/microsoft-azure/microsoft-azure-instance-api/) — The Instance API from Microsoft Azure — 1 operation(s) for instance.
+- [Microsoft Azure Instances API](https://apis.io/apis/microsoft-azure/microsoft-azure-instances-api/) — The Instances API from Microsoft Azure — 10 operation(s) for instances.
+- [Microsoft Azure IntegrationAccountAgreements API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountagreements-api/) — The IntegrationAccountAgreements API from Microsoft Azure — 3 operation(s) for integrationaccountagreements.
+- [Microsoft Azure IntegrationAccountAssemblies API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountassemblies-api/) — The IntegrationAccountAssemblies API from Microsoft Azure — 3 operation(s) for integrationaccountassemblies.
+- [Microsoft Azure IntegrationAccountBatchConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountbatchconfigurations-api/) — The IntegrationAccountBatchConfigurations API from Microsoft Azure — 2 operation(s) for integrationaccountbatchconfigurations.
+- [Microsoft Azure IntegrationAccountCertificates API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountcertificates-api/) — The IntegrationAccountCertificates API from Microsoft Azure — 2 operation(s) for integrationaccountcertificates.
+- [Microsoft Azure IntegrationAccountMaps API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountmaps-api/) — The IntegrationAccountMaps API from Microsoft Azure — 3 operation(s) for integrationaccountmaps.
+- [Microsoft Azure IntegrationAccountPartners API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountpartners-api/) — The IntegrationAccountPartners API from Microsoft Azure — 3 operation(s) for integrationaccountpartners.
+- [Microsoft Azure IntegrationAccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccounts-api/) — The IntegrationAccounts API from Microsoft Azure — 7 operation(s) for integrationaccounts.
+- [Microsoft Azure IntegrationAccountSchemas API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountschemas-api/) — The IntegrationAccountSchemas API from Microsoft Azure — 3 operation(s) for integrationaccountschemas.
+- [Microsoft Azure IntegrationAccountSessions API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationaccountsessions-api/) — The IntegrationAccountSessions API from Microsoft Azure — 2 operation(s) for integrationaccountsessions.
+- [Microsoft Azure IntegrationRuntimes API](https://apis.io/apis/microsoft-azure/microsoft-azure-integrationruntimes-api/) — The IntegrationRuntimes API from Microsoft Azure — 7 operation(s) for integrationruntimes.
+- [Microsoft Azure Interactions API](https://apis.io/apis/microsoft-azure/microsoft-azure-interactions-api/) — The Interactions API from Microsoft Azure — 3 operation(s) for interactions.
+- [Microsoft Azure Invitation API](https://apis.io/apis/microsoft-azure/microsoft-azure-invitation-api/) — The Invitation API from Microsoft Azure — 2 operation(s) for invitation.
+- [Microsoft Azure Invoices API](https://apis.io/apis/microsoft-azure/microsoft-azure-invoices-api/) — The Invoices API from Microsoft Azure — 3 operation(s) for invoices.
+- [Microsoft Azure IotDpsResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-iotdpsresource-api/) — The IotDpsResource API from Microsoft Azure — 12 operation(s) for iotdpsresource.
+- [Microsoft Azure IscsiDisks API](https://apis.io/apis/microsoft-azure/microsoft-azure-iscsidisks-api/) — The IscsiDisks API from Microsoft Azure — 5 operation(s) for iscsidisks.
+- [Microsoft Azure IscsiServers API](https://apis.io/apis/microsoft-azure/microsoft-azure-iscsiservers-api/) — The IscsiServers API from Microsoft Azure — 6 operation(s) for iscsiservers.
+- [Microsoft Azure IscsiTargets API](https://apis.io/apis/microsoft-azure/microsoft-azure-iscsitargets-api/) — APIs for iSCSI target operations.
+- [Microsoft Azure ItemLevelRecoveryConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-itemlevelrecoveryconnections-api/) — The ItemLevelRecoveryConnections API from Microsoft Azure — 2 operation(s) for itemlevelrecoveryconnections.
+- [Microsoft Azure Items API](https://apis.io/apis/microsoft-azure/microsoft-azure-items-api/) — Operations for managing items (documents)
+- [Microsoft Azure JitRequests API](https://apis.io/apis/microsoft-azure/microsoft-azure-jitrequests-api/) — The JitRequests API from Microsoft Azure — 3 operation(s) for jitrequests.
+- [Microsoft Azure Job API](https://apis.io/apis/microsoft-azure/microsoft-azure-job-api/) — The Job API from Microsoft Azure — 18 operation(s) for job.
+- [Microsoft Azure JobCancellations API](https://apis.io/apis/microsoft-azure/microsoft-azure-jobcancellations-api/) — The JobCancellations API from Microsoft Azure — 1 operation(s) for jobcancellations.
+- [Microsoft Azure JobCollections API](https://apis.io/apis/microsoft-azure/microsoft-azure-jobcollections-api/) — The JobCollections API from Microsoft Azure — 5 operation(s) for jobcollections.
+- [Microsoft Azure JobOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-joboperationresults-api/) — The JobOperationResults API from Microsoft Azure — 1 operation(s) for joboperationresults.
+- [Microsoft Azure JobRuns API](https://apis.io/apis/microsoft-azure/microsoft-azure-jobruns-api/) — The JobRuns API from Microsoft Azure — 2 operation(s) for jobruns.
+- [Microsoft Azure Jobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-jobs-api/) — The Jobs API from Microsoft Azure — 45 operation(s) for jobs.
+- [Microsoft Azure Jobschedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-jobschedules-api/) — The Jobschedules API from Microsoft Azure — 6 operation(s) for jobschedules.
+- [Microsoft Azure JoinRequest API](https://apis.io/apis/microsoft-azure/microsoft-azure-joinrequest-api/) — The JoinRequest API from Microsoft Azure — 5 operation(s) for joinrequest.
+- [Microsoft Azure KafkaConnector API](https://apis.io/apis/microsoft-azure/microsoft-azure-kafkaconnector-api/) — The KafkaConnector API from Microsoft Azure — 2 operation(s) for kafkaconnector.
+- [Microsoft Azure KafkaConnectorTopicMap API](https://apis.io/apis/microsoft-azure/microsoft-azure-kafkaconnectortopicmap-api/) — The KafkaConnectorTopicMap API from Microsoft Azure — 2 operation(s) for kafkaconnectortopicmap.
+- [Microsoft Azure Key API](https://apis.io/apis/microsoft-azure/microsoft-azure-key-api/) — The Key API from Microsoft Azure — 2 operation(s) for key.
+- [Microsoft Azure Key Phrases API](https://apis.io/apis/microsoft-azure/microsoft-azure-keyphrases-api/) — The keyPhrases API from Microsoft Azure — 1 operation(s) for keyphrases.
+- [Microsoft Azure Keys API](https://apis.io/apis/microsoft-azure/microsoft-azure-keys-api/) — The Keys API from Microsoft Azure — 6 operation(s) for keys.
+- [Microsoft Azure KeyValues API](https://apis.io/apis/microsoft-azure/microsoft-azure-keyvalues-api/) — The KeyValues API from Microsoft Azure — 4 operation(s) for keyvalues.
+- [Microsoft Azure KeyVault API](https://apis.io/apis/microsoft-azure/microsoft-azure-keyvault-api/) — The KeyVault API from Microsoft Azure — 1 operation(s) for keyvault.
+- [Microsoft Azure Kpi API](https://apis.io/apis/microsoft-azure/microsoft-azure-kpi-api/) — The Kpi API from Microsoft Azure — 3 operation(s) for kpi.
+- [Microsoft Azure KubeEnvironments API](https://apis.io/apis/microsoft-azure/microsoft-azure-kubeenvironments-api/) — The KubeEnvironments API from Microsoft Azure — 3 operation(s) for kubeenvironments.
+- [Microsoft Azure L2 Connection API](https://apis.io/apis/microsoft-azure/microsoft-azure-l2-connection-api/) — The L2 Connection API from Microsoft Azure — 5 operation(s) for l2 connection.
+- [Microsoft Azure LabAccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-labaccounts-api/) — The LabAccounts API from Microsoft Azure — 5 operation(s) for labaccounts.
+- [Microsoft Azure Labels API](https://apis.io/apis/microsoft-azure/microsoft-azure-labels-api/) — The Labels API from Microsoft Azure — 3 operation(s) for labels.
+- [Microsoft Azure Labs API](https://apis.io/apis/microsoft-azure/microsoft-azure-labs-api/) — The Labs API from Microsoft Azure — 17 operation(s) for labs.
+- [Microsoft Azure Languages API](https://apis.io/apis/microsoft-azure/microsoft-azure-languages-api/) — The Languages API from Microsoft Azure — 2 operation(s) for languages.
+- [Microsoft Azure Largefacelists API](https://apis.io/apis/microsoft-azure/microsoft-azure-largefacelists-api/) — The Largefacelists API from Microsoft Azure — 6 operation(s) for largefacelists.
+- [Microsoft Azure Largepersongroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-largepersongroups-api/) — The Largepersongroups API from Microsoft Azure — 8 operation(s) for largepersongroups.
+- [Microsoft Azure Layout API](https://apis.io/apis/microsoft-azure/microsoft-azure-layout-api/) — The Layout API from Microsoft Azure — 2 operation(s) for layout.
+- [Microsoft Azure Ledger Identity API](https://apis.io/apis/microsoft-azure/microsoft-azure-ledgeridentity-api/) — The ledgerIdentity API from Microsoft Azure — 1 operation(s) for ledgeridentity.
+- [Microsoft Azure LegacyPeerings API](https://apis.io/apis/microsoft-azure/microsoft-azure-legacypeerings-api/) — The LegacyPeerings API from Microsoft Azure — 1 operation(s) for legacypeerings.
+- [Microsoft Azure Lineage API](https://apis.io/apis/microsoft-azure/microsoft-azure-lineage-api/) — The Lineage API from Microsoft Azure — 4 operation(s) for lineage.
+- [Microsoft Azure LinkedResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-linkedresources-api/) — The LinkedResources API from Microsoft Azure — 2 operation(s) for linkedresources.
+- [Microsoft Azure Linkers API](https://apis.io/apis/microsoft-azure/microsoft-azure-linkers-api/) — The Linkers API from Microsoft Azure — 7 operation(s) for linkers.
+- [Microsoft Azure Links API](https://apis.io/apis/microsoft-azure/microsoft-azure-links-api/) — The Links API from Microsoft Azure — 2 operation(s) for links.
+- [Microsoft Azure ListChanges API](https://apis.io/apis/microsoft-azure/microsoft-azure-listchanges-api/) — The ListChanges API from Microsoft Azure — 1 operation(s) for listchanges.
+- [Microsoft Azure ListManagementImage API](https://apis.io/apis/microsoft-azure/microsoft-azure-listmanagementimage-api/) — The ListManagementImage API from Microsoft Azure — 2 operation(s) for listmanagementimage.
+- [Microsoft Azure ListManagementImageLists API](https://apis.io/apis/microsoft-azure/microsoft-azure-listmanagementimagelists-api/) — The ListManagementImageLists API from Microsoft Azure — 3 operation(s) for listmanagementimagelists.
+- [Microsoft Azure ListManagementTerm API](https://apis.io/apis/microsoft-azure/microsoft-azure-listmanagementterm-api/) — The ListManagementTerm API from Microsoft Azure — 2 operation(s) for listmanagementterm.
+- [Microsoft Azure ListManagementTermLists API](https://apis.io/apis/microsoft-azure/microsoft-azure-listmanagementtermlists-api/) — The ListManagementTermLists API from Microsoft Azure — 3 operation(s) for listmanagementtermlists.
+- [Microsoft Azure ListQnAMakerEndpointKeys API](https://apis.io/apis/microsoft-azure/microsoft-azure-listqnamakerendpointkeys-api/) — The ListQnAMakerEndpointKeys API from Microsoft Azure — 1 operation(s) for listqnamakerendpointkeys.
+- [Microsoft Azure ListServiceProviders API](https://apis.io/apis/microsoft-azure/microsoft-azure-listserviceproviders-api/) — The ListServiceProviders API from Microsoft Azure — 1 operation(s) for listserviceproviders.
+- [Microsoft Azure ListSnapshots API](https://apis.io/apis/microsoft-azure/microsoft-azure-listsnapshots-api/) — The ListSnapshots API from Microsoft Azure — 1 operation(s) for listsnapshots.
+- [Microsoft Azure LocalNetworkGateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-localnetworkgateways-api/) — The LocalNetworkGateways API from Microsoft Azure — 3 operation(s) for localnetworkgateways.
+- [Microsoft Azure LocalRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-localrules-api/) — The LocalRules API from Microsoft Azure — 5 operation(s) for localrules.
+- [Microsoft Azure LocalRulestacks API](https://apis.io/apis/microsoft-azure/microsoft-azure-localrulestacks-api/) — The LocalRulestacks API from Microsoft Azure — 13 operation(s) for localrulestacks.
+- [Microsoft Azure LocalSearch API](https://apis.io/apis/microsoft-azure/microsoft-azure-localsearch-api/) — The LocalSearch API from Microsoft Azure — 1 operation(s) for localsearch.
+- [Microsoft Azure Location API](https://apis.io/apis/microsoft-azure/microsoft-azure-location-api/) — The Location API from Microsoft Azure — 5 operation(s) for location.
+- [Microsoft Azure LocationBasedCapabilities API](https://apis.io/apis/microsoft-azure/microsoft-azure-locationbasedcapabilities-api/) — The LocationBasedCapabilities API from Microsoft Azure — 1 operation(s) for locationbasedcapabilities.
+- [Microsoft Azure LocationBasedCapability API](https://apis.io/apis/microsoft-azure/microsoft-azure-locationbasedcapability-api/) — The LocationBasedCapability API from Microsoft Azure — 2 operation(s) for locationbasedcapability.
+- [Microsoft Azure LocationBasedPerformanceTier API](https://apis.io/apis/microsoft-azure/microsoft-azure-locationbasedperformancetier-api/) — The LocationBasedPerformanceTier API from Microsoft Azure — 1 operation(s) for locationbasedperformancetier.
+- [Microsoft Azure LocationBasedRecommendedActionSessionsOperationStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-locationbasedrecommendedactionsessionsoperationstatus-api/) — The LocationBasedRecommendedActionSessionsOperationStatus API from Microsoft Azure — 1 operation(s) for locationbasedrecommendedactionsessionsoperationstatus.
+- [Microsoft Azure LocationBasedRecommendedActionSessionsResult API](https://apis.io/apis/microsoft-azure/microsoft-azure-locationbasedrecommendedactionsessionsresult-api/) — The LocationBasedRecommendedActionSessionsResult API from Microsoft Azure — 1 operation(s) for locationbasedrecommendedactionsessionsresult.
+- [Microsoft Azure Locations API](https://apis.io/apis/microsoft-azure/microsoft-azure-locations-api/) — The Locations API from Microsoft Azure — 6 operation(s) for locations.
+- [Microsoft Azure LocationUsage API](https://apis.io/apis/microsoft-azure/microsoft-azure-locationusage-api/) — The LocationUsage API from Microsoft Azure — 1 operation(s) for locationusage.
+- [Microsoft Azure Locks API](https://apis.io/apis/microsoft-azure/microsoft-azure-locks-api/) — The Locks API from Microsoft Azure — 1 operation(s) for locks.
+- [Microsoft Azure LogFiles API](https://apis.io/apis/microsoft-azure/microsoft-azure-logfiles-api/) — The LogFiles API from Microsoft Azure — 1 operation(s) for logfiles.
+- [Microsoft Azure LogsV1Dot1Preview2 API](https://apis.io/apis/microsoft-azure/microsoft-azure-logsv1dot1preview2-api/) — Manages reinforcement learning logs.
+- [Microsoft Azure Long Running Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-long-running-operations-api/) — The Long Running Operations API from Microsoft Azure — 1 operation(s) for long running operations.
+- [Microsoft Azure MachineExtensions API](https://apis.io/apis/microsoft-azure/microsoft-azure-machineextensions-api/) — The MachineExtensions API from Microsoft Azure — 4 operation(s) for machineextensions.
+- [Microsoft Azure MachineExtensions Upgrade API](https://apis.io/apis/microsoft-azure/microsoft-azure-machineextensions-upgrade-api/) — The MachineExtensions Upgrade API from Microsoft Azure — 1 operation(s) for machineextensions upgrade.
+- [Microsoft Azure MachineLearningComputeOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-machinelearningcomputeoperations-api/) — The MachineLearningComputeOperations API from Microsoft Azure — 1 operation(s) for machinelearningcomputeoperations.
+- [Microsoft Azure Machines API](https://apis.io/apis/microsoft-azure/microsoft-azure-machines-api/) — The Machines API from Microsoft Azure — 9 operation(s) for machines.
+- [Microsoft Azure MachinesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-machinescontroller-api/) — The MachinesController API from Microsoft Azure — 6 operation(s) for machinescontroller.
+- [Microsoft Azure MachinesOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-machinesoperations-api/) — The MachinesOperations API from Microsoft Azure — 2 operation(s) for machinesoperations.
+- [Microsoft Azure MaintenanceConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-maintenanceconfigurations-api/) — The MaintenanceConfigurations API from Microsoft Azure — 3 operation(s) for maintenanceconfigurations.
+- [Microsoft Azure Manage Purchased Phone Numbers API](https://apis.io/apis/microsoft-azure/microsoft-azure-manage-purchased-phone-numbers-api/) — The Manage Purchased Phone Numbers API from Microsoft Azure — 3 operation(s) for manage purchased phone numbers.
+- [Microsoft Azure Managed APIs API](https://apis.io/apis/microsoft-azure/microsoft-azure-managed-apis-api/) — The Managed APIs API from Microsoft Azure — 2 operation(s) for managed apis.
+- [Microsoft Azure Managed CCF API](https://apis.io/apis/microsoft-azure/microsoft-azure-managed-ccf-api/) — The Managed CCF API from Microsoft Azure — 5 operation(s) for managed ccf.
+- [Microsoft Azure Managed Clusters API](https://apis.io/apis/microsoft-azure/microsoft-azure-managed-clusters-api/) — Operations for managing AKS clusters
+- [Microsoft Azure ManagedHostingEnvironments API](https://apis.io/apis/microsoft-azure/microsoft-azure-managedhostingenvironments-api/) — The ManagedHostingEnvironments API from Microsoft Azure — 7 operation(s) for managedhostingenvironments.
+- [Microsoft Azure ManagedNetwork API](https://apis.io/apis/microsoft-azure/microsoft-azure-managednetwork-api/) — The ManagedNetwork API from Microsoft Azure — 3 operation(s) for managednetwork.
+- [Microsoft Azure ManagedNetworkGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-managednetworkgroups-api/) — The ManagedNetworkGroups API from Microsoft Azure — 2 operation(s) for managednetworkgroups.
+- [Microsoft Azure ManagedNetworkPeeringPolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-managednetworkpeeringpolicies-api/) — The ManagedNetworkPeeringPolicies API from Microsoft Azure — 2 operation(s) for managednetworkpeeringpolicies.
+- [Microsoft Azure ManagedNetworks API](https://apis.io/apis/microsoft-azure/microsoft-azure-managednetworks-api/) — The ManagedNetworks API from Microsoft Azure — 3 operation(s) for managednetworks.
+- [Microsoft Azure ManagedPrivateEndpoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-managedprivateendpoints-api/) — The ManagedPrivateEndpoints API from Microsoft Azure — 2 operation(s) for managedprivateendpoints.
+- [Microsoft Azure ManagedVirtualNetworks API](https://apis.io/apis/microsoft-azure/microsoft-azure-managedvirtualnetworks-api/) — The ManagedVirtualNetworks API from Microsoft Azure — 4 operation(s) for managedvirtualnetworks.
+- [Microsoft Azure ManagementAssociation API](https://apis.io/apis/microsoft-azure/microsoft-azure-managementassociation-api/) — The ManagementAssociation API from Microsoft Azure — 2 operation(s) for managementassociation.
+- [Microsoft Azure ManagementConfiguration API](https://apis.io/apis/microsoft-azure/microsoft-azure-managementconfiguration-api/) — The ManagementConfiguration API from Microsoft Azure — 2 operation(s) for managementconfiguration.
+- [Microsoft Azure ManagementGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-managementgroups-api/) — A Management Group is a customer defined scope (grouping mechanism) that provides access control (authorization), policy management and reporting.…
+- [Microsoft Azure ManagementLocks API](https://apis.io/apis/microsoft-azure/microsoft-azure-managementlocks-api/) — The ManagementLocks API from Microsoft Azure — 8 operation(s) for managementlocks.
+- [Microsoft Azure ManagementZones API](https://apis.io/apis/microsoft-azure/microsoft-azure-managementzones-api/) — The ManagementZones API from Microsoft Azure — 4 operation(s) for managementzones.
+- [Microsoft Azure Managers API](https://apis.io/apis/microsoft-azure/microsoft-azure-managers-api/) — The Managers API from Microsoft Azure — 14 operation(s) for managers.
+- [Microsoft Azure Manifest API](https://apis.io/apis/microsoft-azure/microsoft-azure-manifest-api/) — Everything about manifests
+- [Microsoft Azure Map API](https://apis.io/apis/microsoft-azure/microsoft-azure-map-api/) — The Map API from Microsoft Azure — 3 operation(s) for map.
+- [Microsoft Azure Maps API](https://apis.io/apis/microsoft-azure/microsoft-azure-maps-api/) — The Maps API from Microsoft Azure — 1 operation(s) for maps.
+- [Microsoft Azure MarketplaceImageOffer API](https://apis.io/apis/microsoft-azure/microsoft-azure-marketplaceimageoffer-api/) — The MarketplaceImageOffer API from Microsoft Azure — 2 operation(s) for marketplaceimageoffer.
+- [Microsoft Azure MarketplaceImagePublisher API](https://apis.io/apis/microsoft-azure/microsoft-azure-marketplaceimagepublisher-api/) — The MarketplaceImagePublisher API from Microsoft Azure — 1 operation(s) for marketplaceimagepublisher.
+- [Microsoft Azure MarketplaceImageSasToken API](https://apis.io/apis/microsoft-azure/microsoft-azure-marketplaceimagesastoken-api/) — The MarketplaceImageSasToken API from Microsoft Azure — 1 operation(s) for marketplaceimagesastoken.
+- [Microsoft Azure MarketplaceImageSku API](https://apis.io/apis/microsoft-azure/microsoft-azure-marketplaceimagesku-api/) — The MarketplaceImageSku API from Microsoft Azure — 1 operation(s) for marketplaceimagesku.
+- [Microsoft Azure MarketplaceImageVersion API](https://apis.io/apis/microsoft-azure/microsoft-azure-marketplaceimageversion-api/) — The MarketplaceImageVersion API from Microsoft Azure — 2 operation(s) for marketplaceimageversion.
+- [Microsoft Azure Marketplaces API](https://apis.io/apis/microsoft-azure/microsoft-azure-marketplaces-api/) — The Marketplaces API from Microsoft Azure — 1 operation(s) for marketplaces.
+- [Microsoft Azure MasterSitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-mastersitescontroller-api/) — The MasterSitesController API from Microsoft Azure — 4 operation(s) for mastersitescontroller.
+- [Microsoft Azure MasterSitesOperationsStatusController API](https://apis.io/apis/microsoft-azure/microsoft-azure-mastersitesoperationsstatuscontroller-api/) — The MasterSitesOperationsStatusController API from Microsoft Azure — 1 operation(s) for mastersitesoperationsstatuscontroller.
+- [Microsoft Azure MediaComposition API](https://apis.io/apis/microsoft-azure/microsoft-azure-mediacomposition-api/) — The MediaComposition API from Microsoft Azure — 3 operation(s) for mediacomposition.
+- [Microsoft Azure MeshApplications API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshapplications-api/) — The MeshApplications API from Microsoft Azure — 3 operation(s) for meshapplications.
+- [Microsoft Azure MeshCodePackages API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshcodepackages-api/) — The MeshCodePackages API from Microsoft Azure — 1 operation(s) for meshcodepackages.
+- [Microsoft Azure MeshGateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshgateways-api/) — The MeshGateways API from Microsoft Azure — 2 operation(s) for meshgateways.
+- [Microsoft Azure MeshNetworks API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshnetworks-api/) — The MeshNetworks API from Microsoft Azure — 2 operation(s) for meshnetworks.
+- [Microsoft Azure MeshSecrets API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshsecrets-api/) — The MeshSecrets API from Microsoft Azure — 2 operation(s) for meshsecrets.
+- [Microsoft Azure MeshSecretValues API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshsecretvalues-api/) — The MeshSecretValues API from Microsoft Azure — 3 operation(s) for meshsecretvalues.
+- [Microsoft Azure MeshServiceReplicas API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshservicereplicas-api/) — The MeshServiceReplicas API from Microsoft Azure — 2 operation(s) for meshservicereplicas.
+- [Microsoft Azure MeshServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshservices-api/) — The MeshServices API from Microsoft Azure — 2 operation(s) for meshservices.
+- [Microsoft Azure MeshVolumes API](https://apis.io/apis/microsoft-azure/microsoft-azure-meshvolumes-api/) — The MeshVolumes API from Microsoft Azure — 2 operation(s) for meshvolumes.
+- [Microsoft Azure Messages API](https://apis.io/apis/microsoft-azure/microsoft-azure-messages-api/) — The Messages API from Microsoft Azure — 2 operation(s) for messages.
+- [Microsoft Azure Metadata API](https://apis.io/apis/microsoft-azure/microsoft-azure-metadata-api/) — The Metadata API from Microsoft Azure — 2 operation(s) for metadata.
+- [Microsoft Azure Metric API](https://apis.io/apis/microsoft-azure/microsoft-azure-metric-api/) — The Metric API from Microsoft Azure — 5 operation(s) for metric.
+- [Microsoft Azure Metrics API](https://apis.io/apis/microsoft-azure/microsoft-azure-metrics-api/) — The Metrics API from Microsoft Azure — 13 operation(s) for metrics.
+- [Microsoft Azure Microsoft Azure Blob Storage API](https://apis.io/apis/microsoft-azure/microsoft-azure-microsoft-azure-azure-blob-storage-api-api/) — The Microsoft Azure Azure Blob Storage API API from Microsoft Azure — 1 operation(s) for microsoft azure azure blob storage api.
+- [Microsoft Azure Microsoft Azure ML Chat API](https://apis.io/apis/microsoft-azure/microsoft-azure-microsoft-azure-azure-ml-chat-api/) — The Microsoft Azure Azure ML Chat API from Microsoft Azure — 1 operation(s) for microsoft azure azure ml chat.
+- [Microsoft Azure MidConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-midconnections-api/) — The MidConnections API from Microsoft Azure — 10 operation(s) for midconnections.
+- [Microsoft Azure MigrateAgent API](https://apis.io/apis/microsoft-azure/microsoft-azure-migrateagent-api/) — MigrateAgent Controller.
+- [Microsoft Azure MigrateProjectsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-migrateprojectscontroller-api/) — The MigrateProjectsController API from Microsoft Azure — 4 operation(s) for migrateprojectscontroller.
+- [Microsoft Azure MigrationRecoveryPoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-migrationrecoverypoints-api/) — The MigrationRecoveryPoints API from Microsoft Azure — 2 operation(s) for migrationrecoverypoints.
+- [Microsoft Azure MigrationServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-migrationservices-api/) — The MigrationServices API from Microsoft Azure — 4 operation(s) for migrationservices.
+- [Microsoft Azure Model API](https://apis.io/apis/microsoft-azure/microsoft-azure-model-api/) — The Model API from Microsoft Azure — 8 operation(s) for model.
+- [Microsoft Azure ModelInference API](https://apis.io/apis/microsoft-azure/microsoft-azure-modelinference-api/) — The ModelInference API from Microsoft Azure — 3 operation(s) for modelinference.
+- [Microsoft Azure Models API](https://apis.io/apis/microsoft-azure/microsoft-azure-models-api/) — Operations for listing available models
+- [Microsoft Azure ModelV1Dot1Preview3 API](https://apis.io/apis/microsoft-azure/microsoft-azure-modelv1dot1preview3-api/) — Manages reinforcement learning configuration operations.
+- [Microsoft Azure ModernizeProject API](https://apis.io/apis/microsoft-azure/microsoft-azure-modernizeproject-api/) — ModernizeProject Controller.
+- [Microsoft Azure MongoClusterOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-mongoclusteroperations-api/) — The MongoClusterOperations API from Microsoft Azure — 1 operation(s) for mongoclusteroperations.
+- [Microsoft Azure MongoClusters API](https://apis.io/apis/microsoft-azure/microsoft-azure-mongoclusters-api/) — The MongoClusters API from Microsoft Azure — 4 operation(s) for mongoclusters.
+- [Microsoft Azure MonitoredSubscriptions API](https://apis.io/apis/microsoft-azure/microsoft-azure-monitoredsubscriptions-api/) — The MonitoredSubscriptions API from Microsoft Azure — 2 operation(s) for monitoredsubscriptions.
+- [Microsoft Azure Monitoring API](https://apis.io/apis/microsoft-azure/microsoft-azure-monitoring-api/) — The Monitoring API from Microsoft Azure — 2 operation(s) for monitoring.
+- [Microsoft Azure MonitoringConfig API](https://apis.io/apis/microsoft-azure/microsoft-azure-monitoringconfig-api/) — The MonitoringConfig API from Microsoft Azure — 2 operation(s) for monitoringconfig.
+- [Microsoft Azure Monitors API](https://apis.io/apis/microsoft-azure/microsoft-azure-monitors-api/) — The Monitors API from Microsoft Azure — 25 operation(s) for monitors.
+- [Microsoft Azure MonitorsResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-monitorsresource-api/) — The MonitorsResource API from Microsoft Azure — 8 operation(s) for monitorsresource.
+- [Microsoft Azure MonitorUpgradableVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-monitorupgradableversions-api/) — The MonitorUpgradableVersions API from Microsoft Azure — 1 operation(s) for monitorupgradableversions.
+- [Microsoft Azure MoveCollections API](https://apis.io/apis/microsoft-azure/microsoft-azure-movecollections-api/) — The MoveCollections API from Microsoft Azure — 9 operation(s) for movecollections.
+- [Microsoft Azure MoveResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-moveresources-api/) — The MoveResources API from Microsoft Azure — 1 operation(s) for moveresources.
+- [Microsoft Azure Mq API](https://apis.io/apis/microsoft-azure/microsoft-azure-mq-api/) — The Mq API from Microsoft Azure — 3 operation(s) for mq.
+- [Microsoft Azure MqttBridgeConnector API](https://apis.io/apis/microsoft-azure/microsoft-azure-mqttbridgeconnector-api/) — The MqttBridgeConnector API from Microsoft Azure — 2 operation(s) for mqttbridgeconnector.
+- [Microsoft Azure MqttBridgeTopicMap API](https://apis.io/apis/microsoft-azure/microsoft-azure-mqttbridgetopicmap-api/) — The MqttBridgeTopicMap API from Microsoft Azure — 2 operation(s) for mqttbridgetopicmap.
+- [Microsoft Azure MsixImage API](https://apis.io/apis/microsoft-azure/microsoft-azure-msiximage-api/) — The MsixImage API from Microsoft Azure — 1 operation(s) for msiximage.
+- [Microsoft Azure MSIXPackage API](https://apis.io/apis/microsoft-azure/microsoft-azure-msixpackage-api/) — The MSIXPackage API from Microsoft Azure — 2 operation(s) for msixpackage.
+- [Microsoft Azure MultipleActivationKeys API](https://apis.io/apis/microsoft-azure/microsoft-azure-multipleactivationkeys-api/) — The MultipleActivationKeys API from Microsoft Azure — 3 operation(s) for multipleactivationkeys.
+- [Microsoft Azure MultiSlotEvents API](https://apis.io/apis/microsoft-azure/microsoft-azure-multislotevents-api/) — Manages multi-slot event operations.
+- [Microsoft Azure MultiSlotRank API](https://apis.io/apis/microsoft-azure/microsoft-azure-multislotrank-api/) — Manages multi-slot ranking operations.
+- [Microsoft Azure Multivariate API](https://apis.io/apis/microsoft-azure/microsoft-azure-multivariate-api/) — The Multivariate API from Microsoft Azure — 5 operation(s) for multivariate.
+- [Microsoft Azure NameAvailability API](https://apis.io/apis/microsoft-azure/microsoft-azure-nameavailability-api/) — The NameAvailability API from Microsoft Azure — 2 operation(s) for nameavailability.
+- [Microsoft Azure NamedValue API](https://apis.io/apis/microsoft-azure/microsoft-azure-namedvalue-api/) — The NamedValue API from Microsoft Azure — 4 operation(s) for namedvalue.
+- [Microsoft Azure Namespaces API](https://apis.io/apis/microsoft-azure/microsoft-azure-namespaces-api/) — The Namespaces API from Microsoft Azure — 13 operation(s) for namespaces.
+- [Microsoft Azure NetApp Accounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-netapp-accounts-api/) — The NetApp Accounts API from Microsoft Azure — 5 operation(s) for netapp accounts.
+- [Microsoft Azure NetApp Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-netapp-resource-api/) — The NetApp Resource API from Microsoft Azure — 10 operation(s) for netapp resource.
+- [Microsoft Azure Network Connections API](https://apis.io/apis/microsoft-azure/microsoft-azure-network-connections-api/) — The Network Connections API from Microsoft Azure — 5 operation(s) for network connections.
+- [Microsoft Azure Network Settings API](https://apis.io/apis/microsoft-azure/microsoft-azure-network-settings-api/) — The Network Settings API from Microsoft Azure — 1 operation(s) for network settings.
+- [Microsoft Azure NetworkExperimentProfiles API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkexperimentprofiles-api/) — The configuration of Network Experiment profiles
+- [Microsoft Azure NetworkFunctions API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkfunctions-api/) — The NetworkFunctions API from Microsoft Azure — 3 operation(s) for networkfunctions.
+- [Microsoft Azure NetworkGroupMemberships_List API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkgroupmemberships-list-api/) — The NetworkGroupMemberships_List API from Microsoft Azure — 1 operation(s) for networkgroupmemberships_list.
+- [Microsoft Azure NetworkGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkgroups-api/) — The NetworkGroups API from Microsoft Azure — 3 operation(s) for networkgroups.
+- [Microsoft Azure NetworkManagerActiveConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkmanageractiveconfigurations-api/) — The NetworkManagerActiveConfigurations API from Microsoft Azure — 1 operation(s) for networkmanageractiveconfigurations.
+- [Microsoft Azure NetworkManagerActiveConnectivityConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkmanageractiveconnectivityconfigurations-api/) — The NetworkManagerActiveConnectivityConfigurations API from Microsoft Azure — 1 operation(s) for networkmanageractiveconnectivityconfigurations.
+- [Microsoft Azure NetworkManagerActiveSecurityUserRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkmanageractivesecurityuserrules-api/) — The NetworkManagerActiveSecurityUserRules API from Microsoft Azure — 1 operation(s) for networkmanageractivesecurityuserrules.
+- [Microsoft Azure NetworkManagerEffectiveConnectivityConfiguration API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkmanagereffectiveconnectivityconfiguration-api/) — The NetworkManagerEffectiveConnectivityConfiguration API from Microsoft Azure — 1 operation(s) for networkmanagereffectiveconnectivityconfiguration.
+- [Microsoft Azure NetworkManagerEffectiveSecurityAdminRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkmanagereffectivesecurityadminrules-api/) — The NetworkManagerEffectiveSecurityAdminRules API from Microsoft Azure — 1 operation(s) for networkmanagereffectivesecurityadminrules.
+- [Microsoft Azure NetworkManagers API](https://apis.io/apis/microsoft-azure/microsoft-azure-networkmanagers-api/) — The NetworkManagers API from Microsoft Azure — 6 operation(s) for networkmanagers.
+- [Microsoft Azure Networks API](https://apis.io/apis/microsoft-azure/microsoft-azure-networks-api/) — The Networks API from Microsoft Azure — 3 operation(s) for networks.
+- [Microsoft Azure NetworkSecurityGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-networksecuritygroups-api/) — The NetworkSecurityGroups API from Microsoft Azure — 3 operation(s) for networksecuritygroups.
+- [Microsoft Azure NetworkSecurityPerimeterConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-networksecurityperimeterconfigurations-api/) — The NetworkSecurityPerimeterConfigurations API from Microsoft Azure — 3 operation(s) for networksecurityperimeterconfigurations.
+- [Microsoft Azure NetworkSecurityPerimeters API](https://apis.io/apis/microsoft-azure/microsoft-azure-networksecurityperimeters-api/) — The NetworkSecurityPerimeters API from Microsoft Azure — 3 operation(s) for networksecurityperimeters.
+- [Microsoft Azure NewsTrendingTopics API](https://apis.io/apis/microsoft-azure/microsoft-azure-newstrendingtopics-api/) — The NewsTrendingTopics API from Microsoft Azure — 1 operation(s) for newstrendingtopics.
+- [Microsoft Azure NginxCertificate API](https://apis.io/apis/microsoft-azure/microsoft-azure-nginxcertificate-api/) — The NginxCertificate API from Microsoft Azure — 2 operation(s) for nginxcertificate.
+- [Microsoft Azure NginxConfiguration API](https://apis.io/apis/microsoft-azure/microsoft-azure-nginxconfiguration-api/) — The NginxConfiguration API from Microsoft Azure — 2 operation(s) for nginxconfiguration.
+- [Microsoft Azure NginxDeployment API](https://apis.io/apis/microsoft-azure/microsoft-azure-nginxdeployment-api/) — The NginxDeployment API from Microsoft Azure — 4 operation(s) for nginxdeployment.
+- [Microsoft Azure Node API](https://apis.io/apis/microsoft-azure/microsoft-azure-node-api/) — The Node API from Microsoft Azure — 14 operation(s) for node.
+- [Microsoft Azure Nodecounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-nodecounts-api/) — The Nodecounts API from Microsoft Azure — 1 operation(s) for nodecounts.
+- [Microsoft Azure Nodes API](https://apis.io/apis/microsoft-azure/microsoft-azure-nodes-api/) — The Nodes API from Microsoft Azure — 1 operation(s) for nodes.
+- [Microsoft Azure Notification API](https://apis.io/apis/microsoft-azure/microsoft-azure-notification-api/) — The Notification API from Microsoft Azure — 4 operation(s) for notification.
+- [Microsoft Azure NotificationHubs API](https://apis.io/apis/microsoft-azure/microsoft-azure-notificationhubs-api/) — The NotificationHubs API from Microsoft Azure — 9 operation(s) for notificationhubs.
+- [Microsoft Azure NotificationRecipientEmail API](https://apis.io/apis/microsoft-azure/microsoft-azure-notificationrecipientemail-api/) — The NotificationRecipientEmail API from Microsoft Azure — 2 operation(s) for notificationrecipientemail.
+- [Microsoft Azure NotificationRecipientUser API](https://apis.io/apis/microsoft-azure/microsoft-azure-notificationrecipientuser-api/) — The NotificationRecipientUser API from Microsoft Azure — 2 operation(s) for notificationrecipientuser.
+- [Microsoft Azure NotificationRegistration API](https://apis.io/apis/microsoft-azure/microsoft-azure-notificationregistration-api/) — The NotificationRegistration API from Microsoft Azure — 2 operation(s) for notificationregistration.
+- [Microsoft Azure Notifications API](https://apis.io/apis/microsoft-azure/microsoft-azure-notifications-api/) — The Notifications API from Microsoft Azure — 1 operation(s) for notifications.
+- [Microsoft Azure NrfDeployments API](https://apis.io/apis/microsoft-azure/microsoft-azure-nrfdeployments-api/) — The NrfDeployments API from Microsoft Azure — 3 operation(s) for nrfdeployments.
+- [Microsoft Azure NspAccessRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-nspaccessrules-api/) — The NspAccessRules API from Microsoft Azure — 2 operation(s) for nspaccessrules.
+- [Microsoft Azure NspAccessRulesReconcile API](https://apis.io/apis/microsoft-azure/microsoft-azure-nspaccessrulesreconcile-api/) — The NspAccessRulesReconcile API from Microsoft Azure — 1 operation(s) for nspaccessrulesreconcile.
+- [Microsoft Azure NspAssociationReconcile API](https://apis.io/apis/microsoft-azure/microsoft-azure-nspassociationreconcile-api/) — The NspAssociationReconcile API from Microsoft Azure — 1 operation(s) for nspassociationreconcile.
+- [Microsoft Azure NspAssociations API](https://apis.io/apis/microsoft-azure/microsoft-azure-nspassociations-api/) — The NspAssociations API from Microsoft Azure — 2 operation(s) for nspassociations.
+- [Microsoft Azure NspLinkReferences API](https://apis.io/apis/microsoft-azure/microsoft-azure-nsplinkreferences-api/) — The NspLinkReferences API from Microsoft Azure — 2 operation(s) for nsplinkreferences.
+- [Microsoft Azure NspLinks API](https://apis.io/apis/microsoft-azure/microsoft-azure-nsplinks-api/) — The NspLinks API from Microsoft Azure — 2 operation(s) for nsplinks.
+- [Microsoft Azure NspProfiles API](https://apis.io/apis/microsoft-azure/microsoft-azure-nspprofiles-api/) — The NspProfiles API from Microsoft Azure — 2 operation(s) for nspprofiles.
+- [Microsoft Azure NssfDeployments API](https://apis.io/apis/microsoft-azure/microsoft-azure-nssfdeployments-api/) — The NssfDeployments API from Microsoft Azure — 3 operation(s) for nssfdeployments.
+- [Microsoft Azure Number API](https://apis.io/apis/microsoft-azure/microsoft-azure-number-api/) — The Number API from Microsoft Azure — 4 operation(s) for number.
+- [Microsoft Azure Number Verification API](https://apis.io/apis/microsoft-azure/microsoft-azure-number-verification-api/) — The Number Verification API from Microsoft Azure — 1 operation(s) for number verification.
+- [Microsoft Azure NumberRoutingValidation API](https://apis.io/apis/microsoft-azure/microsoft-azure-numberroutingvalidation-api/) — The NumberRoutingValidation API from Microsoft Azure — 1 operation(s) for numberroutingvalidation.
+- [Microsoft Azure Numbers API](https://apis.io/apis/microsoft-azure/microsoft-azure-numbers-api/) — The Numbers API from Microsoft Azure — 1 operation(s) for numbers.
+- [Microsoft Azure NutrientAnalyses API](https://apis.io/apis/microsoft-azure/microsoft-azure-nutrientanalyses-api/) — The NutrientAnalyses API from Microsoft Azure — 3 operation(s) for nutrientanalyses.
+- [Microsoft Azure OAuth2PermissionGrant_Create API](https://apis.io/apis/microsoft-azure/microsoft-azure-oauth2permissiongrant-create-api/) — The OAuth2PermissionGrant_Create API from Microsoft Azure — 1 operation(s) for oauth2permissiongrant_create.
+- [Microsoft Azure OAuth2PermissionGrant_delete API](https://apis.io/apis/microsoft-azure/microsoft-azure-oauth2permissiongrant-delete-api/) — The OAuth2PermissionGrant_delete API from Microsoft Azure — 1 operation(s) for oauth2permissiongrant_delete.
+- [Microsoft Azure OAuth2PermissionGrant_List API](https://apis.io/apis/microsoft-azure/microsoft-azure-oauth2permissiongrant-list-api/) — The OAuth2PermissionGrant_List API from Microsoft Azure — 1 operation(s) for oauth2permissiongrant_list.
+- [Microsoft Azure Objects API](https://apis.io/apis/microsoft-azure/microsoft-azure-objects-api/) — The Objects API from Microsoft Azure — 1 operation(s) for objects.
+- [Microsoft Azure ObservabilityServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-observabilityservices-api/) — The ObservabilityServices API from Microsoft Azure — 3 operation(s) for observabilityservices.
+- [Microsoft Azure Ocr API](https://apis.io/apis/microsoft-azure/microsoft-azure-ocr-api/) — The Ocr API from Microsoft Azure — 1 operation(s) for ocr.
+- [Microsoft Azure OEPResourcePartition API](https://apis.io/apis/microsoft-azure/microsoft-azure-oepresourcepartition-api/) — The OEPResourcePartition API from Microsoft Azure — 3 operation(s) for oepresourcepartition.
+- [Microsoft Azure OncoPhenotype API](https://apis.io/apis/microsoft-azure/microsoft-azure-oncophenotype-api/) — The OncoPhenotype API from Microsoft Azure — 4 operation(s) for oncophenotype.
+- [Microsoft Azure OpenAIIntegration API](https://apis.io/apis/microsoft-azure/microsoft-azure-openaiintegration-api/) — The OpenAIIntegration API from Microsoft Azure — 3 operation(s) for openaiintegration.
+- [Microsoft Azure OpenID Metadata Discovery API](https://apis.io/apis/microsoft-azure/microsoft-azure-openid-metadata-discovery-api/) — The OpenID Metadata Discovery API from Microsoft Azure — 2 operation(s) for openid metadata discovery.
+- [Microsoft Azure OpenShiftClusters API](https://apis.io/apis/microsoft-azure/microsoft-azure-openshiftclusters-api/) — The OpenShiftClusters API from Microsoft Azure — 5 operation(s) for openshiftclusters.
+- [Microsoft Azure Operation API](https://apis.io/apis/microsoft-azure/microsoft-azure-operation-api/) — The Operation API from Microsoft Azure — 9 operation(s) for operation.
+- [Microsoft Azure Operation Status API](https://apis.io/apis/microsoft-azure/microsoft-azure-operation-status-api/) — The Operation Status API from Microsoft Azure — 2 operation(s) for operation status.
+- [Microsoft Azure OperationalizationClusters API](https://apis.io/apis/microsoft-azure/microsoft-azure-operationalizationclusters-api/) — The OperationalizationClusters API from Microsoft Azure — 8 operation(s) for operationalizationclusters.
+- [Microsoft Azure OperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-operationresults-api/) — The OperationResults API from Microsoft Azure — 3 operation(s) for operationresults.
+- [Microsoft Azure Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-operations-api/) — The Operations API from Microsoft Azure — 168 operation(s) for operations.
+- [Microsoft Azure Operations in a Cluster API](https://apis.io/apis/microsoft-azure/microsoft-azure-operations-in-a-cluster-api/) — The Operations in a Cluster API from Microsoft Azure — 1 operation(s) for operations in a cluster.
+- [Microsoft Azure OperationsDiscovery API](https://apis.io/apis/microsoft-azure/microsoft-azure-operationsdiscovery-api/) — The OperationsDiscovery API from Microsoft Azure — 1 operation(s) for operationsdiscovery.
+- [Microsoft Azure OperationsStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-operationsstatus-api/) — The OperationsStatus API from Microsoft Azure — 2 operation(s) for operationsstatus.
+- [Microsoft Azure Operator API](https://apis.io/apis/microsoft-azure/microsoft-azure-operator-api/) — The Operator API from Microsoft Azure — 1 operation(s) for operator.
+- [Microsoft Azure OrchestratorInstance API](https://apis.io/apis/microsoft-azure/microsoft-azure-orchestratorinstance-api/) — The OrchestratorInstance API from Microsoft Azure — 1 operation(s) for orchestratorinstance.
+- [Microsoft Azure OrchestratorInstanceList API](https://apis.io/apis/microsoft-azure/microsoft-azure-orchestratorinstancelist-api/) — The OrchestratorInstanceList API from Microsoft Azure — 2 operation(s) for orchestratorinstancelist.
+- [Microsoft Azure Order API](https://apis.io/apis/microsoft-azure/microsoft-azure-order-api/) — The Order API from Microsoft Azure — 3 operation(s) for order.
+- [Microsoft Azure Orders API](https://apis.io/apis/microsoft-azure/microsoft-azure-orders-api/) — The Orders API from Microsoft Azure — 3 operation(s) for orders.
+- [Microsoft Azure Organization API](https://apis.io/apis/microsoft-azure/microsoft-azure-organization-api/) — The Organization API from Microsoft Azure — 4 operation(s) for organization.
+- [Microsoft Azure Organizations API](https://apis.io/apis/microsoft-azure/microsoft-azure-organizations-api/) — The Organizations API from Microsoft Azure — 6 operation(s) for organizations.
+- [Microsoft Azure OriginGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-origingroups-api/) — The OriginGroups API from Microsoft Azure — 2 operation(s) for origingroups.
+- [Microsoft Azure Origins API](https://apis.io/apis/microsoft-azure/microsoft-azure-origins-api/) — The Origins API from Microsoft Azure — 2 operation(s) for origins.
+- [Microsoft Azure OuContainer API](https://apis.io/apis/microsoft-azure/microsoft-azure-oucontainer-api/) — The OuContainer API from Microsoft Azure — 3 operation(s) for oucontainer.
+- [Microsoft Azure OutboundEndpoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-outboundendpoints-api/) — The OutboundEndpoints API from Microsoft Azure — 2 operation(s) for outboundendpoints.
+- [Microsoft Azure OutboundNetworkDependenciesEndpoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-outboundnetworkdependenciesendpoints-api/) — The OutboundNetworkDependenciesEndpoints API from Microsoft Azure — 2 operation(s) for outboundnetworkdependenciesendpoints.
+- [Microsoft Azure P2SVpnGateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-p2svpngateways-api/) — The P2SVpnGateways API from Microsoft Azure — 6 operation(s) for p2svpngateways.
+- [Microsoft Azure Package API](https://apis.io/apis/microsoft-azure/microsoft-azure-package-api/) — The Package API from Microsoft Azure — 2 operation(s) for package.
+- [Microsoft Azure Parameters API](https://apis.io/apis/microsoft-azure/microsoft-azure-parameters-api/) — The Parameters API from Microsoft Azure — 1 operation(s) for parameters.
+- [Microsoft Azure Participants API](https://apis.io/apis/microsoft-azure/microsoft-azure-participants-api/) — The Participants API from Microsoft Azure — 4 operation(s) for participants.
+- [Microsoft Azure Parties API](https://apis.io/apis/microsoft-azure/microsoft-azure-parties-api/) — The Parties API from Microsoft Azure — 4 operation(s) for parties.
+- [Microsoft Azure Partition API](https://apis.io/apis/microsoft-azure/microsoft-azure-partition-api/) — The Partition API from Microsoft Azure — 17 operation(s) for partition.
+- [Microsoft Azure Partner API](https://apis.io/apis/microsoft-azure/microsoft-azure-partner-api/) — The Partner API from Microsoft Azure — 1 operation(s) for partner.
+- [Microsoft Azure PartnerDestinations API](https://apis.io/apis/microsoft-azure/microsoft-azure-partnerdestinations-api/) — The PartnerDestinations API from Microsoft Azure — 4 operation(s) for partnerdestinations.
+- [Microsoft Azure PartnerInventory API](https://apis.io/apis/microsoft-azure/microsoft-azure-partnerinventory-api/) — The PartnerInventory API from Microsoft Azure — 3 operation(s) for partnerinventory.
+- [Microsoft Azure PartnerNamespaces API](https://apis.io/apis/microsoft-azure/microsoft-azure-partnernamespaces-api/) — The PartnerNamespaces API from Microsoft Azure — 5 operation(s) for partnernamespaces.
+- [Microsoft Azure PartnerRegistrations API](https://apis.io/apis/microsoft-azure/microsoft-azure-partnerregistrations-api/) — The PartnerRegistrations API from Microsoft Azure — 3 operation(s) for partnerregistrations.
+- [Microsoft Azure Partners API](https://apis.io/apis/microsoft-azure/microsoft-azure-partners-api/) — The Partners API from Microsoft Azure — 1 operation(s) for partners.
+- [Microsoft Azure PartnerTopics API](https://apis.io/apis/microsoft-azure/microsoft-azure-partnertopics-api/) — The PartnerTopics API from Microsoft Azure — 5 operation(s) for partnertopics.
+- [Microsoft Azure PATCH API](https://apis.io/apis/microsoft-azure/microsoft-azure-patch-api/) — The PATCH API from Microsoft Azure — 1 operation(s) for patch.
+- [Microsoft Azure PatchAccessReviewMyInstanceDecision API](https://apis.io/apis/microsoft-azure/microsoft-azure-patchaccessreviewmyinstancedecision-api/) — The PatchAccessReviewMyInstanceDecision API from Microsoft Azure — 1 operation(s) for patchaccessreviewmyinstancedecision.
+- [Microsoft Azure PatchSchedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-patchschedules-api/) — The PatchSchedules API from Microsoft Azure — 2 operation(s) for patchschedules.
+- [Microsoft Azure PatientTimeline API](https://apis.io/apis/microsoft-azure/microsoft-azure-patienttimeline-api/) — The PatientTimeline API from Microsoft Azure — 2 operation(s) for patienttimeline.
+- [Microsoft Azure PeerAsns API](https://apis.io/apis/microsoft-azure/microsoft-azure-peerasns-api/) — The PeerAsns API from Microsoft Azure — 2 operation(s) for peerasns.
+- [Microsoft Azure PeeringLocations API](https://apis.io/apis/microsoft-azure/microsoft-azure-peeringlocations-api/) — The PeeringLocations API from Microsoft Azure — 1 operation(s) for peeringlocations.
+- [Microsoft Azure Peerings API](https://apis.io/apis/microsoft-azure/microsoft-azure-peerings-api/) — The Peerings API from Microsoft Azure — 3 operation(s) for peerings.
+- [Microsoft Azure PeeringServiceLocations API](https://apis.io/apis/microsoft-azure/microsoft-azure-peeringservicelocations-api/) — The PeeringServiceLocations API from Microsoft Azure — 1 operation(s) for peeringservicelocations.
+- [Microsoft Azure PeeringServicePrefixes API](https://apis.io/apis/microsoft-azure/microsoft-azure-peeringserviceprefixes-api/) — The PeeringServicePrefixes API from Microsoft Azure — 2 operation(s) for peeringserviceprefixes.
+- [Microsoft Azure PeeringServiceProviders API](https://apis.io/apis/microsoft-azure/microsoft-azure-peeringserviceproviders-api/) — The PeeringServiceProviders API from Microsoft Azure — 1 operation(s) for peeringserviceproviders.
+- [Microsoft Azure PeeringServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-peeringservices-api/) — The PeeringServices API from Microsoft Azure — 3 operation(s) for peeringservices.
+- [Microsoft Azure PersonalVoice API](https://apis.io/apis/microsoft-azure/microsoft-azure-personalvoice-api/) — The PersonalVoice API from Microsoft Azure — 2 operation(s) for personalvoice.
+- [Microsoft Azure PersonDirectory API](https://apis.io/apis/microsoft-azure/microsoft-azure-persondirectory-api/) — The PersonDirectory API from Microsoft Azure — 8 operation(s) for persondirectory.
+- [Microsoft Azure Pipeline API](https://apis.io/apis/microsoft-azure/microsoft-azure-pipeline-api/) — The Pipeline API from Microsoft Azure — 2 operation(s) for pipeline.
+- [Microsoft Azure Pipelines API](https://apis.io/apis/microsoft-azure/microsoft-azure-pipelines-api/) — The Pipelines API from Microsoft Azure — 5 operation(s) for pipelines.
+- [Microsoft Azure PipelineTemplateDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-pipelinetemplatedefinitions-api/) — The PipelineTemplateDefinitions API from Microsoft Azure — 1 operation(s) for pipelinetemplatedefinitions.
+- [Microsoft Azure Plan API](https://apis.io/apis/microsoft-azure/microsoft-azure-plan-api/) — The Plan API from Microsoft Azure — 1 operation(s) for plan.
+- [Microsoft Azure PlantingData API](https://apis.io/apis/microsoft-azure/microsoft-azure-plantingdata-api/) — The PlantingData API from Microsoft Azure — 5 operation(s) for plantingdata.
+- [Microsoft Azure PlantTissueAnalyses API](https://apis.io/apis/microsoft-azure/microsoft-azure-planttissueanalyses-api/) — The PlantTissueAnalyses API from Microsoft Azure — 5 operation(s) for planttissueanalyses.
+- [Microsoft Azure Policies API](https://apis.io/apis/microsoft-azure/microsoft-azure-policies-api/) — The Policies API from Microsoft Azure — 2 operation(s) for policies.
+- [Microsoft Azure Policy API](https://apis.io/apis/microsoft-azure/microsoft-azure-policy-api/) — The Policy API from Microsoft Azure — 5 operation(s) for policy.
+- [Microsoft Azure Policy Management Certificates API](https://apis.io/apis/microsoft-azure/microsoft-azure-policy-management-certificates-api/) — The Policy Management Certificates API from Microsoft Azure — 3 operation(s) for policy management certificates.
+- [Microsoft Azure PolicyElements API](https://apis.io/apis/microsoft-azure/microsoft-azure-policyelements-api/) — The PolicyElements API from Microsoft Azure — 1 operation(s) for policyelements.
+- [Microsoft Azure PolicyEvents API](https://apis.io/apis/microsoft-azure/microsoft-azure-policyevents-api/) — The PolicyEvents API from Microsoft Azure — 1 operation(s) for policyevents.
+- [Microsoft Azure PolicyFragment API](https://apis.io/apis/microsoft-azure/microsoft-azure-policyfragment-api/) — The PolicyFragment API from Microsoft Azure — 3 operation(s) for policyfragment.
+- [Microsoft Azure PolicyListing API](https://apis.io/apis/microsoft-azure/microsoft-azure-policylisting-api/) — The PolicyListing API from Microsoft Azure — 1 operation(s) for policylisting.
+- [Microsoft Azure Pool API](https://apis.io/apis/microsoft-azure/microsoft-azure-pool-api/) — The Pool API from Microsoft Azure — 4 operation(s) for pool.
+- [Microsoft Azure Pool Change API](https://apis.io/apis/microsoft-azure/microsoft-azure-pool-change-api/) — The Pool Change API from Microsoft Azure — 1 operation(s) for pool change.
+- [Microsoft Azure Pools API](https://apis.io/apis/microsoft-azure/microsoft-azure-pools-api/) — The Pools API from Microsoft Azure — 34 operation(s) for pools.
+- [Microsoft Azure Poolusagemetrics API](https://apis.io/apis/microsoft-azure/microsoft-azure-poolusagemetrics-api/) — The Poolusagemetrics API from Microsoft Azure — 1 operation(s) for poolusagemetrics.
+- [Microsoft Azure PortalRegistryPackage API](https://apis.io/apis/microsoft-azure/microsoft-azure-portalregistrypackage-api/) — The PortalRegistryPackage API from Microsoft Azure — 1 operation(s) for portalregistrypackage.
+- [Microsoft Azure PortalTenant API](https://apis.io/apis/microsoft-azure/microsoft-azure-portaltenant-api/) — The PortalTenant API from Microsoft Azure — 1 operation(s) for portaltenant.
+- [Microsoft Azure Ports API](https://apis.io/apis/microsoft-azure/microsoft-azure-ports-api/) — The Ports API from Microsoft Azure — 5 operation(s) for ports.
+- [Microsoft Azure POST API](https://apis.io/apis/microsoft-azure/microsoft-azure-post-api/) — The POST API from Microsoft Azure — 15 operation(s) for post.
+- [Microsoft Azure PostAccessReviewHistoryDefinitionInstance API](https://apis.io/apis/microsoft-azure/microsoft-azure-postaccessreviewhistorydefinitioninstance-api/) — The PostAccessReviewHistoryDefinitionInstance API from Microsoft Azure — 1 operation(s) for postaccessreviewhistorydefinitioninstance.
+- [Microsoft Azure PostRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-postrules-api/) — The PostRules API from Microsoft Azure — 5 operation(s) for postrules.
+- [Microsoft Azure PowerBIResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-powerbiresources-api/) — The PowerBIResources API from Microsoft Azure — 1 operation(s) for powerbiresources.
+- [Microsoft Azure Prebuilt API](https://apis.io/apis/microsoft-azure/microsoft-azure-prebuilt-api/) — The Prebuilt API from Microsoft Azure — 8 operation(s) for prebuilt.
+- [Microsoft Azure PreconfiguredEndpoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-preconfiguredendpoints-api/) — The preconfigured endpoints and details
+- [Microsoft Azure PreConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-preconnections-api/) — The PreConnections API from Microsoft Azure — 4 operation(s) for preconnections.
+- [Microsoft Azure Prediction API](https://apis.io/apis/microsoft-azure/microsoft-azure-prediction-api/) — The Prediction API from Microsoft Azure — 1 operation(s) for prediction.
+- [Microsoft Azure Predictions API](https://apis.io/apis/microsoft-azure/microsoft-azure-predictions-api/) — The Predictions API from Microsoft Azure — 5 operation(s) for predictions.
+- [Microsoft Azure PredictionsApi API](https://apis.io/apis/microsoft-azure/microsoft-azure-predictionsapi-api/) — The PredictionsApi API from Microsoft Azure — 4 operation(s) for predictionsapi.
+- [Microsoft Azure PrefixListGlobalRulestack API](https://apis.io/apis/microsoft-azure/microsoft-azure-prefixlistglobalrulestack-api/) — The PrefixListGlobalRulestack API from Microsoft Azure — 2 operation(s) for prefixlistglobalrulestack.
+- [Microsoft Azure PrefixListLocalRulestack API](https://apis.io/apis/microsoft-azure/microsoft-azure-prefixlistlocalrulestack-api/) — The PrefixListLocalRulestack API from Microsoft Azure — 2 operation(s) for prefixlistlocalrulestack.
+- [Microsoft Azure PreRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-prerules-api/) — The PreRules API from Microsoft Azure — 5 operation(s) for prerules.
+- [Microsoft Azure PrescriptionMaps API](https://apis.io/apis/microsoft-azure/microsoft-azure-prescriptionmaps-api/) — The PrescriptionMaps API from Microsoft Azure — 4 operation(s) for prescriptionmaps.
+- [Microsoft Azure Prescriptions API](https://apis.io/apis/microsoft-azure/microsoft-azure-prescriptions-api/) — The Prescriptions API from Microsoft Azure — 5 operation(s) for prescriptions.
+- [Microsoft Azure PriceSheet API](https://apis.io/apis/microsoft-azure/microsoft-azure-pricesheet-api/) — The PriceSheet API from Microsoft Azure — 2 operation(s) for pricesheet.
+- [Microsoft Azure PrivateClouds API](https://apis.io/apis/microsoft-azure/microsoft-azure-privateclouds-api/) — The PrivateClouds API from Microsoft Azure — 8 operation(s) for privateclouds.
+- [Microsoft Azure PrivateEndpoint API](https://apis.io/apis/microsoft-azure/microsoft-azure-privateendpoint-api/) — The PrivateEndpoint API from Microsoft Azure — 1 operation(s) for privateendpoint.
+- [Microsoft Azure PrivateEndpointConnection Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-privateendpointconnection-resource-api/) — The PrivateEndpointConnection Resource API from Microsoft Azure — 1 operation(s) for privateendpointconnection resource.
+- [Microsoft Azure PrivateEndpointConnectionController API](https://apis.io/apis/microsoft-azure/microsoft-azure-privateendpointconnectioncontroller-api/) — The PrivateEndpointConnectionController API from Microsoft Azure — 4 operation(s) for privateendpointconnectioncontroller.
+- [Microsoft Azure PrivateEndpointConnectionOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-privateendpointconnectionoperations-api/) — The PrivateEndpointConnectionOperations API from Microsoft Azure — 2 operation(s) for privateendpointconnectionoperations.
+- [Microsoft Azure PrivateEndpointConnectionProxies API](https://apis.io/apis/microsoft-azure/microsoft-azure-privateendpointconnectionproxies-api/) — The PrivateEndpointConnectionProxies API from Microsoft Azure — 2 operation(s) for privateendpointconnectionproxies.
+- [Microsoft Azure PrivateEndpointConnectionProxyController API](https://apis.io/apis/microsoft-azure/microsoft-azure-privateendpointconnectionproxycontroller-api/) — The PrivateEndpointConnectionProxyController API from Microsoft Azure — 3 operation(s) for privateendpointconnectionproxycontroller.
+- [Microsoft Azure PrivateLinkAssociation API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkassociation-api/) — The PrivateLinkAssociation API from Microsoft Azure — 2 operation(s) for privatelinkassociation.
+- [Microsoft Azure PrivateLinkResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkresource-api/) — The PrivateLinkResource API from Microsoft Azure — 4 operation(s) for privatelinkresource.
+- [Microsoft Azure PrivateLinkResourceController API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkresourcecontroller-api/) — The PrivateLinkResourceController API from Microsoft Azure — 2 operation(s) for privatelinkresourcecontroller.
+- [Microsoft Azure PrivateLinkResourceOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkresourceoperations-api/) — The PrivateLinkResourceOperations API from Microsoft Azure — 2 operation(s) for privatelinkresourceoperations.
+- [Microsoft Azure PrivateLinkResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkresources-api/) — The PrivateLinkResources API from Microsoft Azure — 36 operation(s) for privatelinkresources.
+- [Microsoft Azure PrivateLinkResourcesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkresourcescontroller-api/) — The PrivateLinkResourcesController API from Microsoft Azure — 2 operation(s) for privatelinkresourcescontroller.
+- [Microsoft Azure PrivateLinkScopedResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkscopedresources-api/) — The PrivateLinkScopedResources API from Microsoft Azure — 2 operation(s) for privatelinkscopedresources.
+- [Microsoft Azure PrivateLinkServiceResourceOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkserviceresourceoperationresults-api/) — The PrivateLinkServiceResourceOperationResults API from Microsoft Azure — 1 operation(s) for privatelinkserviceresourceoperationresults.
+- [Microsoft Azure PrivateLinkServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatelinkservices-api/) — The PrivateLinkServices API from Microsoft Azure — 2 operation(s) for privatelinkservices.
+- [Microsoft Azure PrivateZones API](https://apis.io/apis/microsoft-azure/microsoft-azure-privatezones-api/) — The PrivateZones API from Microsoft Azure — 3 operation(s) for privatezones.
+- [Microsoft Azure ProblemClassifications API](https://apis.io/apis/microsoft-azure/microsoft-azure-problemclassifications-api/) — The ProblemClassifications API from Microsoft Azure — 2 operation(s) for problemclassifications.
+- [Microsoft Azure Processes API](https://apis.io/apis/microsoft-azure/microsoft-azure-processes-api/) — The Processes API from Microsoft Azure — 6 operation(s) for processes.
+- [Microsoft Azure Product API](https://apis.io/apis/microsoft-azure/microsoft-azure-product-api/) — The Product API from Microsoft Azure — 8 operation(s) for product.
+- [Microsoft Azure ProductApiLink API](https://apis.io/apis/microsoft-azure/microsoft-azure-productapilink-api/) — The ProductApiLink API from Microsoft Azure — 2 operation(s) for productapilink.
+- [Microsoft Azure ProductFamilyMetadata API](https://apis.io/apis/microsoft-azure/microsoft-azure-productfamilymetadata-api/) — The ProductFamilyMetadata API from Microsoft Azure — 1 operation(s) for productfamilymetadata.
+- [Microsoft Azure ProductGroupLink API](https://apis.io/apis/microsoft-azure/microsoft-azure-productgrouplink-api/) — The ProductGroupLink API from Microsoft Azure — 2 operation(s) for productgrouplink.
+- [Microsoft Azure ProductPolicy API](https://apis.io/apis/microsoft-azure/microsoft-azure-productpolicy-api/) — The ProductPolicy API from Microsoft Azure — 2 operation(s) for productpolicy.
+- [Microsoft Azure Products API](https://apis.io/apis/microsoft-azure/microsoft-azure-products-api/) — The Products API from Microsoft Azure — 7 operation(s) for products.
+- [Microsoft Azure ProductsAndConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-productsandconfigurations-api/) — The ProductsAndConfigurations API from Microsoft Azure — 2 operation(s) for productsandconfigurations.
+- [Microsoft Azure ProductSecrets API](https://apis.io/apis/microsoft-azure/microsoft-azure-productsecrets-api/) — The ProductSecrets API from Microsoft Azure — 4 operation(s) for productsecrets.
+- [Microsoft Azure ProfessionalServiceOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-professionalserviceoperations-api/) — The ProfessionalServiceOperations API from Microsoft Azure — 1 operation(s) for professionalserviceoperations.
+- [Microsoft Azure ProfessionalServiceResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-professionalserviceresources-api/) — The ProfessionalServiceResources API from Microsoft Azure — 1 operation(s) for professionalserviceresources.
+- [Microsoft Azure Profile API](https://apis.io/apis/microsoft-azure/microsoft-azure-profile-api/) — The Profile API from Microsoft Azure — 2 operation(s) for profile.
+- [Microsoft Azure Profiles API](https://apis.io/apis/microsoft-azure/microsoft-azure-profiles-api/) — The Profiles API from Microsoft Azure — 12 operation(s) for profiles.
+- [Microsoft Azure Project API](https://apis.io/apis/microsoft-azure/microsoft-azure-project-api/) — The Project API from Microsoft Azure — 2 operation(s) for project.
+- [Microsoft Azure Projects API](https://apis.io/apis/microsoft-azure/microsoft-azure-projects-api/) — The Projects API from Microsoft Azure — 7 operation(s) for projects.
+- [Microsoft Azure Property Management API](https://apis.io/apis/microsoft-azure/microsoft-azure-property-management-api/) — The Property Management API from Microsoft Azure — 6 operation(s) for property management.
+- [Microsoft Azure ProtectableContainers API](https://apis.io/apis/microsoft-azure/microsoft-azure-protectablecontainers-api/) — The ProtectableContainers API from Microsoft Azure — 1 operation(s) for protectablecontainers.
+- [Microsoft Azure ProtectedItem API](https://apis.io/apis/microsoft-azure/microsoft-azure-protecteditem-api/) — Protected items controller.
+- [Microsoft Azure ProtectedItemOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-protecteditemoperationresults-api/) — The ProtectedItemOperationResults API from Microsoft Azure — 1 operation(s) for protecteditemoperationresults.
+- [Microsoft Azure ProtectedItemOperationStatuses API](https://apis.io/apis/microsoft-azure/microsoft-azure-protecteditemoperationstatuses-api/) — The ProtectedItemOperationStatuses API from Microsoft Azure — 1 operation(s) for protecteditemoperationstatuses.
+- [Microsoft Azure ProtectedItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-protecteditems-api/) — The ProtectedItems API from Microsoft Azure — 1 operation(s) for protecteditems.
+- [Microsoft Azure ProtectionContainerOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-protectioncontaineroperationresults-api/) — The ProtectionContainerOperationResults API from Microsoft Azure — 1 operation(s) for protectioncontaineroperationresults.
+- [Microsoft Azure ProtectionContainerRefreshOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-protectioncontainerrefreshoperationresults-api/) — The ProtectionContainerRefreshOperationResults API from Microsoft Azure — 1 operation(s) for protectioncontainerrefreshoperationresults.
+- [Microsoft Azure ProtectionContainers API](https://apis.io/apis/microsoft-azure/microsoft-azure-protectioncontainers-api/) — The ProtectionContainers API from Microsoft Azure — 3 operation(s) for protectioncontainers.
+- [Microsoft Azure ProtectionIntent API](https://apis.io/apis/microsoft-azure/microsoft-azure-protectionintent-api/) — The ProtectionIntent API from Microsoft Azure — 2 operation(s) for protectionintent.
+- [Microsoft Azure ProtectionPolicyOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-protectionpolicyoperationresults-api/) — The ProtectionPolicyOperationResults API from Microsoft Azure — 1 operation(s) for protectionpolicyoperationresults.
+- [Microsoft Azure ProtectionPolicyOperationStatuses API](https://apis.io/apis/microsoft-azure/microsoft-azure-protectionpolicyoperationstatuses-api/) — The ProtectionPolicyOperationStatuses API from Microsoft Azure — 1 operation(s) for protectionpolicyoperationstatuses.
+- [Microsoft Azure Provider API](https://apis.io/apis/microsoft-azure/microsoft-azure-provider-api/) — The Provider API from Microsoft Azure — 11 operation(s) for provider.
+- [Microsoft Azure ProviderOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-provideroperations-api/) — The ProviderOperations API from Microsoft Azure — 2 operation(s) for provideroperations.
+- [Microsoft Azure ProviderRegistration API](https://apis.io/apis/microsoft-azure/microsoft-azure-providerregistration-api/) — The ProviderRegistration API from Microsoft Azure — 3 operation(s) for providerregistration.
+- [Microsoft Azure Providers API](https://apis.io/apis/microsoft-azure/microsoft-azure-providers-api/) — The Providers API from Microsoft Azure — 122 operation(s) for providers.
+- [Microsoft Azure Proxy API](https://apis.io/apis/microsoft-azure/microsoft-azure-proxy-api/) — The Proxy API from Microsoft Azure — 3 operation(s) for proxy.
+- [Microsoft Azure ProxyOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-proxyoperations-api/) — The ProxyOperations API from Microsoft Azure — 7 operation(s) for proxyoperations.
+- [Microsoft Azure Public-Offers-Listing API](https://apis.io/apis/microsoft-azure/microsoft-azure-public-offers-listing-api/) — The Public-Offers-Listing API from Microsoft Azure — 1 operation(s) for public-offers-listing.
+- [Microsoft Azure Public-Offers-Single API](https://apis.io/apis/microsoft-azure/microsoft-azure-public-offers-single-api/) — The Public-Offers-Single API from Microsoft Azure — 1 operation(s) for public-offers-single.
+- [Microsoft Azure Public-Search API](https://apis.io/apis/microsoft-azure/microsoft-azure-public-search-api/) — The Public-Search API from Microsoft Azure — 2 operation(s) for public-search.
+- [Microsoft Azure Public-Suggestions API](https://apis.io/apis/microsoft-azure/microsoft-azure-public-suggestions-api/) — The Public-Suggestions API from Microsoft Azure — 1 operation(s) for public-suggestions.
+- [Microsoft Azure PublicIpAddresses API](https://apis.io/apis/microsoft-azure/microsoft-azure-publicipaddresses-api/) — The PublicIpAddresses API from Microsoft Azure — 3 operation(s) for publicipaddresses.
+- [Microsoft Azure PublicMaintenanceConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-publicmaintenanceconfigurations-api/) — The PublicMaintenanceConfigurations API from Microsoft Azure — 2 operation(s) for publicmaintenanceconfigurations.
+- [Microsoft Azure PublishedArtifact API](https://apis.io/apis/microsoft-azure/microsoft-azure-publishedartifact-api/) — The PublishedArtifact API from Microsoft Azure — 2 operation(s) for publishedartifact.
+- [Microsoft Azure PublishedBlueprint API](https://apis.io/apis/microsoft-azure/microsoft-azure-publishedblueprint-api/) — The PublishedBlueprint API from Microsoft Azure — 2 operation(s) for publishedblueprint.
+- [Microsoft Azure Publishers API](https://apis.io/apis/microsoft-azure/microsoft-azure-publishers-api/) — The Publishers API from Microsoft Azure — 3 operation(s) for publishers.
+- [Microsoft Azure PUT API](https://apis.io/apis/microsoft-azure/microsoft-azure-put-api/) — The PUT API from Microsoft Azure — 6 operation(s) for put.
+- [Microsoft Azure PutAccessReviewDefaultSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-putaccessreviewdefaultsettings-api/) — The PutAccessReviewDefaultSettings API from Microsoft Azure — 1 operation(s) for putaccessreviewdefaultsettings.
+- [Microsoft Azure PutAccessReviewHistoryDefinition API](https://apis.io/apis/microsoft-azure/microsoft-azure-putaccessreviewhistorydefinition-api/) — The PutAccessReviewHistoryDefinition API from Microsoft Azure — 1 operation(s) for putaccessreviewhistorydefinition.
+- [Microsoft Azure PutAccessReviewInstance API](https://apis.io/apis/microsoft-azure/microsoft-azure-putaccessreviewinstance-api/) — The PutAccessReviewInstance API from Microsoft Azure — 1 operation(s) for putaccessreviewinstance.
+- [Microsoft Azure PutAccessReviewScheduleDefinition API](https://apis.io/apis/microsoft-azure/microsoft-azure-putaccessreviewscheduledefinition-api/) — The PutAccessReviewScheduleDefinition API from Microsoft Azure — 1 operation(s) for putaccessreviewscheduledefinition.
+- [Microsoft Azure Query API](https://apis.io/apis/microsoft-azure/microsoft-azure-query-api/) — The Query API from Microsoft Azure — 1 operation(s) for query.
+- [Microsoft Azure :Query Knowledgebases API](https://apis.io/apis/microsoft-azure/microsoft-azure-query-knowledgebases-api/) — The :Query Knowledgebases API from Microsoft Azure — 1 operation(s) for :query knowledgebases.
+- [Microsoft Azure :Query Text API](https://apis.io/apis/microsoft-azure/microsoft-azure-query-text-api/) — The :Query Text API from Microsoft Azure — 1 operation(s) for :query text.
+- [Microsoft Azure QueryGeneration API](https://apis.io/apis/microsoft-azure/microsoft-azure-querygeneration-api/) — The QueryGeneration API from Microsoft Azure — 1 operation(s) for querygeneration.
+- [Microsoft Azure QueryKeys API](https://apis.io/apis/microsoft-azure/microsoft-azure-querykeys-api/) — The QueryKeys API from Microsoft Azure — 3 operation(s) for querykeys.
+- [Microsoft Azure QueryTexts API](https://apis.io/apis/microsoft-azure/microsoft-azure-querytexts-api/) — The QueryTexts API from Microsoft Azure — 2 operation(s) for querytexts.
+- [Microsoft Azure QuickPulseService API](https://apis.io/apis/microsoft-azure/microsoft-azure-quickpulseservice-api/) — The QuickPulseService API from Microsoft Azure — 2 operation(s) for quickpulseservice.
+- [Microsoft Azure QuotaInformation API](https://apis.io/apis/microsoft-azure/microsoft-azure-quotainformation-api/) — The QuotaInformation API from Microsoft Azure — 4 operation(s) for quotainformation.
+- [Microsoft Azure QuotaRequests API](https://apis.io/apis/microsoft-azure/microsoft-azure-quotarequests-api/) — The QuotaRequests API from Microsoft Azure — 4 operation(s) for quotarequests.
+- [Microsoft Azure Quotas API](https://apis.io/apis/microsoft-azure/microsoft-azure-quotas-api/) — The Quotas API from Microsoft Azure — 2 operation(s) for quotas.
+- [Microsoft Azure RadiologyInsights API](https://apis.io/apis/microsoft-azure/microsoft-azure-radiologyinsights-api/) — The RadiologyInsights API from Microsoft Azure — 2 operation(s) for radiologyinsights.
+- [Microsoft Azure Rank API](https://apis.io/apis/microsoft-azure/microsoft-azure-rank-api/) — Manages ranking operations.
+- [Microsoft Azure Rating and Reviews Public API](https://apis.io/apis/microsoft-azure/microsoft-azure-rating-and-reviews-public-api-api/) — The Rating and Reviews Public API API from Microsoft Azure — 1 operation(s) for rating and reviews public api.
+- [Microsoft Azure RealUserMetrics API](https://apis.io/apis/microsoft-azure/microsoft-azure-realusermetrics-api/) — The RealUserMetrics API from Microsoft Azure — 1 operation(s) for realusermetrics.
+- [Microsoft Azure ReceivedShare API](https://apis.io/apis/microsoft-azure/microsoft-azure-receivedshare-api/) — The ReceivedShare API from Microsoft Azure — 3 operation(s) for receivedshare.
+- [Microsoft Azure Recognize Text API](https://apis.io/apis/microsoft-azure/microsoft-azure-recognizetext-api/) — The recognizeText API from Microsoft Azure — 1 operation(s) for recognizetext.
+- [Microsoft Azure Recommendations API](https://apis.io/apis/microsoft-azure/microsoft-azure-recommendations-api/) — The Recommendations API from Microsoft Azure — 15 operation(s) for recommendations.
+- [Microsoft Azure RecommendedActions API](https://apis.io/apis/microsoft-azure/microsoft-azure-recommendedactions-api/) — The RecommendedActions API from Microsoft Azure — 2 operation(s) for recommendedactions.
+- [Microsoft Azure RecommendedActionSessions API](https://apis.io/apis/microsoft-azure/microsoft-azure-recommendedactionsessions-api/) — The RecommendedActionSessions API from Microsoft Azure — 1 operation(s) for recommendedactionsessions.
+- [Microsoft Azure Recording API](https://apis.io/apis/microsoft-azure/microsoft-azure-recording-api/) — The Recording API from Microsoft Azure — 4 operation(s) for recording.
+- [Microsoft Azure RecordSets API](https://apis.io/apis/microsoft-azure/microsoft-azure-recordsets-api/) — The RecordSets API from Microsoft Azure — 7 operation(s) for recordsets.
+- [Microsoft Azure RecoveryPoint API](https://apis.io/apis/microsoft-azure/microsoft-azure-recoverypoint-api/) — Recovery points controller.
+- [Microsoft Azure RecoveryPointsRecommendedForMove API](https://apis.io/apis/microsoft-azure/microsoft-azure-recoverypointsrecommendedformove-api/) — The RecoveryPointsRecommendedForMove API from Microsoft Azure — 1 operation(s) for recoverypointsrecommendedformove.
+- [Microsoft Azure Recurrence API](https://apis.io/apis/microsoft-azure/microsoft-azure-recurrence-api/) — The Recurrence API from Microsoft Azure — 2 operation(s) for recurrence.
+- [Microsoft Azure Redis API](https://apis.io/apis/microsoft-azure/microsoft-azure-redis-api/) — The Redis API from Microsoft Azure — 16 operation(s) for redis.
+- [Microsoft Azure RedisEnterprise API](https://apis.io/apis/microsoft-azure/microsoft-azure-redisenterprise-api/) — The RedisEnterprise API from Microsoft Azure — 11 operation(s) for redisenterprise.
+- [Microsoft Azure RefreshSetPasswordLink API](https://apis.io/apis/microsoft-azure/microsoft-azure-refreshsetpasswordlink-api/) — The RefreshSetPasswordLink API from Microsoft Azure — 1 operation(s) for refreshsetpasswordlink.
+- [Microsoft Azure RegisteredServer Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-registeredserver-resource-api/) — The RegisteredServer Resource API from Microsoft Azure — 3 operation(s) for registeredserver resource.
+- [Microsoft Azure Register Storage Configuration API](https://apis.io/apis/microsoft-azure/microsoft-azure-registerstorageconfiguration-api/) — The registerStorageConfiguration API from Microsoft Azure — 1 operation(s) for registerstorageconfiguration.
+- [Microsoft Azure RegistrationAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-registrationassignments-api/) — The RegistrationAssignments API from Microsoft Azure — 2 operation(s) for registrationassignments.
+- [Microsoft Azure RegistrationDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-registrationdefinitions-api/) — The RegistrationDefinitions API from Microsoft Azure — 2 operation(s) for registrationdefinitions.
+- [Microsoft Azure Registrations API](https://apis.io/apis/microsoft-azure/microsoft-azure-registrations-api/) — The Registrations API from Microsoft Azure — 5 operation(s) for registrations.
+- [Microsoft Azure Relationship API](https://apis.io/apis/microsoft-azure/microsoft-azure-relationship-api/) — The Relationship API from Microsoft Azure — 2 operation(s) for relationship.
+- [Microsoft Azure RelationshipLinks API](https://apis.io/apis/microsoft-azure/microsoft-azure-relationshiplinks-api/) — The RelationshipLinks API from Microsoft Azure — 2 operation(s) for relationshiplinks.
+- [Microsoft Azure Relationships API](https://apis.io/apis/microsoft-azure/microsoft-azure-relationships-api/) — The Relationships API from Microsoft Azure — 2 operation(s) for relationships.
+- [Microsoft Azure Rendering Session API](https://apis.io/apis/microsoft-azure/microsoft-azure-rendering-session-api/) — The Rendering Session API from Microsoft Azure — 3 operation(s) for rendering session.
+- [Microsoft Azure RepairManagement API](https://apis.io/apis/microsoft-azure/microsoft-azure-repairmanagement-api/) — The RepairManagement API from Microsoft Azure — 7 operation(s) for repairmanagement.
+- [Microsoft Azure Replica API](https://apis.io/apis/microsoft-azure/microsoft-azure-replica-api/) — The Replica API from Microsoft Azure — 9 operation(s) for replica.
+- [Microsoft Azure Replicas API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicas-api/) — The Replicas API from Microsoft Azure — 5 operation(s) for replicas.
+- [Microsoft Azure ReplicationAlertSettings API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationalertsettings-api/) — The ReplicationAlertSettings API from Microsoft Azure — 2 operation(s) for replicationalertsettings.
+- [Microsoft Azure ReplicationAppliances API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationappliances-api/) — The ReplicationAppliances API from Microsoft Azure — 1 operation(s) for replicationappliances.
+- [Microsoft Azure ReplicationEligibilityResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationeligibilityresults-api/) — The ReplicationEligibilityResults API from Microsoft Azure — 2 operation(s) for replicationeligibilityresults.
+- [Microsoft Azure ReplicationEvents API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationevents-api/) — The ReplicationEvents API from Microsoft Azure — 2 operation(s) for replicationevents.
+- [Microsoft Azure ReplicationExtension API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationextension-api/) — Replication extension controller.
+- [Microsoft Azure ReplicationFabrics API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationfabrics-api/) — The ReplicationFabrics API from Microsoft Azure — 7 operation(s) for replicationfabrics.
+- [Microsoft Azure ReplicationJobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationjobs-api/) — The ReplicationJobs API from Microsoft Azure — 6 operation(s) for replicationjobs.
+- [Microsoft Azure ReplicationLogicalNetworks API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationlogicalnetworks-api/) — The ReplicationLogicalNetworks API from Microsoft Azure — 2 operation(s) for replicationlogicalnetworks.
+- [Microsoft Azure ReplicationMigrationItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationmigrationitems-api/) — The ReplicationMigrationItems API from Microsoft Azure — 9 operation(s) for replicationmigrationitems.
+- [Microsoft Azure ReplicationNetworkMappings API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationnetworkmappings-api/) — The ReplicationNetworkMappings API from Microsoft Azure — 3 operation(s) for replicationnetworkmappings.
+- [Microsoft Azure ReplicationNetworks API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationnetworks-api/) — The ReplicationNetworks API from Microsoft Azure — 3 operation(s) for replicationnetworks.
+- [Microsoft Azure ReplicationProtectableItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationprotectableitems-api/) — The ReplicationProtectableItems API from Microsoft Azure — 2 operation(s) for replicationprotectableitems.
+- [Microsoft Azure ReplicationProtectedItems API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationprotecteditems-api/) — The ReplicationProtectedItems API from Microsoft Azure — 19 operation(s) for replicationprotecteditems.
+- [Microsoft Azure ReplicationProtectionContainerMappings API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationprotectioncontainermappings-api/) — The ReplicationProtectionContainerMappings API from Microsoft Azure — 4 operation(s) for replicationprotectioncontainermappings.
+- [Microsoft Azure ReplicationProtectionContainers API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationprotectioncontainers-api/) — The ReplicationProtectionContainers API from Microsoft Azure — 6 operation(s) for replicationprotectioncontainers.
+- [Microsoft Azure ReplicationProtectionIntents API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationprotectionintents-api/) — The ReplicationProtectionIntents API from Microsoft Azure — 2 operation(s) for replicationprotectionintents.
+- [Microsoft Azure ReplicationRecoveryPlans API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationrecoveryplans-api/) — The ReplicationRecoveryPlans API from Microsoft Azure — 9 operation(s) for replicationrecoveryplans.
+- [Microsoft Azure ReplicationRecoveryServicesProviders API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationrecoveryservicesproviders-api/) — The ReplicationRecoveryServicesProviders API from Microsoft Azure — 5 operation(s) for replicationrecoveryservicesproviders.
+- [Microsoft Azure ReplicationStorageClassificationMappings API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationstorageclassificationmappings-api/) — The ReplicationStorageClassificationMappings API from Microsoft Azure — 3 operation(s) for replicationstorageclassificationmappings.
+- [Microsoft Azure ReplicationStorageClassifications API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationstorageclassifications-api/) — The ReplicationStorageClassifications API from Microsoft Azure — 3 operation(s) for replicationstorageclassifications.
+- [Microsoft Azure ReplicationVaultHealth API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationvaulthealth-api/) — The ReplicationVaultHealth API from Microsoft Azure — 2 operation(s) for replicationvaulthealth.
+- [Microsoft Azure ReplicationVaultSetting API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationvaultsetting-api/) — The ReplicationVaultSetting API from Microsoft Azure — 2 operation(s) for replicationvaultsetting.
+- [Microsoft Azure ReplicationvCenters API](https://apis.io/apis/microsoft-azure/microsoft-azure-replicationvcenters-api/) — The ReplicationvCenters API from Microsoft Azure — 3 operation(s) for replicationvcenters.
+- [Microsoft Azure Reports API](https://apis.io/apis/microsoft-azure/microsoft-azure-reports-api/) — The Reports API from Microsoft Azure — 14 operation(s) for reports.
+- [Microsoft Azure Repository API](https://apis.io/apis/microsoft-azure/microsoft-azure-repository-api/) — Everything about repository
+- [Microsoft Azure Requests API](https://apis.io/apis/microsoft-azure/microsoft-azure-requests-api/) — The Requests API from Microsoft Azure — 6 operation(s) for requests.
+- [Microsoft Azure Reservation Order Aliases API](https://apis.io/apis/microsoft-azure/microsoft-azure-reservation-order-aliases-api/) — The Reservation Order Aliases API from Microsoft Azure — 1 operation(s) for reservation order aliases.
+- [Microsoft Azure ReservationRecommendations API](https://apis.io/apis/microsoft-azure/microsoft-azure-reservationrecommendations-api/) — The ReservationRecommendations API from Microsoft Azure — 1 operation(s) for reservationrecommendations.
+- [Microsoft Azure ReservedInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-reservedinstances-api/) — The ReservedInstances API from Microsoft Azure — 4 operation(s) for reservedinstances.
+- [Microsoft Azure Reset Cifs Password API](https://apis.io/apis/microsoft-azure/microsoft-azure-reset-cifs-password-api/) — The Reset Cifs Password API from Microsoft Azure — 1 operation(s) for reset cifs password.
+- [Microsoft Azure Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-resource-api/) — The Resource API from Microsoft Azure — 7 operation(s) for resource.
+- [Microsoft Azure Resource Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-resource-groups-api/) — Operations for managing resource groups
+- [Microsoft Azure ResourceChanges API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcechanges-api/) — The ResourceChanges API from Microsoft Azure — 1 operation(s) for resourcechanges.
+- [Microsoft Azure ResourceDetails API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcedetails-api/) — The ResourceDetails API from Microsoft Azure — 1 operation(s) for resourcedetails.
+- [Microsoft Azure ResourceGuardProxies API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourceguardproxies-api/) — The ResourceGuardProxies API from Microsoft Azure — 1 operation(s) for resourceguardproxies.
+- [Microsoft Azure ResourceGuardProxy API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourceguardproxy-api/) — The ResourceGuardProxy API from Microsoft Azure — 2 operation(s) for resourceguardproxy.
+- [Microsoft Azure ResourceGuards API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourceguards-api/) — The ResourceGuards API from Microsoft Azure — 15 operation(s) for resourceguards.
+- [Microsoft Azure ResourceHealthMetadata API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcehealthmetadata-api/) — The ResourceHealthMetadata API from Microsoft Azure — 6 operation(s) for resourcehealthmetadata.
+- [Microsoft Azure ResourceManagementPrivateLink API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcemanagementprivatelink-api/) — The ResourceManagementPrivateLink API from Microsoft Azure — 3 operation(s) for resourcemanagementprivatelink.
+- [Microsoft Azure ResourceProvider API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourceprovider-api/) — The ResourceProvider API from Microsoft Azure — 1 operation(s) for resourceprovider.
+- [Microsoft Azure Resources API](https://apis.io/apis/microsoft-azure/microsoft-azure-resources-api/) — The Resources API from Microsoft Azure — 8 operation(s) for resources.
+- [Microsoft Azure ResourceSetRuleConfig API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcesetruleconfig-api/) — The ResourceSetRuleConfig API from Microsoft Azure — 2 operation(s) for resourcesetruleconfig.
+- [Microsoft Azure Resource Sync Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcesyncrules-api/) — The resourceSyncRules API from Microsoft Azure — 2 operation(s) for resourcesyncrules.
+- [Microsoft Azure ResourceTypeRegistration API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcetyperegistration-api/) — The ResourceTypeRegistration API from Microsoft Azure — 2 operation(s) for resourcetyperegistration.
+- [Microsoft Azure ResourceTypeSku API](https://apis.io/apis/microsoft-azure/microsoft-azure-resourcetypesku-api/) — The ResourceTypeSku API from Microsoft Azure — 8 operation(s) for resourcetypesku.
+- [Microsoft Azure RestorableDroppedSqlPools API](https://apis.io/apis/microsoft-azure/microsoft-azure-restorabledroppedsqlpools-api/) — The RestorableDroppedSqlPools API from Microsoft Azure — 2 operation(s) for restorabledroppedsqlpools.
+- [Microsoft Azure Restore API](https://apis.io/apis/microsoft-azure/microsoft-azure-restore-api/) — The Restore API from Microsoft Azure — 1 operation(s) for restore.
+- [Microsoft Azure Restores API](https://apis.io/apis/microsoft-azure/microsoft-azure-restores-api/) — The Restores API from Microsoft Azure — 1 operation(s) for restores.
+- [Microsoft Azure Reviews API](https://apis.io/apis/microsoft-azure/microsoft-azure-reviews-api/) — The Reviews API from Microsoft Azure — 8 operation(s) for reviews.
+- [Microsoft Azure Reviews Public API](https://apis.io/apis/microsoft-azure/microsoft-azure-reviews-public-api-api/) — The Reviews Public API API from Microsoft Azure — 1 operation(s) for reviews public api.
+- [Microsoft Azure Revisions API](https://apis.io/apis/microsoft-azure/microsoft-azure-revisions-api/) — The Revisions API from Microsoft Azure — 1 operation(s) for revisions.
+- [Microsoft Azure RevokeApiKey API](https://apis.io/apis/microsoft-azure/microsoft-azure-revokeapikey-api/) — The RevokeApiKey API from Microsoft Azure — 1 operation(s) for revokeapikey.
+- [Microsoft Azure RoleInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-roleinstances-api/) — The RoleInstances API from Microsoft Azure — 5 operation(s) for roleinstances.
+- [Microsoft Azure Roles API](https://apis.io/apis/microsoft-azure/microsoft-azure-roles-api/) — The Roles API from Microsoft Azure — 9 operation(s) for roles.
+- [Microsoft Azure Rooms API](https://apis.io/apis/microsoft-azure/microsoft-azure-rooms-api/) — The Rooms API from Microsoft Azure — 2 operation(s) for rooms.
+- [Microsoft Azure RootCauseAnalysisDataSet API](https://apis.io/apis/microsoft-azure/microsoft-azure-rootcauseanalysisdataset-api/) — The RootCauseAnalysisDataSet API from Microsoft Azure — 7 operation(s) for rootcauseanalysisdataset.
+- [Microsoft Azure RootCauseAnalysisInstance API](https://apis.io/apis/microsoft-azure/microsoft-azure-rootcauseanalysisinstance-api/) — The RootCauseAnalysisInstance API from Microsoft Azure — 2 operation(s) for rootcauseanalysisinstance.
+- [Microsoft Azure RootCauseAnalysisKind API](https://apis.io/apis/microsoft-azure/microsoft-azure-rootcauseanalysiskind-api/) — The RootCauseAnalysisKind API from Microsoft Azure — 1 operation(s) for rootcauseanalysiskind.
+- [Microsoft Azure RootCauseAnalysisModel API](https://apis.io/apis/microsoft-azure/microsoft-azure-rootcauseanalysismodel-api/) — The RootCauseAnalysisModel API from Microsoft Azure — 3 operation(s) for rootcauseanalysismodel.
+- [Microsoft Azure Route API](https://apis.io/apis/microsoft-azure/microsoft-azure-route-api/) — The Route API from Microsoft Azure — 4 operation(s) for route.
+- [Microsoft Azure Routes API](https://apis.io/apis/microsoft-azure/microsoft-azure-routes-api/) — The Routes API from Microsoft Azure — 2 operation(s) for routes.
+- [Microsoft Azure Routesets API](https://apis.io/apis/microsoft-azure/microsoft-azure-routesets-api/) — The Routesets API from Microsoft Azure — 3 operation(s) for routesets.
+- [Microsoft Azure Routing API](https://apis.io/apis/microsoft-azure/microsoft-azure-routing-api/) — The Routing API from Microsoft Azure — 21 operation(s) for routing.
+- [Microsoft Azure RoutingConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-routingconfigurations-api/) — The RoutingConfigurations API from Microsoft Azure — 2 operation(s) for routingconfigurations.
+- [Microsoft Azure RoutingRuleCollections API](https://apis.io/apis/microsoft-azure/microsoft-azure-routingrulecollections-api/) — The RoutingRuleCollections API from Microsoft Azure — 2 operation(s) for routingrulecollections.
+- [Microsoft Azure RuleCollections API](https://apis.io/apis/microsoft-azure/microsoft-azure-rulecollections-api/) — The RuleCollections API from Microsoft Azure — 1 operation(s) for rulecollections.
+- [Microsoft Azure Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-rules-api/) — The Rules API from Microsoft Azure — 4 operation(s) for rules.
+- [Microsoft Azure Run API](https://apis.io/apis/microsoft-azure/microsoft-azure-run-api/) — The Run API from Microsoft Azure — 6 operation(s) for run.
+- [Microsoft Azure RunArtifacts API](https://apis.io/apis/microsoft-azure/microsoft-azure-runartifacts-api/) — The RunArtifacts API from Microsoft Azure — 7 operation(s) for runartifacts.
+- [Microsoft Azure RunAsAccountsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-runasaccountscontroller-api/) — The RunAsAccountsController API from Microsoft Azure — 2 operation(s) for runasaccountscontroller.
+- [Microsoft Azure RunMetrics API](https://apis.io/apis/microsoft-azure/microsoft-azure-runmetrics-api/) — The RunMetrics API from Microsoft Azure — 4 operation(s) for runmetrics.
+- [Microsoft Azure SaaSOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-saasoperations-api/) — The SaaSOperations API from Microsoft Azure — 1 operation(s) for saasoperations.
+- [Microsoft Azure SaaSResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-saasresources-api/) — The SaaSResources API from Microsoft Azure — 5 operation(s) for saasresources.
+- [Microsoft Azure Saved Filters API](https://apis.io/apis/microsoft-azure/microsoft-azure-saved-filters-api/) — Provides access to saved filter resources.
+- [Microsoft Azure Savings Plan API](https://apis.io/apis/microsoft-azure/microsoft-azure-savings-plan-api/) — The Savings Plan API from Microsoft Azure — 5 operation(s) for savings plan.
+- [Microsoft Azure Savings Plan Order Aliases API](https://apis.io/apis/microsoft-azure/microsoft-azure-savings-plan-order-aliases-api/) — The Savings Plan Order Aliases API from Microsoft Azure — 1 operation(s) for savings plan order aliases.
+- [Microsoft Azure Savings Plan Order API](https://apis.io/apis/microsoft-azure/microsoft-azure-savings-plan-order-api/) — The Savings Plan Order API from Microsoft Azure — 3 operation(s) for savings plan order.
+- [Microsoft Azure ScaleUnitNodes API](https://apis.io/apis/microsoft-azure/microsoft-azure-scaleunitnodes-api/) — The ScaleUnitNodes API from Microsoft Azure — 8 operation(s) for scaleunitnodes.
+- [Microsoft Azure ScalingPlan API](https://apis.io/apis/microsoft-azure/microsoft-azure-scalingplan-api/) — The ScalingPlan API from Microsoft Azure — 4 operation(s) for scalingplan.
+- [Microsoft Azure ScalingPlanPersonalSchedule API](https://apis.io/apis/microsoft-azure/microsoft-azure-scalingplanpersonalschedule-api/) — The ScalingPlanPersonalSchedule API from Microsoft Azure — 2 operation(s) for scalingplanpersonalschedule.
+- [Microsoft Azure ScalingPlanPooledSchedule API](https://apis.io/apis/microsoft-azure/microsoft-azure-scalingplanpooledschedule-api/) — The ScalingPlanPooledSchedule API from Microsoft Azure — 2 operation(s) for scalingplanpooledschedule.
+- [Microsoft Azure Scan API](https://apis.io/apis/microsoft-azure/microsoft-azure-scan-api/) — The Scan API from Microsoft Azure — 2 operation(s) for scan.
+- [Microsoft Azure Scenes API](https://apis.io/apis/microsoft-azure/microsoft-azure-scenes-api/) — The Scenes API from Microsoft Azure — 5 operation(s) for scenes.
+- [Microsoft Azure Schedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-schedules-api/) — The Schedules API from Microsoft Azure — 6 operation(s) for schedules.
+- [Microsoft Azure Schema API](https://apis.io/apis/microsoft-azure/microsoft-azure-schema-api/) — The Schema API from Microsoft Azure — 2 operation(s) for schema.
+- [Microsoft Azure $schemaGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-schemagroups-api/) — The $schemaGroups API from Microsoft Azure — 6 operation(s) for $schemagroups.
+- [Microsoft Azure SCOM Instance API](https://apis.io/apis/microsoft-azure/microsoft-azure-scom-instance-api/) — The SCOM Instance API from Microsoft Azure — 2 operation(s) for scom instance.
+- [Microsoft Azure SCOM Instances API](https://apis.io/apis/microsoft-azure/microsoft-azure-scom-instances-api/) — The SCOM Instances API from Microsoft Azure — 2 operation(s) for scom instances.
+- [Microsoft Azure ScopeAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-scopeassignments-api/) — The ScopeAssignments API from Microsoft Azure — 2 operation(s) for scopeassignments.
+- [Microsoft Azure ScopeConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-scopeconnections-api/) — The ScopeConnections API from Microsoft Azure — 2 operation(s) for scopeconnections.
+- [Microsoft Azure Search API](https://apis.io/apis/microsoft-azure/microsoft-azure-search-api/) — The Search API from Microsoft Azure — 18 operation(s) for search.
+- [Microsoft Azure SeasonalFields API](https://apis.io/apis/microsoft-azure/microsoft-azure-seasonalfields-api/) — The SeasonalFields API from Microsoft Azure — 5 operation(s) for seasonalfields.
+- [Microsoft Azure Seasons API](https://apis.io/apis/microsoft-azure/microsoft-azure-seasons-api/) — The Seasons API from Microsoft Azure — 2 operation(s) for seasons.
+- [Microsoft Azure Secrets API](https://apis.io/apis/microsoft-azure/microsoft-azure-secrets-api/) — Operations for managing secrets
+- [Microsoft Azure Security Contacts API](https://apis.io/apis/microsoft-azure/microsoft-azure-security-contacts-api/) — The Security Contacts API from Microsoft Azure — 2 operation(s) for security contacts.
+- [Microsoft Azure SecurityAdminConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-securityadminconfigurations-api/) — The SecurityAdminConfigurations API from Microsoft Azure — 2 operation(s) for securityadminconfigurations.
+- [Microsoft Azure SecurityAdvisoryImpactedResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-securityadvisoryimpactedresources-api/) — The SecurityAdvisoryImpactedResources API from Microsoft Azure — 2 operation(s) for securityadvisoryimpactedresources.
+- [Microsoft Azure SecurityConnectors API](https://apis.io/apis/microsoft-azure/microsoft-azure-securityconnectors-api/) — The SecurityConnectors API from Microsoft Azure — 3 operation(s) for securityconnectors.
+- [Microsoft Azure SecurityPINs API](https://apis.io/apis/microsoft-azure/microsoft-azure-securitypins-api/) — The SecurityPINs API from Microsoft Azure — 1 operation(s) for securitypins.
+- [Microsoft Azure SecurityUserConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-securityuserconfigurations-api/) — The SecurityUserConfigurations API from Microsoft Azure — 2 operation(s) for securityuserconfigurations.
+- [Microsoft Azure SelfServicePolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-selfservicepolicies-api/) — The SelfServicePolicies API from Microsoft Azure — 2 operation(s) for selfservicepolicies.
+- [Microsoft Azure Sensitivity Settings API](https://apis.io/apis/microsoft-azure/microsoft-azure-sensitivitysettings-api/) — The sensitivitySettings API from Microsoft Azure — 1 operation(s) for sensitivitysettings.
+- [Microsoft Azure SensorDataModels API](https://apis.io/apis/microsoft-azure/microsoft-azure-sensordatamodels-api/) — The SensorDataModels API from Microsoft Azure — 2 operation(s) for sensordatamodels.
+- [Microsoft Azure SensorEvents API](https://apis.io/apis/microsoft-azure/microsoft-azure-sensorevents-api/) — The SensorEvents API from Microsoft Azure — 1 operation(s) for sensorevents.
+- [Microsoft Azure SensorMappings API](https://apis.io/apis/microsoft-azure/microsoft-azure-sensormappings-api/) — The SensorMappings API from Microsoft Azure — 2 operation(s) for sensormappings.
+- [Microsoft Azure SensorPartnerIntegrations API](https://apis.io/apis/microsoft-azure/microsoft-azure-sensorpartnerintegrations-api/) — The SensorPartnerIntegrations API from Microsoft Azure — 4 operation(s) for sensorpartnerintegrations.
+- [Microsoft Azure Sensors API](https://apis.io/apis/microsoft-azure/microsoft-azure-sensors-api/) — The Sensors API from Microsoft Azure — 4 operation(s) for sensors.
+- [Microsoft Azure Sentiment API](https://apis.io/apis/microsoft-azure/microsoft-azure-sentiment-api/) — The Sentiment API from Microsoft Azure — 1 operation(s) for sentiment.
+- [Microsoft Azure SentShare API](https://apis.io/apis/microsoft-azure/microsoft-azure-sentshare-api/) — The SentShare API from Microsoft Azure — 2 operation(s) for sentshare.
+- [Microsoft Azure SentShareInvitation API](https://apis.io/apis/microsoft-azure/microsoft-azure-sentshareinvitation-api/) — The SentShareInvitation API from Microsoft Azure — 3 operation(s) for sentshareinvitation.
+- [Microsoft Azure SerialPorts API](https://apis.io/apis/microsoft-azure/microsoft-azure-serialports-api/) — The SerialPorts API from Microsoft Azure — 4 operation(s) for serialports.
+- [Microsoft Azure ServerAdministrators API](https://apis.io/apis/microsoft-azure/microsoft-azure-serveradministrators-api/) — The ServerAdministrators API from Microsoft Azure — 2 operation(s) for serveradministrators.
+- [Microsoft Azure ServerCall API](https://apis.io/apis/microsoft-azure/microsoft-azure-servercall-api/) — The ServerCall API from Microsoft Azure — 4 operation(s) for servercall.
+- [Microsoft Azure ServerCollectorsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-servercollectorsoperations-api/) — The ServerCollectorsOperations API from Microsoft Azure — 2 operation(s) for servercollectorsoperations.
+- [Microsoft Azure ServerDependencyMapController API](https://apis.io/apis/microsoft-azure/microsoft-azure-serverdependencymapcontroller-api/) — The ServerDependencyMapController API from Microsoft Azure — 5 operation(s) for serverdependencymapcontroller.
+- [Microsoft Azure ServerEndpoint Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-serverendpoint-resource-api/) — The ServerEndpoint Resource API from Microsoft Azure — 3 operation(s) for serverendpoint resource.
+- [Microsoft Azure ServerFarms API](https://apis.io/apis/microsoft-azure/microsoft-azure-serverfarms-api/) — The ServerFarms API from Microsoft Azure — 13 operation(s) for serverfarms.
+- [Microsoft Azure ServerGroupOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-servergroupoperations-api/) — The ServerGroupOperations API from Microsoft Azure — 3 operation(s) for servergroupoperations.
+- [Microsoft Azure ServerJobsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-serverjobscontroller-api/) — The ServerJobsController API from Microsoft Azure — 2 operation(s) for serverjobscontroller.
+- [Microsoft Azure ServerMetrics API](https://apis.io/apis/microsoft-azure/microsoft-azure-servermetrics-api/) — The ServerMetrics API from Microsoft Azure — 4 operation(s) for servermetrics.
+- [Microsoft Azure ServerOperationsStatusController API](https://apis.io/apis/microsoft-azure/microsoft-azure-serveroperationsstatuscontroller-api/) — The ServerOperationsStatusController API from Microsoft Azure — 1 operation(s) for serveroperationsstatuscontroller.
+- [Microsoft Azure ServerRestart API](https://apis.io/apis/microsoft-azure/microsoft-azure-serverrestart-api/) — The ServerRestart API from Microsoft Azure — 1 operation(s) for serverrestart.
+- [Microsoft Azure ServerRunAsAccountsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-serverrunasaccountscontroller-api/) — The ServerRunAsAccountsController API from Microsoft Azure — 2 operation(s) for serverrunasaccountscontroller.
+- [Microsoft Azure Servers API](https://apis.io/apis/microsoft-azure/microsoft-azure-servers-api/) — The Servers API from Microsoft Azure — 19 operation(s) for servers.
+- [Microsoft Azure ServersController API](https://apis.io/apis/microsoft-azure/microsoft-azure-serverscontroller-api/) — The ServersController API from Microsoft Azure — 2 operation(s) for serverscontroller.
+- [Microsoft Azure ServerSecurityAlertPolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-serversecurityalertpolicies-api/) — The ServerSecurityAlertPolicies API from Microsoft Azure — 1 operation(s) for serversecurityalertpolicies.
+- [Microsoft Azure ServerSitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-serversitescontroller-api/) — The ServerSitesController API from Microsoft Azure — 12 operation(s) for serversitescontroller.
+- [Microsoft Azure ServerSoftwareInventoriesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-serversoftwareinventoriescontroller-api/) — The ServerSoftwareInventoriesController API from Microsoft Azure — 2 operation(s) for serversoftwareinventoriescontroller.
+- [Microsoft Azure Service Health: API](https://apis.io/apis/microsoft-azure/microsoft-azure-service-health-api/) — The Service Health: API from Microsoft Azure — 1 operation(s) for service health:.
+- [Microsoft Azure Service Package API](https://apis.io/apis/microsoft-azure/microsoft-azure-service-package-api/) — The Service Package API from Microsoft Azure — 5 operation(s) for service package.
+- [Microsoft Azure ServiceFabrics API](https://apis.io/apis/microsoft-azure/microsoft-azure-servicefabrics-api/) — The ServiceFabrics API from Microsoft Azure — 5 operation(s) for servicefabrics.
+- [Microsoft Azure ServiceFabricSchedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-servicefabricschedules-api/) — The ServiceFabricSchedules API from Microsoft Azure — 3 operation(s) for servicefabricschedules.
+- [Microsoft Azure ServiceHealths API](https://apis.io/apis/microsoft-azure/microsoft-azure-servicehealths-api/) — The ServiceHealths API from Microsoft Azure — 2 operation(s) for servicehealths.
+- [Microsoft Azure ServiceMembers API](https://apis.io/apis/microsoft-azure/microsoft-azure-servicemembers-api/) — The ServiceMembers API from Microsoft Azure — 9 operation(s) for servicemembers.
+- [Microsoft Azure ServicePrincipal API](https://apis.io/apis/microsoft-azure/microsoft-azure-serviceprincipal-api/) — The ServicePrincipal API from Microsoft Azure — 2 operation(s) for serviceprincipal.
+- [Microsoft Azure ServicePrincipalAppRoleAssignedTo API](https://apis.io/apis/microsoft-azure/microsoft-azure-serviceprincipalapproleassignedto-api/) — The ServicePrincipalAppRoleAssignedTo API from Microsoft Azure — 1 operation(s) for serviceprincipalapproleassignedto.
+- [Microsoft Azure ServicePrincipalAppRoleAssignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-serviceprincipalapproleassignments-api/) — The ServicePrincipalAppRoleAssignments API from Microsoft Azure — 1 operation(s) for serviceprincipalapproleassignments.
+- [Microsoft Azure ServicePrincipalKeyCredentials API](https://apis.io/apis/microsoft-azure/microsoft-azure-serviceprincipalkeycredentials-api/) — The ServicePrincipalKeyCredentials API from Microsoft Azure — 1 operation(s) for serviceprincipalkeycredentials.
+- [Microsoft Azure ServicePrincipalOwners API](https://apis.io/apis/microsoft-azure/microsoft-azure-serviceprincipalowners-api/) — The ServicePrincipalOwners API from Microsoft Azure — 3 operation(s) for serviceprincipalowners.
+- [Microsoft Azure ServicePrincipalPasswordCredentials API](https://apis.io/apis/microsoft-azure/microsoft-azure-serviceprincipalpasswordcredentials-api/) — The ServicePrincipalPasswordCredentials API from Microsoft Azure — 1 operation(s) for serviceprincipalpasswordcredentials.
+- [Microsoft Azure ServicePrincipalsByAppId API](https://apis.io/apis/microsoft-azure/microsoft-azure-serviceprincipalsbyappid-api/) — The ServicePrincipalsByAppId API from Microsoft Azure — 1 operation(s) for serviceprincipalsbyappid.
+- [Microsoft Azure ServiceRunners API](https://apis.io/apis/microsoft-azure/microsoft-azure-servicerunners-api/) — The ServiceRunners API from Microsoft Azure — 1 operation(s) for servicerunners.
+- [Microsoft Azure Services API](https://apis.io/apis/microsoft-azure/microsoft-azure-services-api/) — The Services API from Microsoft Azure — 8 operation(s) for services.
+- [Microsoft Azure Servicestats API](https://apis.io/apis/microsoft-azure/microsoft-azure-servicestats-api/) — The Servicestats API from Microsoft Azure — 1 operation(s) for servicestats.
+- [Microsoft Azure ServiceType API](https://apis.io/apis/microsoft-azure/microsoft-azure-servicetype-api/) — The ServiceType API from Microsoft Azure — 5 operation(s) for servicetype.
+- [Microsoft Azure SessionHost API](https://apis.io/apis/microsoft-azure/microsoft-azure-sessionhost-api/) — The SessionHost API from Microsoft Azure — 3 operation(s) for sessionhost.
+- [Microsoft Azure SessionHostConfiguration API](https://apis.io/apis/microsoft-azure/microsoft-azure-sessionhostconfiguration-api/) — The SessionHostConfiguration API from Microsoft Azure — 2 operation(s) for sessionhostconfiguration.
+- [Microsoft Azure SessionHostConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-sessionhostconfigurations-api/) — The SessionHostConfigurations API from Microsoft Azure — 2 operation(s) for sessionhostconfigurations.
+- [Microsoft Azure SessionHostManagement API](https://apis.io/apis/microsoft-azure/microsoft-azure-sessionhostmanagement-api/) — The SessionHostManagement API from Microsoft Azure — 3 operation(s) for sessionhostmanagement.
+- [Microsoft Azure SessionHostManagements API](https://apis.io/apis/microsoft-azure/microsoft-azure-sessionhostmanagements-api/) — The SessionHostManagements API from Microsoft Azure — 4 operation(s) for sessionhostmanagements.
+- [Microsoft Azure Settings API](https://apis.io/apis/microsoft-azure/microsoft-azure-settings-api/) — The Settings API from Microsoft Azure — 2 operation(s) for settings.
+- [Microsoft Azure Share API](https://apis.io/apis/microsoft-azure/microsoft-azure-share-api/) — The Share API from Microsoft Azure — 8 operation(s) for share.
+- [Microsoft Azure SharedGalleries API](https://apis.io/apis/microsoft-azure/microsoft-azure-sharedgalleries-api/) — The SharedGalleries API from Microsoft Azure — 2 operation(s) for sharedgalleries.
+- [Microsoft Azure SharedGalleryImages API](https://apis.io/apis/microsoft-azure/microsoft-azure-sharedgalleryimages-api/) — The SharedGalleryImages API from Microsoft Azure — 2 operation(s) for sharedgalleryimages.
+- [Microsoft Azure SharedGalleryImageVersions API](https://apis.io/apis/microsoft-azure/microsoft-azure-sharedgalleryimageversions-api/) — The SharedGalleryImageVersions API from Microsoft Azure — 2 operation(s) for sharedgalleryimageversions.
+- [Microsoft Azure SharedPrivateLinkResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-sharedprivatelinkresources-api/) — The SharedPrivateLinkResources API from Microsoft Azure — 4 operation(s) for sharedprivatelinkresources.
+- [Microsoft Azure ShareResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-shareresource-api/) — The ShareResource API from Microsoft Azure — 1 operation(s) for shareresource.
+- [Microsoft Azure Shares API](https://apis.io/apis/microsoft-azure/microsoft-azure-shares-api/) — The Shares API from Microsoft Azure — 3 operation(s) for shares.
+- [Microsoft Azure ShareSubscription API](https://apis.io/apis/microsoft-azure/microsoft-azure-sharesubscription-api/) — The ShareSubscription API from Microsoft Azure — 8 operation(s) for sharesubscription.
+- [Microsoft Azure SignalR API](https://apis.io/apis/microsoft-azure/microsoft-azure-signalr-api/) — The SignalR API from Microsoft Azure — 25 operation(s) for signalr.
+- [Microsoft Azure SignedInUser API](https://apis.io/apis/microsoft-azure/microsoft-azure-signedinuser-api/) — The SignedInUser API from Microsoft Azure — 2 operation(s) for signedinuser.
+- [Microsoft Azure Sim Swap API](https://apis.io/apis/microsoft-azure/microsoft-azure-sim-swap-api/) — The Sim Swap API from Microsoft Azure — 2 operation(s) for sim swap.
+- [Microsoft Azure Simplified Solutions API](https://apis.io/apis/microsoft-azure/microsoft-azure-simplifiedsolutions-api/) — The simplifiedSolutions API from Microsoft Azure — 1 operation(s) for simplifiedsolutions.
+- [Microsoft Azure Sites API](https://apis.io/apis/microsoft-azure/microsoft-azure-sites-api/) — The Sites API from Microsoft Azure — 110 operation(s) for sites.
+- [Microsoft Azure SitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sitescontroller-api/) — The SitesController API from Microsoft Azure — 10 operation(s) for sitescontroller.
+- [Microsoft Azure Skillsets API](https://apis.io/apis/microsoft-azure/microsoft-azure-skillsets-api/) — The Skillsets API from Microsoft Azure — 2 operation(s) for skillsets.
+- [Microsoft Azure Sku API](https://apis.io/apis/microsoft-azure/microsoft-azure-sku-api/) — The Sku API from Microsoft Azure — 2 operation(s) for sku.
+- [Microsoft Azure Skus API](https://apis.io/apis/microsoft-azure/microsoft-azure-skus-api/) — The Skus API from Microsoft Azure — 4 operation(s) for skus.
+- [Microsoft Azure SmfDeployments API](https://apis.io/apis/microsoft-azure/microsoft-azure-smfdeployments-api/) — The SmfDeployments API from Microsoft Azure — 3 operation(s) for smfdeployments.
+- [Microsoft Azure Sms API](https://apis.io/apis/microsoft-azure/microsoft-azure-sms-api/) — The Sms API from Microsoft Azure — 1 operation(s) for sms.
+- [Microsoft Azure Snapshot Policy API](https://apis.io/apis/microsoft-azure/microsoft-azure-snapshot-policy-api/) — The Snapshot Policy API from Microsoft Azure — 2 operation(s) for snapshot policy.
+- [Microsoft Azure Snapshot Policy List Volumes API](https://apis.io/apis/microsoft-azure/microsoft-azure-snapshot-policy-list-volumes-api/) — The Snapshot Policy List Volumes API from Microsoft Azure — 1 operation(s) for snapshot policy list volumes.
+- [Microsoft Azure Snapshots API](https://apis.io/apis/microsoft-azure/microsoft-azure-snapshots-api/) — The Snapshots API from Microsoft Azure — 14 operation(s) for snapshots.
+- [Microsoft Azure SoftDeletedContainers API](https://apis.io/apis/microsoft-azure/microsoft-azure-softdeletedcontainers-api/) — The SoftDeletedContainers API from Microsoft Azure — 1 operation(s) for softdeletedcontainers.
+- [Microsoft Azure Software Plan API](https://apis.io/apis/microsoft-azure/microsoft-azure-software-plan-api/) — The Software Plan API from Microsoft Azure — 1 operation(s) for software plan.
+- [Microsoft Azure Software Plan Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-software-plan-operations-api/) — The Software Plan Operations API from Microsoft Azure — 1 operation(s) for software plan operations.
+- [Microsoft Azure Software Update Configuration Run API](https://apis.io/apis/microsoft-azure/microsoft-azure-software-update-configuration-run-api/) — The Software Update Configuration Run API from Microsoft Azure — 2 operation(s) for software update configuration run.
+- [Microsoft Azure Solution API](https://apis.io/apis/microsoft-azure/microsoft-azure-solution-api/) — The Solution API from Microsoft Azure — 3 operation(s) for solution.
+- [Microsoft Azure SolutionInference API](https://apis.io/apis/microsoft-azure/microsoft-azure-solutioninference-api/) — The SolutionInference API from Microsoft Azure — 3 operation(s) for solutioninference.
+- [Microsoft Azure Solutions API](https://apis.io/apis/microsoft-azure/microsoft-azure-solutions-api/) — The Solutions API from Microsoft Azure — 11 operation(s) for solutions.
+- [Microsoft Azure SolutionsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-solutionscontroller-api/) — The SolutionsController API from Microsoft Azure — 4 operation(s) for solutionscontroller.
+- [Microsoft Azure SolutionsDiscoverability API](https://apis.io/apis/microsoft-azure/microsoft-azure-solutionsdiscoverability-api/) — The SolutionsDiscoverability API from Microsoft Azure — 2 operation(s) for solutionsdiscoverability.
+- [Microsoft Azure SolutionSelfHelp API](https://apis.io/apis/microsoft-azure/microsoft-azure-solutionselfhelp-api/) — The SolutionSelfHelp API from Microsoft Azure — 1 operation(s) for solutionselfhelp.
+- [Microsoft Azure SourceControlConfiguration API](https://apis.io/apis/microsoft-azure/microsoft-azure-sourcecontrolconfiguration-api/) — The SourceControlConfiguration API from Microsoft Azure — 2 operation(s) for sourcecontrolconfiguration.
+- [Microsoft Azure Spaces API](https://apis.io/apis/microsoft-azure/microsoft-azure-spaces-api/) — The Spaces API from Microsoft Azure — 3 operation(s) for spaces.
+- [Microsoft Azure SparkBatch API](https://apis.io/apis/microsoft-azure/microsoft-azure-sparkbatch-api/) — The SparkBatch API from Microsoft Azure — 2 operation(s) for sparkbatch.
+- [Microsoft Azure SparkSession API](https://apis.io/apis/microsoft-azure/microsoft-azure-sparksession-api/) — The SparkSession API from Microsoft Azure — 6 operation(s) for sparksession.
+- [Microsoft Azure Spatial API](https://apis.io/apis/microsoft-azure/microsoft-azure-spatial-api/) — The Spatial API from Microsoft Azure — 5 operation(s) for spatial.
+- [Microsoft Azure Split Clone Volume API](https://apis.io/apis/microsoft-azure/microsoft-azure-split-clone-volume-api/) — The Split Clone Volume API from Microsoft Azure — 1 operation(s) for split clone volume.
+- [Microsoft Azure Spot Placement Recommender API](https://apis.io/apis/microsoft-azure/microsoft-azure-spotplacementrecommender-api/) — The spotPlacementRecommender API from Microsoft Azure — 1 operation(s) for spotplacementrecommender.
+- [Microsoft Azure Springbootapps API](https://apis.io/apis/microsoft-azure/microsoft-azure-springbootapps-api/) — The Springbootapps API from Microsoft Azure — 3 operation(s) for springbootapps.
+- [Microsoft Azure Springbootservers API](https://apis.io/apis/microsoft-azure/microsoft-azure-springbootservers-api/) — The Springbootservers API from Microsoft Azure — 3 operation(s) for springbootservers.
+- [Microsoft Azure Springbootsites API](https://apis.io/apis/microsoft-azure/microsoft-azure-springbootsites-api/) — The Springbootsites API from Microsoft Azure — 4 operation(s) for springbootsites.
+- [Microsoft Azure SqlAssessmentOptionsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlassessmentoptionsoperations-api/) — The SqlAssessmentOptionsOperations API from Microsoft Azure — 2 operation(s) for sqlassessmentoptionsoperations.
+- [Microsoft Azure SqlAssessmentV2Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlassessmentv2operations-api/) — The SqlAssessmentV2Operations API from Microsoft Azure — 3 operation(s) for sqlassessmentv2operations.
+- [Microsoft Azure SqlAssessmentV2SummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlassessmentv2summaryoperations-api/) — The SqlAssessmentV2SummaryOperations API from Microsoft Azure — 2 operation(s) for sqlassessmentv2summaryoperations.
+- [Microsoft Azure SqlAvailabilityGroupsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlavailabilitygroupscontroller-api/) — The SqlAvailabilityGroupsController API from Microsoft Azure — 2 operation(s) for sqlavailabilitygroupscontroller.
+- [Microsoft Azure SqlCollectorOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlcollectoroperations-api/) — The SqlCollectorOperations API from Microsoft Azure — 2 operation(s) for sqlcollectoroperations.
+- [Microsoft Azure SqlDatabasesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqldatabasescontroller-api/) — The SqlDatabasesController API from Microsoft Azure — 2 operation(s) for sqldatabasescontroller.
+- [Microsoft Azure SqlDiscoverySiteDataSourceController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqldiscoverysitedatasourcecontroller-api/) — The SqlDiscoverySiteDataSourceController API from Microsoft Azure — 2 operation(s) for sqldiscoverysitedatasourcecontroller.
+- [Microsoft Azure SqlJobsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqljobscontroller-api/) — The SqlJobsController API from Microsoft Azure — 2 operation(s) for sqljobscontroller.
+- [Microsoft Azure SqlMigrationServices API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlmigrationservices-api/) — The SqlMigrationServices API from Microsoft Azure — 8 operation(s) for sqlmigrationservices.
+- [Microsoft Azure SqlOperationsStatusController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqloperationsstatuscontroller-api/) — The SqlOperationsStatusController API from Microsoft Azure — 1 operation(s) for sqloperationsstatuscontroller.
+- [Microsoft Azure SqlPoolsV3 API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlpoolsv3-api/) — The SqlPoolsV3 API from Microsoft Azure — 4 operation(s) for sqlpoolsv3.
+- [Microsoft Azure SqlRunAsAccountsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlrunasaccountscontroller-api/) — The SqlRunAsAccountsController API from Microsoft Azure — 2 operation(s) for sqlrunasaccountscontroller.
+- [Microsoft Azure SqlServerRegistrations API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlserverregistrations-api/) — The SqlServerRegistrations API from Microsoft Azure — 3 operation(s) for sqlserverregistrations.
+- [Microsoft Azure SqlServers API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlservers-api/) — The SqlServers API from Microsoft Azure — 2 operation(s) for sqlservers.
+- [Microsoft Azure SqlServersController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlserverscontroller-api/) — The SqlServersController API from Microsoft Azure — 2 operation(s) for sqlserverscontroller.
+- [Microsoft Azure SqlSitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlsitescontroller-api/) — The SqlSitesController API from Microsoft Azure — 7 operation(s) for sqlsitescontroller.
+- [Microsoft Azure SqlVirtualMachineGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlvirtualmachinegroups-api/) — The SqlVirtualMachineGroups API from Microsoft Azure — 3 operation(s) for sqlvirtualmachinegroups.
+- [Microsoft Azure SqlVirtualMachines API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlvirtualmachines-api/) — The SqlVirtualMachines API from Microsoft Azure — 6 operation(s) for sqlvirtualmachines.
+- [Microsoft Azure SqlVirtualMachineTroubleshoot API](https://apis.io/apis/microsoft-azure/microsoft-azure-sqlvirtualmachinetroubleshoot-api/) — The SqlVirtualMachineTroubleshoot API from Microsoft Azure — 1 operation(s) for sqlvirtualmachinetroubleshoot.
+- [Microsoft Azure StandbyContainerGroupPools API](https://apis.io/apis/microsoft-azure/microsoft-azure-standbycontainergrouppools-api/) — The StandbyContainerGroupPools API from Microsoft Azure — 3 operation(s) for standbycontainergrouppools.
+- [Microsoft Azure StandbyVirtualMachinePools API](https://apis.io/apis/microsoft-azure/microsoft-azure-standbyvirtualmachinepools-api/) — The StandbyVirtualMachinePools API from Microsoft Azure — 3 operation(s) for standbyvirtualmachinepools.
+- [Microsoft Azure StandbyVirtualMachines API](https://apis.io/apis/microsoft-azure/microsoft-azure-standbyvirtualmachines-api/) — The StandbyVirtualMachines API from Microsoft Azure — 2 operation(s) for standbyvirtualmachines.
+- [Microsoft Azure StartMenuItem API](https://apis.io/apis/microsoft-azure/microsoft-azure-startmenuitem-api/) — The StartMenuItem API from Microsoft Azure — 1 operation(s) for startmenuitem.
+- [Microsoft Azure StaticMembers API](https://apis.io/apis/microsoft-azure/microsoft-azure-staticmembers-api/) — The StaticMembers API from Microsoft Azure — 2 operation(s) for staticmembers.
+- [Microsoft Azure Storage Actions Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-storage-actions-operations-api/) — The Storage Actions Operations API from Microsoft Azure — 1 operation(s) for storage actions operations.
+- [Microsoft Azure Storage API](https://apis.io/apis/microsoft-azure/microsoft-azure-storage-api/) — The Storage API from Microsoft Azure — 8 operation(s) for storage.
+- [Microsoft Azure StorageAccountCredentials API](https://apis.io/apis/microsoft-azure/microsoft-azure-storageaccountcredentials-api/) — The StorageAccountCredentials API from Microsoft Azure — 5 operation(s) for storageaccountcredentials.
+- [Microsoft Azure StorageAccounts API](https://apis.io/apis/microsoft-azure/microsoft-azure-storageaccounts-api/) — The StorageAccounts API from Microsoft Azure — 19 operation(s) for storageaccounts.
+- [Microsoft Azure StorageClass API](https://apis.io/apis/microsoft-azure/microsoft-azure-storageclass-api/) — The StorageClass API from Microsoft Azure — 2 operation(s) for storageclass.
+- [Microsoft Azure StorageDomains API](https://apis.io/apis/microsoft-azure/microsoft-azure-storagedomains-api/) — The StorageDomains API from Microsoft Azure — 2 operation(s) for storagedomains.
+- [Microsoft Azure StorageImportExport API](https://apis.io/apis/microsoft-azure/microsoft-azure-storageimportexport-api/) — The StorageImportExport API from Microsoft Azure — 7 operation(s) for storageimportexport.
+- [Microsoft Azure StorageMovers API](https://apis.io/apis/microsoft-azure/microsoft-azure-storagemovers-api/) — The StorageMovers API from Microsoft Azure — 3 operation(s) for storagemovers.
+- [Microsoft Azure StoragePoolOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-storagepooloperations-api/) — APIs for StoragePool operations.
+- [Microsoft Azure StorageSyncService API](https://apis.io/apis/microsoft-azure/microsoft-azure-storagesyncservice-api/) — The StorageSyncService API from Microsoft Azure — 1 operation(s) for storagesyncservice.
+- [Microsoft Azure StorageSyncServices Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-storagesyncservices-resource-api/) — The StorageSyncServices Resource API from Microsoft Azure — 3 operation(s) for storagesyncservices resource.
+- [Microsoft Azure StorageTargets API](https://apis.io/apis/microsoft-azure/microsoft-azure-storagetargets-api/) — The StorageTargets API from Microsoft Azure — 8 operation(s) for storagetargets.
+- [Microsoft Azure StorageTasks API](https://apis.io/apis/microsoft-azure/microsoft-azure-storagetasks-api/) — The StorageTasks API from Microsoft Azure — 6 operation(s) for storagetasks.
+- [Microsoft Azure Stored Procedures API](https://apis.io/apis/microsoft-azure/microsoft-azure-stored-procedures-api/) — Operations for managing stored procedures
+- [Microsoft Azure Stream API](https://apis.io/apis/microsoft-azure/microsoft-azure-stream-api/) — The Stream API from Microsoft Azure — 1 operation(s) for stream.
+- [Microsoft Azure StudentLabs API](https://apis.io/apis/microsoft-azure/microsoft-azure-studentlabs-api/) — The StudentLabs API from Microsoft Azure — 2 operation(s) for studentlabs.
+- [Microsoft Azure Students API](https://apis.io/apis/microsoft-azure/microsoft-azure-students-api/) — The Students API from Microsoft Azure — 2 operation(s) for students.
+- [Microsoft Azure Styles API](https://apis.io/apis/microsoft-azure/microsoft-azure-styles-api/) — The Styles API from Microsoft Azure — 6 operation(s) for styles.
+- [Microsoft Azure Subnets API](https://apis.io/apis/microsoft-azure/microsoft-azure-subnets-api/) — The Subnets API from Microsoft Azure — 2 operation(s) for subnets.
+- [Microsoft Azure Subscription API](https://apis.io/apis/microsoft-azure/microsoft-azure-subscription-api/) — The Subscription API from Microsoft Azure — 5 operation(s) for subscription.
+- [Microsoft Azure SubscriptionDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-subscriptiondefinitions-api/) — The SubscriptionDefinitions API from Microsoft Azure — 4 operation(s) for subscriptiondefinitions.
+- [Microsoft Azure SubscriptionLevelProfessionalServiceResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-subscriptionlevelprofessionalserviceresources-api/) — The SubscriptionLevelProfessionalServiceResources API from Microsoft Azure — 4 operation(s) for subscriptionlevelprofessionalserviceresources.
+- [Microsoft Azure SubscriptionLevelSaaSResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-subscriptionlevelsaasresources-api/) — The SubscriptionLevelSaaSResources API from Microsoft Azure — 7 operation(s) for subscriptionlevelsaasresources.
+- [Microsoft Azure Subscriptions API](https://apis.io/apis/microsoft-azure/microsoft-azure-subscriptions-api/) — The Subscriptions API from Microsoft Azure — 488 operation(s) for subscriptions.
+- [Microsoft Azure Subvolumes API](https://apis.io/apis/microsoft-azure/microsoft-azure-subvolumes-api/) — The Subvolumes API from Microsoft Azure — 3 operation(s) for subvolumes.
+- [Microsoft Azure SuggestTagsAndRegionsApi API](https://apis.io/apis/microsoft-azure/microsoft-azure-suggesttagsandregionsapi-api/) — The SuggestTagsAndRegionsApi API from Microsoft Azure — 1 operation(s) for suggesttagsandregionsapi.
+- [Microsoft Azure Summaries API](https://apis.io/apis/microsoft-azure/microsoft-azure-summaries-api/) — The Summaries API from Microsoft Azure — 3 operation(s) for summaries.
+- [Microsoft Azure Supportedimages API](https://apis.io/apis/microsoft-azure/microsoft-azure-supportedimages-api/) — The Supportedimages API from Microsoft Azure — 1 operation(s) for supportedimages.
+- [Microsoft Azure SupportedOperatingSystems API](https://apis.io/apis/microsoft-azure/microsoft-azure-supportedoperatingsystems-api/) — The SupportedOperatingSystems API from Microsoft Azure — 1 operation(s) for supportedoperatingsystems.
+- [Microsoft Azure SupportPackages API](https://apis.io/apis/microsoft-azure/microsoft-azure-supportpackages-api/) — The SupportPackages API from Microsoft Azure — 1 operation(s) for supportpackages.
+- [Microsoft Azure SuppressionLists API](https://apis.io/apis/microsoft-azure/microsoft-azure-suppressionlists-api/) — The SuppressionLists API from Microsoft Azure — 4 operation(s) for suppressionlists.
+- [Microsoft Azure SynapseRbacScopes API](https://apis.io/apis/microsoft-azure/microsoft-azure-synapserbacscopes-api/) — The SynapseRbacScopes API from Microsoft Azure — 1 operation(s) for synapserbacscopes.
+- [Microsoft Azure SynapseRoleDefinitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-synapseroledefinitions-api/) — The SynapseRoleDefinitions API from Microsoft Azure — 2 operation(s) for synapseroledefinitions.
+- [Microsoft Azure SyncGroup Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-syncgroup-resource-api/) — The SyncGroup Resource API from Microsoft Azure — 2 operation(s) for syncgroup resource.
+- [Microsoft Azure SynchronizationSetting API](https://apis.io/apis/microsoft-azure/microsoft-azure-synchronizationsetting-api/) — The SynchronizationSetting API from Microsoft Azure — 2 operation(s) for synchronizationsetting.
+- [Microsoft Azure SynonymMaps API](https://apis.io/apis/microsoft-azure/microsoft-azure-synonymmaps-api/) — The SynonymMaps API from Microsoft Azure — 2 operation(s) for synonymmaps.
+- [Microsoft Azure SystemScanRulesets API](https://apis.io/apis/microsoft-azure/microsoft-azure-systemscanrulesets-api/) — The SystemScanRulesets API from Microsoft Azure — 5 operation(s) for systemscanrulesets.
+- [Microsoft Azure SystemTopics API](https://apis.io/apis/microsoft-azure/microsoft-azure-systemtopics-api/) — The SystemTopics API from Microsoft Azure — 3 operation(s) for systemtopics.
+- [Microsoft Azure Table API](https://apis.io/apis/microsoft-azure/microsoft-azure-table-api/) — The Table API from Microsoft Azure — 5 operation(s) for table.
+- [Microsoft Azure Tag API](https://apis.io/apis/microsoft-azure/microsoft-azure-tag-api/) — The Tag API from Microsoft Azure — 1 operation(s) for tag.
+- [Microsoft Azure TagApiLink API](https://apis.io/apis/microsoft-azure/microsoft-azure-tagapilink-api/) — The TagApiLink API from Microsoft Azure — 2 operation(s) for tagapilink.
+- [Microsoft Azure TagOperationLink API](https://apis.io/apis/microsoft-azure/microsoft-azure-tagoperationlink-api/) — The TagOperationLink API from Microsoft Azure — 2 operation(s) for tagoperationlink.
+- [Microsoft Azure TagProductLink API](https://apis.io/apis/microsoft-azure/microsoft-azure-tagproductlink-api/) — The TagProductLink API from Microsoft Azure — 2 operation(s) for tagproductlink.
+- [Microsoft Azure Tags API](https://apis.io/apis/microsoft-azure/microsoft-azure-tags-api/) — The Tags API from Microsoft Azure — 1 operation(s) for tags.
+- [Microsoft Azure TargetComputeSizes API](https://apis.io/apis/microsoft-azure/microsoft-azure-targetcomputesizes-api/) — The TargetComputeSizes API from Microsoft Azure — 1 operation(s) for targetcomputesizes.
+- [Microsoft Azure Targets API](https://apis.io/apis/microsoft-azure/microsoft-azure-targets-api/) — The Targets API from Microsoft Azure — 7 operation(s) for targets.
+- [Microsoft Azure Tasks API](https://apis.io/apis/microsoft-azure/microsoft-azure-tasks-api/) — Provides access to task resources.
+- [Microsoft Azure TcbBaseline API](https://apis.io/apis/microsoft-azure/microsoft-azure-tcbbaseline-api/) — The TcbBaseline API from Microsoft Azure — 1 operation(s) for tcbbaseline.
+- [Microsoft Azure TeamsAvailableCapabilities API](https://apis.io/apis/microsoft-azure/microsoft-azure-teamsavailablecapabilities-api/) — The TeamsAvailableCapabilities API from Microsoft Azure — 1 operation(s) for teamsavailablecapabilities.
+- [Microsoft Azure TeamsCapabilityPlans API](https://apis.io/apis/microsoft-azure/microsoft-azure-teamscapabilityplans-api/) — The TeamsCapabilityPlans API from Microsoft Azure — 1 operation(s) for teamscapabilityplans.
+- [Microsoft Azure TeamsCivicAddress API](https://apis.io/apis/microsoft-azure/microsoft-azure-teamscivicaddress-api/) — The TeamsCivicAddress API from Microsoft Azure — 1 operation(s) for teamscivicaddress.
+- [Microsoft Azure TeamsCivicAddresses API](https://apis.io/apis/microsoft-azure/microsoft-azure-teamscivicaddresses-api/) — The TeamsCivicAddresses API from Microsoft Azure — 1 operation(s) for teamscivicaddresses.
+- [Microsoft Azure TeamsRequestForInformation API](https://apis.io/apis/microsoft-azure/microsoft-azure-teamsrequestforinformation-api/) — The TeamsRequestForInformation API from Microsoft Azure — 2 operation(s) for teamsrequestforinformation.
+- [Microsoft Azure Template API](https://apis.io/apis/microsoft-azure/microsoft-azure-template-api/) — The Template API from Microsoft Azure — 1 operation(s) for template.
+- [Microsoft Azure Tenant API](https://apis.io/apis/microsoft-azure/microsoft-azure-tenant-api/) — Tenant controller.
+- [Microsoft Azure TenantEmailRegistration API](https://apis.io/apis/microsoft-azure/microsoft-azure-tenantemailregistration-api/) — The TenantEmailRegistration API from Microsoft Azure — 2 operation(s) for tenantemailregistration.
+- [Microsoft Azure TenantLevelGetAccessReviewInstanceContactedReviewers API](https://apis.io/apis/microsoft-azure/microsoft-azure-tenantlevelgetaccessreviewinstancecontactedreviewers-api/) — The TenantLevelGetAccessReviewInstanceContactedReviewers API from Microsoft Azure — 1 operation(s) for tenantlevelgetaccessreviewinstancecontactedreviewers.
+- [Microsoft Azure Test API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-api/) — The Test API from Microsoft Azure — 10 operation(s) for test.
+- [Microsoft Azure Test Base Account API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-base-account-api/) — The Test Base Account API from Microsoft Azure — 6 operation(s) for test base account.
+- [Microsoft Azure Test Base Customer Event API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-base-customer-event-api/) — The Test Base Customer Event API from Microsoft Azure — 1 operation(s) for test base customer event.
+- [Microsoft Azure Test Base Customer Notification Events API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-base-customer-notification-events-api/) — The Test Base Customer Notification Events API from Microsoft Azure — 1 operation(s) for test base customer notification events.
+- [Microsoft Azure Test Base Email Event API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-base-email-event-api/) — The Test Base Email Event API from Microsoft Azure — 2 operation(s) for test base email event.
+- [Microsoft Azure Test Base Package API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-base-package-api/) — The Test Base Package API from Microsoft Azure — 12 operation(s) for test base package.
+- [Microsoft Azure Test Result API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-result-api/) — The Test Result API from Microsoft Azure — 12 operation(s) for test result.
+- [Microsoft Azure TestLines API](https://apis.io/apis/microsoft-azure/microsoft-azure-testlines-api/) — The TestLines API from Microsoft Azure — 2 operation(s) for testlines.
+- [Microsoft Azure Text:analyze API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-analyze-api/) — The Text:analyze API from Microsoft Azure — 1 operation(s) for text:analyze.
+- [Microsoft Azure Text API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-api/) — The Text API from Microsoft Azure — 6 operation(s) for text.
+- [Microsoft Azure Text-Dependent API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-dependent-api/) — The Text-Dependent API from Microsoft Azure — 6 operation(s) for text-dependent.
+- [Microsoft Azure Text:detect Groundedness API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-detectgroundedness-api/) — The text:detectGroundedness API from Microsoft Azure — 1 operation(s) for text:detectgroundedness.
+- [Microsoft Azure Text:detect Jailbreak API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-detectjailbreak-api/) — The text:detectJailbreak API from Microsoft Azure — 1 operation(s) for text:detectjailbreak.
+- [Microsoft Azure Text:detect Protected Material API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-detectprotectedmaterial-api/) — The text:detectProtectedMaterial API from Microsoft Azure — 1 operation(s) for text:detectprotectedmaterial.
+- [Microsoft Azure Text-Independent API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-independent-api/) — The Text-Independent API from Microsoft Azure — 8 operation(s) for text-independent.
+- [Microsoft Azure Text:shield Prompt API](https://apis.io/apis/microsoft-azure/microsoft-azure-text-shieldprompt-api/) — The text:shieldPrompt API from Microsoft Azure — 1 operation(s) for text:shieldprompt.
+- [Microsoft Azure TextModeration API](https://apis.io/apis/microsoft-azure/microsoft-azure-textmoderation-api/) — The TextModeration API from Microsoft Azure — 2 operation(s) for textmoderation.
+- [Microsoft Azure Text Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-textoperations-api/) — The textOperations API from Microsoft Azure — 1 operation(s) for textoperations.
+- [Microsoft Azure Threads API](https://apis.io/apis/microsoft-azure/microsoft-azure-threads-api/) — The Threads API from Microsoft Azure — 16 operation(s) for threads.
+- [Microsoft Azure ThroughputPools API](https://apis.io/apis/microsoft-azure/microsoft-azure-throughputpools-api/) — The ThroughputPools API from Microsoft Azure — 1 operation(s) for throughputpools.
+- [Microsoft Azure Tilesets API](https://apis.io/apis/microsoft-azure/microsoft-azure-tilesets-api/) — The Tilesets API from Microsoft Azure — 3 operation(s) for tilesets.
+- [Microsoft Azure TillageData API](https://apis.io/apis/microsoft-azure/microsoft-azure-tillagedata-api/) — The TillageData API from Microsoft Azure — 5 operation(s) for tillagedata.
+- [Microsoft Azure Timezone API](https://apis.io/apis/microsoft-azure/microsoft-azure-timezone-api/) — The Timezone API from Microsoft Azure — 6 operation(s) for timezone.
+- [Microsoft Azure Token API](https://apis.io/apis/microsoft-azure/microsoft-azure-token-api/) — The Token API from Microsoft Azure — 2 operation(s) for token.
+- [Microsoft Azure TomcatWebApplicationsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-tomcatwebapplicationscontroller-api/) — The TomcatWebApplicationsController API from Microsoft Azure — 2 operation(s) for tomcatwebapplicationscontroller.
+- [Microsoft Azure TomcatWebServersController API](https://apis.io/apis/microsoft-azure/microsoft-azure-tomcatwebserverscontroller-api/) — The TomcatWebServersController API from Microsoft Azure — 2 operation(s) for tomcatwebserverscontroller.
+- [Microsoft Azure Topics API](https://apis.io/apis/microsoft-azure/microsoft-azure-topics-api/) — The Topics API from Microsoft Azure — 15 operation(s) for topics.
+- [Microsoft Azure TopicTypes API](https://apis.io/apis/microsoft-azure/microsoft-azure-topictypes-api/) — The TopicTypes API from Microsoft Azure — 3 operation(s) for topictypes.
+- [Microsoft Azure TopLevelDomains API](https://apis.io/apis/microsoft-azure/microsoft-azure-topleveldomains-api/) — The TopLevelDomains API from Microsoft Azure — 3 operation(s) for topleveldomains.
+- [Microsoft Azure TopQueryStatistics API](https://apis.io/apis/microsoft-azure/microsoft-azure-topquerystatistics-api/) — The TopQueryStatistics API from Microsoft Azure — 2 operation(s) for topquerystatistics.
+- [Microsoft Azure Track API](https://apis.io/apis/microsoft-azure/microsoft-azure-track-api/) — The Track API from Microsoft Azure — 1 operation(s) for track.
+- [Microsoft Azure Traffic API](https://apis.io/apis/microsoft-azure/microsoft-azure-traffic-api/) — The Traffic API from Microsoft Azure — 5 operation(s) for traffic.
+- [Microsoft Azure TrafficControllerInterface API](https://apis.io/apis/microsoft-azure/microsoft-azure-trafficcontrollerinterface-api/) — The TrafficControllerInterface API from Microsoft Azure — 3 operation(s) for trafficcontrollerinterface.
+- [Microsoft Azure TrainingSet API](https://apis.io/apis/microsoft-azure/microsoft-azure-trainingset-api/) — The TrainingSet API from Microsoft Azure — 3 operation(s) for trainingset.
+- [Microsoft Azure TransactionNode API](https://apis.io/apis/microsoft-azure/microsoft-azure-transactionnode-api/) — The TransactionNode API from Microsoft Azure — 4 operation(s) for transactionnode.
+- [Microsoft Azure Transformations API](https://apis.io/apis/microsoft-azure/microsoft-azure-transformations-api/) — The Transformations API from Microsoft Azure — 1 operation(s) for transformations.
+- [Microsoft Azure Translate API](https://apis.io/apis/microsoft-azure/microsoft-azure-translate-api/) — The Translate API from Microsoft Azure — 1 operation(s) for translate.
+- [Microsoft Azure Transliterate API](https://apis.io/apis/microsoft-azure/microsoft-azure-transliterate-api/) — The Transliterate API from Microsoft Azure — 1 operation(s) for transliterate.
+- [Microsoft Azure TrialMatcher API](https://apis.io/apis/microsoft-azure/microsoft-azure-trialmatcher-api/) — The TrialMatcher API from Microsoft Azure — 4 operation(s) for trialmatcher.
+- [Microsoft Azure Trigger API](https://apis.io/apis/microsoft-azure/microsoft-azure-trigger-api/) — The Trigger API from Microsoft Azure — 2 operation(s) for trigger.
+- [Microsoft Azure Triggers API](https://apis.io/apis/microsoft-azure/microsoft-azure-triggers-api/) — The Triggers API from Microsoft Azure — 3 operation(s) for triggers.
+- [Microsoft Azure Troubleshooter API](https://apis.io/apis/microsoft-azure/microsoft-azure-troubleshooter-api/) — The Troubleshooter API from Microsoft Azure — 4 operation(s) for troubleshooter.
+- [Microsoft Azure TrustedIdProviders API](https://apis.io/apis/microsoft-azure/microsoft-azure-trustedidproviders-api/) — The TrustedIdProviders API from Microsoft Azure — 2 operation(s) for trustedidproviders.
+- [Microsoft Azure Turn API](https://apis.io/apis/microsoft-azure/microsoft-azure-turn-api/) — The Turn API from Microsoft Azure — 2 operation(s) for turn.
+- [Microsoft Azure Twins API](https://apis.io/apis/microsoft-azure/microsoft-azure-twins-api/) — The Twins API from Microsoft Azure — 7 operation(s) for twins.
+- [Microsoft Azure Type API](https://apis.io/apis/microsoft-azure/microsoft-azure-type-api/) — The Type API from Microsoft Azure — 18 operation(s) for type.
+- [Microsoft Azure Types API](https://apis.io/apis/microsoft-azure/microsoft-azure-types-api/) — The Types API from Microsoft Azure — 18 operation(s) for types.
+- [Microsoft Azure TypingNotifications API](https://apis.io/apis/microsoft-azure/microsoft-azure-typingnotifications-api/) — The TypingNotifications API from Microsoft Azure — 1 operation(s) for typingnotifications.
+- [Microsoft Azure Update Management API](https://apis.io/apis/microsoft-azure/microsoft-azure-update-management-api/) — The Update Management API from Microsoft Azure — 10 operation(s) for update management.
+- [Microsoft Azure UpdateRuns API](https://apis.io/apis/microsoft-azure/microsoft-azure-updateruns-api/) — The UpdateRuns API from Microsoft Azure — 5 operation(s) for updateruns.
+- [Microsoft Azure Updates API](https://apis.io/apis/microsoft-azure/microsoft-azure-updates-api/) — The Updates API from Microsoft Azure — 5 operation(s) for updates.
+- [Microsoft Azure UpfDeployments API](https://apis.io/apis/microsoft-azure/microsoft-azure-upfdeployments-api/) — The UpfDeployments API from Microsoft Azure — 3 operation(s) for upfdeployments.
+- [Microsoft Azure Usage API](https://apis.io/apis/microsoft-azure/microsoft-azure-usage-api/) — The Usage API from Microsoft Azure — 2 operation(s) for usage.
+- [Microsoft Azure UsageAggregates API](https://apis.io/apis/microsoft-azure/microsoft-azure-usageaggregates-api/) — The UsageAggregates API from Microsoft Azure — 1 operation(s) for usageaggregates.
+- [Microsoft Azure UsageDetails API](https://apis.io/apis/microsoft-azure/microsoft-azure-usagedetails-api/) — The UsageDetails API from Microsoft Azure — 2 operation(s) for usagedetails.
+- [Microsoft Azure UsageModels API](https://apis.io/apis/microsoft-azure/microsoft-azure-usagemodels-api/) — The UsageModels API from Microsoft Azure — 1 operation(s) for usagemodels.
+- [Microsoft Azure Usages API](https://apis.io/apis/microsoft-azure/microsoft-azure-usages-api/) — The Usages API from Microsoft Azure — 1 operation(s) for usages.
+- [Microsoft Azure UsagesInformation API](https://apis.io/apis/microsoft-azure/microsoft-azure-usagesinformation-api/) — The UsagesInformation API from Microsoft Azure — 2 operation(s) for usagesinformation.
+- [Microsoft Azure User API](https://apis.io/apis/microsoft-azure/microsoft-azure-user-api/) — The User API from Microsoft Azure — 3 operation(s) for user.
+- [Microsoft Azure UserOrganization API](https://apis.io/apis/microsoft-azure/microsoft-azure-userorganization-api/) — The UserOrganization API from Microsoft Azure — 1 operation(s) for userorganization.
+- [Microsoft Azure UserRPOepResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-userrpoepresource-api/) — The UserRPOepResource API from Microsoft Azure — 3 operation(s) for userrpoepresource.
+- [Microsoft Azure UserRuleCollections API](https://apis.io/apis/microsoft-azure/microsoft-azure-userrulecollections-api/) — The UserRuleCollections API from Microsoft Azure — 2 operation(s) for userrulecollections.
+- [Microsoft Azure UserRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-userrules-api/) — The UserRules API from Microsoft Azure — 2 operation(s) for userrules.
+- [Microsoft Azure Users API](https://apis.io/apis/microsoft-azure/microsoft-azure-users-api/) — The Users API from Microsoft Azure — 8 operation(s) for users.
+- [Microsoft Azure UserSolutions API](https://apis.io/apis/microsoft-azure/microsoft-azure-usersolutions-api/) — The UserSolutions API from Microsoft Azure — 2 operation(s) for usersolutions.
+- [Microsoft Azure V1consumer API](https://apis.io/apis/microsoft-azure/microsoft-azure-v1consumer-api/) — Consume records
+- [Microsoft Azure V1metadata API](https://apis.io/apis/microsoft-azure/microsoft-azure-v1metadata-api/) — Get the metadata of topic and partition
+- [Microsoft Azure V1producer API](https://apis.io/apis/microsoft-azure/microsoft-azure-v1producer-api/) — Produce records
+- [Microsoft Azure V1status API](https://apis.io/apis/microsoft-azure/microsoft-azure-v1status-api/) — Get Kafka Restproxy status
+- [Microsoft Azure V1topics API](https://apis.io/apis/microsoft-azure/microsoft-azure-v1topics-api/) — Manage Kafka topics
+- [Microsoft Azure V2WorkspaceConnectionResource API](https://apis.io/apis/microsoft-azure/microsoft-azure-v2workspaceconnectionresource-api/) — The V2WorkspaceConnectionResource API from Microsoft Azure — 4 operation(s) for v2workspaceconnectionresource.
+- [Microsoft Azure ValidateOperation API](https://apis.io/apis/microsoft-azure/microsoft-azure-validateoperation-api/) — The ValidateOperation API from Microsoft Azure — 1 operation(s) for validateoperation.
+- [Microsoft Azure ValidateOperationResults API](https://apis.io/apis/microsoft-azure/microsoft-azure-validateoperationresults-api/) — The ValidateOperationResults API from Microsoft Azure — 1 operation(s) for validateoperationresults.
+- [Microsoft Azure ValidateOperationStatuses API](https://apis.io/apis/microsoft-azure/microsoft-azure-validateoperationstatuses-api/) — The ValidateOperationStatuses API from Microsoft Azure — 1 operation(s) for validateoperationstatuses.
+- [Microsoft Azure ValidateProbe API](https://apis.io/apis/microsoft-azure/microsoft-azure-validateprobe-api/) — The ValidateProbe API from Microsoft Azure — 1 operation(s) for validateprobe.
+- [Microsoft Azure Validate Storage Configuration API](https://apis.io/apis/microsoft-azure/microsoft-azure-validatestorageconfiguration-api/) — The validateStorageConfiguration API from Microsoft Azure — 1 operation(s) for validatestorageconfiguration.
+- [Microsoft Azure Validations API](https://apis.io/apis/microsoft-azure/microsoft-azure-validations-api/) — The Validations API from Microsoft Azure — 1 operation(s) for validations.
+- [Microsoft Azure Variables API](https://apis.io/apis/microsoft-azure/microsoft-azure-variables-api/) — The Variables API from Microsoft Azure — 4 operation(s) for variables.
+- [Microsoft Azure Vault API](https://apis.io/apis/microsoft-azure/microsoft-azure-vault-api/) — Vault Controller.
+- [Microsoft Azure VaultUsages API](https://apis.io/apis/microsoft-azure/microsoft-azure-vaultusages-api/) — The VaultUsages API from Microsoft Azure — 1 operation(s) for vaultusages.
+- [Microsoft Azure VcenterController API](https://apis.io/apis/microsoft-azure/microsoft-azure-vcentercontroller-api/) — The VcenterController API from Microsoft Azure — 2 operation(s) for vcentercontroller.
+- [Microsoft Azure VCenters API](https://apis.io/apis/microsoft-azure/microsoft-azure-vcenters-api/) — The VCenters API from Microsoft Azure — 3 operation(s) for vcenters.
+- [Microsoft Azure VendorNetworkFunctions API](https://apis.io/apis/microsoft-azure/microsoft-azure-vendornetworkfunctions-api/) — The VendorNetworkFunctions API from Microsoft Azure — 2 operation(s) for vendornetworkfunctions.
+- [Microsoft Azure VerifiedPartners API](https://apis.io/apis/microsoft-azure/microsoft-azure-verifiedpartners-api/) — The VerifiedPartners API from Microsoft Azure — 2 operation(s) for verifiedpartners.
+- [Microsoft Azure Verify API](https://apis.io/apis/microsoft-azure/microsoft-azure-verify-api/) — The Verify API from Microsoft Azure — 1 operation(s) for verify.
+- [Microsoft Azure Version API](https://apis.io/apis/microsoft-azure/microsoft-azure-version-api/) — The Version API from Microsoft Azure — 1 operation(s) for version.
+- [Microsoft Azure VideoDetailSearch API](https://apis.io/apis/microsoft-azure/microsoft-azure-videodetailsearch-api/) — The VideoDetailSearch API from Microsoft Azure — 1 operation(s) for videodetailsearch.
+- [Microsoft Azure VideoTrendingSearch API](https://apis.io/apis/microsoft-azure/microsoft-azure-videotrendingsearch-api/) — The VideoTrendingSearch API from Microsoft Azure — 1 operation(s) for videotrendingsearch.
+- [Microsoft Azure Views API](https://apis.io/apis/microsoft-azure/microsoft-azure-views-api/) — The Views API from Microsoft Azure — 2 operation(s) for views.
+- [Microsoft Azure VirtualDesktopUserController API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualdesktopusercontroller-api/) — The VirtualDesktopUserController API from Microsoft Azure — 2 operation(s) for virtualdesktopusercontroller.
+- [Microsoft Azure VirtualMachineImageTemplate API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualmachineimagetemplate-api/) — The VirtualMachineImageTemplate API from Microsoft Azure — 6 operation(s) for virtualmachineimagetemplate.
+- [Microsoft Azure VirtualMachineInstances API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualmachineinstances-api/) — The VirtualMachineInstances API from Microsoft Azure — 5 operation(s) for virtualmachineinstances.
+- [Microsoft Azure VirtualMachineRunCommands API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualmachineruncommands-api/) — The VirtualMachineRunCommands API from Microsoft Azure — 4 operation(s) for virtualmachineruncommands.
+- [Microsoft Azure VirtualMachineScaleSetVMRunCommands API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualmachinescalesetvmruncommands-api/) — The VirtualMachineScaleSetVMRunCommands API from Microsoft Azure — 2 operation(s) for virtualmachinescalesetvmruncommands.
+- [Microsoft Azure VirtualMachineScaleSetVMs API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualmachinescalesetvms-api/) — The VirtualMachineScaleSetVMs API from Microsoft Azure — 1 operation(s) for virtualmachinescalesetvms.
+- [Microsoft Azure VirtualMachineSchedules API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualmachineschedules-api/) — The VirtualMachineSchedules API from Microsoft Azure — 3 operation(s) for virtualmachineschedules.
+- [Microsoft Azure VirtualMachineTemplates API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualmachinetemplates-api/) — The VirtualMachineTemplates API from Microsoft Azure — 8 operation(s) for virtualmachinetemplates.
+- [Microsoft Azure VirtualNetworkGatewayConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualnetworkgatewayconnections-api/) — The VirtualNetworkGatewayConnections API from Microsoft Azure — 6 operation(s) for virtualnetworkgatewayconnections.
+- [Microsoft Azure VirtualNetworkGateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualnetworkgateways-api/) — The VirtualNetworkGateways API from Microsoft Azure — 4 operation(s) for virtualnetworkgateways.
+- [Microsoft Azure VirtualNetworkLinks API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualnetworklinks-api/) — The VirtualNetworkLinks API from Microsoft Azure — 4 operation(s) for virtualnetworklinks.
+- [Microsoft Azure VirtualNetworkRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualnetworkrules-api/) — The VirtualNetworkRules API from Microsoft Azure — 4 operation(s) for virtualnetworkrules.
+- [Microsoft Azure VirtualNetworkSubnetUsage API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualnetworksubnetusage-api/) — The VirtualNetworkSubnetUsage API from Microsoft Azure — 1 operation(s) for virtualnetworksubnetusage.
+- [Microsoft Azure VirtualWANs API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtualwans-api/) — The VirtualWANs API from Microsoft Azure — 2 operation(s) for virtualwans.
+- [Microsoft Azure VM_Host API](https://apis.io/apis/microsoft-azure/microsoft-azure-vm-host-api/) — The VM_Host API from Microsoft Azure — 6 operation(s) for vm_host.
+- [Microsoft Azure VM Insights Onboarding API](https://apis.io/apis/microsoft-azure/microsoft-azure-vm-insights-onboarding-api/) — The VM Insights Onboarding API from Microsoft Azure — 1 operation(s) for vm insights onboarding.
+- [Microsoft Azure VMCollectionUpdate API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmcollectionupdate-api/) — The VMCollectionUpdate API from Microsoft Azure — 1 operation(s) for vmcollectionupdate.
+- [Microsoft Azure VMExtensions API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmextensions-api/) — The VMExtensions API from Microsoft Azure — 2 operation(s) for vmextensions.
+- [Microsoft Azure VMHHostList API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmhhostlist-api/) — The VMHHostList API from Microsoft Azure — 1 operation(s) for vmhhostlist.
+- [Microsoft Azure VMIngestionDetails API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmingestiondetails-api/) — The VMIngestionDetails API from Microsoft Azure — 1 operation(s) for vmingestiondetails.
+- [Microsoft Azure VMInstanceGuestAgents API](https://apis.io/apis/microsoft-azure/microsoft-azure-vminstanceguestagents-api/) — The VMInstanceGuestAgents API from Microsoft Azure — 2 operation(s) for vminstanceguestagents.
+- [Microsoft Azure VmInstanceHybridIdentityMetadata API](https://apis.io/apis/microsoft-azure/microsoft-azure-vminstancehybrididentitymetadata-api/) — The VmInstanceHybridIdentityMetadata API from Microsoft Azure — 2 operation(s) for vminstancehybrididentitymetadata.
+- [Microsoft Azure VmmServers API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmmservers-api/) — The VmmServers API from Microsoft Azure — 3 operation(s) for vmmservers.
+- [Microsoft Azure VmwareCollectorsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmwarecollectorsoperations-api/) — The VmwareCollectorsOperations API from Microsoft Azure — 2 operation(s) for vmwarecollectorsoperations.
+- [Microsoft Azure VmwareHostController API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmwarehostcontroller-api/) — The VmwareHostController API from Microsoft Azure — 2 operation(s) for vmwarehostcontroller.
+- [Microsoft Azure VmwareOperationsStatus API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmwareoperationsstatus-api/) — The VmwareOperationsStatus API from Microsoft Azure — 1 operation(s) for vmwareoperationsstatus.
+- [Microsoft Azure VmwarePropertiesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmwarepropertiescontroller-api/) — The VmwarePropertiesController API from Microsoft Azure — 4 operation(s) for vmwarepropertiescontroller.
+- [Microsoft Azure VmwareSoftwareInventoriesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-vmwaresoftwareinventoriescontroller-api/) — The VmwareSoftwareInventoriesController API from Microsoft Azure — 2 operation(s) for vmwaresoftwareinventoriescontroller.
+- [Microsoft Azure vNetPeering API](https://apis.io/apis/microsoft-azure/microsoft-azure-vnetpeering-api/) — The vNetPeering API from Microsoft Azure — 2 operation(s) for vnetpeering.
+- [Microsoft Azure Volume Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-volume-groups-api/) — The Volume Groups API from Microsoft Azure — 2 operation(s) for volume groups.
+- [Microsoft Azure VolumeContainers API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumecontainers-api/) — The VolumeContainers API from Microsoft Azure — 4 operation(s) for volumecontainers.
+- [Microsoft Azure VolumeQuotaRules API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumequotarules-api/) — The VolumeQuotaRules API from Microsoft Azure — 2 operation(s) for volumequotarules.
+- [Microsoft Azure Volumes API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumes-api/) — The Volumes API from Microsoft Azure — 15 operation(s) for volumes.
+- [Microsoft Azure Volumes OnPrem Migration API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumes-onprem-migration-api/) — The Volumes OnPrem Migration API from Microsoft Azure — 3 operation(s) for volumes onprem migration.
+- [Microsoft Azure Volumes OnPrem Migration Finalize API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumes-onprem-migration-finalize-api/) — The Volumes OnPrem Migration Finalize API from Microsoft Azure — 1 operation(s) for volumes onprem migration finalize.
+- [Microsoft Azure Volumes Relocation API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumes-relocation-api/) — The Volumes Relocation API from Microsoft Azure — 3 operation(s) for volumes relocation.
+- [Microsoft Azure Volumes Replication API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumes-replication-api/) — The Volumes Replication API from Microsoft Azure — 8 operation(s) for volumes replication.
+- [Microsoft Azure Volumes Revert API](https://apis.io/apis/microsoft-azure/microsoft-azure-volumes-revert-api/) — The Volumes Revert API from Microsoft Azure — 1 operation(s) for volumes revert.
+- [Microsoft Azure VpnGateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-vpngateways-api/) — The VpnGateways API from Microsoft Azure — 4 operation(s) for vpngateways.
+- [Microsoft Azure Vpn Link Connections API](https://apis.io/apis/microsoft-azure/microsoft-azure-vpnlinkconnections-api/) — The vpnLinkConnections API from Microsoft Azure — 1 operation(s) for vpnlinkconnections.
+- [Microsoft Azure VpnServerConfigurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-vpnserverconfigurations-api/) — The VpnServerConfigurations API from Microsoft Azure — 1 operation(s) for vpnserverconfigurations.
+- [Microsoft Azure VpnSites API](https://apis.io/apis/microsoft-azure/microsoft-azure-vpnsites-api/) — The VpnSites API from Microsoft Azure — 1 operation(s) for vpnsites.
+- [Microsoft Azure WaitStatistics API](https://apis.io/apis/microsoft-azure/microsoft-azure-waitstatistics-api/) — The WaitStatistics API from Microsoft Azure — 2 operation(s) for waitstatistics.
+- [Microsoft Azure Watcher API](https://apis.io/apis/microsoft-azure/microsoft-azure-watcher-api/) — The Watcher API from Microsoft Azure — 4 operation(s) for watcher.
+- [Microsoft Azure Watchers API](https://apis.io/apis/microsoft-azure/microsoft-azure-watchers-api/) — The Watchers API from Microsoft Azure — 5 operation(s) for watchers.
+- [Microsoft Azure Wayfinding API](https://apis.io/apis/microsoft-azure/microsoft-azure-wayfinding-api/) — The Wayfinding API from Microsoft Azure — 1 operation(s) for wayfinding.
+- [Microsoft Azure Weather API](https://apis.io/apis/microsoft-azure/microsoft-azure-weather-api/) — The Weather API from Microsoft Azure — 11 operation(s) for weather.
+- [Microsoft Azure WebAppAssessmentOptionsOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappassessmentoptionsoperations-api/) — The WebAppAssessmentOptionsOperations API from Microsoft Azure — 2 operation(s) for webappassessmentoptionsoperations.
+- [Microsoft Azure WebAppAssessmentV2Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappassessmentv2operations-api/) — The WebAppAssessmentV2Operations API from Microsoft Azure — 3 operation(s) for webappassessmentv2operations.
+- [Microsoft Azure WebAppAssessmentV2SummaryOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappassessmentv2summaryoperations-api/) — The WebAppAssessmentV2SummaryOperations API from Microsoft Azure — 2 operation(s) for webappassessmentv2summaryoperations.
+- [Microsoft Azure WebAppCollectorOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappcollectoroperations-api/) — The WebAppCollectorOperations API from Microsoft Azure — 2 operation(s) for webappcollectoroperations.
+- [Microsoft Azure WebAppDiscoverySiteDataSourcesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappdiscoverysitedatasourcescontroller-api/) — The WebAppDiscoverySiteDataSourcesController API from Microsoft Azure — 2 operation(s) for webappdiscoverysitedatasourcescontroller.
+- [Microsoft Azure WebAppExtendedMachinesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappextendedmachinescontroller-api/) — The WebAppExtendedMachinesController API from Microsoft Azure — 2 operation(s) for webappextendedmachinescontroller.
+- [Microsoft Azure WebApplicationFirewallManagedRuleSets API](https://apis.io/apis/microsoft-azure/microsoft-azure-webapplicationfirewallmanagedrulesets-api/) — The WebApplicationFirewallManagedRuleSets API from Microsoft Azure — 1 operation(s) for webapplicationfirewallmanagedrulesets.
+- [Microsoft Azure WebApplicationFirewallPolicies API](https://apis.io/apis/microsoft-azure/microsoft-azure-webapplicationfirewallpolicies-api/) — The WebApplicationFirewallPolicies API from Microsoft Azure — 5 operation(s) for webapplicationfirewallpolicies.
+- [Microsoft Azure WebApplicationsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-webapplicationscontroller-api/) — The WebApplicationsController API from Microsoft Azure — 1 operation(s) for webapplicationscontroller.
+- [Microsoft Azure WebAppPropertiesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-webapppropertiescontroller-api/) — The WebAppPropertiesController API from Microsoft Azure — 1 operation(s) for webapppropertiescontroller.
+- [Microsoft Azure WebAppRunAsAccountsController API](https://apis.io/apis/microsoft-azure/microsoft-azure-webapprunasaccountscontroller-api/) — The WebAppRunAsAccountsController API from Microsoft Azure — 2 operation(s) for webapprunasaccountscontroller.
+- [Microsoft Azure WebAppServicePlanV2Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappserviceplanv2operations-api/) — The WebAppServicePlanV2Operations API from Microsoft Azure — 2 operation(s) for webappserviceplanv2operations.
+- [Microsoft Azure WebAppSitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-webappsitescontroller-api/) — The WebAppSitesController API from Microsoft Azure — 6 operation(s) for webappsitescontroller.
+- [Microsoft Azure Webhook API](https://apis.io/apis/microsoft-azure/microsoft-azure-webhook-api/) — The Webhook API from Microsoft Azure — 3 operation(s) for webhook.
+- [Microsoft Azure WebServersController API](https://apis.io/apis/microsoft-azure/microsoft-azure-webserverscontroller-api/) — The WebServersController API from Microsoft Azure — 3 operation(s) for webserverscontroller.
+- [Microsoft Azure WebSitesController API](https://apis.io/apis/microsoft-azure/microsoft-azure-websitescontroller-api/) — The WebSitesController API from Microsoft Azure — 2 operation(s) for websitescontroller.
+- [Microsoft Azure .Well Known API](https://apis.io/apis/microsoft-azure/microsoft-azure-well-known-api/) — The .Well Known API from Microsoft Azure — 1 operation(s) for .well known.
+- [Microsoft Azure Wfs API](https://apis.io/apis/microsoft-azure/microsoft-azure-wfs-api/) — The Wfs API from Microsoft Azure — 7 operation(s) for wfs.
+- [Microsoft Azure Widgets API](https://apis.io/apis/microsoft-azure/microsoft-azure-widgets-api/) — The Widgets API from Microsoft Azure — 3 operation(s) for widgets.
+- [Microsoft Azure Workflow API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflow-api/) — Workflow controller.
+- [Microsoft Azure Workflow Resource API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflow-resource-api/) — The Workflow Resource API from Microsoft Azure — 3 operation(s) for workflow resource.
+- [Microsoft Azure WorkflowRunActions API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflowrunactions-api/) — The WorkflowRunActions API from Microsoft Azure — 22 operation(s) for workflowrunactions.
+- [Microsoft Azure WorkflowRunOperations API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflowrunoperations-api/) — The WorkflowRunOperations API from Microsoft Azure — 1 operation(s) for workflowrunoperations.
+- [Microsoft Azure Workflows API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflows-api/) — The Workflows API from Microsoft Azure — 16 operation(s) for workflows.
+- [Microsoft Azure WorkflowTriggerHistories API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflowtriggerhistories-api/) — The WorkflowTriggerHistories API from Microsoft Azure — 6 operation(s) for workflowtriggerhistories.
+- [Microsoft Azure WorkloadDeployment API](https://apis.io/apis/microsoft-azure/microsoft-azure-workloaddeployment-api/) — Workload deployments controller.
+- [Microsoft Azure WorkloadGroups API](https://apis.io/apis/microsoft-azure/microsoft-azure-workloadgroups-api/) — The WorkloadGroups API from Microsoft Azure — 2 operation(s) for workloadgroups.
+- [Microsoft Azure WorkloadInstance API](https://apis.io/apis/microsoft-azure/microsoft-azure-workloadinstance-api/) — Workload instance controller.
+- [Microsoft Azure WorkloadNetworks API](https://apis.io/apis/microsoft-azure/microsoft-azure-workloadnetworks-api/) — The WorkloadNetworks API from Microsoft Azure — 16 operation(s) for workloadnetworks.
+- [Microsoft Azure Workspace API](https://apis.io/apis/microsoft-azure/microsoft-azure-workspace-api/) — The Workspace API from Microsoft Azure — 5 operation(s) for workspace.
+- [Microsoft Azure WorkspaceCollections API](https://apis.io/apis/microsoft-azure/microsoft-azure-workspacecollections-api/) — The WorkspaceCollections API from Microsoft Azure — 7 operation(s) for workspacecollections.
+- [Microsoft Azure WorkspacePolicy API](https://apis.io/apis/microsoft-azure/microsoft-azure-workspacepolicy-api/) — The WorkspacePolicy API from Microsoft Azure — 2 operation(s) for workspacepolicy.
+- [Microsoft Azure WorkspacePrivateEndpointConnections API](https://apis.io/apis/microsoft-azure/microsoft-azure-workspaceprivateendpointconnections-api/) — The WorkspacePrivateEndpointConnections API from Microsoft Azure — 2 operation(s) for workspaceprivateendpointconnections.
+- [Microsoft Azure WorkspacePrivateLinkResources API](https://apis.io/apis/microsoft-azure/microsoft-azure-workspaceprivatelinkresources-api/) — The WorkspacePrivateLinkResources API from Microsoft Azure — 1 operation(s) for workspaceprivatelinkresources.
+- [Microsoft Azure Workspaces API](https://apis.io/apis/microsoft-azure/microsoft-azure-workspaces-api/) — The Workspaces API from Microsoft Azure — 43 operation(s) for workspaces.
+- [Microsoft Azure Zones API](https://apis.io/apis/microsoft-azure/microsoft-azure-zones-api/) — The Zones API from Microsoft Azure — 8 operation(s) for zones.
+- [Microsoft Azure APIS API](https://apis.io/apis/microsoft-azure/microsoft-azure-apis-api/) — The Apis API from Microsoft Azure — 1 operation(s) for apis.
+- [Microsoft Azure Microsoft Azure Azure Container Registry API](https://apis.io/apis/microsoft-azure/microsoft-azure-microsoft-azure-azure-container-registry-api/) — The Microsoft Azure Azure Container Registry API from Microsoft Azure — 1 operation(s) for microsoft azure azure container registry.
+- [Microsoft Azure Access Control Records API](https://apis.io/apis/microsoft-azure/microsoft-azure-access-control-records-api/) — The Access Control Records API from Microsoft Azure — 2 operation(s) for access control records.
+- [Microsoft Azure Access Policies API](https://apis.io/apis/microsoft-azure/microsoft-azure-access-policies-api/) — The Access Policies API from Microsoft Azure — 2 operation(s) for access policies.
+- [Microsoft Azure Access Token API](https://apis.io/apis/microsoft-azure/microsoft-azure-access-token-api/) — The Access Token API from Microsoft Azure — 2 operation(s) for access token.
+- [Microsoft Azure Add Ons API](https://apis.io/apis/microsoft-azure/microsoft-azure-add-ons-api/) — The Add Ons API from Microsoft Azure — 4 operation(s) for add ons.
+- [Microsoft Azure Admin Keys API](https://apis.io/apis/microsoft-azure/microsoft-azure-admin-keys-api/) — The Admin Keys API from Microsoft Azure — 2 operation(s) for admin keys.
+- [Microsoft Azure Anomaly Detection API](https://apis.io/apis/microsoft-azure/microsoft-azure-anomaly-detection-api/) — The Anomaly Detection API from Microsoft Azure — 8 operation(s) for anomaly detection.
+- [Microsoft Azure API Key API](https://apis.io/apis/microsoft-azure/microsoft-azure-api-key-api/) — The API Key API from Microsoft Azure — 4 operation(s) for api key.
+- [Microsoft Azure API Tokens API](https://apis.io/apis/microsoft-azure/microsoft-azure-api-tokens-api/) — The API Tokens API from Microsoft Azure — 2 operation(s) for api tokens.
+- [Microsoft Azure Application Gateways API](https://apis.io/apis/microsoft-azure/microsoft-azure-application-gateways-api/) — The Application Gateways API from Microsoft Azure — 5 operation(s) for application gateways.
+- [Microsoft Azure Application Resources API](https://apis.io/apis/microsoft-azure/microsoft-azure-application-resources-api/) — The Application Resources API from Microsoft Azure — 2 operation(s) for application resources.
+- [Microsoft Azure Async Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-async-operations-api/) — The Async Operations API from Microsoft Azure — 1 operation(s) for async operations.
+- [Microsoft Azure Authorization Policies API](https://apis.io/apis/microsoft-azure/microsoft-azure-authorization-policies-api/) — The Authorization Policies API from Microsoft Azure — 4 operation(s) for authorization policies.
+- [Microsoft Azure Backup Jobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-backup-jobs-api/) — The Backup Jobs API from Microsoft Azure — 1 operation(s) for backup jobs.
+- [Microsoft Azure Backup Policies API](https://apis.io/apis/microsoft-azure/microsoft-azure-backup-policies-api/) — The Backup Policies API from Microsoft Azure — 6 operation(s) for backup policies.
+- [Microsoft Azure Best Practices API](https://apis.io/apis/microsoft-azure/microsoft-azure-best-practices-api/) — The Best Practices API from Microsoft Azure — 2 operation(s) for best practices.
+- [Microsoft Azure Billing Periods API](https://apis.io/apis/microsoft-azure/microsoft-azure-billing-periods-api/) — The Billing Periods API from Microsoft Azure — 2 operation(s) for billing periods.
+- [Microsoft Azure Business Processes API](https://apis.io/apis/microsoft-azure/microsoft-azure-business-processes-api/) — The Business Processes API from Microsoft Azure — 2 operation(s) for business processes.
+- [Microsoft Azure Certificate Profiles API](https://apis.io/apis/microsoft-azure/microsoft-azure-certificate-profiles-api/) — The Certificate Profiles API from Microsoft Azure — 3 operation(s) for certificate profiles.
+- [Microsoft Azure Classification Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-classification-rules-api/) — The Classification Rules API from Microsoft Azure — 4 operation(s) for classification rules.
+- [Microsoft Azure Cloud Connections API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloud-connections-api/) — The Cloud Connections API from Microsoft Azure — 3 operation(s) for cloud connections.
+- [Microsoft Azure Cloud Connectors API](https://apis.io/apis/microsoft-azure/microsoft-azure-cloud-connectors-api/) — The Cloud Connectors API from Microsoft Azure — 4 operation(s) for cloud connectors.
+- [Microsoft Azure Commitment Plans API](https://apis.io/apis/microsoft-azure/microsoft-azure-commitment-plans-api/) — The Commitment Plans API from Microsoft Azure — 4 operation(s) for commitment plans.
+- [Microsoft Azure Configuration Profiles API](https://apis.io/apis/microsoft-azure/microsoft-azure-configuration-profiles-api/) — The Configuration Profiles API from Microsoft Azure — 3 operation(s) for configuration profiles.
+- [Microsoft Azure Container Apps API](https://apis.io/apis/microsoft-azure/microsoft-azure-container-apps-api/) — The Container Apps API from Microsoft Azure — 4 operation(s) for container apps.
+- [Microsoft Azure Container Logs API](https://apis.io/apis/microsoft-azure/microsoft-azure-container-logs-api/) — The Container Logs API from Microsoft Azure — 1 operation(s) for container logs.
+- [Microsoft Azure Custom Domains API](https://apis.io/apis/microsoft-azure/microsoft-azure-custom-domains-api/) — The Custom Domains API from Microsoft Azure — 4 operation(s) for custom domains.
+- [Microsoft Azure Data Collection Endpoints API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-collection-endpoints-api/) — The Data Collection Endpoints API from Microsoft Azure — 3 operation(s) for data collection endpoints.
+- [Microsoft Azure Data Connectors API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-connectors-api/) — The Data Connectors API from Microsoft Azure — 2 operation(s) for data connectors.
+- [Microsoft Azure Data Export API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-export-api/) — The Data Export API from Microsoft Azure — 6 operation(s) for data export.
+- [Microsoft Azure Data Feed API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-feed-api/) — The Data Feed API from Microsoft Azure — 2 operation(s) for data feed.
+- [Microsoft Azure Data Pools API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-pools-api/) — The Data Pools API from Microsoft Azure — 2 operation(s) for data pools.
+- [Microsoft Azure Data Products API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-products-api/) — The Data Products API from Microsoft Azure — 8 operation(s) for data products.
+- [Microsoft Azure Data Services API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-services-api/) — The Data Services API from Microsoft Azure — 2 operation(s) for data services.
+- [Microsoft Azure Data Sources API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-sources-api/) — The Data Sources API from Microsoft Azure — 3 operation(s) for data sources.
+- [Microsoft Azure Data Types API](https://apis.io/apis/microsoft-azure/microsoft-azure-data-types-api/) — The Data Types API from Microsoft Azure — 4 operation(s) for data types.
+- [Microsoft Azure Deployment Info API](https://apis.io/apis/microsoft-azure/microsoft-azure-deployment-info-api/) — The Deployment Info API from Microsoft Azure — 2 operation(s) for deployment info.
+- [Microsoft Azure Deployment Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-deployment-operations-api/) — The Deployment Operations API from Microsoft Azure — 10 operation(s) for deployment operations.
+- [Microsoft Azure Deployment Settings API](https://apis.io/apis/microsoft-azure/microsoft-azure-deployment-settings-api/) — The Deployment Settings API from Microsoft Azure — 2 operation(s) for deployment settings.
+- [Microsoft Azure Dev Ops API](https://apis.io/apis/microsoft-azure/microsoft-azure-dev-ops-api/) — The Dev Ops API from Microsoft Azure — 22 operation(s) for dev ops.
+- [Microsoft Azure Device Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-device-groups-api/) — The Device Groups API from Microsoft Azure — 7 operation(s) for device groups.
+- [Microsoft Azure Device Templates API](https://apis.io/apis/microsoft-azure/microsoft-azure-device-templates-api/) — The Device Templates API from Microsoft Azure — 2 operation(s) for device templates.
+- [Microsoft Azure Diagnostic Settings API](https://apis.io/apis/microsoft-azure/microsoft-azure-diagnostic-settings-api/) — The Diagnostic Settings API from Microsoft Azure — 2 operation(s) for diagnostic settings.
+- [Microsoft Azure Document Classifiers API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-classifiers-api/) — The Document Classifiers API from Microsoft Azure — 4 operation(s) for document classifiers.
+- [Microsoft Azure Document Classifiers:build API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-classifiers-build-api/) — The Document Classifiers:build API from Microsoft Azure — 1 operation(s) for document classifiers:build.
+- [Microsoft Azure Document Models API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-models-api/) — The Document Models API from Microsoft Azure — 5 operation(s) for document models.
+- [Microsoft Azure Document Models:authorize Copy API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-models-authorize-copy-api/) — The Document Models:authorize Copy API from Microsoft Azure — 1 operation(s) for document models:authorize copy.
+- [Microsoft Azure Document Models:build API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-models-build-api/) — The Document Models:build API from Microsoft Azure — 1 operation(s) for document models:build.
+- [Microsoft Azure Document Models:compose API](https://apis.io/apis/microsoft-azure/microsoft-azure-document-models-compose-api/) — The Document Models:compose API from Microsoft Azure — 1 operation(s) for document models:compose.
+- [Microsoft Azure Domains API](https://apis.io/apis/microsoft-azure/microsoft-azure-domains-api-api/) — The Domains API API from Microsoft Azure — 2 operation(s) for domains api.
+- [Microsoft Azure Edge Nodes API](https://apis.io/apis/microsoft-azure/microsoft-azure-edge-nodes-api/) — The Edge Nodes API from Microsoft Azure — 1 operation(s) for edge nodes.
+- [Microsoft Azure Email Configuration API](https://apis.io/apis/microsoft-azure/microsoft-azure-email-configuration-api/) — Email configuration Controller.
+- [Microsoft Azure Endpoint Settings API](https://apis.io/apis/microsoft-azure/microsoft-azure-endpoint-settings-api/) — The Endpoint Settings API from Microsoft Azure — 1 operation(s) for endpoint settings.
+- [Microsoft Azure Entity Search API](https://apis.io/apis/microsoft-azure/microsoft-azure-entity-search-api/) — The Entity Search API from Microsoft Azure — 1 operation(s) for entity search.
+- [Microsoft Azure Environment Operations API](https://apis.io/apis/microsoft-azure/microsoft-azure-environment-operations-api/) — The Environment Operations API from Microsoft Azure — 3 operation(s) for environment operations.
+- [Microsoft Azure Environment Settings API](https://apis.io/apis/microsoft-azure/microsoft-azure-environment-settings-api/) — The Environment Settings API from Microsoft Azure — 6 operation(s) for environment settings.
+- [Microsoft Azure Event Sources API](https://apis.io/apis/microsoft-azure/microsoft-azure-event-sources-api/) — The Event Sources API from Microsoft Azure — 2 operation(s) for event sources.
+- [Microsoft Azure Event Subscriptions API](https://apis.io/apis/microsoft-azure/microsoft-azure-event-subscriptions-api/) — The Event Subscriptions API from Microsoft Azure — 33 operation(s) for event subscriptions.
+- [Microsoft Azure Events Controller API](https://apis.io/apis/microsoft-azure/microsoft-azure-events-controller-api/) — The Events Controller API from Microsoft Azure — 2 operation(s) for events controller.
+- [Microsoft Azure ExpressRoute Circuits API](https://apis.io/apis/microsoft-azure/microsoft-azure-expressroute-circuits-api/) — The ExpressRoute Circuits API from Microsoft Azure — 6 operation(s) for expressroute circuits.
+- [Microsoft Azure File Servers API](https://apis.io/apis/microsoft-azure/microsoft-azure-file-servers-api/) — The File Servers API from Microsoft Azure — 6 operation(s) for file servers.
+- [Microsoft Azure File Shares API](https://apis.io/apis/microsoft-azure/microsoft-azure-file-shares-api/) — The File Shares API from Microsoft Azure — 5 operation(s) for file shares.
+- [Microsoft Azure File Uploads API](https://apis.io/apis/microsoft-azure/microsoft-azure-file-uploads-api/) — The File Uploads API from Microsoft Azure — 1 operation(s) for file uploads.
+- [Microsoft Azure Firewall Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-firewall-rules-api/) — The Firewall Rules API from Microsoft Azure — 16 operation(s) for firewall rules.
+- [Microsoft Azure Forwarding Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-forwarding-rules-api/) — The Forwarding Rules API from Microsoft Azure — 2 operation(s) for forwarding rules.
+- [Microsoft Azure Generate Thumbnail API](https://apis.io/apis/microsoft-azure/microsoft-azure-generate-thumbnail-api/) — The Generate Thumbnail API from Microsoft Azure — 1 operation(s) for generate thumbnail.
+- [Microsoft Azure Graph Query API](https://apis.io/apis/microsoft-azure/microsoft-azure-graph-query-api/) — The Graph Query API from Microsoft Azure — 2 operation(s) for graph query.
+- [Microsoft Azure Groundstation API](https://apis.io/apis/microsoft-azure/microsoft-azure-groundstation-api/) — The Groundstation API from Microsoft Azure — 3 operation(s) for groundstation.
+- [Microsoft Azure Group User API](https://apis.io/apis/microsoft-azure/microsoft-azure-group-user-api/) — The Group User API from Microsoft Azure — 2 operation(s) for group user.
+- [Microsoft Azure Heat Maps API](https://apis.io/apis/microsoft-azure/microsoft-azure-heat-maps-api/) — The Heat Maps API from Microsoft Azure — 1 operation(s) for heat maps.
+- [Microsoft Azure Image API](https://apis.io/apis/microsoft-azure/microsoft-azure-image-api-api/) — The Image API API from Microsoft Azure — 15 operation(s) for image api.
+- [Microsoft Azure Image Processing API](https://apis.io/apis/microsoft-azure/microsoft-azure-image-processing-api/) — The Image Processing API from Microsoft Azure — 1 operation(s) for image processing.
+- [Microsoft Azure Image Search API](https://apis.io/apis/microsoft-azure/microsoft-azure-image-search-api/) — The Image Search API from Microsoft Azure — 1 operation(s) for image search.
+- [Microsoft Azure Import Export API](https://apis.io/apis/microsoft-azure/microsoft-azure-import-export-api/) — The Import Export API from Microsoft Azure — 3 operation(s) for import export.
+- [Microsoft Azure Import Jobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-import-jobs-api/) — The Import Jobs API from Microsoft Azure — 3 operation(s) for import jobs.
+- [Microsoft Azure Infrastructure Resources API](https://apis.io/apis/microsoft-azure/microsoft-azure-infrastructure-resources-api/) — The Infrastructure Resources API from Microsoft Azure — 2 operation(s) for infrastructure resources.
+- [Microsoft Azure ingestion > status API](https://apis.io/apis/microsoft-azure/microsoft-azure-ingestion-status-api/) — The ingestion > status API from Microsoft Azure — 3 operation(s) for ingestion > status.
+- [Microsoft Azure Inventory Items API](https://apis.io/apis/microsoft-azure/microsoft-azure-inventory-items-api/) — The Inventory Items API from Microsoft Azure — 4 operation(s) for inventory items.
+- [Microsoft Azure Job Definitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-job-definitions-api/) — The Job Definitions API from Microsoft Azure — 8 operation(s) for job definitions.
+- [Microsoft Azure Job Details API](https://apis.io/apis/microsoft-azure/microsoft-azure-job-details-api/) — The Job Details API from Microsoft Azure — 1 operation(s) for job details.
+- [Microsoft Azure Knowledge Bases API](https://apis.io/apis/microsoft-azure/microsoft-azure-knowledge-bases-api/) — The Knowledge Bases API from Microsoft Azure — 6 operation(s) for knowledge bases.
+- [Microsoft Azure Load Balancers API](https://apis.io/apis/microsoft-azure/microsoft-azure-load-balancers-api/) — The Load Balancers API from Microsoft Azure — 5 operation(s) for load balancers.
+- [Microsoft Azure Load Tests API](https://apis.io/apis/microsoft-azure/microsoft-azure-load-tests-api/) — The Load Tests API from Microsoft Azure — 3 operation(s) for load tests.
+- [Microsoft Azure Machine Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-machine-groups-api/) — The Machine Groups API from Microsoft Azure — 3 operation(s) for machine groups.
+- [Microsoft Azure Map Data API](https://apis.io/apis/microsoft-azure/microsoft-azure-map-data-api/) — The Map Data API from Microsoft Azure — 3 operation(s) for map data.
+- [Microsoft Azure Metadata Policy API](https://apis.io/apis/microsoft-azure/microsoft-azure-metadata-policy-api/) — The Metadata Policy API from Microsoft Azure — 2 operation(s) for metadata policy.
+- [Microsoft Azure Metadata Roles API](https://apis.io/apis/microsoft-azure/microsoft-azure-metadata-roles-api/) — The Metadata Roles API from Microsoft Azure — 1 operation(s) for metadata roles.
+- [Microsoft Azure Metric Definitions API](https://apis.io/apis/microsoft-azure/microsoft-azure-metric-definitions-api/) — The Metric Definitions API from Microsoft Azure — 2 operation(s) for metric definitions.
+- [Microsoft Azure Model Management API](https://apis.io/apis/microsoft-azure/microsoft-azure-model-management-api/) — The Model Management API from Microsoft Azure — 2 operation(s) for model management.
+- [Microsoft Azure Monitored Resources API](https://apis.io/apis/microsoft-azure/microsoft-azure-monitored-resources-api/) — The Monitored Resources API from Microsoft Azure — 2 operation(s) for monitored resources.
+- [Microsoft Azure Network Interfaces API](https://apis.io/apis/microsoft-azure/microsoft-azure-network-interfaces-api/) — The Network Interfaces API from Microsoft Azure — 6 operation(s) for network interfaces.
+- [Microsoft Azure News Category API](https://apis.io/apis/microsoft-azure/microsoft-azure-news-category-api/) — The News Category API from Microsoft Azure — 1 operation(s) for news category.
+- [Microsoft Azure News Search API](https://apis.io/apis/microsoft-azure/microsoft-azure-news-search-api/) — The News Search API from Microsoft Azure — 1 operation(s) for news search.
+- [Microsoft Azure Node Type API](https://apis.io/apis/microsoft-azure/microsoft-azure-node-type-api/) — The Node Type API from Microsoft Azure — 6 operation(s) for node type.
+- [Microsoft Azure Notification Channels API](https://apis.io/apis/microsoft-azure/microsoft-azure-notification-channels-api/) — The Notification Channels API from Microsoft Azure — 3 operation(s) for notification channels.
+- [Microsoft Azure OAuth Providers API](https://apis.io/apis/microsoft-azure/microsoft-azure-oauth-providers-api/) — The OAuth Providers API from Microsoft Azure — 3 operation(s) for oauth providers.
+- [Microsoft Azure OAuth Tokens API](https://apis.io/apis/microsoft-azure/microsoft-azure-oauth-tokens-api/) — The OAuth Tokens API from Microsoft Azure — 3 operation(s) for oauth tokens.
+- [Microsoft Azure Order Items API](https://apis.io/apis/microsoft-azure/microsoft-azure-order-items-api/) — The Order Items API from Microsoft Azure — 5 operation(s) for order items.
+- [Microsoft Azure Partner Configurations API](https://apis.io/apis/microsoft-azure/microsoft-azure-partner-configurations-api/) — The Partner Configurations API from Microsoft Azure — 5 operation(s) for partner configurations.
+- [Microsoft Azure Payment Methods API](https://apis.io/apis/microsoft-azure/microsoft-azure-payment-methods-api/) — The Payment Methods API from Microsoft Azure — 6 operation(s) for payment methods.
+- [Microsoft Azure Person Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-person-groups-api/) — The Person Groups API from Microsoft Azure — 8 operation(s) for person groups.
+- [Microsoft Azure Policy Sets API](https://apis.io/apis/microsoft-azure/microsoft-azure-policy-sets-api/) — The Policy Sets API from Microsoft Azure — 1 operation(s) for policy sets.
+- [Microsoft Azure Private Endpoint Connection API](https://apis.io/apis/microsoft-azure/microsoft-azure-private-endpoint-connection-api/) — The Private Endpoint Connection API from Microsoft Azure — 5 operation(s) for private endpoint connection.
+- [Microsoft Azure Private Endpoint Connections API](https://apis.io/apis/microsoft-azure/microsoft-azure-private-endpoint-connections-api/) — The Private Endpoint Connections API from Microsoft Azure — 36 operation(s) for private endpoint connections.
+- [Microsoft Azure Private Link API](https://apis.io/apis/microsoft-azure/microsoft-azure-private-link-api/) — The Private Link API from Microsoft Azure — 10 operation(s) for private link.
+- [Microsoft Azure Project API](https://apis.io/apis/microsoft-azure/microsoft-azure-project-api-api/) — The Project API API from Microsoft Azure — 13 operation(s) for project api.
+- [Microsoft Azure Protection Policies API](https://apis.io/apis/microsoft-azure/microsoft-azure-protection-policies-api/) — The Protection Policies API from Microsoft Azure — 1 operation(s) for protection policies.
+- [Microsoft Azure Public Keys API](https://apis.io/apis/microsoft-azure/microsoft-azure-public-keys-api/) — The Public Keys API from Microsoft Azure — 2 operation(s) for public keys.
+- [Microsoft Azure Rate Card API](https://apis.io/apis/microsoft-azure/microsoft-azure-rate-card-api/) — The Rate Card API from Microsoft Azure — 1 operation(s) for rate card.
+- [Microsoft Azure Recovery Points API](https://apis.io/apis/microsoft-azure/microsoft-azure-recovery-points-api/) — The Recovery Points API from Microsoft Azure — 4 operation(s) for recovery points.
+- [Microsoft Azure Reference Data Sets API](https://apis.io/apis/microsoft-azure/microsoft-azure-reference-data-sets-api/) — The Reference Data Sets API from Microsoft Azure — 2 operation(s) for reference data sets.
+- [Microsoft Azure Replication Policies API](https://apis.io/apis/microsoft-azure/microsoft-azure-replication-policies-api/) — The Replication Policies API from Microsoft Azure — 2 operation(s) for replication policies.
+- [Microsoft Azure Resource Actions API](https://apis.io/apis/microsoft-azure/microsoft-azure-resource-actions-api/) — The Resource Actions API from Microsoft Azure — 1 operation(s) for resource actions.
+- [Microsoft Azure Resource Links API](https://apis.io/apis/microsoft-azure/microsoft-azure-resource-links-api/) — The Resource Links API from Microsoft Azure — 3 operation(s) for resource links.
+- [Microsoft Azure Resource Pools API](https://apis.io/apis/microsoft-azure/microsoft-azure-resource-pools-api/) — The Resource Pools API from Microsoft Azure — 5 operation(s) for resource pools.
+- [Microsoft Azure Role Assignments API](https://apis.io/apis/microsoft-azure/microsoft-azure-role-assignments-api/) — The Role Assignments API from Microsoft Azure — 2 operation(s) for role assignments.
+- [Microsoft Azure Route Tables API](https://apis.io/apis/microsoft-azure/microsoft-azure-route-tables-api/) — The Route Tables API from Microsoft Azure — 3 operation(s) for route tables.
+- [Microsoft Azure Routing Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-routing-rules-api/) — The Routing Rules API from Microsoft Azure — 2 operation(s) for routing rules.
+- [Microsoft Azure Scan Result API](https://apis.io/apis/microsoft-azure/microsoft-azure-scan-result-api/) — The Scan Result API from Microsoft Azure — 3 operation(s) for scan result.
+- [Microsoft Azure Scan Rulesets API](https://apis.io/apis/microsoft-azure/microsoft-azure-scan-rulesets-api/) — The Scan Rulesets API from Microsoft Azure — 2 operation(s) for scan rulesets.
+- [Microsoft Azure Scheduled Events API](https://apis.io/apis/microsoft-azure/microsoft-azure-scheduled-events-api/) — The Scheduled Events API from Microsoft Azure — 1 operation(s) for scheduled events.
+- [Microsoft Azure Scheduled Jobs API](https://apis.io/apis/microsoft-azure/microsoft-azure-scheduled-jobs-api/) — The Scheduled Jobs API from Microsoft Azure — 3 operation(s) for scheduled jobs.
+- [Microsoft Azure Scheduled Query Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-scheduled-query-rules-api/) — The Scheduled Query Rules API from Microsoft Azure — 5 operation(s) for scheduled query rules.
+- [Microsoft Azure Security alert API](https://apis.io/apis/microsoft-azure/microsoft-azure-security-alert-api/) — The Security alert API from Microsoft Azure — 1 operation(s) for security alert.
+- [Microsoft Azure Security Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-security-rules-api/) — The Security Rules API from Microsoft Azure — 2 operation(s) for security rules.
+- [Microsoft Azure Server Groups API](https://apis.io/apis/microsoft-azure/microsoft-azure-server-groups-api/) — The Server Groups API from Microsoft Azure — 4 operation(s) for server groups.
+- [Microsoft Azure Service Principals API](https://apis.io/apis/microsoft-azure/microsoft-azure-service-principals-api/) — The Service Principals API from Microsoft Azure — 2 operation(s) for service principals.
+- [Microsoft Azure Single Sign On API](https://apis.io/apis/microsoft-azure/microsoft-azure-single-sign-on-api/) — The Single Sign On API from Microsoft Azure — 6 operation(s) for single sign on.
+- [Microsoft Azure SIP Configuration API](https://apis.io/apis/microsoft-azure/microsoft-azure-sip-configuration-api/) — The SIP Configuration API from Microsoft Azure — 1 operation(s) for sip configuration.
+- [Microsoft Azure Spell Check API](https://apis.io/apis/microsoft-azure/microsoft-azure-spell-check-api/) — The Spell Check API from Microsoft Azure — 1 operation(s) for spell check.
+- [Microsoft Azure Static Sites API](https://apis.io/apis/microsoft-azure/microsoft-azure-static-sites-api/) — The Static Sites API from Microsoft Azure — 51 operation(s) for static sites.
+- [Microsoft Azure Sub Account API](https://apis.io/apis/microsoft-azure/microsoft-azure-sub-account-api/) — The Sub Account API from Microsoft Azure — 3 operation(s) for sub account.
+- [Microsoft Azure Support Tickets API](https://apis.io/apis/microsoft-azure/microsoft-azure-support-tickets-api/) — The Support Tickets API from Microsoft Azure — 6 operation(s) for support tickets.
+- [Microsoft Azure Tag Rules API](https://apis.io/apis/microsoft-azure/microsoft-azure-tag-rules-api/) — The Tag Rules API from Microsoft Azure — 8 operation(s) for tag rules.
+- [Microsoft Azure Tags API](https://apis.io/apis/microsoft-azure/microsoft-azure-tags-api-api/) — The Tags API API from Microsoft Azure — 2 operation(s) for tags api.
+- [Microsoft Azure Template Spec Versions API](https://apis.io/apis/microsoft-azure/microsoft-azure-template-spec-versions-api/) — The Template Spec Versions API from Microsoft Azure — 2 operation(s) for template spec versions.
+- [Microsoft Azure Template Specs API](https://apis.io/apis/microsoft-azure/microsoft-azure-template-specs-api/) — The Template Specs API from Microsoft Azure — 3 operation(s) for template specs.
+- [Microsoft Azure Test Run API](https://apis.io/apis/microsoft-azure/microsoft-azure-test-run-api/) — The Test Run API from Microsoft Azure — 16 operation(s) for test run.
+- [Microsoft Azure Time Series API](https://apis.io/apis/microsoft-azure/microsoft-azure-time-series-api/) — The Time Series API from Microsoft Azure — 3 operation(s) for time series.
+- [Microsoft Azure Traffic Filter API](https://apis.io/apis/microsoft-azure/microsoft-azure-traffic-filter-api/) — The Traffic Filter API from Microsoft Azure — 8 operation(s) for traffic filter.
+- [Microsoft Azure User Requests API](https://apis.io/apis/microsoft-azure/microsoft-azure-user-requests-api/) — The User Requests API from Microsoft Azure — 1 operation(s) for user requests.
+- [Microsoft Azure User Session API](https://apis.io/apis/microsoft-azure/microsoft-azure-user-session-api/) — The User Session API from Microsoft Azure — 5 operation(s) for user session.
+- [Microsoft Azure Video Search API](https://apis.io/apis/microsoft-azure/microsoft-azure-video-search-api/) — The Video Search API from Microsoft Azure — 1 operation(s) for video search.
+- [Microsoft Azure virtual machine API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtual-machine-api/) — The virtual machine API from Microsoft Azure — 7 operation(s) for virtual machine.
+- [Microsoft Azure Virtual Machines API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtual-machines-api/) — The Virtual Machines API from Microsoft Azure — 41 operation(s) for virtual machines.
+- [Microsoft Azure Virtual Networks API](https://apis.io/apis/microsoft-azure/microsoft-azure-virtual-networks-api/) — The Virtual Networks API from Microsoft Azure — 13 operation(s) for virtual networks.
+- [Microsoft Azure Weather Data API](https://apis.io/apis/microsoft-azure/microsoft-azure-weather-data-api/) — The Weather Data API from Microsoft Azure — 2 operation(s) for weather data.
+- [Microsoft Azure Web Apps API](https://apis.io/apis/microsoft-azure/microsoft-azure-web-apps-api/) — The Web Apps API from Microsoft Azure — 295 operation(s) for web apps.
+- [Microsoft Azure Web Pub Sub API](https://apis.io/apis/microsoft-azure/microsoft-azure-web-pub-sub-api/) — The Web Pub Sub API from Microsoft Azure — 39 operation(s) for web pub sub.
+- [Microsoft Azure Web Services API](https://apis.io/apis/microsoft-azure/microsoft-azure-web-services-api/) — The Web Services API from Microsoft Azure — 4 operation(s) for web services.
+- [Microsoft Azure widget types API](https://apis.io/apis/microsoft-azure/microsoft-azure-widget-types-api/) — The widget types API from Microsoft Azure — 2 operation(s) for widget types.
+- [Microsoft Azure Workflow Runs API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflow-runs-api/) — The Workflow Runs API from Microsoft Azure — 9 operation(s) for workflow runs.
+- [Microsoft Azure Workflow Tasks API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflow-tasks-api/) — The Workflow Tasks API from Microsoft Azure — 6 operation(s) for workflow tasks.
+- [Microsoft Azure Workflow Triggers API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflow-triggers-api/) — The Workflow Triggers API from Microsoft Azure — 13 operation(s) for workflow triggers.
+- [Microsoft Azure Workflow Versions API](https://apis.io/apis/microsoft-azure/microsoft-azure-workflow-versions-api/) — The Workflow Versions API from Microsoft Azure — 4 operation(s) for workflow versions.
 
-## Timestamps
+### Published properties
 
-- **Created:** 2023-11-08T00:00:00.000Z
-- **Modified:** 2026-05-19
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-## APIs
+#### Arazzo workflows (14)
 
-### Microsoft Azure  API Client
+Multi-step workflows that chain operations into a business task.
 
-The Microsoft Azure API Client is a tool that allows developers to easily access and integrate Azure services within their applications. This client provides a set of libraries and tools that streamline the process of communicating with various Azure APIs, enabling developers to interact with services such as virtual machines, storage, databases, and more.
+- [Microsoft Azure Audit Subscription Resources Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-audit-subscription-resources-workflow/)
+- [Microsoft Azure Create Resource Group And Deploy From Link Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-create-resource-group-and-deploy-from-link-workflow/)
+- [Microsoft Azure Create Resource Group And Verify Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-create-resource-group-and-verify-workflow/)
+- [Microsoft Azure Deploy Template To Resource Group Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-deploy-template-to-resource-group-workflow/)
+- [Microsoft Azure Deploy Then Delete Resource Group Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-deploy-then-delete-resource-group-workflow/)
+- [Microsoft Azure Deployment Status And Resource List Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-deployment-status-and-resource-list-workflow/)
+- [Microsoft Azure Find Resources By Type And Inspect Group Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-find-resources-by-type-and-inspect-group-workflow/)
+- [Microsoft Azure List Providers And Resources Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-list-providers-and-resources-workflow/)
+- [Microsoft Azure List Resource Groups And Inventory Resources Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-list-resource-groups-and-inventory-resources-workflow/)
+- [Microsoft Azure Redeploy Into Existing Group Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-redeploy-into-existing-group-workflow/)
+- [Microsoft Azure Relocate Resource Group Deployment Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-relocate-resource-group-deployment-workflow/)
+- [Microsoft Azure Resource Group Lifecycle Tag And Inventory Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-resource-group-lifecycle-tag-and-inventory-workflow/)
+- [Microsoft Azure Select Subscription And List Resource Groups Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-select-subscription-and-list-resource-groups-workflow/)
+- [Microsoft Azure Tag Resource Group Workflow](https://apis.io/arazzos/microsoft-azure/microsoft-azure-tag-resource-group-workflow/)
 
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
+#### AsyncAPI (1)
 
-#### Properties
+Event-driven and webhook contracts.
 
-- [OpenAPI](openapi/api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Microsoft Azure Event Grid Webhooks](https://apis.io/asyncapis/microsoft-azure/microsoft-azure-event-grid-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [microsoft-azure-mcp.yml](https://apis.io/servers/microsoft-azure/microsoft-azure-mcp-yml/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Microsoft Azure Agentic Access](https://apis.io/agentic-access/microsoft-azure/microsoft-azure-agentic-access/)
+
+#### JSON Schema (415)
+
+The data models the API reads and writes.
+
+- [BlobEnumerationResults](https://apis.io/schemas/microsoft-azure/azure-blob-storage-blob-enumeration-results/)
+- [BlobItem](https://apis.io/schemas/microsoft-azure/azure-blob-storage-blob-item/)
+- [BlobProperties](https://apis.io/schemas/microsoft-azure/azure-blob-storage-blob-properties/)
+- [CorsRule](https://apis.io/schemas/microsoft-azure/azure-blob-storage-cors-rule/)
+- [Metrics](https://apis.io/schemas/microsoft-azure/azure-blob-storage-metrics/)
+- [RetentionPolicy](https://apis.io/schemas/microsoft-azure/azure-blob-storage-retention-policy/)
+- [StorageError](https://apis.io/schemas/microsoft-azure/azure-blob-storage-storage-error/)
+- [StorageServiceProperties](https://apis.io/schemas/microsoft-azure/azure-blob-storage-storage-service-properties/)
+- [Account](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-account/)
+- [AccountListResult](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-account-list-result/)
+- [AccountModel](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-account-model/)
+- [AccountProperties](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-account-properties/)
+- [ApiKeys](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-api-keys/)
+- [Deployment](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-deployment/)
+- [DeploymentListResult](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-deployment-list-result/)
+- [DeploymentModel](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-deployment-model/)
+- [DeploymentProperties](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-deployment-properties/)
+- [ErrorResponse](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-error-response/)
+- [Identity](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-identity/)
+- [ModelListResult](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-model-list-result/)
+- [NetworkRuleSet](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-network-rule-set/)
+- [Sku](https://apis.io/schemas/microsoft-azure/azure-cognitive-services-sku/)
+- [AcrErrorInfo](https://apis.io/schemas/microsoft-azure/azure-container-registry-acr-error-info/)
+- [AcrErrors](https://apis.io/schemas/microsoft-azure/azure-container-registry-acr-errors/)
+- [DeletedRepository](https://apis.io/schemas/microsoft-azure/azure-container-registry-deleted-repository/)
+- …and 390 more published on APIs.io
+
+#### JSON Structure (141)
+
+Data models expressed in JSON Structure.
+
+- [Azure Blob Storage Blob Enumeration Results Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-blob-enumeration-results-structure/)
+- [Azure Blob Storage Blob Item Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-blob-item-structure/)
+- [Azure Blob Storage Blob Properties Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-blob-properties-structure/)
+- [Azure Blob Storage Cors Rule Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-cors-rule-structure/)
+- [Azure Blob Storage Metrics Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-metrics-structure/)
+- [Azure Blob Storage Retention Policy Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-retention-policy-structure/)
+- [Azure Blob Storage Storage Error Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-storage-error-structure/)
+- [Azure Blob Storage Storage Service Properties Structure](https://apis.io/json-structure/microsoft-azure/azure-blob-storage-storage-service-properties-structure/)
+- [Azure Cognitive Services Account List Result Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-account-list-result-structure/)
+- [Azure Cognitive Services Account Model Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-account-model-structure/)
+- [Azure Cognitive Services Account Properties Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-account-properties-structure/)
+- [Azure Cognitive Services Account Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-account-structure/)
+- [Azure Cognitive Services Api Keys Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-api-keys-structure/)
+- [Azure Cognitive Services Deployment List Result Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-deployment-list-result-structure/)
+- [Azure Cognitive Services Deployment Model Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-deployment-model-structure/)
+- [Azure Cognitive Services Deployment Properties Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-deployment-properties-structure/)
+- [Azure Cognitive Services Deployment Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-deployment-structure/)
+- [Azure Cognitive Services Error Response Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-error-response-structure/)
+- [Azure Cognitive Services Identity Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-identity-structure/)
+- [Azure Cognitive Services Model List Result Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-model-list-result-structure/)
+- [Azure Cognitive Services Network Rule Set Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-network-rule-set-structure/)
+- [Azure Cognitive Services Sku Structure](https://apis.io/json-structure/microsoft-azure/azure-cognitive-services-sku-structure/)
+- [Azure Container Registry Acr Error Info Structure](https://apis.io/json-structure/microsoft-azure/azure-container-registry-acr-error-info-structure/)
+- [Azure Container Registry Acr Errors Structure](https://apis.io/json-structure/microsoft-azure/azure-container-registry-acr-errors-structure/)
+- [Azure Container Registry Deleted Repository Structure](https://apis.io/json-structure/microsoft-azure/azure-container-registry-deleted-repository-structure/)
+- …and 116 more published on APIs.io
+
+#### JSON-LD (9)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Azure Blob Storage Context](https://apis.io/jsonld/microsoft-azure/azure-blob-storage-context/)
+- [Azure Cognitive Services Context](https://apis.io/jsonld/microsoft-azure/azure-cognitive-services-context/)
+- [Azure Container Registry Context](https://apis.io/jsonld/microsoft-azure/azure-container-registry-context/)
+- [Azure Cosmos Db Context](https://apis.io/jsonld/microsoft-azure/azure-cosmos-db-context/)
+- [Azure Key Vault Context](https://apis.io/jsonld/microsoft-azure/azure-key-vault-context/)
+- [Azure Kubernetes Service Context](https://apis.io/jsonld/microsoft-azure/azure-kubernetes-service-context/)
+- [Azure Openai Service Context](https://apis.io/jsonld/microsoft-azure/azure-openai-service-context/)
+- [Azure Resource Manager Context](https://apis.io/jsonld/microsoft-azure/azure-resource-manager-context/)
+- [Microsoft Azure Context](https://apis.io/jsonld/microsoft-azure/microsoft-azure-context/)
+
+#### Vocabulary (1)
+
+The provider's domain terms, defined.
+
+- [Microsoft Azure Vocabulary](https://apis.io/vocabularies/microsoft-azure/microsoft-azure-vocabulary/)
+
+#### Examples (228)
+
+Example requests and responses.
+
+- [Azure Blob Storage Blob Enumeration Results Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-blob-enumeration-results-example/)
+- [Azure Blob Storage Blob Item Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-blob-item-example/)
+- [Azure Blob Storage Blob Properties Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-blob-properties-example/)
+- [Azure Blob Storage Cors Rule Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-cors-rule-example/)
+- [Azure Blob Storage Metrics Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-metrics-example/)
+- [Azure Blob Storage Retention Policy Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-retention-policy-example/)
+- [Azure Blob Storage Storage Error Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-storage-error-example/)
+- [Azure Blob Storage Storage Service Properties Example](https://apis.io/examples/microsoft-azure/azure-blob-storage-storage-service-properties-example/)
+- [Azure Cognitive Services Account Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-account-example/)
+- [Azure Cognitive Services Account List Result Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-account-list-result-example/)
+- [Azure Cognitive Services Account Model Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-account-model-example/)
+- [Azure Cognitive Services Account Properties Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-account-properties-example/)
+- [Azure Cognitive Services Api Keys Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-api-keys-example/)
+- [Azure Cognitive Services Deployment Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-deployment-example/)
+- [Azure Cognitive Services Deployment List Result Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-deployment-list-result-example/)
+- [Azure Cognitive Services Deployment Model Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-deployment-model-example/)
+- [Azure Cognitive Services Deployment Properties Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-deployment-properties-example/)
+- [Azure Cognitive Services Error Response Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-error-response-example/)
+- [Azure Cognitive Services Identity Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-identity-example/)
+- [Azure Cognitive Services Model List Result Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-model-list-result-example/)
+- [Azure Cognitive Services Network Rule Set Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-network-rule-set-example/)
+- [Azure Cognitive Services Sku Example](https://apis.io/examples/microsoft-azure/azure-cognitive-services-sku-example/)
+- [Azure Container Registry Acr Error Info Example](https://apis.io/examples/microsoft-azure/azure-container-registry-acr-error-info-example/)
+- [Azure Container Registry Acr Errors Example](https://apis.io/examples/microsoft-azure/azure-container-registry-acr-errors-example/)
+- [Azure Container Registry Deleted Repository Example](https://apis.io/examples/microsoft-azure/azure-container-registry-deleted-repository-example/)
+- …and 203 more published on APIs.io
+
+#### Collections (2031)
+
+Postman and Open Collection request collections.
+
+- [Open Azure Blob Storage](https://apis.io/collections/microsoft-azure/open-azure-blob-storage/)
+- [Open Azure Cognitive Services](https://apis.io/collections/microsoft-azure/open-azure-cognitive-services/)
+- [Open Azure Container Registry](https://apis.io/collections/microsoft-azure/open-azure-container-registry/)
+- [Open Azure Cosmos Db](https://apis.io/collections/microsoft-azure/open-azure-cosmos-db/)
+- [Open Azure Key Vault](https://apis.io/collections/microsoft-azure/open-azure-key-vault/)
+- [Open Azure Kubernetes Service](https://apis.io/collections/microsoft-azure/open-azure-kubernetes-service/)
+- [Open Azure Openai Service](https://apis.io/collections/microsoft-azure/open-azure-openai-service/)
+- [Open Azure Resource Manager](https://apis.io/collections/microsoft-azure/open-azure-resource-manager/)
+- [Open Microsoft Azure Accessconnector Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-accessconnector-api/)
+- [Open Microsoft Azure Accesscontrolrecords Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-accesscontrolrecords-api/)
+- [Open Microsoft Azure Accesspolicies Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-accesspolicies-api/)
+- [Open Microsoft Azure Accesstoken Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-accesstoken-api/)
+- [Open Microsoft Azure Account Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-account-api/)
+- [Open Microsoft Azure Account Operations Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-account-operations-api/)
+- [Open Microsoft Azure Accountquotas Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-accountquotas-api/)
+- [Open Microsoft Azure Accounts Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-accounts-api/)
+- [Open Microsoft Azure Acr Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-acr-api/)
+- [Open Microsoft Azure Acrmanifest Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-acrmanifest-api/)
+- [Open Microsoft Azure Acrmetadata Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-acrmetadata-api/)
+- [Open Microsoft Azure Acrrepository Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-acrrepository-api/)
+- [Open Microsoft Azure Acrtag Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-acrtag-api/)
+- [Open Microsoft Azure Acrtoken Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-acrtoken-api/)
+- [Open Microsoft Azure Actions Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-actions-api/)
+- [Open Microsoft Azure Activesessionhostconfiguration Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-activesessionhostconfiguration-api/)
+- [Open Microsoft Azure Addondetails Api](https://apis.io/collections/microsoft-azure/open-microsoft-azure-addondetails-api/)
+- …and 2006 more published on APIs.io
+
+#### Overlays (1636)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Microsoft Azure Access Control Records Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-access-control-records-api-phrasing-overlay/)
+- [Microsoft Azure Access Policies Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-access-policies-api-phrasing-overlay/)
+- [Microsoft Azure Access Token Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-access-token-api-phrasing-overlay/)
+- [Microsoft Azure Accessconnector Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accessconnector-api-phrasing-overlay/)
+- [Microsoft Azure Accessreviewinstanceacceptrecommmendations Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accessreviewinstanceacceptrecommmendations-api-phrasing-overlay/)
+- [Microsoft Azure Accessreviewinstanceapplydecisions Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accessreviewinstanceapplydecisions-api-phrasing-overlay/)
+- [Microsoft Azure Accessreviewinstanceresetdecisions Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accessreviewinstanceresetdecisions-api-phrasing-overlay/)
+- [Microsoft Azure Accessreviewinstancesendreminders Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accessreviewinstancesendreminders-api-phrasing-overlay/)
+- [Microsoft Azure Accessreviewinstancestop Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accessreviewinstancestop-api-phrasing-overlay/)
+- [Microsoft Azure Accessreviewscheduledefinitionstop Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accessreviewscheduledefinitionstop-api-phrasing-overlay/)
+- [Microsoft Azure Account Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-account-api-phrasing-overlay/)
+- [Microsoft Azure Account Operations Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-account-operations-api-phrasing-overlay/)
+- [Microsoft Azure Accountquotas Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accountquotas-api-phrasing-overlay/)
+- [Microsoft Azure Accounts Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-accounts-api-phrasing-overlay/)
+- [Microsoft Azure Acrmanifest Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-acrmanifest-api-phrasing-overlay/)
+- [Microsoft Azure Acrmetadata Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-acrmetadata-api-phrasing-overlay/)
+- [Microsoft Azure Acrrepository Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-acrrepository-api-phrasing-overlay/)
+- [Microsoft Azure Acrtoken Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-acrtoken-api-phrasing-overlay/)
+- [Microsoft Azure Actions Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-actions-api-phrasing-overlay/)
+- [Microsoft Azure Activesessionhostconfiguration Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-activesessionhostconfiguration-api-phrasing-overlay/)
+- [Microsoft Azure Add Ons Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-add-ons-api-phrasing-overlay/)
+- [Microsoft Azure Addondetails Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-addondetails-api-phrasing-overlay/)
+- [Microsoft Azure Addonstatus Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-addonstatus-api-phrasing-overlay/)
+- [Microsoft Azure Addresses Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-addresses-api-phrasing-overlay/)
+- [Microsoft Azure Adds Api Phrasing Overlay](https://apis.io/overlays/microsoft-azure/microsoft-azure-adds-api-phrasing-overlay/)
+- …and 1611 more published on APIs.io
+
+#### Governance rules (2)
+
+Spectral rulesets for the provider's contracts.
+
+- [Microsoft Azure Jsonschema Spectral Rules](https://apis.io/rules/microsoft-azure/microsoft-azure-jsonschema-spectral-rules/)
+- [Microsoft Azure Spectral Rules](https://apis.io/rules/microsoft-azure/microsoft-azure-spectral-rules/)
+
+#### Security (4)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Microsoft Azure Authentication](https://apis.io/security/microsoft-azure/microsoft-azure-authentication/)
+- [Microsoft Azure Domain Security](https://apis.io/security/microsoft-azure/microsoft-azure-domain-security/)
+- [Microsoft Azure Trust Center](https://apis.io/security/microsoft-azure/microsoft-azure-trust-center/)
+- [Microsoft Azure Vulnerability Disclosure](https://apis.io/security/microsoft-azure/microsoft-azure-vulnerability-disclosure/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Microsoft Azure Scopes](https://apis.io/scopes/microsoft-azure/microsoft-azure-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Microsoft Azure Plans Pricing](https://apis.io/plans/microsoft-azure/microsoft-azure-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Microsoft Azure Rate Limits](https://apis.io/rate-limits/microsoft-azure/microsoft-azure-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [Microsoft Azure Finops](https://apis.io/finops/microsoft-azure/microsoft-azure-finops/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://azure.microsoft.com/)
 - [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure Access Control Client
-
-Microsoft Azure Access Control Client is a tool that helps users manage and control access to their Azure resources. With this client, users can easily set up and enforce access policies, monitor user activity, and grant or revoke permissions as needed. This helps ensure that only authorized individuals have access to critical data and applications, increasing security and improving overall compliance with regulatory requirements.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/role-based-access-control/](https://learn.microsoft.com/en-us/azure/role-based-access-control/)
-
-#### Properties
-
-- [OpenAPI](openapi/accesscontrolclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/role-based-access-control/)
-
-### Microsoft Azure Action Groups API
-
-The Microsoft Azure Action Groups API is a platform that allows users to define a set of notifications and actions that are triggered in response to specific events or alerts within the Azure ecosystem. Users can create custom action groups and specify the notifications and actions that should be taken when certain conditions are met. These actions can range from sending emails or text messages to executing automated scripts or escalating issues to designated individuals.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/action-groups?view=rest-monitor-2021-09-01](https://learn.microsoft.com/en-us/rest/api/monitor/action-groups?view=rest-monitor-2021-09-01)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-action-groups-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/action-groups?view=rest-monitor-2021-09-01)
-
-### Microsoft Azure Active Directory
-
-Microsoft Azure Active Directory is a cloud-based directory service that provides a secure and seamless way for users to access their applications and devices. It allows organizations to centrally manage and secure user identities and control access to resources within their environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/entra/identity/](https://learn.microsoft.com/en-us/entra/identity/)
-
-#### Properties
-
-- [OpenAPI](openapi/azureactivedirectory-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/entra/identity/)
-
-### Microsoft Azure Activity Log Alerts API
-
-The Microsoft Azure Activity Log Alerts API is a tool that allows users to create and manage alerts based on activity logs within their Azure environment. This API enables users to set up custom notifications for specific events or patterns of activity, helping them easily monitor and respond to important changes or issues within their cloud services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/activity-log-alerts?view=rest-monitor-2020-10-01](https://learn.microsoft.com/en-us/rest/api/monitor/activity-log-alerts?view=rest-monitor-2020-10-01)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-activity-log-alerts-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/activity-log-alerts?view=rest-monitor-2020-10-01)
-
-### Microsoft Azure Ad Hybrid Health Service
-
-Microsoft Azure AD Hybrid Health Service is a cloud-based service that helps organizations monitor and improve the health and performance of their hybrid identity environment. By collecting data from on-premises Active Directory and Azure Active Directory, the service provides insights into potential issues such as synchronization failures, password sync problems, or authentication failures.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/whatis-azure-ad-connect](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/whatis-azure-ad-connect)
-
-#### Properties
-
-- [OpenAPI](openapi/adhybridhealthservice-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/whatis-azure-ad-connect)
-
-### Microsoft Azure Addons Resource Provider
-
-Microsoft Azure Addons Resource Provider is a service that allows users to easily integrate additional features and services into their Azure environments. These add-ons provide users with a wide range of functionalities, such as security and compliance solutions, monitoring and analytics tools, and backup and recovery services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-addons-resource-provider-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-### Microsoft Azure Adp
-
-Microsoft Azure ADP, or Azure Active Directory Premium, is a cloud-based identity and access management service that helps organizations manage and secure user identities and access to applications and resources within their environment. With Azure ADP, businesses can implement single sign-on capabilities for their users, streamline access control, enforce multi-factor authentication, and automate user provisioning and deprovisioning processes.
-
-- **Human URL:** [https://azuremarketplace.microsoft.com/en-us/marketplace/apps/robomq.adptoad?tab=overview](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/robomq.adptoad?tab=overview)
-
-#### Properties
-
-- [OpenAPI](openapi/adp-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/robomq.adptoad?tab=overview)
-
-### Microsoft Azure Advisor Management Client
-
-Microsoft Azure Advisor Management Client is a tool that helps users optimize their Azure resources by providing personalized recommendations based on usage data and best practices. The Advisor Management Client analyzes the user's Azure environment and offers suggestions for improving performance, security, and cost efficiency. Users can view and prioritize recommendations, track progress, and implement changes directly through the client interface.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.advisor-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.advisor-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/advisormanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.advisor-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Ag Food Platform Data Plane Service
-
-The Microsoft Azure Ag Food Platform Data Plane Service is designed to provide farmers and agricultural businesses with a comprehensive solution for managing and analyzing their data. This service allows users to collect, store, and process data from various sources, such as sensors, drones, and satellite imagery, in order to gain valuable insights that can improve crop yield, optimize resource allocation, and enhance overall operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.agfoodplatform-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.agfoodplatform-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-agfoodplatform-data-plane-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.agfoodplatform-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Ag Food Platform Rp Service
-
-Microsoft Azure Ag Food Platform Rp Service is a service that helps agricultural businesses streamline their operations and improve crop yields through data analytics and AI technology. It allows farmers to collect and analyze data from their equipment and sensors, monitor crop health and growth, and make informed decisions about irrigation, fertilization, and pest control.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.agfoodplatform-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.agfoodplatform-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-agfoodplatform-rp-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.agfoodplatform-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Agri Food Rp Service
-
-Microsoft Azure Agri Food RP Service is a cloud-based platform designed to revolutionize the agriculture and food industry by providing advanced analytics, data management, and software solutions. This service enables farmers, food producers, and distributors to optimize their operations, improve crop yields, reduce waste, and enhance sustainability.
-
-- **Human URL:** [https://azure.microsoft.com/en-us/products/data-manager-for-agriculture](https://azure.microsoft.com/en-us/products/data-manager-for-agriculture)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-agrifood-rp-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azure.microsoft.com/en-us/products/data-manager-for-agriculture)
-
-### Microsoft Azure Ai Document Translation
-
-Microsoft Azure AI Document Translation is a cloud-based service that allows users to easily translate documents at scale. By leveraging advanced machine learning algorithms, Azure AI Document Translation can accurately translate various types of documents, including text, images, and scanned files, into multiple languages. This service helps businesses and organizations streamline their translation process, save time, and reach a wider audience by breaking down language barriers.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/translator/](https://learn.microsoft.com/en-us/azure/ai-services/translator/)
-
-#### Properties
-
-- [OpenAPI](openapi/azureaidocumenttranslation-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/translator/)
-
-### Microsoft Azure Ai Health Insights
-
-Microsoft Azure AI Health Insights is a comprehensive platform that uses advanced artificial intelligence and machine learning technologies to provide personalized insights and recommendations for healthcare providers. It analyzes vast amounts of data from electronic health records, medical imaging, and wearable devices to identify patterns and trends that can help improve patient outcomes and optimize care delivery.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-health-insights/](https://learn.microsoft.com/en-us/azure/azure-health-insights/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-ai-health-insights-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-health-insights/)
-
-### Microsoft Azure Alerts Management Service Resource Provider
-
-The Microsoft Azure Alerts Management Service Resource Provider is a tool that helps users manage and monitor the alerts generated by various resources within the Azure platform. This service provides a centralized dashboard where users can view, customize, and configure alert rules for their Azure resources. Users can set up notifications for specific events, such as performance thresholds being exceeded, resource outages, or security breaches.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-overview)
-
-#### Properties
-
-- [OpenAPI](openapiazure-alerts-management-service-resource-provider-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-overview)
-
-### Microsoft Azure Analysis Services
-
-Microsoft Azure Analysis Services is a cloud-based service that allows users to easily build, deploy, and manage analytical models. It enables organizations to access large volumes of data from various sources and gain insights through data visualization tools. Azure Analysis Services offers advanced data processing capabilities such as data mining, predictive analytics, and machine learning to help organizations make informed business decisions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/analysis-services/](https://learn.microsoft.com/en-us/azure/analysis-services/)
-
-#### Properties
-
-- [OpenAPI](openapi/azureanalysisservices-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/analysis-services/)
-
-### Microsoft Azure Analytics Purview Data Map
-
-Azure Purview Data Map is a data governance solution that helps organizations discover, classify, and manage all their data assets across on-premises, multicloud, and SaaS environments. The Data Map allows users to create a holistic view of their data landscape, including structured and unstructured data, so they can understand where their data resides, who has access to it, and how it is being used.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/analytics.purview.datamap-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/analytics.purview.datamap-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-analytics-purview-data-map-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/analytics.purview.datamap-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Anomaly Detector
-
-The Anomaly Detector API detects anomalies automatically in time series data. It supports both a stateless detection mode and a stateful detection mode. In stateless mode, there are three functionalities. Entire Detect is for detecting the whole series, with the model trained by the time series. Last Detect is for detecting the last point, with the model trained by points before. ChangePoint Detect is for detecting trend changes in the time series.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/](https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/)
-
-#### Properties
-
-- [OpenAPI](openapi/anomaly-detector-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/)
-
-### Microsoft Azure Anomaly Detector Client
-
-The Anomaly Detector API detects anomalies automatically in time series data. It supports two kinds of mode, one is for stateless using, another is for stateful using. In stateless mode, there are three functionalities. Entire Detect is for detecting the whole series with model trained by the time series, Last Detect is detecting last point with model trained by points before. ChangePoint Detect is for detecting trend changes in time series.
-
-#### Properties
-
-- [OpenAPI](openapi/anomaly-detector-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-
-### Microsoft Azure Aoa Front End APIs
-
-Microsoft Azure AOA front end APIs allow developers to easily interact with and manage their applications hosted on the Azure platform. These APIs provide a set of tools and functionalities that enable developers to build and customize user interfaces, integrate data and services, and automate processes. With Azure AOA front end APIs, developers can create responsive and user-friendly interfaces, streamline workflows, and enhance the overall user experience of their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/aoa-front-end-apis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure API Center
-
-Microsoft Azure API Management is a platform that enables organizations to publish, manage, secure, and analyze APIs in a scalable and cost-effective manner. With the API Management service, developers can easily create, publish, and consume APIs with just a few clicks, and organizations can control access, usage, and performance of their APIs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/api-center/](https://learn.microsoft.com/en-us/azure/api-center/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-api-center-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/api-center/)
-
-### Microsoft Azure API Center Data Api
-
-Microsoft Azure API Management Data API serves as a foundation of Microsoft's API Management service and helps to ensure smooth operations and management of APIs. It provides a platform for developers to easily create, publish, version, and manage APIs through a comprehensive set of tools and features. With the Data API, developers can securely expose their APIs to external consumers, track usage analytics, implement security policies, and monitor performance metrics.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/api-center/](https://learn.microsoft.com/en-us/azure/api-center/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-api-center-data-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/api-center/)
-
-### Microsoft Azure API for Managing Scom Managed Instances and Monitored Resources
-
-Microsoft Azure API for managing SCOM managed instances and monitored resources provides developers with a comprehensive set of tools and capabilities to efficiently manage System Center Operations Manager (SCOM) resources on the Azure platform. This API allows users to programmatically access and interact with SCOM managed instances, including creating, updating, and deleting resources, as well as retrieving information about monitored resources and triggering actions based on monitoring data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/scom-manage-instance/overview](https://learn.microsoft.com/en-us/azure/azure-monitor/scom-manage-instance/overview)
-
-#### Properties
-
-- [OpenAPI](openapiazure-api-for-managing-scom-managed-instances-and-monitored-resources-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/scom-manage-instance/overview)
-
-### Microsoft Azure API Management Client
-
-Microsoft Azure API Management Client is a tool that allows users to easily manage and monitor their APIs in Azure. With this client, users can create, deploy, and secure APIs, as well as control access to them. The client provides a centralized hub for managing all aspects of APIs, including setting policies, monitoring performance, and analyzing usage data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/api-management/](https://learn.microsoft.com/en-us/azure/api-management/)
-
-#### Properties
-
-- [OpenAPI](openapi/apimanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/api-management/)
-- [API Reference](https://learn.microsoft.com/en-us/rest/api/apimanagement/)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/api-management/)
-
-### Microsoft Azure App Compliance Automation Tool for Microsoft 365
-
-The Microsoft Azure App Compliance Automation Tool for Microsoft 365 is a comprehensive solution designed to streamline and simplify the compliance process for organizations using Microsoft's suite of productivity tools. This tool automates the monitoring and enforcement of compliance policies, ensuring that all data stored and shared within Microsoft 365 applications meets regulatory requirements and internal policies.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/microsoft-365-app-certification/docs/acat-overview](https://learn.microsoft.com/en-us/microsoft-365-app-certification/docs/acat-overview)
-
-#### Properties
-
-- [OpenAPI](openapiapp-compliance-automation-tool-for-microsoft-365-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/microsoft-365-app-certification/docs/acat-overview)
-
-### Microsoft Azure App Configuration
-
-Microsoft Azure App Configuration is a service that helps developers manage application settings and feature flags easily. With Azure App Configuration, developers can centralize all their application configurations in one place, making it easier to manage and update settings across different environments. This service also allows for dynamic configuration updates without the need for redeployment, helping developers respond quickly to changing requirements or fix bugs in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-app-configuration/](https://learn.microsoft.com/en-us/azure/azure-app-configuration/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-app-configuration-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-app-configuration/)
-
-### Microsoft Azure App Configuration Management Client
-
-The Microsoft Azure App Configuration Management Client is a tool that allows developers to easily manage and configure settings for their applications. With this client, developers can store their application settings in a centralized location in Azure and access them from their code. This enables them to dynamically update configurations without having to redeploy the application.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-app-configuration/](https://learn.microsoft.com/en-us/azure/azure-app-configuration/)
-
-#### Properties
-
-- [OpenAPI](openapi/appconfigurationmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-app-configuration/)
-
-### Microsoft Azure App Platform Management Client
-
-The Microsoft Azure App Platform Management Client is a tool that allows users to easily monitor and manage their applications and services on the Azure platform. With this client, users can view and analyze detailed metrics and logs, configure and scale their application resources, and set up alerts and notifications for any potential issues.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/app-service/](https://learn.microsoft.com/en-us/azure/app-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/appplatformmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/app-service/)
-
-### Microsoft Azure App Service Certificate Orders API Client
-
-The Microsoft Azure App Service Certificate Orders API Client is a tool that allows users to easily manage and automate the process of ordering SSL certificates for their web applications hosted on the Azure platform. With this API client, users can securely request and manage SSL certificates directly from the Azure portal, eliminating the need for manual processes and streamlining the certificate ordering and deployment process.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/app-service-certificate-orders/get?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/app-service-certificate-orders/get?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/appservicecertificateorders-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/app-service-certificate-orders/get?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure App Service Environments API Client
-
-The Microsoft Azure App Service Environments API Client is a powerful tool that allows developers to interact with Azure App Service Environments programmatically. This API client enables users to perform a wide range of actions, such as deploying, scaling, and monitoring their applications within the Azure environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/app-service/environment/](https://learn.microsoft.com/en-us/azure/app-service/environment/)
-
-#### Properties
-
-- [OpenAPI](openapi/appserviceenvironments-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/app-service/environment/)
-
-### Microsoft Azure App Service Plans API Client
-
-The Microsoft Azure App Service Plans API Client is a tool that allows developers to interact with and manage Azure App Service Plans programmatically. With this API client, developers can create, update, and delete app service plans, as well as perform various administrative tasks such as scaling, monitoring, and deploying applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/app-service-plans?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/app-service-plans?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/appserviceplans-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/app-service-plans?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure Appliances
-
-Microsoft Azure Appliances is a cloud computing platform that provides a range of services, including virtual machines, databases, and storage, to help businesses manage and scale their operations. With Azure Appliances, organizations can access and deploy resources quickly and easily, enabling them to support their applications and services with greater flexibility and efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/appliances-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Application Client
-
-Microsoft Azure Application Client is a software tool that allows users to access and manage applications that are hosted on the Microsoft Azure cloud platform. With this client, users can view and interact with their applications, as well as securely authenticate and authorize access to them. The client provides a user-friendly interface for developers and administrators to monitor and troubleshoot their applications, as well as configure settings and access logs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
-
-#### Properties
-
-- [OpenAPI](openapi/applicationclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
-
-### Microsoft Azure Application Insights Client
-
-Microsoft Azure Application Insights Client is a software development kit (SDK) that allows developers to monitor and track the performance of their applications running on the Azure cloud platform. The client collects and analyzes telemetry data, such as performance metrics, error logs, and user interactions, to provide insights into the application's health and usage.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/applicationinsightsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview)
-
-### Microsoft Azure Application Insights Component Linked Storage Accounts Client
-
-The Microsoft Azure Application Insights Component Linked Storage Accounts Client is a tool that allows users to link their application insights data to storage accounts for streamlined data management. By using this client, users can easily store their application insights data in a secure and organized manner within their storage accounts, allowing for convenient access, retrieval, and analysis.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/cli/azure/monitor/app-insights/component/linked-storage?view=azure-cli-latest](https://learn.microsoft.com/en-us/cli/azure/monitor/app-insights/component/linked-storage?view=azure-cli-latest)
-
-#### Properties
-
-- [OpenAPI](openapiapplicationinsightscomponentlinkedstorageaccountsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/cli/azure/monitor/app-insights/component/linked-storage?view=azure-cli-latest)
-
-### Microsoft Azure Application Insights Data Plane
-
-Microsoft Azure Application Insights Data Plane is a powerful tool that allows users to analyze and gain insights from data collected by their applications. The data plane enables users to track and monitor the performance, usage, and user interactions of their applications in real time. This data can be used to identify and troubleshoot issues, optimize performance, and make informed decisions to improve user experience.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/application-insights-data-plane-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview)
-
-### Microsoft Azure Application Insights Management Client
-
-Microsoft Azure Application Insights Management Client is a tool that allows users to monitor and manage their applications deployed in Azure. With this client, users can track performance metrics, identify and troubleshoot issues, and gain insights into how their applications are performing in real-time. The client provides dashboards and reports to visualize data, set up alerts for critical issues, and enable automated responses to ensure applications are running smoothly.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.applicationinsights-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.applicationinsights-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/applicationinsightsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.applicationinsights-readme?view=azure-dotnet)
-
-### Microsoft Azure Arc Data Management Client
-
-Microsoft Azure Arc Data Management Client is a powerful tool that enables users to centralize and manage their data across multiple environments. With this client, organizations can easily connect to and control data stored in on-premises servers, edge devices, and cloud environments, all from a single interface.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-arc/](https://learn.microsoft.com/en-us/azure/azure-arc/)
-
-#### Properties
-
-- [OpenAPI](openapi/azurearcdatamanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-arc/)
-
-### Microsoft Azure Arg Query Generation
-
-Microsoft Azure Arg Query Generation is a tool that allows users to easily create complex queries for their Azure resources. It provides a user-friendly interface that allows for the quick and efficient construction of queries using logical operators, filters, and sorting options. This tool simplifies the process of querying and retrieving data from Azure resources, making it easier for users to analyze and manage their cloud services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/resource-graph/](https://learn.microsoft.com/en-us/azure/governance/resource-graph/)
-
-#### Properties
-
-- [OpenAPI](openapi/arg-query-generation-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/resource-graph/)
-
-### Microsoft Azure Artifacts Client
-
-Microsoft Azure Artifacts Client is a tool that allows developers to easily manage and share their NuGet packages within their organization. With this client, developers can upload, download, and manage their packages directly from the Azure DevOps Services portal. This tool streamlines the process of distributing and consuming packages, ensuring that all team members have access to the most up-to-date versions of their libraries and dependencies.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/devops/artifacts/?view=azure-devops](https://learn.microsoft.com/en-us/azure/devops/artifacts/?view=azure-devops)
-
-#### Properties
-
-- [OpenAPI](openapi/artifactsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/devops/artifacts/?view=azure-devops)
-
-### Microsoft Azure Attestation Client
-
-The Microsoft Azure Attestation Client is a security service that validates the integrity of devices and ensures that they have not been tampered with or compromised. By securely verifying the identity and integrity of devices and software components, the attestation client helps to protect sensitive data and resources within the Azure cloud platform.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/security.attestation-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/security.attestation-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/attestationclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/security.attestation-readme?view=azure-dotnet)
-
-### Microsoft Azure Attestation Management Client
-
-Microsoft Azure Attestation Management Client is a tool designed to help users securely verify the authenticity and integrity of software running on virtual machines in the Azure cloud. By leveraging a combination of cryptographic techniques and hardware-based attestation technologies, the client can provide assurance that the software being executed has not been tampered with or compromised in any way.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/attestation/](https://learn.microsoft.com/en-us/azure/attestation/)
-
-#### Properties
-
-- [OpenAPI](openapi/attestationmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/attestation/)
-
-### Microsoft Azure Attestations Client
-
-Microsoft Azure Attestations Client is a service that enables developers to prove the integrity and security of their applications running on Azure. It allows users to verify the trustworthiness of the components and prevent unauthorized modifications. By generating cryptographic evidence of the state of the application at a specific point in time, developers can ensure that their code has not been tampered with and is running as intended.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/security.attestation-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/security.attestation-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/attestationsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/security.attestation-readme?view=azure-dotnet)
-
-### Microsoft Azure Authorization Management Client
-
-The Microsoft Azure Authorization Management Client is a service that allows users to manage access control and permissions within their Azure environment. It provides tools for creating and managing role-based access control (RBAC) assignments, defining access policies, and granting or revoking permissions for specific resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.authorization-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.authorization-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/authorizationmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.authorization-readme?view=azure-dotnet)
-
-### Microsoft Azure Auto Suggest Client
-
-The Microsoft Azure Auto Suggest Client is a tool that helps users quickly find relevant information by providing automatic suggestions based on their search queries. This client uses advanced algorithms and artificial intelligence to analyze the user's input and generate a list of recommended results in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azure-cognitiveservices-search-autosuggest/azure.cognitiveservices.search.autosuggest.autosuggestclient?view=azure-python-preview](https://learn.microsoft.com/en-us/python/api/azure-cognitiveservices-search-autosuggest/azure.cognitiveservices.search.autosuggest.autosuggestclient?view=azure-python-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/autosuggest-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azure-cognitiveservices-search-autosuggest/azure.cognitiveservices.search.autosuggest.autosuggestclient?view=azure-python-preview)
-
-### Microsoft Azure Automanage
-
-Microsoft Azure Automanage is a service that helps to simplify the management of virtual machines in the Azure cloud by automating common administrative tasks. Through machine learning and automation, Automanage continuously monitors and adjusts the configuration settings of virtual machines to optimize performance, security, compliance, and cost.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/automanage/](https://learn.microsoft.com/en-us/azure/automanage/)
-
-#### Properties
-
-- [OpenAPI](openapi/automanage-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/automanage/)
-
-### Microsoft Azure Automation Management
-
-Microsoft Azure Automation Management is a cloud-based service that allows organizations to automate repetitive tasks and processes within their Azure environment. It provides a centralized platform for creating, scheduling, and managing automation workflows, allowing users to streamline their operations and improve efficiency. With Azure Automation Management, users can automate tasks such as provisioning and managing resources, running scripts, and orchestrating complex workflows.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/automation/](https://learn.microsoft.com/en-us/azure/automation/)
-
-#### Properties
-
-- [OpenAPI](openapi/automationmanagement-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/automation/)
-
-### Microsoft Azure Automation Management Client
-
-The Microsoft Azure Automation Management Client is a cloud-based service that allows users to automate and manage tasks across their Azure resources. This client helps streamline and simplify various processes by scripting routine operations and workflows, saving time and effort for IT professionals.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/automation/](https://learn.microsoft.com/en-us/azure/automation/)
-
-#### Properties
-
-- [OpenAPI](openapi/automationmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/automation/)
-
-### Microsoft Azure Backup Management Client
-
-Microsoft Azure Backup Management Client is a tool that allows users to easily set up, monitor, and manage backups of their data to the Azure cloud. This client provides a centralized interface for configuring backup policies, scheduling regular backups, and monitoring the status of backup jobs. It also allows users to restore data from Azure backups, helping to protect critical information in the event of data loss or corruption.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/backup/](https://learn.microsoft.com/en-us/azure/backup/)
-
-#### Properties
-
-- [OpenAPI](openapi/backupmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/backup/)
-
-### Microsoft Azure Bare Metal Infrastructure Client
-
-The Microsoft Azure Bare Metal Infrastructure Client is a service that provides customers with direct access to physical servers in Azure data centers, allowing for the deployment of virtual machines and applications without the need for a hypervisor. This service offers high performance, scalability, and security by providing dedicated hardware resources and a fully isolated environment for each customer.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/baremetal-infrastructure/](https://learn.microsoft.com/en-us/azure/baremetal-infrastructure/)
-
-#### Properties
-
-- [OpenAPI](openapi/baremetalinfrastructureclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/baremetal-infrastructure/)
-
-### Microsoft Azure Batch
-
-Microsoft Azure Batch is a cloud-based service designed to help developers and scientists run large-scale parallel and high-performance compute jobs efficiently. It enables users to easily schedule, manage, and run a large number of compute-intensive tasks across a pool of virtual machines, allowing for quick and cost-effective processing of demanding workloads.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/batch/](https://learn.microsoft.com/en-us/azure/batch/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-batch-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/batch/)
-
-### Microsoft Azure Batch Document Translation Client
-
-The Microsoft Azure Batch Document Translation Client is a service that allows users to easily translate large volumes of text and documents into multiple languages. This client utilizes Azure Batch, a cloud-based parallel processing service, to efficiently translate large quantities of documents in a short amount of time. Users can simply upload their documents to the Azure Batch service, select the desired target languages, and then let the client handle the rest.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/translator/document-translation/quickstarts/client-library-sdks](https://learn.microsoft.com/en-us/azure/ai-services/translator/document-translation/quickstarts/client-library-sdks)
-
-#### Properties
-
-- [OpenAPI](openapi/batch-document-translation-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/translator/document-translation/quickstarts/client-library-sdks)
-
-### Microsoft Azure Batch Management
-
-Microsoft Azure Batch Management is a cloud-based service that allows users to efficiently and effectively manage and execute large-scale parallel and high-performance computational tasks. It provides the capability to dynamically provision compute resources on demand, scale resources up or down based on workload, and schedule and distribute tasks across multiple virtual machines.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/batch/](https://learn.microsoft.com/en-us/azure/batch/)
-
-#### Properties
-
-- [OpenAPI](openapi/batchmanagement-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/batch/)
-
-### Microsoft Azure Batch Management Client
-
-The Microsoft Azure Batch Management Client is a tool that allows users to efficiently manage and scale their batch processing workloads on the Azure cloud platform. With this client, users can easily create and manage pools of virtual machines to run their batch jobs, set up custom job schedules, monitor job progress, and optimize resource usage.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/batch/](https://learn.microsoft.com/en-us/azure/batch/)
-
-#### Properties
-
-- [OpenAPI](openapi/batchmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/batch/)
-
-### Microsoft Azure Batch Service
-
-Microsoft Azure Batch Service is a cloud-based service that allows users to run large-scale parallel and high-performance computing (HPC) workloads in Azure. It simplifies the process of distributing and running jobs across a pool of virtual machines, allowing users to efficiently scale their computing resources to meet the demands of their workloads.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/batch/](https://learn.microsoft.com/en-us/azure/batch/)
-
-#### Properties
-
-- [OpenAPI](openapi/batchservice-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/batch/)
-
-### Microsoft Azure Batch Service Client
-
-The Microsoft Azure Batch Service Client is a cloud-based service that allows developers to efficiently run large-scale parallel and high-performance computing (HPC) workloads in the Azure cloud.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/batch/](https://learn.microsoft.com/en-us/azure/batch/)
-
-#### Properties
-
-- [OpenAPI](openapi/batchserviceclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/batch/)
-
-### Microsoft Azure Batch Synthesis API
-
-Microsoft Azure Batch Synthesis API enables developers to easily create and manage complex batch processing workflows in the cloud. By utilizing powerful Azure services, developers can efficiently process large amounts of data without the need for managing infrastructure or scaling resources. The API streamlines the process of running compute-intensive tasks, such as image rendering or data analytics, by automating job scheduling, resource allocation, and job monitoring.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/batch-synthesis](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/batch-synthesis)
-
-#### Properties
-
-- [OpenAPI](openapi/batch-synthesis-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/batch-synthesis)
-
-### Microsoft Azure Bicep Client
-
-The Microsoft Azure Bicep Client is a tool that allows users to author and deploy infrastructure as code on the Azure cloud platform. It enables developers to define and manage Azure resources using a declarative syntax that is easier to read and write than traditional template languages like JSON or ARM templates. With Bicep, users can create reusable modules, parameterize their configurations, and validate their code for best practices and compliance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
-
-#### Properties
-
-- [OpenAPI](openapi/bicepclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
-
-### Microsoft Azure Billing Benefits Rp
-
-Microsoft Azure Billing Benefits RP is a service provided by Microsoft Azure that offers a comprehensive and easy-to-use platform for managing billing and cost analysis. With this service, users are able to track and monitor their Azure usage in real-time, view detailed reports on costs and usage trends, and optimize their spending by identifying areas for potential cost savings.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.billingbenefits-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.billingbenefits-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/billing-benefits-rp-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.billingbenefits-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Billing Client
-
-Microsoft Azure Billing Client is a tool designed to help users manage their Azure cloud services billing efficiently. It provides comprehensive and detailed insights into usage data, costs, and billing information within the Azure platform. With the Azure Billing Client, users can track their expenditures, analyze usage trends, and make informed decisions on optimizing their cloud resources to reduce costs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cost-management-billing/](https://learn.microsoft.com/en-us/azure/cost-management-billing/)
-
-#### Properties
-
-- [OpenAPI](openapi/billingclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cost-management-billing/)
-
-### Microsoft Azure Billing Management Client
-
-The Microsoft Azure Billing Management Client is a tool that allows users to track and manage their Azure billing accounts. It provides a comprehensive dashboard that displays detailed information about usage, costs, and expenses related to various Azure services. Users can generate reports, analyze trends, and set budget alerts to help them effectively manage their expenses.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cost-management-billing/](https://learn.microsoft.com/en-us/azure/cost-management-billing/)
-
-#### Properties
-
-- [OpenAPI](openapi/billingmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cost-management-billing/)
-
-### Microsoft Azure Blob Storage
-
-Microsoft Azure Blob Storage is a cloud-based storage solution that allows users to store and manage large amounts of unstructured data, such as images, videos, documents, and logs. It provides scalable and secure storage for a wide range of applications, including data analytics, backup and archiving, and content delivery. With Azure Blob Storage, users can easily access and manipulate their data from anywhere in the world, while benefiting from high availability, durability, and redundancy.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/blobs/](https://learn.microsoft.com/en-us/azure/storage/blobs/)
-
-#### Tags
-
-- Blobs
-- Object Storage
-- Storage
-
-#### Properties
-
-- [OpenAPI](openapi/azure-blob-storage-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [OpenAPI](openapi/azure-blob-storage-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/blobs/)
-- [JSON-LD](json-ld/azure-blob-storage-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure Blockchain Management Client
-
-Microsoft Azure Blockchain Management Client is a tool that allows users to easily create, deploy, and manage blockchain networks on the Azure platform. By providing a user-friendly interface and powerful management capabilities, the client enables users to establish secure and efficient blockchain networks for various applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/archive/msdn-magazine/2018/june/blockchain-introducing-azure-blockchain-workbench](https://learn.microsoft.com/en-us/archive/msdn-magazine/2018/june/blockchain-introducing-azure-blockchain-workbench)
-
-#### Properties
-
-- [OpenAPI](openapi/blockchainmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/archive/msdn-magazine/2018/june/blockchain-introducing-azure-blockchain-workbench)
-
-### Microsoft Azure Blueprint Client
-
-Microsoft Azure Blueprint Client is a tool that allows users to easily manage and deploy Azure Blueprints within their organization. Azure Blueprints are a set of pre-defined configurations, policies, and resources that can be quickly applied to new environments to ensure compliance with organizational standards and best practices.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/blueprints/](https://learn.microsoft.com/en-us/azure/governance/blueprints/)
-
-#### Properties
-
-- [OpenAPI](openapi/blueprintclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/blueprints/)
-
-### Microsoft Azure Bot Service
-
-Microsoft Azure Bot Service is a platform developed by Microsoft that enables users to build, deploy, and manage intelligent bots that can interact with users across multiple channels. The service provides a comprehensive set of tools and resources for developers to create conversational bots that can be integrated with various messaging platforms, websites, and applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/bot-service/?view=azure-bot-service-4.0](https://learn.microsoft.com/en-us/azure/bot-service/?view=azure-bot-service-4.0)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-bot-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/bot-service/?view=azure-bot-service-4.0)
-
-### Microsoft Azure Bridge Admin Client
-
-The Microsoft Azure Bridge Admin Client is a tool that enables administrators to manage and monitor their Azure Bridge environments with ease. This client provides a user-friendly interface for setting up and configuring bridge configurations, monitoring traffic and performance metrics, and managing permissions for users within the Azure Bridge system.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles)
-
-#### Properties
-
-- [OpenAPI](openapi/azurebridgeadminclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles)
-
-### Microsoft Azure Capability Metadata Types
-
-Microsoft Azure Capability Metadata Types provide detailed information about the capabilities and features of various Azure services. These metadata types help users understand the functionalities of each service and how they can be utilized to meet specific business needs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/cloud-scale-analytics/govern-metadata-standards](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/cloud-scale-analytics/govern-metadata-standards)
-
-#### Properties
-
-- [OpenAPI](openapi/capability-metadata-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/cloud-scale-analytics/govern-metadata-standards)
-
-### Microsoft Azure Capability Types
-
-Microsoft Azure Capability Types refer to the various features and functionalities that are offered by the Microsoft Azure cloud computing platform. These capabilities are categorized into different types such as compute, storage, networking, security, and database services. The compute capability type includes services for virtual machines, containers, and serverless computing options. The storage capability type includes services for storing and managing data in various formats and locations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/capability-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Carbon
-
-Microsoft Azure Carbon is a cloud computing service that focuses on helping businesses reduce their carbon footprint. By utilizing renewable energy sources and energy-efficient data centers, Azure Carbon provides an environmentally friendly solution for companies looking to transition to a more sustainable IT infrastructure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/carbon-optimization/view-emissions](https://learn.microsoft.com/en-us/azure/carbon-optimization/view-emissions)
-
-#### Properties
-
-- [OpenAPI](openapi/carbon-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/carbon-optimization/view-emissions)
-
-### Microsoft Azure Cdn Management Client
-
-The Microsoft Azure CDN Management Client is a tool that allows users to easily manage their content delivery network (CDN) resources within the Azure platform. With this client, users can create, update, and delete CDN profiles, endpoints, and custom domains. They can also configure caching rules, set up load balancing, and monitor the performance of their CDN resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.cdn-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.cdn-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/cdnmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.cdn-readme?view=azure-dotnet)
-
-### Microsoft Azure Cdn Web Application Firewall Management
-
-Microsoft Azure CDN Web Application Firewall Management is a powerful tool designed to enhance the security of web applications hosted on Azure CDN. This tool provides advanced protection against various cyber threats, such as DDoS attacks, SQL injection, and cross-site scripting.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/web-application-firewall/](https://learn.microsoft.com/en-us/azure/web-application-firewall/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-cdn-webapplicationfirewallmanagement-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/web-application-firewall/)
-
-### Microsoft Azure Certificate Orders Diagnostics API Client
-
-The Microsoft Azure Certificate Orders Diagnostics API Client is a tool designed to provide detailed diagnostic information about certificate orders on the Azure platform. This API client allows users to obtain insights into the status of their certificate orders, identify any potential issues, and troubleshoot any errors that may arise during the ordering process.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/certificate-orders-diagnostics?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/certificate-orders-diagnostics?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/certificateordersdiagnostics-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/certificate-orders-diagnostics?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure Certificate Registration Provider API Client
-
-The Microsoft Azure Certificate Registration Provider API Client is a tool that allows users to securely manage and automate the provisioning and renewal of SSL/TLS certificates on their Azure resources. By integrating with Azure Key Vault, the API client enables users to easily upload, retrieve, and configure certificates for their web applications, virtual machines, and other cloud services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-mutual-certificates-for-clients](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-mutual-certificates-for-clients)
-
-#### Properties
-
-- [OpenAPI](openapi/certificateregistrationprovider-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-mutual-certificates-for-clients)
-
-### Microsoft Azure Certificates API Client
-
-The Microsoft Azure Certificates API Client is a service that allows users to manage and interact with certificates within their Azure cloud environment. This API client provides a range of functionality, including the ability to create, delete, and update certificates, as well as perform actions such as importing and exporting certificates. In addition, the API client enables users to retrieve information about certificates, such as their expiration dates and associated keys.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-mutual-certificates-for-clients](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-mutual-certificates-for-clients)
-
-#### Properties
-
-- [OpenAPI](openapi/certificates-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-mutual-certificates-for-clients)
-
-### Microsoft Azure Change Analysis Management Client
-
-The Microsoft Azure Change Analysis Management Client is a tool designed to help businesses track and monitor changes within their Azure environment. With this tool, organizations can easily detect and analyze any alterations made to their Azure resources, configurations, or settings in real-time. By providing detailed insights and reports on changes, the Change Analysis Management Client helps businesses ensure compliance, security, and operational efficiency within their Azure infrastructure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.changeanalysis-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.changeanalysis-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/azurechangeanalysismanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.changeanalysis-readme?view=azure-dotnet)
-
-### Microsoft Azure Changes Client
-
-Microsoft Azure Changes Client is a tool that allows clients to easily track and manage changes within their Azure environment. With this tool, clients can view and monitor all modifications made to their resources, configurations, and settings within the Azure platform. This helps clients stay informed about any potential security risks, compliance issues, or unauthorized changes that may occur.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-changes-readme?view=azure-node-latest](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-changes-readme?view=azure-node-latest)
-
-#### Properties
-
-- [OpenAPI](openapi/changesclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-changes-readme?view=azure-node-latest)
-
-### Microsoft Azure Chaos Management
-
-Microsoft Azure Chaos Management is a service offered by Microsoft Azure that allows users to introduce controlled chaos into their cloud environments in order to test the resiliency and reliability of their applications and infrastructure. By simulating real-world failures and disruptions, organizations can proactively identify weaknesses in their systems and address them before they impact their customers or business operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/chaos-studio/](https://learn.microsoft.com/en-us/azure/chaos-studio/)
-
-#### Properties
-
-- [OpenAPI](openapi/chaos-management-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/chaos-studio/)
-
-### Microsoft Azure Check Policy Restrictions Client
-
-Microsoft Azure Check Policy Restrictions Client is a tool designed to help administrators quickly verify policy restrictions within their Azure environment. This client allows users to easily check whether certain policies are being properly enforced and can detect any potential violations. By providing real-time monitoring and reporting on policy restrictions, this tool helps organizations ensure compliance with regulatory requirements and prevent security breaches.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/policy/policy-restrictions?view=rest-policy-2023-03-01](https://learn.microsoft.com/en-us/rest/api/policy/policy-restrictions?view=rest-policy-2023-03-01)
-
-#### Properties
-
-- [OpenAPI](openapi/checkpolicyrestrictionsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/policy/policy-restrictions?view=rest-policy-2023-03-01)
-
-### Microsoft Azure Cloud Service Management Client
-
-Microsoft Azure Cloud Service Management Client is a comprehensive and user-friendly tool that helps businesses manage and monitor their cloud services within the Azure platform. With this client, users can easily provision, deploy, and scale their applications and services, as well as monitor performance, health, and usage statistics. The client also provides features for troubleshooting, managing security settings, and optimizing resource utilization.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/cloudservicemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Cloud Shell Client
-
-The Microsoft Azure Cloud Shell Client is a powerful tool that allows users to manage their Azure resources directly from their web browser. With the Cloud Shell Client, users can access a set of command-line tools and scripts that enable them to interact with their Azure resources, such as virtual machines, storage accounts, and databases.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cloud-shell/overview](https://learn.microsoft.com/en-us/azure/cloud-shell/overview)
-
-#### Properties
-
-- [OpenAPI](openapi/cloudshellclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cloud-shell/overview)
-
-### Microsoft Azure Code Signing Management Client
-
-Microsoft Azure Code Signing Management Client is a tool that allows users to securely sign their code with digital certificates within the Azure environment. This tool helps developers protect their code from unauthorized modifications and ensure the authenticity of their software. By utilizing code signing, developers can establish trust with end-users and stakeholders, as well as comply with industry security standards.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.trustedsigning-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.trustedsigning-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/codesigningmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.trustedsigning-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Cognitive Services Management Client
-
-Microsoft Azure Cognitive Services Management Client is a powerful tool that allows users to easily manage and monitor their cognitive services resources on the Azure platform. With this client, users can create, delete, update, and view details of their cognitive services resources like Vision, Speech, Language, and Search. Users can also access usage and billing information, set up alerts for resource limits, and configure authentication and authorization settings for their cognitive services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.cognitiveservices-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.cognitiveservices-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/cognitiveservicesmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.cognitiveservices-readme?view=azure-dotnet)
-- [API Reference](https://learn.microsoft.com/en-us/rest/api/cognitiveservices/)
-
-### Microsoft Azure Commerce Management Client
-
-The Microsoft Azure Commerce Management Client is a software tool designed to help businesses effectively manage their commerce operations on the Azure cloud platform. With this client, users can easily monitor, track, and analyze their sales, inventory, and customer data to make informed business decisions. The client offers a range of features, including order processing, pricing management, and promotional offers, all within a user-friendly interface.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/overview/azure/commerce?view=azure-python](https://learn.microsoft.com/en-us/python/api/overview/azure/commerce?view=azure-python)
-
-#### Properties
-
-- [OpenAPI](openapi/commercemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/overview/azure/commerce?view=azure-python)
-
-### Microsoft Azure Common Alert Types
-
-Microsoft Azure Common Alert Types is a feature that allows users to set up alerts for various events and occurrences within their Azure environment. These alerts can be customized to monitor specific metrics, such as CPU usage, storage levels, or connectivity issues. Users can choose from a variety of alert types, such as email notifications or integrations with third-party monitoring tools.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-types](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-types)
-
-#### Properties
-
-- [OpenAPI](openapi/common-alert-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-types)
-
-### Microsoft Azure Common Content Metadata Types
-
-Microsoft Azure Common Content Metadata Types is a metadata platform that allows users to organize and categorize their content in an efficient and standardized manner. This platform provides various types of metadata, such as keywords, descriptions, and tags, that can be used to easily search, filter, and sort through content. By using these metadata types, users can improve the organization and accessibility of their content, making it easier to manage and share with others.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/search/search-blob-metadata-properties](https://learn.microsoft.com/en-us/azure/search/search-blob-metadata-properties)
-
-#### Properties
-
-- [OpenAPI](openapi/common-content-metadata-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/search/search-blob-metadata-properties)
-
-### Microsoft Azure Common Definitions
-
-Microsoft Azure Common Definitions is a resource provided by Microsoft Azure that offers a comprehensive and standardized set of terms and definitions used within the Azure platform. This resource serves as a reference guide for users, helping them better understand and navigate the various services, features, and functionalities offered by Azure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/considerations/fundamental-concepts](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/considerations/fundamental-concepts)
-
-#### Properties
-
-- [OpenAPI](openapi/common-definitions-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/considerations/fundamental-concepts)
-
-### Microsoft Azure Common Entity Types
-
-Microsoft Azure Common Entity Types is a tool that helps users easily access and manage different types of entities within the Azure environment. By categorizing entities based on common characteristics, such as virtual machines, databases, storage accounts, and networks, users can efficiently organize and navigate their resources. This tool allows users to quickly identify and interact with specific entities, streamlining the management and operation of their Azure deployments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/sentinel/entities-reference](https://learn.microsoft.com/en-us/azure/sentinel/entities-reference)
-
-#### Properties
-
-- [OpenAPI](openapi/common-entity-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/sentinel/entities-reference)
-
-### Microsoft Azure Common Incident Types
-
-Microsoft Azure Common Incident Types is a comprehensive monitoring and alerting system that helps users to identify and respond to common incidents that may occur within their Azure environment. This tool monitors critical systems and services, such as virtual machines, storage accounts, and networking resources, to detect issues like performance degradation, connectivity issues, and resource limitations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dynamics365/field-service/configure-incident-types](https://learn.microsoft.com/en-us/dynamics365/field-service/configure-incident-types)
-
-#### Properties
-
-- [OpenAPI](openapi/common-incident-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dynamics365/field-service/configure-incident-types)
-
-### Microsoft Azure Common Monitoring Types
-
-Microsoft Azure Common Monitoring Types offers various types of monitoring capabilities for users to track the performance and health of their Azure resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-#### Properties
-
-- [OpenAPI](openapi/common-monitoring-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-### Microsoft Azure Common Referenced Parameters File
-
-The Microsoft Azure Common Referenced Parameters File provides a centralized location for storing commonly used parameters that can be referenced in multiple Azure Resource Manager templates. This file helps streamline the deployment process by allowing users to define and manage parameters in one place, making it easier to update and maintain configurations across different resources and deployments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameter-files](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameter-files)
-
-#### Properties
-
-- [OpenAPI](openapi/common-referenced-parameters-file-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/parameter-files)
-
-### Microsoft Azure Common Relation Types
-
-Microsoft Azure Common Relation Types is a feature that allows users to establish relationships between different data entities in their Azure environment. These relationships can be defined in various ways, such as one-to-one, one-to-many, or many-to-many. With these relation types, users can easily connect and reference related data across different Azure services, making it easier to manage and analyze complex data structures.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-design-modeling](https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-design-modeling)
-
-#### Properties
-
-- [OpenAPI](openapi/common-relation-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-design-modeling)
-
-### Microsoft Azure Common Types
-
-Microsoft Azure Common Types is a collection of frequently used data types and classes that are used in various Microsoft Azure services and products. These common types help developers to easily and efficiently work with Azure resources and services by providing a standardized way to represent and interact with data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/common-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Common Types for Microsoft Billing
-
-Microsoft Azure Common Types For Microsoft Billing is a comprehensive tool that provides users with a variety of options for managing their billing and invoicing needs within the Microsoft Azure platform. This tool allows users to easily track and monitor their usage and spending, as well as set up automated billing processes to ensure accurate and timely payments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cost-management-billing/](https://learn.microsoft.com/en-us/azure/cost-management-billing/)
-
-#### Properties
-
-- [OpenAPI](openapi/common-types-for-microsoftbilling-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cost-management-billing/)
-
-### Microsoft Azure Common Types for Operational Insights
-
-Microsoft Azure Common Types for Operational Insights is a suite of tools designed to help organizations monitor and analyze their IT environments in order to optimize performance, improve security, and troubleshoot issues. The common types include data sources, schemas, and queries that allow users to collect and analyze data from a variety of sources such as servers, applications, and networks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.operationalinsights-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.operationalinsights-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapicommon-types-for-microsoftoperationalinsights-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.operationalinsights-readme?view=azure-dotnet)
-
-### Microsoft Azure Community Gallery Service Client
-
-The Microsoft Azure Community Gallery Service Client is a tool that allows users to efficiently discover, rate, and share community-provided solutions on the Azure platform. It enables developers to quickly find and explore a wide range of resources such as templates, code samples, and best practices contributed by the Azure community.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-machines/share-gallery-community](https://learn.microsoft.com/en-us/azure/virtual-machines/share-gallery-community)
-
-#### Properties
-
-- [OpenAPI](openapi/communitygalleryserviceclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-machines/share-gallery-community)
-
-### Microsoft Azure Component Policy States Client
-
-The Microsoft Azure Component Policy States Client is a tool used to manage and enforce policies within the Azure environment. It allows users to define rules and regulations governing resource allocation, security settings, and compliance requirements. By utilizing this client, organizations can ensure that their Azure environment aligns with internal policies and industry standards.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/policy/component-policy-states?view=rest-policy-2022-04-01](https://learn.microsoft.com/en-us/rest/api/policy/component-policy-states?view=rest-policy-2022-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/componentpolicystatesclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/policy/component-policy-states?view=rest-policy-2022-04-01)
-
-### Microsoft Azure Compute Admin Client
-
-The Microsoft Azure Compute Admin Client is a powerful tool that allows users to manage and monitor their virtual machines, applications, and services within the Azure cloud. With this client, administrators can easily create, deploy, and scale virtual machines, as well as configure and monitor their performance and availability. Additionally, the client provides real-time monitoring and alerts for potential issues, allowing administrators to quickly address any problems that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/compute-admin-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Compute Diagnostic Resource Provider Client
-
-The Microsoft Azure Compute Diagnostic Resource Provider Client is a service that allows users to monitor, diagnose, and troubleshoot issues with their Azure compute resources. It provides insights into the performance and health of virtual machines, containers, and other compute resources hosted on the Azure platform. Users can access detailed logs, metrics, and alerts to quickly identify and resolve any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-#### Properties
-
-- [OpenAPI](openapi/computediagnosticresourceproviderclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-### Microsoft Azure Compute Disk Admin Management Client
-
-Microsoft Azure Compute Disk Admin Management Client is a tool designed to help administrators manage and administer disk resources within the Azure cloud computing platform. The client provides a user-friendly interface for tasks such as creating, resizing, and deleting disk resources, as well as monitoring disk performance and usage metrics. It also allows administrators to set up automated tasks, manage access permissions, and troubleshoot any issues related to disk resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/compute](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/compute)
-
-#### Properties
-
-- [OpenAPI](openapi/computediskadminmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/compute)
-
-### Microsoft Azure Computer Vision API
-
-Microsoft Azure Computer Vision API is a cloud-based service that allows users to easily analyze and extract information from images. This powerful tool uses advanced machine learning algorithms to identify objects, people, text, and even emotions within images. With the Computer Vision API, users can quickly understand the content and context of their imagery, automate image processing tasks, and transform raw visual data into actionable insights.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/)
-
-#### Properties
-
-- [OpenAPI](openapi/computer-vision-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/)
-
-### Microsoft Azure Computer Vision Client
-
-Microsoft Azure Computer Vision Client is a powerful tool that allows users to analyze and extract insights from images and videos. With this client, users can easily detect objects, faces, text, and even landmarks within their visual content. They can also identify and categorize images based on content, as well as analyze image quality and extract text from images.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/)
-
-#### Properties
-
-- [OpenAPI](openapi/computer-vision-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/)
-
-### Microsoft Azure Connectivity Configuration
-
-Microsoft Azure ConnectivityConfiguration is a service that allows users to configure and manage network connectivity settings for their Azure resources. This includes setting up virtual networks, configuring firewall rules, and managing VPN connections. With ConnectivityConfiguration, users can ensure that their Azure resources are securely connected to the internet and other resources within their network.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-connectivity-configuration](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-connectivity-configuration)
-
-#### Properties
-
-- [OpenAPI](openapi/connectivityconfiguration-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-connectivity-configuration)
-
-### Microsoft Azure Container Apps API Client
-
-The Microsoft Azure Container Apps API Client is a tool designed to interact with the Azure Container Apps service, enabling users to manage and deploy containerized applications in a seamless and efficient manner. This API client provides developers with a set of functions and methods that allow for the creation, updating, and monitoring of container applications within the Azure environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.appcontainers-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.appcontainers-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/containerapps-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.appcontainers-readme?view=azure-dotnet)
-- [API Reference](https://learn.microsoft.com/en-us/rest/api/containerapps/)
-
-### Microsoft Azure Container Apps Revisions API Client
-
-The Microsoft Azure Container Apps Revisions API Client is a tool that allows users to manage and interact with different versions or revisions of containerized applications within the Azure platform. This API client enables developers to easily create, update, delete, and monitor revisions of their container apps, helping them streamline the deployment and management process.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/container-apps/revisions-manage](https://learn.microsoft.com/en-us/azure/container-apps/revisions-manage)
-
-#### Properties
-
-- [OpenAPI](openapi/containerappsrevisions-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/container-apps/revisions-manage)
-
-### Microsoft Azure Container Service Admin Client
-
-Microsoft Azure Container Service Admin Client is a powerful tool that allows administrators to manage and monitor their containerized applications in the Azure cloud environment. This client provides a user-friendly interface for deploying, scaling, and updating container instances, as well as managing network configurations and workload scheduling.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/containers/](https://learn.microsoft.com/en-us/azure/containers/)
-
-#### Properties
-
-- [OpenAPI](openapi/containerserviceadminclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/containers/)
-
-### Microsoft Azure Container Service Fleet Client
-
-The Microsoft Azure Container Service Fleet Client is a tool designed to manage and deploy containerized applications across a fleet of virtual machines or physical servers. It provides a simplified way to spin up, scale, and manage container clusters within the Azure cloud environment. Users can easily create and deploy containers using popular containerization technologies, such as Docker and Kubernetes.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/templates/microsoft.containerservice/fleets](https://learn.microsoft.com/en-us/azure/templates/microsoft.containerservice/fleets)
-
-#### Properties
-
-- [OpenAPI](openapi/containerservicefleetclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/templates/microsoft.containerservice/fleets)
-
-### Microsoft Azure Content Moderator Client
-
-Microsoft Azure Content Moderator Client is a cloud-based service that helps users filter and moderate content on their websites or applications. It provides a range of moderation capabilities, including text moderation, image moderation, and video moderation. Users can set up rules to filter out inappropriate or offensive content, such as hate speech, nudity, violence, and more.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/content-moderator/](https://learn.microsoft.com/en-us/azure/ai-services/content-moderator/)
-
-#### Properties
-
-- [OpenAPI](openapi/content-moderator-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/content-moderator/)
-
-### Microsoft Azure Content Safety Service
-
-Microsoft Azure Content Safety Service is a tool designed to help businesses protect their online content from harmful or inappropriate material. This service uses advanced AI technology to analyze and filter out content that violates company policies or regulations. It can detect and block content such as hate speech, violence, or explicit material in real-time, ensuring that only safe and compliant content is accessible to users.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/content-safety/](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/)
-
-#### Properties
-
-- [OpenAPI](openapi/contentsafety-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/)
-
-### Microsoft Azure Cosmos Db for Postgre SQL
-
-Microsoft Azure Cosmos DB for PostgreSQL is a globally distributed, multi-model database service that allows users to store and manage data at a massive scale across geographic regions. It provides high availability and low latency for read and write operations, ensuring consistent performance for applications that require real-time data access.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cosmos-db/postgresql/](https://learn.microsoft.com/en-us/azure/cosmos-db/postgresql/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-cosmos-db-for-postgresql-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cosmos-db/postgresql/)
-
-### Microsoft Azure Custom Image Search Client
-
-Microsoft Azure Custom Image Search Client is a service that allows users to search and retrieve images based on their own customized criteria. Users can specify specific categories, tags, colors, and other parameters to narrow down their search results and find the exact images they are looking for. This service is designed to help users save time and effort in finding the perfect image for their projects or presentations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.customimagesearch.customimagesearchclient?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.customimagesearch.customimagesearchclient?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/custom-image-search-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.customimagesearch.customimagesearchclient?view=azure-dotnet)
-
-### Microsoft Azure Custom Search Client
-
-Microsoft Azure Custom Search Client is a powerful tool that allows users to customize and tailor their search experiences according to their specific needs and preferences. With this client, individuals and businesses can create personalized search engines that deliver relevant and accurate results based on their own criteria.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/search.documents-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/search.documents-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/custom-search-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/search.documents-readme?view=azure-dotnet)
-
-### Microsoft Azure Custom Vision Prediction Client
-
-The Microsoft Azure Custom Vision Prediction Client is a solution that allows users to easily predict and classify images with high accuracy. By using machine learning algorithms, the prediction client can analyze and interpret images based on pre-trained models or custom models created by the user.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/](https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/custom-vision-prediction-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/)
-
-### Microsoft Azure Custom Vision Training Client
-
-Microsoft Azure Custom Vision Training Client is a tool that allows users to train custom image recognition models for their specific use case. By providing a set of labeled images, users can create and fine-tune a machine learning model that can accurately classify and identify objects within images. The Training Client offers a user-friendly interface that guides users through the process of uploading data, labeling images, and training the model.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/](https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/custom-vision-training-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/)
-
-### Microsoft Azure Custom Voice API
-
-Microsoft Azure Custom Voice API is a powerful tool that allows developers to create custom synthetic voices for their applications. This API enables users to build unique voices that are tailored to specific projects, giving users the ability to customize accents, pronunciations, and overall voice characteristics.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/speech/](https://learn.microsoft.com/en-us/rest/api/speech/)
-
-#### Properties
-
-- [OpenAPI](openapi/custom-voice-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/speech/)
-
-### Microsoft Azure Data Lake Storage  API
-
-Microsoft Azure Data Lake Storage Rest API allows users to perform various operations on their Data Lake storage accounts programmatically. Some of the key functionalities it provides include creating, managing, and monitoring data lakes, uploading and downloading files, managing file and folder permissions, and executing bulk operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/storageservices/data-lake-storage-gen2](https://learn.microsoft.com/en-us/rest/api/storageservices/data-lake-storage-gen2)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-data-lake-storage-rest-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/storageservices/data-lake-storage-gen2)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/storageservices/data-lake-storage-gen2)
-
-### Microsoft Azure Data Management Client
-
-The Microsoft Azure Data Management Client is a powerful tool that allows users to easily access, manage, and analyze their data stored on the Azure cloud platform. With this client, users can seamlessly connect to various data sources, such as SQL databases, NoSQL databases, and data warehouses, and retrieve, manipulate, and store data in a secure and efficient manner.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/azuredatamanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Data Manager for Agriculture Data Plane Service
-
-Microsoft Azure Data Manager for Agriculture Data Plane Service is a cloud-based platform that helps farmers and agricultural businesses collect, process, and analyze data to make informed decisions about their operations. It allows users to securely store and manage agricultural data from various sources, such as sensors, drones, and weather stations, and provides tools for visualization, reporting, and predictive analytics.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/data-manager-for-agri/](https://learn.microsoft.com/en-us/rest/api/data-manager-for-agri/)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-azure-data-manager-for-agriculture-data-plane-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/data-manager-for-agri/)
-
-### Microsoft Azure Data Migration Service (Classic) Resource Provider
-
-The Microsoft Azure Data Migration Service (Classic) Resource Provider is a tool that helps organizations seamlessly migrate their data to Azure. By utilizing this service, users can easily transfer data from various sources such as on-premises databases, cloud databases, and other data storage systems to Azure without any disruptions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/dms/](https://learn.microsoft.com/en-us/azure/dms/)
-
-#### Properties
-
-- [OpenAPI](openapiazure-data-migration-service-classic-resource-provider-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/dms/)
-
-### Microsoft Azure Data Plane Account Client
-
-The Microsoft Azure Data Plane Account Client is a service that allows users to securely access and manage their data stored in Azure. It provides a platform for users to interact with their data through a variety of tools and applications, enabling them to perform tasks such as uploading, downloading, and deleting data. The Account Client also offers built-in security measures to protect sensitive information and ensure data integrity.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/control-plane-and-data-plane](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/control-plane-and-data-plane)
-
-#### Properties
-
-- [OpenAPI](openapi/dataplaneaccountclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/control-plane-and-data-plane)
-
-### Microsoft Azure Data Sensitivity Settings
-
-Microsoft Azure Data Sensitivity Settings is a feature that allows users to classify and label their data based on its sensitivity level. By categorizing data as either public, confidential, or highly confidential, users can apply specific security measures and access controls to ensure that sensitive information is protected.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/defender-for-cloud/data-sensitivity-settings](https://learn.microsoft.com/en-us/azure/defender-for-cloud/data-sensitivity-settings)
-
-#### Properties
-
-- [OpenAPI](openapi/data-sensitivity-settings-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/defender-for-cloud/data-sensitivity-settings)
-
-### Microsoft Azure Data Transfer
-
-Microsoft Azure Data Transfer is a service that allows users to securely and efficiently transfer large volumes of data to and from the cloud. By utilizing Azure's high-speed network and reliable infrastructure, Data Transfer ensures that data is transferred quickly and without errors.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/databox/](https://learn.microsoft.com/en-us/azure/databox/)
-
-#### Properties
-
-- [OpenAPI](openapi/azuredatatransferrp-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/databox/)
-
-### Microsoft Azure Database Threat Detection Policy APIs
-
-The Microsoft Azure Database Threat Detection Policy APIs provide a set of tools and resources to help organizations better protect their data and mitigate potential security threats in their Azure databases. These APIs allow users to define and customize policies for detecting and responding to suspicious activities, such as unauthorized access attempts, data breaches, or unusual database activity.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/sql/database-threat-detection-policies/get?view=rest-sql-2014-04-01](https://learn.microsoft.com/en-us/rest/api/sql/database-threat-detection-policies/get?view=rest-sql-2014-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/database-threat-detection-policy-apis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/sql/database-threat-detection-policies/get?view=rest-sql-2014-04-01)
-
-### Microsoft Azure Defender Easm
-
-Microsoft Azure Defender Easm is a comprehensive security solution that helps organizations protect their cloud resources and workloads from various cyber threats. Easm stands for Endpoint and Server Management, and this tool focuses on monitoring and securing endpoints and servers within an organization's Azure environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/external-attack-surface-management/](https://learn.microsoft.com/en-us/azure/external-attack-surface-management/)
-
-#### Properties
-
-- [OpenAPI](openapi/defender-easm-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/external-attack-surface-management/)
-
-### Microsoft Azure Definitions File
-
-The Microsoft Azure Definitions File is a configuration file that contains information about resources and services within the Azure cloud computing platform. It includes definitions for various components such as virtual machines, databases, storage accounts, and networking setups. This file helps users define and manage their resources in a structured and organized manner, ensuring consistency and accuracy in their Azure environments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/files/](https://learn.microsoft.com/en-us/azure/storage/files/)
-
-#### Properties
-
-- [OpenAPI](openapi/definitions-file-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/files/)
-
-### Microsoft Azure Deleted Web Apps API Client
-
-The Microsoft Azure Deleted Web Apps API Client is a tool that allows users to manage and monitor the deletion of web applications on the Azure cloud platform. This API client provides developers with the ability to retrieve information on deleted web apps, including details such as the deletion date and time, as well as any associated resources that were removed along with the app.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/web-apps/delete?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/web-apps/delete?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/deletedwebapps-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/web-apps/delete?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure Deployment Admin Client
-
-The Microsoft Azure Deployment Admin Client is a tool that allows users to manage and deploy resources on the Azure platform. This includes setting up virtual machines, managing databases, and configuring network security groups. The client provides a user-friendly interface for administrators to easily monitor and track the status of their deployments, as well as troubleshoot any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/deploymentadminclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Deployment Scripts Client
-
-Microsoft Azure Deployment Scripts Client is a tool that allows developers to automate the deployment of their applications on the Azure cloud platform. With this client, developers can write scripts that define the configuration and resources needed for their applications to run smoothly on Azure. These scripts can then be executed to quickly and efficiently deploy the application, saving time and reducing the risk of manual errors.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template)
-
-#### Properties
-
-- [OpenAPI](openapi/deploymentscriptsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template)
-
-### Microsoft Azure Deployment Settings
-
-Microsoft Azure Deployment Settings is a feature that allows users to configure various deployment settings for their applications and services on the Azure platform. This includes options for defining the resources and infrastructure needed for deployment, setting up deployment slots for staging and production environments, configuring auto-scaling rules to automatically adjust resources based on demand, and managing deployment pipelines for continuous integration and continuous delivery.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/deployment-environments/](https://learn.microsoft.com/en-us/azure/deployment-environments/)
-
-#### Properties
-
-- [OpenAPI](openapi/deployment-settings-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/deployment-environments/)
-
-### Microsoft Azure Deployment Stacks Client
-
-Microsoft Azure Deployment Stacks Client is a tool designed to simplify the process of deploying and managing applications on the Azure cloud platform. This tool allows users to quickly and easily deploy and configure various types of applications, such as web applications, mobile apps, and microservices, on Azure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-stacks](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-stacks)
-
-#### Properties
-
-- [OpenAPI](openapi/deploymentstacksclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/deployment-stacks)
-
-### Microsoft Azure Device Services
-
-Microsoft Azure Device Services is a platform that allows users to securely connect, monitor, manage, and update their Internet of Things (IoT) devices. With Azure Device Services, users can easily provision, authenticate, and configure their devices, as well as collect and analyze data to gain insights and optimize performance. This platform simplifies the process of managing IoT devices at scale, providing a centralized hub for all device-related tasks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/iot-dps/](https://learn.microsoft.com/en-us/azure/iot-dps/)
-
-#### Properties
-
-- [OpenAPI](openapi/deviceservices-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/iot-dps/)
-
-### Microsoft Azure Diagnostics API Client
-
-The Microsoft Azure Diagnostics API Client is a tool that allows users to retrieve diagnostic data from Azure services and resources. This includes information about the performance, availability, and usage of applications and virtual machines running in the Azure environment. The API client provides developers with the ability to monitor and analyze the health and status of their systems, as well as troubleshoot any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/api-management/diagnostic-logs-reference](https://learn.microsoft.com/en-us/azure/api-management/diagnostic-logs-reference)
-
-#### Properties
-
-- [OpenAPI](openapi/diagnostics-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/api-management/diagnostic-logs-reference)
-
-### Microsoft Azure Disk Resource Provider Client
-
-Microsoft Azure Disk Resource Provider Client is a software tool that allows users to manage and access disk resources within the Azure cloud environment. This client enables users to create, delete, and resize disks, as well as attach and detach disks from virtual machines. It also provides monitoring and reporting capabilities to track disk usage and performance metrics.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-#### Properties
-
-- [OpenAPI](openapi/diskresourceproviderclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-### Microsoft Azure Document Intelligence (formerly Form Recognizer)
-
-Microsoft Azure Document Intelligence, formerly known as Form Recognizer, is a powerful tool that allows organizations to extract valuable information from a variety of documents. With its advanced machine learning capabilities, Document Intelligence can accurately analyze and process forms, invoices, receipts, and other types of documents.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/?view=doc-intel-4.0.0](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/?view=doc-intel-4.0.0)
-
-#### Properties
-
-- [OpenAPI](openapidocument-intelligence-formerly-form-recognizer-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/?view=doc-intel-4.0.0)
-
-### Microsoft Azure Domain Registration Provider API Client
-
-The Microsoft Azure Domain Registration Provider API Client is a tool that allows users to manage their domain registrations through the Microsoft Azure platform. This client provides an easy and convenient way to register, renew, and manage domain names directly within the Azure environment. Users can access their domain settings, update contact information, configure DNS records, and view important domain details all from a single interface.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/domainregistrationprovider-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure Domains API Client
-
-The Microsoft Azure Domains API Client is a powerful tool that allows developers to easily interact with and manage domain resources in the Azure environment. By integrating with this API client, users can seamlessly create, update, delete, and retrieve domain records, as well as configure DNS settings and manage domain ownership.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/domains-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure Easm
-
-EASM discovers and maps your digital attack surface to provide an "outside-in" perspective using probes to discover assets. The assets are provided with detailed metadata associated, including vulnerabilities, configurations and web components, allowing customers to view and prioritize external risk. The EASM REST API enables you to develop clients that integrate with your application.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/external-attack-surface-management/](https://learn.microsoft.com/en-us/azure/external-attack-surface-management/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-easm-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/external-attack-surface-management/)
-
-### Microsoft Azure Edge Devices
-
-Microsoft Azure Edge Devices is a comprehensive suite of products and services designed to extend the power of Microsoft Azure cloud computing to the edge of the network. These devices enable organizations to process data closer to where it is generated, reducing latency and improving performance for critical applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/iot-edge/?view=iotedge-1.5](https://learn.microsoft.com/en-us/azure/iot-edge/?view=iotedge-1.5)
-
-#### Properties
-
-- [OpenAPI](openapi/edge-devices-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/iot-edge/?view=iotedge-1.5)
-
-### Microsoft Azure Enterprise Knowledge Graph Service
-
-Microsoft Azure Enterprise Knowledge Graph Service is a powerful platform that allows organizations to integrate and connect their data across various sources, making it easier to discover insights and drive informed decision-making. This service enables companies to create a comprehensive and structured knowledge graph that maps relationships between different data points, making it easier to analyze, search, and understand complex information.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/shows/azure-cosmos-db-conf-2022/creating-enterprise-knowledge-graphs-from-unstructured-data](https://learn.microsoft.com/en-us/shows/azure-cosmos-db-conf-2022/creating-enterprise-knowledge-graphs-from-unstructured-data)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-enterprise-knowledge-graph-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/shows/azure-cosmos-db-conf-2022/creating-enterprise-knowledge-graphs-from-unstructured-data)
-
-### Microsoft Azure Entity Search Client
-
-The Microsoft Azure Entity Search Client is a tool that allows developers to build powerful search capabilities into their applications. This client enables users to query and retrieve information from a variety of sources, such as databases, files, and web services, and to deliver accurate and relevant search results.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/search.documents-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/search.documents-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/entity-search-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/search.documents-readme?view=azure-dotnet)
-
-### Microsoft Azure Experiment Types
-
-Microsoft Azure Experiment Types provides a platform for users to conduct various experiments and tests within the Microsoft Azure cloud environment. Users can choose from a wide range of experiment types, including A/B testing, machine learning models, and data analysis experiments. The platform allows users to easily set up, run, and monitor their experiments, providing valuable insights and data to improve decision-making and drive business success.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azureml-core/azureml.core.experiment.experiment?view=azure-ml-py](https://learn.microsoft.com/en-us/python/api/azureml-core/azureml.core.experiment.experiment?view=azure-ml-py)
-
-#### Properties
-
-- [OpenAPI](openapi/experiment-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azureml-core/azureml.core.experiment.experiment?view=azure-ml-py)
-
-### Microsoft Azure Express Route Cross Connection  APIs
-
-Microsoft Azure ExpressRouteCrossConnection REST APIs provide a way to manage cross-connections for Azure ExpressRoute. These APIs allow users to create, update, delete, and list express route cross-connections, as well as retrieve details about specific cross-connections. Users can also use these APIs to configure settings for cross-connections, such as bandwidth and peering locations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/expressroute/cross-connections-api-development](https://learn.microsoft.com/en-us/azure/expressroute/cross-connections-api-development)
-
-#### Properties
-
-- [OpenAPI](openapi/expressroutecrossconnection-rest-apis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/expressroute/cross-connections-api-development)
-
-### Microsoft Azure Fabric Admin Client
-
-The Microsoft Azure Fabric Admin Client is a powerful tool used for managing and monitoring Azure Service Fabric clusters. It allows administrators to perform various tasks such as deploying and scaling applications, configuring load balancers, monitoring performance metrics, and troubleshooting issues within the cluster.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/fabric/admin/](https://learn.microsoft.com/en-us/fabric/admin/)
-
-#### Properties
-
-- [OpenAPI](openapi/fabricadminclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/fabric/admin/)
-
-### Microsoft Azure Face Client
-
-Microsoft Azure Face Client is a powerful tool that allows developers to easily integrate facial recognition capabilities into their applications. With Azure Face Client, users can detect and recognize faces in images, verify the identity of individuals, and analyze facial attributes such as age, gender, and emotion. The API offers real-time processing of facial data and can be used to enhance security measures, personalize user experiences, and streamline business operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.vision.face-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.vision.face-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/face-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.vision.face-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Feature Client
-
-The Microsoft Azure Feature Client is a tool that allows users to easily access and manage a wide range of features within the Azure cloud computing platform. With this tool, users can effortlessly deploy, monitor, and scale various resources such as virtual machines, databases, and web applications. The Azure Feature Client also provides real-time insights and analytics, allowing users to optimize their cloud infrastructure for maximum performance and efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.featureclient?view=azure-dotnet-legacy](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.featureclient?view=azure-dotnet-legacy)
-
-#### Properties
-
-- [OpenAPI](openapi/featureclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.featureclient?view=azure-dotnet-legacy)
-
-### Microsoft Azure File Storage
-
-Microsoft Azure File Storage is a cloud-based storage service that allows users to store and access their files from anywhere in the world. It provides a secure and scalable solution for organizations to store their files, share them with other users, and easily access them from any device. Users can store a wide variety of file types, including documents, images, videos, and more.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/files/](https://learn.microsoft.com/en-us/azure/storage/files/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-file-storage-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/files/)
-
-### Microsoft Azure form Recognizer Client
-
-Microsoft Azure Form Recognizer Client is a powerful tool that allows users to extract text, key-value pairs, and tables from a variety of documents such as receipts, invoices, and forms. This tool uses advanced machine learning algorithms to accurately analyze and extract data from these documents, making it easy for users to digitize and organize important information quickly and efficiently.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.formrecognizer-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.formrecognizer-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/form-recognizer-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.formrecognizer-readme?view=azure-dotnet)
-
-### Microsoft Azure Gallery Management Client
-
-The Microsoft Azure Gallery Management Client is a tool that allows users to easily manage and organize their virtual machine images in the Azure Gallery. This client provides a user-friendly interface for browsing, uploading, updating, and removing virtual machine images from the Azure Gallery. Users can also tag and categorize their images for easier searching and identification.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-machines/azure-compute-gallery](https://learn.microsoft.com/en-us/azure/virtual-machines/azure-compute-gallery)
-
-#### Properties
-
-- [OpenAPI](openapi/gallerymanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-machines/azure-compute-gallery)
-
-### Microsoft Azure Global API Client
-
-Microsoft Azure Global API Client is a powerful tool that allows developers to interact with various Azure services programmatically. With this client, users can perform a wide range of tasks such as deploying virtual machines, managing storage accounts, and accessing data analytics services. The API client provides a unified interface for accessing all Azure services, making it easier for developers to automate processes and integrate Azure services into their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/global-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure Guest Diagnostic Settings API
-
-The Microsoft Azure Guest Diagnostic Settings API allows users to configure diagnostic settings for virtual machines running on the Azure platform. By using this API, users can specify which types of diagnostic data they want to collect, such as performance metrics, logs, or event traces. This data can then be sent to a storage account or event hub for analysis and monitoring.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/diagnostic-settings?view=rest-monitor-2021-05-01-preview](https://learn.microsoft.com/en-us/rest/api/monitor/diagnostic-settings?view=rest-monitor-2021-05-01-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/guest-diagnostic-settings-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/diagnostic-settings?view=rest-monitor-2021-05-01-preview)
-
-### Microsoft Azure Guest Diagnostic Settings Association API
-
-The Microsoft Azure Guest Diagnostic Settings Association API allows users to associate diagnostic settings with virtual machines running on the Azure platform. This API enables users to monitor and collect diagnostic data from their virtual machines, providing valuable insight into the performance and health of their resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/guestdiagnosticsettingsassociation](https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/guestdiagnosticsettingsassociation)
-
-#### Properties
-
-- [OpenAPI](openapi/guest-diagnostic-settings-association-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/guestdiagnosticsettingsassociation)
-
-### Microsoft Azure Hdinsight On Aks Management Client
-
-Microsoft Azure HDInsight on AKS Management Client is a tool that allows users to easily manage and monitor their HDInsight clusters running on Azure Kubernetes Service (AKS). With this client, users can easily provision and scale HDInsight clusters, monitor cluster health and performance, and troubleshoot any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/hdinsight-aks/](https://learn.microsoft.com/en-us/azure/hdinsight-aks/)
-
-#### Properties
-
-- [OpenAPI](openapi/hdinsight-on-aks-management-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/hdinsight-aks/)
-
-### Microsoft Azure Health Insights
-
-Microsoft Azure Health Insights is a powerful platform that leverages the latest advancements in cloud computing technology to provide healthcare organizations with valuable insights and analytics. By securely storing and analyzing vast amounts of patient data, Azure Health Insights enables healthcare providers to gain a deeper understanding of their patients' health and behavior patterns.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-health-insights/](https://learn.microsoft.com/en-us/azure/azure-health-insights/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-health-insights-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-health-insights/)
-
-### Microsoft Azure Hyperscale Citus Management Client
-
-The Microsoft Azure Hyperscale Citus Management Client is a tool designed to help users efficiently manage their distributed databases in the cloud. This client provides a user-friendly interface for monitoring and controlling various aspects of the databases, such as scaling, performance tuning, and backup management. With the Citus Management Client, users can easily add or remove nodes, allocate resources, and troubleshoot any issues that may arise.
-
-- **Human URL:** [https://docs.citusdata.com/en/v9.2/portals/citus_cloud.html](https://docs.citusdata.com/en/v9.2/portals/citus_cloud.html)
-
-#### Properties
-
-- [OpenAPI](openapi/hyperscalecitusmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://docs.citusdata.com/en/v9.2/portals/citus_cloud.html)
-
-### Microsoft Azure Image Analysis
-
-Microsoft Azure Image Analysis is a powerful tool that allows users to easily analyze and understand the content of images using advanced machine learning algorithms. With this service, users can extract valuable information from images such as objects, faces, text, and even emotions. This tool can be used for a variety of applications, from automated image tagging and sorting to facial recognition and sentiment analysis.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/)
-
-#### Properties
-
-- [OpenAPI](openapi/image-analysis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/)
-
-### Microsoft Azure Image Search Client
-
-The Microsoft Azure Image Search Client is a powerful tool that allows users to search for images using various criteria such as keywords, image tags, and visual similarity. This client provides a seamless and intuitive way to filter and browse through a vast collection of images stored in the Azure database. Users can easily upload their own images or input specific search parameters to quickly locate the images they need.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.imagesearch.imagesearchclient?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.imagesearch.imagesearchclient?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/image-search-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.imagesearch.imagesearchclient?view=azure-dotnet)
-
-### Microsoft Azure Infrastructure Insights Management Client
-
-The Microsoft Azure Infrastructure Insights Management Client is a powerful tool designed to provide organizations with comprehensive monitoring and management capabilities for their Azure infrastructure. This client enables users to gain real-time insights into the performance, availability, and health of their cloud resources, allowing them to proactively identify and address potential issues.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/infrastructureinsightsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Ingestion Using Data Collection Rules
-
-Microsoft Azure Ingestion Using Data Collection Rules is a feature that allows organizations to easily and efficiently ingest large amounts of data into their Azure environment. By creating data collection rules, users can specify how data should be collected, transformed, and stored, making the ingestion process more streamlined and automated.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-rule-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-rule-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/ingestion-using-data-collection-rules-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-rule-overview)
-
-### Microsoft Azure Integration Spaces
-
-Microsoft Azure Integration Spaces is a platform that allows businesses to seamlessly integrate and connect various applications, services, and data sources within their organization. With Azure Integration Spaces, companies can create custom workflows, automate processes, and streamline communication between different systems. This enables organizations to improve efficiency, enhance collaboration, and optimize their operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/integration-environments/create-integration-environment](https://learn.microsoft.com/en-us/azure/integration-environments/create-integration-environment)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftintegrationspaces-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/integration-environments/create-integration-environment)
-
-### Microsoft Azure Kafka Restproxy APIs
-
-Microsoft Azure Kafka Restproxy APIs allow developers to interact with Apache Kafka clusters in Azure using HTTP/REST protocols. This API enables users to easily produce and consume messages from Kafka topics, as well as manage topics, partitions, and consumer groups. With Azure Kafka Restproxy APIs, developers can seamlessly integrate Kafka messaging functionality into their applications without the need for complex Kafka client libraries.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/hdinsight/kafka/rest-proxy](https://learn.microsoft.com/en-us/azure/hdinsight/kafka/rest-proxy)
-
-#### Properties
-
-- [OpenAPI](openapi/kafka-restproxy-apis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/hdinsight/kafka/rest-proxy)
-
-### Microsoft Azure Kube Environments API Client
-
-The Microsoft Azure Kube Environments API Client is a tool that allows users to manage and interact with their Kubernetes environments on the Azure cloud platform. With this client, users can easily create, manage, update, and monitor their Kubernetes clusters and applications, all through a simple and intuitive interface.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/kube-environments/create-or-update?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/kube-environments/create-or-update?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/kubeenvironments-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/kube-environments/create-or-update?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure Kusto Management Client
-
-Microsoft Azure Kusto Management Client is a powerful tool that allows users to easily interact with Azure Data Explorer clusters, databases, data sources, and queries through a user-friendly interface. This client provides seamless integration with Azure services, enabling users to efficiently manage and monitor their data assets.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.kusto-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.kusto-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/kustomanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.kusto-readme?view=azure-dotnet)
-
-### Microsoft Azure Large Instance
-
-Microsoft Azure Large Instance is a powerful cloud computing service that offers high-performance virtual machines with a large amount of memory, processing power, and storage capacity. These instances are designed to handle demanding workloads and applications, making them ideal for businesses with complex computing needs. With Azure Large Instance, users can easily scale up or down their computing resources based on their requirements, ensuring optimal performance and cost-efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-large-instances/what-is-azure-large-instances](https://learn.microsoft.com/en-us/azure/azure-large-instances/what-is-azure-large-instances)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-large-instance-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-large-instances/what-is-azure-large-instances)
-
-### Microsoft Azure Live Metrics  APIs for Client Sdks
-
-Microsoft Azure Live Metrics Rest APIs for Client SDKs allows developers to easily access and monitor real-time performance metrics of their applications running on Azure. By leveraging these APIs, developers can retrieve information such as CPU usage, memory utilization, and network latency, giving them valuable insights into the health and performance of their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/app/live-stream](https://learn.microsoft.com/en-us/azure/azure-monitor/app/live-stream)
-
-#### Properties
-
-- [OpenAPI](openapi/live-metrics-rest-apis-for-client-sdks-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/app/live-stream)
-
-### Microsoft Azure Local Search Client
-
-Microsoft Azure Local Search Client is a powerful tool that allows users to perform detailed and accurate searches for local businesses and services. By utilizing the vast resources of the Microsoft Azure cloud platform, this client is able to provide up-to-date and relevant information for a wide range of search queries. Users can easily find nearby restaurants, shops, attractions, and more, all with the convenience of a user-friendly interface.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/azure.search.documents.searchclient?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/azure.search.documents.searchclient?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/local-search-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/azure.search.documents.searchclient?view=azure-dotnet)
-
-### Microsoft Azure Log Analytics
-
-Microsoft Azure Log Analytics is a tool that allows users to collect, analyze, and monitor log and performance data from various sources. This service helps organizations gain valuable insights into their systems, applications, and services by providing a centralized platform for storing and querying log data. With Azure Log Analytics, users can easily create custom dashboards, alerts, and reports to track performance metrics, troubleshoot issues, and improve overall system efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-log-analytics-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview)
-
-### Microsoft Azure Log Analytics  Operations Management
-
-Microsoft Azure Log Analytics Operations Management is a service that helps organizations monitor and manage their resources and applications hosted in the Azure cloud. It provides a centralized platform for collecting, analyzing, and visualizing data from various sources, including servers, virtual machines, and applications. With Log Analytics, users can easily track performance metrics, identify trends, and troubleshoot issues in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-tutorial](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-tutorial)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-log-analytics-operations-management-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-tutorial)
-
-### Microsoft Azure Log Analytics Query Packs
-
-Microsoft Azure Log Analytics Query Packs is a feature that allows users to easily access pre-built queries for analyzing log data in their Azure environment. These query packs are designed to help users quickly identify and troubleshoot issues within their systems by providing tailored queries for specific use cases. By utilizing query packs, users can save time and effort in creating complex queries, as well as leverage best practices and expert knowledge in log data analysis.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/logs/query-packs](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/query-packs)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-log-analytics-query-packs-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/query-packs)
-
-### Microsoft Azure Logic Apps Management Client
-
-The Microsoft Azure Logic Apps Management Client is a powerful tool that allows users to create, deploy, and manage logic apps in the Azure cloud platform. With this client, users can easily build automated workflows that integrate various applications and services, streamlining business processes and increasing efficiency. The management client provides a user-friendly interface for designing and orchestrating logic apps, as well as monitoring and troubleshooting their execution.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.logic-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.logic-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/logicappsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.logic-readme?view=azure-dotnet)
-
-### Microsoft Azure Luis Authoring Client
-
-The Microsoft Azure Luis Authoring Client is a tool used for building and managing Language Understanding (LUIS) applications. LUIS is a cloud-based service that allows developers to create natural language understanding models to interpret user input and extract relevant information. With the Authoring Client, users can easily define intents and entities, train models, and test how well their application understands and processes different types of input.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/luis/client-libraries-rest-api](https://learn.microsoft.com/en-us/azure/ai-services/luis/client-libraries-rest-api)
-
-#### Properties
-
-- [OpenAPI](openapi/luis-authoring-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/luis/client-libraries-rest-api)
-
-### Microsoft Azure Luis Runtime Client
-
-The Microsoft Azure Luis Runtime Client is a software tool that enables developers to access and interact with the Language Understanding Intelligent Service (LUIS) in the Azure cloud platform. This client provides a seamless way for applications to leverage LUIS, a natural language processing service that helps understand user input and intents.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/luis/client-libraries-rest-api](https://learn.microsoft.com/en-us/azure/ai-services/luis/client-libraries-rest-api)
-
-#### Properties
-
-- [OpenAPI](openapi/luis-runtime-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/luis/client-libraries-rest-api)
-
-### Microsoft Azure Managed Application Client
-
-Microsoft Azure Managed Application Client is a service provided by Microsoft that helps businesses deploy, manage, and monitor applications in the cloud. This client allows users to easily create, customize, and scale applications without the need for extensive technical expertise or infrastructure management. With Azure Managed Application Client, businesses can streamline their operations, improve efficiency, and reduce costs by leveraging Microsoft's secure and reliable cloud platform.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/](https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/)
-
-#### Properties
-
-- [OpenAPI](openapi/managedapplicationclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/managed-applications/)
-
-### Microsoft Azure Managed Lustre Client
-
-Microsoft Azure Managed Lustre Client is a service that enables users to easily deploy and manage Lustre file systems on Azure. Lustre is a high-performance parallel file system commonly used in high-performance computing environments for storing and accessing large amounts of data. With the Managed Lustre Client, users can quickly provision and scale Lustre file systems, monitor performance and utilization, and seamlessly integrate with other Azure services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-managed-lustre/](https://learn.microsoft.com/en-us/azure/azure-managed-lustre/)
-
-#### Properties
-
-- [OpenAPI](openapi/managed-lustre-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-managed-lustre/)
-
-### Microsoft Azure Managed Private Endpoints Client
-
-Microsoft Azure Managed Private Endpoints Client is a powerful tool that allows users to securely connect to Azure services from their virtual network. By creating a private endpoint, users can access Azure resources without exposing them to the public internet, greatly enhancing security and privacy. This client also simplifies the management of private endpoints by automating the configuration and maintenance processes.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints](https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints)
-
-#### Properties
-
-- [OpenAPI](openapi/managedprivateendpointsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints)
-
-### Microsoft Azure Managed Service Identity Client
-
-The Microsoft Azure Managed Service Identity Client is a tool designed to simplify the process of managing identities and access control for Azure resources. This client enables developers to securely access Azure services without the need to store credentials in their code or manage them manually.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview)
-
-#### Properties
-
-- [OpenAPI](openapi/managedserviceidentityclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview)
-
-### Microsoft Azure Management Link Client
-
-Microsoft Azure Management Link Client is a tool designed to help users easily manage their Azure resources through a centralized platform. It allows users to link their on-premises resources to Azure and monitor, troubleshoot, and manage these resources from a single interface. With Azure Management Link Client, users can track the performance of their resources, set up alerts for any issues, and configure security settings to ensure the safety of their data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-links-readme?view=azure-node-latest](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-links-readme?view=azure-node-latest)
-
-#### Properties
-
-- [OpenAPI](openapi/managementlinkclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-links-readme?view=azure-node-latest)
-
-### Microsoft Azure Management Lock Client
-
-Microsoft Azure Management Lock Client is a tool that allows users to apply locks to their Azure resources to prevent accidental deletion or modification. This can help ensure the stability and security of critical resources within an organization's Azure environment. The Management Lock Client provides a simple and intuitive interface for users to create, manage, and remove locks on their resources, giving them greater control and visibility over their Azure infrastructure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.managementlockclient?view=azure-dotnet-legacy](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.managementlockclient?view=azure-dotnet-legacy)
-
-#### Properties
-
-- [OpenAPI](openapi/managementlockclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.managementlockclient?view=azure-dotnet-legacy)
-
-### Microsoft Azure Maps Data Registry Service
-
-Microsoft Azure Maps Data Registry Service is a cloud-based platform that allows users to manage and access geospatial data at scale. This service provides a centralized location for storing, cataloging, and sharing various types of geographic data, such as maps, satellite imagery, and location-based information. Users can easily upload, update, and reference their spatial data, enabling efficient collaboration and decision-making across teams.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/how-to-create-data-registries](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-create-data-registries)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-data-registry-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-create-data-registries)
-
-### Microsoft Azure Maps Feedback Service
-
-Microsoft Azure Maps Feedback Service is a platform that allows users to provide feedback and suggestions on the accuracy and quality of mapping data within the Azure Maps platform. It enables users to report any errors or discrepancies they encounter while using the mapping service, such as incorrect locations, missing roads, or outdated information.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/how-to-use-feedback-tool](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-use-feedback-tool)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-feedback-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-use-feedback-tool)
-
-### Microsoft Azure Maps Geocoding Service
-
-Microsoft Azure Maps Geocoding Service is a powerful tool that allows users to convert addresses or place names into geographic coordinates (latitude and longitude). This service helps businesses accurately pinpoint the locations of their customers, assets, or services, enabling them to optimize routing, resource allocation, and decision-making processes.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-geocoding-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Maps Render Service
-
-Microsoft Azure Maps Render Service is a powerful tool that allows developers to easily create interactive maps for web and mobile applications. The service provides high-quality rendering of geographic data, allowing users to customize maps with different styles, layers, and annotations. With Azure Maps Render Service, developers can display complex spatial data in a visually appealing and interactive way, making it easier for users to navigate and explore geographic information.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-render-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Maps Route Service
-
-Microsoft Azure Maps Route Service is a cloud-based service that provides developers with tools to calculate the most efficient and effective route between two or more locations. This service leverages data such as traffic conditions, road closures, and real-time information to generate accurate and reliable directions for users.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-route-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Maps Routeset Service
-
-Microsoft Azure Maps Routeset Service is a mapping and location-based service that allows users to access advanced routing capabilities for various transportation modes. With Routeset Service, users can calculate routes based on real-time traffic data, optimize routes for multiple stops, and integrate location intelligence into their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-routeset-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Maps Search Service
-
-Microsoft Azure Maps Search Service is a powerful tool that allows users to easily search for specific locations, addresses, and points of interest on a map. With this service, users can quickly find nearby businesses, restaurants, landmarks, and more with just a few clicks. In addition, the Search Service provides detailed information about each location, such as contact information, ratings, reviews, and even real-time traffic updates.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-search-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Maps Spatial Service
-
-Microsoft Azure Maps Spatial Service is a powerful tool that allows developers to analyze and visualize location-based data in their applications. By integrating spatial intelligence into their software, users can easily understand complex geospatial relationships, identify patterns, and make informed decisions based on real-time location data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-spatial-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Maps Tileset Service
-
-Microsoft Azure Maps Tileset Service is a cloud-based service that enables users to create custom map tilesets for displaying geographical data in web and mobile applications. By using this service, developers can easily generate and store map tiles that are optimized for fast rendering and display on various devices. The service offers a range of customization options, allowing users to specify the style, zoom level, and extent of their map tiles.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/maps/render/get-map-tileset?view=rest-maps-2024-04-01](https://learn.microsoft.com/en-us/rest/api/maps/render/get-map-tileset?view=rest-maps-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-tileset-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/maps/render/get-map-tileset?view=rest-maps-2024-04-01)
-
-### Microsoft Azure Maps Time Zone Service
-
-The Microsoft Azure Maps Time Zone Service is a tool that allows users to accurately determine the current time zone for any location on the map. This service utilizes advanced algorithms and geographical data to provide precise and up-to-date information about time zones around the world.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/maps/timezone?view=rest-maps-2024-04-01](https://learn.microsoft.com/en-us/rest/api/maps/timezone?view=rest-maps-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-time-zone-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/maps/timezone?view=rest-maps-2024-04-01)
-
-### Microsoft Azure Maps Traffic Service
-
-Microsoft Azure Maps Traffic Service provides real-time and historical traffic data to help organizations optimize their transportation routes and make informed decisions. It offers detailed information on traffic flow, incidents, and construction that can impact travel times and route planning. By leveraging this service, businesses can improve efficiency, reduce congestion, and enhance the overall user experience for their customers.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-traffic-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Maps Wayfinding Service
-
-Microsoft Azure Maps Wayfinding Service is a cloud-based service that provides interactive maps and navigation capabilities for users to easily create and use custom wayfinding experiences in their applications. With this service, developers can integrate real-time directions, route optimization, and location-based services into their applications, allowing users to navigate complex indoor and outdoor environments with ease.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/how-to-creator-wayfinding](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-creator-wayfinding)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-wayfinding-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-creator-wayfinding)
-
-### Microsoft Azure Maps Weather Service
-
-Microsoft Azure Maps Weather Service is a powerful tool that provides real-time and historical weather data to help businesses make informed decisions. With the ability to access up-to-date weather forecasts, current conditions, and historical climate data, users can plan their operations more effectively and mitigate potential risks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/how-to-request-weather-data](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-request-weather-data)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-weather-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/how-to-request-weather-data)
-
-### Microsoft Azure Maps Web Feature Service
-
-Microsoft Azure Maps Web Feature Service provides a set of APIs that allow users to access and manipulate geospatial data on the Azure cloud platform. With this service, users can store, search, and retrieve spatial data such as points of interest, roads, and polygons. The service supports various spatial data formats and enables users to perform spatial queries and spatial analytics.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-maps-web-feature-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Marketplace Saa S Offers
-
-Microsoft Azure Marketplace SaaS Offers is a platform that provides a wide range of software as a service (SaaS) solutions to help businesses streamline their operations, enhance productivity, and improve efficiency. These offerings include tools for collaboration, customer relationship management, data analytics, and more, all accessible through the cloud.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/partner-center/marketplace-offers/create-new-saas-offer](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/create-new-saas-offer)
-
-#### Properties
-
-- [OpenAPI](openapi/saas-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/create-new-saas-offer)
-
-### Microsoft Azure Media Services
-
-Microsoft Azure Media Services is a cloud-based platform that provides a set of services designed to help organizations deliver high-quality media content to their audiences. From live streaming events to on-demand video playback, Azure Media Services offers a range of tools and features to support every aspect of media delivery.
-
-- **Human URL:** [https://learn.microsoft.com/sr-cyrl-rs/azure/media-services/latest/](https://learn.microsoft.com/sr-cyrl-rs/azure/media-services/latest/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-media-services-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/sr-cyrl-rs/azure/media-services/latest/)
-
-### Microsoft Azure Media Services Management Client
-
-Microsoft Azure Media Services Management Client is a tool that allows users to manage and monitor their media assets on the Azure platform. With this client, users can easily upload, encode, and deliver video and audio content to a global audience. It provides options for transcoding, streaming, and content protection to ensure optimal viewing experiences for users.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.media-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.media-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/mediaservicesmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.media-readme?view=azure-dotnet)
-
-### Microsoft Azure Metrics
-
-Microsoft Azure Metrics provides users with a comprehensive set of tools to monitor and analyze the performance of their applications and services running on the Azure platform. By collecting and aggregating data from various sources, Azure Metrics offers real-time insights into the health and availability of resources, as well as the overall performance of their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-metrics-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-### Microsoft Azure Metrics Advisor
-
-Microsoft Azure Metrics Advisor is a powerful tool that helps organizations monitor and analyze their data in real-time to make informed decisions. By using advanced machine learning algorithms, Metrics Advisor can detect anomalies, forecast trends, and provide recommendations for optimizing performance. It allows users to easily track key metrics and KPIs across various data sources, enabling them to quickly identify issues and take proactive measures to address them.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/metrics-advisor/](https://learn.microsoft.com/en-us/azure/ai-services/metrics-advisor/)
-
-#### Properties
-
-- [OpenAPI](openapi/metrics-advisor-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/metrics-advisor/)
-
-### Microsoft Azure Microsoft Cognitive Language Service
-
-Microsoft Azure Microsoft Cognitive Language Service is a powerful tool that allows developers to enhance their applications with sophisticated language understanding capabilities. By leveraging cutting-edge artificial intelligence technologies, this service can analyze and interpret text in natural language, enabling applications to intelligently process and respond to user input.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/language-service/](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoft-cognitive-language-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)
-
-### Microsoft Azure Microsoft Cognitive Language Service  Analyze Conversations
-
-Microsoft Azure Cognitive Services provides a range of tools for developers to build applications that can understand and interpret natural language. One of these tools, Analyze Conversations, is specifically designed to help applications analyze and extract information from conversations between users.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.language.conversations-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.language.conversations-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-cognitive-language-service-analyze-conversations-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.language.conversations-readme?view=azure-dotnet)
-
-### Microsoft Azure Microsoft Cognitive Language Service  Analyze Conversations Authoring
-
-Microsoft Azure Cognitive Services - Language Service Analyze Conversations Authoring helps developers understand and analyze text-based conversations. By leveraging advanced natural language processing technology, this service can extract valuable insights, sentiments, and intentions from long-form text conversations. It can also identify key topics, entities, and relationships within the text, helping users gain a deeper understanding of their conversations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.language.conversations-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.language.conversations-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-cognitive-language-service-analyze-conversations-authoring-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/ai.language.conversations-readme?view=azure-dotnet)
-
-### Microsoft Azure Microsoft Cognitive Language Service  Analyze Text Authoring
-
-Microsoft Azure Cognitive Services - Text Analytics helps businesses analyze text content, making it easier to understand the sentiment, key phrases, and language within text data. Using advanced natural language processing techniques, the service can identify the sentiment of a piece of text, extract key phrases or entities, and determine language usage patterns. This powerful tool can aid in tasks such as sorting customer feedback, analyzing social media posts, or categorizing documents.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/language/text-analysis-authoring/import?view=rest-language-2023-04-01](https://learn.microsoft.com/en-us/rest/api/language/text-analysis-authoring/import?view=rest-language-2023-04-01)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-cognitive-language-service-analyze-text-authoring-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/language/text-analysis-authoring/import?view=rest-language-2023-04-01)
-
-### Microsoft Azure Microsoft Cognitive Language Service  Question Answering
-
-Microsoft Azure Microsoft Cognitive Language Service Question Answering uses advanced natural language processing techniques and machine learning algorithms to analyze and understand text-based questions and provide accurate responses. This service leverages deep learning models to extract key information from the input text and generate relevant answers based on the context of the query.
-
-- **Human URL:** [https://azure.microsoft.com/en-us/products/ai-services/question-answering](https://azure.microsoft.com/en-us/products/ai-services/question-answering)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-cognitive-language-service-question-answering-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azure.microsoft.com/en-us/products/ai-services/question-answering)
-
-### Microsoft Azure Microsoft Cognitive Language Service  Question Answering  Authoring
-
-Microsoft Azure Cognitive Language Service is a powerful tool that allows users to create intelligent question answering systems. With this service, users can easily author and deploy question answering models that can effectively respond to natural language questions. By leveraging advanced natural language processing capabilities, this service can understand the context and intent behind user queries and provide accurate and relevant answers.
-
-- **Human URL:** [https://azure.microsoft.com/en-us/products/ai-services/question-answering](https://azure.microsoft.com/en-us/products/ai-services/question-answering)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-cognitive-language-service-question-answering-authoring-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azure.microsoft.com/en-us/products/ai-services/question-answering)
-
-### Microsoft Azure Microsoft Cognitive Language Service  Text Analysis
-
-Microsoft Azure Cognitive Language Service Text Analysis is a powerful tool that allows users to extract valuable insights and meaning from large volumes of text data. Using advanced machine learning algorithms, the service can automatically detect sentiment, key phrases, entities, and language from a variety of sources such as social media, customer reviews, and documents.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/language-service/](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-cognitive-language-service-text-analysis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)
-
-### Microsoft Azure Microsoft Cognitive Language Service  Text Analysis Authoring
-
-Microsoft Azure Cognitive Language Service Text Analysis Authoring is a powerful tool that allows users to analyze and process text data in a variety of ways. With features such as sentiment analysis, entity recognition, key phrase extraction, and language detection, users can gain valuable insights from large amounts of textual information.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/language-service/](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-cognitive-language-service-text-analysis-authoring-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)
-
-### Microsoft Azure Microsoft Defender for Cloud
-
-Microsoft Azure Microsoft Defender for Cloud is a comprehensive security solution designed to protect cloud environments and resources from cyber threats. By continuously monitoring and analyzing data patterns, Defender for Cloud can detect and respond to potential security risks in real time. It offers a range of advanced security features such as threat intelligence, vulnerability assessment, and access control to help organizations safeguard their data and applications in the cloud.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/defender-for-cloud/](https://learn.microsoft.com/en-us/azure/defender-for-cloud/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoft-defender-for-cloud-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/defender-for-cloud/)
-
-### Microsoft Azure Microsoft External Attack Surface Management
-
-Microsoft Azure External Attack Surface Management helps organizations identify and mitigate potential security risks by continuously monitoring and assessing their external attack surface. This includes identifying all external-facing assets such as web applications, APIs, and network devices, and assessing their security posture to detect vulnerabilities and misconfigurations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/external-attack-surface-management/](https://learn.microsoft.com/en-us/azure/external-attack-surface-management/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsofteasm-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/external-attack-surface-management/)
-
-### Microsoft Azure Microsoft Insights API
-
-The Microsoft Azure Microsoft Insights API is a comprehensive tool that enables developers to gain valuable insights and analytics from their applications. This powerful API allows users to monitor and analyze real-time data, track performance metrics, and generate reports to help optimize their applications for improved efficiency and user experience.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/application-insights/](https://learn.microsoft.com/en-us/rest/api/application-insights/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoft-insights-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/application-insights/)
-
-### Microsoft Azure Microsoft Marketplace Rating and Reviews API
-
-The Microsoft Azure Microsoft Marketplace Rating And Reviews API is a service that allows users to access and retrieve information about ratings and reviews for products listed on the Microsoft Marketplace. This API provides developers with the ability to gather data on customer feedback, ratings, and comments for various products available on the marketplace, enabling them to make informed decisions about which products to purchase or integrate into their own applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/marketplacecatalog/dataplane/reviews/get?view=rest-marketplacecatalog-dataplane-2023-01-01-preview&tabs=HTTP](https://learn.microsoft.com/en-us/rest/api/marketplacecatalog/dataplane/reviews/get?view=rest-marketplacecatalog-dataplane-2023-01-01-preview&tabs=HTTP)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-marketplace-rating-and-reviews-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/marketplacecatalog/dataplane/reviews/get?view=rest-marketplacecatalog-dataplane-2023-01-01-preview&tabs=HTTP)
-
-### Microsoft Azure Microsoft Net App
-
-Microsoft Azure NetApp files is a storage service that provides high-performance file storage that is optimized for use with Azure virtual machines. It allows users to easily deploy and manage file shares in the cloud, providing a scalable solution for storing and accessing large amounts of data. With features like automatic tiering and Geo-replication, Azure NetApp files offers a secure and reliable storage solution for businesses looking to leverage the power of the cloud.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-netapp-files/](https://learn.microsoft.com/en-us/azure/azure-netapp-files/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoft-netapp-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-netapp-files/)
-
-### Microsoft Azure Microsoft Playwright Testing Auth Manager Service API
-
-The Microsoft Azure Microsoft Playwright Testing Auth Manager Service API is a service that enables developers to easily manage and authenticate user access to their applications. With this API, developers can set up and configure authentication policies, secure user credentials, and manage permissions for different users or user groups. This service also provides tools for testing and debugging authentication processes, ensuring that user access is secure and reliable.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/playwright-testing/how-to-manage-authentication](https://learn.microsoft.com/en-us/azure/playwright-testing/how-to-manage-authentication)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-playwrighttesting-authmanager-service-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/playwright-testing/how-to-manage-authentication)
-
-### Microsoft Azure Microsoft Scanning Client
-
-Microsoft Azure Microsoft Scanning Client is a tool that helps businesses to easily scan and manage their documents and files stored in Microsoft Azure. This client software allows users to scan physical documents directly into Azure cloud storage, making it simple to store, organize, and retrieve important information.
-
-- **Human URL:** [https://azure.microsoft.com/en-us/products/ai-services/ai-document-intelligence](https://azure.microsoft.com/en-us/products/ai-services/ai-document-intelligence)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftscanningclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azure.microsoft.com/en-us/products/ai-services/ai-document-intelligence)
-
-### Microsoft Azure Microsoft Security Dev Ops
-
-Microsoft Azure Microsoft Security DevOps is a comprehensive solution that enables organizations to seamlessly integrate security into their DevOps processes. It harnesses the power of Microsoft Azure cloud services to provide robust security measures, including threat detection, response automation, and compliance monitoring.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/defender-for-cloud/azure-devops-extension](https://learn.microsoft.com/en-us/azure/defender-for-cloud/azure-devops-extension)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftsecuritydevops-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/defender-for-cloud/azure-devops-extension)
-
-### Microsoft Azure Microsoft Sentinel Upload Indicators API
-
-The Microsoft Azure Microsoft Sentinel Upload Indicators API is a tool designed to allow users to quickly and easily upload indicators of compromise (IOCs) into their Azure Sentinel workspace. This API streamlines the process of sharing threat intelligence data, enabling organizations to better identify and respond to security threats in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/sentinel/upload-indicators-api](https://learn.microsoft.com/en-us/azure/sentinel/upload-indicators-api)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoft-sentinel-upload-indicators-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/sentinel/upload-indicators-api)
-
-### Microsoft Azure Microsoft Serial Console Client
-
-The Microsoft Azure Microsoft Serial Console Client is a tool that allows users to interact with virtual machines through a serial console connection. This feature is particularly useful when there are networking issues that prevent access to the VM through traditional methods. With the Serial Console Client, users can troubleshoot and diagnose issues directly from the Azure portal, regardless of the state of the VM.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/windows/serial-console-windows](https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/windows/serial-console-windows)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftserialconsoleclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/windows/serial-console-windows)
-
-### Microsoft Azure Microsoft Service Linker
-
-Microsoft Azure Microsoft Service Linker is a tool that helps organizations connect different Microsoft services together in a seamless and efficient way. It allows users to easily create links between various services, such as Azure Active Directory, Power BI, and Dynamics 365, enabling data and workflows to flow smoothly between them. By using Service Linker, organizations can streamline their processes, automate tasks, and improve collaboration between different teams and departments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/templates/microsoft.servicelinker/linkers](https://learn.microsoft.com/en-us/azure/templates/microsoft.servicelinker/linkers)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftservicelinker-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/templates/microsoft.servicelinker/linkers)
-
-### Microsoft Azure Microsoft Standby Pool
-
-The Microsoft Azure Microsoft Standby Pool is a comprehensive cloud-based service that offers a standby pool of resources to ensure high availability and performance for critical workloads in case of failures or sudden spikes in demand. This solution allows businesses to seamlessly allocate additional resources as needed, reducing downtime and ensuring continuous operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/container-instances/container-instances-standby-pool-overview](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-standby-pool-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftstandbypool-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-standby-pool-overview)
-
-### Microsoft Azure Microsoft Storage Sync
-
-Microsoft Azure Storage Sync is a cloud service that allows businesses to synchronize and backup their on-premises data to the cloud. This service enables organizations to easily store and access their data in a secure and reliable manner, reducing the risk of data loss and increasing accessibility. With Microsoft Azure Storage Sync, users can easily collaborate with team members and access their files from anywhere, at any time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/file-sync/](https://learn.microsoft.com/en-us/azure/storage/file-sync/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoft-storage-sync-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/file-sync/)
-
-### Microsoft Azure Microsoftazureamhweb Rolev20200501
-
-Microsoft Azure Microsoftazureamhweb Rolev20200501 is a specific role in the Microsoft Azure platform that is designed to provide advanced capabilities for hosting and managing web applications and services. This role offers a variety of tools and features to help developers and IT professionals deploy, scale, and monitor web applications with ease.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftazureamhwebrolev20200501-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Microsoftmobile Packet Core Mobile Packet Core Service
-
-Microsoft Azure Microsoft.MobilePacketCore Mobile Packet Core Service is a cloud-based service that enables mobile operators to efficiently manage and optimize their packet core network. The service provides advanced functionalities for network slicing, quality of service management, and real-time monitoring of network performance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/mobilepacketcore/](https://learn.microsoft.com/en-us/rest/api/mobilepacketcore/)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoftmobilepacketcore-mobile-packet-core-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/mobilepacketcore/)
-
-### Microsoft Azure Microsoftmobile Packet Core Network Function Resource
-
-The Microsoft.MobilePacketCore Network Function resource within Microsoft Azure is designed to provide mobile operators with essential packet core network services for their telecommunications infrastructure. This resource offers functionalities such as packet data routing, session management, and network policy enforcement, which are crucial for ensuring seamless and efficient communication for mobile users.
-
-- **Human URL:** [https://azure.microsoft.com/en-us/products/azure-network-function-manager](https://azure.microsoft.com/en-us/products/azure-network-function-manager)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoftmobilepacketcore-network-function-resource-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azure.microsoft.com/en-us/products/azure-network-function-manager)
-
-### Microsoft Azure Microsoftnetwork Analytics
-
-Microsoft Azure Microsoftnetwork Analytics is a powerful tool that enables users to gain insights into their network performance and security. By utilizing advanced analytics and machine learning algorithms, Microsoftnetwork Analytics can detect abnormal behavior patterns, identify potential security threats, and provide recommendations for improving network performance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/network-watcher/traffic-analytics](https://learn.microsoft.com/en-us/azure/network-watcher/traffic-analytics)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftnetworkanalytics-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/network-watcher/traffic-analytics)
-
-### Microsoft Azure Microsoftresource Health
-
-Microsoft Azure Microsoft.ResourceHealth is a service that helps users monitor and manage the health of their Azure resources. It provides real-time insights into the availability and performance of virtual machines, storage accounts, databases, and other Azure services. By continuously monitoring resource health, users can proactively identify and address issues before they impact their operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/service-health/resource-health-overview](https://learn.microsoft.com/en-us/azure/service-health/resource-health-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftresourcehealth-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/service-health/resource-health-overview)
-
-### Microsoft Azure Microsoftsecurity
-
-Microsoft Azure Microsoftsecurity is a comprehensive suite of security tools and services designed to protect data, applications, and infrastructure on the Microsoft Azure cloud platform. The offering includes advanced threat detection and prevention capabilities, identity and access management solutions, encryption and data protection features, compliance management tools, and more.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/security/](https://learn.microsoft.com/en-us/azure/security/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftsecurity-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/security/)
-
-### Microsoft Azure Migrate
-
-Microsoft Azure Migrate is a cloud-based service that allows organizations to assess and migrate their on-premises infrastructure and applications to the Azure cloud. By providing a comprehensive and efficient solution for the migration process, Azure Migrate helps businesses quickly and seamlessly transition their workloads to the cloud.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/migrate/](https://learn.microsoft.com/en-us/azure/migrate/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-migrate-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/migrate/)
-
-### Microsoft Azure Migrate Assessment Service
-
-Microsoft Azure Migrate Assessment Service is a tool designed to simplify the process of planning and migrating to the Azure cloud. This service assesses an organization's on-premises infrastructure and workloads, providing recommendations for optimal migration strategies. It helps in determining the readiness of the environment for migration, estimating costs, and identifying potential compatibility issues.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/migrate/](https://learn.microsoft.com/en-us/azure/migrate/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-migrate-assessment-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/migrate/)
-
-### Microsoft Azure Migrate Engine APIs
-
-Microsoft Azure Migrate Engine APIs offer a range of functionalities to assist users in migrating their on-premises infrastructure to the cloud with ease. These APIs enable seamless connection and communication with the Azure Migrate service, allowing users to assess their workloads, discover dependencies, and generate migration plans.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/migrate/](https://learn.microsoft.com/en-us/rest/api/migrate/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-migrate-engine-apis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/migrate/)
-
-### Microsoft Azure Mixed Reality Remote Rendering
-
-Microsoft Azure Mixed Reality Remote Rendering allows users to create high-fidelity, immersive mixed reality experiences without the need for powerful local hardware. Through cloud-based rendering capabilities, users can offload the complex rendering processes to remote servers, enabling them to stream high-quality graphics and visuals directly to their mixed reality devices.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/java/api/com.azure.mixedreality.remoterendering?view=azure-java-stable](https://learn.microsoft.com/en-us/java/api/com.azure.mixedreality.remoterendering?view=azure-java-stable)
-
-#### Properties
-
-- [OpenAPI](openapi/mixedrealityremoterendering-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/java/api/com.azure.mixedreality.remoterendering?view=azure-java-stable)
-
-### Microsoft Azure Mixed Reality Sts Client
-
-Microsoft Azure MixedRealityStsClient is a client library that enables developers to authenticate users and acquire access tokens for Azure services, such as Azure Mixed Reality. By integrating this client library into their applications, developers can easily manage user authentication and authorization, allowing users to securely access resources and data within their Mixed Reality applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/java/api/com.azure.mixedreality.authentication.mixedrealitystsclient?view=azure-java-stable](https://learn.microsoft.com/en-us/java/api/com.azure.mixedreality.authentication.mixedrealitystsclient?view=azure-java-stable)
-
-#### Properties
-
-- [OpenAPI](openapi/mixedrealitystsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/java/api/com.azure.mixedreality.authentication.mixedrealitystsclient?view=azure-java-stable)
-
-### Microsoft Azure Monitor Client
-
-Microsoft Azure MonitorClient is a tool that allows users to effectively monitor and manage their resources in the cloud. With Azure MonitorClient, users can gain valuable insights into the performance and availability of their applications and services, as well as proactively identify and address any issues that may arise. This tool provides real-time monitoring and alerting capabilities, allowing users to stay informed and in control of their cloud-based resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-#### Properties
-
-- [OpenAPI](openapi/monitorclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-### Microsoft Azure Monitor Data Collection Control Plane API
-
-The Microsoft Azure Monitor Data Collection Control Plane API allows users to manage the data collection capabilities within Azure Monitor. This API enables developers to create and manage data collection rules, automate the process of collecting and analyzing data from various sources, and configure alerts for monitoring purposes. By using this API, users can easily customize and optimize their data collection strategy to ensure that they are collecting the right data at the right time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/](https://learn.microsoft.com/en-us/rest/api/monitor/)
-
-#### Properties
-
-- [OpenAPI](openapiazure-monitor-data-collection-control-plane-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/)
-
-### Microsoft Azure Monitor Data Collection Endpoints API
-
-The Microsoft Azure Monitor Data Collection Endpoints API provides a centralized way to collect and store data from various sources within an organization's Azure environment. This API allows users to easily configure and manage data collection endpoints, enabling them to capture performance metrics, logs, and other essential data from virtual machines, applications, and services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-endpoint-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-endpoint-overview)
-
-#### Properties
-
-- [OpenAPI](openapiazure-monitor-data-collection-endpoints-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/data-collection-endpoint-overview)
-
-### Microsoft Azure Monitor Data Collection Rule Associations API
-
-The Microsoft Azure Monitor Data Collection Rule Associations API allows users to manage associations between data collection rules and target resources within their Azure environment. By utilizing this API, users can easily create, update, or delete associations to ensure that the collected data is delivered to the appropriate destinations for processing and analysis.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/data-collection-rule-associations?view=rest-monitor-2023-03-11](https://learn.microsoft.com/en-us/rest/api/monitor/data-collection-rule-associations?view=rest-monitor-2023-03-11)
-
-#### Properties
-
-- [OpenAPI](openapiazure-monitor-data-collection-rule-associations-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/data-collection-rule-associations?view=rest-monitor-2023-03-11)
-
-### Microsoft Azure Monitor Data Collection Rules API
-
-The Microsoft Azure Monitor Data Collection Rules API allows users to define and configure rules that determine how data is collected and processed in their Azure monitor environment. By creating custom data collection rules, users can specify which data sources to collect from, how frequently data should be collected, and how it should be processed and stored.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/data-collection-rules?view=rest-monitor-2023-03-11](https://learn.microsoft.com/en-us/rest/api/monitor/data-collection-rules?view=rest-monitor-2023-03-11)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-monitor-data-collection-rules-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/data-collection-rules?view=rest-monitor-2023-03-11)
-
-### Microsoft Azure Monitor Management Client
-
-Microsoft Azure Monitor ManagementClient is a service that helps organizations manage and monitor their applications and infrastructure hosted on the Azure cloud platform. It provides a centralized dashboard for monitoring various metrics, logs, and events across different services and resources. With Azure Monitor ManagementClient, users can set up alerts, track performance trends, analyze resource utilization, and troubleshoot issues in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azure-mgmt-monitor/azure.mgmt.monitor.monitormanagementclient?view=azure-python](https://learn.microsoft.com/en-us/python/api/azure-mgmt-monitor/azure.mgmt.monitor.monitormanagementclient?view=azure-python)
-
-#### Properties
-
-- [OpenAPI](openapi/monitormanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azure-mgmt-monitor/azure.mgmt.monitor.monitormanagementclient?view=azure-python)
-
-### Microsoft Azure Monitor Metric Batch
-
-Microsoft Azure Monitor Metric Batch is a service that allows users to collect, correlate, and analyze metrics from various sources within their Azure environment. This tool enables users to easily track and monitor performance metrics, identify potential issues, and make informed decisions based on real-time data. With Azure Monitor Metric Batch, users can aggregate and batch metric data, set up custom alerts and notifications, and gain insights into their overall system performance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/batch/monitor-batch](https://learn.microsoft.com/en-us/azure/batch/monitor-batch)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-monitor-metric-batch-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/batch/monitor-batch)
-
-### Microsoft Azure Monitor Metrics Data API
-
-The Microsoft Azure Monitor Metrics Data API allows users to access and retrieve real-time monitoring data for various resources within the Azure cloud platform. This API provides a unified interface for querying and analyzing metrics data, making it easier for developers and administrators to monitor the performance and health of their applications and services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/metrics?view=rest-monitor-2023-10-01](https://learn.microsoft.com/en-us/rest/api/monitor/metrics?view=rest-monitor-2023-10-01)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-monitor-metrics-data-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/metrics?view=rest-monitor-2023-10-01)
-
-### Microsoft Azure Monitor Metrics Definitions API
-
-The Microsoft Azure Monitor Metrics Definitions API is a tool that allows users to access and retrieve detailed information about the various metrics available in their Azure resources. This API provides a comprehensive list of definitions for all the metrics that Azure Monitor collects, giving users the ability to understand and analyze the performance and health of their resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/metric-definitions?view=rest-monitor-2023-10-01](https://learn.microsoft.com/en-us/rest/api/monitor/metric-definitions?view=rest-monitor-2023-10-01)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-monitor-metrics-definitions-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/metric-definitions?view=rest-monitor-2023-10-01)
-
-### Microsoft Azure Monitor Operations API
-
-Microsoft Azure Monitor Operations API is a tool that allows users to track and analyze the performance of their Azure resources in real-time. By providing access to metrics, logs, and alerts, the API enables organizations to monitor the health and status of their applications and infrastructure, identify potential issues, and take proactive measures to prevent downtime.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/](https://learn.microsoft.com/en-us/rest/api/monitor/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-monitor-operations-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/)
-
-### Microsoft Azure Monitor Workspaces Control Plane API
-
-The Microsoft Azure Monitor Workspaces Control Plane API is a tool that provides control and management capabilities for monitoring workspaces deployed within the Azure cloud environment. This API allows users to create, manage, and delete monitoring workspaces, as well as configure and customize monitoring settings.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/monitor-resource-manager](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/monitor-resource-manager)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-monitor-workspaces-control-plane-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/monitor-resource-manager)
-
-### Microsoft Azure Monitoring Client
-
-The Microsoft Azure Monitoring Client is a tool designed to help organizations track and analyze the performance of their applications and services hosted on the Azure platform. By providing real-time insights into various metrics such as response times, error rates, and resource utilization, the Monitoring Client enables users to quickly identify and troubleshoot issues that may be impacting the efficiency of their cloud-based systems.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-#### Properties
-
-- [OpenAPI](openapi/monitoringclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/)
-
-### Microsoft Azure My SQLmanagement Client
-
-Microsoft Azure MySQL Management Client is a powerful tool that allows users to easily manage their MySQL databases in the Azure cloud environment. With this tool, users can perform a wide range of tasks, such as creating and managing databases, executing SQL queries, monitoring performance, and setting up backups.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sql-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sql-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/mysqlmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sql-readme?view=azure-dotnet)
-
-### Microsoft Azure Network Admin Management Client
-
-Microsoft Azure Network Admin Management Client is a tool designed to assist network administrators in managing and monitoring their Azure network infrastructure. This client allows users to configure and monitor virtual networks, set up network security groups, and monitor network traffic. It also provides insight into network performance, helping administrators identify and resolve issues quickly.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network-manager/](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-#### Properties
-
-- [OpenAPI](openapi/networkadminmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-### Microsoft Azure Network Cloud
-
-Microsoft Azure Network Cloud is a cloud computing service that provides a range of networking solutions for businesses. It allows users to create and manage virtual networks, connect their on-premises networks to the cloud, and securely transfer data between different cloud services. Azure Network Cloud also offers advanced networking features such as load balancing, traffic management, and application security to ensure optimal performance and reliability for applications running in the cloud.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/networking/](https://learn.microsoft.com/en-us/azure/networking/)
-
-#### Properties
-
-- [OpenAPI](openapi/networkcloud-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/networking/)
-
-### Microsoft Azure Network Group
-
-Microsoft Azure NetworkGroup is a service that provides customers with the ability to seamlessly connect and manage resources within their Azure cloud environment. The NetworkGroup allows users to create and configure virtual networks, set up dedicated connections to on-premises networks, and secure their network traffic through various security features such as firewalls and virtual private networks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview](https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/networkgroup-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview)
-
-### Microsoft Azure Network Manager
-
-Microsoft Azure NetworkManager is a comprehensive networking solution that allows businesses to easily manage and monitor their network infrastructure. With NetworkManager, users can create and configure virtual networks, set up custom routing rules, and monitor network performance in real-time. This powerful tool also provides advanced security features such as network segmentation and encryption to help protect sensitive data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network-manager/](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-#### Properties
-
-- [OpenAPI](openapi/networkmanager-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-### Microsoft Azure Network Manager Active Configuration
-
-Microsoft Azure NetworkManagerActiveConfiguration is a service that helps to streamline and automate network configuration and management tasks within an Azure environment. This service allows users to easily define and manage network configurations, including virtual networks, subnets, and security groups. With NetworkManagerActiveConfiguration, users can quickly deploy and scale their networks, monitor network performance, and ensure security best practices are followed.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network-manager/](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-#### Properties
-
-- [OpenAPI](openapi/networkmanageractiveconfiguration-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-### Microsoft Azure Network Manager Effective Configuration
-
-The Microsoft Azure Network Manager effective configuration API provides a RESTful set of web services that interact with Microsoft Azure Networks service to manage your network resources. The API has entities that capture the relationship between an end user and the Microsoft Azure Networks service.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network-manager/](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-#### Properties
-
-- [OpenAPI](openapi/networkmanagereffectiveconfiguration-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network-manager/)
-
-### Microsoft Azure Network Manager Group Membership
-
-Microsoft Azure Network Manager Group Membership allows users to create and manage groups within their network to easily organize and assign permissions to different users. This feature streamlines the process of managing access control within the network by providing an intuitive interface for users to easily add or remove members from groups.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-network-groups](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-network-groups)
-
-#### Properties
-
-- [OpenAPI](openapi/networkmanagergroupmembership-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-network-groups)
-
-### Microsoft Azure Network Resource Provider Client
-
-The Microsoft Azure Network Resource Provider Client is a tool that allows users to efficiently manage and configure network resources within the Azure cloud platform. With this client, users can easily create and manage virtual networks, subnets, load balancers, and virtual private networks. The client also enables users to monitor network performance, set up security rules, and establish connectivity between on-premises networks and Azure resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-#### Properties
-
-- [OpenAPI](openapi/networkresourceproviderclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-### Microsoft Azure Network Security Perimeter
-
-Microsoft Azure Network Security Perimeter is a comprehensive solution that helps organizations protect their critical data and resources from cyber threats. It establishes a secure network perimeter by implementing various security measures such as firewalls, intrusion detection systems, and access controls. This helps to prevent unauthorized access to the network and ensures that only trusted users and devices can interact with the organization's systems.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/private-link/network-security-perimeter-concepts](https://learn.microsoft.com/en-us/azure/private-link/network-security-perimeter-concepts)
-
-#### Properties
-
-- [OpenAPI](openapi/networksecurityperimeter-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/private-link/network-security-perimeter-concepts)
-
-### Microsoft Azure New Relic Observability
-
-Microsoft Azure New Relic Observability is a comprehensive monitoring and observability platform that helps organizations gain deep insights into their applications and infrastructure. With advanced telemetry and data visualization capabilities, it allows users to track the performance, availability, and behavior of their applications in real time.
-
-- **Human URL:** [https://docs.newrelic.com/docs/infrastructure/microsoft-azure-integrations/get-started/introduction-azure-monitoring-integrations/](https://docs.newrelic.com/docs/infrastructure/microsoft-azure-integrations/get-started/introduction-azure-monitoring-integrations/)
-
-#### Properties
-
-- [OpenAPI](openapi/newrelicobservability-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://docs.newrelic.com/docs/infrastructure/microsoft-azure-integrations/get-started/introduction-azure-monitoring-integrations/)
-
-### Microsoft Azure News Search Client
-
-The Microsoft Azure News Search Client is a powerful tool that allows users to search and access a vast collection of news articles from around the world. This client enables users to quickly and efficiently search through a plethora of news sources, filter results by publication date or relevance, and view article previews before accessing the full content.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.newssearch.newssearchclient?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.newssearch.newssearchclient?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/news-search-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.search.newssearch.newssearchclient?view=azure-dotnet)
-
-### Microsoft Azure Nginx Plus
-
-Microsoft Azure NGINX Plus is a powerful application delivery and load balancing platform that enhances the performance, reliability, and security of web applications hosted on the Azure cloud. With NGINX Plus, users can easily manage and optimize their application traffic, scale resources up or down based on demand, and ensure high availability with features such as health checks and session persistence.
-
-- **Human URL:** [https://docs.nginx.com/nginx/deployment-guides/microsoft-azure/](https://docs.nginx.com/nginx/deployment-guides/microsoft-azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/nginxnginxplus-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://docs.nginx.com/nginx/deployment-guides/microsoft-azure/)
-
-### Microsoft Azure Notification Hubs Management Client
-
-The Microsoft Azure Notification Hubs Management Client is a tool designed to manage and control the Notification Hubs service within the Azure platform. This client allows users to easily create, manage, and send notifications to their mobile applications or devices across multiple platforms, including iOS, Android, and Windows.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/notification-hubs/](https://learn.microsoft.com/en-us/azure/notification-hubs/)
-
-#### Properties
-
-- [OpenAPI](openapi/notificationhubsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/notification-hubs/)
-
-### Microsoft Azure Notification Hubs Rp Client
-
-The Microsoft Azure Notification Hubs RP Client is a software development kit that enables developers to easily integrate push notifications into their mobile or web applications. With this client, developers can create and manage notification hubs to send personalized and targeted messages to their users across various platforms, including iOS, Android, and Windows.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/notification-hubs/](https://learn.microsoft.com/en-us/azure/notification-hubs/)
-
-#### Properties
-
-- [OpenAPI](openapi/notificationhubs-rp-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/notification-hubs/)
-- [Documentation](https://learn.microsoft.com/en-us/azure/notification-hubs/)
-
-### Microsoft Azure Off Azure Spring Boot
-
-Microsoft Azure Off Azure Spring Boot is a cloud-based service that allows users to quickly and easily deploy and run Spring Boot applications on the Microsoft Azure platform. With Azure Spring Boot, developers can take advantage of a managed infrastructure, automated scaling, and built-in monitoring and logging capabilities, freeing them up to focus on writing code and building great applications.
-
-- **Human URL:** [https://azure.microsoft.com/en-us/products/spring-apps](https://azure.microsoft.com/en-us/products/spring-apps)
-
-#### Properties
-
-- [OpenAPI](openapi/offazurespringboot-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azure.microsoft.com/en-us/products/spring-apps)
-
-### Microsoft Azure Open Ai
-
-Microsoft Azure Open AI is a platform that provides access to cutting-edge artificial intelligence technologies for developers and businesses. It offers a wide range of AI services, including natural language processing, computer vision, and machine learning, to help organizations leverage the power of AI in their applications and workflows.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-openai-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
-- [API Reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/azure-openai/)
-- [Getting Started](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)
-
-### Microsoft Azure Open Ai API
-
-Microsoft Azure Open AI API is a suite of tools and services that enable developers to integrate artificial intelligence capabilities into their applications. This API allows users to access pre-trained machine learning models for tasks such as natural language processing, image recognition, and text generation. With Azure Open AI API, developers can easily incorporate advanced AI functionality into their software without having to build and train their own models from scratch.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-openai-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
-- [API Reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/azure-openai/)
-- [Getting Started](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)
-
-### Microsoft Azure Open Ai API Version 20220301preview
-
-Microsoft Azure Open AI API Version 20220301preview is a cutting-edge artificial intelligence platform that allows developers to access powerful AI models for a wide range of applications. With this API, users can leverage advanced natural language processing capabilities, image recognition technology, and machine learning algorithms to build innovative solutions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference-preview](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference-preview)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2022-03-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference-preview)
-
-### Microsoft Azure Open Ai API Version 20220601preview
-
-Microsoft Azure Open Ai API Version 20220601preview is a cutting-edge artificial intelligence platform that offers a wide range of powerful tools and services to help developers create innovative and intelligent applications. This API version introduces new features and improvements that enhance the capabilities of AI models, allowing for more accurate and efficient processing of natural language, image recognition, and other cognitive tasks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2022-06-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-### Microsoft Azure Open Ai API Version 20221201
-
-Microsoft Azure Open Ai API Version 20221201 is a powerful tool that harnesses the capabilities of artificial intelligence to provide a wide range of services. This latest version offers enhanced performance and improved accuracy in natural language processing, text generation, and image recognition tasks. Users can leverage this API to develop cutting-edge applications that can analyze, interpret, and generate content with greater precision and efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-openai-api-version-2022-12-01-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-### Microsoft Azure Open Ai API Version 20230315preview
-
-Microsoft Azure Open Ai API Version 20230315preview is an advanced artificial intelligence tool that allows users to access and integrate cutting-edge AI capabilities into their applications. This API version provides a wide range of functionalities, including natural language processing, computer vision, and speech recognition.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2023-03-15-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-### Microsoft Azure Open Ai API Version 20230515
-
-Microsoft Azure Open AI API Version 20230515 is an advanced artificial intelligence platform that provides developers with powerful tools for natural language processing, machine learning, and automation. This latest version offers improved performance and enhanced capabilities, allowing users to access cutting-edge AI models and algorithms for a wide range of applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-openai-api-version-2023-05-15-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-### Microsoft Azure Open Ai API Version 20230601preview
-
-Microsoft Azure Open AI API Version 20230601preview is an advanced artificial intelligence platform that provides developers with powerful tools and resources to build innovative AI-powered applications. This API allows developers to access cutting-edge AI capabilities, including natural language processing, computer vision, and speech recognition.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2023-06-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-### Microsoft Azure Open Ai API Version 20230701preview
-
-Microsoft Azure OpenAI API Version 20230701preview is a cutting-edge tool that allows developers to integrate advanced artificial intelligence capabilities into their applications and workflows. This API enables seamless access to a wide range of AI models and services, including natural language processing, image recognition, and machine learning algorithms.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2023-07-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-### Microsoft Azure Open Ai API Version 20230801preview
-
-Microsoft Azure Open Ai API Version 20230801preview is a cutting-edge artificial intelligence platform that allows developers to integrate advanced machine learning models and natural language processing capabilities into their applications. This API enables businesses to leverage powerful AI technologies to automate tasks, analyze data, and generate valuable insights.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2023-08-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-### Microsoft Azure Open Ai API Version 20230901preview
-
-Microsoft Azure Open AI API Version 20230901preview is a cutting-edge platform that provides developers with advanced tools and capabilities to integrate artificial intelligence and machine learning models into their applications. This API allows users to access a wide range of AI services, including natural language processing, computer vision, and speech recognition.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2023-09-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-### Microsoft Azure Open Ai API Version 20231001preview
-
-Microsoft Azure Open AI API Version 20231001preview is a cutting-edge platform that provides developers with access to advanced artificial intelligence capabilities. With this API, users can easily integrate powerful AI models into their applications, enabling them to unlock new levels of functionality and intelligence.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2023-10-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-### Microsoft Azure Open Ai API Version 20231201preview
-
-Microsoft Azure Open AI API Version 20231201preview is a cutting-edge artificial intelligence platform that enables developers to integrate AI capabilities into their applications with ease. With this API, users can access advanced AI models, natural language processing tools, and machine learning algorithms to enhance the functionality and intelligence of their software.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference-preview](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference-preview)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2023-12-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference-preview)
-
-### Microsoft Azure Open Ai API Version 20240201
-
-Microsoft Azure Open Ai API Version 20240201 is a cutting-edge artificial intelligence platform that offers developers access to powerful machine learning models and tools. This API allows users to integrate advanced natural language processing capabilities, such as sentiment analysis, text recognition, and language translation, into their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-openai-api-version-2024-02-01-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-### Microsoft Azure Open Ai API Version 20240215preview
-
-The Microsoft Azure Open Ai API Version 20240215preview is a tool that leverages artificial intelligence to help developers build innovative applications and services. This API allows users to access a wide range of pre-trained machine learning models, including natural language processing, computer vision, and speech recognition.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2024-02-15-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-### Microsoft Azure Open Ai API Version 20240301preview
-
-The Microsoft Azure Open AI API Version 20240301preview is a cutting-edge tool that allows users to harness the power of artificial intelligence for a wide range of applications. This API enables developers to access advanced AI models and technologies, such as natural language processing, computer vision, and speech recognition, to create innovative solutions and enhance their projects.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-#### Properties
-
-- [OpenAPI](openapiazure-openai-api-version-2024-03-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation)
-
-### Microsoft Azure Open AI Service API
-
-Microsoft Azure Open Ai Service API is a powerful tool that allows application developers to easily integrate advanced artificial intelligence capabilities into their software. This API provides access to a wide range of AI services, such as natural language processing, computer vision, and speech recognition.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/openai/reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-
-#### Tags
-
-- AI
-- Large Language Models
-- OpenAI
-
-#### Properties
-
-- [OpenAPI](openapi/azure-openai-service-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [OpenAPI](openapi/azure-openai-service-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/azure-openai/)
-- [Getting Started](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)
-- [JSON-LD](json-ld/azure-openai-service-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure Open Energy Platform Management Service APIs
-
-The Microsoft Azure Open Energy Platform Management Service APIs provide developers with a set of tools and resources to efficiently manage and integrate energy data within their applications. These APIs allow users to access real-time energy consumption information, analyze historical data, and make informed decisions to optimize energy usage and reduce costs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-oep-readme?view=azure-node-preview](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-oep-readme?view=azure-node-preview)
-
-#### Properties
-
-- [OpenAPI](openapiopen-energy-platform-management-service-apis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-oep-readme?view=azure-node-preview)
-
-### Microsoft Azure Orbital
-
-Microsoft Azure Orbital is a ground-breaking service that allows users to easily connect and manage satellite data in the cloud. With Azure Orbital, customers can schedule, coordinate, and process satellite data through a single, easy-to-use interface. This service enables organizations to quickly access and analyze large amounts of satellite imagery and data, allowing for more efficient decision-making and resource management.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/orbital/](https://learn.microsoft.com/en-us/azure/orbital/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-orbital-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/orbital/)
-
-### Microsoft Azure Palo Alto Network Cloud Ngfw
-
-Microsoft Azure Palo Alto Network Cloud NGFW is a comprehensive cloud-based network security solution that provides advanced firewall capabilities to protect organizations from cyber threats. It offers next-generation firewall functionality, including intrusion prevention, application control, and threat detection and response. This solution integrates seamlessly with Microsoft Azure cloud services, allowing for easy deployment and management of security policies across virtual networks.
-
-- **Human URL:** [https://docs.paloaltonetworks.com/cloud-ngfw/azure](https://docs.paloaltonetworks.com/cloud-ngfw/azure)
-
-#### Properties
-
-- [OpenAPI](openapi/paloaltonetworkscloudngfw-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://docs.paloaltonetworks.com/cloud-ngfw/azure)
-
-### Microsoft Azure Payment Management Client
-
-Microsoft Azure Payment Management Client is a powerful tool that helps businesses manage all aspects of their payment transactions securely and efficiently. With this client, companies can easily process payments, manage customer billing information, and analyze payment data to gain valuable insights into their financial health. The client also offers advanced features such as fraud detection and prevention, recurring billing options, and seamless integration with various payment gateways.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/)
-
-#### Properties
-
-- [OpenAPI](openapi/paymentmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/)
-
-### Microsoft Azure Peering Management Client
-
-Microsoft Azure Peering Management Client is a tool that helps organizations manage their peering relationships within the Azure cloud network. With this client, users can easily establish and optimize their connections with various partners and services, ensuring reliable and high-performance network connectivity.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.peering-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.peering-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/peeringmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.peering-readme?view=azure-dotnet)
-
-### Microsoft Azure Personalizer Base
-
-Microsoft Azure Personalizer Base is a service that uses machine learning algorithms to deliver personalized content recommendations. By analyzing user behavior and preferences, Personalizer Base can generate recommendations that are tailored to each individual's unique needs and interests. This service is particularly useful for companies looking to enhance their customer experience by providing personalized recommendations for products, services, or content.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/personalizer/](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-#### Properties
-
-- [OpenAPI](openapi/personalizer-base-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-### Microsoft Azure Personalizer Client
-
-Microsoft Azure Personalizer Client is a tool that allows users to leverage machine learning algorithms to tailor personalized experiences for their customers. By providing insights into user behaviors, preferences, and interactions, the Personalizer Client can optimize the delivery of content, recommendations, and products in real-time. This results in improved engagement, increased conversion rates, and enhanced user satisfaction.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/personalizer/](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-#### Properties
-
-- [OpenAPI](openapi/personalizer-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-### Microsoft Azure Personalizer Client 20220901preview
-
-Microsoft Azure Personalizer Client 20220901preview is a tool that allows users to incorporate personalized recommendations into their applications. This client leverages machine learning algorithms to analyze user behavior and preferences, providing tailored suggestions for content, products, or services. By utilizing this tool, developers can improve user engagement and satisfaction by delivering relevant and timely recommendations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/personalizer/](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-#### Properties
-
-- [OpenAPI](openapi/personalizer-client-2022-09-01-preview-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-### Microsoft Azure Personalizer Client V11preview3
-
-Microsoft Azure Personalizer Client V11preview3 is a tool that enables developers to customize and personalize their applications by utilizing machine learning algorithms. It allows users to create personalized experiences for their customers by providing recommendations, content suggestions, and other tailored services based on user behavior and preferences.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/personalizer/](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-#### Properties
-
-- [OpenAPI](openapi/personalizer-client-v11-preview3-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/)
-
-### Microsoft Azure Playwright Service Management API
-
-Microsoft Azure Playwright Service Management API is a service management API that allows developers to easily manage and monitor their Playwright services on the Microsoft Azure platform. With this API, users can create and deploy Playwright services, scale their services up or down based on demand, and monitor the performance of their services in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-playwrighttesting-readme?view=azure-node-latest](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-playwrighttesting-readme?view=azure-node-latest)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoft-azureplaywrightservice-management-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-playwrighttesting-readme?view=azure-node-latest)
-
-### Microsoft Azure Policy Client
-
-Microsoft Azure Policy Client is a powerful tool that allows users to enforce compliance policies within their Azure environment. With this client, users can define specific rules and guidelines that must be followed by all resources deployed within Azure. The Policy Client enables users to create, assign, and manage policies across their entire Azure subscription, ensuring that resources are consistently deployed in accordance with organizational standards.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/policy/](https://learn.microsoft.com/en-us/azure/governance/policy/)
-
-#### Properties
-
-- [OpenAPI](openapi/policyclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/policy/)
-
-### Microsoft Azure Policy Events Client
-
-The Microsoft Azure Policy Events Client is a tool that allows users to monitor and manage policy events within their Azure environment. With this client, users can track policy evaluations, exemptions, and other policy-related activities to ensure compliance with organizational standards and regulations. By using this tool, administrators can gain insight into which resources are not meeting policy requirements and take corrective actions to bring them into compliance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/policy/concepts/event-overview](https://learn.microsoft.com/en-us/azure/governance/policy/concepts/event-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/policyeventsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/policy/concepts/event-overview)
-
-### Microsoft Azure Policy Insights Operations API
-
-Microsoft Azure Policy Insights Operations API allows users to monitor and analyze policy compliance across their Azure environment. By providing a central hub for viewing policy insights, users can easily track policy evaluations, view compliance trends, and identify any areas of non-compliance. This API enables users to gain valuable insights into their Azure policies, helping them to make informed decisions and take necessary actions to maintain a secure and compliant cloud environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/policy/](https://learn.microsoft.com/en-us/rest/api/policy/)
-
-#### Properties
-
-- [OpenAPI](openapi/policy-insights-operations-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/policy/)
-
-### Microsoft Azure Policy Metadata Client
-
-The Microsoft Azure Policy Metadata Client is a tool that allows users to access and manage metadata related to Azure policies. This client provides a centralized platform for creating, defining, and enforcing policies within Azure. By utilizing this tool, users can easily define and manage policies across their Azure infrastructure, ensuring that resources are provisioned and maintained in a secure and compliant manner.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/policy/concepts/definition-structure-basics](https://learn.microsoft.com/en-us/azure/governance/policy/concepts/definition-structure-basics)
-
-#### Properties
-
-- [OpenAPI](openapi/policymetadataclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/policy/concepts/definition-structure-basics)
-
-### Microsoft Azure Policy States Client
-
-The Microsoft Azure Policy States Client is a tool that allows organizations to define and enforce policies for resources within their Azure environment. It provides a centralized platform where administrators can create, manage, and assign policies that govern the configuration and behavior of their resources. By using the Azure Policy States Client, organizations can ensure compliance with internal standards, industry regulations, and best practices.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/policy/overview](https://learn.microsoft.com/en-us/azure/governance/policy/overview)
-
-#### Properties
-
-- [OpenAPI](openapi/policystatesclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/policy/overview)
-
-### Microsoft Azure Policy Tracked Resources Client
-
-The Microsoft Azure Policy Tracked Resources Client provides users with a tool to track and manage their Azure resources based on established policies. This client allows users to define and enforce desired configurations, security controls, and compliance standards across their cloud resources. By monitoring and evaluating resource compliance in real-time, the Azure Policy Tracked Resources Client helps organizations maintain a secure and well-managed cloud environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/policy/overview](https://learn.microsoft.com/en-us/azure/governance/policy/overview)
-
-#### Properties
-
-- [OpenAPI](openapi/policytrackedresourcesclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/policy/overview)
-
-### Microsoft Azure Portal
-
-Microsoft Azure Portal is a web-based platform that allows users to manage, monitor, and scale their cloud resources easily. It provides a centralized dashboard where users can access all of their Azure services and resources, such as virtual machines, databases, storage accounts, and more. The portal offers a user-friendly interface with customizable dashboards, quick access to frequently used tools, and detailed analytics to help users optimize their cloud infrastructure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-portal/](https://learn.microsoft.com/en-us/azure/azure-portal/)
-
-#### Properties
-
-- [OpenAPI](openapi/portal-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-portal/)
-
-### Microsoft Azure Postgre SQLmanagement Client
-
-Microsoft Azure Postgre Sql management Client is a tool designed to help users easily manage and interact with their Postgre Sql databases hosted on the Microsoft Azure cloud platform. With this client, users can perform a variety of tasks such as creating and managing databases, tables, and indexes, executing SQL queries, and monitoring database performance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.postgresql-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.postgresql-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/postgresqlmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.postgresql-readme?view=azure-dotnet)
-
-### Microsoft Azure Postgre SQLserver Management Client
-
-The Microsoft Azure Postgre SQL Server Management Client is a comprehensive tool designed to manage and administer Postgre SQL databases on the Azure cloud platform. This client provides users with a user-friendly interface to easily create, modify, and monitor databases, tables, and queries. It offers advanced features such as importing and exporting data, scheduling backups, and optimizing database performance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.postgresql-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.postgresql-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/postgresqlservermanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.postgresql-readme?view=azure-dotnet)
-
-### Microsoft Azure Power Bi Embedded Management Client
-
-Microsoft Azure Power BI Embedded Management Client is a tool that allows users to effectively manage and monitor their Power BI Embedded resources in the Azure cloud. This client provides various features like creating, updating, and scaling embedded capacities, as well as monitoring usage and performance metrics. With this tool, users can also automate administrative tasks, such as billing and permissions management.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-powerbiembedded-readme?view=azure-node-latest](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-powerbiembedded-readme?view=azure-node-latest)
-
-#### Properties
-
-- [OpenAPI](openapi/power-bi-embedded-management-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-powerbiembedded-readme?view=azure-node-latest)
-
-### Microsoft Azure Power Bidedicated
-
-Microsoft Azure Power Bidedicated is a specialized service designed to provide customers with dedicated infrastructure and resources within the Azure cloud platform. This service allows organizations to have exclusive access to compute, storage, and networking resources, ensuring high performance, security, and compliance with industry regulations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-powerbidedicated-readme?view=azure-node-latest](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-powerbidedicated-readme?view=azure-node-latest)
-
-#### Properties
-
-- [OpenAPI](openapi/powerbidedicated-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-powerbidedicated-readme?view=azure-node-latest)
-
-### Microsoft Azure Power Platform
-
-Microsoft Azure Power Platform is a comprehensive suite of tools and services that allows organizations to build, automate, and analyze business processes in the cloud. With Power Platform, users can create custom applications, automate workflows, and analyze data to gain insights and make informed decisions. The platform consists of three main components: Power Apps, Power Automate, and Power BI.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/power-platform/](https://learn.microsoft.com/en-us/power-platform/)
-
-#### Properties
-
-- [OpenAPI](openapi/powerplatform-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/power-platform/)
-
-### Microsoft Azure Prediction Endpoint
-
-Microsoft Azure Prediction Endpoint is a machine learning service that allows users to deploy predictive models to the cloud and make real-time predictions on new data. This service provides an easy and scalable solution for businesses to integrate predictive analytics into their applications without the need for extensive coding or infrastructure setup.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/use-prediction-api](https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/use-prediction-api)
-
-#### Properties
-
-- [OpenAPI](openapi/predictionendpoint-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/custom-vision-service/use-prediction-api)
-
-### Microsoft Azure Private Accesses Types
-
-Microsoft Azure Private Accesses Types provides users with secure and private access to Azure resources. This feature allows organizations to control access to their resources, ensuring that only authorized users can connect to them. There are several types of private access methods available, including Azure Private Link, Virtual Network Service Endpoints, and Azure ExpressRoute.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/private-link/](https://learn.microsoft.com/en-us/azure/private-link/)
-
-#### Properties
-
-- [OpenAPI](openapi/privateaccesses-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/private-link/)
-- [Documentation](https://learn.microsoft.com/en-us/azure/private-link/)
-
-### Microsoft Azure Private Dns Management Client
-
-The Microsoft Azure Private DNS Management Client is a service that allows users to centrally manage and monitor their private DNS zones within Azure. With this client, users can easily create, update, and delete DNS records for their private zones, ensuring that their applications and services are properly registered and accessible.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.privatedns-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.privatedns-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/privatednsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.privatedns-readme?view=azure-dotnet)
-
-### Microsoft Azure Private Endpoint Connection Types
-
-Microsoft Azure Private Endpoint Connection Types allows users to create secure and private connections between their Azure resources and services. This feature provides a more secure way to access and interact with cloud services, ensuring that sensitive data is protected from external threats. Users can choose from different connection types such as Virtual Network, Azure Load Balancer, or Azure Application Gateway to establish a secure and private connection for their resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/privateendpointconnection-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview)
-
-### Microsoft Azure Private Link Services for Power Biclient
-
-Microsoft Azure Private Link Services for Power BI Client allows organizations to securely access Power BI services from within their Azure Virtual Network (VNet) using private endpoints. This means that all data traffic between the organization's virtual network and Power BI services is securely routed through the Azure backbone network, ensuring data privacy and compliance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/power-bi/enterprise/service-security-private-links-on-premises](https://learn.microsoft.com/en-us/power-bi/enterprise/service-security-private-links-on-premises)
-
-#### Properties
-
-- [OpenAPI](openapi/privatelinkservicesforpowerbiclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/power-bi/enterprise/service-security-private-links-on-premises)
-
-### Microsoft Azure Professional Service
-
-Microsoft Azure Professional Services is a team of experts that helps businesses maximize their investment in Azure cloud services. These professionals offer a range of services including architecture design, implementation, migration, optimization, and ongoing support. They work closely with clients to understand their unique business needs and goals, and develop customized solutions to address them.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/professionalservice-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Programmable Connectivity
-
-Microsoft Azure Programmable Connectivity is a cloud-based service that allows users to easily create and manage their network connections. With programmable connectivity, users can seamlessly integrate their applications with various network services such as virtual private networks (VPNs), content delivery networks (CDNs), and third-party services. This service provides flexibility and scalability, enabling users to adjust their network resources based on their specific needs.
-
-- **Human URL:** [https://azure.microsoft.com/en-us/products/programmable-connectivity](https://azure.microsoft.com/en-us/products/programmable-connectivity)
-
-#### Properties
-
-- [OpenAPI](openapi/programmable-connectivity-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://azure.microsoft.com/en-us/products/programmable-connectivity)
-
-### Microsoft Azure Provider API Client
-
-The Microsoft Azure Provider API Client is a tool that allows users to interact with the Azure cloud computing platform through a set of APIs. This client enables developers to access and manage various Azure services and resources programmatically, such as virtual machines, storage accounts, and databases. By providing a simplified interface for working with Azure services, the API client allows developers to automate tasks, deploy applications, and monitor performance more efficiently.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/provider-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure Provider Hub
-
-The Microsoft Azure Provider Hub is a centralized platform that enables businesses to easily access and manage their Azure services. This hub serves as a control panel where users can seamlessly provision, monitor, and optimize their cloud resources. It offers a range of tools and features that simplify the management of Azure services, including automated workflows, advanced monitoring capabilities, and detailed analytics.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.providerhub-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.providerhub-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/providerhub-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.providerhub-readme?view=azure-dotnet)
-
-### Microsoft Azure Purview Catalog Service  API Document
-
-Microsoft Azure Purview Catalog Service Rest API Document provides a comprehensive guide on how to interact with and utilize the Azure Purview Catalog Service through RESTful APIs. This document outlines the various endpoints, request methods, parameters, and responses that can be used to manage, search, and extract metadata from data assets within the Azure Purview Catalog.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/purview/](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-#### Properties
-
-- [OpenAPI](openapi/purview-catalog-service-rest-api-document-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-### Microsoft Azure Purview Data Map Service  API Document
-
-The Microsoft Azure Purview Data Map Service Rest API Document provides a comprehensive guide for developers to integrate and utilize the Data Map Service Rest API within the Azure Purview platform. This document outlines the various endpoints, parameters, authentication methods, and data formats supported by the API, allowing users to interact with and manipulate metadata and data assets stored within their Azure Purview environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/purview/](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-#### Properties
-
-- [OpenAPI](openapi/purview-data-map-service-rest-api-document-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-### Microsoft Azure Purview Devops Policies  API Document
-
-The Microsoft Azure Purview DevOps Policies REST API Document provides developers with a comprehensive guide to leveraging Azure Purview's policy management capabilities within a DevOps workflow. This document outlines the various REST API endpoints and operations available for interacting with Purview's policy engines, allowing developers to define, enforce, and monitor governance policies across their data assets.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/purview/legacy/concept-policies-devops](https://learn.microsoft.com/en-us/purview/legacy/concept-policies-devops)
-
-#### Properties
-
-- [OpenAPI](openapi/purview-devops-policies-rest-api-document-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/purview/legacy/concept-policies-devops)
-
-### Microsoft Azure Purview Distribution Service  API Document
-
-The Microsoft Azure Purview Distribution Service Rest API Document provides developers with a comprehensive guide on how to integrate and interact with the Distribution Service in Azure Purview. This API documentation outlines the various endpoints, methods, and parameters that can be used to manage, track, and distribute metadata across different data sources and systems within an organization.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/purview/](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-#### Properties
-
-- [OpenAPI](openapipurview-distribution-service-rest-api-document-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-### Microsoft Azure Purview Management Client
-
-The Microsoft Azure Purview Management Client is a comprehensive tool that allows organizations to efficiently manage their data governance and compliance efforts. With this client, users can easily discover, classify, and map their data assets across their entire organization in a centralized and seamless way. It provides a unified view of all data sources, making it easier to understand and govern data usage, access, and storage.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.purview-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.purview-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/purviewmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.purview-readme?view=azure-dotnet)
-
-### Microsoft Azure Purview Metadata Policies Service  API Document
-
-The Microsoft Azure Purview Metadata Policies Service Rest API Document provides a comprehensive guide on how to use the REST API to manage metadata policies within the Azure Purview service. This document outlines the various endpoints, methods, and parameters available for interacting with metadata policies through the API. It covers how to create, update, delete, and retrieve metadata policies, as well as how to assign policies to specific assets or entities within the Purview data catalog.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/purview/legacy/tutorial-metadata-policy-collections-apis](https://learn.microsoft.com/en-us/purview/legacy/tutorial-metadata-policy-collections-apis)
-
-#### Properties
-
-- [OpenAPI](openapipurview-metadata-policies-service-rest-api-document-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/purview/legacy/tutorial-metadata-policy-collections-apis)
-
-### Microsoft Azure Purview Policy Client
-
-The Microsoft Azure Purview Policy Client is a tool that enables organizations to define and enforce data governance policies within their Azure environment. This client allows users to create and manage policies that govern who can access and manipulate data, as well as how that data is classified, protected, and utilized.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/purview/](https://learn.microsoft.com/en-us/purview/)
-
-#### Properties
-
-- [OpenAPI](openapi/purviewpolicyclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/purview/)
-
-### Microsoft Azure Purview Selfservice Policies  API Document
-
-The Microsoft Azure Purview Selfservice Policies Rest API Document provides a comprehensive guide for developers and users on how to effectively utilize the API for managing policies within the Azure Purview Selfservice platform. This document outlines the various endpoints, parameters, and methods that can be used to create, update, and delete policies to ensure data governance and compliance within an organization.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/purview/](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-#### Properties
-
-- [OpenAPI](openapipurview-self-service-policies-rest-api-document-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/purview/)
-
-### Microsoft Azure Purview Share Client
-
-Microsoft Azure Purview Share Client is a tool that allows users to easily and securely share data, business glossaries, and data insights across an organization. Users can quickly and efficiently collaborate with colleagues, partners, and stakeholders, giving them access to the information they need in a controlled and organized manner.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/analytics.purview.sharing-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/analytics.purview.sharing-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/purview-share-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/analytics.purview.sharing-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Purview Workflow Service
-
-Workflows are automated, repeatable business processes which allow organizations to track changes, enforce policy compliance, and ensure quality data across their data landscape.Workflow service is a micro service within Microsoft Purview to validate and orchestrate CUD (create, update, delete) operations on their data entities. This spec defines REST API of Purview Workflow Service, which could used for creating Purview workflow client.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/purview/legacy/concept-workflow](https://learn.microsoft.com/en-us/purview/legacy/concept-workflow)
-
-#### Properties
-
-- [OpenAPI](openapi/purview-workflow-service-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/purview/legacy/concept-workflow)
-
-### Microsoft Azure Qn Amaker Client
-
-Microsoft Azure QnA Maker Client is a powerful tool that allows users to easily create and manage their own question and answer databases. Users can input their own questions and corresponding answers, train the system to better understand user queries, and then integrate the QnA Maker into various applications and platforms. This client is designed to streamline the process of building conversational AI experiences and providing users with accurate and efficient responses to their questions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/qnamaker/](https://learn.microsoft.com/en-us/azure/ai-services/qnamaker/)
-
-#### Properties
-
-- [OpenAPI](openapi/qnamaker-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/qnamaker/)
-
-### Microsoft Azure Qn Amaker Runtime Client
-
-The Microsoft Azure QnA Maker Runtime Client is a software tool that allows developers to integrate question and answer functionality into their applications. This tool uses natural language processing to interpret user queries and provide accurate responses based on pre-defined knowledge bases. Developers can easily customize and train the QnA Maker Runtime Client to better understand user intent and provide more accurate answers over time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.knowledge.qnamaker.runtime?view=azure-dotnet-legacy](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.knowledge.qnamaker.runtime?view=azure-dotnet-legacy)
-
-#### Properties
-
-- [OpenAPI](openapi/qnamaker-runtime-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.knowledge.qnamaker.runtime?view=azure-dotnet-legacy)
-
-### Microsoft Azure Quantum Client
-
-Microsoft Azure Quantum Client is a software tool that allows users to harness the power of quantum computing within the Azure cloud platform. With this client, users can create and run quantum algorithms on quantum hardware, simulate quantum circuits, and visualize results in a user-friendly interface. Additionally, the Azure Quantum Client provides access to a library of quantum programming tools and resources to help developers and researchers explore the capabilities of quantum computing.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/quantum/](https://learn.microsoft.com/en-us/azure/quantum/)
-
-#### Properties
-
-- [OpenAPI](openapi/quantum-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/quantum/)
-
-### Microsoft Azure Quantum Management Client
-
-The Microsoft Azure Quantum Management Client is a comprehensive tool designed to support the management of quantum computing resources on the Azure platform. This client provides users with a user-friendly interface to monitor and control quantum computing resources, allowing for easy navigation and efficient management. Users can easily deploy, scale, and monitor quantum computing instances, as well as monitor performance metrics and resource utilization.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.quantum-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.quantum-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-quantum-management-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.quantum-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Quantum Workspace Services
-
-Microsoft Azure Quantum Workspace Services is a platform that allows users to access quantum computing resources in the cloud. With this service, users can develop, simulate, and optimize quantum algorithms, as well as run quantum programs on hardware from a variety of quantum computing providers. The platform offers a range of tools and resources to help users harness the power of quantum computing, including quantum development kits, quantum simulators, and quantum programming languages.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/quantum/](https://learn.microsoft.com/en-us/azure/quantum/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-quantum-workspace-services-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/quantum/)
-
-### Microsoft Azure Queue Storage
-
-Microsoft Azure Queue Storage is a cloud-based service that allows users to store large amounts of messages in a queue for later processing. This service provides reliable and scalable message delivery for applications that need to decouple their components and scale independently. Azure Queue Storage can be used for tasks such as queuing up work items, passing messages between components, or handling asynchronous communication between different parts of an application.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/queues/](https://learn.microsoft.com/en-us/azure/storage/queues/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-queue-storage-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/queues/)
-
-### Microsoft Azure Quota Extension API
-
-The Microsoft Azure Quota Extension API allows users to programmatically manage and extend their resource quotas in the Azure cloud platform. With this API, developers can request additional resources or adjust existing quotas for services such as virtual machines, storage, or networking. By leveraging this API, organizations can easily scale their infrastructure to meet growing demands and ensure that they have sufficient resources to support their applications and workloads.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/quota/](https://learn.microsoft.com/en-us/rest/api/quota/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-quota-extension-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/quota/)
-
-### Microsoft Azure Recommendations API Client
-
-The Microsoft Azure Recommendations API Client is a tool that provides intelligent product recommendations to users based on their preferences and behaviors. By analyzing a vast amount of data, such as user interactions and purchase history, the API Client generates personalized recommendations that are tailored to each individual user. This helps businesses increase customer engagement and drive sales by offering relevant products or services to their target audience.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/recommendations-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure Recommendations Service
-
-Microsoft Azure Recommendations Service is a cloud-based tool that helps businesses enhance customer engagement and increase sales by providing personalized product recommendations. By analyzing customer behavior and preferences, the service generates targeted recommendations that are tailored to the individual user's needs and interests. This helps companies deliver more relevant and valuable content to their customers, ultimately leading to higher conversion rates and customer satisfaction.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/recommendationsservice-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Recovery Services Backup Client
-
-The Microsoft Azure Recovery Services Backup Client is a tool that provides backup and recovery solutions for protecting data stored on Windows machines. It allows users to easily schedule regular backups of their files, applications, and system settings to Azure cloud storage. In the event of a data loss or system failure, the Backup Client offers a fast and reliable way to restore the most recent copies of files and data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/backup/](https://learn.microsoft.com/en-us/azure/backup/)
-
-#### Properties
-
-- [OpenAPI](openapi/recoveryservicesbackupclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/backup/)
-
-### Microsoft Azure Recovery Services Client
-
-Microsoft Azure Recovery Services Client is a tool that enables users to back up their data and applications to the Microsoft Azure cloud. It allows users to protect their data from potential loss or corruption by creating and managing backups, as well as recovering files or entire systems in the event of a disaster.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/recovery-services?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/recovery-services?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/recoveryservicesclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/recovery-services?view=azure-dotnet)
-
-### Microsoft Azure Red Hat Open Shift 4 Client
-
-Microsoft Azure Red Hat Open Shift 4 Client is a powerful platform that enables enterprises to easily deploy, manage, and scale containerized applications in a secure and flexible environment. With this client, organizations can take advantage of Red Hat OpenShift's robust container orchestration capabilities while leveraging the scalability and reliability of Microsoft Azure.
-
-- **Human URL:** [https://docs.openshift.com/aro/4/welcome/index.html](https://docs.openshift.com/aro/4/welcome/index.html)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-red-hat-openshift-4-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://docs.openshift.com/aro/4/welcome/index.html)
-
-### Microsoft Azure Red Hat Open Shift Client
-
-The Microsoft Azure Red Hat OpenShift Client is a cloud-based service that allows users to deploy, manage, and scale containerized applications. By integrating Red Hat OpenShift technology with Microsoft Azure's powerful cloud platform, users can take advantage of a flexible, scalable, and secure environment for developing and deploying applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/openshift/](https://learn.microsoft.com/en-us/azure/openshift/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-red-hat-openshift-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/openshift/)
-
-### Microsoft Azure Redis Enterprise
-
-Microsoft Azure Redis Enterprise is a fully managed, in-memory data store that enables users to build high-performance, low-latency applications at scale. With its advanced caching capabilities and support for data structures such as strings, lists, sets, and hashes, Azure Redis Enterprise provides a powerful solution for handling large volumes of data in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/)
-
-#### Properties
-
-- [OpenAPI](openapi/redisenterprise-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/)
-
-### Microsoft Azure Redis Enterprise Management Client
-
-Microsoft Azure Redis Enterprise Management Client is a tool used to efficiently manage enterprise-level Redis caches on the Azure cloud platform. With this client, users can easily create, configure, monitor, and scale their Redis caches, allowing for increased performance and reliability of their applications. The client also provides features such as data persistence, failover support, and security enhancements to ensure that Redis caches are always available and secure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.redisenterprise-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.redisenterprise-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/redisenterprisemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.redisenterprise-readme?view=azure-dotnet)
-
-### Microsoft Azure Redis Management Client
-
-The Microsoft Azure Redis Management Client is a tool designed to help users manage and monitor their Redis cache instances that are hosted on the Azure cloud platform. It provides a user-friendly interface for administrators to create, update, and delete Redis cache resources, as well as view key performance metrics and monitor usage trends. The client also offers automated scaling capabilities, allowing users to easily adjust the capacity of their cache instances based on demand.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/)
-
-#### Properties
-
-- [OpenAPI](openapi/redismanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/)
-
-### Microsoft Azure Relay API
-
-Microsoft Azure Relay API provides a secure way to establish communication between on-premises and cloud-based applications, enabling seamless data exchange and interaction between different environments. By acting as a bridge between the two, the Azure Relay API allows for real-time messaging and event-driven scenarios, making it easier for organizations to integrate their systems and services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/relay/](https://learn.microsoft.com/en-us/rest/api/relay/)
-
-#### Properties
-
-- [OpenAPI](openapi/relay-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/relay/)
-
-### Microsoft Azure Remediations Client
-
-Microsoft Azure Remediations Client is a tool that helps organizations identify and address security vulnerabilities within their Azure cloud environment. The client scans the organization's Azure resources for misconfigurations, unauthorized access, or other potential security risks, and then provides recommendations for remediation.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/mem/intune/fundamentals/remediations](https://learn.microsoft.com/en-us/mem/intune/fundamentals/remediations)
-
-#### Properties
-
-- [OpenAPI](openapi/remediationsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/mem/intune/fundamentals/remediations)
-
-### Microsoft Azure Reservation API
-
-The Microsoft Azure Reservation API allows users to manage and optimize their cloud resources by enabling them to pre-purchase Azure services like virtual machines, databases, and storage for a specified period of time at a discounted rate. By making reservations in advance, users can ensure availability and capacity for their workloads while also saving costs compared to on-demand pricing.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/reservation-apis](https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/reservation-apis)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-reservation-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/reservation-apis)
-
-### Microsoft Azure Resource Graph
-
-Microsoft Azure Resource Graph is a powerful and flexible tool that allows users to quickly query and analyze their Azure resources at scale. By leveraging the Azure Resource Graph, users can retrieve information about their resources, relationships, and configurations in a fast and efficient manner.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/resource-graph/](https://learn.microsoft.com/en-us/azure/governance/resource-graph/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-resource-graph-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/resource-graph/)
-
-### Microsoft Azure Resource Graph Query
-
-Microsoft Azure Resource Graph Query is a powerful tool that allows users to quickly and easily explore and analyze their Azure resources. With Resource Graph Query, users can run complex queries to gain insights into resource inventory, configuration, and relationships. This tool helps users identify trends, troubleshoot issues, and optimize their infrastructure by providing a comprehensive view of their Azure environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/governance/resource-graph/](https://learn.microsoft.com/en-us/azure/governance/resource-graph/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-resource-graph-query-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/governance/resource-graph/)
-
-### Microsoft Azure Resource Health Metadata API Client
-
-The Microsoft Azure Resource Health Metadata API Client is a tool designed to provide developers with easy access to detailed information about the health status of their Azure resources. By utilizing this API client, users can quickly retrieve data related to the operational status, availability, and performance of their resources, helping them to make informed decisions and take proactive steps to maintain the reliability and functionality of their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/resource-health-metadata/list?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/resource-health-metadata/list?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/resourcehealthmetadata-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/resource-health-metadata/list?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure Resource Management Client
-
-The Microsoft Azure Resource Management Client is a tool that allows users to manage their Azure resources in a more efficient and streamlined manner. With this client, users can easily create, deploy, update, and delete resources such as virtual machines, databases, web apps, and more all from a single interface. It also enables users to define and enforce policies for their resources, track usage and performance, and automate resource management tasks through scripts and templates.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/](https://learn.microsoft.com/en-us/azure/azure-resource-manager/)
-
-#### Properties
-
-- [OpenAPI](openapi/resourcemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/)
-- [API Reference](https://learn.microsoft.com/en-us/rest/api/resources/)
-
-### Microsoft Azure Resource Mover Service API
-
-The Microsoft Azure Resource Mover Service API is a tool designed to simplify the process of moving resources between different Azure regions or subscriptions. This API allows users to efficiently transfer resources such as virtual machines, storage accounts, and databases without the need to reconfigure them manually. By using the Resource Mover Service API, users can ensure seamless migration of resources with minimal downtime and disruptions to their operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/resource-mover/](https://learn.microsoft.com/en-us/azure/resource-mover/)
-
-#### Properties
-
-- [OpenAPI](openapi/resource-mover-service-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/resource-mover/)
-
-### Microsoft Azure Resource Private Link Client
-
-Microsoft Azure Resource Private Link Client is a service that helps to securely connect and access private resources within Azure. It allows users to create private endpoints to access Azure services such as storage accounts, databases, and other resources without exposing them to the public internet. By using Private Link Client, users can ensure that their data remains secure and confidential by restricting access only to authorized users and applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/private-link/](https://learn.microsoft.com/en-us/azure/private-link/)
-
-#### Properties
-
-- [OpenAPI](openapi/resourceprivatelinkclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/private-link/)
-
-### Microsoft Azure Routing Configuration
-
-Microsoft Azure Routing Configuration allows users to define and manage routes for directing network traffic within their Azure virtual network. By setting up routing tables, users can control how traffic is routed between subnets, virtual networks, and external networks. This configuration enables users to ensure that network traffic is efficiently and securely directed to its intended destination.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/routingconfiguration-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview)
-
-### Microsoft Azure Run Commands Client
-
-Microsoft Azure Run Commands Client is a tool that allows users to remotely execute commands on virtual machines and cloud services running on the Azure platform. This client provides a secure and efficient way to manage and troubleshoot resources in the Azure environment without needing direct access to the virtual machines. With the Run Commands Client, users can easily run scripts, install software, configure settings, and perform other maintenance tasks on Azure VMs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-machines/windows/run-command](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/run-command)
-
-#### Properties
-
-- [OpenAPI](openapi/runcommandsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/run-command)
-
-### Microsoft Azure Scheduled Query Rules API
-
-The Microsoft Azure Scheduled Query Rules API allows users to create and manage scheduled query rules that monitor and analyze data for potential issues or anomalies. By defining specific query rules and setting a schedule for when they should be executed, users can proactively detect and address any issues in their Azure environment. This API enables users to customize queries based on their specific needs and receive alerts or notifications when certain conditions are met.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/scheduled-query-rules?view=rest-monitor-2021-08-01](https://learn.microsoft.com/en-us/rest/api/monitor/scheduled-query-rules?view=rest-monitor-2021-08-01)
-
-#### Properties
-
-- [OpenAPI](openapi/scheduled-query-rules-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/scheduled-query-rules?view=rest-monitor-2021-08-01)
-
-### Microsoft Azure Scheduler Management Client
-
-The Microsoft Azure Scheduler Management Client is a tool that allows users to easily manage their scheduled jobs within the Azure cloud computing platform. This client provides an intuitive interface for creating, scheduling, and monitoring specific tasks and processes that need to be executed at certain times or intervals.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/scheduler/](https://learn.microsoft.com/en-us/azure/scheduler/)
-
-#### Properties
-
-- [OpenAPI](openapi/schedulermanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/scheduler/)
-
-### Microsoft Azure Schema Registry
-
-Microsoft Azure Schema Registry is a centralized repository that allows users to store and manage the schemas for their data in one place. It provides a platform for organizations to standardize their data structures and ensure consistency across all applications and services. By centralizing schemas, Azure Schema Registry helps to simplify data integration and governance processes, making it easier for teams to collaborate and share data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/event-hubs/schema-registry-overview](https://learn.microsoft.com/en-us/azure/event-hubs/schema-registry-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-schema-registry-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/event-hubs/schema-registry-overview)
-
-### Microsoft Azure Scope Connections
-
-Microsoft Azure ScopeConnections is a feature that allows users to control the scope of connections within their Azure environment. With ScopeConnections, users can define specific connections and the boundaries within which those connections can operate. This capability enhances security by restricting access to resources and services only to authorized parties, while also streamlining network management and optimizing performance.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/networkmanager/scope-connections/create-or-update?view=rest-networkmanager-2023-11-01](https://learn.microsoft.com/en-us/rest/api/networkmanager/scope-connections/create-or-update?view=rest-networkmanager-2023-11-01)
-
-#### Properties
-
-- [OpenAPI](openapi/scopeconnections-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/networkmanager/scope-connections/create-or-update?view=rest-networkmanager-2023-11-01)
-
-### Microsoft Azure Sea Breeze Management Client
-
-Microsoft Azure Sea Breeze Management Client is a powerful tool that allows users to efficiently manage and monitor their Azure resources. With this client, users can easily monitor the health and performance of their applications, set up alerts for important metrics, and automate various tasks to streamline their operations. The client also offers comprehensive reporting features, giving users valuable insights into their Azure environment and helping them make informed decisions.
-
-- **Human URL:** [https://github.com/Azure/service-fabric-issues/issues/1021](https://github.com/Azure/service-fabric-issues/issues/1021)
-
-#### Properties
-
-- [OpenAPI](openapi/seabreezemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://github.com/Azure/service-fabric-issues/issues/1021)
-
-### Microsoft Azure Search Index Client
-
-The Microsoft Azure Search Index Client is a tool that allows developers to create and manage search indexes within their applications. This client enables users to easily integrate powerful search capabilities into their services, making it easier for end-users to find relevant information quickly. With the Index Client, developers can define the structure of their search indexes, upload and manage content, perform advanced search queries, and retrieve search results efficiently.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azure-search-documents/azure.search.documents.indexes.searchindexclient?view=azure-python](https://learn.microsoft.com/en-us/python/api/azure-search-documents/azure.search.documents.indexes.searchindexclient?view=azure-python)
-
-#### Properties
-
-- [OpenAPI](openapi/searchindexclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azure-search-documents/azure.search.documents.indexes.searchindexclient?view=azure-python)
-
-### Microsoft Azure Search Management Client
-
-The Microsoft Azure Search Management Client is a software tool that allows users to easily manage and interact with their search indexes and search services on the Azure cloud platform. With this client, users can create, configure, and manage search indexes, as well as monitor the performance of their search services. It provides a user-friendly interface for performing tasks such as adding documents to an index, setting up search filters, and analyzing search results.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azure-mgmt-search/azure.mgmt.search.searchmanagementclient?view=azure-python](https://learn.microsoft.com/en-us/python/api/azure-mgmt-search/azure.mgmt.search.searchmanagementclient?view=azure-python)
-
-#### Properties
-
-- [OpenAPI](openapi/searchmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azure-mgmt-search/azure.mgmt.search.searchmanagementclient?view=azure-python)
-
-### Microsoft Azure Search Service Client
-
-Microsoft Azure Search Service Client is a powerful tool that allows developers to easily integrate search functionality into their applications. With this service, users can search for specific data within their databases, websites, or other sources, enabling them to quickly find the information they need. The Search Service Client also offers advanced features such as faceted search, geospatial search, and fuzzy matching, which enhance the search experience for users.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/search/](https://learn.microsoft.com/en-us/azure/search/)
-
-#### Properties
-
-- [OpenAPI](openapi/searchserviceclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/search/)
-
-### Microsoft Azure Security Admin Configuration
-
-Microsoft Azure SecurityAdminConfiguration is a service that helps organizations secure their Azure environments by providing advanced configuration settings and monitoring capabilities. This service allows users to customize security settings, create access controls, and monitor compliance with industry security standards. With SecurityAdminConfiguration, organizations can strengthen their security posture and mitigate potential risks associated with cloud computing.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/security/](https://learn.microsoft.com/en-us/azure/security/)
-
-#### Properties
-
-- [OpenAPI](openapi/securityadminconfiguration-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/security/)
-
-### Microsoft Azure Security and Compliance APIs
-
-Microsoft Azure Security And Compliance APIs provide developers with a robust set of tools to help secure their applications and ensure compliance with industry regulations. These APIs enable developers to implement security controls such as access management, encryption, and threat detection, as well as monitor compliance with regulations like GDPR and HIPAA.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/compliance/](https://learn.microsoft.com/en-us/azure/compliance/)
-
-#### Properties
-
-- [OpenAPI](openapi/securityandcomplianceapis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/compliance/)
-
-### Microsoft Azure Security Center
-
-Microsoft Azure Security Center is a comprehensive cloud security solution that provides advanced threat protection across all hybrid cloud workloads. It continuously monitors and analyzes security data from various sources, such as Azure resources, networks, and applications, to identify and respond to potential security threats in real-time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/security/](https://learn.microsoft.com/en-us/azure/security/)
-
-#### Properties
-
-- [OpenAPI](openapi/security-center-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/security/)
-
-### Microsoft Azure Security Insights
-
-Microsoft Azure Security Insights is a comprehensive security solution that provides deep visibility into the security posture of an organization's Azure environment. It monitors and analyzes security events and alerts from various sources, such as Azure Security Center, Azure Sentinel, and third-party security tools, to detect potential threats and vulnerabilities.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.securityinsights-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.securityinsights-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/security-insights-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.securityinsights-readme?view=azure-dotnet)
-
-### Microsoft Azure Security User Configuration
-
-Microsoft Azure Security User Configuration allows users to configure and manage security settings for their Azure resources. This includes setting up user access controls, defining permissions and roles, and implementing security policies to protect data and applications hosted on the Azure platform. Users can customize authentication methods, enable multi-factor authentication, and monitor user activity to ensure compliance with security standards.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/security/](https://learn.microsoft.com/en-us/azure/security/)
-
-#### Properties
-
-- [OpenAPI](openapi/securityuserconfiguration-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/security/)
-
-### Microsoft Azure Service Bus Management Client
-
-The Microsoft Azure Service Bus Management Client is a powerful tool that allows users to manage and monitor their Azure Service Bus resources efficiently. With this client, users can create and manage namespaces, queues, topics, subscriptions, and relays within their Azure environment. The client also provides advanced features such as message routing, filtering, and dead-letter queues to help users optimize their message delivery processes.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/service-bus-messaging/](https://learn.microsoft.com/en-us/azure/service-bus-messaging/)
-
-#### Properties
-
-- [OpenAPI](openapi/servicebusmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/service-bus-messaging/)
-- [API Reference](https://learn.microsoft.com/en-us/rest/api/servicebus/)
-
-### Microsoft Azure Service Fabric Client APIs
-
-Microsoft Azure Service Fabric Client APIs provide developers with a way to interact with and manage service instances deployed in a Service Fabric cluster. These APIs allow developers to perform various operations such as creating, deploying, and upgrading services, as well as monitoring the health and status of services within the cluster.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/servicefabric/sfclient-index](https://learn.microsoft.com/en-us/rest/api/servicefabric/sfclient-index)
-
-#### Properties
-
-- [OpenAPI](openapi/service-fabric-client-apis-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/servicefabric/sfclient-index)
-
-### Microsoft Azure Service Fabric Management Client
-
-Microsoft Azure Service Fabric Management Client is a tool that allows users to easily manage and monitor their Service Fabric applications. With this client, users can easily deploy, scale, and update their applications with a few simple clicks. The management client also provides users with real-time insights into the health and performance of their applications, allowing them to quickly identify and address any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/service-fabric/](https://learn.microsoft.com/en-us/azure/service-fabric/)
-
-#### Properties
-
-- [OpenAPI](openapi/servicefabricmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/service-fabric/)
-
-### Microsoft Azure Service Map
-
-Microsoft Azure Service Map is a cloud-based service that provides a visual representation of the dependencies and relationships between different components of an application or service running on Microsoft Azure. It helps users understand how all the elements of their infrastructure are interconnected and how they interact with each other. Service Map automatically discovers and maps out all the resources, including virtual machines, databases, and network connections.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-maps/](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-#### Properties
-
-- [OpenAPI](openapi/service-map-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-maps/)
-
-### Microsoft Azure Shared Gallery Service Client
-
-Microsoft Azure Shared Gallery Service Client is a tool that allows users to easily access and manage shared image resources in the Azure Gallery. Users can upload, store, and share image templates, virtual machines, and other resources in a centralized location. The Shared Gallery Service Client provides a user-friendly interface for browsing, searching, and deploying shared resources, making it easier for teams to collaborate and streamline their development processes.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-machines/share-gallery-direct](https://learn.microsoft.com/en-us/azure/virtual-machines/share-gallery-direct)
-
-#### Properties
-
-- [OpenAPI](openapi/sharedgalleryserviceclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-machines/share-gallery-direct)
-
-### Microsoft Azure Shared Image Gallery Service Client
-
-Microsoft Azure Shared Image Gallery Service Client is a tool that allows users to efficiently create, manage, and share custom virtual machine images across their organization. With this service, users can easily capture and deploy images of their virtual machines, ensuring consistency and reliability across all instances.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-machines/shared-image-galleries](https://learn.microsoft.com/en-us/azure/virtual-machines/shared-image-galleries)
-
-#### Properties
-
-- [OpenAPI](openapi/sharedimagegalleryserviceclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-machines/shared-image-galleries)
-
-### Microsoft Azure Signal R Management Client
-
-Microsoft Azure Signal R Management Client is a powerful tool that allows developers to easily manage and monitor their Signal R applications on the Azure platform. With the Management Client, users can configure and scale their real-time web applications, monitor traffic and performance, and troubleshoot any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-signalr/](https://learn.microsoft.com/en-us/azure/azure-signalr/)
-
-#### Properties
-
-- [OpenAPI](openapi/signalrmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-signalr/)
-
-### Microsoft Azure Site Recovery Management Client
-
-The Microsoft Azure Site Recovery Management Client is a tool that allows users to manage and monitor their disaster recovery plans on the Azure platform. This client provides a centralized dashboard for setting up, configuring, and testing disaster recovery scenarios, as well as for monitoring the health and performance of replication and failover processes. Users can easily initiate failovers, perform test failovers, and track replication progress, all from one convenient interface.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/site-recovery/](https://learn.microsoft.com/en-us/azure/site-recovery/)
-
-#### Properties
-
-- [OpenAPI](openapi/siterecoverymanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/site-recovery/)
-
-### Microsoft Azure Site Recovery Management Service API
-
-The Microsoft Azure Site Recovery Management Service API is a tool that allows users to manage and monitor their disaster recovery processes on the Azure cloud platform. This API enables users to automate the configuration, monitoring, and failover processes for their virtual machines and physical servers.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/site-recovery/](https://learn.microsoft.com/en-us/rest/api/site-recovery/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-site-recovery-management-service-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/site-recovery/)
-
-### Microsoft Azure Snapshots Client
-
-The Microsoft Azure Snapshots Client is a tool that provides users with the ability to create and manage snapshots of virtual machines in the Azure cloud platform. Snapshots are essentially point-in-time copies of a virtual machine's disk that can be used for backup, disaster recovery, or testing purposes. With the Azure Snapshots Client, users can easily schedule, create, and delete snapshots, as well as restore a virtual machine to a previous state using a snapshot.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-machines/snapshot-copy-managed-disk](https://learn.microsoft.com/en-us/azure/virtual-machines/snapshot-copy-managed-disk)
-
-#### Properties
-
-- [OpenAPI](openapi/snapshotsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-machines/snapshot-copy-managed-disk)
-
-### Microsoft Azure Software Plan Rp
-
-Microsoft Azure Software Plan Rp is a comprehensive software solution that provides businesses with the tools they need to efficiently manage their operations in the cloud. With features such as virtual machines, networking, storage, and databases, this plan allows organizations to streamline their workflows and maximize productivity.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/software-plan-rp-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Spark Client
-
-Microsoft Azure Spark Client is a powerful tool that allows users to easily interact with Apache Spark through the Azure cloud platform. With this client, users can efficiently execute Spark jobs, analyze large datasets, and build data processing pipelines. The client provides a user-friendly interface that simplifies the process of writing and executing Spark applications, making it accessible to users of all skill levels.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azure-synapse-spark/azure.synapse.spark.sparkclient?view=azure-python-preview](https://learn.microsoft.com/en-us/python/api/azure-synapse-spark/azure.synapse.spark.sparkclient?view=azure-python-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/sparkclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azure-synapse-spark/azure.synapse.spark.sparkclient?view=azure-python-preview)
-
-### Microsoft Azure Speaker Identification API
-
-Microsoft Azure Speaker Identification API is a tool that allows users to identify and verify speakers in audio recordings. By analyzing features such as voice patterns, pitch, and tempo, this API can help users accurately determine the identity of the speaker in a given audio file. This can be particularly useful in various applications, such as call center analytics, security and surveillance, and speech recognition technology.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/speakerrecognition/](https://learn.microsoft.com/en-us/rest/api/speakerrecognition/)
-
-#### Properties
-
-- [OpenAPI](openapi/speaker-identification-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/speakerrecognition/)
-
-### Microsoft Azure Speaker Verification API
-
-Microsoft Azure Speaker Verification API is a powerful tool that allows users to authenticate and verify the identity of individuals through their voice. By analyzing unique characteristics of a person's voice, such as pitch, tone, and accent, the API can accurately confirm a person's identity with a high level of accuracy.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/speakerrecognition/](https://learn.microsoft.com/en-us/rest/api/speakerrecognition/)
-
-#### Properties
-
-- [OpenAPI](openapi/speaker-verification-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/speakerrecognition/)
-
-### Microsoft Azure Speech Services API V20
-
-Microsoft Azure Speech Services API V20 is a powerful tool that allows developers to integrate cutting-edge speech recognition and synthesis capabilities into their applications. With this API, users can convert spoken language into text in real-time, enabling seamless voice-to-text transcription for a variety of use cases. Additionally, the API offers high-quality text-to-speech functionality, allowing applications to generate natural-sounding speech from written text.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/speech-services-api-v20-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-### Microsoft Azure Speech Services API V30
-
-The Microsoft Azure Speech Services API V3.0 is a powerful and versatile tool that allows developers to incorporate speech recognition and translation capabilities into their applications. With this API, users can easily transcribe spoken language into text, identify spoken language, convert text into natural sounding speech, and translate spoken language into different languages.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/speech-services-api-v30-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-### Microsoft Azure Speech Services API V31
-
-Microsoft Azure Speech Services API V31 is a powerful tool that enables developers to incorporate speech recognition and synthesis capabilities into their applications. With this API, users can convert spoken language into text and vice versa, making it easier for applications to understand and respond to human speech. This latest version of the API boasts improved accuracy, faster response times, and new features such as real-time translation and speaker diarization.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-speech-to-text](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-speech-to-text)
-
-#### Properties
-
-- [OpenAPI](openapi/speech-services-api-v31-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-speech-to-text)
-
-### Microsoft Azure Speech Services API V31preview1
-
-Microsoft Azure Speech Services API V31preview1 is a cutting-edge application programming interface that is designed to provide advanced speech recognition and speech-to-text conversion capabilities for developers. This powerful API allows users to easily integrate speech recognition functionality into their applications, allowing for seamless voice-controlled interactions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/speech-services-api-v31-preview1-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-### Microsoft Azure Speech Services API V32preview1
-
-Microsoft Azure Speech Services API V32preview1 is a cutting-edge tool that provides advanced speech recognition and synthesis capabilities. With this API, users can easily convert spoken language into text and vice versa, creating seamless interactions between human users and machines. This powerful tool also includes features such as speaker recognition, language identification, and keyword spotting, making it a versatile and indispensable solution for a wide range of applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/speech-services-api-v32-preview1-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-### Microsoft Azure Speech Services API V32preview2
-
-Microsoft Azure Speech Services API V32preview2 is a powerful tool that allows developers to integrate speech functionality into their applications. This API provides a wide range of features, including speech-to-text conversion, text-to-speech synthesis, and speech recognition capabilities. With the ability to support multiple languages and dialects, developers can create applications that cater to a global audience.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/speech-services-api-v32-preview2-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-### Microsoft Azure Spell Check Client
-
-Microsoft Azure Spell Check Client is a powerful tool that helps users detect and correct spelling errors in their text. With advanced algorithms and machine learning capabilities, this client is able to accurately detect misspelled words and suggest corrections in real-time. Users can easily integrate this spell check client into their applications and services, ensuring that their content is free of embarrassing typos and mistakes.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.language.spellcheck.spellcheckclient?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.language.spellcheck.spellcheckclient?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/spell-check-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.cognitiveservices.language.spellcheck.spellcheckclient?view=azure-dotnet)
-
-### Microsoft Azure Sphere Provider Client
-
-The Microsoft Azure Sphere Provider Client is a software tool developed by Microsoft that acts as a bridge between the Azure Sphere operating system and the Azure IoT service. It enables seamless communication and integration between Azure Sphere-powered devices and the Azure cloud platform, allowing for secure and reliable data exchange, remote monitoring, and management of connected devices.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure-sphere/?view=azure-sphere-integrated](https://learn.microsoft.com/en-us/azure-sphere/?view=azure-sphere-integrated)
-
-#### Properties
-
-- [OpenAPI](openapi/azuresphereproviderclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure-sphere/?view=azure-sphere-integrated)
-
-### Microsoft Azure SQL Database
-
-Microsoft Azure SQL Database is a cloud-based relational database service offered by Microsoft. It allows users to store and manage relational data in the cloud, eliminating the need for on-premises hardware and maintenance. With Azure SQL Database, users can scale their databases up or down as needed, ensuring optimal performance and cost efficiency. The service also offers built-in security features, automated backups, and high availability to ensure data is always accessible and protected.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-database-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/?view=azuresql)
-
-### Microsoft Azure SQL Database API Spec
-
-The Microsoft Azure SQL Database API Spec is a set of guidelines and specifications that define how developers can interact with Azure SQL Database through its API. It outlines the various endpoints, methods, parameters, and data formats that developers can use to query, manipulate, and manage data stored in Azure SQL Database. The API Spec also includes information on authentication, error handling, and best practices for working with the Azure SQL Database API.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/sql/](https://learn.microsoft.com/en-us/rest/api/sql/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-database-api-spec-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/sql/)
-
-### Microsoft Azure SQL Database Backup
-
-Microsoft Azure SQL Database Backup is a cloud-based service that allows users to create backups of their SQL databases stored in the Azure cloud. This service provides a secure and reliable way to protect critical data by creating scheduled backups that can be easily restored in case of data loss or corruption. Azure SQL Database Backup also offers features such as point-in-time restore and geo-redundant backups, ensuring that data is always available and protected against unforeseen events.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/database/automated-backups-overview?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/database/automated-backups-overview?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-database-backup-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/automated-backups-overview?view=azuresql)
-
-### Microsoft Azure SQL Database Capabilities
-
-Microsoft Azure SQL Database Capabilities provide organizations with a highly scalable, secure, and reliable cloud-based database solution. It enables businesses to easily manage and access their data while capitalizing on the benefits of a fully managed platform. With features such as automatic tuning, intelligent insights, and built-in high availability, Azure SQL Database ensures optimal performance and uptime for applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/database/?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/database/?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-database-capabilities-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/?view=azuresql)
-
-### Microsoft Azure SQL Database Datamasking Policies and Rules
-
-Microsoft Azure SQL Database Data Masking Policies and Rules is a feature that allows users to define and enforce data masking rules on sensitive data stored in Azure SQL databases. With this feature, users can easily specify which columns or fields in their database contain sensitive information, such as social security numbers or credit card numbers, and set up rules to dynamically mask this data to protect it from unauthorized access.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/database/dynamic-data-masking-overview?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/database/dynamic-data-masking-overview?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapiazure-sql-database-datamasking-policies-and-rules-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/dynamic-data-masking-overview?view=azuresql)
-
-### Microsoft Azure SQL Database Disaster Recovery Configurations
-
-Microsoft Azure SQL Database Disaster Recovery Configurations allow users to set up a failover environment in case of a disaster or outage. This includes configuring geo-replication to replicate data to a secondary region, setting up automatic failover to switch to the secondary region in case of an outage, and configuring point-in-time restore to recover data to a specific point in time.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/database/disaster-recovery-guidance?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/database/disaster-recovery-guidance?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapiazure-sql-database-disaster-recovery-configurations-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/disaster-recovery-guidance?view=azuresql)
-
-### Microsoft Azure SQL Database Import/export Spec
-
-The Microsoft Azure SQL Database Import/Export Spec provides functionality for importing and exporting data to and from Azure SQL databases. It allows users to effortlessly transfer data, schemas, and objects between on-premises SQL Server instances and Azure SQL databases. The Import/Export Spec tool streamlines the process of moving large amounts of data quickly and efficiently while ensuring data integrity and security.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/database/database-import-export-private-link?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/database/database-import-export-private-link?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-database-importexport-spec-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/database-import-export-private-link?view=azuresql)
-
-### Microsoft Azure SQL Database Replication Links
-
-Microsoft Azure SQL Database Replication Links is a feature that allows users to replicate data across different SQL databases within the Azure environment. With Replication Links, users can easily synchronize data between databases to ensure consistency and availability. This feature supports both one-way and bi-directional replication, allowing users to configure replication settings according to their specific needs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/database/replication-to-sql-database?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/database/replication-to-sql-database?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-database-replication-links-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/replication-to-sql-database?view=azuresql)
-
-### Microsoft Azure SQL Database Server Firewall Rules
-
-Microsoft Azure SQL Database Server Firewall Rules allow users to control access to their Azure SQL databases by defining rules that specify the IP addresses or IP address ranges that are allowed to connect to the server. This feature adds an additional layer of security to the database server by restricting access to only trusted sources. Users can create, modify, and delete firewall rules as needed to ensure that only authorized users are able to connect to the database server.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-sql/database/firewall-configure?view=azuresql](https://learn.microsoft.com/en-us/azure/azure-sql/database/firewall-configure?view=azuresql)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-database-server-firewall-rules-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-sql/database/firewall-configure?view=azuresql)
-
-### Microsoft Azure SQL Management Client
-
-The Microsoft Azure SQL Management Client is a powerful tool that allows users to easily manage and monitor their Azure SQL databases. With this client, users can perform a wide range of tasks such as creating, editing, and deleting databases, as well as managing permissions and backups. The client also provides real-time monitoring and alerting capabilities, allowing users to quickly identify and respond to any issues or performance bottlenecks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sql-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sql-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/sqlmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sql-readme?view=azure-dotnet)
-
-### Microsoft Azure SQL Server API Spec
-
-The Microsoft Azure SQL Server API Spec is a detailed document that outlines the guidelines and specifications for interacting with the Azure SQL Server API. It provides developers with information on how to make requests, handle responses, and utilize various functionalities of the SQL Server API. This includes details on authentication, endpoints, parameters, payload formats, error handling, and other important aspects of API integration.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/sql/](https://learn.microsoft.com/en-us/rest/api/sql/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-sql-server-api-spec-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/sql/)
-
-### Microsoft Azure SQL Virtual Machine Management Client
-
-Microsoft Azure SQL Virtual Machine Management Client is a tool that allows users to manage virtual machines running SQL Server on the Microsoft Azure cloud platform. With this client, users can easily provision, configure, and monitor virtual machines, as well as manage storage, networking, and security settings. Additionally, the client enables users to automate common tasks and perform routine maintenance on their virtual machines, ensuring optimal performance and efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sqlvirtualmachine-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sqlvirtualmachine-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/sqlvirtualmachinemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.sqlvirtualmachine-readme?view=azure-dotnet)
-
-### Microsoft Azure Stack Azure Bridge Client
-
-Microsoft Azure Stack Azure Bridge Client is a tool designed to connect on-premises data centers to the Azure public cloud. It acts as a bridge between the two environments, allowing organizations to seamlessly extend their infrastructure and services to the cloud. The Azure Bridge Client enables easy access to Azure resources, simplifies hybrid cloud management, and provides a unified platform for deploying, managing, and monitoring applications across both on-premises and cloud environments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure-stack/](https://learn.microsoft.com/en-us/azure-stack/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-stack-azure-bridge-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure-stack/)
-
-### Microsoft Azure Stack Hci
-
-Microsoft Azure Stack HCI is a hyper-converged infrastructure solution that brings together compute, storage, and networking resources into a single software-defined platform. This allows organizations to seamlessly extend their on-premises data centers to the cloud, creating a hybrid environment that offers the flexibility and scalability of the public cloud with the security and control of a private data center.
-
-- **Human URL:** [https://docs.azure.cn/en-us/azure-stack/hci/](https://docs.azure.cn/en-us/azure-stack/hci/)
-
-#### Properties
-
-- [OpenAPI](openapi/azurestackhci-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://docs.azure.cn/en-us/azure-stack/hci/)
-
-### Microsoft Azure Stack Hci Common
-
-Microsoft Azure Stack HCI Common is a software solution that enables organizations to run virtualized workloads on their on-premises infrastructure. It provides a consistent and seamless experience for managing and deploying applications across hybrid cloud environments. With Azure Stack HCI Common, users can leverage the power of Microsoft Azure services and infrastructure while maintaining control over their own data and resources.
-
-- **Human URL:** [https://docs.azure.cn/en-us/azure-stack/hci/](https://docs.azure.cn/en-us/azure-stack/hci/)
-
-#### Properties
-
-- [OpenAPI](openapi/azurestackhci-common-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://docs.azure.cn/en-us/azure-stack/hci/)
-
-### Microsoft Azure Static Sites API Client
-
-The Microsoft Azure Static Sites API Client is a tool that allows developers to interact with the Azure Static Sites API, enabling them to manage and deploy static websites hosted on the Azure platform. With this client, users can easily create, update, and delete static sites, as well as configure custom domain names and SSL certificates.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/static-sites/get-static-site?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/static-sites/get-static-site?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/staticsites-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/static-sites/get-static-site?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure Stor Simple Management Client
-
-The Microsoft Azure StorSimple Management Client is a tool that allows users to easily manage their StorSimple devices and data in the cloud. This client provides a centralized platform for monitoring and configuring storage virtual machines, as well as optimizing data usage through automated tiering and data deduplication. Users can easily access and manage their data from anywhere, ensuring that all valuable information is secure and easily accessible.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storsimple/](https://learn.microsoft.com/en-us/azure/storsimple/)
-
-#### Properties
-
-- [OpenAPI](openapi/storsimplemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storsimple/)
-
-### Microsoft Azure Stor Simple8000series Management Client
-
-Sure! The Microsoft Azure StorSimple 8000 series Management Client is a tool that allows users to easily manage and monitor their StorSimple devices within the Microsoft Azure cloud platform. With this client, users can perform tasks such as creating and managing virtual volumes, monitoring storage capacity and performance, and configuring backup and restore options.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-storsimple8000series-readme?view=azure-node-latest](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-storsimple8000series-readme?view=azure-node-latest)
-
-#### Properties
-
-- [OpenAPI](openapi/storsimple8000seriesmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-storsimple8000series-readme?view=azure-node-latest)
-
-### Microsoft Azure Storage
-
-Microsoft Azure Storage is a cloud storage solution that allows users to store and manage large amounts of data in a secure and scalable way. It provides a range of storage options, including blob storage for unstructured data, table storage for structured data, file storage for file-based data, and queue storage for message-based communication. Azure Storage also offers features such as data encryption, replication, and access control, ensuring that data is protected and always available.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/](https://learn.microsoft.com/en-us/azure/storage/)
-
-#### Properties
-
-- [OpenAPI](openapi/storage-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/)
-
-### Microsoft Azure Storage Actions Management Client
-
-The Microsoft Azure Storage Actions Management Client is a tool that enables users to efficiently manage and automate actions within their Azure storage accounts. This client allows users to easily create, update, and delete various storage actions, such as uploading, downloading, and deleting files, as well as managing permissions and access controls.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storageactions-readme?view=azure-dotnet-preview](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storageactions-readme?view=azure-dotnet-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/storageactionsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storageactions-readme?view=azure-dotnet-preview)
-
-### Microsoft Azure Storage Cache Mgmt Client
-
-The Microsoft Azure Storage Cache Mgmt Client is a tool that allows users to manage and optimize their cache storage within Azure Storage. This client provides functionalities such as creating, deleting, updating, and monitoring cache storage to help efficiently store and retrieve data. By utilizing the Cache Mgmt Client, users can improve the performance and responsiveness of their applications by effectively managing their cache storage resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storagecache-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storagecache-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/storage-cache-mgmt-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storagecache-readme?view=azure-dotnet)
-
-### Microsoft Azure Storage Import Export
-
-Microsoft Azure Storage Import Export is a service that allows users to securely transfer large amounts of data to and from Azure storage accounts using physical storage devices such as hard drives or Azure Blob Storage. This service is ideal for customers who need to move large datasets quickly, securely, and cost-effectively without relying solely on internet bandwidth.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/import-export/](https://learn.microsoft.com/en-us/azure/import-export/)
-
-#### Properties
-
-- [OpenAPI](openapi/storageimportexport-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/import-export/)
-
-### Microsoft Azure Storage Management
-
-Microsoft Azure Storage Management is a comprehensive platform that allows users to store, manage, and access data on Microsoft's cloud storage service, Azure. With Azure Storage Management, users can easily create and manage storage accounts, upload and download files, and set access permissions for data stored in the cloud. The platform also offers features such as automated backups, data encryption, and seamless integration with other Azure services.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage/](https://learn.microsoft.com/en-us/azure/storage/)
-
-#### Properties
-
-- [OpenAPI](openapi/storagemanagement-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage/)
-
-### Microsoft Azure Storage Management Client
-
-Microsoft Azure Storage Management Client is a tool used to manage and monitor storage resources in the Microsoft Azure cloud platform. It allows users to create, delete, and modify storage accounts, as well as configure settings such as access permissions and encryption. Additionally, the client provides insights into storage usage and performance metrics, helping users optimize their storage resources for cost-effectiveness and efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storage-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storage-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/storagemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storage-readme?view=azure-dotnet)
-
-### Microsoft Azure Storage Mover Client
-
-The Microsoft Azure Storage Mover Client is a tool that allows users to easily transfer data between different storage accounts within the Azure cloud platform. This client provides a seamless and efficient way to move large amounts of data, whether it be files, images, videos, or other types of data, from one storage account to another. By using the Storage Mover Client, users can easily manage and organize their data storage, ensuring it is stored in the most secure and efficient manner.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/storage-mover/](https://learn.microsoft.com/en-us/azure/storage-mover/)
-
-#### Properties
-
-- [OpenAPI](openapi/storagemoverclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/storage-mover/)
-
-### Microsoft Azure Storage Pool Management
-
-Microsoft Azure Storage Pool Management is a service that allows organizations to efficiently manage their storage resources within the Azure cloud platform. With Storage Pool Management, users can easily create, configure, and manage storage pools to optimize performance, availability, and cost.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storagepool-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storagepool-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/storagepoolmanagement-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.storagepool-readme?view=azure-dotnet)
-
-### Microsoft Azure Stream Analytics Management Client
-
-Microsoft Azure Stream Analytics Management Client is a tool that allows users to monitor and manage their Stream Analytics jobs in the Azure cloud platform. With this client, users can easily create, deploy, and manage complex queries and transformations on real-time streaming data. The Management Client provides a user-friendly interface for configuring input and output sources, setting up alerts and notifications, and monitoring the performance of their Stream Analytics jobs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/stream-analytics/](https://learn.microsoft.com/en-us/azure/stream-analytics/)
-
-#### Properties
-
-- [OpenAPI](openapi/streamanalyticsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/stream-analytics/)
-
-### Microsoft Azure Subscription Client
-
-A Microsoft Azure Subscription Client is a user or organization that has purchased a subscription to Microsoft Azure, a cloud computing platform that offers a wide range of services and resources for building, deploying, and managing applications and services through Microsoft's global network of data centers.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-subscriptions-readme?view=azure-node-latest](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-subscriptions-readme?view=azure-node-latest)
-
-#### Properties
-
-- [OpenAPI](openapi/subscriptionclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-subscriptions-readme?view=azure-node-latest)
-
-### Microsoft Azure Subscription Definitions Client
-
-The Microsoft Azure Subscription Definitions Client is a tool that allows users to manage and define their Azure subscriptions. With this client, users can easily view and update the details of their Azure subscriptions, including billing information, resource quotas, and access permissions. This tool enables users to customize and organize their subscriptions to best suit their needs, enabling them to effectively utilize the resources available to them on the Azure cloud platform.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-subscriptions](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-subscriptions)
-
-#### Properties
-
-- [OpenAPI](openapi/subscriptiondefinitionsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-subscriptions)
-
-### Microsoft Azure Subscriptions Management Client
-
-The Microsoft Azure Subscriptions Management Client is a tool that helps users effectively manage their Azure subscriptions. It allows users to easily view and update their subscription details, such as billing information, usage reports, and access control. With this client, users can easily track their resource usage, allocate costs, and optimize their subscription plans to fit their specific needs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/)
-
-#### Properties
-
-- [OpenAPI](openapi/subscriptionsmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/)
-
-### Microsoft Azure Support
-
-Microsoft Azure Support provides technical assistance and guidance to customers using the Azure cloud computing platform. The support team is available 24/7 to help with troubleshooting issues, answering questions, and addressing any concerns that users may have. They offer various levels of support, ranging from basic to premium, to cater to the specific needs and requirements of individual customers.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftsupport-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Synapse Management Client
-
-Microsoft Azure Synapse Management Client is a powerful tool that allows users to easily manage and monitor their data workloads in Azure Synapse Analytics. With this tool, users can perform tasks such as creating and monitoring Apache Spark pools, viewing and analyzing query performance metrics, managing data integrations, and configuring access controls.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azure-mgmt-synapse/azure.mgmt.synapse.synapsemanagementclient?view=azure-python](https://learn.microsoft.com/en-us/python/api/azure-mgmt-synapse/azure.mgmt.synapse.synapsemanagementclient?view=azure-python)
-
-#### Properties
-
-- [OpenAPI](openapi/synapsemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azure-mgmt-synapse/azure.mgmt.synapse.synapsemanagementclient?view=azure-python)
-
-### Microsoft Azure Synapse SQL V3 Management Client
-
-Microsoft Azure Synapse SQL V3 Management Client is a tool designed to help users manage and optimize their data processing and analytics workflows in the Azure Synapse ecosystem. With this client, users can easily create, configure, and monitor data pipelines, query data lakes, and orchestrate data integration tasks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/synapse-analytics/sql/connect-overview](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql/connect-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/synapsesqlv3managementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql/connect-overview)
-
-### Microsoft Azure Syntex
-
-Microsoft Azure Syntex is a content understanding service that combines AI and machine learning to automatically categorize and extract valuable information from unstructured data. With Azure Syntex, organizations can easily manage, process, and analyze large amounts of content, turning it into structured data that can be used for decision-making and business insights.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/microsoft-365/syntex/](https://learn.microsoft.com/en-us/microsoft-365/syntex/)
-
-#### Properties
-
-- [OpenAPI](openapi/syntex-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/microsoft-365/syntex/)
-
-### Microsoft Azure System Center Virtual Machine Manager
-
-Microsoft Azure System Center Virtual Machine Manager is a powerful management tool that enables organizations to easily and efficiently create, deploy, and manage virtual machines in their Azure cloud environment. With this tool, users can centralize and automate the management of virtual machines, from provisioning to monitoring and troubleshooting.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/system-center/vmm/?view=sc-vmm-2025](https://learn.microsoft.com/en-us/system-center/vmm/?view=sc-vmm-2025)
-
-#### Properties
-
-- [OpenAPI](openapi/scvmm-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/system-center/vmm/?view=sc-vmm-2025)
-
-### Microsoft Azure Target Metadata Types
-
-Microsoft Azure Target Metadata Types is a feature that allows businesses to define various types of metadata for their Azure resources. This feature enables users to categorize and organize their resources in a more structured manner, making it easier to manage and track them. With Target Metadata Types, users can create custom metadata fields such as labels, tags, and properties to provide additional context and information about their resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/data-factory/control-flow-get-metadata-activity](https://learn.microsoft.com/en-us/azure/data-factory/control-flow-get-metadata-activity)
-
-#### Properties
-
-- [OpenAPI](openapi/target-metadata-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/data-factory/control-flow-get-metadata-activity)
-
-### Microsoft Azure Target Types
-
-Microsoft Azure Target Types allows users to define the specific targets they want to monitor and manage within their Azure environment. This feature provides a way to classify and organize different types of resources based on their function, location, or any other relevant criteria.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/chaosstudio/target-types/list?view=rest-chaosstudio-2024-01-01](https://learn.microsoft.com/en-us/rest/api/chaosstudio/target-types/list?view=rest-chaosstudio-2024-01-01)
-
-#### Properties
-
-- [OpenAPI](openapi/target-types-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/chaosstudio/target-types/list?view=rest-chaosstudio-2024-01-01)
-
-### Microsoft Azure Template Specs Client
-
-Microsoft Azure Template Specs Client is a tool designed to help users easily create, manage, and deploy Azure Resource Manager templates. With this client, users can generate template specs that encapsulate ARM templates, parameter files, and configuration files, making it easier to reuse and share templates across different projects and environments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/template-specs](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/template-specs)
-
-#### Properties
-
-- [OpenAPI](openapi/templatespecsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/template-specs)
-
-### Microsoft Azure Tenant Action Groups API
-
-The Microsoft Azure Tenant Action Groups API allows users to programmatically manage and configure action groups within their Azure tenant. Action groups are collections of notification preferences and actions that can be triggered in response to alerts and events in Azure Monitor. With this API, users can create, update, and delete action groups, as well as configure the specific notifications and actions to be taken when a particular event occurs.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/action-groups](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/action-groups)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-tenant-action-groups-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/action-groups)
-
-### Microsoft Azure Tenant Level Activity Log Alert Rules In Alerts Management Resource Provider
-
-Microsoft Azure Tenant Level Activity Log Alert Rules in Alerts Management Resource Provider allows users to create and manage customized alert rules based on activity log events at the tenant level within Azure. This feature enables organizations to proactively monitor and respond to specific activities or behaviors within their Azure environment, helping to identify and mitigate potential security and compliance risks.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-create-activity-log-alert-rule](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-create-activity-log-alert-rule)
-
-#### Properties
-
-- [OpenAPI](openapitenant-level-activity-log-alert-rules-in-alertsmanagement-resource-provider-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-create-activity-log-alert-rule)
-
-### Microsoft Azure Test Base
-
-Microsoft Azure Test Base is a cloud-based testing platform that allows users to easily create, manage, and run tests for their applications. With Test Base, developers can quickly set up test environments, automate testing processes, and analyze results to ensure the quality and functionality of their software. Test Base provides a variety of testing tools and services, such as test case management, test execution, and test reporting, all within a centralized and scalable cloud environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/microsoft-365/test-base/overview?view=o365-worldwide](https://learn.microsoft.com/en-us/microsoft-365/test-base/overview?view=o365-worldwide)
-
-#### Properties
-
-- [OpenAPI](openapi/test-base-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/microsoft-365/test-base/overview?view=o365-worldwide)
-
-### Microsoft Azure Text Analytics Client
-
-Microsoft Azure Text Analytics Client is a powerful tool designed to analyze and extract valuable insights from unstructured text data. By utilizing advanced natural language processing techniques, this client is able to identify key themes, sentiments, and entities within large volumes of text. It can also perform tasks such as language detection, sentiment analysis, and key phrase extraction to help organizations better understand and make informed decisions based on their textual data.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/overview/azure/ai-textanalytics-readme?view=azure-python](https://learn.microsoft.com/en-us/python/api/overview/azure/ai-textanalytics-readme?view=azure-python)
-
-#### Properties
-
-- [OpenAPI](openapi/text-analytics-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/overview/azure/ai-textanalytics-readme?view=azure-python)
-
-### Microsoft Azure Text Translation
-
-Microsoft Azure Text Translation is a cloud-based service that utilizes advanced machine learning algorithms to accurately and efficiently translate text content from one language to another. This powerful tool enables users to easily and seamlessly convert written content into multiple languages, breaking down communication barriers and enabling global collaboration.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/translator/](https://learn.microsoft.com/en-us/azure/ai-services/translator/)
-
-#### Properties
-
-- [OpenAPI](openapi/text-translation-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/translator/)
-
-### Microsoft Azure Time Series Insights Client
-
-Microsoft Azure Time Series Insights Client is a powerful tool that allows users to visualize and analyze time-series data in real-time. With this client, users can easily explore and interpret their data to gain valuable insights and make informed decisions. The client provides a user-friendly interface that lets users easily navigate through their data, create custom queries, and generate detailed reports.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/time-series-insights/](https://learn.microsoft.com/en-us/azure/time-series-insights/)
-
-#### Properties
-
-- [OpenAPI](openapi/timeseriesinsightsclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/time-series-insights/)
-
-### Microsoft Azure Top Level Domains API Client
-
-The Microsoft Azure Top Level Domains API Client is a tool that allows users to interact with the Microsoft Azure domain management system through a simplified interface. With this API client, users can easily access and manage top-level domain names associated with their Azure account, enabling them to register, renew, update, and delete domains with ease.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/appservice/top-level-domains/list?view=rest-appservice-2024-04-01](https://learn.microsoft.com/en-us/rest/api/appservice/top-level-domains/list?view=rest-appservice-2024-04-01)
-
-#### Properties
-
-- [OpenAPI](openapi/topleveldomains-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/appservice/top-level-domains/list?view=rest-appservice-2024-04-01)
-
-### Microsoft Azure Traffic Collector
-
-Microsoft Azure Traffic Collector is a tool used to collect and analyze network traffic data in real time. It is designed to help businesses monitor and manage their networks more effectively by providing insights into network performance, security threats, and other key metrics. The Traffic Collector gathers data from various sources, such as virtual machines, network appliances, and cloud services, and consolidates it into a centralized dashboard for easy access and analysis.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/expressroute/traffic-collector](https://learn.microsoft.com/en-us/azure/expressroute/traffic-collector)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-traffic-collector-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/expressroute/traffic-collector)
-
-### Microsoft Azure Traffic Controller
-
-Microsoft Azure Traffic Controller is a cloud-based service that helps businesses manage and optimize their network traffic. The Traffic Controller allows users to set rules and policies for how traffic is routed between different resources in their Azure environment, ensuring that critical applications receive the bandwidth and resources they need to perform at their best.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/traffic-manager/](https://learn.microsoft.com/en-us/azure/traffic-manager/)
-
-#### Properties
-
-- [OpenAPI](openapi/trafficcontroller-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/traffic-manager/)
-
-### Microsoft Azure Traffic Manager Management Client
-
-The Microsoft Azure Traffic Manager Management Client is a tool designed to help users effectively manage and monitor their Azure Traffic Manager services. With this client, users can easily create, update, and delete traffic manager profiles, endpoints, and monitor the health of their traffic manager resources.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/traffic-manager/](https://learn.microsoft.com/en-us/azure/traffic-manager/)
-
-#### Properties
-
-- [OpenAPI](openapi/trafficmanagermanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/traffic-manager/)
-
-### Microsoft Azure Training API
-
-Microsoft Azure Training API is a tool that provides training and education resources for individuals and organizations looking to enhance their skills and knowledge in Microsoft Azure. This API offers a wide range of courses, tutorials, and learning materials that cover various aspects of Azure, such as cloud computing, data management, and artificial intelligence.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/api-management/](https://learn.microsoft.com/en-us/azure/api-management/)
-
-#### Properties
-
-- [OpenAPI](openapi/trainingapi-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/api-management/)
-
-### Microsoft Azure Update Admin Client
-
-The Microsoft Azure Update Admin Client is a tool that allows administrators to efficiently manage and install updates across their Azure infrastructure. This client enables administrators to schedule update installations, view update status and progress, and troubleshoot any issues that may arise during the update process.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/update-manager/overview](https://learn.microsoft.com/en-us/azure/update-manager/overview)
-
-#### Properties
-
-- [OpenAPI](openapi/updateadminclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/update-manager/overview)
-
-### Microsoft Azure Update Management API
-
-Microsoft Azure Update Management API allows users to programmatically manage and automate updates for their virtual machines in Azure. With this API, users can schedule update deployments, track update compliance, and customize update settings for their virtual machines. This API provides a convenient way to ensure that virtual machines are regularly updated with the latest security patches and updates, reducing the risk of security vulnerabilities and downtime.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/update-manager/manage-vms-programmatically](https://learn.microsoft.com/en-us/azure/update-manager/manage-vms-programmatically)
-
-#### Properties
-
-- [OpenAPI](openapi/update-management-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/update-manager/manage-vms-programmatically)
-
-### Microsoft Azure Usage Management Client
-
-The Microsoft Azure Usage Management Client is a tool designed to help organizations effectively manage their usage and consumption of Microsoft Azure services. By providing detailed insights and analysis of how resources are being utilized, the Usage Management Client allows users to track and optimize their spending, identify areas for cost savings, and make informed decisions about resource allocation.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/consumption/](https://learn.microsoft.com/en-us/rest/api/consumption/)
-
-#### Properties
-
-- [OpenAPI](openapi/usagemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/consumption/)
-
-### Microsoft Azure Vi
-
-Microsoft Azure Virtual Instruments (Vi) is a cloud-based platform that provides teams with the ability to monitor, analyze, and optimize the performance of their applications and services. With Vi, users can track key performance metrics, identify potential bottlenecks or errors, and make data-driven decisions to improve overall efficiency and reliability. The platform offers real-time monitoring and diagnostics, as well as customizable performance alerts and reporting capabilities.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/](https://learn.microsoft.com/en-us/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/vi-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/)
-
-### Microsoft Azure Video Analyzer
-
-Microsoft Azure Video Analyzer is a cloud-based service that uses artificial intelligence and machine learning algorithms to analyze and extract insights from video content. It can detect objects, faces, emotions, activities, and other visual elements within a video, providing valuable data and analytics. With Azure Video Analyzer, users can easily search, filter, and categorize large volumes of video content, making it easier to find relevant information quickly.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-video-indexer/](https://learn.microsoft.com/en-us/azure/azure-video-indexer/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-video-analyzer-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-video-indexer/)
-
-### Microsoft Azure Video Analyzer for Edge
-
-Microsoft Azure Video Analyzer for Edge is a cloud service that enables customers to build AI capabilities for video analysis directly on the edge devices. By leveraging the power of Azure AI technologies, this service allows users to detect, track, and analyze objects and events in real-time video streams. With built-in support for various edge devices such as cameras, drones, and IoT devices, organizations can easily deploy and scale their video analytics solutions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/@azure/video-analyzer-edge/?view=azure-node-legacy](https://learn.microsoft.com/en-us/javascript/api/@azure/video-analyzer-edge/?view=azure-node-legacy)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-video-analyzer-for-edge-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/@azure/video-analyzer-edge/?view=azure-node-legacy)
-
-### Microsoft Azure Video Analyzer Resource Provider
-
-Microsoft Azure Video Analyzer Resource Provider is a comprehensive tool that allows users to easily analyze and process video content on the Azure platform. This resource provider offers a range of features that help users extract valuable insights from their video data, including object detection, facial recognition, and sentiment analysis.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-video-indexer/](https://learn.microsoft.com/en-us/azure/azure-video-indexer/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-video-analyzer-resource-provider-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-video-indexer/)
-
-### Microsoft Azure Virtual Wanas Aservice Management Client
-
-Microsoft Azure VirtualWANAsAServiceManagementClient is a service management client that provides a centralized platform for managing virtual wide area networks (WANs) hosted on the Azure cloud computing platform. This service allows users to easily create, configure, and manage virtual WANs to securely connect multiple branch offices, data centers, and cloud environments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-wan/](https://learn.microsoft.com/en-us/azure/virtual-wan/)
-
-#### Properties
-
-- [OpenAPI](openapi/virtualwanasaservicemanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-wan/)
-
-### Microsoft Azure Visual Studio Projects Resource Provider Client
-
-Sure! The Microsoft Azure Visual Studio Projects Resource Provider Client is a tool that allows users to easily access and manage resources within their Visual Studio projects on the Azure platform. With this client, developers can streamline their workflow by quickly deploying and scaling their projects, accessing real-time analytics and diagnostics, and collaborating with team members all within the familiar Visual Studio environment.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-visualstudio-readme?view=azure-node-preview](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-visualstudio-readme?view=azure-node-preview)
-
-#### Properties
-
-- [OpenAPI](openapivisual-studio-projects-resource-provider-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-visualstudio-readme?view=azure-node-preview)
-
-### Microsoft Azure Visual Studio Resource Provider Client
-
-The Microsoft Azure Visual Studio Resource Provider Client is a tool that allows developers to access and manage resources within Azure using Visual Studio. With this client, developers can easily deploy, monitor, and scale their applications and services in the cloud. Additionally, they can leverage the integrated development environment capabilities of Visual Studio to streamline the development process.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-visualstudio-readme?view=azure-node-preview](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-visualstudio-readme?view=azure-node-preview)
-
-#### Properties
-
-- [OpenAPI](openapi/visual-studio-resource-provider-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/javascript/api/overview/azure/arm-visualstudio-readme?view=azure-node-preview)
-
-### Microsoft Azure Vm Insights Onboarding API
-
-The Microsoft Azure VM Insights Onboarding API is a tool that allows users to easily onboard their virtual machines (VMs) on Azure for monitoring and optimization purposes. By leveraging this API, users can automate the process of setting up performance monitoring and analytics for their VMs, enabling them to gain valuable insights into the health, performance, and usage of their virtual machines.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/vm/vminsights-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/vm/vminsights-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/vm-insights-onboarding-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/vm/vminsights-overview)
-
-### Microsoft Azure Vmware Cloud Simple
-
-Microsoft Azure VMware Cloud Simple is a service that allows customers to run VMware workloads natively on Azure, utilizing the familiar VMware stack without having to refactor applications. This service provides the flexibility and scalability of the Azure cloud infrastructure while maintaining the reliability and security of the VMware platform.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-vmware/](https://learn.microsoft.com/en-us/azure/azure-vmware/)
-
-#### Properties
-
-- [OpenAPI](openapi/vmwarecloudsimple-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-vmware/)
-
-### Microsoft Azure Vmware Solution API
-
-The Microsoft Azure VMware Solution API is a set of tools and resources that enable users to seamlessly integrate their VMware environments with Microsoft Azure. Through the API, users can easily manage and monitor their virtual machines, virtual networks, and other resources in Azure while leveraging the security and compliance features of VMware.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/avs/](https://learn.microsoft.com/en-us/rest/api/avs/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-vmware-solution-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/avs/)
-
-### Microsoft Azure Vnet Client
-
-Microsoft Azure Vnet Client is a virtual network client that allows users to connect their on-premises networks to their Azure virtual networks securely. This client provides a seamless and secure way for users to extend their on-premises networks to the cloud, allowing them to access resources and services hosted in Azure.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/virtual-network/](https://learn.microsoft.com/en-us/azure/virtual-network/)
-
-#### Properties
-
-- [OpenAPI](openapi/vnetclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/virtual-network/)
-
-### Microsoft Azure Voice Services
-
-Microsoft Azure Voice Services is a cloud-based platform that allows developers to integrate high-quality speech recognition and natural language processing capabilities into their applications. This service enables users to interact with applications using spoken commands and responses, creating a more seamless and user-friendly experience.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/speech-service/](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftvoiceservices-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/)
-
-### Microsoft Azure Voice Services Provisioning
-
-Microsoft Azure Voice Services Provisioning is a service that enables developers to easily add voice capabilities to their applications and devices. With this service, developers can create voice-enabled applications that can recognize and understand speech, convert text to speech, and even provide natural language understanding. This allows for a more seamless and user-friendly experience for users interacting with the application through voice commands.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/communications-gateway/provisioning-platform](https://learn.microsoft.com/en-us/azure/communications-gateway/provisioning-platform)
-
-#### Properties
-
-- [OpenAPI](openapi/microsoftvoiceservicesprovisioning-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/communications-gateway/provisioning-platform)
-
-### Microsoft Azure Voice Services Provisioning Platform API
-
-Microsoft Azure Voice Services Provisioning Platform API is a tool that allows users to easily integrate voice recognition and control functionalities into their applications. With this API, developers can create voice-enabled applications that can understand and respond to natural language commands. The API provides a range of features including speech recognition, text-to-speech conversion, language translation, and natural language understanding.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/voiceservices/](https://learn.microsoft.com/en-us/rest/api/voiceservices/)
-
-#### Properties
-
-- [OpenAPI](openapimicrosoftvoiceservicesacgprovisioningplatformapi-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/voiceservices/)
-
-### Microsoft Azure Web Apps API Client
-
-Microsoft Azure Web Apps API Client is a tool that allows developers to easily connect their web applications to Microsoft Azure's cloud computing platform. With this API client, developers can access a variety of services and features offered by Azure, such as virtual machines, databases, and storage solutions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/azure/](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-#### Properties
-
-- [OpenAPI](openapi/webapps-api-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-
-### Microsoft Azure Web Pub Sub Management Client
-
-The Microsoft Azure Web Pub Sub Management Client is a tool that allows users to easily manage and monitor their Web Pub Sub service on the Azure cloud platform. With this client, users can create, update, and delete instances of the Web Pub Sub service, as well as configure settings, view metrics, and troubleshoot any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-web-pubsub/](https://learn.microsoft.com/en-us/azure/azure-web-pubsub/)
-
-#### Properties
-
-- [OpenAPI](openapi/webpubsubmanagementclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-web-pubsub/)
-
-### Microsoft Azure Web Pub Sub Service  API
-
-Microsoft Azure Web Pub Sub Service Rest API is a powerful tool that allows developers to build scalable real-time web applications by providing a way to push data to connected clients in real-time. This service enables the exchange of real-time messages between clients and servers, making it easy to create interactive, collaborative applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/webpubsub/](https://learn.microsoft.com/en-us/rest/api/webpubsub/)
-
-#### Properties
-
-- [OpenAPI](openapi/azure-web-pubsub-service-rest-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/webpubsub/)
-
-### Microsoft Azure Web Site Management Client
-
-Microsoft Azure Web Site Management Client is a powerful tool that provides users with a centralized platform for managing all aspects of their Azure Web Sites. With this client, users can easily browse and manage their websites, view detailed site metrics, monitor site performance, and troubleshoot issues in real-time. Additionally, the client offers advanced features such as automated scaling, integration with Azure resources, and seamless deployment of web applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/python/api/azure-mgmt-web/azure.mgmt.web.websitemanagementclient?view=azure-python](https://learn.microsoft.com/en-us/python/api/azure-mgmt-web/azure.mgmt.web.websitemanagementclient?view=azure-python)
-
-#### Properties
-
-- [OpenAPI](openapi/website-management-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/python/api/azure-mgmt-web/azure.mgmt.web.websitemanagementclient?view=azure-python)
-
-### Microsoft Azure Windows Extended Security Updates
-
-Microsoft Azure Windows Extended Security Updates provides extended support and security updates for outdated Windows operating systems, such as Windows 7 and Windows Server 2008. This service allows customers to continue receiving crucial security patches and updates for their legacy systems beyond their end-of-life date, ensuring that their environments remain secure and compliant.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/lifecycle/faq/extended-security-updates](https://learn.microsoft.com/en-us/lifecycle/faq/extended-security-updates)
-
-#### Properties
-
-- [OpenAPI](openapi/windowsesu-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/lifecycle/faq/extended-security-updates)
-
-### Microsoft Azure Workbook Client
-
-Microsoft Azure Workbook Client is a powerful tool that allows users to visualize and analyze data from their Azure environment. This tool enables users to create custom interactive dashboards and reports to monitor the performance and health of their resources. With Azure Workbook Client, users can easily track key metrics, trends, and anomalies, making it easier to identify and address issues before they impact the overall system.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview](https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview)
-
-#### Properties
-
-- [OpenAPI](openapi/workbookclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-monitor/visualize/workbooks-overview)
-
-### Microsoft Azure Workload Monitor API
-
-The Microsoft Azure Workload Monitor API is a tool designed to help organizations accurately monitor and manage their workloads within the Azure cloud environment. This API enables users to collect real-time data on the performance and health of their workloads, allowing them to quickly identify and address any issues that may arise.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/rest/api/monitor/](https://learn.microsoft.com/en-us/rest/api/monitor/)
-
-#### Properties
-
-- [OpenAPI](openapi/workload-monitor-api-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/monitor/)
-
-### Microsoft Azure Workloads Client
-
-Microsoft Azure Workloads Client is a powerful tool that allows users to manage and monitor their workloads in the Azure cloud environment. With this client, users can easily deploy, scale, and update their applications with just a few clicks. The client also provides detailed insights and analytics into the performance of workloads, helping users optimize their resources and improve efficiency.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.workloads-readme?view=azure-dotnet](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.workloads-readme?view=azure-dotnet)
-
-#### Properties
-
-- [OpenAPI](openapi/workloads-client-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/dotnet/api/overview/azure/resourcemanager.workloads-readme?view=azure-dotnet)
-
-### Microsoft Azure AI Search API
-
-Azure AI Search is an enterprise-ready information retrieval system for building search experiences over private, heterogeneous content in web, mobile, and enterprise applications. It provides full text search, vector search, hybrid search, and semantic ranking capabilities through REST APIs and SDKs, enabling developers to build powerful search solutions with AI enrichment, including support for indexers, skillsets, and knowledge mining scenarios.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/search/](https://learn.microsoft.com/en-us/azure/search/)
-
-#### Tags
-
-- AI
-- Cognitive Search
-- Search
-
-#### Properties
-
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/searchservice/)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/searchmanagement/)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/search/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/ai-services/ai-search)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Microsoft Azure Communication Services API
-
-Azure Communication Services provides multichannel communication APIs that enable developers to add voice, video, chat, text messaging and SMS, email, and more to their applications. The service offers fully open-source SDKs and published REST APIs that can be used directly over the internet, supporting integration with Microsoft Teams for enterprise communication scenarios.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/communication-services/](https://learn.microsoft.com/en-us/azure/communication-services/)
-
-#### Tags
-
-- Chat
-- Communication
-- Email
-- SMS
-- Video
-- Voice
-
-#### Properties
-
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/communication/)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/communication-services/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/communication-services)
-- [Git Hub Org](https://github.com/Azure/Communication)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Microsoft Azure Event Grid API
-
-Azure Event Grid is a fully managed event routing service that enables developers to build event-driven architectures. It provides reliable delivery of events at massive scale and simplifies the development of event-based applications by managing all routing of events from any source to any destination, supporting filtering and fan-out patterns for serverless and microservices-based solutions.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/event-grid/](https://learn.microsoft.com/en-us/azure/event-grid/)
-
-#### Tags
-
-- Events
-- Messaging
-- Serverless
-
-#### Properties
-
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/eventgrid/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/event-grid)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Microsoft Azure Container Registry API
-
-Azure Container Registry is a managed Docker registry service for storing and managing private Docker container images and other artifacts. The REST API provides operations for managing registries, repositories, tags, and manifests, enabling automated container image builds, vulnerability scanning, and geo-replication for enterprise container deployments.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/container-registry/](https://learn.microsoft.com/en-us/azure/container-registry/)
-
-#### Tags
-
-- Containers
-- Docker
-- Registry
-
-#### Properties
-
-- [OpenAPI](openapi/azure-container-registry-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/containerregistry/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/container-registry)
-- [JSON-LD](json-ld/azure-container-registry-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure Kubernetes Service API
-
-Azure Kubernetes Service is a managed Kubernetes container orchestration service that simplifies deploying, managing, and scaling containerized applications. The REST API provides operations for managing AKS clusters, node pools, and upgrades, enabling developers to automate Kubernetes infrastructure management and integrate container orchestration into their CI/CD workflows.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/aks/](https://learn.microsoft.com/en-us/azure/aks/)
-
-#### Tags
-
-- Containers
-- Kubernetes
-- Orchestration
-
-#### Properties
-
-- [OpenAPI](openapi/azure-kubernetes-service-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/aks/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/kubernetes-service)
-- [JSON-LD](json-ld/azure-kubernetes-service-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure Functions API
-
-Azure Functions is an event-driven serverless compute platform that enables developers to build and run applications without managing infrastructure. It supports multiple programming languages and provides triggers and bindings for integrating with other Azure services, enabling developers to build web APIs, process data, respond to events, and automate workflows with automatic scaling.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-functions/](https://learn.microsoft.com/en-us/azure/azure-functions/)
-
-#### Tags
-
-- Compute
-- Functions
-- Serverless
-
-#### Properties
-
-- [Documentation](https://learn.microsoft.com/en-us/azure/azure-functions/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/functions)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Microsoft Azure Cosmos DB API
-
-Azure Cosmos DB is a globally distributed, multi-model database service that provides turnkey global distribution, elastic scaling, and guaranteed low latency. The REST API provides programmatic access to Cosmos DB resources for creating, querying, and managing databases, collections, and documents, supporting multiple data models including document, key-value, graph, and column-family databases.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/cosmos-db/](https://learn.microsoft.com/en-us/azure/cosmos-db/)
-
-#### Tags
-
-- Database
-- Globally Distributed
-- NoSQL
-
-#### Properties
-
-- [OpenAPI](openapi/azure-cosmos-db-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/cosmos-db/)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/cosmos-db-resource-provider/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/cosmos-db)
-- [JSON-LD](json-ld/azure-cosmos-db-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure Resource Manager API
-
-Azure Resource Manager is the deployment and management service for Azure that provides a management layer enabling you to create, update, and delete resources in your Azure account. The REST API provides operations for managing resources, resource groups, deployments, subscriptions, tenants, and policies, serving as the foundational control plane for all Azure resource management operations.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/](https://learn.microsoft.com/en-us/azure/azure-resource-manager/)
-
-#### Tags
-
-- ARM
-- Infrastructure
-- Resource Management
-
-#### Properties
-
-- [OpenAPI](openapi/azure-resource-manager-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/resources/)
-- [Getting Started](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resources-rest)
-- [JSON-LD](json-ld/azure-resource-manager-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure DevOps REST API
-
-Azure DevOps provides developer services for allowing teams to plan work, collaborate on code development, and build and deploy applications. The REST API provides programmatic access to Azure DevOps Services and Server resources, including work items, builds, releases, pipelines, repositories, and test plans, supporting automation and integration of DevOps workflows.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/devops/](https://learn.microsoft.com/en-us/azure/devops/)
-
-#### Tags
-
-- CI/CD
-- DevOps
-- Pipelines
-
-#### Properties
-
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/devops/?view=azure-devops-rest-7.2)
-- [Getting Started](https://azure.microsoft.com/en-us/products/devops)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Microsoft Azure AI Foundry API
-
-Microsoft Foundry is a unified Azure platform-as-a-service offering for enterprise AI operations, model builders, and application development. It combines production-grade infrastructure with friendly interfaces, enabling developers to access and deploy AI models, build intelligent agents, and create AI-powered applications with built-in evaluation and monitoring capabilities.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/foundry/](https://learn.microsoft.com/en-us/azure/foundry/)
-
-#### Tags
-
-- AI
-- Machine Learning
-- Models
-
-#### Properties
-
-- [Documentation](https://learn.microsoft.com/en-us/azure/foundry/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/ai-foundry)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Microsoft Azure Cognitive Services API
-
-Azure Cognitive Services provides REST APIs and client library SDKs for adding cognitive capabilities to applications. The service includes AI capabilities for vision, speech, language, decision, and search, enabling developers to integrate pre-built AI models for computer vision, text analytics, speech recognition, language understanding, and content moderation into their applications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/ai-services/](https://learn.microsoft.com/en-us/azure/ai-services/)
-
-#### Tags
-
-- AI
-- Cognitive Services
-- Machine Learning
-
-#### Properties
-
-- [OpenAPI](openapi/azure-cognitive-services-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/cognitiveservices/)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/)
-- [JSON-LD](json-ld/azure-cognitive-services-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure Key Vault API
-
-Azure Key Vault is a cloud service for securely storing and accessing secrets, keys, and certificates. The REST API provides programmatic access to manage cryptographic keys, secrets such as connection strings and passwords, and certificates used by cloud applications and services, helping safeguard cryptographic keys and secrets while enabling users to maintain control of their keys.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/key-vault/](https://learn.microsoft.com/en-us/azure/key-vault/)
-
-#### Tags
-
-- Cryptography
-- Secrets
-- Security
-
-#### Properties
-
-- [OpenAPI](openapi/azure-key-vault-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [OpenAPI](openapi/keyvaultclient-openapi-original.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/keyvault/)
-- [Getting Started](https://azure.microsoft.com/en-us/products/key-vault)
-- [Pricing](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
-- [JSON-LD](json-ld/azure-key-vault-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-
-### Microsoft Azure Resource JSON Schema
-
-JSON Schema definitions for core Azure Resource Manager data models including the base Resource type, Resource Groups, Subscriptions, Deployments, Managed Clusters, and the standard Error Response format. These schemas define the canonical structure of Azure resources as documented in the Azure REST API specifications.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types)
-
-#### Tags
-
-- JSON Schema
-- Resource Model
-- Schema
-
-#### Properties
-
-- [JSON Schema](json-schema/microsoft-azure-resource-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [JSON Schema](json-schema/microsoft-azure-error-response-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [JSON Schema](json-schema/microsoft-azure-resource-group-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [JSON Schema](json-schema/microsoft-azure-subscription-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [JSON Schema](json-schema/microsoft-azure-deployment-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [JSON Schema](json-schema/microsoft-azure-managed-cluster-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Microsoft Azure JSON-LD Context
-
-JSON-LD context definitions for Microsoft Azure resource types, providing semantic annotations and linked data mappings for Azure Resource Manager resources, Kubernetes clusters, Key Vault keys and secrets, Cosmos DB databases and containers, Blob Storage, Container Registry images, OpenAI deployments, and Cognitive Services accounts.
-
-- **Human URL:** [https://learn.microsoft.com/en-us/azure/azure-resource-manager/](https://learn.microsoft.com/en-us/azure/azure-resource-manager/)
-
-#### Tags
-
-- JSON-LD
-- Linked Data
-- Semantic Web
-
-#### Properties
-
-- [JSON-LD](json-ld/microsoft-azure-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-- [Postman Collection](collections/azure-blob-storage.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-blob-storage.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cognitive-services.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cognitive-services.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-container-registry.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-container-registry.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-cosmos-db.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-cosmos-db.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-key-vault.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-key-vault.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-kubernetes-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-kubernetes-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-openai-service.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-openai-service.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [Postman Collection](collections/azure-resource-manager.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/azure-resource-manager.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-## Common Properties
-
-- [Arazzo Workflows](arazzo/) — [Arazzo Specification](https://spec.openapis.org/arazzo/latest.html)
-- [LinkedIn](https://www.linkedin.com/showcase/microsoft-azure)
+- [Getting started](https://azure.microsoft.com/en-us/get-started/)
+- [API reference](https://learn.microsoft.com/en-us/rest/api/azure/)
 - [Pricing](https://azure.microsoft.com/en-us/pricing/)
-- [Getting Started](https://azure.microsoft.com/en-us/get-started/)
-- [Blog](https://azure.microsoft.com/en-us/blog/)
-- [Events](https://azure.microsoft.com/en-us/resources/events/)
-- [Marketplace](https://azure.microsoft.com/en-us/partners/marketplace/)
 - [Support](https://azure.microsoft.com/en-us/support/)
-- [Portal](https://portal.azure.com)
-- [Developer Portal](https://learn.microsoft.com/en-us/azure/)
-- [Authentication](https://learn.microsoft.com/en-us/azure/active-directory/develop/)
-- [SDK](https://azure.microsoft.com/en-us/downloads/)
-- [Status Page](https://status.azure.com)
-- [Terms of Service](https://azure.microsoft.com/en-us/support/legal/)
-- [Documentation](https://learn.microsoft.com/en-us/rest/api/azure/)
-- [Privacy Policy](https://privacy.microsoft.com/en-us/privacystatement)
-- [Sign Up](https://signup.azure.com/)
-- [Login](https://portal.azure.com/#home)
-- [GitHub Organization](https://github.com/Azure)
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/azure)
-- [YouTube](https://www.youtube.com/c/MicrosoftAzure)
 - [Changelog](https://azure.microsoft.com/en-us/updates)
-- [OpenAPI](https://github.com/Azure/azure-rest-api-specs) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Plans](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account)
-- [JSON-LD](json-ld/microsoft-azure-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-- [Features](undefined)
-- [Use Cases](undefined)
-- [Integrations](undefined)
+- [Blog](https://azure.microsoft.com/en-us/blog/)
+- [Terms of service](https://azure.microsoft.com/en-us/support/legal/)
+- [Privacy policy](https://privacy.microsoft.com/en-us/privacystatement)
+- [GitHub](https://github.com/Azure)
+- [Status](https://status.azure.com)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
-**URL:** http://apievangelist.com
-**FN:** Microsoft Corporation
-**Email:** azuresupport@microsoft.com
-**URL:** https://azure.microsoft.com
+**Kin Score 76.5** — exemplar · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 63.3 |
+| Contract quality | 70.4 |
+| Contract governance | 31.8 |
+| Operational transparency | 73.7 |
+| Developer ergonomics | 74.4 |
+| Access clarity | 52.6 |
+
+**Agent readiness 45.7** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | verified |
+| MCP Server | platform (partial credit) |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | verified |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | documented (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | — |
+| Operation Distinctiveness | — |
+
+**Regulatory alignment 45.1** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/microsoft-azure/](https://apis.io/providers/microsoft-azure/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Microsoft Azure: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/microsoft-azure/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
